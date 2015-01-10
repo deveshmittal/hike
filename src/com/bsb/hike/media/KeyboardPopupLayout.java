@@ -22,8 +22,8 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 	private boolean isKeyboardOpen;
 
 	private int firstTimeHeight;
-	
-	private int[] mEatTouchEventViewIds; 
+
+	private int[] mEatTouchEventViewIds;
 
 	/**
 	 * 
@@ -122,6 +122,7 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 				popup.setTouchInterceptor(this);
 			}
 		}
+		popup.setHeight(height);
 		setOnDismissListener(this);
 		if (isKeyboardOpen)
 		{
@@ -201,4 +202,8 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		registerOnGlobalLayoutListener();
 	}
 
+	public boolean isKeyboardOpen()
+	{
+		return isKeyboardOpen;
+	}
 }
