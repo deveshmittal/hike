@@ -3,6 +3,7 @@ package com.bsb.hike.chatthread;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -18,6 +19,8 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		public void actionModeDestroyed(int id);
 
 		public void doneClicked(int id);
+
+		public void initActionbarActionModeView(int id,View view);
 	}
 
 	private static final int DEFAULT_LAYOUT = R.layout.hike_action_mode;
@@ -30,9 +33,14 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 
 	private ActionModeListener listener;
 
+	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity)
+	{
+		this(sherlockFragmentActivity, -1, -1, DEFAULT_LAYOUT);
+	}
+
 	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int layoutId)
 	{
-		this(sherlockFragmentActivity, layoutId, -1, -1);
+		this(sherlockFragmentActivity, -1, -1, layoutId);
 	}
 
 	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int title, int save, int layoutId)
@@ -92,17 +100,23 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 
 	public void showActionMode(int id, int layoutId)
 	{
-		this.id = id;
+		this.layoutId = layoutId;
+		showActionMode(id, title, save);
 	}
 
-	private void setActionBarText()
+	public void showActionMode(int id, int title, int save)
 	{
-		if (layoutId == DEFAULT_LAYOUT)
-		{
-			setText(R.id.title, title);
-			setText(R.id.save, save);
+		this.id = id;
+		this.title = title;
+		this.save = save;
+		sherlockFragmentActivity.startActionMode(this);
+	}
 
-		}
+	private void initDefaultView()
+	{
+		setText(R.id.title, title, -1);
+		setText(R.id.save, save, R.anim.scale_in);
+		actionMode.getCustomView().findViewById(R.id.done_container).setOnClickListener(this);
 	}
 
 	/**
@@ -110,22 +124,38 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	 */
 	protected void initView()
 	{
-		setActionBarText();
+		if (layoutId == DEFAULT_LAYOUT)
+		{
+			initDefaultView();
+		}
+		else
+		{
+			if (listener != null)
+			{
+				listener.initActionbarActionModeView(id,actionMode.getCustomView());
+			}
+		}
 	}
 
-	private void setText(int viewId, int textId)
+	private View setText(int viewId, int textId, int animId)
 	{
 		if (textId != -1)
 		{
 			TextView tv = (TextView) actionMode.getCustomView().findViewById(viewId);
 			tv.setText(textId);
+			if (animId != -1)
+			{
+				tv.startAnimation(AnimationUtils.loadAnimation(sherlockFragmentActivity, animId));
+			}
+			return tv;
 		}
+		return null;
 	}
 
 	@Override
 	public void onClick(View v)
 	{
-		if (v.getId() == R.id.save)
+		if (v.getId() == R.id.done_container)
 		{
 			doneClicked();
 		}
@@ -140,6 +170,24 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		if (listener != null)
 		{
 			listener.doneClicked(id);
+		}
+	}
+
+	public boolean onBackPressed()
+	{
+		if (actionMode != null)
+		{
+			actionMode.finish();
+			return true;
+		}
+		return false;
+	}
+
+	public void finish()
+	{
+		if (actionMode != null)
+		{
+			actionMode.finish();
 		}
 	}
 }
