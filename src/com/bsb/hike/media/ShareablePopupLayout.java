@@ -154,4 +154,9 @@ public class ShareablePopupLayout
 		this.mKeyboardPopupLayout.updateMainView(view);
 	}
 
+	public boolean isKeyboardOpen()
+	{
+		return mKeyboardPopupLayout.isKeyboardOpen();
+	}
+
 }

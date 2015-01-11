@@ -105,9 +105,9 @@ import com.bsb.hike.utils.Utils;
  * @generated
  */
 
-public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
-		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener,
-		OnScrollListener, Listener
+public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener,
+		CaptureImageListener, PickFileListener, HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>,
+		OnItemLongClickListener, OnTouchListener, OnScrollListener, Listener
 {
 	private static final String TAG = "chatthread";
 
@@ -571,7 +571,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void sendMessage()
 	{
+		sendMessage(createConvMessageFromCompose());
+	}
+
+	protected ConvMessage createConvMessageFromCompose()
+	{
 		String message = mComposeView.getText().toString();
+		if (TextUtils.isEmpty(message))
+		{
+			return null; // Do not create message
+		}
 		ConvMessage convMessage = Utils.makeConvMessage(msisdn, message, isOnHike());
 		// TODO : PinShowing related code -gaurav
 		mComposeView.setText("");
@@ -579,7 +588,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			mComposeViewWatcher.onMessageSent();
 		}
-		sendMessage(convMessage);
+		return convMessage;
 	}
 
 	/**
@@ -589,9 +598,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void sendMessage(ConvMessage convMessage)
 	{
-		addMessage(convMessage, true);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
-
+		if (convMessage != null)
+		{
+			addMessage(convMessage, true);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
+		}
 	}
 
 	protected void audioRecordClicked()
@@ -891,7 +902,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		// TODO : Implement this
 		// Utils.emoticonClicked(getApplicationContext(), emoticonIndex, mComposeView);
 		Logger.i(TAG, " This emoticon was selected : " + emoticonIndex);
-		mShareablePopupLayout.dismiss();
+		Utils.emoticonClicked(activity.getApplicationContext(), emoticonIndex, mComposeView);
 	}
 
 	@Override
