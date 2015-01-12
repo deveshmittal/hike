@@ -311,8 +311,8 @@ public class VoIPService extends Service {
 			builder = new NotificationCompat.Builder(getApplicationContext());
 
 		int callDuration = getCallDuration();
-		// Logger.d(VoIPConstants.TAG, "Showing notification.. " + callDuration);
-		String durationString = String.format(" (%02d:%02d)", (callDuration / 60), (callDuration % 60));
+		String durationString = (callDuration == 0)? "" : String.format(" (%02d:%02d)", (callDuration / 60), (callDuration % 60));
+
 		Notification myNotification = builder
 		.setContentTitle("Hike Ongoing Call")
 		.setContentText("Call in progress " + durationString)
