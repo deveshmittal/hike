@@ -92,6 +92,8 @@ public class AccountUtils
 
 	public static final int _DEV_STAGING_HOST = 2;
 
+	public static final int _PROD_DEBUGMQTT_HOST = 3;
+
 	public static final int PRODUCTION_PORT = 80;
 
 	public static final int PRODUCTION_PORT_SSL = 443;

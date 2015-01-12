@@ -1677,6 +1677,7 @@ public class Utils
 		{
 
 		case AccountUtils._PRODUCTION_HOST:
+		case AccountUtils._PROD_DEBUGMQTT_HOST:
 			AccountUtils.host = AccountUtils.PRODUCTION_HOST;
 			AccountUtils.port = ssl ? AccountUtils.PRODUCTION_PORT_SSL : AccountUtils.PRODUCTION_PORT;
 			break;

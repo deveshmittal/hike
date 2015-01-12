@@ -126,6 +126,9 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		case 2 :
 			whichHost = AccountUtils._DEV_STAGING_HOST;
 			break;
+		case 3 :
+			whichHost = AccountUtils._PROD_DEBUGMQTT_HOST;
+			break;
 		}
 
 
