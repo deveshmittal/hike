@@ -10,11 +10,13 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Message;
+import android.text.TextUtils;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.utils.Logger;
 
 public class PlatformAlarmManager
@@ -28,6 +30,8 @@ public class PlatformAlarmManager
 	public static final String LAYOUT_ID = "layout_id";
 
 	public static final String NOTIFICATION = "notification";
+	
+	public static final String NOTIFICATION_SOUND = "notification_sound";
 
 	public static final String INCREASE_UNREAD = "inc_unread";
 
@@ -77,7 +81,7 @@ public class PlatformAlarmManager
 					}
 				}
 				increaseUnreadCount(data, context);
-				showNotification(data);
+				showNotification(data,context);
 			}
 		}
 	}
@@ -130,11 +134,15 @@ public class PlatformAlarmManager
 		}
 	}
 
-	private static void showNotification(Bundle data)
+	private static void showNotification(Bundle data,Context context)
 	{
 		if (data.containsKey(CONV_MSISDN))
 		{
-			// TODO: Show Notification
+			String message = data.getString(NOTIFICATION);
+			if(TextUtils.isEmpty(message)){
+				boolean playSound = data.getBoolean(NOTIFICATION_SOUND);
+				HikeNotification.getInstance(context).notifyStringMessage(data.getString(CONV_MSISDN), message, !playSound);
+			}
 		}
 	}
 }
