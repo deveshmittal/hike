@@ -34,6 +34,7 @@ import android.telephony.TelephonyManager;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
@@ -240,6 +241,7 @@ public class HikeService extends Service
 		 */
 		assignUtilityThread();
 		scheduleNextAccountBackup();
+		scheduleNextAnalyticsSendAlarm();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
@@ -853,4 +855,12 @@ public class HikeService extends Service
 		this.isInitialized = isInitialized;
 	}
 
+	/**
+	 * Used to schedule the alarm for sending analytics data to the server after the HikeService has been booted
+	 */
+	private void scheduleNextAnalyticsSendAlarm()
+	{
+		long whenToSend = Utils.getTimeInMillis(Calendar.getInstance(), HAManager.getInstance().getWhenToSend(), 0, 0);
+		HikeAlarmManager.setAlarm(getApplicationContext(), whenToSend, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
+	}
 }
