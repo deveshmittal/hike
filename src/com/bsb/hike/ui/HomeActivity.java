@@ -199,7 +199,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (!showingProgress)
 		{
 			initialiseHomeScreen(savedInstanceState);
-			if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWN_VOIP_INTRO_TIP, false))
+			if (Utils.isVoipActivated(HomeActivity.this) && !HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWN_VOIP_INTRO_TIP, false))
 			{
 				HikeDialog.showDialog(HomeActivity.this, HikeDialog.VOIP_INTRO_DIALOG, null);
 			}
