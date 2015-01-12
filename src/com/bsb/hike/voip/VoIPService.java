@@ -118,7 +118,7 @@ public class VoIPService extends Service {
 	// Call quality fields
 	private int qualityCounter = 0;
 	private long lastQualityReset = 0;
-	private CallQuality currentCallQuality = CallQuality.GOOD;
+	private CallQuality currentCallQuality = CallQuality.UNKNOWN;
 
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToDecodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToEncodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
