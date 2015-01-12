@@ -1,18 +1,13 @@
 package com.bsb.hike.analytics;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
-
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -69,12 +64,7 @@ public class HAManager
 		fileMaxSize = getPrefs().getLong(HAManager.FILE_SIZE_LIMIT, AnalyticsConstants.MAX_FILE_SIZE);
 		
 		analyticsMaxSize = getPrefs().getLong(ANALYTICS_SIZE_LIMIT, AnalyticsConstants.MAX_ANALYTICS_SIZE);
-		
-		long whenToSendAnalytics = Utils.getTimeInMillis(Calendar.getInstance(), getWhenToSend(), 0, 0);  
-	
-		// set first alarm to upload analytics data to server
-		HikeAlarmManager.setAlarm(this.context, whenToSendAnalytics, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
-		
+				
 		// set wifi listener
 //		listner = new NetworkListener(this.context);
 	}
