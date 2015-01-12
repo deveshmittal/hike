@@ -1198,7 +1198,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			Logger.i(TAG, "load in background of conversation loader");
 			if (chatThread.get() != null)
 			{
-				return loaderId == FETCH_CONV ? chatThread.get().fetchConversation() : loaderId == LOAD_MORE_MESSAGES ? chatThread.get().loadMessages() : null;
+				return loaderId == FETCH_CONV ? conversation = chatThread.get().fetchConversation() : loaderId == LOAD_MORE_MESSAGES ? list = chatThread.get().loadMessages() : null;
 			}
 			return null;
 		}
