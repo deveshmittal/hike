@@ -25,6 +25,7 @@ import android.os.SystemClock;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ImageSpan;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -255,24 +256,16 @@ public class VoIPActivity extends Activity implements CallActions
 		handleIntent(intent);
 	}
 
-	/*
 	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-
-		boolean retval = true; 
-
-		if (voipService != null && voipService.isAudioRunning() && 
-				(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP)) {
-			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
-				voipService.adjustGain(-1000);
-			else
-				voipService.adjustGain(1000);
-		} else
-			retval = super.onKeyDown(keyCode, event);
-
-		return retval;
+	public boolean onKeyDown(int keyCode, KeyEvent event)
+	{
+		if (voipService!=null && !voipService.isAudioRunning() && (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP))
+		{
+			voipService.stopRingtone();
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
 	}
-	*/
 
 	private void handleIntent(Intent intent) {
 		String action = intent.getStringExtra("action");

@@ -121,7 +121,7 @@ public class VoIPService extends Service {
 	// Call quality fields
 	private int qualityCounter = 0;
 	private long lastQualityReset = 0;
-	private CallQuality currentCallQuality = CallQuality.GOOD;
+	private CallQuality currentCallQuality = CallQuality.UNKNOWN;
 
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToDecodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToEncodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
@@ -436,10 +436,16 @@ public class VoIPService extends Service {
 		} catch (IllegalStateException e) {
 			Logger.d(VoIPConstants.TAG, "Mediaplayer exception: " + e.toString());
 		}
-		
+		stopRingtone();
+	}
+
+	public void stopRingtone()
+	{
 		// Stop ringtone if playing
 		if (ringtone != null && ringtone.isPlaying())
+		{
 			ringtone.stop();
+		}
 	}
 	
 	public void setMessenger(Messenger messenger) {
