@@ -112,18 +112,21 @@ public class PlatformAlarmManager
 	{
 		if (data.containsKey(CONV_MSISDN) && data.containsKey(INCREASE_UNREAD))
 		{
-			 
+
 			// increase unread count
 			HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 			String msisdn = data.getString(CONV_MSISDN);
 			int dbUnreadCount = db.getConvUnreadCount(msisdn);
-			int count = db.getExtraConvUnreadCount(data.getString(CONV_MSISDN));
-			count++;
-			db.setExtraConvUnreadCount(msisdn, count);
-			Message ms = Message.obtain();
-			ms.arg1 = count + dbUnreadCount; // db + extra unread
-			ms.obj = msisdn;
-			HikeMessengerApp.getPubSub().publish(HikePubSub.CONV_UNREAD_COUNT_MODIFIED, ms);
+			if (dbUnreadCount != -1)
+			{
+				int count = db.getExtraConvUnreadCount(data.getString(CONV_MSISDN));
+				count++;
+				db.setExtraConvUnreadCount(msisdn, count);
+				Message ms = Message.obtain();
+				ms.arg1 = count + dbUnreadCount; // db + extra unread
+				ms.obj = msisdn;
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CONV_UNREAD_COUNT_MODIFIED, ms);
+			}
 		}
 	}
 
