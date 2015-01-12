@@ -1016,7 +1016,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		if (mComposeViewWatcher != null)
 		{
-			mComposeViewWatcher.uninit();
+			mComposeViewWatcher.releaseResources();
 		}
 		/* get the number of credits and also listen for changes */
 		int mCredits = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
@@ -1587,6 +1587,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void onDestroy()
 	{
 		removePubSubListeners();
+		
+		releaseComposeViewWatcher();
+		
 	}
 
 	/**
@@ -2503,5 +2506,26 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void setSMSReadInNative()
 	{
 		return;
+	}
+	
+	/**
+	 * Releases composeView watcher coupled to the EditText
+	 */
+	private void releaseComposeViewWatcher()
+	{
+		if (mComposeViewWatcher != null)
+		{
+			/**
+			 * If we didn't send an end typing notification earlier, well, now is the best time to do it.
+			 */
+
+			if (!mComposeViewWatcher.wasEndTypingSent())
+			{
+				mComposeViewWatcher.sendEndTyping();
+			}
+
+			mComposeViewWatcher.releaseResources();
+			mComposeViewWatcher = null;
+		}
 	}
 }

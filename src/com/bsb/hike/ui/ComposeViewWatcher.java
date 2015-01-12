@@ -62,7 +62,7 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements Runnable,
 		mComposeView.addTextChangedListener(this);
 	}
 
-	public void uninit()
+	public void releaseResources()
 	{
 		mPubSub.removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		mUIThreadHandler.removeCallbacks(this);
