@@ -249,4 +249,18 @@ public class VoIPUtils {
 //		Logger.w(VoIPConstants.TAG, "Our connection class: " + connection.name());
 		return connection;
 	}
+	
+	/**
+	 * Is the user currently in a call?
+	 * @param context
+	 * @return
+	 */
+	public static boolean isUserInCall(Context context) {
+		boolean callActive = false;
+		TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		if (telephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE)
+			callActive = true;
+		
+		return callActive;
+	}
 }

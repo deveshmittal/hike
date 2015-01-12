@@ -9,7 +9,6 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -51,8 +50,8 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient;
 import com.bsb.hike.voip.VoIPConstants;
-import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPConstants.CallQuality;
+import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPService.LocalBinder;
 
 public class VoIPActivity extends Activity implements CallActions
@@ -82,7 +81,6 @@ public class VoIPActivity extends Activity implements CallActions
 	public static final int MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE = 8;
 	public static final int MSG_PARTNER_SOCKET_INFO_TIMEOUT = 10;
 	public static final int MSG_PARTNER_ANSWER_TIMEOUT = 11;
-	public static final int MSG_HANGUP = 12;
 	public static final int MSG_INCOMING_CALL_DECLINED = 14;
 	public static final int MSG_RECONNECTING = 15;
 	public static final int MSG_RECONNECTED = 16;
@@ -144,8 +142,6 @@ public class VoIPActivity extends Activity implements CallActions
 				break;
 			case MSG_PARTNER_ANSWER_TIMEOUT:
 				showMessage("No response.");
-				break;
-			case MSG_HANGUP:	// TODO in service
 				break;
 			case MSG_RECONNECTING:
 				showMessage("Reconnecting..");
@@ -223,7 +219,7 @@ public class VoIPActivity extends Activity implements CallActions
 	protected void onPause() {
 		super.onPause();
 		sensorManager.unregisterListener(proximitySensorEventListener);
-		Logger.w(VoIPConstants.TAG, "VoIPActivity onPause()");
+//		Logger.w(VoIPConstants.TAG, "VoIPActivity onPause()");
 	}
 
 	@Override
@@ -291,7 +287,8 @@ public class VoIPActivity extends Activity implements CallActions
 			if (message == null || message.isEmpty())
 				message = "Callee needs to upgrade their client.";
 			showMessage(message);
-			voipService.stop();
+			if (voipService != null)
+				voipService.stop();
 		}
 		
 		if (action.equals(VoIPConstants.PARTNER_INCOMPATIBLE)) {
@@ -299,7 +296,8 @@ public class VoIPActivity extends Activity implements CallActions
 			if (message == null || message.isEmpty())
 				message = "Callee is on an incompatible client.";
 			showMessage(message);
-			voipService.stop();
+			if (voipService != null)
+				voipService.stop();
 		}
 		
 		if (action.equals(VoIPConstants.PARTNER_HAS_BLOCKED_YOU)) {
@@ -307,7 +305,8 @@ public class VoIPActivity extends Activity implements CallActions
 			if (message == null || message.isEmpty())
 				message = "You have been blocked by the person you are trying to call.";
 			showMessage(message);
-			voipService.stop();
+			if (voipService != null)
+				voipService.stop();
 		}
 		
 		if (action.equals(VoIPConstants.PARTNER_IN_CALL)) {
@@ -325,7 +324,8 @@ public class VoIPActivity extends Activity implements CallActions
 			} else if (VoIPService.isConnected())
 				voipService.hangUp();
 			else
-				voipService.stop();
+				if (voipService != null)
+					voipService.stop();
 		}
 		
 		// Clear the intent so the activity doesn't process intent again on resume

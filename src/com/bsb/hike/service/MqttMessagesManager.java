@@ -2140,10 +2140,11 @@ public class MqttMessagesManager
 					Log.d(VoIPConstants.TAG, "Receiving socket info..");
 					JSONObject metadataJSON = jsonObj.getJSONObject(HikeConstants.DATA).getJSONObject(HikeConstants.METADATA);
 					
+					// Check for currently active voip call
 					if (VoIPService.isConnected() && 
 							metadataJSON.getInt("callId") != VoIPService.getCallId() &&
 							metadataJSON.getBoolean("reconnecting") != true) {
-						Log.w(VoIPConstants.TAG, "We are already in a call.");
+						Log.w(VoIPConstants.TAG, "We are already in a Hike call.");
 						VoIPUtils.sendMessage(jsonObj.getString(HikeConstants.FROM), 
 								HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
 								HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);

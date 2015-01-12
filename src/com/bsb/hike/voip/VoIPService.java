@@ -43,11 +43,13 @@ import android.media.audiofx.NoiseSuppressor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.widget.Chronometer;
 
 import com.bsb.hike.HikeConstants;
@@ -107,6 +109,7 @@ public class VoIPService extends Service {
 	private NotificationCompat.Builder builder;
 	private MediaPlayer mediaplayer = null;
 	private AudioManager audioManager;
+	private AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
 	private boolean socketInfoSent = false, socketInfoReceived = false, establishingConnection = false;
 	private int reconnectAttempts = 0;
 	private Chronometer chronometer = null;
@@ -155,7 +158,7 @@ public class VoIPService extends Service {
 		clientSelf = new VoIPClient();
 		setCallid(0);
 		
-		audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+		initAudioManager();
 		setSpeaker(false);
 		
 		if (resamplerEnabled)
@@ -177,7 +180,7 @@ public class VoIPService extends Service {
 		
 		int returnInt = super.onStartCommand(intent, flags, startId);
 		
-		Logger.d(VoIPConstants.TAG, "VoIPService onStartCommand()");
+//		Logger.d(VoIPConstants.TAG, "VoIPService onStartCommand()");
 
 		if (intent == null)
 			return returnInt;
@@ -195,6 +198,19 @@ public class VoIPService extends Service {
 			// Error case: we receive a call while we are connecting / connected to another call
 			if (getCallId() != 0 && partnerCallId != getCallId()) {
 				Logger.w(VoIPConstants.TAG, "Call ID mismatch. Remote: " + partnerCallId + ", Self: " + getCallId());
+				return returnInt;
+			}
+			
+			// Error case: we are in a cellular call
+			if (VoIPUtils.isUserInCall(getApplicationContext())) {
+				Log.w(VoIPConstants.TAG, "We are already in a cellular call.");
+				try {
+					VoIPUtils.sendMessage(intent.getStringExtra("msisdn"), 
+							HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
+							HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 				return returnInt;
 			}
 			
@@ -229,7 +245,13 @@ public class VoIPService extends Service {
 				
 			// Error case: we are receiving a repeat v0 during call setup
 			if (partnerCallId == getCallId() && !partnerReconnecting && clientPartner.isInitiator()) {
-				Logger.w(VoIPConstants.TAG, "Ignoring repeat v0.");
+				Logger.d(VoIPConstants.TAG, "Repeat call initiation message.");
+				try {
+					// Try sending our socket info again. Caller could've missed our original message.
+					sendSocketInfoToPartner();
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 				return returnInt;
 			}
 			
@@ -258,6 +280,7 @@ public class VoIPService extends Service {
 			socketInfoReceived = true;
 		}
 		
+		// We are initiating a VoIP call
 		if (action.equals("outgoingcall")) {
 
 			// Edge case. 
@@ -267,7 +290,20 @@ public class VoIPService extends Service {
 				return returnInt;
 			}
 			
-			if (connected) {
+			// Error case: we are in a cellular call
+			if (VoIPUtils.isUserInCall(getApplicationContext())) {
+				Log.w(VoIPConstants.TAG, "We are already in a cellular call.");
+				try {
+					VoIPUtils.sendMessage(intent.getStringExtra("msisdn"), 
+							HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
+							HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				return returnInt;
+			}
+			
+			if (getCallId() > 0) {
 				Logger.e(VoIPConstants.TAG, "Error. Already in a call.");
 				return returnInt;
 			}
@@ -278,7 +314,6 @@ public class VoIPService extends Service {
 			clientPartner.setInitiator(false);
 			setCallid(new Random().nextInt(99999999));
 			Logger.d(VoIPConstants.TAG, "Making outgoing call to: " + clientPartner.getPhoneNumber() + ", id: " + getCallId());
-			initAudioManager();
 			
 			// Show activity
 			Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
@@ -300,6 +335,7 @@ public class VoIPService extends Service {
 	}
 
 	private void showNotification() {
+//		Logger.d(VoIPConstants.TAG, "Showing notification..");
 		Intent myIntent = new Intent(getApplicationContext(), VoIPActivity.class);
 		myIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, myIntent, 0);
@@ -311,7 +347,7 @@ public class VoIPService extends Service {
 			builder = new NotificationCompat.Builder(getApplicationContext());
 
 		int callDuration = getCallDuration();
-		// Logger.d(VoIPConstants.TAG, "Showing notification.. " + callDuration);
+//		Logger.d(VoIPConstants.TAG, "Showing notification.. " + callDuration);
 		String durationString = String.format(" (%02d:%02d)", (callDuration / 60), (callDuration % 60));
 		Notification myNotification = builder
 		.setContentTitle("Hike Ongoing Call")
@@ -333,14 +369,53 @@ public class VoIPService extends Service {
 	}
 	
 	@SuppressLint("InlinedApi") private void initAudioManager() {
-//		audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+
+		Logger.w(VoIPConstants.TAG, "Initializing audio manager.");
+		
+		if (audioManager == null)
+			audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+		
 		if (android.os.Build.VERSION.SDK_INT >= 11)
 			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);	
 		audioManager.setParameters("noise_suppression=on");
+		
+		// Audio focus
+		mOnAudioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
+			
+			@Override
+			public void onAudioFocusChange(int focusChange) {
+				switch (focusChange) {
+				case AudioManager.AUDIOFOCUS_GAIN:
+					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_GAIN");
+					setHold(false);
+					break;
+				case AudioManager.AUDIOFOCUS_LOSS:
+					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_LOSS");
+					setHold(true);
+					break;
+				case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_LOSS_TRANSIENT");
+					setHold(true);
+					break;
+				case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
+					setHold(true);
+					break;
+				}
+			}
+		};
+		
+		int result = audioManager.requestAudioFocus(mOnAudioFocusChangeListener, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN);
+		if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+			Logger.w(VoIPConstants.TAG, "Unable to gain audio focus. result: " + result);
+		} else
+			Logger.d(VoIPConstants.TAG, "Received audio focus.");
+		
 	}
 	
 	private void releaseAudioManager() {
 		if (audioManager != null) {
+			audioManager.abandonAudioFocus(mOnAudioFocusChangeListener);
 			audioManager.setMode(AudioManager.MODE_NORMAL);
 		}
 	}
@@ -418,11 +493,15 @@ public class VoIPService extends Service {
 	}
 	
 	public void startChrono() {
+
 		try {
 			if (chronometer == null) {
+//				Looper.prepare();
+//				Logger.w(VoIPConstants.TAG, "Starting chrono..");
 				chronometer = new Chronometer(VoIPService.this);
 				chronometer.setBase(SystemClock.elapsedRealtime());
 				chronometer.start();
+//				Looper.loop();
 			}
 		} catch (Exception e) {
 			Logger.w(VoIPConstants.TAG, "Chrono exception: " + e.toString());
@@ -446,11 +525,6 @@ public class VoIPService extends Service {
 				"\nReconnect attempts: " + reconnectAttempts +
 				"\nCall duration: " + getCallDuration());
 		
-		keepRunning = false;
-		connected = false;
-		setCallid(0);
-		chronometer = null;
-
 		if (partnerTimeoutThread != null)
 			partnerTimeoutThread.interrupt();
 
@@ -458,13 +532,19 @@ public class VoIPService extends Service {
 			reconnectingBeepsThread.interrupt();
 
 		// Hangup tone
-		tg.startTone(ToneGenerator.TONE_CDMA_PIP);
+		if (clientSelf.isInitiator() || connected)
+			tg.startTone(ToneGenerator.TONE_CDMA_PIP);
+		
 		stopMediaPlayer();
 		releaseAudioManager();
 		
 		if (opusWrapper != null)
 			opusWrapper.destroy();
 
+		keepRunning = false;
+		connected = false;
+		setCallid(0);
+		chronometer = null;
 		stopSelf();
 	}
 	
@@ -478,7 +558,7 @@ public class VoIPService extends Service {
 				stop();
 			}
 		}).start();
-		sendHandlerMessage(VoIPActivity.MSG_HANGUP);
+
 		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration());
 	}
 	
@@ -868,7 +948,6 @@ public class VoIPService extends Service {
 		startPlayBack();
 		partnerTimeoutThread.interrupt();
 		stopMediaPlayer();
-		initAudioManager();
 		sendHandlerMessage(VoIPActivity.MSG_AUDIO_START);
 		audioStarted = true;
 		
@@ -909,7 +988,7 @@ public class VoIPService extends Service {
 						Logger.d(VoIPConstants.TAG, "Initial NS status: " + ns.getEnabled());
 						if (ns != null) ns.setEnabled(true);
 					} else {
-						Logger.w(VoIPConstants.TAG, "Noise suppression not available.");
+						Logger.d(VoIPConstants.TAG, "Noise suppression not available.");
 					}
 					
 					// Attach echo cancellation
@@ -918,7 +997,7 @@ public class VoIPService extends Service {
 						Logger.d(VoIPConstants.TAG, "Initial AEC status: " + aec.getEnabled());
 						if (aec != null) aec.setEnabled(true);
 					} else {
-						Logger.w(VoIPConstants.TAG, "Echo cancellation not available.");
+						Logger.d(VoIPConstants.TAG, "Echo cancellation not available.");
 					}
 					
 					// Attach gain control
@@ -927,7 +1006,7 @@ public class VoIPService extends Service {
 						Logger.d(VoIPConstants.TAG, "Initial AGC status: " + agc.getEnabled());
 						if (agc != null) agc.setEnabled(true);
 					} else {
-						Logger.w(VoIPConstants.TAG, "Automatic gain control not available.");
+						Logger.d(VoIPConstants.TAG, "Automatic gain control not available.");
 					}
 				}
 				
@@ -1343,6 +1422,11 @@ public class VoIPService extends Service {
 		if (dp == null)
 			return;
 		
+		if (socket == null) {
+			Logger.d(VoIPConstants.TAG, "Socket is null.");
+			return;
+		}
+		
 		// While reconnecting don't send anything except for connection setup packets
 		if (reconnecting) {
 			if (!dp.getPacketType().toString().startsWith("COMM"))
@@ -1724,6 +1808,11 @@ public class VoIPService extends Service {
 			return;
 		}
 
+		if (!haveExternalSocketInfo()) {
+			Logger.d(VoIPConstants.TAG, "Can't send socket info (don't have it!)");
+			return;
+		}
+		
 		JSONObject socketData = new JSONObject();
 		socketData.put("internalIP", clientSelf.getInternalIPAddress()); 
 		socketData.put("internalPort", clientSelf.getInternalPort());
@@ -1790,7 +1879,7 @@ public class VoIPService extends Service {
 	 */
 	public void establishConnection() {
 		
-		if (establishingConnection) {
+		if (establishingConnection || connected) {
 			Logger.w(VoIPConstants.TAG, "Already trying to establish connection.");
 			return;
 		}
@@ -1947,5 +2036,6 @@ public class VoIPService extends Service {
 		
 		partnerTimeoutThread.start();
 	}
+
 }
 
