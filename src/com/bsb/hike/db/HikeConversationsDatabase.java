@@ -2111,8 +2111,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				}
 				conv.setMessages(messages);
 			}
+			unreadCount += getExtraConvUnreadCount(msisdn);
 			conv.setUnreadCount(unreadCount);
-
 			return conv;
 		}
 		finally
@@ -2123,6 +2123,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			}
 		}
 
+	}
+
+	/*
+	 * This function returns unread count for any given msisdn , In addition to unread messages there could be many events which we might want to add in unread for any given
+	 * conversation , for example missed call, PIN, Micro App State chagned etc
+	 */
+	public int getExtraConvUnreadCount(String msisdn)
+	{
+		return HikeSharedPreferenceUtil.getInstance(mContext, HikeSharedPreferenceUtil.CONV_UNREAD_COUNT).getData(msisdn, 0);
+	}
+
+	/*
+	 * This function set unread count for any given msisdn , In addition to unread messages there could be many events which we might want to add in unread for any given
+	 * conversation , for example missed call, PIN, Micro App State chagned etc
+	 */
+	public void setExtraConvUnreadCount(String msisdn, int count)
+	{
+		HikeSharedPreferenceUtil.getInstance(mContext, HikeSharedPreferenceUtil.CONV_UNREAD_COUNT).saveData(msisdn, count);
 	}
 
 	public Conversation getConversation(String msisdn, int limit)
@@ -5971,6 +5989,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		rowId = (int) mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
 
 		return rowId < 0 ? false : true;
+	}
+
+
+	public void updateMetadataOfMessage(long messageId, String metadata)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(MESSAGE_ID, messageId);
+		contentValues.put(MESSAGE_METADATA, metadata);
+		mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { String.valueOf(messageId) });
 	}
 
 }
