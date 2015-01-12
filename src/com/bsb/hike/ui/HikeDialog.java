@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
@@ -41,6 +42,8 @@ public class HikeDialog
 	public static final int SMS_CLIENT_DIALOG = 7;
 
 	public static final int HIKE_UPGRADE_DIALOG = 8;
+
+	public static final int VOIP_INTRO_DIALOG = 9;
 
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -66,6 +69,8 @@ public class HikeDialog
 			return showSMSClientDialog(context, listener, data);
 		case HIKE_UPGRADE_DIALOG:
 			return showHikeUpgradeDialog(context, data);
+		case VOIP_INTRO_DIALOG:
+			return showVoipFtuePopUp(context, listener, data);
 		}
 
 		return null;
@@ -169,6 +174,31 @@ public class HikeDialog
 		});
 
 		dialog.show();
+		return dialog;
+	}
+	
+	private static Dialog showVoipFtuePopUp(final Context context, final HikeDialogListener listener, Object... data)
+	{
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.voip_ftue_popup);
+		dialog.setCancelable(true);
+		TextView okBtn = (TextView) dialog.findViewById(R.id.awesomeButton);
+		
+		okBtn.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				if (listener != null)
+				{
+					listener.neutralClicked(dialog);
+				}
+				dialog.dismiss();
+			}
+		});
+
+		dialog.show();
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_VOIP_INTRO_TIP, true);
 		return dialog;
 	}
 
