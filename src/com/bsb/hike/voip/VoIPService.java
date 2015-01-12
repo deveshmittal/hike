@@ -347,8 +347,7 @@ public class VoIPService extends Service {
 			builder = new NotificationCompat.Builder(getApplicationContext());
 
 		int callDuration = getCallDuration();
-//		Logger.d(VoIPConstants.TAG, "Showing notification.. " + callDuration);
-		String durationString = String.format(" (%02d:%02d)", (callDuration / 60), (callDuration % 60));
+		String durationString = (callDuration == 0)? "" : String.format(" (%02d:%02d)", (callDuration / 60), (callDuration % 60));
 		Notification myNotification = builder
 		.setContentTitle("Hike Ongoing Call")
 		.setContentText("Call in progress " + durationString)
@@ -558,8 +557,7 @@ public class VoIPService extends Service {
 				stop();
 			}
 		}).start();
-
-		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration());
+		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration(), -1);
 	}
 	
 	public void rejectIncomingCall() {
@@ -575,7 +573,7 @@ public class VoIPService extends Service {
 		}).start();
 		
 		// sendHandlerMessage(VoIPActivity.MSG_INCOMING_CALL_DECLINED);
-		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
+		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1);
 
 	}
 	
@@ -1863,7 +1861,7 @@ public class VoIPService extends Service {
 
 				sendHandlerMessage(VoIPActivity.MSG_PARTNER_SOCKET_INFO_TIMEOUT);
 				if (clientSelf.isInitiator()) {
-					VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0);
+					VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1);
 					VoIPUtils.sendMissedCallNotificationToPartner(clientPartner);
 				}
 				stop();					
@@ -1997,9 +1995,9 @@ public class VoIPService extends Service {
 					sendHandlerMessage(VoIPActivity.MSG_CONNECTION_FAILURE);
 					if (!reconnecting) {
 						if (clientSelf.isInitiator())
-							VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0);
+							VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1);
 						else
-							VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
+							VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1);
 					}
 					stop();
 				}
@@ -2020,9 +2018,9 @@ public class VoIPService extends Service {
 						sendHandlerMessage(VoIPActivity.MSG_PARTNER_ANSWER_TIMEOUT);
 						if (!reconnecting) {
 							if (!clientSelf.isInitiator())
-								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
+								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1);
 							else
-								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0);
+								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1);
 						}
 						
 						stop();

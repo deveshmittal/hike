@@ -579,7 +579,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		case CONTACT_INFO:
 			MenuItem friendItem = menu.findItem(R.id.unfriend);
 			MenuItem overflow = menu.findItem(R.id.overflow_menu);
-			MenuItem callItem = menu.findItem(R.id.call);
 
 			if (friendItem != null)
 			{
@@ -592,11 +591,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						friendItem.setVisible(false);
 					}
-			}
-
-			if (callItem!=null && !contactInfo.isOnhike())
-			{
-				callItem.setVisible(false);
 			}
 
 			if(overflow!=null && !overflow.getSubMenu().hasVisibleItems())
@@ -620,9 +614,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		switch (item.getItemId())
 		{
-		case R.id.call:
-			Utils.onCallClicked(this, mLocalMSISDN);
-			break;
 		case R.id.unfriend:
 			FavoriteType fav = Utils.checkAndUnfriendContact(contactInfo);
 			contactInfo.setFavoriteType(fav);
