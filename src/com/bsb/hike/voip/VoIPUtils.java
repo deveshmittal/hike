@@ -123,7 +123,7 @@ public class VoIPUtils {
      * @param messageType
      * @param duration
      */
-    public static void addMessageToChatThread(Context context, VoIPClient clientPartner, String messageType, int duration) {
+    public static void addMessageToChatThread(Context context, VoIPClient clientPartner, String messageType, int duration, long timeStamp) {
 		
     	Logger.d(VoIPConstants.TAG, "Adding message to chat thread. Message: " + messageType + ", Duration: " + duration);
     	HikeConversationsDatabase mConversationDb = HikeConversationsDatabase.getInstance();
@@ -141,7 +141,11 @@ public class VoIPUtils {
 	at com.bsb.hike.voip.VoIPUtils.addMessageToChatThread(VoIPUtils.java:130)
     	 */
     	long timestamp = System.currentTimeMillis() / 1000;
-
+    	if (timeStamp > 0)
+    	{
+    		timestamp = timeStamp;
+    	}
+    	
 		JSONObject jsonObject = new JSONObject();
 		JSONObject data = new JSONObject();
 		
@@ -158,6 +162,7 @@ public class VoIPUtils {
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(timestamp));
 			data.put(HikeConstants.VOIP_CALL_DURATION, duration);
 			data.put(HikeConstants.VOIP_CALL_INITIATOR, !clientPartner.isInitiator());
+			data.put(HikeConstants.TIMESTAMP, timestamp);
 
 			jsonObject.put(HikeConstants.DATA, data);
 			jsonObject.put(HikeConstants.TYPE, messageType);

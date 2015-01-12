@@ -2178,7 +2178,7 @@ public class MqttMessagesManager
 					VoIPClient clientPartner = new VoIPClient();
 					clientPartner.setPhoneNumber(jsonObj.getString(HikeConstants.FROM));
 					clientPartner.setInitiator(true);
-					VoIPUtils.addMessageToChatThread(context, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
+					VoIPUtils.addMessageToChatThread(context, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, jsonObj.getJSONObject(HikeConstants.DATA).getLong(HikeConstants.TIMESTAMP));
 				}
 				
 				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_UPGRADABLE)) {
