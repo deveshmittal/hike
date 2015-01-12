@@ -38,6 +38,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
@@ -1229,5 +1230,21 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}, threadName);
 		
 		t.start();
+	}
+	
+	/**
+	 * Overrides {@link ChatThread#onDestroy()}
+	 */
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+
+		HikeSharedPreferenceUtil prefsUtil = HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext());
+		
+		if (mAdapter != null && mAdapter.shownSdrToolTip() && (!prefsUtil.getData(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false)))
+		{
+			prefsUtil.saveData(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, true);
+		}
 	}
 }
