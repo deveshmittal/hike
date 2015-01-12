@@ -582,7 +582,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			if (!TextUtils.isEmpty(mContactInfo.getMsisdnType()))
 				viewHolder.subText.setText(" (" + mContactInfo.getMsisdnType().toLowerCase() + ")");
 
-			if(!mContactInfo.isOnhike())
+			if(!mContactInfo.isOnhike() || !Utils.isVoipActivated(context))
 			{
 				viewHolder.phoneIcon.setVisibility(View.GONE);
 				viewHolder.divider.setVisibility(View.GONE);

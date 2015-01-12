@@ -1191,6 +1191,11 @@ public class MqttMessagesManager
 			int bitrate = data.getInt(HikeConstants.VOIP_BITRATE_WIFI);
 			editor.putInt(HikeMessengerApp.VOIP_BITRATE_WIFI, bitrate);
 		}
+		if(data.has(HikeConstants.VOIP_ACTIVATED))
+		{
+			int activateVoip = data.getInt(HikeConstants.VOIP_ACTIVATED);
+			editor.putInt(HikeConstants.VOIP_ACTIVATED, activateVoip);
+		}
 		if (data.has(HikeConstants.REWARDS_TOKEN))
 		{
 			String rewardToken = data.getString(HikeConstants.REWARDS_TOKEN);
