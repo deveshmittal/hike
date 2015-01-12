@@ -395,6 +395,10 @@ public class ConvMessage
 
 		this.mMessage = "";
 		this.mTimestamp = System.currentTimeMillis() / 1000;
+		if (obj.has(HikeConstants.DATA))
+		{
+			mTimestamp = obj.getJSONObject(HikeConstants.DATA).optLong(HikeConstants.TIMESTAMP, mTimestamp);
+		}
 		switch (this.participantInfoState)
 		{
 		case PARTICIPANT_JOINED:
