@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,9 +24,11 @@ import com.bsb.hike.utils.Utils;
 import com.google.android.gms.plus.model.people.Person.Image;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,6 +57,7 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 	private NuxSelectFriends selectFriends;
 	private TextView sectionDisplayMessage;
 	private TextView nxtBtn;
+	private HashSet<String> contactsDisplayed;
 	
     public static HorizontalFriendsFragment newInstance(int someInt, String someTitle) {
         HorizontalFriendsFragment fragmentDemo = new HorizontalFriendsFragment();
@@ -89,23 +93,54 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     @Override
     public View onCreateView(LayoutInflater inf, ViewGroup parent, Bundle savedInstanceState) {
 
-        View v =  inf.inflate(R.layout.display_selected_friends, parent, false);    	
+        View v =  inf.inflate(R.layout.display_selected_friends, parent, false); 
+        contactsDisplayed = new HashSet<String>();
 
         ll = (LinearLayout) v.findViewById(R.id.horizontalView);
         hsc = (HorizontalScrollView) v.findViewById(R.id.scrollView);
         nxtBtn = (TextView) v.findViewById(R.id.nux_next_selection_button);
         nxtBtn.setOnClickListener(this);
 
-    	NUXManager nm = NUXManager.getInstance(getActivity());
-    	selectFriends = nm.getNuxSelectFriendsPojo();
-    	sectionDisplayMessage = (TextView) v.findViewById(R.id.nux_header_selection_text);
-    	changeDisplayString(0);
-        linearViews = new LinkedHashMap<ContactInfo,View>();
-        //ll.addView();
-     //   ListView lv = (ListView) v.findViewById(R.id.abs__action_bar_title);
-        //lv.setAdapter(adapter);
-        return v;
-    }
+		NUXManager nm = NUXManager.getInstance();
+		selectFriends = nm.getNuxSelectFriendsPojo();
+		sectionDisplayMessage = (TextView) v.findViewById(R.id.nux_header_selection_text);
+		changeDisplayString(0);
+		linearViews = new LinkedHashMap<ContactInfo, View>();
+		if (getActivity() instanceof NuxSendCustomMessageActivity)
+		{
+			
+			String msisdn = getActivity().getIntent().getStringExtra("selected_friends");
+			if (!TextUtils.isEmpty(msisdn))
+			{
+				String[] arrmsisdn = msisdn.split(NUXConstants.STRING_SPLIT_SEPERATOR);
+				Logger.d("UmangX", Arrays.asList(arrmsisdn).toString());
+				contactsDisplayed.addAll(Arrays.asList(arrmsisdn));
+			}
+			nxtBtn.setEnabled(true);
+
+			for (String s : contactsDisplayed)
+			{
+							
+				Logger.d("UmangX numbe  : "  , s);
+
+				View py = inf.inflate(R.layout.friends_horizontal_item, null);
+				py.setTag(s);
+				TextView tv = (TextView) py.findViewById(R.id.msisdn);
+				ImageView iv = (ImageView) py.findViewById(R.id.profile_image);
+				iv.setImageDrawable(ContactManager.getInstance().getIcon(s, true));
+				ContactInfo contactInfo = ContactManager.getInstance().getContact(s);
+				if(contactInfo != null)
+					tv.setText(contactInfo.getFirstNameAndSurname());
+				else 
+					tv.setText(s);
+				ll.addView(py);
+				linearViews.put(ContactManager.getInstance().getContact(s), py);			
+			}
+
+			
+		}
+		return v;
+	}
     
     public boolean removeView(ContactInfo contactInfo){
     	//View c = linearViews.get(contactInfo); 
@@ -261,18 +296,39 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     }
 
 	@Override
-	public void onClick(View v) {
-		NUXManager nm = NUXManager.getInstance(getActivity());
-    	Logger.d("UmangX", "next clicked");
-    	HashSet<String> contactsNux = new HashSet<String>();
-		for(ContactInfo contactInfo : linearViews.keySet()){
-			contactsNux.add(contactInfo.getMsisdn());
+	public void onClick(View v) 
+	{
+		NUXManager nm = NUXManager.getInstance();
+		if(getActivity() instanceof ComposeChatActivity)
+		{
+//			nm.sendMessage(contactsDisplayed, nm.getNuxCustomMessagePojo().getSmsMessage());
+//			nm.saveNUXContact(contactsDisplayed);
+//			nm.sendMsisdnListToServer(contactsDisplayed);
+//			nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
+			Logger.d("UmangX", " CCA next clicked");
+			HashSet<String> contactsNux = new HashSet<String>();
+			for(ContactInfo contactInfo : linearViews.keySet()){
+				contactsNux.add(contactInfo.getMsisdn());
+			}
+			Logger.d("UmangX", "" + contactsNux.toString().replace("[", "").replace("]", ""));
+			nm.startNuxCustomMessage(contactsNux.toString().replace("[", "").replace("]", ""));
+			
+			
+		} else if (getActivity() instanceof NuxSendCustomMessageActivity)
+		{
+			nm.sendMessage(contactsDisplayed, ((NuxSendCustomMessageActivity)getActivity()).getCustomMessage());
+			nm.saveNUXContact(contactsDisplayed);
+			nm.sendMsisdnListToServer(contactsDisplayed);
+			nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
+			Intent intent = new Intent(getActivity(), HomeActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+			
 		}
-		nm.sendMessage(contactsNux, nm.getNuxCustomMessagePojo().getSmsMessage() , getActivity());
-		nm.saveNUXContact(contactsNux, getActivity());
-		nm.sendMsisdnListToServer(contactsNux);
-		nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
-		nm.startNuxCustomMessage(getActivity());
+		
+    	
+    	
+		
 		// TODO call the send message activity.
 	}
 

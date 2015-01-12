@@ -15,7 +15,7 @@
         android:layout_marginLeft="20dp"
         android:layout_weight=".35"
         android:background="#ef554e"
-        android:text="Remind"
+        android:text="@string/nux_remind"
         android:textColor="#ffffff" />
 
     <Button
@@ -28,7 +28,7 @@
         android:layout_marginRight="20dp"
         android:layout_weight=".35"
         android:background="#ef554e"
-        android:text="Invite More"
+        android:text="@string/nux_invite_more"
         android:textColor="#ffffff" />
 
 </LinearLayout>

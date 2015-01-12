@@ -24,7 +24,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
 
-public class NuxSendCustomMessageActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener
+public class NuxSendCustomMessageActivity extends HikeAppStateBaseFragmentActivity 
 {
 
 	private TextView tapToChangeView;
@@ -53,7 +53,7 @@ public class NuxSendCustomMessageActivity extends HikeAppStateBaseFragmentActivi
 
 		bindViews(savedInstanceState);
 
-		bindListeners();
+		//bindListeners();
 
 		processViewElemets();
 
@@ -80,15 +80,15 @@ public class NuxSendCustomMessageActivity extends HikeAppStateBaseFragmentActivi
         }
 	}
 
-	private void bindListeners()
-	{
-		tapToChangeView.setOnClickListener(this);
-		
-	}
+//	private void bindListeners()
+//	{
+//		tapToChangeView.setOnClickListener(this);
+//		
+//	}
 
 	private void processViewElemets()
 	{
-		NUXManager mmNuxManager = NUXManager.getInstance(this);
+		NUXManager mmNuxManager = NUXManager.getInstance();
 		NuxCustomMessage mmCustomMessage = mmNuxManager.getNuxCustomMessagePojo();
 
 		if (!TextUtils.isEmpty(mmCustomMessage.getSmsMessage()))
@@ -96,23 +96,30 @@ public class NuxSendCustomMessageActivity extends HikeAppStateBaseFragmentActivi
 			textMessageView.setHint(mmCustomMessage.getSmsMessage());
 		}
 	}
-
-	@Override
-	public void onClick(View v)
-	{
-		switch (v.getId())
-		{
-		
-		
-
-		case R.id.tap_to_write :
-			
-			//IntentManager.openNuxFriendSelector(this);
-			Toast.makeText(this, "NUX started NOW", Toast.LENGTH_LONG).show();
-			break;
+	
+	public String getCustomMessage(){
+		if(TextUtils.isEmpty(textMessageView.getText())){
+			return NUXManager.getInstance().getNuxCustomMessagePojo().getSmsMessage();
+		} else {
+			return textMessageView.getText().toString();
 		}
-
 	}
+//	@Override
+//	public void onClick(View v)
+//	{
+//		switch (v.getId())
+//		{
+//		
+//		
+//
+//		case R.id.tap_to_write :
+//			
+//			//IntentManager.openNuxFriendSelector(this);
+//			Toast.makeText(this, "NUX started NOW", Toast.LENGTH_LONG).show();
+//			break;
+//		}
+//
+//	}
 
 	@Override
 	protected void onDestroy()

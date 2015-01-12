@@ -16,6 +16,7 @@ import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -189,13 +190,9 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		List<ContactInfo> allContacts = HikeMessengerApp.getContactManager().getAllContacts();
 		Set<String> blockSet = ContactManager.getInstance().getBlockedMsisdnSet();
 		
-		NUXManager nuxManager = NUXManager.getInstance(context);
+		NUXManager nuxManager = NUXManager.getInstance();
 		
 		
-		if(nuxManager.is_NUX_Active()){
-//			nuxHideTaskList = nuxManager.getNuxSelectFriendsPojo().getRecoList();
-//			blockSet.addAll(nuxHideTaskList);
-		}
 		if(fetchRecents)
 		{
 			List<ContactInfo> convContacts = HikeMessengerApp.getContactManager().getAllConversationContactsSorted(true, false);
@@ -223,9 +220,15 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		smsTaskList = new ArrayList<ContactInfo>();
 		recentlyJoinedTaskList = new ArrayList<ContactInfo>();
 		nuxRecommendedTaskList = new ArrayList<ContactInfo>();
-		
-		if(nuxManager.is_NUX_Active()){
-			nuxRecommendedTaskList = nuxManager.getRecommendedContacts();
+
+		if (nuxManager.getCurrentState() == NUXConstants.NUX_IS_ACTIVE)
+		{
+			ArrayList<String> mmList = nuxManager.getNuxSelectFriendsPojo().getRecoList();
+			for (String s : mmList)
+			{
+				nuxRecommendedTaskList.add(ContactManager.getInstance().getContact(s));
+			}
+
 		}
 		
 		long iterationTime = System.currentTimeMillis();

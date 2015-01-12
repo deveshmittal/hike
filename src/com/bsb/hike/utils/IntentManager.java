@@ -241,12 +241,14 @@ public class IntentManager
 	{
 		// TODO Auto-generated method stub
 		Intent in = new Intent(context, NUXInviteActivity.class);
+		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		return in;
 	}
 	
 	public static Intent openNuxFriendSelector(Context context)
 	{
 		Intent in = new Intent(context, ComposeChatActivity.class);
+		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		in.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 		in.putExtra(HikeConstants.Extras.NUX_INCENTIVE_MODE, true);
 		return in;
@@ -255,6 +257,7 @@ public class IntentManager
 	public static Intent openNuxCustomMessage(Context context)
 	{
 		Intent in = new Intent(context, NuxSendCustomMessageActivity.class);
+		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		return in;
 	}
 

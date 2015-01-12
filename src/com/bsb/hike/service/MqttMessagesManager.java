@@ -1088,11 +1088,11 @@ public class MqttMessagesManager
 		{
 			this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
 		}
-		if (data.optJSONObject(HikeConstants.METADATA) != null)
+		if (data.has(HikeConstants.METADATA) )
 		{
 			JSONObject mmobObject = data.optJSONObject(HikeConstants.METADATA);
-			if (mmobObject.optJSONObject(HikeConstants.NUX) != null)
-				NUXManager.getInstance(context).parseNuxPacket(mmobObject.getJSONObject(HikeConstants.NUX).toString(), context);
+			if (mmobObject.has(HikeConstants.NUX))
+				NUXManager.getInstance().parseNuxPacket(mmobObject.getJSONObject(HikeConstants.NUX).toString());
 		}
 	}
 
@@ -1301,15 +1301,16 @@ public class MqttMessagesManager
 		{
 			UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);
 		}
-		if (data.optJSONObject(HikeConstants.METADATA) != null)
+		if (data.has(HikeConstants.METADATA))
 		{
 			JSONObject mmobObject = data.optJSONObject(HikeConstants.METADATA);
-			if (mmobObject.optJSONObject(HikeConstants.NUX) != null)
-				NUXManager.getInstance(context).parseNuxPacket(mmobObject.getJSONObject(HikeConstants.NUX).toString(), context);
+			if (mmobObject.has(HikeConstants.NUX))
+				NUXManager.getInstance().parseNuxPacket(mmobObject.getJSONObject(HikeConstants.NUX).toString());
 		}
 
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
+		
 	}
 
 	private void saveRewards(JSONObject jsonObj) throws JSONException

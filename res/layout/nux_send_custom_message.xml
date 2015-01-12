@@ -22,7 +22,7 @@
         android:id="@+id/multiforward_text_message"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:hint="@string/nux_default_message"
+        android:hint="@string/custom_message"
         android:textColorHint="@color/gray"
         android:textSize="30sp"
         android:gravity="center"
@@ -37,7 +37,7 @@
         android:padding="20dp"
         android:layout_gravity="center"
         android:gravity="center"
-        android:text="@string/tap_to_write"
+        android:text="@string/custom_message_hint"
         android:textSize="20sp"
         android:textColor="@color/light_gray_hike"/>
 

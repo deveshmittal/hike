@@ -8,10 +8,12 @@
 
     <com.bsb.hike.ui.utils.RecyclingImageView
         android:id="@+id/imgv_nux"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/ic_accept" >
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:src="@drawable/ic_dots" >
     </com.bsb.hike.ui.utils.RecyclingImageView>
 
     <LinearLayout

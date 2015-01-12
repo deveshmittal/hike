@@ -625,19 +625,19 @@ public class ConversationsAdapter extends BaseAdapter
 			return;
 		}
 
-		updateViewsRelatedToMessageState(parentView, message, conversation);
-
 		TextView messageView = viewHolder.subText;
-
-		CharSequence markedUp = getConversationText(conversation, message);
-
-		messageView.setVisibility(View.VISIBLE); 
-		if(NUXManager.getInstance(context).getCurrentState() == NUXConstants.NUX_IS_ACTIVE &&NUXManager.getInstance(context).getAllNUXContacts().contains(message.getMsisdn())){
-			messageView.setText("Waiting for response");
-		}
-		else{
+		messageView.setVisibility(View.VISIBLE);
+		
+		if(! (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_IS_ACTIVE) || !NUXManager.getInstance().isContactLocked(message.getMsisdn()))
+		{
+			updateViewsRelatedToMessageState(parentView, message, conversation);
+			CharSequence markedUp = getConversationText(conversation, message);
 			messageView.setText(markedUp);
+			
+		} else {
+			messageView.setText(NUXManager.getInstance().getNuxChatRewardPojo().getChatWaitingText());	
 		}
+		
 		TextView tsView = viewHolder.timeStamp;
 		tsView.setText(message.getTimestampFormatted(true, context));
 	}

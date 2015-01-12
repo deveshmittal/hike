@@ -29,6 +29,10 @@ public class NUXChatReward
 	private String remindText;
 
 	private String tapToClaimLink;
+	
+	private String tapToClaimText;
+	
+	private String selectFriends;
 
 	/**
 	 * @return the toggleModule
@@ -137,7 +141,7 @@ public class NUXChatReward
 	 * @param tapToClaimLink
 	 */
 	public NUXChatReward(boolean toggleModule, String rewardCardText, String rewardCardSuccessText, String statusText, String chatWaitingText, String pendingChatIcon,
-			String detailsText, String detailsLink, String button1Text, String button2Text, String tapToClaimLink)
+			String detailsText, String detailsLink, String button1Text, String button2Text, String tapToClaimLink,String tapToClaimText,String selectFriends)
 	{
 		this.toggleModule = toggleModule;
 		this.rewardCardText = rewardCardText;
@@ -150,6 +154,20 @@ public class NUXChatReward
 		this.inviteMoreText = button1Text;
 		this.remindText = button2Text;
 		this.tapToClaimLink = tapToClaimLink;
+		this.tapToClaimText=tapToClaimText;
+		this.selectFriends=selectFriends;
+	}
+
+	public String getTapToClaimText()
+	{
+		// TODO Auto-generated method stub
+		return tapToClaimText;
+	}
+
+	public String getSelectFriendsText()
+	{
+		// TODO Auto-generated method stub
+		return selectFriends;
 	}
 
 }

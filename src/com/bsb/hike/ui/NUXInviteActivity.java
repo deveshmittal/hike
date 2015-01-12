@@ -34,6 +34,8 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 
+		Utils.blockOrientationChange(this);
+		
 		if (Utils.requireAuth(this))
 		{
 			return;
@@ -78,26 +80,33 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 
 	private void processViewElemets()
 	{
-		NUXManager mmNuxManager = NUXManager.getInstance(this);
+		NUXManager mmNuxManager = NUXManager.getInstance();
 		NuxInviteFriends mmInviteFriends = mmNuxManager.getNuxInviteFriendsPojo();
 
-		if (!TextUtils.isEmpty(mmInviteFriends.getButText()))
+		if (mmInviteFriends != null)
 		{
-			butInviteFriends.setText(mmInviteFriends.getButText());
-		}
+			if (!TextUtils.isEmpty(mmInviteFriends.getButText()))
+			{
+				butInviteFriends.setText(mmInviteFriends.getButText());
+			}
 
-		if (!TextUtils.isEmpty(mmInviteFriends.getRewardTitle()))
-		{
-			tvRewardMain.setText(mmInviteFriends.getRewardTitle());
-		}
+			if (!TextUtils.isEmpty(mmInviteFriends.getRewardTitle()))
+			{
+				tvRewardMain.setText(mmInviteFriends.getRewardTitle());
+			}
 
-		if (!TextUtils.isEmpty(mmInviteFriends.getRewardSubText()))
-		{
-			tvRewardSubText.setText(mmInviteFriends.getRewardSubText());
-		}
-		if (mmInviteFriends.getImageBitmap() != null)
-		{
-			imgvInviteFrd.setImageBitmap(mmInviteFriends.getImageBitmap());
+			if (!TextUtils.isEmpty(mmInviteFriends.getRewardSubText()))
+			{
+				tvRewardSubText.setText(mmInviteFriends.getRewardSubText());
+			}
+			if (mmInviteFriends.getImageBitmap() != null)
+			{
+				imgvInviteFrd.setImageBitmap(mmInviteFriends.getImageBitmap());
+			}
+			if (!mmInviteFriends.isToggleSkipButton())
+			{
+				butSkip.setVisibility(View.INVISIBLE);
+			}
 		}
 	}
 
@@ -108,13 +117,13 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		{
 		case R.id.but_skip:
 			IntentManager.openHomeActivity(this);
-			NUXManager.getInstance(this).setCurrentState(NUXConstants.NUX_SKIPPED);
+			NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
 			Toast.makeText(this, "Button Skip", Toast.LENGTH_LONG).show();
 			finish();
 			break;
 
 		case R.id.but_inviteFrnds:
-			NUXManager.getInstance(this).startNuxSelector(this);
+			NUXManager.getInstance().startNuxSelector();
 			//IntentManager.openNuxFriendSelector(this);
 			Toast.makeText(this, "Invite Friends", Toast.LENGTH_LONG).show();
 			break;

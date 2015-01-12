@@ -182,9 +182,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 
 		setContentView(R.layout.compose_chat);
-		NUXManager nuxManager = NUXManager.getInstance(getApplicationContext());
 		
-		if (savedInstanceState == null) {
+		if (savedInstanceState == null && nuxIncentiveMode) {
            
 			
 			FragmentManager fm = getSupportFragmentManager();
@@ -259,7 +258,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
 			sendBroadcast(contactSyncIntent);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.COMPOSE_REFRESH_CONTACTS);
-			
 		}
 		return super.onOptionsItemSelected(item);
 	}

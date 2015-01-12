@@ -74,6 +74,8 @@ public class NUXConstants
 	public static final String TD_MIN_CONTACTS = "min";
 
 	public static final String TD_MAX_CONTACTS = "max";
+	
+	public static final String TD_IS_SKIPPABLE = "sskppbl";
 
 	public static final String CHAT_REWARDS_BAR = "s4";
 
@@ -98,6 +100,10 @@ public class NUXConstants
 	public static final String CR_BUTTON2_TEXT = "bttn2Txt";
 
 	public static final String CR_TAPTOCLAIM = "tpToClmLnk";
+	
+	public static final String CR_TAPTOCLAIMTEXT="tptoclmtxt";
+	
+	public static final String CR_SELECTFRIENDS="slctfrnd";
 
 	public static final String CURRENT_NUX_ACTIVITY = "current_nux_activity";
 
@@ -110,8 +116,10 @@ public class NUXConstants
 	public static final int NUX_IS_ACTIVE = 4;
 
 	public static final int OTHER_ACTIVITY = -1;
+	
+	public static final int COMPLETED=5;
 
-	public static final Object SUBTYPE_NEW = "new";
+	public static final String SUBTYPE_NEW = "nuxNew";
 
 	public static final String SCREENS = "s";
 
@@ -139,12 +147,14 @@ public class NUXConstants
 
 	public static final String CURRENT_PERSONS_UNLOCKED="current_persons_unlocked";
 	
-	public static final String UNLOCK_PERSONS="msisdn";
+	public static final String UNLOCK_PERSONS="msisdns";
 
 	public static final String ID="_id";
 
 	public static final String TYPE="type";
 
 	public static final String INCENTIVE_AMOUNT="recharge";
+
+	public static final String SHOW_REWARDS="shwRwrd";
 
 }

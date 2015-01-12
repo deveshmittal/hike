@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,6 +34,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.location.GpsStatus.NmeaListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -232,17 +232,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private View inviteFooter;
 
-	View parent;
-
 	private LinearLayout llChatReward, llInviteOptions, llNuxFooter;
 
-	private ImageView lockImage;
+	private ImageView footercontroller,lockImage;
 
 	private HoloCircularProgress progressNux;
 
 	private Button butInviteMore,butRemind;
 
-	private TextView chatProgress;
+	private TextView chatProgress,rewardCard;
+
 
 	private enum hikeBotConvStat
 	{
@@ -274,38 +273,45 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		parent = inflater.inflate(R.layout.conversations, null);
+		View parent = inflater.inflate(R.layout.conversations, null);
 
-		if (NUXManager.getInstance(getActivity()).getCurrentState() == NUXConstants.NUX_IS_ACTIVE
-				|| (NUXManager.getInstance(getActivity()).getCurrentState() == NUXConstants.NUX_SKIPPED))
+		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_IS_ACTIVE
+				|| (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_SKIPPED)||(NUXManager.getInstance().getCurrentState() == NUXConstants.COMPLETED))
 		{
 			ViewStub mmStub = (ViewStub) parent.findViewById(R.id.nux_footer);
 			mmStub.setLayoutResource(R.layout.nux_footer);
 			mmStub.inflate();
 			bindNuxViews(parent);
 			footerState.setEnumState(footerState.CLOSED);
-
 		}
 		return parent;
 	}
 
 	private void bindNuxViews(final View root)
 	{
-		lockImage = (ImageView) root.findViewById(R.id.imgv_nux);
-		lockImage.setOnClickListener(this);
-		llNuxFooter = (LinearLayout) parent.findViewById(R.id.ll_footer);
+		footercontroller = (ImageView) root.findViewById(R.id.imgv_nux);
+		footercontroller.setOnClickListener(this);
+		
+		lockImage=(ImageView)root.findViewById(R.id.nux_lock);
+		llNuxFooter = (LinearLayout) root.findViewById(R.id.ll_footer);
 
-		llChatReward = (LinearLayout) parent.findViewById(R.id.ll_chatReward);
+		llChatReward = (LinearLayout) root.findViewById(R.id.ll_chatReward);
 		llChatReward.setOnClickListener(this);
-		llInviteOptions = (LinearLayout) parent.findViewById(R.id.ll_buttons);
-		chatProgress = (TextView) parent.findViewById(R.id.tv_chatStatus);
+		llInviteOptions = (LinearLayout) root.findViewById(R.id.ll_buttons);
+		chatProgress = (TextView) root.findViewById(R.id.tv_chatStatus);
 		chatProgress.setOnClickListener(this);
 
-		butInviteMore=(Button)parent.findViewById(R.id.but_inviteMore);
-		butRemind=(Button)parent.findViewById(R.id.but_inviteMore);
-		progressNux = (HoloCircularProgress) parent.findViewById(R.id.nux_progress);
+		butInviteMore=(Button)root.findViewById(R.id.but_inviteMore);
+		butRemind=(Button)root.findViewById(R.id.but_remind);
+		
+		butInviteMore.setOnClickListener(this);
+		butRemind.setOnClickListener(this);
+		progressNux = (HoloCircularProgress) root.findViewById(R.id.nux_progress);
 
-		fillNuxFooterElements();
+		rewardCard = (TextView) root.findViewById(R.id.tv_chatReward);
+		
+		
+		fillNuxFooterElements(root);
 		
 		
 		if (!Utils.isHoneycombOrHigher())
@@ -328,77 +334,63 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			});
 		}
 	}
-	private void fillNuxFooterElements()
+	private void fillNuxFooterElements(final View root)
 	{
-		NUXManager mmNuxManager = NUXManager.getInstance(getActivity());
+		NUXManager mmNuxManager = NUXManager.getInstance();
 		NUXTaskDetails mmDetails = mmNuxManager.getNuxTaskDetailsPojo();
 		NUXChatReward mmReward = mmNuxManager.getNuxChatRewardPojo();
 
 		
-		if(mmReward!=null){
-		
-		if(!TextUtils.isEmpty(mmReward.getInviteMoreButtonText()))
+		if (mmReward != null)
 		{
 			butInviteMore.setText(mmReward.getInviteMoreButtonText());
-		}
-		if(!TextUtils.isEmpty(mmReward.getRemindButtonText()))
-		{
+
 			butRemind.setText(mmReward.getRemindButtonText());
+			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_SKIPPED)
+			{
+				butRemind.setVisibility(View.GONE);
+				butInviteMore.setText(mmReward.getSelectFriendsText());
+			}
+			rewardCard.setText(String.format(mmReward.getRewardCardText(), mmDetails.getMin(), mmDetails.getIncentiveAmount()));
+
 		}
-		if(!TextUtils.isEmpty(mmReward.getRewardCardText()))
+
+		if (mmNuxManager.getCountCurrentNUXContacts() + mmNuxManager.getCurrentUnlockedSize() == mmDetails.getMax())
 		{
-			TextView rewardCard=(TextView)parent.findViewById(R.id.tv_chatReward);
-			rewardCard.setText(String.format(mmReward.getRewardCardText(),mmDetails.getIncentiveAmount()));
+			butInviteMore.setVisibility(View.GONE);
 		}
-		else
+
+		if (!(mmNuxManager.getCurrentState()==NUXConstants.COMPLETED))
 		{
-			TextView rewardCard=(TextView)parent.findViewById(R.id.tv_chatReward);
-			rewardCard.setText(String.format(mmReward.getRewardCardText(),getActivity().getString(R.string.incentive_amount)));
-		}
-		
-		if(!TextUtils.isEmpty(mmReward.getStatusText()))
-		{
-			chatProgress.setText(String.format(mmReward.getStatusText(),mmNuxManager.getCurrentUnlockedSize(),mmDetails.getMin()));
-		}
-		if (mmNuxManager.getCurrentUnlockedSize() < mmDetails.getMin())
-		{
-			progressNux.setProgress(NUXManager.getInstance(getActivity()).getCurrentUnlockedSize() / mmDetails.getMin());
+			progressNux.setProgress(NUXManager.getInstance().getCurrentUnlockedSize() / mmDetails.getMin());
+			chatProgress.setText(String.format(mmReward.getStatusText(), mmNuxManager.getCurrentUnlockedSize(), mmDetails.getMin()));
+
 		}
 		else
 		{
 			// Reward Unlocked.
-			
-			
+
 			lockImage.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_nux_unlocked));
 
-			chatProgress.setText(R.string.tap_to_claim);
+			chatProgress.setText(mmReward.getTapToClaimText());
 
-			TextView rewardCard = (TextView) parent.findViewById(R.id.tv_chatReward);
-			if (!TextUtils.isEmpty(mmReward.getRewardCardSuccessText()))
-			{
-
-				rewardCard.setText(mmReward.getRewardCardSuccessText());
-			}
-			else
-			{
-//TODO replace 4 with incentive number send by server.
-				rewardCard.setText(String.format(getActivity().getString(R.string.reward_card_success), 4));
-			}
+			rewardCard.setText(String.format(mmReward.getRewardCardSuccessText(), mmDetails.getIncentiveAmount()));
+			
+			llChatReward.setOnClickListener(null);
 			
 			
 		}			
-		}
+		
 	}
 
 	@Override
 	public void onClick(View v)
 	{
-		NUXManager mmNuxManager = NUXManager.getInstance(getActivity());
+		NUXManager mmNuxManager = NUXManager.getInstance();
 		NUXTaskDetails mmDetails = mmNuxManager.getNuxTaskDetailsPojo();
 		NUXChatReward mmReward = mmNuxManager.getNuxChatRewardPojo();
 		switch (v.getId())
 		{
-
 		case R.id.imgv_nux:
 
 			switch (footerState.getEnum())
@@ -420,7 +412,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				break;
 			case HALFOPEN:
 				if(Utils.isHoneycombOrHigher())
-				ObjectAnimator.ofFloat(llNuxFooter, "translationY",llNuxFooter.getHeight()-lockImage.getHeight()).start();
+				ObjectAnimator.ofFloat(llNuxFooter, "translationY",llNuxFooter.getHeight()-footercontroller.getHeight()).start();
 				else
 				{
 					llChatReward.setVisibility(View.GONE);
@@ -434,17 +426,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			case CLOSED:
 				Logger.d("Footer", "closed");
 			
-				if(!TextUtils.isEmpty(mmReward.getStatusText()))
+				if(mmNuxManager.getCurrentState()==NUXConstants.COMPLETED)
 				{
-					chatProgress.setText(String.format(mmReward.getStatusText(),mmNuxManager.getCurrentUnlockedSize(),mmDetails.getMin()));
+					chatProgress.setText(mmReward.getTapToClaimText());
 				}
 				else
 				{
-					chatProgress.setText(String.format(getActivity().getString(R.string.status_text),mmNuxManager.getCurrentUnlockedSize(),mmDetails.getMin()));
-				}
-				if (mmNuxManager.getCurrentUnlockedSize() < mmDetails.getMin())
-				{
-					progressNux.setProgress(NUXManager.getInstance(getActivity()).getCurrentUnlockedSize() / mmDetails.getMin());
+					chatProgress.setText(String.format(mmReward.getStatusText(),mmNuxManager.getCurrentUnlockedSize(),mmDetails.getMin()));
+					progressNux.setProgress(NUXManager.getInstance().getCurrentUnlockedSize() / mmDetails.getMin());
 				}
 				if (Utils.isHoneycombOrHigher())
 					ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).start();
@@ -459,9 +448,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			break;
 		case R.id.ll_chatReward:
-			if (!TextUtils.isEmpty(NUXManager.getInstance(getActivity()).getNuxChatRewardPojo().getDetailsText()))
+			if ((NUXManager.getInstance().getNuxChatRewardPojo()!=null)&&!TextUtils.isEmpty(NUXManager.getInstance().getNuxChatRewardPojo().getDetailsText()))
 			{
-				chatProgress.setText(NUXManager.getInstance(getActivity()).getNuxChatRewardPojo().getDetailsText());
+				chatProgress.setText(NUXManager.getInstance().getNuxChatRewardPojo().getDetailsText());
 
 			}
 			else
@@ -484,12 +473,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		case R.id.tv_chatStatus:
 
 			Intent intent = null;
-			if (NUXManager.getInstance(getActivity()).getCurrentUnlockedSize() == NUXManager.getInstance(getActivity()).getNuxTaskDetailsPojo().getMin())
+			if (NUXManager.getInstance().getCurrentState()==NUXConstants.COMPLETED)
 			{
 				
 				Toast.makeText(getActivity(), "Open TAP TO CLAIM LINK", Toast.LENGTH_SHORT).show();
-				
-				
+
 				if ((!TextUtils.isEmpty(mmReward.getTapToClaimLink())))
 				{
 					intent = new Intent(getActivity(), WebViewActivity.class);
@@ -510,7 +498,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					startActivity(intent);
 				}
 			}
-				
+			break;
+		case R.id.but_remind:
+			Toast.makeText(getActivity(), "Remind Button Pressed", Toast.LENGTH_SHORT).show();
+			break;
+		case R.id.but_inviteMore:
+			NUXManager.getInstance().startNuxSelector();
+			Toast.makeText(getActivity(), "Invite MOre  Button Pressed", Toast.LENGTH_SHORT).show();
+			break;
 			
 		}
 	}

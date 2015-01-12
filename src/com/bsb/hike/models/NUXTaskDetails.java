@@ -15,6 +15,8 @@ public class NUXTaskDetails
 	
 	private int incentiveAmount;
 
+	private boolean isNuxSkippable;
+
 	/**
 	 * @param incentiveId
 	 * @param activityId
@@ -23,8 +25,9 @@ public class NUXTaskDetails
 	 * @param min
 	 * @param max
 	 * @param incentiveAmount 
+	 * @param isNuxSkippable 
 	 */
-	public NUXTaskDetails(String incentiveId, String activityId, int incrMax, int incrMin, int min, int max, int incentiveAmount)
+	public NUXTaskDetails(String incentiveId, String activityId, int incrMax, int incrMin, int min, int max, int incentiveAmount, boolean isNuxSkippable)
 	{
 		super();
 		this.incentiveId = incentiveId;
@@ -33,7 +36,8 @@ public class NUXTaskDetails
 		this.incrMin = incrMin;
 		this.min = min;
 		this.max = max;
-		this.setIncentiveAmount(incentiveAmount);
+		this.isNuxSkippable=isNuxSkippable;
+		this.incentiveAmount=incentiveAmount;
 	}
 
 	private int max;
@@ -91,9 +95,9 @@ public class NUXTaskDetails
 		return incentiveAmount;
 	}
 
-	public void setIncentiveAmount(int incentiveAmount)
+	public boolean isNuxSkippable()
 	{
-		this.incentiveAmount = incentiveAmount;
+		return isNuxSkippable;
 	}
 
 }
