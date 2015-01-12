@@ -6052,7 +6052,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 	public Cursor getMessage(String messageId)
 	{
-		String selection = DBConstants.MSISDN + "=?";
+		String selection = DBConstants.MESSAGE_ID + "=?";
 		return mDb.query(MESSAGES_TABLE, null, selection, new String[]{messageId}, null, null, null);
 	}
 	
@@ -6062,6 +6062,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		contentValues.put(MESSAGE_ID, messageId);
 		contentValues.put(MESSAGE_METADATA, metadata);
 		mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { String.valueOf(messageId) });
+	}
+	
+	/**
+	 * 
+	 * @param msisdn
+	 * @return unread count, -1 if conversation does not exist
+	 */
+	public int getConvUnreadCount(String msisdn){
+		String selection = DBConstants.MSISDN + "=?";
+		Cursor c = mDb.query(CONVERSATIONS_TABLE, new String[]{UNREAD_COUNT}, selection, new String[]{msisdn}, null, null, null);
+		if(c.moveToFirst()){
+			return c.getInt(c.getColumnIndex(DBConstants.UNREAD_COUNT));
+		}
+		return -1;
 	}
 
 }

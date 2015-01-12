@@ -46,11 +46,11 @@ public class PlatformAlarmManager
 		Bundle data = intent.getExtras();
 		if (data != null)
 		{
-			int messageId = data.getInt(MESSAGE_ID);
+			long messageId = data.getInt(MESSAGE_ID);
 			if (messageId != 0) // validation
 			{
-				Cursor cursor = HikeConversationsDatabase.getInstance().getMessage(messageId);
-				if (cursor != null)
+				Cursor cursor = HikeConversationsDatabase.getInstance().getMessage(String.valueOf(messageId));
+				if (cursor != null && cursor.moveToFirst())
 				{
 					try
 					{
@@ -76,8 +76,7 @@ public class PlatformAlarmManager
 						jsoException.printStackTrace();
 					}
 				}
-				int unreadCount = cursor.getInt(cursor.getColumnIndex(DBConstants.UNREAD_COUNT));
-				increaseUnreadCount(data, context, unreadCount);
+				increaseUnreadCount(data, context);
 				showNotification(data);
 			}
 		}
@@ -109,18 +108,21 @@ public class PlatformAlarmManager
 		return null;
 	}
 
-	private static void increaseUnreadCount(Bundle data, Context context, int dbUnreadCount)
+	private static void increaseUnreadCount(Bundle data, Context context)
 	{
 		if (data.containsKey(CONV_MSISDN) && data.containsKey(INCREASE_UNREAD))
 		{
+			 
 			// increase unread count
 			HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
+			String msisdn = data.getString(CONV_MSISDN);
+			int dbUnreadCount = db.getConvUnreadCount(msisdn);
 			int count = db.getExtraConvUnreadCount(data.getString(CONV_MSISDN));
 			count++;
-			db.setExtraConvUnreadCount(data.getString(CONV_MSISDN), count);
+			db.setExtraConvUnreadCount(msisdn, count);
 			Message ms = Message.obtain();
 			ms.arg1 = count + dbUnreadCount; // db + extra unread
-			ms.obj = data.getString(CONV_MSISDN);
+			ms.obj = msisdn;
 			HikeMessengerApp.getPubSub().publish(HikePubSub.CONV_UNREAD_COUNT_MODIFIED, ms);
 		}
 	}
