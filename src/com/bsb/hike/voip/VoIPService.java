@@ -43,7 +43,6 @@ import android.media.audiofx.NoiseSuppressor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
@@ -246,12 +245,8 @@ public class VoIPService extends Service {
 			// Error case: we are receiving a repeat v0 during call setup
 			if (partnerCallId == getCallId() && !partnerReconnecting && clientPartner.isInitiator()) {
 				Logger.d(VoIPConstants.TAG, "Repeat call initiation message.");
-				try {
-					// Try sending our socket info again. Caller could've missed our original message.
-					sendSocketInfoToPartner();
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
+				// Try sending our socket info again. Caller could've missed our original message.
+				sendSocketInfoToPartner();
 				return returnInt;
 			}
 			
@@ -1687,7 +1682,7 @@ public class VoIPService extends Service {
 		Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 		if (ringtone == null)
 			ringtone = RingtoneManager.getRingtone(getApplicationContext(), notification);
-		ringtone.setStreamType(AudioManager.STREAM_RING);
+		ringtone.setStreamType(AudioManager.STREAM_VOICE_CALL);
 		ringtone.play();		
 	}
 	
@@ -1767,18 +1762,13 @@ public class VoIPService extends Service {
 					Logger.d(VoIPConstants.TAG, "UnknownHostException: " + e.toString());
 				}
 				
-				if (haveExternalSocketInfo())
-					try {
-						sendSocketInfoToPartner();
-						if (socketInfoReceived)
-							establishConnection();
-						else
-							startPartnerTimeoutThread();
-
-					} catch (JSONException e) {
-						Logger.d(VoIPConstants.TAG, "JSONException: " + e.toString());
-					}
-				else {
+				if (haveExternalSocketInfo()) {
+					sendSocketInfoToPartner();
+					if (socketInfoReceived)
+						establishConnection();
+					else
+						startPartnerTimeoutThread();
+				} else {
 					Logger.d(VoIPConstants.TAG, "Failed to retrieve external socket.");
 					sendHandlerMessage(VoIPActivity.MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE);
 				}
@@ -1806,7 +1796,7 @@ public class VoIPService extends Service {
 			return false;
 	}
 	
-	private void sendSocketInfoToPartner() throws JSONException {
+	private void sendSocketInfoToPartner() {
 		if (clientPartner.getPhoneNumber() == null || clientPartner.getPhoneNumber().isEmpty()) {
 			Logger.e(VoIPConstants.TAG, "Have no partner info. Quitting.");
 			return;
@@ -1817,30 +1807,36 @@ public class VoIPService extends Service {
 			return;
 		}
 		
-		JSONObject socketData = new JSONObject();
-		socketData.put("internalIP", clientSelf.getInternalIPAddress()); 
-		socketData.put("internalPort", clientSelf.getInternalPort());
-		socketData.put("externalIP", clientSelf.getExternalIPAddress());
-		socketData.put("externalPort", clientSelf.getExternalPort());
-		socketData.put("relay", clientSelf.getRelayAddress());
-		socketData.put("callId", getCallId());
-		socketData.put("initiator", clientSelf.isInitiator());
-		socketData.put("reconnecting", reconnecting);
-		
-		JSONObject data = new JSONObject();
-		data.put(HikeConstants.MESSAGE_ID, new Random().nextInt(10000));
-		data.put(HikeConstants.TIMESTAMP, System.currentTimeMillis() / 1000); 
-		data.put(HikeConstants.METADATA, socketData);
+		try {
+			JSONObject socketData = new JSONObject();
+			socketData.put("internalIP", clientSelf.getInternalIPAddress());
+			socketData.put("internalPort", clientSelf.getInternalPort());
+			socketData.put("externalIP", clientSelf.getExternalIPAddress());
+			socketData.put("externalPort", clientSelf.getExternalPort());
+			socketData.put("relay", clientSelf.getRelayAddress());
+			socketData.put("callId", getCallId());
+			socketData.put("initiator", clientSelf.isInitiator());
+			socketData.put("reconnecting", reconnecting);
+			
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.MESSAGE_ID, new Random().nextInt(10000));
+			data.put(HikeConstants.TIMESTAMP, System.currentTimeMillis() / 1000); 
+			data.put(HikeConstants.METADATA, socketData);
 
-		JSONObject message = new JSONObject();
-		message.put(HikeConstants.TO, clientPartner.getPhoneNumber());
-		message.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0);
-		message.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO);
-		message.put(HikeConstants.DATA, data);
-		
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
-		Logger.d(VoIPConstants.TAG, "Sent socket information to partner. Reconnecting: " + reconnecting);
-		socketInfoSent = true;
+			JSONObject message = new JSONObject();
+			message.put(HikeConstants.TO, clientPartner.getPhoneNumber());
+			message.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0);
+			message.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO);
+			message.put(HikeConstants.DATA, data);
+			
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
+			Logger.d(VoIPConstants.TAG, "Sent socket information to partner. Reconnecting: " + reconnecting);
+			socketInfoSent = true;
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+			Logger.w(VoIPConstants.TAG, "sendSocketInfoToPartner JSON error: " + e.toString());
+		} 
 		
 	}
 	
@@ -1860,8 +1856,6 @@ public class VoIPService extends Service {
 					} catch (InterruptedException e) {
 						Logger.d(VoIPConstants.TAG, "Timeout thread interrupted.");
 						return;
-					} catch (JSONException e) {
-						Logger.d(VoIPConstants.TAG, "Timeout thread JSONException: " + e.toString());
 					}
 				}
 
@@ -1883,8 +1877,9 @@ public class VoIPService extends Service {
 	 */
 	public void establishConnection() {
 		
-		if (establishingConnection || connected) {
+		if (!reconnecting && (establishingConnection || connected)) {
 			Logger.w(VoIPConstants.TAG, "Already trying to establish connection.");
+//			sendSocketInfoToPartner();
 			return;
 		}
 		
