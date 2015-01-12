@@ -924,10 +924,14 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	 */
 	private void muteConvToggledUIChange(boolean isMuted)
 	{
-		//if(!checknetworkError())
+		if(!checkNetworkError())
 		{
 			toggleConversationMuteViewVisibility(isMuted);
 		}
+		
+		/**
+		 * Updating the overflow menu item
+		 */
 		
 		updateOverflowMenuItemString(R.string.mute_group, isMuted ? activity.getString(R.string.unmute_group) : activity.getString(R.string.mute_group));
 	}
@@ -935,5 +939,24 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	private void toggleConversationMuteViewVisibility(boolean isMuted)
 	{
 		activity.findViewById(R.id.conversation_mute).setVisibility(isMuted ? View.VISIBLE : View.GONE);
+	}
+	
+	/**
+	 * This overrides {@link ChatThread#updateNetworkState()} inorder to toggleGroupMute visibility appropriately
+	 */
+	@Override
+	protected void updateNetworkState()
+	{
+		super.updateNetworkState();
+
+		if (checkNetworkError())
+		{
+			toggleConversationMuteViewVisibility(false);
+		}
+
+		else
+		{
+			toggleConversationMuteViewVisibility(groupConversation.isMuted());
+		}
 	}
 }

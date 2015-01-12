@@ -142,6 +142,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	protected static final int BLOCK_UNBLOCK_USER = 15;
 	
+	protected static final int UPDATE_NETWORK_STATE = 16;
+	
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -252,6 +254,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case BLOCK_UNBLOCK_USER:
 			blockUnBlockUser((boolean) msg.obj);
 			break;
+		case UPDATE_NETWORK_STATE:
+			updateNetworkState();
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
 			break;
@@ -359,6 +364,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		audioRecordView = new AudioRecordView(activity, this);
 		mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
+		
+		if(checkNetworkError())
+		{
+			showNetworkError(true);
+		}
 	}
 
 	/**
@@ -1409,6 +1419,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HikePubSub.UNBLOCK_USER:
 			blockUser(object, false);
 			break;
+		case HikePubSub.UPDATE_NETWORK_STATE:
+			uiHandler.sendEmptyMessage(UPDATE_NETWORK_STATE);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1532,7 +1545,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
 				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.MESSAGE_FAILED,
 				HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.STICKER_CATEGORY_MAP_UPDATED,
-				HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER };
+				HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER, HikePubSub.UPDATE_NETWORK_STATE };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -2362,5 +2375,27 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(activity, null);
 		Utils.executeConvAsyncTask(emailTask, mConversation);
+	}
+	
+	/**
+	 * Called on the UI thread, it is used to update the network error view
+	 * @param isNetworkError
+	 */
+	private void showNetworkError(boolean isNetworkError)
+	{
+		activity.findViewById(R.id.network_error_chat).setVisibility(isNetworkError ? View.VISIBLE : View.GONE);
+	}
+	
+	protected boolean checkNetworkError()
+	{
+		return HikeMessengerApp.networkError;
+	}
+	
+	/**
+	 * This is called from the UI thread
+	 */
+	protected void updateNetworkState()
+	{
+		showNetworkError(checkNetworkError());
 	}
 }
