@@ -1246,5 +1246,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			prefsUtil.saveData(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, true);
 		}
+		
+		resetLastSeenScheduler();
 	}
 }

@@ -1590,6 +1590,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		
 		releaseComposeViewWatcher();
 		
+		releaseMessageAdapterResources();
+		
+		StickerManager.getInstance().saveCustomCategories();
+		
+		releaseMessageMap();
+		
 	}
 
 	/**
@@ -2526,6 +2532,24 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 			mComposeViewWatcher.releaseResources();
 			mComposeViewWatcher = null;
+		}
+	}
+
+	private void releaseMessageAdapterResources()
+	{
+		if (mAdapter != null)
+		{
+			mAdapter.resetPlayerIfRunning();
+		}
+	}
+
+	private void releaseMessageMap()
+	{
+
+		if (mMessageMap != null)
+		{
+			mMessageMap.clear();
+			mMessageMap = null;
 		}
 	}
 }
