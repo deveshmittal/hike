@@ -114,6 +114,8 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 			break;
 
 		case R.id.but_inviteFrnds:
+			NUXManager.getInstance(this).startNuxSelector(this);
+			//IntentManager.openNuxFriendSelector(this);
 			Toast.makeText(this, "Invite Friends", Toast.LENGTH_LONG).show();
 			break;
 		}

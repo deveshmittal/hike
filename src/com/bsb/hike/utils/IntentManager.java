@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.models.NuxCustomMessage;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
 import com.bsb.hike.ui.CreditsActivity;
@@ -15,6 +16,7 @@ import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.NUXInviteActivity;
+import com.bsb.hike.ui.NuxSendCustomMessageActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
@@ -239,6 +241,20 @@ public class IntentManager
 	{
 		// TODO Auto-generated method stub
 		Intent in = new Intent(context, NUXInviteActivity.class);
+		return in;
+	}
+	
+	public static Intent openNuxFriendSelector(Context context)
+	{
+		Intent in = new Intent(context, ComposeChatActivity.class);
+		in.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+		in.putExtra(HikeConstants.Extras.NUX_INCENTIVE_MODE, true);
+		return in;
+	}
+	
+	public static Intent openNuxCustomMessage(Context context)
+	{
+		Intent in = new Intent(context, NuxSendCustomMessageActivity.class);
 		return in;
 	}
 

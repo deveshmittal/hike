@@ -259,20 +259,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
 			sendBroadcast(contactSyncIntent);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.COMPOSE_REFRESH_CONTACTS);
-			HashSet<String> contactsNux = new HashSet<String>();
-			for(ContactInfo contactInfo : adapter.getAllSelectedContacts()){
-				contactsNux.add(contactInfo.getMsisdn());
-			}
-			NUXManager nm = NUXManager.getInstance(this);
-			nm.sendMessage(contactsNux, "I am calling form MArs", this);
-			nm.saveNUXContact(contactsNux, this);
-			nm.sendMsisdnListToServer(contactsNux);
-			nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
+			
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
-
+	
 	private boolean shouldInitiateFileTransfer()
 	{
 		if (isSharingFile)

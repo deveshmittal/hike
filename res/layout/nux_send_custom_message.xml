@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical" >
+
+    <include
+        android:id="@+id/spinner"
+        layout="@layout/spinner_center_screen"
+        android:visibility="gone" />
+
+    
+	<FrameLayout
+       android:id="@+id/horizontal_friends_placeholder"
+       android:layout_height="wrap_content"
+       android:layout_width="match_parent">
+  	</FrameLayout>
+    
+    
+    <com.bsb.hike.view.CustomFontEditText
+        android:id="@+id/multiforward_text_message"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:hint="@string/nux_default_message"
+        android:textColorHint="@color/gray"
+        android:textSize="30sp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:textColor="@color/grey"
+        android:layout_margin="10dp"/>
+    
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/tap_to_write"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:padding="20dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="@string/tap_to_write"
+        android:textSize="20sp"
+        android:textColor="@color/light_gray_hike"/>
+
+</LinearLayout>

@@ -264,7 +264,11 @@
           <activity
             android:name="com.bsb.hike.ui.NUXInviteActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
-        </activity>      
+        </activity> 
+        <activity
+            android:name="com.bsb.hike.ui.NuxSendCustomMessageActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>     
         <activity
     		android:name="com.haibison.android.lockpattern.LockPatternActivity"
     		android:configChanges="orientation|screenSize|keyboard|keyboardHidden"

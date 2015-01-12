@@ -1301,6 +1301,12 @@ public class MqttMessagesManager
 		{
 			UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);
 		}
+		if (data.optJSONObject(HikeConstants.METADATA) != null)
+		{
+			JSONObject mmobObject = data.optJSONObject(HikeConstants.METADATA);
+			if (mmobObject.optJSONObject(HikeConstants.NUX) != null)
+				NUXManager.getInstance(context).parseNuxPacket(mmobObject.getJSONObject(HikeConstants.NUX).toString(), context);
+		}
 
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);

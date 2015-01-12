@@ -17,6 +17,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NUXConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.MultipleConvMessage;
@@ -93,6 +94,19 @@ public class NUXManager
 	{
 		// mprefs.saveData(NUXConstants.IS_NUX_ACTIVE, true);
 		context.startActivity(IntentManager.openInviteFriends(context));
+
+		// shutDownNUX(context);
+	}
+	
+	public void startNuxCustomMessage(Context context)
+	{
+		context.startActivity(IntentManager.openNuxCustomMessage(context));
+	}
+	
+	public void startNuxSelector(Context context)
+	{
+		// mprefs.saveData(NUXConstants.IS_NUX_ACTIVE, true);
+		context.startActivity(IntentManager.openNuxFriendSelector(context));
 
 		// shutDownNUX(context);
 	}
@@ -340,10 +354,10 @@ public class NUXManager
 						
 					}
 					
-					int incrMax = task_details.optInt(NUXConstants.TD_INCR_MAX);
-					int min = task_details.optInt(NUXConstants.TD_MIN_CONTACTS, 3);
-					int max = task_details.optInt(NUXConstants.TD_MAX_CONTACTS, 3);
-					int incrMin = task_details.optInt(NUXConstants.TD_INCR_MIN);
+					int incrMax = task_details.optInt(NUXConstants.TD_INCR_MAX, R.integer.nux_incr_default);
+					int min = task_details.optInt(NUXConstants.TD_MIN_CONTACTS, R.integer.nux_min_default);
+					int max = task_details.optInt(NUXConstants.TD_MAX_CONTACTS, R.integer.nux_max_default);
+					int incrMin = task_details.optInt(NUXConstants.TD_INCR_MIN, R.integer.nux_incr_default);
 					taskDetails = new NUXTaskDetails(incentiveId, activityId, incrMax, incrMin, min, max,incentiveAmount);
 				}
 			}

@@ -31,7 +31,6 @@
             android:layout_weight=".2"
             android:id="@+id/nux_next_selection_button"
             android:layout_width="0dp"
-            android:onClick="friendsSelected"
             android:layout_height="wrap_content"
 			android:text="@string/next_uppercase"
 			android:layout_gravity="right"

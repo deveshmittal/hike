@@ -2,18 +2,21 @@ package com.bsb.hike.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
@@ -26,6 +29,7 @@ import android.support.v4.app.Fragment;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -37,7 +41,7 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 
-public class HorizontalFriendsFragment extends Fragment {
+public class HorizontalFriendsFragment extends Fragment implements OnClickListener{
 //	
 //    ThingsAdapter adapter;
 //    FragmentActivity listener;
@@ -45,7 +49,7 @@ public class HorizontalFriendsFragment extends Fragment {
 	private Map<ContactInfo, View> linearViews;
 
 	private LinearLayout ll;
-	private int maxShowListCount = 5;
+	private int maxShowListCount = 2;
 	private HorizontalScrollView hsc; 
 	private NuxSelectFriends selectFriends;
 	private TextView sectionDisplayMessage;
@@ -90,6 +94,7 @@ public class HorizontalFriendsFragment extends Fragment {
         ll = (LinearLayout) v.findViewById(R.id.horizontalView);
         hsc = (HorizontalScrollView) v.findViewById(R.id.scrollView);
         nxtBtn = (TextView) v.findViewById(R.id.nux_next_selection_button);
+        nxtBtn.setOnClickListener(this);
 
     	NUXManager nm = NUXManager.getInstance(getActivity());
     	selectFriends = nm.getNuxSelectFriendsPojo();
@@ -120,7 +125,8 @@ public class HorizontalFriendsFragment extends Fragment {
     	//if(count  == 5) return false;
     	changeDisplayString(count - 1);
 		ll.removeView(replaceView); 	
-    	scrollHorizontalView(index -1 , replaceView.getWidth());
+		linearViews.remove(contactInfo);
+		scrollHorizontalView(index -1 , replaceView.getWidth());
 		LayoutInflater inf = getLayoutInflater(null);
 		View py = inf.inflate(R.layout.friends_horizontal_item,null);
 		py.setTag("tag");
@@ -194,6 +200,7 @@ public class HorizontalFriendsFragment extends Fragment {
     	scrollHorizontalView(maxShowListCount - count - 1, replaceView.getWidth());
         Logger.d("UmangX", index+ " value of I");
     	ll.addView(py, index);
+    	linearViews.put(contactInfo,py);
     	ll.removeView(replaceView);
     	//ll.addView(v);
     	//ll.indexOfChild(py);
@@ -235,10 +242,6 @@ public class HorizontalFriendsFragment extends Fragment {
     	//ll.invalidate();
     }
     
-    public void friendsSelected(View v){
-    	
-    }
-    
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
     	super.onActivityCreated(savedInstanceState);
@@ -256,5 +259,21 @@ public class HorizontalFriendsFragment extends Fragment {
     	}
        
     }
+
+	@Override
+	public void onClick(View v) {
+		NUXManager nm = NUXManager.getInstance(getActivity());
+    	Logger.d("UmangX", "next clicked");
+    	HashSet<String> contactsNux = new HashSet<String>();
+		for(ContactInfo contactInfo : linearViews.keySet()){
+			contactsNux.add(contactInfo.getMsisdn());
+		}
+		nm.sendMessage(contactsNux, nm.getNuxCustomMessagePojo().getSmsMessage() , getActivity());
+		nm.saveNUXContact(contactsNux, getActivity());
+		nm.sendMsisdnListToServer(contactsNux);
+		nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
+		nm.startNuxCustomMessage(getActivity());
+		// TODO call the send message activity.
+	}
 
 }

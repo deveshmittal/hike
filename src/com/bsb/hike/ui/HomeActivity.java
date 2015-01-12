@@ -179,7 +179,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			return;
 		}
 				
-		if (NUXManager.getInstance(this).getCurrentState() == NUXConstants.NUX_NEW)
+		if (NUXManager.getInstance(this).getCurrentState() != NUXConstants.NUX_KILLED)
 		{
 			if (!NUXManager.getInstance(this).getNuxInviteFriendsPojo().isToggleSkipButton())
 			{
@@ -187,7 +187,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 
 			NUXManager.getInstance(this).startNUX(this);
-			finish();
+			finish(); 
 		}
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
@@ -470,8 +470,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
 				Intent intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
-				intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
-				intent.putExtra(HikeConstants.Extras.NUX_INCENTIVE_MODE, true);
+				intent.putExtra(HikeConstants.Extras.EDIT, true);
 				
 				newConversationIndicator.setVisibility(View.GONE);
 				startActivity(intent);
