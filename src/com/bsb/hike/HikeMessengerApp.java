@@ -60,7 +60,6 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 
 @ReportsCrashes(formKey = "", customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
@@ -736,16 +735,9 @@ public void onTrimMemory(int level)
 
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
 
-		// adding a check here for MobileAppTracker SDK update case
 		// we use this preference to check if this is a fresh install case or an
 		// update case
 		// in case of an update the SSL pref would not be null
-		TrackerUtil tUtil = TrackerUtil.getInstance(this.getApplicationContext());
-		if (tUtil != null)
-		{
-			tUtil.setTrackOptions(!preferenceManager.contains(HikeConstants.SSL_PREF));
-			Logger.d(getClass().getSimpleName(), "Init for apptracker sdk finished" + !preferenceManager.contains(HikeConstants.SSL_PREF));
-		}
 
 		boolean isSAUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE);
 
