@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.NotificationManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -1619,6 +1620,41 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * Mark any messages unread as read
 		 */
 		setMessagesRead();
+		
+		/**
+		 * Pause any onGoing loaders for MessagesAdapter
+		 */
+		
+		pauseImageLoaders();
+		
+		/**
+		 * Clear any pending notifications
+		 */
+		
+		if (mConversation != null)
+		{
+			NotificationManager mgr = (NotificationManager) (activity.getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE));
+			mgr.cancel((int) mConversation.getMsisdn().hashCode());
+		}
+		
+		/**
+		 * Publish new Activity pubSub. 
+		 */
+		
+		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, activity);
+		
+		/**
+		 * re - init the ComposeView watcher
+		 */
+		
+		if(mComposeViewWatcher != null)
+		{
+			mComposeViewWatcher.init();
+			mComposeViewWatcher.setBtnEnabled();
+			mComposeView.requestFocus();
+		}
+		
+		// TODO : Decrement pin Count. updateOverflow menu count
 	}
 	
 	private void unreadCounterClicked()
@@ -2550,6 +2586,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			mMessageMap.clear();
 			mMessageMap = null;
+		}
+	}
+	
+	private void pauseImageLoaders()
+	{
+		if (mAdapter != null)
+		{
+			// mAdapter.getStickerLoader().setExitTasksEarly(false);
+			mAdapter.getIconImageLoader().setExitTasksEarly(false);
+			mAdapter.getHighQualityThumbLoader().setExitTasksEarly(false);
+			mAdapter.notifyDataSetChanged();
 		}
 	}
 }
