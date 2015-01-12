@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
@@ -18,6 +20,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -996,6 +999,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		currentTheme = mConversation.getTheme();
 		updateUIAsPerTheme(currentTheme);// it has to be done after setting adapter
 		initMessageSenderLayout();
+		
+		setMessagesRead(); //Setting messages as read if there are any unread ones
 	}
 
 	/*
@@ -1600,6 +1605,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void onResume()
 	{
 		isActivityVisible = true;
+		
+		/**
+		 * Mark any messages unread as read
+		 */
+		setMessagesRead();
 	}
 	
 	private void unreadCounterClicked()
@@ -2397,5 +2407,101 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void updateNetworkState()
 	{
 		showNetworkError(checkNetworkError());
+	}
+
+	/**
+	 * Mark unread messages. This is called from {@link #onResume()}
+	 */
+	private void setMessagesRead()
+	{
+		/**
+		 * Proceeding only if we have an unread message to be marked
+		 */
+		if (isLastMessageReceivedAndUnread())
+		{
+			if (PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+			{
+				setSMSReadInNative();
+			}
+
+			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(mConversation.getMsisdn());
+
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+
+			Logger.d(TAG, "Unread Count event triggered");
+
+			/**
+			 * If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read avoid sending read notifications for group chats
+			 * 
+			 */
+
+			if (ids != null)
+			{
+				JSONObject object = new JSONObject();
+
+				try
+				{
+					object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
+					object.put(HikeConstants.TO, mConversation.getMsisdn());
+					object.put(HikeConstants.DATA, ids);
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+			}
+		}
+
+	}
+
+	/**
+	 * Returns true if and only if the last message was received but unread
+	 * 
+	 * @return
+	 */
+	private boolean isLastMessageReceivedAndUnread()
+	{
+		if (mAdapter == null || mConversation == null)
+		{
+			return false;
+		}
+
+		ConvMessage lastMsg = null;
+
+		/**
+		 * Extracting the last contextual message
+		 */
+		for (int i = messages.size() - 1; i >= 0; i--)
+		{
+			ConvMessage msg = messages.get(i);
+
+			/**
+			 * Do nothing if it's a typing notification
+			 */
+			if (msg.getTypingNotification() != null)
+			{
+				continue;
+			}
+
+			lastMsg = msg;
+			break;
+		}
+
+		if (lastMsg == null)
+		{
+			return false;
+		}
+
+		return lastMsg.getState() == ConvMessage.State.RECEIVED_UNREAD || lastMsg.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE;
+	}
+	
+	/**
+	 * Since SMS are primarily a use case for {@link OneToOneChatThread}, this method is implemented there only.
+	 */
+	protected void setSMSReadInNative()
+	{
+		return;
 	}
 }

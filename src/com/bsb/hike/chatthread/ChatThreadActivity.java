@@ -128,4 +128,5 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 		chatThread.onResume();
 		super.onResume();
 	}
+	
 }

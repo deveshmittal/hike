@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -1196,4 +1197,37 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		// TODO : hideHikeToOfflineTip();
 	}
 	
+	/**
+	 * Spawns a new thread to mark SMS messages as read.
+	 */
+	@Override
+	protected void setSMSReadInNative()
+	{
+		String threadName = "setSMSRead";
+		Thread t = new Thread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				Logger.d(TAG, "Marking SMS as read for : " + msisdn );
+				
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(HikeConstants.SMSNative.READ, 1);
+				
+				try
+				{
+					activity.getContentResolver().update(HikeConstants.SMSNative.INBOX_CONTENT_URI, contentValues, HikeConstants.SMSNative.NUMBER + "=?", new String[] { msisdn});
+				}
+				
+				catch (Exception e)
+				{
+					Logger.e(TAG, e.toString());
+				}
+				
+			}
+		}, threadName);
+		
+		t.start();
+	}
 }
