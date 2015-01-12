@@ -1001,6 +1001,8 @@ public class HikeConstants
 	
 	public static final String VOIP_BITRATE_WIFI = "vbw";
 
+	public static final String VOIP_ACTIVATED = "voip";
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
