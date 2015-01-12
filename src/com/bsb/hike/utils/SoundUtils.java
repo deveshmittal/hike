@@ -21,9 +21,9 @@ public class SoundUtils
 {
 
 	private static Handler soundHandler = new Handler(Looper.getMainLooper());
-	
+
 	private static MediaPlayer mediaPlayer = new MediaPlayer();
-	
+
 	private static Runnable stopSoundRunnable = new Runnable()
 	{
 
@@ -36,7 +36,7 @@ public class SoundUtils
 
 	private static MediaPlayer.OnCompletionListener completeListener = new MediaPlayer.OnCompletionListener()
 	{
-		
+
 		@Override
 		public void onCompletion(MediaPlayer mp)
 		{
@@ -44,23 +44,25 @@ public class SoundUtils
 			soundHandler.removeCallbacks(stopSoundRunnable);
 		}
 	};
-	
+
 	private static MediaPlayer.OnErrorListener errorListener = new MediaPlayer.OnErrorListener()
 	{
-		
+
 		@Override
 		public boolean onError(MediaPlayer mp, int what, int extra)
 		{
-			stopMediaPlayerProperly();
-		    return true;
+			Logger.e("SoundUtils", "MediaPlayer -- OnERROR!!! WHAT:: " + what + " EXTRAS:: " + extra);
+			// This is being removed as onError and on IOEx was called together so accessing 
+			// stopMediaPlayerProperly at same time causing NPE
+			//stopMediaPlayerProperly();
+			return true;
 		}
 	};
-	
+
 	public static boolean isTickSoundEnabled(Context context)
 	{
 		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true) && 
-				tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !isAnyMusicPlaying(context));
+		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true) && tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !isAnyMusicPlaying(context));
 	}
 
 	/**
@@ -73,9 +75,9 @@ public class SoundUtils
 	{
 
 		Logger.i("sound", "playing sound " + soundId);
-		
+
 		// Initializing Player if it has been killed by onErrorListener
-		if(mediaPlayer == null)
+		if (mediaPlayer == null)
 		{
 			mediaPlayer = new MediaPlayer();
 		}
@@ -84,7 +86,7 @@ public class SoundUtils
 			// resetting media player
 			mediaPlayer.reset();
 		}
-		
+
 		mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
 		Resources res = context.getResources();
 		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
@@ -111,17 +113,17 @@ public class SoundUtils
 		catch (IllegalArgumentException e)
 		{
 			e.printStackTrace();
-			
+			stopMediaPlayerProperly();
 		}
 		catch (IllegalStateException e)
 		{
 			e.printStackTrace();
-			mediaPlayer.release();
+			stopMediaPlayerProperly();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			mediaPlayer.release();
+			stopMediaPlayerProperly();
 		}
 	}
 
@@ -150,9 +152,9 @@ public class SoundUtils
 	{
 		// remove any previous handler
 		soundHandler.removeCallbacks(stopSoundRunnable);
-		
+
 		// Initializing Player if it has been killed by onErrorListener
-		if(mediaPlayer == null)
+		if (mediaPlayer == null)
 		{
 			mediaPlayer = new MediaPlayer();
 		}
@@ -161,9 +163,9 @@ public class SoundUtils
 			// resetting media player
 			mediaPlayer.reset();
 		}
-		
+
 		mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
-		
+
 		try
 		{
 			mediaPlayer.setDataSource(context, soundUri);
@@ -209,13 +211,18 @@ public class SoundUtils
 		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		return am.isMusicActive();
 	}
-	
+
 	private static void stopMediaPlayerProperly()
 	{
 		soundHandler.removeCallbacks(stopSoundRunnable);
-		
-		mediaPlayer.stop();
-		mediaPlayer.release();
-		mediaPlayer = null;
+
+		// Add NULL check here because media player, on throwing exception calls this method again.
+		// Which results in stopMediaPlayerProperly() method to be called twice.
+		if (mediaPlayer != null)
+		{
+			mediaPlayer.stop();
+			mediaPlayer.release();
+			mediaPlayer = null;
+		}
 	}
 }

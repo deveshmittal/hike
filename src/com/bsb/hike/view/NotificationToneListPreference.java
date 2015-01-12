@@ -141,7 +141,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 			String selectedRingtoneValue = this.getEntryValues()[mClickedDialogEntryIndex].toString();
 			this.setValue(selectedRingtoneValue);
 			setTitle(mContext.getString(R.string.notificationSoundTitle) + " - " + selectedRingtoneValue);
-			String selectedRintoneUri = ringtonesNameURIMap.get(selectedRingtoneValue) != null ? ringtonesNameURIMap.get(selectedRingtoneValue).toString() : Uri.EMPTY.toString();
+			String selectedRintoneUri = getFinalSelectedRingtoneUri(selectedRingtoneValue);
 			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.NOTIFICATION_TONE_URI, selectedRintoneUri);
 			dialog.dismiss();
 			break;
@@ -157,6 +157,28 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		}
 	}
 
+	private String getFinalSelectedRingtoneUri(String selectedRingtoneValue)
+	{
+		String ringtoneUri = "";
+		if(mClickedDialogEntryIndex == 0)
+		{
+			ringtoneUri = mContext.getResources().getString(R.string.notif_sound_off);
+		}
+		else if(mClickedDialogEntryIndex == 1)
+		{
+			ringtoneUri = mContext.getResources().getString(R.string.notif_sound_default);
+		}
+		else if(mClickedDialogEntryIndex == 2)
+		{
+			ringtoneUri = mContext.getResources().getString(R.string.notif_sound_Hike);
+		}
+		else
+		{
+			ringtoneUri = ringtonesNameURIMap.get(selectedRingtoneValue).toString();
+		}
+		return ringtoneUri;
+	}
+	
 	/**
 	 * Sets entries and Values for SoundListPref via AsyncTask
 	 */
