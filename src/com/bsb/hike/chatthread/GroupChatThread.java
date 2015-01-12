@@ -65,6 +65,8 @@ import com.bsb.hike.view.CustomFontEditText;
 public class GroupChatThread extends ChatThread implements HashTagModeListener, ActionModeListener
 {
 	private static final int PIN_CREATE_ACTION_MODE = 201;
+	
+	private static final int MUTE_CONVERSATION_TOGGLED = 202;
 
 	private static final String TAG = "groupchatthread";
 
@@ -155,9 +157,21 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		return list;
 	}
 
+	/**
+	 * Returns whether the group is mute or not
+	 * @return
+	 */
 	private boolean isMuted()
 	{
-		return false;
+		/**
+		 * Defensive check
+		 */
+		
+		if(groupConversation == null)
+		{
+			return false;
+		}
+		return groupConversation.isMuted();
 	}
 
 	@Override
@@ -168,11 +182,11 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		case R.string.chat_theme:
 			showThemePicker();
 			break;
-		case R.string.block_title:
-			onBlockUserclicked();
-			break;
 		case R.string.group_profile:
 			openProfileScreen();
+			break;
+		case R.string.mute_group:
+			muteUnmuteGroup();
 			break;
 		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
@@ -274,6 +288,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			
 		}
 		
+		toggleConversationMuteViewVisibility(groupConversation.isMuted());
 		toggleGroupLife(groupConversation.getIsGroupAlive());
 		addUnreadCountMessage();
 		if (groupConversation.getImpMessage() != null)
@@ -506,7 +521,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	@Override
 	protected String[] getPubSubListeners()
 	{
-		return new String[] { HikePubSub.GROUP_MESSAGE_DELIVERED_READ };
+		return new String[] { HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.MUTE_CONVERSATION_TOGGLED };
 	}
 
 	/**
@@ -629,8 +644,14 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		case HikePubSub.GROUP_MESSAGE_DELIVERED_READ:
 			onMessageRead(object);
 			break;
+		case HikePubSub.MUTE_CONVERSATION_TOGGLED:
+			onMuteConversationToggled(object);
+			break;
+		default:
+			Logger.d(TAG, "Did not find any matching PubSub event in Group ChatThread. Calling super class' onEventReceived");
+			super.onEventReceived(type, object);
+			break;
 		}
-		super.onEventReceived(type, object);
 	}
 
 	/**
@@ -643,6 +664,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		{
 		case UPDATE_AVATAR:
 			setAvatar(R.drawable.ic_default_avatar_group);
+			break;
+		case MUTE_CONVERSATION_TOGGLED:
+			muteConvToggledUIChange((boolean) msg.obj);
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in Group ChatThread. Calling super class' handleUIMessage");
@@ -864,5 +888,52 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	{
 		boolean toReturn = false;
 		return super.onBackPressed();
+	}
+	
+	/**
+	 * Used to toggle mute and unmute for group
+	 */
+	private void muteUnmuteGroup()
+	{
+		groupConversation.setIsMuted(!(groupConversation.isMuted()));
+		
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MUTE_CONVERSATION_TOGGLED,
+				new Pair<String, Boolean>(groupConversation.getMsisdn(), groupConversation.isMuted()));
+	}
+	
+	private void onMuteConversationToggled(Object object)
+	{
+		Pair<String, Boolean> groupMute = (Pair<String, Boolean>) object;
+		
+		/**
+		 * Proceeding only if we caught an event for this groupchat thread
+		 */
+		
+		if(groupMute.first.equals(msisdn))
+		{
+			groupConversation.setIsMuted(groupMute.second);
+		}
+		
+		sendUIMessage(MUTE_CONVERSATION_TOGGLED, groupMute.second);
+	}
+	
+	/**
+	 * This method handles the UI part of Mute group conversation
+	 * It is to be strictly called from the UI Thread
+	 * @param isMuted
+	 */
+	private void muteConvToggledUIChange(boolean isMuted)
+	{
+		//if(!checknetworkError())
+		{
+			toggleConversationMuteViewVisibility(isMuted);
+		}
+		
+		updateOverflowMenuItemString(R.string.mute_group, isMuted ? activity.getString(R.string.unmute_group) : activity.getString(R.string.mute_group));
+	}
+	
+	private void toggleConversationMuteViewVisibility(boolean isMuted)
+	{
+		activity.findViewById(R.id.conversation_mute).setVisibility(isMuted ? View.VISIBLE : View.GONE);
 	}
 }

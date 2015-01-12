@@ -507,7 +507,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			uiHandler.sendEmptyMessage(SMS_CREDIT_CHANGED);
 			break;
 		default:
+			Logger.d(TAG, "Did not find any matching PubSub event in OneToOne ChatThread. Calling super class' onEventReceived");
 			super.onEventReceived(type, object);
+			break;
 		}
 	}
 
