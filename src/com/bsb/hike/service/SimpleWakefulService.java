@@ -30,7 +30,13 @@ public class SimpleWakefulService extends IntentService
 
 		try
 		{
-			HikeAlarmManager.processTasks(intent, this);
+			long time = intent.getLongExtra(HikeAlarmManager.ALARM_TIME, HikeAlarmManager.REQUESTCODE_DEFAULT);
+			boolean cpuflag=intent.getBooleanExtra(HikeAlarmManager.WAKE_CPU_FLAG, true);
+			
+			if (!cpuflag || Math.abs(time - System.currentTimeMillis()) < (10 * 60 * 1000))
+				HikeAlarmManager.processTasks(intent, this);
+			else
+				HikeAlarmManager.processExpiredTask(intent, this);
 		}
 		catch (Exception e)
 		{

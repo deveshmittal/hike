@@ -1,17 +1,18 @@
 package com.bsb.hike.models;
 
-import com.bsb.hike.HikeConstants;
-import com.bsb.hike.db.DBBackupRestore;
-import com.bsb.hike.notifications.HikeNotification;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.Utils;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.db.DBBackupRestore;
+import com.bsb.hike.db.HikeContentDatabase;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.PreloadNotificationSchedular;
+import com.bsb.hike.service.SimpleWakefulService;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -28,12 +29,17 @@ import com.bsb.hike.utils.Utils;
  * When the application is killed(by swiping) the alarms are not cancelled.But When the application is force closed through settings,the alarms are reset and has to be Rescheduled
  * again by the user.
  * 
+ * 
+ * TODO:Handling the alarms on forceStop.
  */
 
+		
 public class HikeAlarmManager
 {
 
 	private static final String INTENT_ALARM = "com.bsb.hike.START_ALARM";
+	
+	public static final String ALARM_TIME="time";
 
 	// Declare all the request code here .Should be unique.//
 
@@ -44,11 +50,18 @@ public class HikeAlarmManager
 	public static final int REQUESTCODE_PERIODIC_BACKUP= 4569;
 
 	public static final int REQUESTCODE_DEFAULT = 0;
-
-	// ******************************************************//
-	public static final String INTENT_EXTRA = "intent_extra";
 	
-	public static final String LOG_TAG = "HikeAlarmManager";
+	public static final int REQUESTCODE_REPOPULATE_ALARM_DATABASE=4570;
+	
+	// ******************************************************//
+	
+	private static final long TIME_ALARM_BOOT_SERVICE = 1 * 60 * 1000;// (1 min)
+
+	public static final String WAKE_CPU_FLAG = "wake_cpu";
+
+	public static final String INTENT_EXTRA = "intent_extra";
+
+	public static final String TAG = "HikeAlarmManager";
 
 	/**
 	 * 
@@ -79,6 +92,8 @@ public class HikeAlarmManager
 	 * @see <a href = "http://developer.android.com/reference/android/app/AlarmManager.html#set(int, long, android.app.PendingIntent)"> setAlarm </a>
 	 */
 
+	
+	
 	public static void setAlarmwithIntent(Context context, long time, int requestCode, boolean WillWakeCPU, Intent intent)
 	{
 
@@ -86,7 +101,9 @@ public class HikeAlarmManager
 
 		intent.setAction(INTENT_ALARM);
 		intent.putExtra(INTENT_EXTRA, requestCode);
-
+		intent.putExtra(ALARM_TIME, time);
+		intent.putExtra(WAKE_CPU_FLAG, WillWakeCPU);
+		
 		PendingIntent mPendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		if (Utils.isKitkatOrHigher())
@@ -135,7 +152,48 @@ public class HikeAlarmManager
 			mAlarmManager.setInexactRepeating(AlarmManager.RTC, triggerAtMillis, intervalMillis, mPendingIntent);
 		}
 	}
+	
+	/**
+	 * 
+	 * @param context
+	 * @param time
+	 * @param requestCode
+	 * @param WillWakeCPU
+	 * @param intent
+	 * @param persistance-
+	 * 
+	 * This method 
+	 * Also see:
+	 * {@link HikeAlarmManager#setAlarmwithIntent(Context, long, int, boolean, Intent) }
+	 */
+	public static void setAlarmPersistance(Context context, long time, int requestCode, boolean WillWakeCPU, Intent intent)
+	{
 
+		AlarmManager mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		
+		if (intent == null)
+			intent = new Intent();
+		
+		intent.setAction(INTENT_ALARM);
+		intent.putExtra(INTENT_EXTRA, requestCode);
+		intent.putExtra(ALARM_TIME, time);
+		intent.putExtra(WAKE_CPU_FLAG, WillWakeCPU);
+		
+		HikeContentDatabase.getInstance(context).insertIntoAlarmManagerDB(time, requestCode, WillWakeCPU, intent);
+
+		PendingIntent mPendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		if (Utils.isKitkatOrHigher())
+		{
+			mAlarmManager.setExact(WillWakeCPU ? AlarmManager.RTC_WAKEUP : AlarmManager.RTC, time, mPendingIntent);
+		}
+		else
+		{
+
+			mAlarmManager.set(WillWakeCPU ? AlarmManager.RTC_WAKEUP : AlarmManager.RTC, time, mPendingIntent);
+		}
+
+	}
 	/**
 	 * 
 	 * @param context
@@ -156,8 +214,10 @@ public class HikeAlarmManager
 		PendingIntent mPendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_NO_CREATE);
 
 		if (mPendingIntent != null)
+		{
+			HikeContentDatabase.getInstance(context).deleteFromAlarmManagerDB(requestCode);
 			mAlarmManager.cancel(mPendingIntent);
-
+		}
 	}
 
 	/**
@@ -172,7 +232,8 @@ public class HikeAlarmManager
 	{
 
 		int requestCode = intent.getIntExtra(HikeAlarmManager.INTENT_EXTRA, HikeAlarmManager.REQUESTCODE_DEFAULT);
-		
+		System.out.println(requestCode);
+		HikeContentDatabase.getInstance(context).deleteFromAlarmManagerDB(requestCode);
 		switch (requestCode)
 		{
 		case HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD:
@@ -180,7 +241,7 @@ public class HikeAlarmManager
 			break;
 		case HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION:
 			int retryCount  = intent.getExtras().getInt(HikeConstants.RETRY_COUNT, 0);
-			Logger.i(LOG_TAG, "processTasks called with request Code "+requestCode+ "time = "+System.currentTimeMillis() +" retryCount = "+retryCount);
+			Logger.i(TAG, "processTasks called with request Code "+requestCode+ "time = "+System.currentTimeMillis() +" retryCount = "+retryCount);
 			
 			Utils.sendUILogEvent(HikeConstants.LogEvent.RETRY_NOTIFICATION_SENT);
 			HikeNotification.getInstance(context).showNotificationForCurrentMsgStack(true, retryCount);
@@ -190,6 +251,42 @@ public class HikeAlarmManager
 			DBBackupRestore.getInstance(context).scheduleNextAutoBackup();
 			break;
 		default:
+		}
+
+	}
+
+	/*
+	 * 
+	 * This method is used to schedules the alarms again.It fetches the alarm from the database and schedule it again.
+	 * 
+	 * For this we are sending a alarm to do the above process,so that the database query is done on the background. thread
+	 */
+	
+	public static void repopulateAlarm(Context context)
+	{
+		HikeAlarmManager.setAlarm(context, TIME_ALARM_BOOT_SERVICE, REQUESTCODE_REPOPULATE_ALARM_DATABASE, true);
+	}
+	
+	/*
+	 * 
+	 * This is a callback which is called when the alarm is called at un even time due to any reason
+	 * 
+	 * Ex:When you schedule your alarm for 4:00pm and the mobile is off from 2-6 pm then the alarm will be received at 6pm in the following function so that the user can handle
+	 * appropriately
+	 */
+	public static void processExpiredTask(Intent intent, Context context)
+	{
+		int requestCode = intent.getIntExtra(HikeAlarmManager.INTENT_EXTRA, HikeAlarmManager.REQUESTCODE_DEFAULT);
+
+		System.out.println(requestCode);
+		HikeContentDatabase.getInstance(context).deleteFromAlarmManagerDB(requestCode);
+
+		switch (requestCode)
+		{
+		case REQUESTCODE_REPOPULATE_ALARM_DATABASE:
+			HikeContentDatabase.getInstance(context).rePopulateAlarmWhenClosed();
+			break;
+
 		}
 
 	}

@@ -2,6 +2,7 @@ package com.bsb.hike.db;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -12,6 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
@@ -37,6 +39,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -207,9 +210,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")"; 
 		sql = getStickerShopTableCreateQuery();
 		db.execSQL(sql);
+		
 	}
 
-	public void deleteAll()
+		public void deleteAll()
 	{
 		mDb.delete(DBConstants.CONVERSATIONS_TABLE, null, null);
 		mDb.delete(DBConstants.MESSAGES_TABLE, null, null);
@@ -5972,5 +5976,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 		return rowId < 0 ? false : true;
 	}
+	
+	
 
 }

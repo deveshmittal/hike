@@ -240,6 +240,17 @@ public interface DBConstants
 		public static final String CHANNEL_ID = "channel_id";
 		public static final String TIMESTAMP = "timestamp";
 		public static final String METADATA = "metadata";
+		
+		//ALARM TABLE->id,time,willWakeCpu,time,intent
+		
+		public static final String ALARM_MGR_TABLE = "HikeAlaMge";
+
+		public static final String TIME = "time";
+
+		public static final String WILL_WAKE_CPU = "willwakecpu";
+
+		public static final String INTENT = "intent";
+
 		// CONTENT TABLE ENDS HERE
 		
 		public static final String CONTENT_ID_INDEX = "contentTableContentIdIndex";
@@ -258,4 +269,5 @@ public interface DBConstants
 	public static final String CATEGORY_SIZE = "categorySize";
 
 	public static final String STICKER_SHOP_TABLE = "stickerShopTable";
+	
 }
