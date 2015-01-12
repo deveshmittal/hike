@@ -258,4 +258,12 @@ public interface DBConstants
 	public static final String CATEGORY_SIZE = "categorySize";
 
 	public static final String STICKER_SHOP_TABLE = "stickerShopTable";
+	
+	public static final String ALARM_MGR_TABLE="HikeAlaMge";
+	
+	public static final String TIME="time";
+	
+	public static final String WILL_WAKE_CPU="willwakecpu";
+	
+	public static final String INTENT="intent";
 }

@@ -2,6 +2,7 @@ package com.bsb.hike.db;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -12,6 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
@@ -37,6 +39,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -207,8 +210,61 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")"; 
 		sql = getStickerShopTableCreateQuery();
 		db.execSQL(sql);
+		
+		sql = CREATE_TABLE + DBConstants.ALARM_MGR_TABLE + "(" + _ID + " INTEGER PRIMARY KEY, " + TIME + " TEXT, " + DBConstants.WILL_WAKE_CPU + " INTEGER, " + DBConstants.INTENT
+				+ " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
+		db.execSQL(sql);
 	}
 
+	public void insertIntoAlarmManagerDB(long time, int requestCode, boolean WillWakeCPU, Intent intent)
+	{
+		ContentValues cv = new ContentValues();
+		cv.put(DBConstants._ID, requestCode);
+		cv.put(DBConstants.TIME, time + "");
+		cv.put(DBConstants.WILL_WAKE_CPU, WillWakeCPU);
+		cv.put(DBConstants.INTENT, intent.toUri(0));
+
+		mDb.insertWithOnConflict(DBConstants.ALARM_MGR_TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+	}
+
+	public void deleteFromAlarmManagerDB(int requestCode)
+	{
+		mDb.delete(DBConstants.ALARM_MGR_TABLE, DBConstants._ID + "=" + requestCode, null);
+	}
+
+	public void rePopulateAlarmWhenClosed()
+	{
+		Logger.d("Alarm Manager", "rePopulating all Alarms");
+		String selectQuery = "SELECT  * FROM " + DBConstants.ALARM_MGR_TABLE;
+
+		Cursor cursor = mDb.rawQuery(selectQuery, null);
+		try
+		{
+			if (cursor.moveToFirst())
+			{
+				do
+				{
+					Logger.d("Alarm Manager", "rePopulating all Alarms");
+					int requestCode = cursor.getInt(cursor.getColumnIndex(DBConstants._ID));
+					long time = Long.parseLong(cursor.getString(cursor.getColumnIndex(DBConstants.TIME)));
+					int willWakeCpu = cursor.getInt(cursor.getColumnIndex(DBConstants.WILL_WAKE_CPU));
+					String intent = cursor.getString(cursor.getColumnIndex(DBConstants.INTENT));
+					Uri asd = Uri.parse(intent);
+
+					Intent intentAlarm = Intent.getIntent(asd.toString());
+
+					HikeAlarmManager.setAlarmwithIntentPersistance(HikeMessengerApp.getInstance(), time, requestCode, (willWakeCpu != 0), intentAlarm, false);
+
+				}
+				while (cursor.moveToNext());
+			}
+		}
+		catch (URISyntaxException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public void deleteAll()
 	{
 		mDb.delete(DBConstants.CONVERSATIONS_TABLE, null, null);
@@ -5972,5 +6028,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 		return rowId < 0 ? false : true;
 	}
+	
+	
 
 }
