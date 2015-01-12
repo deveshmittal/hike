@@ -383,7 +383,7 @@ public class ConvMessage
 		/**
 		 * This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.
 		 */
-		this.shouldShowPush = obj.getJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.PUSH, true);
+//		this.shouldShowPush = obj.getJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.PUSH, true);
 
 		this.mMessage = "";
 		this.mTimestamp = System.currentTimeMillis() / 1000;
