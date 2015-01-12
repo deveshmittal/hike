@@ -1,5 +1,7 @@
 package com.bsb.hike.models;
 
+
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -9,6 +11,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.platform.PlatformAlarmManager;
 import com.bsb.hike.service.PreloadNotificationSchedular;
 import com.bsb.hike.service.SimpleWakefulService;
 import com.bsb.hike.utils.Logger;
@@ -43,16 +46,18 @@ public class HikeAlarmManager
 	// Declare all the request code here .Should be unique.//
 
 	public static final int REQUESTCODE_NOTIFICATION_PRELOAD = 4567;
-	
+
 	public static final int REQUESTCODE_RETRY_LOCAL_NOTIFICATION = 4568;
 
-	public static final int REQUESTCODE_PERIODIC_BACKUP= 4569;
+	public static final int REQUESTCODE_PERIODIC_BACKUP = 4569;
+
+	public static final int PLATFORM_ALARMS = 4570;
 
 	public static final int REQUESTCODE_DEFAULT = 0;
 
 	// ******************************************************//
 	public static final String INTENT_EXTRA = "intent_extra";
-	
+
 	public static final String LOG_TAG = "HikeAlarmManager";
 
 	/**
@@ -84,8 +89,7 @@ public class HikeAlarmManager
 	 * @see <a href = "http://developer.android.com/reference/android/app/AlarmManager.html#set(int, long, android.app.PendingIntent)"> setAlarm </a>
 	 */
 
-	
-	
+	@SuppressLint("NewApi")
 	public static void setAlarmwithIntent(Context context, long time, int requestCode, boolean WillWakeCPU, Intent intent)
 	{
 
@@ -255,6 +259,9 @@ public class HikeAlarmManager
 		case HikeAlarmManager.REQUESTCODE_PERIODIC_BACKUP:
 			DBBackupRestore.getInstance(context).backupDB();
 			DBBackupRestore.getInstance(context).scheduleNextAutoBackup();
+			break;
+		case HikeAlarmManager.PLATFORM_ALARMS:
+			PlatformAlarmManager.processTasks(intent, context);
 			break;
 		default:
 		}
