@@ -5992,6 +5992,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	}
 
 
+	public Cursor getMessage(String messageId)
+	{
+		String selection = DBConstants.MSISDN + "=?";
+		return mDb.query(MESSAGES_TABLE, null, selection, new String[]{messageId}, null, null, null);
+	}
+	
 	public void updateMetadataOfMessage(long messageId, String metadata)
 	{
 		ContentValues contentValues = new ContentValues();
