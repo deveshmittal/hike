@@ -93,7 +93,7 @@ public class VoIPService extends Service {
 	private long lastHeartbeat;
 	private int totalBytesSent = 0, totalBytesReceived = 0, rawVoiceSent = 0;
 	private VoIPEncryptor encryptor = new VoIPEncryptor();
-	private VoIPEncryptor.EncryptionStage encryptionStage = EncryptionStage.STAGE_INITIAL;
+	private VoIPEncryptor.EncryptionStage encryptionStage;
 	private boolean mute, hold, speaker;
 	private boolean audioStarted = false;
 	private int droppedDecodedPackets = 0;
@@ -114,6 +114,7 @@ public class VoIPService extends Service {
 	private boolean socketInfoSent = false, socketInfoReceived = false, establishingConnection = false;
 	private int reconnectAttempts = 0;
 	private Chronometer chronometer = null;
+	private int chronoBackup = 0;
 	private int playbackSampleRate = 0;
 	private boolean resamplerEnabled = false;
 	private Thread senderThread, reconnectingBeepsThread;
@@ -167,7 +168,7 @@ public class VoIPService extends Service {
 		clientPartner = new VoIPClient();
 		clientSelf = new VoIPClient();
 		setCallid(0);
-		
+		encryptionStage = EncryptionStage.STAGE_INITIAL;
 		initAudioManager();
 		setSpeaker(false);
 		
@@ -421,15 +422,8 @@ public class VoIPService extends Service {
 	
 	private void initSoundPool() {
 		soundpool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+
 		soundpoolMap = new SparseIntArray(3);
-		soundpool.setOnLoadCompleteListener(new OnLoadCompleteListener() {
-			
-			@Override
-			public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
-				Logger.w(VoIPConstants.TAG, "Soundpool initialized.");
-			}
-		});
-		
 		soundpoolMap.put(SOUND_ACCEPT, soundpool.load(getApplicationContext(), SOUND_ACCEPT, 1));
 		soundpoolMap.put(SOUND_DECLINE, soundpool.load(getApplicationContext(), SOUND_DECLINE, 1));
 		soundpoolMap.put(SOUND_INCOMING_RINGTONE, soundpool.load(getApplicationContext(), SOUND_INCOMING_RINGTONE, 1));
@@ -437,8 +431,9 @@ public class VoIPService extends Service {
 	
 	private int playFromSoundPool(int soundId, boolean loop) {
 		int streamID = 0;
-		if (soundpool == null || soundpoolMap == null)
+		if (soundpool == null || soundpoolMap == null) {
 			initSoundPool();
+		}
 		
 		if (loop)
 			streamID = soundpool.play(soundpoolMap.get(soundId), 1, 1, 0, -1, 1);
@@ -499,7 +494,6 @@ public class VoIPService extends Service {
 	}
 	
 	public void startStreaming() throws Exception {
-		encryptionStage = EncryptionStage.STAGE_INITIAL;
 		
 		if (clientPartner == null || clientSelf == null) {
 			throw new Exception("Clients (partner and/or self) not set.");
@@ -517,7 +511,9 @@ public class VoIPService extends Service {
 		int seconds = 0;
 		if (chronometer != null) {
 			seconds = (int) ((SystemClock.elapsedRealtime() - chronometer.getBase()) / 1000);
-		}
+		} else
+			seconds = chronoBackup;
+		
 		return seconds;
 	}
 	
@@ -706,6 +702,8 @@ public class VoIPService extends Service {
 				VoIPDataPacket dp = new VoIPDataPacket(PacketType.HEARTBEAT);
 				while (keepRunning == true) {
 					sendPacket(dp, false);
+					if (isAudioRunning())
+						chronoBackup++;
 					try {
 						Thread.sleep(HEARTBEAT_INTERVAL);
 					} catch (InterruptedException e) {
@@ -1684,8 +1682,10 @@ public class VoIPService extends Service {
 		Logger.w(VoIPConstants.TAG, "Changing hold to: " + hold);
 		
 		if (hold == true) {
-			recordingThread.interrupt();
-			playbackThread.interrupt();
+			if (recordingThread != null)
+				recordingThread.interrupt();
+			if (playbackThread != null)
+				playbackThread.interrupt();
 		} else {
 			// Coming off hold
 			startRecording();

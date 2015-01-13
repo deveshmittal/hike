@@ -1,21 +1,18 @@
 package com.bsb.hike.voip.view;
 
-import com.bsb.hike.R;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.voip.VoIPConstants;
-import com.fima.glowpadview.GlowPadView;
-import com.fima.glowpadview.GlowPadView.OnTriggerListener;
-
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.bsb.hike.R;
+import com.fima.glowpadview.GlowPadView;
+
 public class GlowPadViewWrapper extends GlowPadView implements GlowPadView.OnTriggerListener
 {
 	private CallActions mCallActions;
 
-	private String TAG = "VoIPGlowPad";
+//	private String TAG = "VoIPGlowPad";
 
 	private final long PING_REPEAT_DELAY = 1500;
 
@@ -54,14 +51,14 @@ public class GlowPadViewWrapper extends GlowPadView implements GlowPadView.OnTri
 
 	@Override
 	public void onGrabbed(View v, int handle) {
-		Logger.d(TAG,"Call glow pad view - Grabbed");
+//		Logger.d(TAG,"Call glow pad view - Grabbed");
 		stopPing();
 	}
 
 	@Override
 	public void onReleased(View v, int handle) 
 	{
-		Logger.d(TAG,"Call glow pad view - onRelease");
+//		Logger.d(TAG,"Call glow pad view - onRelease");
 		if(!targetTriggered)
 		{
 			startPing();
@@ -86,24 +83,24 @@ public class GlowPadViewWrapper extends GlowPadView implements GlowPadView.OnTri
 
 	@Override
 	public void onGrabbedStateChange(View v, int handle) {
-		Logger.d(TAG,"Call glow pad view - Grabbed state changed");
+//		Logger.d(TAG,"Call glow pad view - Grabbed state changed");
 	}
 
 	@Override
 	public void onFinishFinalAnimation() {
-		Logger.d(TAG,"Call glow pad view - Finish final anim");
+//		Logger.d(TAG,"Call glow pad view - Finish final anim");
 	}
 
 	public void stopPing()
 	{
-		Logger.d(TAG, "stopping Ping");
+//		Logger.d(TAG, "stopping Ping");
 		pingAutoRepeat = false;
 		pingHandler.removeCallbacks(pingRunnable);
 	}
 
 	public void startPing()
 	{
-		Logger.d(TAG, "starting ping, auto repeat:" + pingAutoRepeat);
+//		Logger.d(TAG, "starting ping, auto repeat:" + pingAutoRepeat);
 		ping();
 		if (pingAutoRepeat)
 		{

@@ -172,6 +172,11 @@ public class VoIPEncryptor {
 	public byte[] aesEncrypt(byte[] data) {
 		byte[] encryptedData = null;
 		
+		if (sessionKey == null) {
+			Logger.e(VoIPConstants.TAG, "aesEncrypt() called, but I have no session key.");
+			return null;
+		}
+		
 		try {
 			if (aesKeySpec == null)
 				aesKeySpec = new SecretKeySpec(sessionKey, "AES");
