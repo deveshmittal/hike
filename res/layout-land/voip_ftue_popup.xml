@@ -4,7 +4,7 @@
     android:layout_width="407dp"
     android:layout_height="236dp"
     android:layout_centerInParent="true"
-    android:background="@color/white"
+    android:background="@drawable/bg_voip_ftue_popup"
     android:gravity="center"
     android:orientation="vertical" >
 
@@ -28,10 +28,10 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
             android:background="@color/white"
             android:gravity="center_vertical"
-            android:orientation="vertical"
-            android:layout_marginLeft="20dp" >
+            android:orientation="vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/header"
@@ -39,8 +39,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:text="@string/hike_calls"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textColor="#111111"
+                android:textSize="24dp"
+                android:textStyle="italic" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/body"
@@ -48,7 +49,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/stealth_ftue_pu_msg_margin_bottom"
                 android:text="@string/voip_intro_popup_msg"
-                android:textSize="14sp" />
+                android:textColor="#26292d"
+                android:textSize="14dp"
+                android:textStyle="italic" />
         </LinearLayout>
     </LinearLayout>
 
@@ -80,8 +83,8 @@
             android:gravity="center"
             android:text="@string/voip_intro_popup_btn"
             android:textColor="@color/blue_hike"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textSize="13dp"
+            android:textStyle="italic|bold" />
     </LinearLayout>
 
 </RelativeLayout>
