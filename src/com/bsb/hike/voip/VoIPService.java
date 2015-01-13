@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.BitSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -32,10 +33,11 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.AudioTrack.OnPlaybackPositionUpdateListener;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.media.SoundPool;
+import android.media.SoundPool.OnLoadCompleteListener;
 import android.media.ToneGenerator;
 import android.media.audiofx.AcousticEchoCanceler;
 import android.media.audiofx.AutomaticGainControl;
@@ -49,6 +51,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.widget.Chronometer;
 
 import com.bsb.hike.HikeConstants;
@@ -90,7 +93,7 @@ public class VoIPService extends Service {
 	private long lastHeartbeat;
 	private int totalBytesSent = 0, totalBytesReceived = 0, rawVoiceSent = 0;
 	private VoIPEncryptor encryptor = new VoIPEncryptor();
-	private VoIPEncryptor.EncryptionStage encryptionStage = EncryptionStage.STAGE_INITIAL;
+	private VoIPEncryptor.EncryptionStage encryptionStage;
 	private boolean mute, hold, speaker;
 	private boolean audioStarted = false;
 	private int droppedDecodedPackets = 0;
@@ -101,17 +104,17 @@ public class VoIPService extends Service {
 	private Thread partnerTimeoutThread = null;
 	private Thread recordingThread = null, playbackThread = null, sendingThread = null, receivingThread = null;
 	private AudioTrack audioTrack;
-	private ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_VOICE_CALL, 100);
+	private ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_VOICE_CALL, 100);
 	private static int callId = 0;
 	private int totalPacketsSent = 0, totalPacketsReceived = 0;
 	private NotificationManager notificationManager;
 	private NotificationCompat.Builder builder;
-	private MediaPlayer mediaplayer = null;
 	private AudioManager audioManager;
 	private AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
 	private boolean socketInfoSent = false, socketInfoReceived = false, establishingConnection = false;
 	private int reconnectAttempts = 0;
 	private Chronometer chronometer = null;
+	private int chronoBackup = 0;
 	private int playbackSampleRate = 0;
 	private boolean resamplerEnabled = false;
 	private Thread senderThread, reconnectingBeepsThread;
@@ -121,6 +124,15 @@ public class VoIPService extends Service {
 	private int qualityCounter = 0;
 	private long lastQualityReset = 0;
 	private CallQuality currentCallQuality = CallQuality.UNKNOWN;
+	
+	// Sounds
+	private SoundPool soundpool;
+	private SparseIntArray soundpoolMap;
+	private static final int SOUND_ACCEPT = R.raw.call_answer;
+	private static final int SOUND_DECLINE = R.raw.call_end;
+	private static final int SOUND_INCOMING_RINGTONE = R.raw.ring_tone;
+	private int ringtoneStreamID = 0;
+	
 
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToDecodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToEncodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
@@ -156,7 +168,7 @@ public class VoIPService extends Service {
 		clientPartner = new VoIPClient();
 		clientSelf = new VoIPClient();
 		setCallid(0);
-		
+		encryptionStage = EncryptionStage.STAGE_INITIAL;
 		initAudioManager();
 		setSpeaker(false);
 		
@@ -342,7 +354,7 @@ public class VoIPService extends Service {
 			builder = new NotificationCompat.Builder(getApplicationContext());
 
 		int callDuration = getCallDuration();
-		String durationString = (callDuration == 0)? "" : String.format(" (%02d:%02d)", (callDuration / 60), (callDuration % 60));
+		String durationString = (callDuration == 0)? "" : String.format(Locale.getDefault(), " (%02d:%02d)", (callDuration / 60), (callDuration % 60));
 		Notification myNotification = builder
 		.setContentTitle("Hike Ongoing Call")
 		.setContentText("Call in progress " + durationString)
@@ -405,6 +417,35 @@ public class VoIPService extends Service {
 		} else
 			Logger.d(VoIPConstants.TAG, "Received audio focus.");
 		
+		initSoundPool();
+	}
+	
+	private void initSoundPool() {
+		soundpool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+
+		soundpoolMap = new SparseIntArray(3);
+		soundpoolMap.put(SOUND_ACCEPT, soundpool.load(getApplicationContext(), SOUND_ACCEPT, 1));
+		soundpoolMap.put(SOUND_DECLINE, soundpool.load(getApplicationContext(), SOUND_DECLINE, 1));
+		soundpoolMap.put(SOUND_INCOMING_RINGTONE, soundpool.load(getApplicationContext(), SOUND_INCOMING_RINGTONE, 1));
+	}
+	
+	private int playFromSoundPool(int soundId, boolean loop) {
+		int streamID = 0;
+		if (soundpool == null || soundpoolMap == null) {
+			initSoundPool();
+		}
+		
+		if (loop)
+			streamID = soundpool.play(soundpoolMap.get(soundId), 1, 1, 0, -1, 1);
+		else
+			streamID = soundpool.play(soundpoolMap.get(soundId), 1, 1, 0, 0, 1);
+		
+		return streamID;
+	}
+	
+	private void stopFromSoundPool(int streamID) {
+		if (soundpool != null)
+			soundpool.stop(streamID);
 	}
 	
 	private void releaseAudioManager() {
@@ -412,28 +453,15 @@ public class VoIPService extends Service {
 			audioManager.abandonAudioFocus(mOnAudioFocusChangeListener);
 			audioManager.setMode(AudioManager.MODE_NORMAL);
 		}
+		
+		/*
+		if (soundpool != null) {
+			soundpool.release();
+			soundpool = null;
+		}
+		*/
 	}
 	
-	private void playOnSpeaker(int resid, boolean looping) {
-		stopMediaPlayer();
-		mediaplayer = MediaPlayer.create(this, resid);
-		mediaplayer.setLooping(looping);
-		mediaplayer.start();
-	}
-
-	private void stopMediaPlayer() {
-		try {
-			if (mediaplayer != null && mediaplayer.isPlaying()) {
-				mediaplayer.stop();
-				mediaplayer.reset();
-				mediaplayer.release();
-			}
-		} catch (IllegalStateException e) {
-			Logger.d(VoIPConstants.TAG, "Mediaplayer exception: " + e.toString());
-		}
-		stopRingtone();
-	}
-
 	public void stopRingtone()
 	{
 		// Stop ringtone if playing
@@ -466,7 +494,6 @@ public class VoIPService extends Service {
 	}
 	
 	public void startStreaming() throws Exception {
-		encryptionStage = EncryptionStage.STAGE_INITIAL;
 		
 		if (clientPartner == null || clientSelf == null) {
 			throw new Exception("Clients (partner and/or self) not set.");
@@ -484,7 +511,9 @@ public class VoIPService extends Service {
 		int seconds = 0;
 		if (chronometer != null) {
 			seconds = (int) ((SystemClock.elapsedRealtime() - chronometer.getBase()) / 1000);
-		}
+		} else
+			seconds = chronoBackup;
+		
 		return seconds;
 	}
 	
@@ -532,10 +561,13 @@ public class VoIPService extends Service {
 			reconnectingBeepsThread.interrupt();
 
 		// Hangup tone
+		/*
 		if (clientSelf.isInitiator() || connected)
-			tg.startTone(ToneGenerator.TONE_CDMA_PIP);
-		
-		stopMediaPlayer();
+			toneGenerator.startTone(ToneGenerator.TONE_CDMA_PIP);
+		*/
+		stopRingtone();
+		stopFromSoundPool(ringtoneStreamID);
+		playFromSoundPool(SOUND_DECLINE, false);
 		releaseAudioManager();
 		
 		if (opusWrapper != null)
@@ -562,7 +594,6 @@ public class VoIPService extends Service {
 	}
 	
 	public void rejectIncomingCall() {
-		playOnSpeaker(R.raw.call_end, false);
 		new Thread(new Runnable() {
 			
 			@Override
@@ -623,7 +654,7 @@ public class VoIPService extends Service {
 			@Override
 			public void run() {
 				while (keepRunning) {
-					tg.startTone(ToneGenerator.TONE_PROP_BEEP2);
+					toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP2);
 					try {
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
@@ -671,6 +702,8 @@ public class VoIPService extends Service {
 				VoIPDataPacket dp = new VoIPDataPacket(PacketType.HEARTBEAT);
 				while (keepRunning == true) {
 					sendPacket(dp, false);
+					if (isAudioRunning())
+						chronoBackup++;
 					try {
 						Thread.sleep(HEARTBEAT_INTERVAL);
 					} catch (InterruptedException e) {
@@ -922,7 +955,6 @@ public class VoIPService extends Service {
 	
 	public void acceptIncomingCall() {
 		
-		playOnSpeaker(R.raw.call_answer, false);
 		new Thread(new Runnable() {
 			
 			@Override
@@ -946,7 +978,9 @@ public class VoIPService extends Service {
 		startRecording();
 		startPlayBack();
 		partnerTimeoutThread.interrupt();
-		stopMediaPlayer();
+		stopRingtone();
+		stopFromSoundPool(ringtoneStreamID);
+		playFromSoundPool(SOUND_ACCEPT, false);
 		sendHandlerMessage(VoIPActivity.MSG_AUDIO_START);
 		audioStarted = true;
 		
@@ -1212,7 +1246,7 @@ public class VoIPService extends Service {
 	
 	private void startReceiving() {
 		if (receivingThread != null) {
-			Logger.d(VoIPConstants.TAG, "Stopping receiving thread before restarting.");
+//			Logger.d(VoIPConstants.TAG, "Stopping receiving thread before restarting.");
 			receivingThread.interrupt();
 		}
 		
@@ -1648,8 +1682,10 @@ public class VoIPService extends Service {
 		Logger.w(VoIPConstants.TAG, "Changing hold to: " + hold);
 		
 		if (hold == true) {
-			recordingThread.interrupt();
-			playbackThread.interrupt();
+			if (recordingThread != null)
+				recordingThread.interrupt();
+			if (playbackThread != null)
+				playbackThread.interrupt();
 		} else {
 			// Coming off hold
 			startRecording();
@@ -1679,6 +1715,7 @@ public class VoIPService extends Service {
 
 	private void playIncomingCallRingtone() {
 		// Ringer
+		Log.w(VoIPConstants.TAG, "Playing ringtone.");
 		Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 		if (ringtone == null)
 			ringtone = RingtoneManager.getRingtone(getApplicationContext(), notification);
@@ -1888,7 +1925,7 @@ public class VoIPService extends Service {
 		if (partnerTimeoutThread != null)
 			partnerTimeoutThread.interrupt();
 		Logger.d(VoIPConstants.TAG, "Trying to establish P2P connection..");
-		Logger.d(VoIPConstants.TAG, "Listening to local socket (for p2p) on port: " + socket.getLocalPort());
+		Logger.d(VoIPConstants.TAG, "Listening on port: " + socket.getLocalPort());
 		
 		// Sender thread
 		senderThread = new Thread(new Runnable() {
@@ -1961,7 +1998,8 @@ public class VoIPService extends Service {
 					Logger.d(VoIPConstants.TAG, "UDP connection established :) " + clientPartner.getPreferredConnectionMethod());
 					sendHandlerMessage(VoIPActivity.MSG_CONNECTION_ESTABLISHED);
 					if (clientSelf.isInitiator() && !reconnecting) {
-						playOnSpeaker(R.raw.ring_tone, true);
+//						playOnSpeaker(R.raw.ring_tone, true);
+						ringtoneStreamID = playFromSoundPool(SOUND_INCOMING_RINGTONE, true);
 					} 
 
 					try {
