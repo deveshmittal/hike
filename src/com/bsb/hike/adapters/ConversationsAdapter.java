@@ -628,7 +628,7 @@ public class ConversationsAdapter extends BaseAdapter
 		TextView messageView = viewHolder.subText;
 		messageView.setVisibility(View.VISIBLE);
 		
-		if(! (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_IS_ACTIVE) || !NUXManager.getInstance().isContactLocked(message.getMsisdn()))
+		if(!( (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_IS_ACTIVE) &&(NUXManager.getInstance().isContactLocked(message.getMsisdn()))))
 		{
 			updateViewsRelatedToMessageState(parentView, message, conversation);
 			CharSequence markedUp = getConversationText(conversation, message);

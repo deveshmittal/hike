@@ -2,6 +2,7 @@ package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -278,12 +280,10 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				if (selectedPeople.containsKey(contactInfo.getMsisdn()))
 				{
 
-					Logger.d("UmangX","checked true");
 					holder.checkbox.setChecked(true);
 				}
 				else
 				{
-					Logger.d("UmangX","checked false");
 					holder.checkbox.setChecked(false);
 				}
 			}
@@ -651,6 +651,20 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			selectedPeople.clear();
 		}
 		notifyDataSetChanged();
+	}
+	
+	public void preSelectContacts(HashSet<String> ... preSelectedMsisdnSets){
+		int total = preSelectedMsisdnSets.length;
+		for(int i=0;i<total;i++){
+			HashSet<String> preSelectedSet = preSelectedMsisdnSets[i];
+			if(preSelectedSet != null){
+				for(String msisdn : preSelectedSet){
+					if(msisdn != null && ContactManager.getInstance().getContact(msisdn) != null){
+						selectedPeople.put(msisdn, ContactManager.getInstance().getContact(msisdn));
+					}
+				}
+			}
+		}
 	}
 	
 	private void selectAllFromList(List<ContactInfo> ...lists){

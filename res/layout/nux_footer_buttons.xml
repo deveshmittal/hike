@@ -13,6 +13,7 @@
         android:layout_gravity="left"
         android:layout_marginBottom="10dp"
         android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         android:layout_weight=".35"
         android:background="#ef554e"
         android:text="@string/nux_remind"

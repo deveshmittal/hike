@@ -189,7 +189,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			FragmentManager fm = getSupportFragmentManager();
 			newFragment = (HorizontalFriendsFragment) fm.findFragmentByTag("chatFragment");
 			if(newFragment == null){
-				Logger.d("UmangX","Give me red");
 				newFragment = new HorizontalFriendsFragment();
 			}
 			
@@ -506,7 +505,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if (isForwardingMessage || isFtueFwd)
 			{
 				// share
-				Logger.d("UmangX","isForwarding true");
 				if(isSharingFile){
 					ArrayList<ContactInfo> list = new ArrayList<ContactInfo>();list.add(contactInfo);
 					forwardConfirmation(list);
@@ -514,7 +512,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 				// for SMS users, append SMS text with name
 
-				Logger.d("UmangX","isForwarding true and not returned");
 				int viewtype = adapter.getItemViewType(arg2);
 				if (contactInfo.getName() == null)
 				{
@@ -526,11 +523,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					if(adapter.isContactAdded(contactInfo)){
 						adapter.removeContact(contactInfo);
 
-						Logger.d("UmangX","removing");
 					}else{
 						adapter.addContact(contactInfo);
 
-						Logger.d("UmangX","adding");
 					}
 					int selected = adapter.getSelectedContactCount();
 					if(selected>0){
@@ -549,11 +544,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						if (adapter.isContactAdded(contactInfo)) {
 							if(newFragment.removeView(contactInfo)) adapter.removeContact(contactInfo);;
 
-							Logger.d("UmangX", "removing");
 						} else {
-							if(newFragment.addView(contactInfo))adapter.addContact(contactInfo);
+							if(newFragment.addView(contactInfo)) adapter.addContact(contactInfo);
 							
-							Logger.d("UmangX", "adding");
 						}
 					}
 				}
@@ -687,8 +680,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			tagEditText.clear(false);
 			adapter.removeFilter();
 			adapter.clearAllSelection(true);
+			NUXManager nm  = NUXManager.getInstance();
+			adapter.preSelectContacts(nm.getLockedContacts(), nm.getUnlockedContacts());
 			System.out.print("INSIDE NUX");
-			Logger.d("UmangX","INNUX");
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
 			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint(R.string.nux_fwd_search_hint);
 			break;

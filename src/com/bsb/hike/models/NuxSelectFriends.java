@@ -1,6 +1,7 @@
 package com.bsb.hike.models;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public class NuxSelectFriends
 {
@@ -22,7 +23,7 @@ public class NuxSelectFriends
 	 * @param searchToggle
 	 * @param contactSectionType
 	 */
-	public NuxSelectFriends(String sectionTitle, String title2, String title3, String recoSectionTitle, ArrayList<String> recoList, ArrayList<String> hideList,
+	public NuxSelectFriends(String sectionTitle, String title2, String title3, String recoSectionTitle, Set<String> recoList, ArrayList<String> hideList,
 			boolean toggleContactSection, String butText, boolean searchToggle, int contactSectionType)
 	{
 		super();
@@ -81,7 +82,7 @@ public class NuxSelectFriends
 	/**
 	 * @return the recoList
 	 */
-	public ArrayList<String> getRecoList()
+	public Set<String> getRecoList()
 	{
 		return recoList;
 	}
@@ -132,7 +133,7 @@ public class NuxSelectFriends
 
 	private boolean toggleRecoSection;
 
-	private ArrayList<String> recoList;
+	private Set<String> recoList;
 
 	private ArrayList<String> hideList;
 

@@ -3,13 +3,13 @@ package com.bsb.hike.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
@@ -29,9 +29,9 @@ import com.bsb.hike.models.NuxInviteFriends;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 
-public class NUXManager
+public class NUXManager implements NUXConstants
 {
-	private static final NUXManager mmManager=new NUXManager();
+	private static final NUXManager mmManager = new NUXManager();
 
 	private HashSet<String> listNuxContacts;
 
@@ -55,19 +55,19 @@ public class NUXManager
 	{
 		this.context = HikeMessengerApp.getInstance().getApplicationContext();
 		listNuxContacts = new HashSet<String>();
-		mprefs = HikeSharedPreferenceUtil.getInstance(context, NUXConstants.NUX_SHARED_PREF);
-		String msisdn = mprefs.getData(NUXConstants.CURRENT_NUX_CONTACTS, null);
+		mprefs = HikeSharedPreferenceUtil.getInstance(context, NUX_SHARED_PREF);
+		String msisdn = mprefs.getData(CURRENT_NUX_CONTACTS, null);
 		if (!TextUtils.isEmpty(msisdn))
 		{
-			String[] arrmsisdn = msisdn.split(NUXConstants.STRING_SPLIT_SEPERATOR);
+			String[] arrmsisdn = msisdn.split(STRING_SPLIT_SEPERATOR);
 			listNuxContacts.addAll(Arrays.asList(arrmsisdn));
 		}
 
 		unlockedNUXContacts = new HashSet<String>();
-		msisdn = mprefs.getData(NUXConstants.UNLOCKED_NUX_CONTACTS, null);
+		msisdn = mprefs.getData(UNLOCKED_NUX_CONTACTS, null);
 		if (!TextUtils.isEmpty(msisdn))
 		{
-			String[] arrmsisdn = msisdn.split(NUXConstants.STRING_SPLIT_SEPERATOR);
+			String[] arrmsisdn = msisdn.split(STRING_SPLIT_SEPERATOR);
 			unlockedNUXContacts.addAll(Arrays.asList(arrmsisdn));
 		}
 	}
@@ -77,27 +77,21 @@ public class NUXManager
 		return mmManager;
 	}
 
-	public void startNUX()
+	public void startNUX(Activity activity)
 	{
-		// mprefs.saveData(NUXConstants.IS_NUX_ACTIVE, true);
-		context.startActivity(IntentManager.openInviteFriends(context));
-
-		// shutDownNUX(context);
+		activity.startActivity(IntentManager.openInviteFriends(activity));
 	}
-	
-	public void startNuxCustomMessage(String selectedFriends)
-	{
-		Intent in = IntentManager.openNuxCustomMessage(context);
-		in.putExtra("selected_friends", selectedFriends);
-		context.startActivity(in);
-	}
-	
-	public void startNuxSelector()
-	{
-		// mprefs.saveData(NUXConstants.IS_NUX_ACTIVE, true);
-		context.startActivity(IntentManager.openNuxFriendSelector(context));
 
-		// shutDownNUX(context);
+	public void startNuxCustomMessage(String selectedFriends,Activity activity)
+	{
+		Intent in = IntentManager.openNuxCustomMessage(activity);
+		in.putExtra(SELECTED_FRIENDS, selectedFriends);
+		activity.startActivity(in);
+	}
+
+	public void startNuxSelector(Activity activity)
+	{
+		activity.startActivity(IntentManager.openNuxFriendSelector(activity));
 	}
 
 	public void saveNUXContact(HashSet<String> msisdn)
@@ -105,7 +99,7 @@ public class NUXManager
 
 		listNuxContacts.addAll(msisdn);
 
-		mprefs.saveData(NUXConstants.CURRENT_NUX_CONTACTS, listNuxContacts.toString().replace("[", "").replace("]", ""));
+		mprefs.saveData(CURRENT_NUX_CONTACTS, listNuxContacts.toString().replace("[", "").replace("]", ""));
 	}
 
 	public void removeNUXContact(HashSet<String> msisdn)
@@ -113,7 +107,7 @@ public class NUXManager
 
 		listNuxContacts.removeAll(msisdn);
 
-		mprefs.saveData(NUXConstants.CURRENT_NUX_CONTACTS, listNuxContacts.toString().replace("[", "").replace("]", ""));
+		mprefs.saveData(CURRENT_NUX_CONTACTS, listNuxContacts.toString().replace("[", "").replace("]", ""));
 
 	}
 
@@ -121,11 +115,11 @@ public class NUXManager
 	{
 		unlockedNUXContacts.addAll(msisdns);
 
-		mprefs.saveData(NUXConstants.UNLOCKED_NUX_CONTACTS, listNuxContacts.toString().replace("[", "").replace("]", ""));
+		mprefs.saveData(UNLOCKED_NUX_CONTACTS, unlockedNUXContacts.toString().replace("[", "").replace("]", ""));
 
 	}
 
-	public int getCountCurrentNUXContacts()
+	public int getCountLockedContacts()
 	{
 		return listNuxContacts.size();
 	}
@@ -135,32 +129,12 @@ public class NUXManager
 		return listNuxContacts.contains(msisdn);
 	}
 
-	// public int getMaxContacts(Context context)
-	// {
-	//
-	// return mprefs.getData(NUXConstants.TD_MAX_CONTACTS, -1);
-	// }
-	//
-	// public void setMaxContacts(Context context, int val)
-	// {
-	// mprefs.saveData(NUXConstants.TD_MAX_CONTACTS, val);
-	// }
-	//
-	// public int getMinContacts(Context context)
-	// {
-	//
-	// return mprefs.getData(NUXConstants.TD_MIN_CONTACTS, -1);
-	// }
-	//
-	// public void setMinContacts(Context context, int val)
-	// {
-	// mprefs.saveData(NUXConstants.TD_MIN_CONTACTS, val);
-	// }
-
 	public void shutDownNUX()
 	{
 		mprefs.deleteAllData();
 		clearALLPojo();
+		listNuxContacts.clear();
+		unlockedNUXContacts.clear();
 	}
 
 	private void clearALLPojo()
@@ -172,9 +146,14 @@ public class NUXManager
 
 	}
 
-	public HashSet<String> getAllNUXContacts()
+	public HashSet<String> getLockedContacts()
 	{
 		return listNuxContacts;
+	}
+	
+	public HashSet<String> getUnlockedContacts()
+	{
+		return unlockedNUXContacts;
 	}
 
 	public void sendMessage(HashSet<String> msisdn, String message)
@@ -206,46 +185,86 @@ public class NUXManager
 			JSONObject root = new JSONObject(json);
 			// "{  \"t\": \"nux\",  \"st\": \"new\", \"d\":{ \"task\": {    \"incentive_id\": \"8976rtfghfre456789iuhju\",    \"activity_id\": \"b7657yghh7tyhgtyghftt\",    \"incr_max\": -3,    \"incr_min\": 4,    \"max\": 6,    \"min\": 3  },  \"s\": {    \"s1\": {      \"ttl\": \"main_title\",      \"txt\": \"abcd\",      \"nxTgl\": false,      \"im\": \"images\",      \"btnTxt\": \"abcd\"    },    \"s2\": {      \"ttl1\": \"section_title\",      \"ttl2\": \"section_title\",      \"ttl3\": \"section_title\",      \"srchTgl\": true,      \"recTitle\": \"My Recoomendations\",      \"recList\": [        \"+91-987656\",        \"+91-273623\",        \"+92827722\"      ],      \"cntctTyp\": \"5values\",      \"hdeLst\": [        \"+91-987656\",        \"+91-273623\",        \"+92827722\"      ],      \"nxTxt\": \"next\"    },    \"s3\": {      \"scrnTgl\": true,      \"defMsg\": \"message\",      \"hnt\": \"tap to do something\",      \"stkrLst\": [        \"+91-987656\",        \"+91-273623\",        \"+92827722\"      ],      \"nxTxt\": \"next\"    },    \"s4\": {      \"mdlTgl\": true,      \"rwdCrdTxt\": \"image\",      \"rwdCrdTxtSccss\": \"image\",      \"sttsTxt\": \"image\",      \"chtWtngTxt\": \"image\",      \"pndngChtIcn\": \"image\",      \"dtlsTxt\": \"image\",      \"dtlsLnk\": \"image\",      \"bttn1Txt\": \"image\",      \"bttn2Txt\": \"image\",      \"tpToClmLnk\": \"image\"    },    \"s5\": {      \"hkImg\": \"image\",      \"hkTxt\": \"image\",      \"nonHkImg\": \"image\",      \"nonHkTxt\": \"image\",      \"hkBttnTxt\": \"image\",      \"hkStkID\": \"image\"    }  }}}");
 
-			if (root.optString(HikeConstants.SUB_TYPE).equals(NUXConstants.SUBTYPE_NEW))
+			if (root.optString(HikeConstants.SUB_TYPE).equals(SUBTYPE_NEW))
 			{
 
 				shutDownNUX();
 				if (!TextUtils.isEmpty(root.optString(HikeConstants.DATA)))
 				{
-					JSONObject data = root.optJSONObject(HikeConstants.DATA);
-					mprefs.saveData(NUXConstants.TASK_DETAILS, data.optString(NUXConstants.TASK_DETAILS));
 
-					JSONObject mmJsonObject = data.optJSONObject(NUXConstants.SCREENS);
+					JSONObject data = root.optJSONObject(HikeConstants.DATA);
+					if (!TextUtils.isEmpty(data.optString(TASK_DETAILS)))
+					{
+						parseTaskDetails(data.optString(TASK_DETAILS));
+					}
+					JSONObject mmJsonObject = data.optJSONObject(SCREENS);
 					if (mmJsonObject != null)
 					{
-						mprefs.saveData(NUXConstants.INVITE_FRIENDS, mmJsonObject.optString(NUXConstants.INVITE_FRIENDS));
-						mprefs.saveData(NUXConstants.SELECT_FRIENDS, mmJsonObject.optString(NUXConstants.SELECT_FRIENDS));
-						mprefs.saveData(NUXConstants.CUSTOM_MESSAGE, mmJsonObject.optString(NUXConstants.CUSTOM_MESSAGE));
-						mprefs.saveData(NUXConstants.CHAT_REWARDS_BAR, mmJsonObject.optString(NUXConstants.CHAT_REWARDS_BAR));
+						if (!TextUtils.isEmpty(mmJsonObject.optString(INVITE_FRIENDS)))
+							parseInviteFriends(mmJsonObject.optString(INVITE_FRIENDS));
+
+						if (!TextUtils.isEmpty(mmJsonObject.optString(SELECT_FRIENDS)))
+							parseselectFriends(mmJsonObject.optString(SELECT_FRIENDS));
+
+						if (!TextUtils.isEmpty(mmJsonObject.optString(CUSTOM_MESSAGE)))
+							parseCustomMessage(mmJsonObject.optString(CUSTOM_MESSAGE));
+
+						if (!TextUtils.isEmpty(mmJsonObject.optString(CHAT_REWARDS_BAR)))
+							parseChatRewards(mmJsonObject.optString(CHAT_REWARDS_BAR));
 
 					}
 
-					setCurrentState(NUXConstants.NUX_NEW);
+					setCurrentState(NUX_NEW);
 				}
 			}
-			else if (root.optString(HikeConstants.SUB_TYPE).equals(NUXConstants.KILLNUX))
+			else if (root.optString(HikeConstants.SUB_TYPE).equals(KILLNUX))
 			{
-				
-				setCurrentState(NUXConstants.NUX_KILLED);
+
+				setCurrentState(NUX_KILLED);
 				shutDownNUX();
 			}
-			else if (root.optString(HikeConstants.SUB_TYPE).equals(NUXConstants.REFRESH))
+			else if (root.optString(HikeConstants.SUB_TYPE).equals(REFRESH))
 			{
-					
+
+				if (!(getCurrentState() == NUX_KILLED || getCurrentState() == COMPLETED))
+				{
+					clearALLPojo();
+					if (!TextUtils.isEmpty(root.optString(HikeConstants.DATA)))
+					{
+						JSONObject data = root.optJSONObject(HikeConstants.DATA);
+
+						if (!TextUtils.isEmpty(data.optString(TASK_DETAILS)))
+							parseTaskDetails(data.optString(TASK_DETAILS));
+
+						JSONObject mmJsonObject = data.optJSONObject(SCREENS);
+
+						if (mmJsonObject != null)
+						{
+							if (!TextUtils.isEmpty(mmJsonObject.optString(INVITE_FRIENDS)))
+								parseInviteFriends(mmJsonObject.optString(INVITE_FRIENDS));
+
+							if (!TextUtils.isEmpty(mmJsonObject.optString(SELECT_FRIENDS)))
+								parseselectFriends(mmJsonObject.optString(SELECT_FRIENDS));
+
+							if (!TextUtils.isEmpty(mmJsonObject.optString(CUSTOM_MESSAGE)))
+								parseCustomMessage(mmJsonObject.optString(CUSTOM_MESSAGE));
+
+							if (!TextUtils.isEmpty(mmJsonObject.optString(CHAT_REWARDS_BAR)))
+								parseChatRewards(mmJsonObject.optString(CHAT_REWARDS_BAR));
+
+						}
+
+					}
+				}
 			}
-			else if (root.optString(HikeConstants.SUB_TYPE).equals(NUXConstants.UNLOCK))
+			else if (root.optString(HikeConstants.SUB_TYPE).equals(UNLOCK))
 			{
 				if (!TextUtils.isEmpty(root.optString(HikeConstants.DATA)))
 				{
 					JSONObject mmdata = root.optJSONObject(HikeConstants.DATA);
-					if (mmdata.has(NUXConstants.UNLOCK_PERSONS))
+					if (mmdata.has(UNLOCK_PERSONS))
 					{
-						JSONArray mmArray = mmdata.getJSONArray(NUXConstants.UNLOCK_PERSONS);
+						JSONArray mmArray = mmdata.getJSONArray(UNLOCK_PERSONS);
 						HashSet<String> mmUnlockedPersons = new HashSet<String>();
 						for (int i = 0; i < mmArray.length(); i++)
 						{
@@ -257,18 +276,264 @@ public class NUXManager
 					if (mmdata.has(HikeConstants.METADATA))
 					{
 						JSONObject mmMetaData = mmdata.getJSONObject(HikeConstants.METADATA);
-						if (mmMetaData.optBoolean(NUXConstants.SHOW_REWARDS))
+						if (mmMetaData.optBoolean(SHOW_REWARDS))
 						{
-							setCurrentState(NUXConstants.COMPLETED);
+							setCurrentState(COMPLETED);
 						}
 					}
 
 				}
 			}
-			else if (root.optString(HikeConstants.SUB_TYPE).equals(NUXConstants.REMINDER))
+			else if (root.optString(HikeConstants.SUB_TYPE).equals(REMINDER))
 			{
-
+				if (!(getCurrentState() == NUX_KILLED || getCurrentState() == COMPLETED))
+				{
+					mprefs.saveData(REMINDER_RECEIVED, true);
+				}
 			}
+
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private void parseTaskDetails(String json)
+	{
+		JSONObject task_details = null;
+		try
+		{
+			JSONObject newTaskDetails = new JSONObject(json);
+			if (!TextUtils.isEmpty(mprefs.getData(TASK_DETAILS, "")))
+				task_details = new JSONObject(mprefs.getData(TASK_DETAILS, ""));
+			else
+				task_details = new JSONObject();
+
+			if (newTaskDetails.has(TD_INCENTIVE_ID))
+			{
+				task_details.put(TD_INCENTIVE_ID, newTaskDetails.get(TD_INCENTIVE_ID));
+			}
+
+			if (newTaskDetails.has(TD_ACTIVITY_ID))
+			{
+				task_details.put(TD_ACTIVITY_ID, newTaskDetails.get(TD_ACTIVITY_ID));
+			}
+
+			if (newTaskDetails.has(TD_MIN_CONTACTS))
+			{
+				task_details.put(TD_MIN_CONTACTS, newTaskDetails.getInt(TD_MIN_CONTACTS));
+			}
+			if (newTaskDetails.has(TD_MAX_CONTACTS))
+			{
+				task_details.put(TD_MAX_CONTACTS, newTaskDetails.getInt(TD_MAX_CONTACTS));
+			}
+
+			if (newTaskDetails.has(TD_IS_SKIPPABLE))
+			{
+				task_details.put(TD_IS_SKIPPABLE, newTaskDetails.getInt(TD_IS_SKIPPABLE));
+			}
+
+			mprefs.saveData(TASK_DETAILS, task_details.toString());
+
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	private void parseInviteFriends(String json)
+	{
+		JSONObject inviteFriends = null;
+		try
+		{
+			JSONObject newinviteFriends = new JSONObject(json);
+			if (!TextUtils.isEmpty(mprefs.getData(INVITE_FRIENDS, "")))
+				inviteFriends = new JSONObject(mprefs.getData(INVITE_FRIENDS, ""));
+			else
+				inviteFriends = new JSONObject();
+
+			if (newinviteFriends.has(INVITEFRDS_BUT_TEXT))
+			{
+				inviteFriends.put(INVITEFRDS_BUT_TEXT, newinviteFriends.getString(INVITEFRDS_BUT_TEXT));
+			}
+
+			if (newinviteFriends.has(INVITEFRDS_IMAGE))
+			{
+				inviteFriends.put(INVITEFRDS_IMAGE, newinviteFriends.getString(INVITEFRDS_IMAGE));
+			}
+
+			if (newinviteFriends.has(INVITEFRDS_MAIN_TITLE))
+			{
+				inviteFriends.put(INVITEFRDS_MAIN_TITLE, newinviteFriends.getString(INVITEFRDS_MAIN_TITLE));
+			}
+
+			if (newinviteFriends.has(INVITEFRDS_SKIP_TOGGLE_BUTTON))
+			{
+				inviteFriends.put(INVITEFRDS_SKIP_TOGGLE_BUTTON, newinviteFriends.getBoolean(INVITEFRDS_SKIP_TOGGLE_BUTTON));
+			}
+
+			if (newinviteFriends.has(INVITEFRDS_TEXT))
+			{
+				inviteFriends.put(INVITEFRDS_TEXT, newinviteFriends.getString(INVITEFRDS_TEXT));
+			}
+
+			mprefs.saveData(INVITE_FRIENDS, inviteFriends.toString());
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+
+	}
+
+	public void parseCustomMessage(String json)
+	{
+		JSONObject customMessage = null;
+		try
+		{
+			JSONObject newCustomMessage = new JSONObject(json);
+
+			if (!TextUtils.isEmpty(mprefs.getData(CUSTOM_MESSAGE, "")))
+				customMessage = new JSONObject(mprefs.getData(CUSTOM_MESSAGE, ""));
+			else
+				customMessage = new JSONObject();
+
+			if (newCustomMessage.has(CM_BUTTON_TEXT))
+			{
+				customMessage.put(CM_BUTTON_TEXT, newCustomMessage.getString(CM_BUTTON_TEXT));
+			}
+
+			if (newCustomMessage.has(CM_DEF_MESSAGE))
+			{
+				customMessage.put(CM_DEF_MESSAGE, newCustomMessage.getString(CM_DEF_MESSAGE));
+			}
+
+			if (newCustomMessage.has(CM_HINT))
+			{
+				customMessage.put(CM_HINT, newCustomMessage.getString(CM_HINT));
+			}
+
+			if (newCustomMessage.has(CM_SCREEN_TOGGLE))
+			{
+				customMessage.put(CM_SCREEN_TOGGLE, newCustomMessage.getBoolean(CM_SCREEN_TOGGLE));
+			}
+
+			mprefs.saveData(CUSTOM_MESSAGE, customMessage.toString());
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public void parseselectFriends(String json)
+	{
+		try
+		{
+			JSONObject selectFriend = null;
+			JSONObject newselectFriend = new JSONObject(json);
+
+			if (!TextUtils.isEmpty(mprefs.getData(SELECT_FRIENDS, "")))
+				selectFriend = new JSONObject(mprefs.getData(SELECT_FRIENDS, ""));
+			else
+				selectFriend = new JSONObject();
+
+			if (newselectFriend.has(SF_BUTTON_TEXT))
+				selectFriend.put(SF_BUTTON_TEXT, newselectFriend.getString(SF_BUTTON_TEXT));
+
+			if (newselectFriend.has(SF_CONTACT_SECTION_TOGGLE))
+				selectFriend.put(SF_CONTACT_SECTION_TOGGLE, newselectFriend.getBoolean(SF_CONTACT_SECTION_TOGGLE));
+
+			if (newselectFriend.has(SF_CONTACT_SECTION_TYPE))
+				selectFriend.put(SF_CONTACT_SECTION_TYPE, newselectFriend.getInt(SF_CONTACT_SECTION_TYPE));
+
+			if (newselectFriend.has(SF_HIDE_LIST))
+				selectFriend.put(SF_HIDE_LIST, newselectFriend.getJSONArray(SF_HIDE_LIST));
+
+			if (newselectFriend.has(SF_RECO_LIST))
+				selectFriend.put(SF_RECO_LIST, newselectFriend.getBoolean(SF_RECO_LIST));
+
+			if (newselectFriend.has(SF_RECO_SECTION_TITLE))
+				selectFriend.put(SF_RECO_SECTION_TITLE, newselectFriend.getString(SF_RECO_SECTION_TITLE));
+
+			if (newselectFriend.has(SF_SEARCH_TOGGLE))
+				selectFriend.put(SF_SEARCH_TOGGLE, newselectFriend.getBoolean(SF_SEARCH_TOGGLE));
+
+			if (newselectFriend.has(SF_SECTION_TITLE))
+				selectFriend.put(SF_SECTION_TITLE, newselectFriend.getString(SF_SECTION_TITLE));
+
+			if (newselectFriend.has(SF_SECTION_TITLE2))
+				selectFriend.put(SF_SECTION_TITLE2, newselectFriend.getString(SF_SECTION_TITLE2));
+
+			if (newselectFriend.has(SF_SECTION_TITLE3))
+				selectFriend.put(SF_SECTION_TITLE3, newselectFriend.getString(SF_SECTION_TITLE3));
+
+			mprefs.saveData(SELECT_FRIENDS, selectFriend.toString());
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public void parseChatRewards(String json)
+	{
+		try
+		{
+			JSONObject chatReward = null;
+			JSONObject newChatReward = new JSONObject(json);
+
+			if (!TextUtils.isEmpty(mprefs.getData(TASK_DETAILS, "")))
+				chatReward = new JSONObject(mprefs.getData(TASK_DETAILS, ""));
+			else
+				chatReward = new JSONObject();
+
+			if (newChatReward.has(CR_BUTTON1_TEXT))
+				chatReward.put(CR_BUTTON1_TEXT, newChatReward.getString(CR_BUTTON1_TEXT));
+
+			if (newChatReward.has(CR_BUTTON2_TEXT))
+				chatReward.put(CR_BUTTON2_TEXT, newChatReward.getString(CR_BUTTON2_TEXT));
+
+			if (newChatReward.has(CR_CHAT_WAITING_TEXT))
+				chatReward.put(CR_CHAT_WAITING_TEXT, newChatReward.getString(CR_CHAT_WAITING_TEXT));
+
+			if (newChatReward.has(CR_DETAILS_LINK))
+				chatReward.put(CR_DETAILS_LINK, newChatReward.getString(CR_DETAILS_LINK));
+
+			if (newChatReward.has(CR_DETAILS_TEXT))
+				chatReward.put(CR_DETAILS_TEXT, newChatReward.getString(CR_DETAILS_TEXT));
+
+			if (newChatReward.has(CR_MODULE_TOGGLE))
+				chatReward.put(CR_MODULE_TOGGLE, newChatReward.getString(CR_MODULE_TOGGLE));
+
+			if (newChatReward.has(CR_PENDINGCHAT_ICON))
+				chatReward.put(CR_PENDINGCHAT_ICON, newChatReward.getString(CR_PENDINGCHAT_ICON));
+
+			if (newChatReward.has(CR_REWARD_CARD_SUCCESS_TEXT))
+				chatReward.put(CR_REWARD_CARD_SUCCESS_TEXT, newChatReward.getString(CR_REWARD_CARD_SUCCESS_TEXT));
+
+			if (newChatReward.has(CR_REWARD_CARD_TEXT))
+				chatReward.put(CR_REWARD_CARD_TEXT, newChatReward.getString(CR_REWARD_CARD_TEXT));
+
+			if (newChatReward.has(CR_STATUS_TEXT))
+				chatReward.put(CR_STATUS_TEXT, newChatReward.getString(CR_STATUS_TEXT));
+
+			if (newChatReward.has(CR_TAPTOCLAIM))
+				chatReward.put(CR_TAPTOCLAIM, newChatReward.getString(CR_TAPTOCLAIM));
+
+			if (newChatReward.has(CR_TAPTOCLAIMTEXT))
+				chatReward.put(CR_TAPTOCLAIMTEXT, newChatReward.getString(CR_TAPTOCLAIMTEXT));
+
+			if (newChatReward.has(CR_SELECTFRIENDS))
+				chatReward.put(CR_SELECTFRIENDS, newChatReward.getString(CR_SELECTFRIENDS));
 
 		}
 		catch (JSONException e)
@@ -279,37 +544,27 @@ public class NUXManager
 
 	public NuxCustomMessage getNuxCustomMessagePojo()
 	{
-	
+
 		if (customMessage == null)
 		{
-			JSONObject custommessage=null;
+			JSONObject custommessage = null;
 			try
 			{
-				if (TextUtils.isEmpty(mprefs.getData(NUXConstants.CUSTOM_MESSAGE, "")))
+				if (TextUtils.isEmpty(mprefs.getData(CUSTOM_MESSAGE, "")))
 				{
 					custommessage = new JSONObject();
 				}
 				else
 				{
-					custommessage = new JSONObject(mprefs.getData(NUXConstants.CUSTOM_MESSAGE, ""));
+					custommessage = new JSONObject(mprefs.getData(CUSTOM_MESSAGE, ""));
 				}
 				if (!TextUtils.isEmpty(custommessage.toString()))
 				{
-					ArrayList<String> stickerList = new ArrayList<String>();
-					String screentitle = custommessage.optString(NUXConstants.CM_DEF_MESSAGE, context.getString(R.string.custom_message_hint));
-					String hint = custommessage.optString(NUXConstants.CM_HINT, context.getString(R.string.custom_message));
-					if(custommessage.has(NUXConstants.CM_STICKER_LIST)){
-						JSONArray mmArray = custommessage.optJSONArray(NUXConstants.CM_STICKER_LIST);
-
-						for (int i = 0; i < mmArray.length(); i++)
-						{
-							stickerList.add(mmArray.optString(i));
-						}
-					}
-					
-					String buttext = custommessage.optString(NUXConstants.CM_BUTTON_TEXT, context.getString(R.string.custome_message_send_button));
-					boolean togglecustommsg = custommessage.optBoolean(NUXConstants.CM_SCREEN_TOGGLE, false);
-					customMessage = new NuxCustomMessage(screentitle, hint, buttext, togglecustommsg, stickerList);
+					String screentitle = custommessage.optString(CM_DEF_MESSAGE, context.getString(R.string.custom_message_hint));
+					String hint = custommessage.optString(CM_HINT, context.getString(R.string.custom_message));
+					String buttext = custommessage.optString(CM_BUTTON_TEXT, context.getString(R.string.custome_message_send_button));
+					boolean togglecustommsg = custommessage.optBoolean(CM_SCREEN_TOGGLE, false);
+					customMessage = new NuxCustomMessage(screentitle, hint, buttext, togglecustommsg);
 				}
 			}
 			catch (JSONException e)
@@ -328,38 +583,35 @@ public class NUXManager
 			try
 			{
 				JSONObject task_details = null;
-				if (!TextUtils.isEmpty(mprefs.getData(NUXConstants.TASK_DETAILS, "")))
-					task_details = new JSONObject(mprefs.getData(NUXConstants.TASK_DETAILS, ""));
+				if (!TextUtils.isEmpty(mprefs.getData(TASK_DETAILS, "")))
+					task_details = new JSONObject(mprefs.getData(TASK_DETAILS, ""));
 				else
 					task_details = new JSONObject();
 
 				String incentiveId = null;
 				int incentiveAmount = 0;
 				String activityId = null;
-				JSONObject incentive = task_details.optJSONObject(NUXConstants.TD_INCENTIVE_ID);
+				JSONObject incentive = task_details.optJSONObject(TD_INCENTIVE_ID);
 				if (incentive != null)
 				{
-					incentiveId = incentive.optString(NUXConstants.ID);
-					if (incentive.optJSONObject(NUXConstants.TYPE) != null)
+					incentiveId = incentive.optString(ID);
+					if (incentive.optJSONObject(TYPE) != null)
 					{
-						incentiveAmount = incentive.optInt(NUXConstants.INCENTIVE_AMOUNT,context.getResources().getInteger(R.integer.incentive_amount));
+						incentiveAmount = incentive.optInt(INCENTIVE_AMOUNT, context.getResources().getInteger(R.integer.incentive_amount));
 					}
 
 				}
 
-				JSONObject activity = task_details.optJSONObject(NUXConstants.TD_ACTIVITY_ID);
+				JSONObject activity = task_details.optJSONObject(TD_ACTIVITY_ID);
 				if (activity != null)
 				{
-					activityId = activity.optString(NUXConstants.ID);
-
+					activityId = activity.optString(ID);
 				}
 
-				int incrMax = task_details.optInt(NUXConstants.TD_INCR_MAX);
-				int min = task_details.optInt(NUXConstants.TD_MIN_CONTACTS, context.getResources().getInteger(R.integer.nux_min_contacts));
-				int max = task_details.optInt(NUXConstants.TD_MAX_CONTACTS, context.getResources().getInteger(R.integer.nux_max_contacts));
-				int incrMin = task_details.optInt(NUXConstants.TD_INCR_MIN);
-				boolean isNuxSkippable=task_details.optBoolean(NUXConstants.TD_IS_SKIPPABLE);
-				taskDetails = new NUXTaskDetails(incentiveId, activityId, incrMax, incrMin, min, max, incentiveAmount,isNuxSkippable);
+				int min = task_details.optInt(TD_MIN_CONTACTS, context.getResources().getInteger(R.integer.nux_min_contacts));
+				int max = task_details.optInt(TD_MAX_CONTACTS, context.getResources().getInteger(R.integer.nux_max_contacts));
+				boolean isNuxSkippable = task_details.optBoolean(TD_IS_SKIPPABLE, true);
+				taskDetails = new NUXTaskDetails(incentiveId, activityId, min, max, incentiveAmount, isNuxSkippable);
 			}
 			catch (JSONException e)
 			{
@@ -378,41 +630,40 @@ public class NUXManager
 			try
 			{
 
-				if (!TextUtils.isEmpty(mprefs.getData(NUXConstants.SELECT_FRIENDS, "")))
-					select_friends = new JSONObject(mprefs.getData(NUXConstants.SELECT_FRIENDS, ""));
+				if (!TextUtils.isEmpty(mprefs.getData(SELECT_FRIENDS, "")))
+					select_friends = new JSONObject(mprefs.getData(SELECT_FRIENDS, ""));
 				else
 					select_friends = new JSONObject();
 
 				{
-					JSONArray mmArray=null;
-					ArrayList<String> recoList = new ArrayList<String>();
+					JSONArray mmArray = null;
+					Set<String> recoList = new HashSet<String>();
 					ArrayList<String> hideList = new ArrayList<String>();
-					String sectionTitle = select_friends.optString(NUXConstants.SF_SECTION_TITLE,context.getString(R.string.nux_select_friends_1));
-					String recoSectionTitle = select_friends.optString(NUXConstants.SF_RECO_SECTION_TITLE,context.getString(R.string.nux_select_friends_reconame));
+					String sectionTitle = select_friends.optString(SF_SECTION_TITLE, context.getString(R.string.nux_select_friends_1));
+					String recoSectionTitle = select_friends.optString(SF_RECO_SECTION_TITLE, context.getString(R.string.nux_select_friends_reconame));
 
-					if (select_friends.has(NUXConstants.SF_RECO_LIST)) {
-						mmArray = select_friends
-								.optJSONArray(NUXConstants.SF_RECO_LIST);
-
-						for (int i = 0; i < mmArray.length(); i++) {
-							recoList.add(mmArray.optString(i));
-						}
-					}
-					if (select_friends.has(NUXConstants.SF_HIDE_LIST))
+					if (select_friends.optBoolean(SF_RECO_LIST))
 					{
-						mmArray = select_friends.optJSONArray(NUXConstants.SF_HIDE_LIST);
+						HikeSharedPreferenceUtil settings = HikeSharedPreferenceUtil.getInstance(context);
+
+						String mymsisdn = settings.getData(HikeMessengerApp.MSISDN_SETTING, "");
+						recoList=Utils.getServerRecommendedContactsSelection(settings.getData(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), mymsisdn);
+					}
+					if (select_friends.has(SF_HIDE_LIST))
+					{
+						mmArray = select_friends.optJSONArray(SF_HIDE_LIST);
 
 						for (int i = 0; i < mmArray.length(); i++)
 						{
 							hideList.add(mmArray.optString(i));
 						}
 					}
-					boolean toggleContactSection = select_friends.optBoolean(NUXConstants.SF_CONTACT_SECTION_TOGGLE);
-					String butText = select_friends.optString(NUXConstants.SF_BUTTON_TEXT, context.getString(R.string.nux_select_friends_nextbut));
-					String title2 = select_friends.optString(NUXConstants.SF_SECTION_TITLE2, context.getString(R.string.nux_select_friends_2));
-					String title3 = select_friends.optString(NUXConstants.SF_SECTION_TITLE3, context.getString(R.string.nux_select_friends_3));
-					boolean searchToggle = select_friends.optBoolean(NUXConstants.SF_SEARCH_TOGGLE);
-					int contactSectionType = select_friends.optInt(NUXConstants.SF_CONTACT_SECTION_TYPE);
+					boolean toggleContactSection = select_friends.optBoolean(SF_CONTACT_SECTION_TOGGLE);
+					String butText = select_friends.optString(SF_BUTTON_TEXT, context.getString(R.string.nux_select_friends_nextbut));
+					String title2 = select_friends.optString(SF_SECTION_TITLE2, context.getString(R.string.nux_select_friends_2));
+					String title3 = select_friends.optString(SF_SECTION_TITLE3, context.getString(R.string.nux_select_friends_3));
+					boolean searchToggle = select_friends.optBoolean(SF_SEARCH_TOGGLE);
+					int contactSectionType = select_friends.optInt(SF_CONTACT_SECTION_TYPE);
 					selectFriends = new NuxSelectFriends(sectionTitle, title2, title3, recoSectionTitle, recoList, hideList, toggleContactSection, butText, searchToggle,
 							contactSectionType);
 				}
@@ -433,17 +684,17 @@ public class NUXManager
 		{
 			try
 			{
-				if (!TextUtils.isEmpty(mprefs.getData(NUXConstants.INVITE_FRIENDS, "")))
-					incentive_reward = new JSONObject(mprefs.getData(NUXConstants.INVITE_FRIENDS, ""));
+				if (!TextUtils.isEmpty(mprefs.getData(INVITE_FRIENDS, "")))
+					incentive_reward = new JSONObject(mprefs.getData(INVITE_FRIENDS, ""));
 				else
 					incentive_reward = new JSONObject();
 				{
 
-					String text = incentive_reward.optString(NUXConstants.INVITEFRDS_TEXT, context.getString(R.string.nux_invitefrnds_objective));
-					String image = incentive_reward.optString(NUXConstants.INVITEFRDS_IMAGE);
-					boolean skip_toggle_button = incentive_reward.optBoolean(NUXConstants.INVITEFRDS_SKIP_TOGGLE_BUTTON);
-					String title = incentive_reward.optString(NUXConstants.INVITEFRDS_MAIN_TITLE, context.getString(R.string.nux_invitefrnds_reward));
-					String buttext = incentive_reward.optString(NUXConstants.INVITEFRDS_BUT_TEXT, context.getString(R.string.nux_invitefrnds_buttext));
+					String text = incentive_reward.optString(INVITEFRDS_TEXT, context.getString(R.string.nux_invitefrnds_objective));
+					String image = incentive_reward.optString(INVITEFRDS_IMAGE);
+					boolean skip_toggle_button = incentive_reward.optBoolean(INVITEFRDS_SKIP_TOGGLE_BUTTON);
+					String title = incentive_reward.optString(INVITEFRDS_MAIN_TITLE, context.getString(R.string.nux_invitefrnds_reward));
+					String buttext = incentive_reward.optString(INVITEFRDS_BUT_TEXT, context.getString(R.string.nux_invitefrnds_buttext));
 					inviteFriends = new NuxInviteFriends(title, text, buttext, image, skip_toggle_button);
 				}
 			}
@@ -464,25 +715,25 @@ public class NUXManager
 			JSONObject chatrewardobj = null;
 			try
 			{
-				if (!TextUtils.isEmpty(mprefs.getData(NUXConstants.CHAT_REWARDS_BAR, "")))
-					chatrewardobj = new JSONObject(mprefs.getData(NUXConstants.CHAT_REWARDS_BAR, ""));
+				if (!TextUtils.isEmpty(mprefs.getData(CHAT_REWARDS_BAR, "")))
+					chatrewardobj = new JSONObject(mprefs.getData(CHAT_REWARDS_BAR, ""));
 				else
 					chatrewardobj = new JSONObject();
 				{
 
-					boolean toggleModule = chatrewardobj.optBoolean(NUXConstants.CR_MODULE_TOGGLE);
-					String rewardCardText = chatrewardobj.optString(NUXConstants.CR_REWARD_CARD_TEXT, context.getString(R.string.reward_card_objective));
-					String rewardCardSuccessText = chatrewardobj.optString(NUXConstants.CR_REWARD_CARD_SUCCESS_TEXT, context.getString(R.string.reward_card_success));
-					String statusText = chatrewardobj.optString(NUXConstants.CR_STATUS_TEXT, context.getString(R.string.status_text));
-					String chatWaitingText = chatrewardobj.optString(NUXConstants.CR_CHAT_WAITING_TEXT, context.getString(R.string.chat_waiting_text));
-					String pendingChatIcon = chatrewardobj.optString(NUXConstants.CR_PENDINGCHAT_ICON);
-					String detailsText = chatrewardobj.optString(NUXConstants.CR_DETAILS_TEXT, context.getString(R.string.details_text));
-					String detailsLink = chatrewardobj.optString(NUXConstants.CR_DETAILS_LINK);
-					String button1Text = chatrewardobj.optString(NUXConstants.CR_BUTTON1_TEXT, context.getString(R.string.nux_invite_more));
-					String button2Text = chatrewardobj.optString(NUXConstants.CR_BUTTON2_TEXT, context.getString(R.string.nux_remind));
-					String tapToClaimLink = chatrewardobj.optString(NUXConstants.CR_TAPTOCLAIM);
-					String tapToClaimText = chatrewardobj.optString(NUXConstants.CR_TAPTOCLAIMTEXT, context.getString(R.string.tap_to_claim));
-					String selectFriends = chatrewardobj.optString(NUXConstants.CR_SELECTFRIENDS, context.getString(R.string.select_friends));
+					boolean toggleModule = chatrewardobj.optBoolean(CR_MODULE_TOGGLE);
+					String rewardCardText = chatrewardobj.optString(CR_REWARD_CARD_TEXT, context.getString(R.string.reward_card_objective));
+					String rewardCardSuccessText = chatrewardobj.optString(CR_REWARD_CARD_SUCCESS_TEXT, context.getString(R.string.reward_card_success));
+					String statusText = chatrewardobj.optString(CR_STATUS_TEXT, context.getString(R.string.status_text));
+					String chatWaitingText = chatrewardobj.optString(CR_CHAT_WAITING_TEXT, context.getString(R.string.chat_waiting_text));
+					String pendingChatIcon = chatrewardobj.optString(CR_PENDINGCHAT_ICON);
+					String detailsText = chatrewardobj.optString(CR_DETAILS_TEXT, context.getString(R.string.details_text));
+					String detailsLink = chatrewardobj.optString(CR_DETAILS_LINK);
+					String button1Text = chatrewardobj.optString(CR_BUTTON1_TEXT, context.getString(R.string.nux_invite_more));
+					String button2Text = chatrewardobj.optString(CR_BUTTON2_TEXT, context.getString(R.string.nux_remind));
+					String tapToClaimLink = chatrewardobj.optString(CR_TAPTOCLAIM);
+					String tapToClaimText = chatrewardobj.optString(CR_TAPTOCLAIMTEXT, context.getString(R.string.tap_to_claim));
+					String selectFriends = chatrewardobj.optString(CR_SELECTFRIENDS, context.getString(R.string.select_friends));
 					chatReward = new NUXChatReward(toggleModule, rewardCardText, rewardCardSuccessText, statusText, chatWaitingText, pendingChatIcon, detailsText, detailsLink,
 							button1Text, button2Text, tapToClaimLink, tapToClaimText, selectFriends);
 
@@ -499,15 +750,15 @@ public class NUXManager
 
 	public void setCurrentState(int mmCurrentState)
 	{
-		mprefs.saveData(NUXConstants.CURRENT_NUX_ACTIVITY, mmCurrentState);
+		mprefs.saveData(CURRENT_NUX_ACTIVITY, mmCurrentState);
 	}
 
 	public int getCurrentState()
 	{
-		return mprefs.getData(NUXConstants.CURRENT_NUX_ACTIVITY, NUXConstants.NUX_KILLED);
+		return mprefs.getData(CURRENT_NUX_ACTIVITY, NUX_KILLED);
 	}
 
-	public int getCurrentUnlockedSize()
+	public int getCountUnlockedSize()
 	{
 		return unlockedNUXContacts.size();
 	}
@@ -518,10 +769,10 @@ public class NUXManager
 		try
 		{
 			root.put(HikeConstants.TYPE, HikeConstants.NUX);
-			root.put(HikeConstants.SUB_TYPE, NUXConstants.INVITE);
+			root.put(HikeConstants.SUB_TYPE, INVITE);
 			JSONArray mmArray = new JSONArray(msisdn);
 			JSONObject object = new JSONObject();
-			object.put(NUXConstants.INVITE_ARRAY, mmArray);
+			object.put(INVITE_ARRAY, mmArray);
 			root.put(HikeConstants.DATA, object);
 
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, root);
@@ -535,12 +786,22 @@ public class NUXManager
 
 	}
 
+	public boolean isReminderReceived()
+	{
+		return mprefs.getData(REMINDER_RECEIVED, false);
+	}
+
+	public void reminderShown()
+	{
+		mprefs.saveData(REMINDER_RECEIVED, false);
+	}
+
 	/**
 	 * All these are testing functions will be removed afterwards.
 	 */
 	public void removeData()
 	{
-		HikeSharedPreferenceUtil.getInstance(context).removeData(NUXConstants.CURRENT_NUX_CONTACTS);
+		HikeSharedPreferenceUtil.getInstance(context).removeData(CURRENT_NUX_CONTACTS);
 	}
 
 	public void putJsonData()
@@ -551,40 +812,40 @@ public class NUXManager
 		JSONObject select_friends = new JSONObject();
 		try
 		{
-			incentive_reward.put(NUXConstants.INVITEFRDS_TEXT, "abcd");
-			incentive_reward.put(NUXConstants.TD_INCENTIVE_ID, 1);
-			incentive_reward.put(NUXConstants.TD_ACTIVITY_ID, 2);
-			incentive_reward.put(NUXConstants.TD_INCR_MAX, -3);
-			incentive_reward.put(NUXConstants.TD_INCR_MIN, 4);
-			incentive_reward.put(NUXConstants.INVITEFRDS_BUT_TEXT, "abcd");
-			incentive_reward.put(NUXConstants.INVITEFRDS_IMAGE, "");
-			incentive_reward.put(NUXConstants.INVITEFRDS_SKIP_TOGGLE_BUTTON, false);
-			incentive_reward.put(NUXConstants.INVITEFRDS_MAIN_TITLE, "main_title");
-			root.put(NUXConstants.INVITE_FRIENDS, incentive_reward);
+			incentive_reward.put(INVITEFRDS_TEXT, "abcd");
+			incentive_reward.put(TD_INCENTIVE_ID, 1);
+			incentive_reward.put(TD_ACTIVITY_ID, 2);
+			incentive_reward.put(TD_INCR_MAX, -3);
+			incentive_reward.put(TD_INCR_MIN, 4);
+			incentive_reward.put(INVITEFRDS_BUT_TEXT, "abcd");
+			incentive_reward.put(INVITEFRDS_IMAGE, "");
+			incentive_reward.put(INVITEFRDS_SKIP_TOGGLE_BUTTON, false);
+			incentive_reward.put(INVITEFRDS_MAIN_TITLE, "main_title");
+			root.put(INVITE_FRIENDS, incentive_reward);
 
-			select_friends.put(NUXConstants.SF_BUTTON_TEXT, "button_text");
-			select_friends.put(NUXConstants.SF_CONTACT_SECTION_TOGGLE, true);
-			select_friends.put(NUXConstants.SF_SECTION_TITLE2, "progress_text");
-			select_friends.put(NUXConstants.SF_RECO_SECTION_TITLE, "My Recoomendations");
-			select_friends.put(NUXConstants.SF_SEARCH_TOGGLE, true);
-			select_friends.put(NUXConstants.SF_SECTION_TITLE, "section_title");
+			select_friends.put(SF_BUTTON_TEXT, "button_text");
+			select_friends.put(SF_CONTACT_SECTION_TOGGLE, true);
+			select_friends.put(SF_SECTION_TITLE2, "progress_text");
+			select_friends.put(SF_RECO_SECTION_TITLE, "My Recoomendations");
+			select_friends.put(SF_SEARCH_TOGGLE, true);
+			select_friends.put(SF_SECTION_TITLE, "section_title");
 
 			JSONArray mmarray = new JSONArray();
 			mmarray.put("+91-987656");
 			mmarray.put("+91-273623");
 			mmarray.put("+92827722");
 
-			select_friends.put(NUXConstants.SF_RECO_LIST, mmarray);
+			select_friends.put(SF_RECO_LIST, mmarray);
 
-			root.put(NUXConstants.SELECT_FRIENDS, select_friends);
+			root.put(SELECT_FRIENDS, select_friends);
 
 			JSONObject custommessage = new JSONObject();
-			custommessage.put(NUXConstants.CM_BUTTON_TEXT, "bu_text");
-			custommessage.put(NUXConstants.CM_DEF_MESSAGE, "screen tilit");
-			custommessage.put(NUXConstants.CM_HINT, true);
+			custommessage.put(CM_BUTTON_TEXT, "bu_text");
+			custommessage.put(CM_DEF_MESSAGE, "screen tilit");
+			custommessage.put(CM_HINT, true);
 
-			root.put(NUXConstants.CUSTOM_MESSAGE, custommessage);
-			Logger.d(NUXConstants.TAG, root.toString());
+			root.put(CUSTOM_MESSAGE, custommessage);
+			Logger.d(TAG, root.toString());
 		}
 		catch (JSONException e)
 		{
@@ -592,25 +853,5 @@ public class NUXManager
 			e.printStackTrace();
 		}
 	}
-
-	// public void startCurrentActivity(Context context)
-	// {
-	//
-	// if (mprefs.getData(NUXConstants.IS_NUX_ACTIVE, false))
-	// {
-	// switch (mprefs.getData(NUXConstants.CURRENT_NUX_ACTIVITY, -1))
-	// {
-	// case NUXConstants.NUX_NEW:
-	// IntentManager.openInviteFriends(context);
-	// break;
-	// // case NUXConstants.SELFRD:
-	// // IntentManager.openSelectFriends(context);
-	// // break;
-	// case NUXConstants.NUX_SKIPPED:
-	// IntentManager.openCustomMessage(context);
-	// break;
-	// }
-	// }
-	// }
 
 }

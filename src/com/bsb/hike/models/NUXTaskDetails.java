@@ -1,18 +1,21 @@
 package com.bsb.hike.models;
 
-public class NUXTaskDetails
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.text.TextUtils;
+
+import com.bsb.hike.NUXConstants;
+
+public class NUXTaskDetails implements NUXConstants
 {
 
 	private String incentiveId;
 
 	private String activityId;
 
-	private int incrMax;
-
-	private int incrMin;
-
 	private int min;
-	
+
 	private int incentiveAmount;
 
 	private boolean isNuxSkippable;
@@ -24,20 +27,18 @@ public class NUXTaskDetails
 	 * @param incrMin
 	 * @param min
 	 * @param max
-	 * @param incentiveAmount 
-	 * @param isNuxSkippable 
+	 * @param incentiveAmount
+	 * @param isNuxSkippable
 	 */
-	public NUXTaskDetails(String incentiveId, String activityId, int incrMax, int incrMin, int min, int max, int incentiveAmount, boolean isNuxSkippable)
+	public NUXTaskDetails(String incentiveId, String activityId, int min, int max, int incentiveAmount, boolean isNuxSkippable)
 	{
 		super();
 		this.incentiveId = incentiveId;
 		this.activityId = activityId;
-		this.incrMax = incrMax;
-		this.incrMin = incrMin;
 		this.min = min;
 		this.max = max;
-		this.isNuxSkippable=isNuxSkippable;
-		this.incentiveAmount=incentiveAmount;
+		this.isNuxSkippable = isNuxSkippable;
+		this.incentiveAmount = incentiveAmount;
 	}
 
 	private int max;
@@ -56,22 +57,6 @@ public class NUXTaskDetails
 	public String getActivityId()
 	{
 		return activityId;
-	}
-
-	/**
-	 * @return the incrMax
-	 */
-	public int getIncrMax()
-	{
-		return incrMax;
-	}
-
-	/**
-	 * @return the incrMin
-	 */
-	public int getIncrMin()
-	{
-		return incrMin;
 	}
 
 	/**
@@ -99,5 +84,4 @@ public class NUXTaskDetails
 	{
 		return isNuxSkippable;
 	}
-
 }

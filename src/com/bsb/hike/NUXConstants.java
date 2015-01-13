@@ -1,6 +1,6 @@
 package com.bsb.hike;
 
-public class NUXConstants
+public interface NUXConstants
 {
 
 	public static final String NUX_SHARED_PREF = "nux_shared_pref";
@@ -111,13 +111,13 @@ public class NUXConstants
 
 	public static final int NUX_KILLED = 2;
 
-	public static final int NUX_SKIPPED = 3;
+	public static final int NUX_SKIPPED = 4;
 
-	public static final int NUX_IS_ACTIVE = 4;
+	public static final int NUX_IS_ACTIVE = 8;
+	
+	public static final int COMPLETED = 16;
 
 	public static final int OTHER_ACTIVITY = -1;
-	
-	public static final int COMPLETED=5;
 
 	public static final String SUBTYPE_NEW = "nuxNew";
 
@@ -155,6 +155,10 @@ public class NUXConstants
 
 	public static final String INCENTIVE_AMOUNT="recharge";
 
-	public static final String SHOW_REWARDS="shwRwrd";
+	public static final String SHOW_REWARDS="rul";
+	
+	public static final String REMINDER_RECEIVED="rem_rec";
+	
+	public static final String SELECTED_FRIENDS="selected_friends";
 
 }

@@ -118,14 +118,11 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		case R.id.but_skip:
 			IntentManager.openHomeActivity(this);
 			NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
-			Toast.makeText(this, "Button Skip", Toast.LENGTH_LONG).show();
 			finish();
 			break;
 
 		case R.id.but_inviteFrnds:
-			NUXManager.getInstance().startNuxSelector();
-			//IntentManager.openNuxFriendSelector(this);
-			Toast.makeText(this, "Invite Friends", Toast.LENGTH_LONG).show();
+			NUXManager.getInstance().startNuxSelector(this);
 			break;
 		}
 

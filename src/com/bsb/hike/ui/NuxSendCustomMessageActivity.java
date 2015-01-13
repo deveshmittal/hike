@@ -71,7 +71,6 @@ public class NuxSendCustomMessageActivity extends HikeAppStateBaseFragmentActivi
 			FragmentManager fm = getSupportFragmentManager();
 			newFragment = (HorizontalFriendsFragment) fm.findFragmentByTag("chatFragment");
 			if(newFragment == null){
-				Logger.d("UmangX","Give me red");
 				newFragment = new HorizontalFriendsFragment();
 			}
 			

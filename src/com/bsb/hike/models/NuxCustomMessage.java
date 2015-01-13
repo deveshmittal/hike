@@ -12,16 +12,13 @@ public class NuxCustomMessage
 
 	private boolean togglescreen;
 
-	private ArrayList<String> stickerList;
-
-	public NuxCustomMessage(String screentitle, String smsmessage, String buttext, boolean togglecustommsg, ArrayList<String> stickerList)
+	public NuxCustomMessage(String screentitle, String smsmessage, String buttext, boolean togglecustommsg)
 	{
 		super();
 		this.screenTitle = screentitle;
 		this.hint = smsmessage;
 		this.buttext = buttext;
 		this.togglescreen = togglecustommsg;
-		this.stickerList = stickerList;
 	}
 
 	/**
@@ -56,9 +53,5 @@ public class NuxCustomMessage
 		return togglescreen;
 	}
 
-	public ArrayList<String> getStickerList()
-	{
-		return stickerList;
-	}
 
 }

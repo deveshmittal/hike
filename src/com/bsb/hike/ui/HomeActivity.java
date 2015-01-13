@@ -179,14 +179,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			return;
 		}
 				
-		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_NEW || NUXManager.getInstance().getCurrentState() != NUXConstants.NUX_IS_ACTIVE)
+		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_NEW)
 		{
-//			if (!NUXManager.getInstance().getNuxInviteFriendsPojo().isToggleSkipButton())
-//			{
-//				NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
-//			}
+			if (NUXManager.getInstance().getNuxTaskDetailsPojo().isNuxSkippable())
+			{
+				NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
+			}
 
-			NUXManager.getInstance().startNUX();
+			NUXManager.getInstance().startNUX(this);
 //			finish();
 		}
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);

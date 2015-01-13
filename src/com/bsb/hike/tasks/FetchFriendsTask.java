@@ -45,7 +45,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 	
 	private List<ContactInfo> nuxRecommendedTaskList;
 	
-	private Set<ContactInfo> nuxHideTaskList;
+	private List<ContactInfo> nuxHideTaskList;
 
 	private List<ContactInfo> hikeTaskList;
 
@@ -190,7 +190,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		List<ContactInfo> allContacts = HikeMessengerApp.getContactManager().getAllContacts();
 		Set<String> blockSet = ContactManager.getInstance().getBlockedMsisdnSet();
 		
-		NUXManager nuxManager = NUXManager.getInstance();
+		NUXManager nm = NUXManager.getInstance();
 		
 		
 		if(fetchRecents)
@@ -220,15 +220,28 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		smsTaskList = new ArrayList<ContactInfo>();
 		recentlyJoinedTaskList = new ArrayList<ContactInfo>();
 		nuxRecommendedTaskList = new ArrayList<ContactInfo>();
+		nuxHideTaskList = new ArrayList<ContactInfo>();
 
-		if (nuxManager.getCurrentState() == NUXConstants.NUX_IS_ACTIVE)
+		if (nm.getCurrentState() == NUXConstants.NUX_IS_ACTIVE || nm.getCurrentState() == NUXConstants.NUX_SKIPPED)
 		{
-			ArrayList<String> mmList = nuxManager.getNuxSelectFriendsPojo().getRecoList();
-			for (String s : mmList)
+			ContactManager cm = ContactManager.getInstance();
+			Set<String> mmSet = nm.getNuxSelectFriendsPojo().getRecoList();
+			if (mmSet != null)
 			{
-				nuxRecommendedTaskList.add(ContactManager.getInstance().getContact(s));
+				for (String msisdn : mmSet)
+				{
+                    if(!TextUtils.isEmpty(msisdn) && !(cm.getContact(msisdn) == null))
+                        nuxRecommendedTaskList.add(cm.getContact(msisdn));
+				}
 			}
 
+			
+			ArrayList<String> mmList  = nm.getNuxSelectFriendsPojo().getHideList();
+			for (String msisdn : mmList)
+			{
+				if(!TextUtils.isEmpty(msisdn) && !(cm.getContact(msisdn) == null))
+					nuxHideTaskList.add(cm.getContact(msisdn));
+			}
 		}
 		
 		long iterationTime = System.currentTimeMillis();

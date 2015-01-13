@@ -106,7 +106,6 @@ public class TagEditText extends EditText
 			if (listener != null)
 			{
 
-				Logger.d("UmangX","Tag added");
 				listener.tagAdded(data, uniqueness);
 				listener.charResetAfterSeperator();
 			}
