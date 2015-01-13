@@ -1030,6 +1030,13 @@ public class MqttMessagesManager
 				settingEditor.putBoolean(HikeConstants.LAST_SEEN_PREF, account.optBoolean(HikeConstants.LAST_SEEN_SETTING, true));
 				settingEditor.commit();
 			}
+			if (account.has(HikeConstants.UJ_NOTIF_SETTING))
+			{
+				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+				Editor settingEditor = settings.edit();
+				settingEditor.putBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, account.optInt(HikeConstants.UJ_NOTIF_SETTING, 1) == 1? true:false);
+				settingEditor.commit();
+			}
 			if (account.has(HikeConstants.CHAT_BACKGROUNDS))
 			{
 				JSONArray chatBackgroundArray = account.getJSONArray(HikeConstants.CHAT_BACKGROUNDS);

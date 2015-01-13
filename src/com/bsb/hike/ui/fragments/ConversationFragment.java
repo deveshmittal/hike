@@ -542,10 +542,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(getString(R.string.delete_chat));
 		}
-		if (conv instanceof GroupConversation)
-		{	
-			optionsList.add(getString(R.string.clear_whole_conversation));
-		}
+
+		//Showing "Clear Whole Conv" option in Both Group and One-to-One Chat
+		optionsList.add(getString(R.string.clear_whole_conversation));
+		
 		optionsList.add(getString(R.string.email_conversations));
 		
 
@@ -2509,6 +2509,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			 * Need to set adapter again after removing footer view because getListView.getChildCount doesn't update. (Hack)
 			 */
 			setListAdapter(mAdapter);
+			Logger.d("nux", "Removed NUX invite footer");
 		}
 	}
 

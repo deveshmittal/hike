@@ -566,7 +566,7 @@ public class HikeNotification
 					avatarDrawable, shouldNotPlaySound, retryCount);
 
 		}
-		else
+		else if (!hikeNotifMsgStack.isEmpty())
 		{
 			showInboxStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
@@ -1208,12 +1208,12 @@ public class HikeNotification
 		 * we wait for the sleep state to get over before showing the local push.
 		 */
 		Calendar calendar = Calendar.getInstance();
-		long toDay12AM = Utils.getTimeInMillis(calendar, 0, 0, 0);
-		long toDay8AM = Utils.getTimeInMillis(calendar, 8, 0, 0);
+		long toDay12AM = Utils.getTimeInMillis(calendar, 0, 0, 0, 0);
+		long toDay8AM = Utils.getTimeInMillis(calendar, 8, 0, 0, 0);
 		
 		calendar.add(Calendar.DAY_OF_YEAR, 1);
-		long nextDay12AM = Utils.getTimeInMillis(calendar, 0, 0, 0);
-		long nextDay8AM = Utils.getTimeInMillis(calendar, 8, 0, 0);
+		long nextDay12AM = Utils.getTimeInMillis(calendar, 0, 0, 0, 0);
+		long nextDay8AM = Utils.getTimeInMillis(calendar, 8, 0, 0, 0);
 		if(nextRetryTime >= toDay12AM && nextRetryTime < toDay8AM)
 		{
 			nextRetryTime = toDay8AM;

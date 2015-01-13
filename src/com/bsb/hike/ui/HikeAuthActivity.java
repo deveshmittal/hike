@@ -38,6 +38,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.HikeSDKConstants;
 import com.bsb.hike.platform.HikeSDKResponseCode;
 import com.bsb.hike.service.HikeService;
@@ -166,6 +167,7 @@ public class HikeAuthActivity extends Activity
 		{
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_VIEWED);
+			metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
 			metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
 			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
@@ -356,6 +358,7 @@ public class HikeAuthActivity extends Activity
 					{
 						JSONObject metadata = new JSONObject();
 						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_CONNECT);
+						metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
 						metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
 						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					}
@@ -377,6 +380,7 @@ public class HikeAuthActivity extends Activity
 					{
 						JSONObject metadata = new JSONObject();
 						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_DECLINED);
+						metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
 						metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
 						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					}
@@ -903,6 +907,7 @@ public class HikeAuthActivity extends Activity
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_SUCCESS);
 			metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+			metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
 			metadata.put(HikeConstants.Extras.SDK_CONNECTION_TYPE, FileTransferManager.getInstance(getApplicationContext()).getNetworkType());
 			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
@@ -973,6 +978,7 @@ public class HikeAuthActivity extends Activity
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_FAILURE);
 			metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+			metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
 			metadata.put(HikeConstants.Extras.SDK_CONNECTION_TYPE, FileTransferManager.getInstance(getApplicationContext()).getNetworkType());
 			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}

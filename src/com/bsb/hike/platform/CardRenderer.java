@@ -344,6 +344,7 @@ public class CardRenderer implements View.OnLongClickListener {
         metadata.put(CardConstants.CARD_NAME, cardName);
         metadata.put(CardConstants.ACTION_TEXT, actionText);
         metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.CONTENT_CARD_TAPPED);
+        metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
         HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
     }
 

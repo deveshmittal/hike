@@ -279,6 +279,8 @@ public class HikeConstants
 
 	public static final String LAST_SEEN_SETTING = "lastseen";
 
+	public static final String UJ_NOTIF_SETTING = "ujn";
+
 	public static final String BULK_LAST_SEEN_KEY = "lastseens";
 
 	public static final String PROTIP_HEADER = "h";
@@ -1354,6 +1356,8 @@ public class HikeConstants
 	{
 		// Common tags for Countly. Don't change.
 
+		public static final String SOURCE_APP = "source_app";
+		
 		public static final String TAG = "tag";
 
 		public static final String DEVICE_ID = "device_id";
@@ -1652,11 +1656,7 @@ public class HikeConstants
 		/*
 		 * Settings screen <screen> = settingsS <event> = notifNUJEnabled, notifH2OEnabled, notifNUJDisabled, notifH2ODisabled
 		 */
-		public static final String SETTINGS_NOTIFICATION_NUJ_ON = "settingsSNotifNUJEnabled";
-		
 		public static final String SETTINGS_NOTIFICATION_H2O_ON = "settingsSNotifH2OEnabled";
-		
-		public static final String SETTINGS_NOTIFICATION_NUJ_OFF = "settingsSNotifNUJDisabled";
 		
 		public static final String SETTINGS_NOTIFICATION_H2O_OFF = "settingsSNotifH2ODisabled";
 		
