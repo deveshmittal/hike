@@ -688,28 +688,37 @@ public class VoIPActivity extends Activity implements CallActions
 		TextView contactMsisdnView = (TextView) findViewById(R.id.contact_msisdn);
 
 		VoIPClient clientPartner = voipService.getPartnerClient();
-		if (clientPartner == null) {
+		if (clientPartner == null) 
+		{
 			finish();
+			Logger.w(VoIPConstants.TAG, "Partner client info is null. Returning.");
 			return;
 		}
-//		Logger.w(VoIPConstants.TAG, "Partner Msisdn: " + clientPartner.getPhoneNumber());
+
 		ContactInfo contactInfo = ContactManager.getInstance().getContact(clientPartner.getPhoneNumber());
-		if (contactInfo == null) {
-			finish();
-			return;
+		String nameOrMsisdn;
+
+		if(contactInfo == null)
+		{
+			// For unsaved contacts
+			nameOrMsisdn = clientPartner.getPhoneNumber();
+			Logger.d(VoIPConstants.TAG, "Contact info is null for msisdn - " + nameOrMsisdn);
 		}
-		String nameOrMsisdn = contactInfo.getNameOrMsisdn();
+		else
+		{
+			nameOrMsisdn = contactInfo.getNameOrMsisdn();
+			if(contactInfo.getName() != null)
+			{
+				contactMsisdnView.setVisibility(View.VISIBLE);
+				contactMsisdnView.setText(contactInfo.getMsisdn());
+			}
+		}
+
 		if(nameOrMsisdn.length() > 16)
 		{
 			contactNameView.setTextSize(24);
 		}
 		contactNameView.setText(nameOrMsisdn);
-
-		if(contactInfo.getName() != null)
-		{
-			contactMsisdnView.setVisibility(View.VISIBLE);
-			contactMsisdnView.setText(contactInfo.getMsisdn());
-		}
 	}
 	
 	public void showCallActionsView()
