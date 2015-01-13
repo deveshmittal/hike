@@ -93,10 +93,22 @@ public class Conversation implements Comparable<Conversation>
 		this.lastPin = string;
 	}
 	
-
+	/**
+	 * Returns -1 if there is a JSON Exception while reading from metadata
+	 * 
+	 * @return
+	 */
 	public int getUnreadPinCount()
 	{
-		return unreadPinCount;
+		try
+		{
+			return metaData.getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+		}
+
+		catch (JSONException e)
+		{
+			return -1;
+		}
 	}
 
 	public void setUnreadPinCount(int unreadPinCount)
