@@ -103,6 +103,7 @@ public class VoIPActivity extends Activity implements CallActions
 	public static final int MSG_RECONNECTING = 15;
 	public static final int MSG_RECONNECTED = 16;
 	public static final int MSG_UPDATE_QUALITY = 17;
+	public static final int MSG_NETWORK_SUCKS = 18;
 
 	private CallActionsView callActionsView;
 	private Chronometer callDuration;
@@ -170,6 +171,9 @@ public class VoIPActivity extends Activity implements CallActions
 			case MSG_UPDATE_QUALITY:
 				CallQuality quality = voipService.getQuality();
 				showSignalStrength(quality);
+				break;
+			case MSG_NETWORK_SUCKS:
+				showMessage("Network quality is not good enough.");
 				break;
 			default:
 				super.handleMessage(msg);
