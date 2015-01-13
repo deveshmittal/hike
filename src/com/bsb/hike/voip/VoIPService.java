@@ -1423,7 +1423,8 @@ public class VoIPService extends Service {
 						
 					case END_CALL:
 						Logger.d(VoIPConstants.TAG, "Other party hung up.");
-						hangUp();
+						stop();
+						VoIPUtils.addMessageToChatThread(getApplicationContext(), clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration(), -1);
 						break;
 						
 					case START_VOICE:
