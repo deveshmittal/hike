@@ -80,7 +80,8 @@ public class PlatformAlarmManager
 						{
 							metadata.put(FILE_ID, data.getString(FILE_ID));
 						}
-
+						// SEND PubSub, if cards are visible they can update themselves
+						HikeConversationsDatabase.getInstance().updateMetadataOfMessage(messageId, metadata.toString());
 					}
 					catch (Exception jsoException)
 					{
