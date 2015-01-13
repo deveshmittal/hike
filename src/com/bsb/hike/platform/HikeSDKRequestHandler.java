@@ -423,6 +423,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_INSTALL_HIKE_ACCEPT);
 					metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, requestJSON.getString(HikeSDKConstants.HIKE_REQ_SDK_CLIENT_PKG_NAME));
+					metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
 					HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.HIKE_SDK_INSTALL_ACCEPT, metadata);
 				}
 				if (!TextUtils.isEmpty(requestJSON.optString(HikeSDKConstants.PREF_HIKE_SDK_INSTALL_DENIED_KEY)))
@@ -430,6 +431,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_INSTALL_HIKE_DECLINE);
 					metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, requestJSON.getString(HikeSDKConstants.HIKE_REQ_SDK_CLIENT_PKG_NAME));
+					metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
 					HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.HIKE_SDK_INSTALL_DECLINE, metadata);
 				}
 			}

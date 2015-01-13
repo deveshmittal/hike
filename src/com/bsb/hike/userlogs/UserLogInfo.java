@@ -16,6 +16,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.provider.CallLog;
+import android.text.TextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -172,7 +173,7 @@ public class UserLogInfo {
 		//for the case when AI packet will not send us the backup Token
 		String salt = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, null);
 		// if salt or key is empty, we do not send anything
-		if(salt == null|| key == null)
+		if(TextUtils.isEmpty(salt) || TextUtils.isEmpty(key))
 			return null;
 		
 		AESEncryption aesObj = new AESEncryption(key + salt, HASH_SCHEME);

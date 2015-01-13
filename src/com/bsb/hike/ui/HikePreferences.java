@@ -685,6 +685,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			LockPattern.confirmPattern(HikePreferences.this, true);
 		}
+		else
+		{}
 
 		return true;
 	}
@@ -810,16 +812,33 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				
 				if(isChecked)
 				{
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_ON);
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_ON);
 				}
 				else{
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_OFF);
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_OFF);
 				}
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 			}
 			catch(JSONException e)
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}			
+			JSONObject object = new JSONObject();
+			
+			try
+			{
+				object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+
+				JSONObject data = new JSONObject();
+				data.put(HikeConstants.UJ_NOTIF_SETTING, isChecked? 1:0 );
+				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
+				object.put(HikeConstants.DATA, data);
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+			}
+			catch (JSONException e)
+			{
+				Logger.w(getClass().getSimpleName(), "Invalid json", e);
 			}
 		}
 		else if (HikeConstants.H2O_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))

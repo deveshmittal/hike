@@ -496,7 +496,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				/*
 				 * If backup is available we don't want to show nux screen to user and also we don't need bot msgs to prompt user for forwarding sticker
 				 */
-				if (!DBBackupRestore.getInstance(this).isBackupAvailable())
+				if (DBBackupRestore.getInstance(this).isBackupAvailable())
 				{
 					showNuxScreen = false;
 				}
@@ -1875,6 +1875,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	@Override
 	public void onBackPressed()
 	{
+		SharedPreferences settings = getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (settings.getBoolean(HikeMessengerApp.RESTORING_BACKUP, false))
+		{
+			return;
+		}
 		if (viewFlipper.getDisplayedChild() == PIN)
 		{
 			if (countDownTimer != null)
