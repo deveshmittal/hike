@@ -186,12 +186,12 @@ public class AnalyticsSender implements Runnable
 		
 		if(instance.getAnalyticsUploadFrequency() < AnalyticsConstants.ANALYTICS_UPLOAD_FREQUENCY)
 		{			
-			nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend() + AnalyticsConstants.UPLOAD_TIME_MULTIPLE, 0, 0);
+			nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend() + AnalyticsConstants.UPLOAD_TIME_MULTIPLE, 0, 0, 0);
 			instance.incrementAnalyticsUploadFrequency();
 		}
 		else
 		{
-			nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend(), 0, 0);
+			nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend(), 0, 0, 0);
 			instance.resetAnalyticsUploadFrequency();			
 		}
 		HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);		
