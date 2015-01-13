@@ -135,7 +135,9 @@ public class VoIPService extends Service {
 	private static final int SOUND_DECLINE = R.raw.call_end;
 	private static final int SOUND_INCOMING_RINGTONE = R.raw.ring_tone;
 	private int ringtoneStreamID = 0;
-	
+
+	// Network quality test
+	private int networkQualityPacketsReceived = 0;
 
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToDecodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToEncodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
@@ -379,7 +381,7 @@ public class VoIPService extends Service {
 	
 	private void initAudioManager() {
 
-		Logger.w(VoIPConstants.TAG, "Initializing audio manager.");
+//		Logger.w(VoIPConstants.TAG, "Initializing audio manager.");
 		
 		if (audioManager == null)
 			audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
@@ -1288,6 +1290,7 @@ public class VoIPService extends Service {
 					try {
 						socket.setSoTimeout(0);
 						socket.receive(packet);
+//						Logger.d(VoIPConstants.TAG, "Received something.");
 						totalBytesReceived += packet.getLength();
 						totalPacketsReceived++;
 					} catch (IOException e) {
@@ -1455,11 +1458,15 @@ public class VoIPService extends Service {
 						sendHandlerMessage(VoIPActivity.MSG_OUTGOING_CALL_DECLINED);
 						stop();
 						break;
+						
 					case CURRENT_BITRATE:
 						remoteBitrate = ByteBuffer.wrap(dataPacket.getData()).order(ByteOrder.LITTLE_ENDIAN).getInt();
 						setIdealBitrate();
 						break;
 
+					case NETWORK_QUALITY:
+						networkQualityPacketsReceived++;
+						break;
 					default:
 						Logger.w(VoIPConstants.TAG, "Received unexpected packet: " + dataPacket.getType());
 						break;
@@ -1483,7 +1490,7 @@ public class VoIPService extends Service {
 		
 		// While reconnecting don't send anything except for connection setup packets
 		if (reconnecting) {
-			if (!dp.getPacketType().toString().startsWith("COMM"))
+			if (!dp.getPacketType().toString().startsWith("COMM") && dp.getPacketType() != PacketType.RELAY_INIT)
 				return;
 		}
 		
@@ -1510,7 +1517,12 @@ public class VoIPService extends Service {
 		byte[] packetData = getUDPDataFromPacket(dp);
 		
 		try {
-			DatagramPacket packet = new DatagramPacket(packetData, packetData.length, clientPartner.getCachedInetAddress(), clientPartner.getPreferredPort());
+			DatagramPacket packet = null;
+			if (dp.getType() == PacketType.RELAY_INIT)
+				packet = new DatagramPacket(packetData, packetData.length, InetAddress.getByName(clientSelf.getRelayAddress()), VoIPConstants.ICEServerPort);
+			else
+				packet = new DatagramPacket(packetData, packetData.length, clientPartner.getCachedInetAddress(), clientPartner.getPreferredPort());
+				
 //			Logger.d(VoIPConstants.TAG, "Sending type: " + dp.getType() + " to: " + clientPartner.getCachedInetAddress() + ":" + clientPartner.getPreferredPort());
 			socket.send(packet);
 			totalBytesSent += packet.getLength();
@@ -1539,12 +1551,10 @@ public class VoIPService extends Service {
 			prefix = PP_PROTOCOL_BUFFER;
 		}
 		
-		if (clientPartner.getPreferredConnectionMethod() != ConnectionMethods.RELAY) { // If RELAY, the server will put the prefix on the packet
-			byte[] finalData = new byte[packetData.length + 1];		// 
-			finalData[0] = prefix;
-			System.arraycopy(packetData, 0, finalData, 1, packetData.length);
-			packetData = finalData;
-		}
+		byte[] finalData = new byte[packetData.length + 1];	
+		finalData[0] = prefix;
+		System.arraycopy(packetData, 0, finalData, 1, packetData.length);
+		packetData = finalData;
 
 		return packetData;
 	}
@@ -1807,8 +1817,9 @@ public class VoIPService extends Service {
 					}
 
 					VoIPDataPacket dp = new VoIPDataPacket(PacketType.RELAY_INIT);
-					byte[] dpData = VoIPSerializer.serialize(dp);
-					DatagramPacket outgoingPacket = new DatagramPacket(dpData, dpData.length, host, VoIPConstants.ICEServerPort);
+					// byte[] dpData = VoIPSerializer.serialize(dp);
+					// DatagramPacket outgoingPacket = new DatagramPacket(dpData, dpData.length, host, VoIPConstants.ICEServerPort);
+//					sendPacket(dp, false);
 					DatagramPacket incomingPacket = new DatagramPacket(receiveData, receiveData.length);
 
 					boolean continueSending = true;
@@ -1820,8 +1831,10 @@ public class VoIPService extends Service {
 							clientSelf.setInternalIPAddress(VoIPUtils.getLocalIpAddress(getApplicationContext())); 
 							clientSelf.setInternalPort(socket.getLocalPort());
 
-							Logger.d(VoIPConstants.TAG, "ICE Sending: " + outgoingPacket.getData().toString() + " to " + host.getHostAddress() + ":" + VoIPConstants.ICEServerPort);
-							socket.send(outgoingPacket);
+//							Logger.d(VoIPConstants.TAG, "ICE Sending: " + outgoingPacket.getData().toString() + " to " + host.getHostAddress() + ":" + VoIPConstants.ICEServerPort);
+							Logger.d(VoIPConstants.TAG, "ICE Sending.");
+//							socket.send(outgoingPacket);
+							sendPacket(dp, false);
 							socket.receive(incomingPacket);
 							
 							String serverResponse = new String(incomingPacket.getData(), 0, incomingPacket.getLength());
@@ -1852,11 +1865,18 @@ public class VoIPService extends Service {
 				}
 				
 				if (haveExternalSocketInfo()) {
-					sendSocketInfoToPartner();
-					if (socketInfoReceived)
-						establishConnection();
-					else
-						startPartnerTimeoutThread();
+					if (!clientSelf.isInitiator() || reconnecting || isNetworkGoodEnough()) {
+						sendSocketInfoToPartner();
+						if (socketInfoReceived)
+							establishConnection();
+						else
+							startPartnerTimeoutThread();
+					} else {
+						Logger.w(VoIPConstants.TAG, "Network is not good enough.");
+						sendHandlerMessage(VoIPActivity.MSG_NETWORK_SUCKS);
+						stop();
+						return;
+					}
 				} else {
 					Logger.d(VoIPConstants.TAG, "Failed to retrieve external socket.");
 					sendHandlerMessage(VoIPActivity.MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE);
@@ -2041,7 +2061,7 @@ public class VoIPService extends Service {
 				}
 
 				senderThread.interrupt();
-				receivingThread.interrupt();
+//				receivingThread.interrupt();
 				establishingConnection = false;
 				if (reconnectingBeepsThread != null)
 					reconnectingBeepsThread.interrupt();
@@ -2108,7 +2128,7 @@ public class VoIPService extends Service {
 					if (!isAudioRunning()) {
 						// Call not answered yet?
 						sendHandlerMessage(VoIPActivity.MSG_PARTNER_ANSWER_TIMEOUT);
-						if (!reconnecting) {
+						if (!reconnecting && !connected) {
 							if (!clientSelf.isInitiator())
 								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1);
 							else
@@ -2127,5 +2147,52 @@ public class VoIPService extends Service {
 		partnerTimeoutThread.start();
 	}
 
+	private boolean isNetworkGoodEnough() {
+		boolean good = false;
+
+		SharedPreferences prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		int simulateBitrate = prefs.getInt(HikeMessengerApp.VOIP_BITRATE_2G, VoIPConstants.BITRATE_2G);
+
+		final int TOTAL_TEST_TIME = 3;
+		final int TOTAL_TEST_BYTES = (simulateBitrate * TOTAL_TEST_TIME) / 8;
+		final int TEST_PACKETS = 50;
+		final int TIME_TO_WAIT_FOR_PACKETS = 2;
+		final int ACCEPTABLE_LOSS_PCT = 10;
+
+		byte[] packetData = new byte[TOTAL_TEST_BYTES / TEST_PACKETS];
+		VoIPDataPacket dp = new VoIPDataPacket(PacketType.NETWORK_QUALITY);
+		dp.setData(packetData);
+		startReceiving();
+		
+		clientPartner.setRelayAddress(clientSelf.getRelayAddress());
+		clientPartner.setPreferredConnectionMethod(ConnectionMethods.RELAY);
+
+		networkQualityPacketsReceived = 0;
+
+		Logger.d(VoIPConstants.TAG, "Testing network with " + TEST_PACKETS + " packets of " + packetData.length + " bytes over " + TOTAL_TEST_TIME + " seconds.");
+		
+		try {
+			for (int bytesSent = 0; bytesSent < TOTAL_TEST_BYTES && keepRunning; bytesSent += packetData.length) {
+				sendPacket(dp, false);
+				Thread.sleep((TOTAL_TEST_TIME * 1000) / TEST_PACKETS);
+				if (Thread.currentThread().isInterrupted())
+					break;
+			}
+			Thread.sleep(TIME_TO_WAIT_FOR_PACKETS);
+		} catch (InterruptedException e) {
+			Logger.d(VoIPConstants.TAG, "Network test cancelled.");
+		}
+
+		if (networkQualityPacketsReceived > ((100 - ACCEPTABLE_LOSS_PCT) * TEST_PACKETS)/100)
+			good = true;
+
+		Logger.d(VoIPConstants.TAG, "Network test returned " + networkQualityPacketsReceived 
+				+ " packets. Sent: " + TEST_PACKETS + ". Verdict: " + good);
+
+		// Reset the preferred connection method
+		clientPartner.setPreferredConnectionMethod(ConnectionMethods.UNKNOWN);
+		
+		return good;
+	}
 }
 

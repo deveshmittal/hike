@@ -18,7 +18,7 @@ public class VoIPConstants {
 	
 	// Relay and ICE server 
 	public static final String ICEServerName = "relay.hike.in";
-	public static final int ICEServerPort = 9998;
+	public static final int ICEServerPort = 9999;
 
 	/**
 	 * Time (ms) to wait before the client being called replies with its
