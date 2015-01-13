@@ -67,7 +67,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	private static final int PIN_CREATE_ACTION_MODE = 201;
 	
 	private static final int MUTE_CONVERSATION_TOGGLED = 202;
-
+	
+	private static final int LATEST_PIN_DELETED = 203;
+	
 	private static final String TAG = "groupchatthread";
 
 	protected GroupConversation groupConversation;
@@ -146,7 +148,15 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	{
 
 		List<OverFlowMenuItem> list = new ArrayList<OverFlowMenuItem>();
-		list.add(new OverFlowMenuItem(getString(R.string.group_profile), 0, 0, R.string.group_profile));
+		int unreadPinCount = 0;
+		if(groupConversation != null)
+		{
+			/**
+			 * It could be possible that conversation, (which loads on a background thread) is created before the UI thread calls for overflow menu creation. 
+			 */
+			unreadPinCount = groupConversation.getUnreadPinCount();
+		}
+		list.add(new OverFlowMenuItem(getString(R.string.group_profile), unreadPinCount, 0, R.string.group_profile));
 
 		for (OverFlowMenuItem item : super.getOverFlowMenuItems())
 		{
@@ -295,6 +305,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		{
 			showImpMessage(groupConversation.getImpMessage(), -1);
 		}
+		
+		updateUnreadPinCount();
 	}
 
 	/**
@@ -521,7 +533,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	@Override
 	protected String[] getPubSubListeners()
 	{
-		return new String[] { HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.MUTE_CONVERSATION_TOGGLED };
+		return new String[] { HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONV_META_DATA_UPDATED };
 	}
 
 	/**
@@ -647,6 +659,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		case HikePubSub.MUTE_CONVERSATION_TOGGLED:
 			onMuteConversationToggled(object);
 			break;
+		case HikePubSub.LATEST_PIN_DELETED:
+			onLatestPinDeleted(object);
+			break;
+		case HikePubSub.CONV_META_DATA_UPDATED:
+			onConvMetadataUpdated(object);
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching PubSub event in Group ChatThread. Calling super class' onEventReceived");
 			super.onEventReceived(type, object);
@@ -667,6 +685,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			break;
 		case MUTE_CONVERSATION_TOGGLED:
 			muteConvToggledUIChange((boolean) msg.obj);
+			break;
+		case LATEST_PIN_DELETED:
+			hidePinFromUI((boolean) msg.obj);
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in Group ChatThread. Calling super class' handleUIMessage");
@@ -847,9 +868,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	{
 		super.clearConversation();
 		
-		// TODO : hidePinFromUI();
-		// Utils.resetPinUnreadCount(mConversation);
-		// updateOverflowMenuUnreadCount();
+		hidePinFromUI(true);
+		Utils.resetPinUnreadCount(groupConversation);
+		updateUnreadPinCount();
 	}
 	
 	public void initActionbarActionModeView(int id, View view)
@@ -959,4 +980,70 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			toggleConversationMuteViewVisibility(groupConversation.isMuted());
 		}
 	}
+	
+	/**
+	 * Used to set unread pin count
+	 */
+	private void updateUnreadPinCount()
+	{
+		if (groupConversation != null)
+		{
+			int unreadPinCount = groupConversation.getUnreadPinCount();
+			updateOverflowMenuIndicatorCount(unreadPinCount);
+			updateOverflowMenuItemCount(R.string.group_profile, unreadPinCount);
+		}
+	}
+	
+	/**
+	 * Called from the pubSub thread
+	 * 
+	 * @param object
+	 */
+	private void onLatestPinDeleted(Object object)
+	{
+		long msgId = (Long) object;
+
+		try
+		{
+			long pinIdFromMetadata = mConversation.getMetaData().getLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+
+			if (msgId == pinIdFromMetadata)
+			{
+				sendUIMessage(LATEST_PIN_DELETED, true);
+			}
+		}
+
+		catch (JSONException e)
+		{
+			Logger.wtf(TAG, "Got an exception during the pubSub : onLatestPinDeleted " + e.toString());
+		}
+
+	}
+	
+	/**
+	 * Called from the pubSub thread
+	 * 
+	 * @param object
+	 */
+	private void onConvMetadataUpdated(Object object)
+	{
+		if (msisdn.equals(((MetaData) object).getGroupId()))
+		{
+			groupConversation.setMetaData(((MetaData) object));
+		}
+	}
+	
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+		
+		if(isShowingPin())
+		{
+			decrementUnreadPInCount();
+		}
+		
+		updateUnreadPinCount();
+	}
+	
 }

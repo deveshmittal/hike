@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 
 public class OverFlowMenuLayout implements OnItemClickListener {
@@ -73,10 +74,20 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 				TextView freeSmsCount = (TextView) convertView
 						.findViewById(R.id.free_sms_count);
 				freeSmsCount.setVisibility(View.GONE);
-
+				
 				TextView newGamesIndicator = (TextView) convertView
 						.findViewById(R.id.new_games_indicator);
-				newGamesIndicator.setVisibility(View.GONE);
+				
+				if(item.unreadCount <= 0)
+				{	
+					newGamesIndicator.setVisibility(View.GONE);
+				}
+				
+				else
+				{
+					newGamesIndicator.setText(setUnreadCounter(item.unreadCount));
+					newGamesIndicator.setVisibility(View.VISIBLE);
+				}
 
 				return convertView;
 			}
@@ -142,6 +153,19 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 			((ArrayAdapter)overFlowListView.getAdapter()).notifyDataSetChanged();
 		}
 		
+	}
+	
+	private String setUnreadCounter(int counter)
+	{
+		if(counter >= HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY)
+		{
+			return context.getString(R.string.max_pin_unread_counter);
+		}
+		
+		else
+		{
+			return Integer.toString(counter);
+		}
 	}
 
 }

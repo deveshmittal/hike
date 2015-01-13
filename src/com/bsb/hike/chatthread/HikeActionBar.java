@@ -29,6 +29,8 @@ public class HikeActionBar
 	private HikeAppStateBaseFragmentActivity mActivity;
 
 	public OverFlowMenuLayout overFlowMenuLayout;
+	
+	private Menu mMenu;
 
 	/**
 	 * @generated
@@ -45,6 +47,7 @@ public class HikeActionBar
 	{
 		MenuInflater menuInflater = mActivity.getSupportMenuInflater();
 		menuInflater.inflate(menuLayout, menu);
+		this.mMenu = menu;
 	}
 
 	public void onCreateOptionsMenu(Menu menu, int menuLayout, List<OverFlowMenuItem> overflowItems, OverflowItemClickListener listener)
@@ -154,7 +157,15 @@ public class HikeActionBar
 	 */
 	public List<OverFlowMenuItem> getOverFlowMenuItems()
 	{
-		return overFlowMenuLayout.getOverFlowMenuItems(); 
+		if(overFlowMenuLayout != null)
+		{
+			return overFlowMenuLayout.getOverFlowMenuItems(); 
+		}
+		
+		else
+		{
+			return null;
+		}
 	}
 
 	/**
@@ -184,6 +195,23 @@ public class HikeActionBar
 	public void showOverflowMenu(int width, int height, int xOffset, int yOffset, View anchor)
 	{
 		overFlowMenuLayout.show(width, height, xOffset, yOffset, anchor);
+	}
+	
+	/**
+	 * Returns a menuItem for a given resId
+	 * 
+	 * @param resId
+	 * @return
+	 */
+	public MenuItem getMenuItem(int resId)
+	{
+		MenuItem menuItem = null;
+		if (mMenu != null)
+		{
+			menuItem = mMenu.findItem(resId);
+		}
+
+		return menuItem;
 	}
 
 }
