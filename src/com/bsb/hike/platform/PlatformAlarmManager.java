@@ -1,20 +1,14 @@
 package com.bsb.hike.platform;
 
-import java.util.Iterator;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.DBConstants;
+import com.bsb.hike.db.HikeContentDatabase;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.notifications.HikeNotification;
@@ -24,12 +18,8 @@ public class PlatformAlarmManager
 {
 	private static final String tag = "platformAlarmManager";
 
-	public static final String HELPER_DATA = "helper_data";
-
-	public static final String CARD_DATA = "card_data";
-
-	public static final String FILE_ID = "file_id";
-
+	public static final String PLATFORM_ALARM = "platform_alarm";
+	
 	public static final String NOTIFICATION = "notification";
 
 	public static final String NOTIFICATION_SOUND = "notification_sound";
@@ -40,10 +30,12 @@ public class PlatformAlarmManager
 
 	public static final String CONV_MSISDN = "conv_msisdn";
 
-	public static final void setAlarm(Context context, Intent intent, int messageId, long timeInMills)
+	public static final void setAlarm(Context context, String data, long messageId, long timeInMills)
 	{
+		Intent intent = new Intent();
 		intent.putExtra(MESSAGE_ID, messageId); // for us uniqueness of a card is message id
-		HikeAlarmManager.setAlarmPersistance(context, timeInMills, HikeAlarmManager.PLATFORM_ALARMS, true, true);
+		intent.putExtra(PLATFORM_ALARM, data);
+		HikeAlarmManager.setAlarmwithIntentPersistance(context, timeInMills, (int) (100000 + messageId), true, intent, true); // 100000 is added to avoid conflict between
 	}
 
 	/*
@@ -55,70 +47,22 @@ public class PlatformAlarmManager
 	{
 		Logger.i(tag, "Process Tasks Invoked with intent :  " + intent.toString());
 		Bundle data = intent.getExtras();
-		if (data != null)
+		if (data != null && data.containsKey(PLATFORM_ALARM))
 		{
-			long messageId = data.getInt(MESSAGE_ID);
+			int messageId = data.getInt(MESSAGE_ID);
 			if (messageId != 0) // validation
 			{
-				Cursor cursor = HikeConversationsDatabase.getInstance().getMessage(String.valueOf(messageId));
-				if (cursor != null && cursor.moveToFirst())
-				{
-					try
-					{
-						String metadataS = cursor.getString(cursor.getColumnIndex(DBConstants.MESSAGE_METADATA));
-						JSONObject metadata = new JSONObject(metadataS);
-
-						if (data.containsKey(CARD_DATA))
-						{
-							metadata.put(CARD_DATA, data.getString(CARD_DATA));
-						}
-						if (data.containsKey(HELPER_DATA))
-						{
-							updateHelperData(data.getString(HELPER_DATA), metadata);
-						}
-						if (data.containsKey(FILE_ID))
-						{
-							metadata.put(FILE_ID, data.getString(FILE_ID));
-						}
-						// SEND PubSub, if cards are visible they can update themselves
-						HikeConversationsDatabase.getInstance().updateMetadataOfMessage(messageId, metadata.toString());
-					}
-					catch (Exception jsoException)
-					{
-						jsoException.printStackTrace();
-					}
-				}
+				HikeContentDatabase.getInstance(context).insertUpdateAppAlarm(messageId, data.getString(PLATFORM_ALARM));
 				increaseUnreadCount(data, context);
 				showNotification(data,context);
+				Message m = Message.obtain();
+				m.arg1 = messageId;
+				m.obj = data.get(PLATFORM_ALARM);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.PLATFORM_CARD_ALARM, m);
 			}
 		}
 	}
 
-	private static String updateHelperData(String helper, JSONObject metadataJSON)
-	{
-		try
-		{
-			JSONObject helperData = new JSONObject(helper);
-			JSONObject oldHelper = metadataJSON.optJSONObject(HELPER_DATA);
-			if (oldHelper == null)
-			{
-				oldHelper = new JSONObject();
-			}
-			Iterator<String> i = helperData.keys();
-			while (i.hasNext())
-			{
-				String key = i.next();
-				oldHelper.put(key, helperData.get(key));
-			}
-			metadataJSON.put(HELPER_DATA, oldHelper.toString());
-			return metadataJSON.toString();
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 	private static void increaseUnreadCount(Bundle data, Context context)
 	{
