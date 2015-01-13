@@ -52,7 +52,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	private StickerLoader worker;
 	
 	private StickerOtherIconLoader stickerOtherIconLoader;
-
+	
 	private class StickerPageObjects
 	{
 		private GridView stickerGridView;
@@ -434,7 +434,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			category.setState(StickerCategory.UPDATE);
 		}
 		
-		int state = category.getState(); 
+		int state = category.getState();
+
 		/* We add UI elements based on the current state of the sticker category*/
 		addStickerPageAdapterItem(category, stickerPageList);
 		/**
@@ -506,5 +507,5 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		return stickerCategoryList.get(index);
 	}
-
+	
 }
