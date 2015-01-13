@@ -9,7 +9,7 @@ import android.text.TextUtils;
 import com.bsb.hike.modules.httpmgr.Header;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
-import com.bsb.hike.modules.httpmgr.retry.DefaultRetryPolicy;
+import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
 
 /**
@@ -29,7 +29,7 @@ public class Request
 
 	private List<Header> headers;
 
-	private byte[] body;
+	private IRequestBody body;
 
 	private int priority;
 
@@ -109,7 +109,7 @@ public class Request
 	 * 
 	 * @return
 	 */
-	public byte[] getBody()
+	public IRequestBody getBody()
 	{
 		return body;
 	}
@@ -230,7 +230,7 @@ public class Request
 	 * 
 	 * @param body
 	 */
-	public void setBody(byte[] body)
+	public void setBody(IRequestBody body)
 	{
 		this.body = body;
 	}
@@ -309,7 +309,7 @@ public class Request
 
 		private List<Header> headers;
 
-		private byte[] body;
+		private IRequestBody body;
 
 		private int priority;
 
@@ -373,7 +373,7 @@ public class Request
 		 * 
 		 * @param body
 		 */
-		public Builder setBody(byte[] body)
+		public Builder setBody(IRequestBody body)
 		{
 			this.body = body;
 			return this;
@@ -476,7 +476,7 @@ public class Request
 			{
 				throw new IllegalArgumentException("Priority can be between " + PriorityConstants.PRIORITY_LOW + " to " + PriorityConstants.PRIORITY_HIGH);
 			}
-			
+
 			if (TextUtils.isEmpty(method))
 			{
 				method = RequestConstants.GET;
