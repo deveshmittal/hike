@@ -194,6 +194,8 @@ public class StickerManager
 
 	public static final String STICKER_RES_ID = "stickerResId";
 	
+	private static final String REMOVE_LEGACY_GREEN_DOTS = "removeLegacyGreenDots";
+	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
 	public static final int DEFAULT_POSITION = 3;
@@ -212,7 +214,7 @@ public class StickerManager
 	private static SharedPreferences preferenceManager;
 
 	private static StickerManager instance;
-
+	
 	public static StickerManager getInstance()
 	{
 		if (instance == null)
@@ -265,6 +267,18 @@ public class StickerManager
 			{
 				StickerManager.getInstance().setStickerUpdateAvailable(DOGGY_CATEGORY, true);
 			}
+		}
+		
+		/**
+		 * This code path is used for removing green dot bug, in which even though there are no stickers to download, the green dot persists.
+		 * 
+		 * TODO : Remove this code flow after 3-4 release cycles.
+		 */
+		
+		if(!settings.getBoolean(StickerManager.REMOVE_LEGACY_GREEN_DOTS, false))
+		{
+			removeLegacyGreenDots();
+			settings.edit().putBoolean(StickerManager.REMOVE_LEGACY_GREEN_DOTS, true).commit();
 		}
 	}
 
@@ -1541,4 +1555,32 @@ public class StickerManager
 
 		return false;
 	}
+	
+	/**
+	 * This method is used to remove legacy green dots where needed
+	 */
+	
+	private void removeLegacyGreenDots()
+	{
+		List<StickerCategory> myStickersList = getMyStickerCategoryList();
+		ArrayList<StickerCategory> updatedList = new ArrayList<StickerCategory>();
+
+		if (myStickersList != null)
+		{
+			for (StickerCategory stickerCategory : myStickersList)
+			{
+				if (shouldRemoveGreenDot(stickerCategory))
+				{
+					stickerCategory.setUpdateAvailable(false);
+					updatedList.add(stickerCategory);
+				}
+			}
+			
+			if (updatedList.size() > 0)
+			{
+				HikeConversationsDatabase.getInstance().saveUpdateFlagOfStickerCategory(updatedList);
+			}
+		}
+	}
+	
 }

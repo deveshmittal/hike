@@ -6016,7 +6016,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 	}
 	
-	public void saveUpdateFlagOfStickerCategory(Set<StickerCategory> stickerCategories)
+	public void saveUpdateFlagOfStickerCategory(List<StickerCategory> stickerCategories)
 	{
 		try
 		{
