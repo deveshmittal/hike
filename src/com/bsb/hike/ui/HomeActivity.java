@@ -107,7 +107,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP, FESTIVE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP, FESTIVE_POPUP, VOIP_FTUE_POPUP
 	}
 
 	private DialogShowing dialogShowing;
@@ -198,11 +198,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (!showingProgress)
 		{
-			initialiseHomeScreen(savedInstanceState);
 			if (Utils.isVoipActivated(HomeActivity.this) && !HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWN_VOIP_INTRO_TIP, false))
 			{
-				HikeDialog.showDialog(HomeActivity.this, HikeDialog.VOIP_INTRO_DIALOG, null);
+				dialogShowing = DialogShowing.VOIP_FTUE_POPUP;
 			}
+			initialiseHomeScreen(savedInstanceState);
 		}
 		
 	}
@@ -1651,6 +1651,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
 			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
 			break;
+		case VOIP_FTUE_POPUP:
+			dialogShowing = DialogShowing.VOIP_FTUE_POPUP;
+			dialog = HikeDialog.showDialog(this, HikeDialog.VOIP_INTRO_DIALOG, getHomeActivityDialogListener());
 		}
 	}
 
