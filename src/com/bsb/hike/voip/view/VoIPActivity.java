@@ -84,8 +84,6 @@ public class VoIPActivity extends Activity implements CallActions
 	// private VoIPClient clientSelf = new VoIPClient(), clientPartner = new VoIPClient();
 	private boolean isBound = false;
 	private final Messenger mMessenger = new Messenger(new IncomingHandler());
-	private int initialAudioMode, initialRingerMode;
-	private boolean initialSpeakerMode;
 	private WakeLock wakeLock = null;
 	private WakeLock proximityWakeLock;
 	private SensorManager sensorManager;
@@ -224,7 +222,6 @@ public class VoIPActivity extends Activity implements CallActions
 			handleIntent(intent);
 		}
 
-		saveCurrentAudioSettings();
 		acquireWakeLock();
 //		isRunning = true;
 	}
@@ -376,7 +373,6 @@ public class VoIPActivity extends Activity implements CallActions
 			Logger.d(VoIPConstants.TAG, "shutdown() exception: " + e.toString());
 		}
 		
-		restoreAudioSettings();
 		releaseWakeLock();
 
 //		isRunning = false;
@@ -396,20 +392,6 @@ public class VoIPActivity extends Activity implements CallActions
 				finish();
 			}
 		}, 600);
-	}
-
-	private void saveCurrentAudioSettings() {
-		AudioManager audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		initialAudioMode = audiomanager.getMode();
-		initialRingerMode = audiomanager.getRingerMode();
-		initialSpeakerMode = audiomanager.isSpeakerphoneOn();
-	}
-
-	private void restoreAudioSettings() {
-		AudioManager audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		audiomanager.setMode(initialAudioMode);
-		audiomanager.setRingerMode(initialRingerMode);
-		audiomanager.setSpeakerphoneOn(initialSpeakerMode);
 	}
 
 	private void acquireWakeLock() {
