@@ -123,9 +123,6 @@ public class FestivePopup
 				}, 500);
 				Utils.sendUILogEvent(HikeConstants.LogEvent.FESTIVE_POPUP_WISH);
 				Intent intent = IntentManager.getForwardStickerIntent(activity, getStickerId(popupType), getCatId(popupType), false);
-
-				// Not to Select the contacts initially
-				intent.putExtra(HikeConstants.Extras.SELECT_ALL_INITIALLY, false);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				activity.startActivity(intent);
 			}
