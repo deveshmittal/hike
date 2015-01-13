@@ -2245,7 +2245,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 			}
 
-			conv.setUnreadCount(unreadCount);
+			conv.setUnreadCount(unreadCount +getExtraConvUnreadCount(msisdn));
 
 			return conv;
 		}
@@ -2678,7 +2678,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					}
 				}
 
-				conv.setUnreadCount(c.getInt(unreadCountColumn));
+				conv.setUnreadCount(c.getInt(unreadCountColumn)+getExtraConvUnreadCount(msisdn));
 				conv.setIsStealth(c.getInt(isStealthColumn) == 1);
 
 				if (getMetadata)
