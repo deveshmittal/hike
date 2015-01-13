@@ -79,7 +79,7 @@ public class SnowFallView extends View
 			animation.setInterpolator(interpolator);
 
 			int startYDisp = (int) (45 * Utils.densityMultiplier);
-			coords[i] = new int[] { random.nextInt(width), -startYDisp };
+			coords[i] = new int[] { random.nextInt(width), -startYDisp - height/100 };
 			drawables.add(new AnimateDrawable(snow_flake, snow_flake_large, snow_flake_trans, animation));
 			animation.setStartOffset((random.nextInt(6 * height) * i)/10);
 			animation.setFillBefore(false);
