@@ -241,7 +241,14 @@ public interface DBConstants
 		public static final String TIMESTAMP = "timestamp";
 		public static final String METADATA = "metadata";
 		// CONTENT TABLE ENDS HERE
+		// APP DATA TABLE
 		
+		// APP DATA TABLE ENDS HERE
+		// APP ALARM -> id, data 
+		public static final String APP_ALARM_TABLE = "app_alarms";
+		public static final String ID = "id";
+		public static final String ALARM_DATA = "data";
+		// APP ALARM ENDS HERE
 		public static final String CONTENT_ID_INDEX = "contentTableContentIdIndex";
 	}
 
