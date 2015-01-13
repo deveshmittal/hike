@@ -51,7 +51,8 @@ public class VoIPConstants {
 		EXCELLENT,
 		GOOD,
 		FAIR,
-		WEAK
+		WEAK,
+		UNKNOWN
 	}
 	
 	/**

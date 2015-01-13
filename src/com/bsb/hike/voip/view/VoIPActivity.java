@@ -9,7 +9,6 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -26,6 +25,7 @@ import android.os.SystemClock;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ImageSpan;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -51,12 +51,31 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient;
 import com.bsb.hike.voip.VoIPConstants;
-import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPConstants.CallQuality;
+import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPService.LocalBinder;
 
 public class VoIPActivity extends Activity implements CallActions
 {
+	
+	/**
+	 * PAY ATTENTION!! TODO!
+	 * 
+	 * Two changes need to be reverted before this code is pushed to production.
+	 * 
+	 * 1. This build connects to DMQTT.
+	 * 2. VoIP is enabled by default with code in HomeActivity onCreate().
+	 * 
+	 *   
+	 *   
+	 *   
+	 *   
+	 *   
+	 *   
+	 *   
+	 *   
+	 *   
+	 */
 
 	static final int PROXIMITY_SCREEN_OFF_WAKELOCK = 32;
 //	public static boolean isRunning = false;
@@ -65,8 +84,6 @@ public class VoIPActivity extends Activity implements CallActions
 	// private VoIPClient clientSelf = new VoIPClient(), clientPartner = new VoIPClient();
 	private boolean isBound = false;
 	private final Messenger mMessenger = new Messenger(new IncomingHandler());
-	private int initialAudioMode, initialRingerMode;
-	private boolean initialSpeakerMode;
 	private WakeLock wakeLock = null;
 	private WakeLock proximityWakeLock;
 	private SensorManager sensorManager;
@@ -82,7 +99,6 @@ public class VoIPActivity extends Activity implements CallActions
 	public static final int MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE = 8;
 	public static final int MSG_PARTNER_SOCKET_INFO_TIMEOUT = 10;
 	public static final int MSG_PARTNER_ANSWER_TIMEOUT = 11;
-	public static final int MSG_HANGUP = 12;
 	public static final int MSG_INCOMING_CALL_DECLINED = 14;
 	public static final int MSG_RECONNECTING = 15;
 	public static final int MSG_RECONNECTED = 16;
@@ -145,8 +161,6 @@ public class VoIPActivity extends Activity implements CallActions
 			case MSG_PARTNER_ANSWER_TIMEOUT:
 				showMessage("No response.");
 				break;
-			case MSG_HANGUP:	// TODO in service
-				break;
 			case MSG_RECONNECTING:
 				showMessage("Reconnecting..");
 				break;
@@ -208,7 +222,6 @@ public class VoIPActivity extends Activity implements CallActions
 			handleIntent(intent);
 		}
 
-		saveCurrentAudioSettings();
 		acquireWakeLock();
 //		isRunning = true;
 	}
@@ -223,7 +236,7 @@ public class VoIPActivity extends Activity implements CallActions
 	protected void onPause() {
 		super.onPause();
 		sensorManager.unregisterListener(proximitySensorEventListener);
-		Logger.w(VoIPConstants.TAG, "VoIPActivity onPause()");
+//		Logger.w(VoIPConstants.TAG, "VoIPActivity onPause()");
 	}
 
 	@Override
@@ -259,24 +272,16 @@ public class VoIPActivity extends Activity implements CallActions
 		handleIntent(intent);
 	}
 
-	/*
 	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-
-		boolean retval = true; 
-
-		if (voipService != null && voipService.isAudioRunning() && 
-				(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP)) {
-			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
-				voipService.adjustGain(-1000);
-			else
-				voipService.adjustGain(1000);
-		} else
-			retval = super.onKeyDown(keyCode, event);
-
-		return retval;
+	public boolean onKeyDown(int keyCode, KeyEvent event)
+	{
+		if (voipService!=null && !voipService.isAudioRunning() && (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP))
+		{
+			voipService.stopRingtone();
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
 	}
-	*/
 
 	private void handleIntent(Intent intent) {
 		String action = intent.getStringExtra("action");
@@ -291,7 +296,8 @@ public class VoIPActivity extends Activity implements CallActions
 			if (message == null || message.isEmpty())
 				message = "Callee needs to upgrade their client.";
 			showMessage(message);
-			voipService.stop();
+			if (voipService != null)
+				voipService.stop();
 		}
 		
 		if (action.equals(VoIPConstants.PARTNER_INCOMPATIBLE)) {
@@ -299,7 +305,8 @@ public class VoIPActivity extends Activity implements CallActions
 			if (message == null || message.isEmpty())
 				message = "Callee is on an incompatible client.";
 			showMessage(message);
-			voipService.stop();
+			if (voipService != null)
+				voipService.stop();
 		}
 		
 		if (action.equals(VoIPConstants.PARTNER_HAS_BLOCKED_YOU)) {
@@ -307,7 +314,8 @@ public class VoIPActivity extends Activity implements CallActions
 			if (message == null || message.isEmpty())
 				message = "You have been blocked by the person you are trying to call.";
 			showMessage(message);
-			voipService.stop();
+			if (voipService != null)
+				voipService.stop();
 		}
 		
 		if (action.equals(VoIPConstants.PARTNER_IN_CALL)) {
@@ -325,7 +333,8 @@ public class VoIPActivity extends Activity implements CallActions
 			} else if (VoIPService.isConnected())
 				voipService.hangUp();
 			else
-				voipService.stop();
+				if (voipService != null)
+					voipService.stop();
 		}
 		
 		// Clear the intent so the activity doesn't process intent again on resume
@@ -364,7 +373,6 @@ public class VoIPActivity extends Activity implements CallActions
 			Logger.d(VoIPConstants.TAG, "shutdown() exception: " + e.toString());
 		}
 		
-		restoreAudioSettings();
 		releaseWakeLock();
 
 //		isRunning = false;
@@ -384,20 +392,6 @@ public class VoIPActivity extends Activity implements CallActions
 				finish();
 			}
 		}, 600);
-	}
-
-	private void saveCurrentAudioSettings() {
-		AudioManager audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		initialAudioMode = audiomanager.getMode();
-		initialRingerMode = audiomanager.getRingerMode();
-		initialSpeakerMode = audiomanager.isSpeakerphoneOn();
-	}
-
-	private void restoreAudioSettings() {
-		AudioManager audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		audiomanager.setMode(initialAudioMode);
-		audiomanager.setRingerMode(initialRingerMode);
-		audiomanager.setSpeakerphoneOn(initialSpeakerMode);
 	}
 
 	private void acquireWakeLock() {

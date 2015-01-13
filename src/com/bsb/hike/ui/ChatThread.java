@@ -2460,6 +2460,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 								HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_JOIN_TIME_OBTAINED, new Pair<String, Long>(mContactNumber, hikeJoinTime));
 								ContactManager.getInstance().updateHikeStatus(ChatThread.this, mContactNumber, true);
 								mConversationDb.updateOnHikeStatus(mContactNumber, true);
+								showCallIcon();
 								HikeMessengerApp.getPubSub().publish(HikePubSub.USER_JOINED, mContactNumber);
 							}
 						}
@@ -2858,6 +2859,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					mAdapter.notifyDataSetChanged();
 				}
 			}
+		}
+	}
+
+	private void showCallIcon()
+	{
+		if(mMenu!=null && !HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber) && Utils.isVoipActivated(this))
+		{
+			mMenu.findItem(R.id.voip_call).setVisible(true);
 		}
 	}
 
