@@ -16,6 +16,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.utils.Logger;
 
@@ -27,10 +28,10 @@ public class PlatformAlarmManager
 
 	public static final String CARD_DATA = "card_data";
 
-	public static final String LAYOUT_ID = "layout_id";
+	public static final String FILE_ID = "file_id";
 
 	public static final String NOTIFICATION = "notification";
-	
+
 	public static final String NOTIFICATION_SOUND = "notification_sound";
 
 	public static final String INCREASE_UNREAD = "inc_unread";
@@ -39,10 +40,16 @@ public class PlatformAlarmManager
 
 	public static final String CONV_MSISDN = "conv_msisdn";
 
+	public static final void setAlarm(Context context, Intent intent, int messageId, long timeInMills)
+	{
+		intent.putExtra(MESSAGE_ID, messageId); // for us uniqueness of a card is message id
+		HikeAlarmManager.setAlarmPersistance(context, timeInMills, HikeAlarmManager.PLATFORM_ALARMS, true, true);
+	}
+
 	/*
 	 * Assuming Format of metadata for platform is :
 	 * 
-	 * metadata:{'layout_id':'','card_data':{},'helper_data':{}}
+	 * metadata:{'layout_id':'','file_id':'','card_data':{},'helper_data':{}}
 	 */
 	public static final void processTasks(Intent intent, Context context)
 	{
@@ -69,9 +76,9 @@ public class PlatformAlarmManager
 						{
 							updateHelperData(data.getString(HELPER_DATA), metadata);
 						}
-						if (data.containsKey(LAYOUT_ID))
+						if (data.containsKey(FILE_ID))
 						{
-							metadata.put(LAYOUT_ID, data.getString(LAYOUT_ID));
+							metadata.put(FILE_ID, data.getString(FILE_ID));
 						}
 
 					}
