@@ -215,7 +215,6 @@ public class FestivePopup
 	public static boolean isPastFestiveDate(int type)
 	{
 		String republicDayDate = "2015-01-26";
-		String festive = republicDayDate;
 
 		Date currentDate, festiveDate;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -223,7 +222,7 @@ public class FestivePopup
 
 		try
 		{
-			festiveDate = sdf.parse(festive);
+			festiveDate = sdf.parse(republicDayDate);
 			currentDate = sdf.parse(current);
 
 			if(currentDate.after(festiveDate))
