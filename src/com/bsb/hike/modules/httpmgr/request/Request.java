@@ -21,7 +21,7 @@ public class Request
 
 	public static final short REQUEST_TYPE_SHORT = 0x1;
 
-	private String id;
+	private long id;
 
 	private String method;
 
@@ -66,7 +66,7 @@ public class Request
 	 * 
 	 * @return
 	 */
-	public String getId()
+	public long getId()
 	{
 		return id;
 	}
@@ -298,7 +298,7 @@ public class Request
 
 	public static class Builder
 	{
-		private String id;
+		private long id = -1;
 
 		private String method;
 
@@ -323,7 +323,7 @@ public class Request
 		 * 
 		 * @param id
 		 */
-		public Builder setId(String id)
+		public Builder setId(long id)
 		{
 			this.id = id;
 			return this;
@@ -472,6 +472,45 @@ public class Request
 			{
 				headers = new ArrayList<Header>();
 			}
+
+			if (id < 0)
+			{
+				id = hashCode();
+			}
 		}
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int urlHashCode = url.hashCode();
+		int headersHashCode = 0;
+		for (Header header : headers)
+		{
+			headersHashCode += header.hashCode();
+		}
+		int requestBodyHashCode = (null != body) ? body.hashCode() : 0;
+		return (31 * urlHashCode) + headersHashCode + requestBodyHashCode;
+	}
+
+	@Override
+	public boolean equals(Object other)
+	{
+		if (this == other)
+		{
+			return true;
+		}
+
+		if (!(other instanceof Request))
+		{
+			return false;
+		}
+
+		Request req = (Request) other;
+		if (this.getId() != req.getId())
+		{
+			return false;
+		}
+		return true;
 	}
 }
