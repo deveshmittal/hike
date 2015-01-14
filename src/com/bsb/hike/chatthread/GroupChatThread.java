@@ -242,7 +242,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		{
 			String readBy = pair.first;
 			long msgId = pair.second;
-			(groupConversation).setupReadByList(readBy, msgId);
+			groupConversation.setupReadByList(readBy, msgId);
 		}
 		
 		// fetch theme
@@ -355,10 +355,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		}
 		else
 		{
-			if (mConversation instanceof GroupConversation)
-			{
-				name = ((GroupConversation) mConversation).getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()) + ": ";
-			}
+			name = groupConversation.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()) + ": ";
 		}
 
 		ForegroundColorSpan fSpan = new ForegroundColorSpan(getResources().getColor(R.color.pin_name_color));
@@ -528,7 +525,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 
 	private void toggleGroupLife(boolean alive)
 	{
-		((GroupConversation) mConversation).setGroupAlive(alive);
+		groupConversation.setGroupAlive(alive);
 		activity.findViewById(R.id.send_message).setEnabled(alive);
 		activity.findViewById(R.id.msg_compose).setVisibility(alive ? View.VISIBLE : View.INVISIBLE);
 		activity.findViewById(R.id.emo_btn).setEnabled(alive);
@@ -551,7 +548,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	protected void handleAbnormalMessages()
 	{
 		ContactManager conMgr = ContactManager.getInstance();
-		((GroupConversation) mConversation).setGroupParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), false, false));
+		groupConversation.setGroupParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), false, false));
 	}
 
 	@Override
@@ -575,7 +572,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 
 		if (convMessage.isSent())
 		{
-			((GroupConversation) mConversation).setupReadByList(null, convMessage.getMsgID());
+			groupConversation.setupReadByList(null, convMessage.getMsgID());
 		}
 
 		if (convMessage.getTypingNotification() == null && typingNotification != null)
