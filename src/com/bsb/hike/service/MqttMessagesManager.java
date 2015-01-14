@@ -1301,6 +1301,20 @@ public class MqttMessagesManager
 		{
 			UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);
 		}
+		if(data.has(HikeConstants.MqttMessageTypes.CREATE_MULTIPLE_BOTS))
+		{
+			JSONArray botsTobeAdded = data.optJSONArray(HikeConstants.MqttMessageTypes.CREATE_MULTIPLE_BOTS);
+			for (int i = 0; i< botsTobeAdded.length(); i++){
+				createBot((JSONObject) botsTobeAdded.get(i));
+			}
+		}
+		if(data.has(HikeConstants.MqttMessageTypes.DELETE_MULTIPLE_BOTS))
+		{
+			JSONArray botsTobeAdded = data.optJSONArray(HikeConstants.MqttMessageTypes.DELETE_MULTIPLE_BOTS);
+			for (int i = 0; i< botsTobeAdded.length(); i++){
+				deleteBot((String) botsTobeAdded.get(i));
+			}
+		}
 
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
@@ -2252,6 +2266,58 @@ public class MqttMessagesManager
 		{
 			saveTip(jsonObj);
 		}
+		else if (HikeConstants.MqttMessageTypes.CREATE_BOT.equals(type))
+		{
+			createBot(jsonObj);
+		}
+
+		else if (HikeConstants.MqttMessageTypes.DELETE_BOT.equals(type))
+		{
+			deleteBot(jsonObj.optString(HikeConstants.MSISDN));
+		}
+	}
+
+	private void deleteBot(String msisdn)
+	{
+		Utils.validateConversationMsisdn(msisdn);
+		List<String> msisdns = new ArrayList<String>(1);
+		msisdns.add(msisdn);
+		convDb.deleteConversation(msisdns);
+		HikeMessengerApp.hikeBotNamesMap.remove(msisdn);
+		ContactManager.getInstance().removeIcon(msisdn);
+		convDb.deleteBot(msisdn);
+	}
+
+	private void createBot(JSONObject jsonObj)
+	{
+		String msisdn = jsonObj.optString(HikeConstants.MSISDN);
+		msisdn = Utils.validateConversationMsisdn(msisdn);
+		String name = jsonObj.optString(HikeConstants.NAME);
+		String thumbnailString = jsonObj.optString(HikeConstants.BOT_THUMBNAIL);
+		ContactManager.getInstance().setIcon(msisdn, Base64.decode(thumbnailString, Base64.DEFAULT), false);
+		HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+		convDb.setChatBackground(msisdn, jsonObj.optString(HikeConstants.BOT_CHAT_THEME), System.currentTimeMillis()/1000);
+		JSONObject obj = new JSONObject();
+		try
+		{
+			obj.put(HikeConstants.NAME, name);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		convDb.addBot(msisdn, name, null);
+
+		if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
+		{
+			ContactInfo contact = new ContactInfo(msisdn, msisdn, name, msisdn);
+			contact.setFavoriteType(FavoriteType.NOT_FRIEND);
+			ContactManager.getInstance().updateContacts(contact);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_ADDED, contact);
+		}
+		HikeMessengerApp.hikeBotNamesMap.put(msisdn, name);
+
 	}
 
 	private void uploadGroupProfileImage(final String groupId, final boolean retryOnce)
@@ -2596,7 +2662,7 @@ public class MqttMessagesManager
 	/**
 	 * We call it atomic pop up , as we discard old if any when new comes --gauravKhanna
 	 * 
-	 * @param jsonObject
+	 * @param jsonObj
 	 *            - jsonFromServer
 	 * @throws JSONException
 	 */
