@@ -434,23 +434,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			category.setState(StickerCategory.UPDATE);
 		}
 		
-		int state = category.getState();
-		
-		/**
-		 * To cater to a corner case, where server sent an update available packet, and before a user could download the new updates for a pack, the user received the new stickers.
-		 * In that case, the updateAvailable flag still remains true for that category. 
-		 * Thus, we are removing it incase the count of stickers in folder == the actual stickers
-		 */
-		
-		if(category.isUpdateAvailable() && stickersList.size() > 0 && (stickersList.size() == category.getTotalStickers()))
-		{
-			category.setUpdateAvailable(false);
-			if(category.getState() == StickerCategory.UPDATE)
-			{
-				category.setState(StickerCategory.NONE);
-			}
-		}
-		
+		int state = category.getState(); 
 		/* We add UI elements based on the current state of the sticker category*/
 		addStickerPageAdapterItem(category, stickerPageList);
 		/**
