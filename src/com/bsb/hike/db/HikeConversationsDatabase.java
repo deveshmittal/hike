@@ -214,6 +214,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		sql = CREATE_TABLE + DBConstants.ALARM_MGR_TABLE + "(" + _ID + " INTEGER PRIMARY KEY, " + TIME + " TEXT, " + DBConstants.WILL_WAKE_CPU + " INTEGER, " + DBConstants.INTENT
 				+ " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
 		db.execSQL(sql);
+
+		sql = CREATE_TABLE + DBConstants.BOT_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.NAME + " TEXT, " + DBConstants.CONVERSATION_METADATA + " TEXT)";
+		db.execSQL(sql);
 	}
 
 	public void insertIntoAlarmManagerDB(long time, int requestCode, boolean WillWakeCPU, Intent intent)
@@ -279,6 +282,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		mDb.delete(DBConstants.SHARED_MEDIA_TABLE, null, null);
 		mDb.delete(DBConstants.FILE_THUMBNAIL_TABLE, null, null);
 		mDb.delete(DBConstants.CHAT_BG_TABLE, null, null);
+		mDb.delete(DBConstants.BOT_TABLE, null, null);
 	}
 
 	@Override
@@ -671,6 +675,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
             String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER";
 			db.execSQL(alter);
         }
+
+		if (oldVersion < 33){
+			String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.BOT_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.NAME + " TEXT, " + DBConstants.CONVERSATION_METADATA + " TEXT)";
+			db.execSQL(sql);
+		}
 	}
 
 	public void upgrade(int oldVersion, int newVersion)

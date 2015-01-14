@@ -5,7 +5,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 public interface DBConstants
 {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 32;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 33;
 
 	public static final int USERS_DATABASE_VERSION = 15;
 
@@ -204,7 +204,8 @@ public interface DBConstants
 	public static final String CREATE_INDEX = "CREATE INDEX IF NOT EXISTS ";
 	
 	public static final String IS_SENT = "isSent";
-	
+	public static final String BOT_TABLE = "botTable";
+
 	public static interface HIKE_CONV_DB{
 		// CHANNEL TABLE -> _id,channel_id,name,visibility,index 
 		public static final String CHANNEL_TABLE = "channel";
