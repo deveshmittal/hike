@@ -17,9 +17,9 @@ import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
  */
 public class Request
 {
-	public static final int REQUEST_TYPE_LONG = 0;
+	public static final short REQUEST_TYPE_LONG = 0x0;
 
-	public static final int REQUEST_TYPE_SHORT = 1;
+	public static final short REQUEST_TYPE_SHORT = 0x1;
 
 	private String id;
 
@@ -33,7 +33,7 @@ public class Request
 
 	private int priority;
 
-	private int requestType;
+	private short requestType;
 
 	private IRetryPolicy retryPolicy;
 
@@ -126,7 +126,7 @@ public class Request
 	 * 
 	 * @return
 	 */
-	public int getRequestType()
+	public short getRequestType()
 	{
 		return requestType;
 	}
@@ -261,7 +261,7 @@ public class Request
 	 * @see #REQUEST_TYPE_LONG
 	 * @see #REQUEST_TYPE_SHORT
 	 */
-	public void setRequestType(int requestType)
+	public void setRequestType(short requestType)
 	{
 		this.requestType = requestType;
 	}
@@ -310,7 +310,7 @@ public class Request
 
 		private int priority;
 
-		private int requestType = REQUEST_TYPE_LONG;
+		private short requestType = REQUEST_TYPE_LONG;
 
 		private IRetryPolicy retryPolicy;
 
@@ -396,7 +396,7 @@ public class Request
 		 * @see #REQUEST_TYPE_LONG
 		 * @see #REQUEST_TYPE_SHORT
 		 */
-		public Builder setRequestType(int requestType)
+		public Builder setRequestType(short requestType)
 		{
 			this.requestType = requestType;
 			return this;
