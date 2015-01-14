@@ -388,5 +388,6 @@
     <color name="signal_red">#f14646</color>
     <color name="signal_green">#45ad25</color>
     <color name="signal_good">#8bb605</color>
+    <color name="black_80">#CC000000</color>
 </resources>
 	
