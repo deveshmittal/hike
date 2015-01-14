@@ -332,9 +332,10 @@ public class Request
 		 * 
 		 * @param id
 		 */
-		public void setId(String id)
+		public Builder setId(String id)
 		{
 			this.id = id;
+			return this;
 		}
 
 		/**
@@ -342,9 +343,10 @@ public class Request
 		 * 
 		 * @param method
 		 */
-		public void setMethod(String method)
+		public Builder setMethod(String method)
 		{
 			this.method = method;
+			return this;
 		}
 
 		/**
@@ -352,9 +354,10 @@ public class Request
 		 * 
 		 * @param url
 		 */
-		public void setUrl(String url)
+		public Builder setUrl(String url)
 		{
 			this.url = url;
+			return this;
 		}
 
 		/**
@@ -426,9 +429,10 @@ public class Request
 		 *            the new retry policy
 		 * @see
 		 */
-		public void setRetryPolicy(IRetryPolicy retryPolicy)
+		public Builder setRetryPolicy(IRetryPolicy retryPolicy)
 		{
 			this.retryPolicy = retryPolicy;
+			return this;
 		}
 
 		/**
@@ -436,9 +440,10 @@ public class Request
 		 * 
 		 * @param requestListener
 		 */
-		public void setRequestListener(IRequestListener requestListener)
+		public Builder setRequestListener(IRequestListener requestListener)
 		{
 			this.requestListener = requestListener;
+			return this;
 		}
 
 		/**
@@ -446,9 +451,10 @@ public class Request
 		 * 
 		 * @param runOnUIThread
 		 */
-		public void setRunOnUIThread(boolean runOnUIThread)
+		public Builder setRunOnUIThread(boolean runOnUIThread)
 		{
 			this.runOnUIThread = runOnUIThread;
+			return this;
 		}
 
 		/**
