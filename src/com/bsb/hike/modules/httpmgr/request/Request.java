@@ -56,12 +56,9 @@ public class Request
 		this.body = builder.body;
 		this.priority = builder.priority;
 		this.requestType = builder.requestType;
-		this.isCancelled = builder.isCancelled;
 		this.retryPolicy = builder.retryPolicy;
 		this.requestListener = builder.requestListener;
-		this.requestCancellationListener = builder.requestCancellationListener;
 		this.runOnUIThread = builder.runOnUIThread;
-		this.future = builder.future;
 	}
 
 	/**
@@ -315,17 +312,11 @@ public class Request
 
 		private int requestType = REQUEST_TYPE_LONG;
 
-		private boolean isCancelled;
-
 		private IRetryPolicy retryPolicy;
 
 		private IRequestListener requestListener;
 
-		private IRequestCancellationListener requestCancellationListener;
-
 		private boolean runOnUIThread;
-
-		private Future<?> future;
 
 		/**
 		 * Sets the unique id of the request
@@ -408,17 +399,6 @@ public class Request
 		public Builder setRequestType(int requestType)
 		{
 			this.requestType = requestType;
-			return this;
-		}
-
-		/**
-		 * Sets the cancelled boolean to true when request is cancelled
-		 * 
-		 * @param isCancelled
-		 */
-		public Builder setCancelled(boolean isCancelled)
-		{
-			this.isCancelled = isCancelled;
 			return this;
 		}
 
