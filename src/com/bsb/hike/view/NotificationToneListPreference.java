@@ -63,6 +63,9 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		this.ringtonesNameURIMap = new LinkedHashMap<String, Uri>();
 		setIcon(context, attrs);
 		this.setValueIndex(HIKE_JINNGLE_INDEX);
+		String defaultTone = mContext.getResources().getString(R.string.notif_sound_Hike);
+		String selectedRingtone = HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.NOTIFICATION_TONE_NAME, defaultTone);
+		setTitle(mContext.getString(R.string.notificationSoundTitle) + " - " + selectedRingtone);
 	}
 
 	private void setIcon(Context context, AttributeSet attrs)
@@ -143,6 +146,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 			setTitle(mContext.getString(R.string.notificationSoundTitle) + " - " + selectedRingtoneValue);
 			String selectedRintoneUri = getFinalSelectedRingtoneUri(selectedRingtoneValue);
 			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.NOTIFICATION_TONE_URI, selectedRintoneUri);
+			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.NOTIFICATION_TONE_NAME, selectedRingtoneValue);
 			dialog.dismiss();
 			break;
 

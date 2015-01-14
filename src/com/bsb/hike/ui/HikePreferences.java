@@ -880,6 +880,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}
 			}
 		});
+		ledPref.setTitle(ledPref.getTitle() + " - " + ledPref.getValue());
 	}
 
 	@Override
