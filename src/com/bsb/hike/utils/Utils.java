@@ -767,6 +767,14 @@ public class Utils
 		return msisdn!=null && !msisdn.startsWith("+");
 	}
 
+	public static String validateBotMsisdn(String msisdn){
+		if (!msisdn.startsWith("+")){
+			msisdn = "+" + msisdn;
+		}
+		return msisdn;
+	}
+
+
 	public static String defaultGroupName(List<PairModified<GroupParticipant, String>> participantList)
 	{
 		List<GroupParticipant> groupParticipants = new ArrayList<GroupParticipant>();

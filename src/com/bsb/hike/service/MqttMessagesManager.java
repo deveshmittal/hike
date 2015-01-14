@@ -23,7 +23,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.provider.CallLog;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -52,7 +51,6 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HomeActivity;
-import com.bsb.hike.utils.*;
 import com.bsb.hike.userlogs.UserLogInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
@@ -2279,7 +2277,7 @@ public class MqttMessagesManager
 
 	private void deleteBot(String msisdn)
 	{
-		Utils.validateConversationMsisdn(msisdn);
+		Utils.validateBotMsisdn(msisdn);
 		List<String> msisdns = new ArrayList<String>(1);
 		msisdns.add(msisdn);
 		convDb.deleteConversation(msisdns);
@@ -2291,7 +2289,7 @@ public class MqttMessagesManager
 	private void createBot(JSONObject jsonObj)
 	{
 		String msisdn = jsonObj.optString(HikeConstants.MSISDN);
-		msisdn = Utils.validateConversationMsisdn(msisdn);
+		msisdn = Utils.validateBotMsisdn(msisdn);
 		String name = jsonObj.optString(HikeConstants.NAME);
 		String thumbnailString = jsonObj.optString(HikeConstants.BOT_THUMBNAIL);
 		ContactManager.getInstance().setIcon(msisdn, Base64.decode(thumbnailString, Base64.DEFAULT), false);
