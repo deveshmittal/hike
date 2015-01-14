@@ -13,7 +13,9 @@ import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
@@ -267,5 +269,20 @@ public class VoIPUtils {
 			callActive = true;
 		
 		return callActive;
+	}
+	
+	@SuppressLint("InlinedApi") public static int getAudioSource() {
+		int source = MediaRecorder.AudioSource.VOICE_RECOGNITION;
+		String model = android.os.Build.MODEL;
+		
+		if (android.os.Build.VERSION.SDK_INT >= 11)
+			source = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
+		
+		Logger.d(VoIPConstants.TAG, "Phone model: " + model);
+		
+		if (model.contains("Nexus 5"))
+			source = MediaRecorder.AudioSource.VOICE_RECOGNITION;
+		
+		return source;
 	}
 }

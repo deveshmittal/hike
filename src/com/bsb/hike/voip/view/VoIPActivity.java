@@ -279,7 +279,9 @@ public class VoIPActivity extends Activity implements CallActions
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event)
 	{
-		if (voipService!=null && !voipService.isAudioRunning() && (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP))
+		if (voipService!=null && !voipService.isAudioRunning() && 
+				(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) &&
+				voipService.getPartnerClient().isInitiator())
 		{
 			voipService.stopRingtone();
 			return true;
@@ -347,6 +349,12 @@ public class VoIPActivity extends Activity implements CallActions
 
 	private void connectMessenger() {
 		voipService.setMessenger(mMessenger);
+		
+		if (VoIPService.getCallId() == 0) {
+			Logger.w(VoIPConstants.TAG, "There is no active call.");
+			finish();
+			return;
+		}
 		
 		VoIPClient clientPartner = voipService.getPartnerClient();
 		if(voipService.isAudioRunning())
@@ -718,7 +726,7 @@ public class VoIPActivity extends Activity implements CallActions
 			}
 		}
 
-		if(nameOrMsisdn.length() > 16)
+		if(nameOrMsisdn != null && nameOrMsisdn.length() > 16)
 		{
 			contactNameView.setTextSize(24);
 		}

@@ -104,7 +104,7 @@ public class VoIPService extends Service {
 	private Thread partnerTimeoutThread = null;
 	private Thread recordingThread = null, playbackThread = null, sendingThread = null, receivingThread = null;
 	private AudioTrack audioTrack;
-	private ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_VOICE_CALL, 100);
+	private ToneGenerator toneGenerator = null;
 	private static int callId = 0;
 	private int totalPacketsSent = 0, totalPacketsReceived = 0;
 	private NotificationManager notificationManager;
@@ -451,21 +451,21 @@ public class VoIPService extends Service {
 	}
 	
 	private void saveCurrentAudioSettings() {
-		audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//		audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		initialAudioMode = audioManager.getMode();
 		initialRingerMode = audioManager.getRingerMode();
 		initialSpeakerMode = audioManager.isSpeakerphoneOn();
 	}
 
 	private void restoreAudioSettings() {
-		audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//		audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		audioManager.setMode(initialAudioMode);
 		audioManager.setRingerMode(initialRingerMode);
 		audioManager.setSpeakerphoneOn(initialSpeakerMode);
 	}
 	
 	private void initSoundPool() {
-		soundpool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+		soundpool = new SoundPool(2, AudioManager.STREAM_VOICE_CALL, 0);
 
 		soundpoolMap = new SparseIntArray(3);
 		soundpoolMap.put(SOUND_ACCEPT, soundpool.load(getApplicationContext(), SOUND_ACCEPT, 1));
@@ -588,6 +588,7 @@ public class VoIPService extends Service {
 		*/
 		stopRingtone();
 		stopFromSoundPool(ringtoneStreamID);
+		setSpeaker(true);
 		playFromSoundPool(SOUND_DECLINE, false);
 		releaseAudioManager();
 		
@@ -674,12 +675,16 @@ public class VoIPService extends Service {
 			
 			@Override
 			public void run() {
+				if (toneGenerator == null)
+					toneGenerator = new ToneGenerator(AudioManager.STREAM_VOICE_CALL, 100);
+				
 				while (keepRunning) {
 					toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP2);
 					try {
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
+						toneGenerator = null;
 						break;
 					}
 				}
@@ -1029,11 +1034,8 @@ public class VoIPService extends Service {
 				int minBufSizeRecording = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 				Logger.d(VoIPConstants.TAG, "minBufSizeRecording: " + minBufSizeRecording);
 
-				// Initialize the audio source
-				if (android.os.Build.VERSION.SDK_INT >= 11)
-					recorder = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizeRecording);
-				else
-					recorder = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizeRecording);
+				int audioSource = VoIPUtils.getAudioSource();
+				recorder = new AudioRecord(audioSource, AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizeRecording);
 
 				if (android.os.Build.VERSION.SDK_INT >= 16) {
 					// Attach noise suppressor
@@ -1166,7 +1168,12 @@ public class VoIPService extends Service {
 					}
 				});
 				
-				audioTrack.play();
+				try {
+					audioTrack.play();
+				} catch (IllegalStateException e) {
+					Logger.e(VoIPConstants.TAG, "Audiotrack error: " + e.toString());
+					hangUp();
+				}
 				
 				while (keepRunning == true) {
 					VoIPDataPacket dp = decodedBuffersQueue.peek();
@@ -1201,10 +1208,12 @@ public class VoIPService extends Service {
 					}
 				}
 				
-				audioTrack.pause();
-				audioTrack.flush();
-				audioTrack.release();
-				audioTrack = null;
+				if (audioTrack != null) {
+					audioTrack.pause();
+					audioTrack.flush();
+					audioTrack.release();
+					audioTrack = null;
+				}
 			}
 		});
 		
@@ -1529,7 +1538,7 @@ public class VoIPService extends Service {
 			totalBytesSent += packet.getLength();
 			totalPacketsSent++;
 		} catch (IOException e) {
-			Logger.w(VoIPConstants.TAG, "sendPacket() IOException");
+			Logger.w(VoIPConstants.TAG, "sendPacket() IOException: " + e.toString());
 		}
 		
 	}
@@ -1743,6 +1752,7 @@ public class VoIPService extends Service {
 		if(audioManager!=null)
 		{
 			audioManager.setSpeakerphoneOn(speaker);
+			Logger.d(VoIPConstants.TAG, "Speaker set to: " + speaker);
 		}
 	}
 
@@ -1873,8 +1883,10 @@ public class VoIPService extends Service {
 						else
 							startPartnerTimeoutThread();
 					} else {
-						Logger.w(VoIPConstants.TAG, "Network is not good enough.");
-						sendHandlerMessage(VoIPActivity.MSG_NETWORK_SUCKS);
+						if (keepRunning) {
+							Logger.w(VoIPConstants.TAG, "Network is not good enough.");
+							sendHandlerMessage(VoIPActivity.MSG_NETWORK_SUCKS);
+						}
 						stop();
 						return;
 					}
@@ -2154,10 +2166,10 @@ public class VoIPService extends Service {
 		SharedPreferences prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		int simulateBitrate = prefs.getInt(HikeMessengerApp.VOIP_BITRATE_2G, VoIPConstants.BITRATE_2G);
 
-		final int TOTAL_TEST_TIME = 3;
+		final int TOTAL_TEST_TIME = 2;
 		final int TOTAL_TEST_BYTES = (simulateBitrate * TOTAL_TEST_TIME) / 8;
-		final int TEST_PACKETS = 50;
-		final int TIME_TO_WAIT_FOR_PACKETS = 2;
+		final int TEST_PACKETS = 35;
+		final int TIME_TO_WAIT_FOR_PACKETS = 3;
 		final int ACCEPTABLE_LOSS_PCT = 10;
 
 		byte[] packetData = new byte[TOTAL_TEST_BYTES / TEST_PACKETS];
