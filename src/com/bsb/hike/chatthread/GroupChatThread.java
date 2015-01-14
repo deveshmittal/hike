@@ -1,9 +1,12 @@
 package com.bsb.hike.chatthread;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +28,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
@@ -37,6 +41,7 @@ import com.bsb.hike.chatthread.HikeActionMode.ActionModeListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.models.GroupConversation;
@@ -69,6 +74,10 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	private static final int MUTE_CONVERSATION_TOGGLED = 202;
 	
 	private static final int LATEST_PIN_DELETED = 203;
+	
+	private static final int BULK_MESSAGE_RECEIVED = 204;
+	
+	private static final int SHOW_IMP_MESSAGE = 205;
 	
 	private static final String TAG = "groupchatthread";
 
@@ -536,7 +545,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	@Override
 	protected String[] getPubSubListeners()
 	{
-		return new String[] { HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONV_META_DATA_UPDATED };
+		return new String[] { HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONV_META_DATA_UPDATED,
+				HikePubSub.BULK_MESSAGE_RECEIVED };
 	}
 
 	/**
@@ -677,6 +687,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		case HikePubSub.CONV_META_DATA_UPDATED:
 			onConvMetadataUpdated(object);
 			break;
+		case HikePubSub.BULK_MESSAGE_RECEIVED:
+			onBulkMessageReceived(object);
 		default:
 			Logger.d(TAG, "Did not find any matching PubSub event in Group ChatThread. Calling super class' onEventReceived");
 			super.onEventReceived(type, object);
@@ -700,6 +712,13 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			break;
 		case LATEST_PIN_DELETED:
 			hidePinFromUI((boolean) msg.obj);
+			break;
+		case BULK_MESSAGE_RECEIVED:
+			addBulkMessages((LinkedList<ConvMessage>) msg.obj);
+			break;
+		case SHOW_IMP_MESSAGE:
+			Pair<Integer, ConvMessage> pair = (Pair<Integer, ConvMessage>) msg.obj;
+			showImpMessage(pair.second, pair.first);
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in Group ChatThread. Calling super class' handleUIMessage");
@@ -1061,6 +1080,138 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		}
 		
 		updateUnreadPinCount();
+	}
+	
+	private void onBulkMessageReceived(Object object)
+	{
+		HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
+		
+		LinkedList<ConvMessage> messagesList = messageListMap.get(msisdn);
+		
+		String bulkLabel = null;
+		
+		/**
+		 * Proceeding only if messages list is not null
+		 */
+		
+		if(messagesList != null)
+		{
+			ConvMessage pinConvMessage = null;
+			
+			JSONArray ids = new JSONArray();
+			
+			for (ConvMessage convMessage : messagesList)
+			{
+				if(convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+				{
+					pinConvMessage = convMessage;
+				}
+				
+				if(activity.hasWindowFocus())
+				{
+					
+					convMessage.setState(ConvMessage.State.RECEIVED_READ);
+					
+					if(convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+					{
+						ids.put(String.valueOf(convMessage.getMappedMsgID()));
+					}
+				}
+				
+				if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+				{
+					ContactManager contactManager = ContactManager.getInstance();
+					groupConversation.setGroupParticipantList(contactManager.getGroupParticipants(groupConversation.getMsisdn(), false, false));
+				}
+				
+				bulkLabel = convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? groupConversation.getLabel() : null;
+				
+				if (isActivityVisible && Utils.isPlayTickSound(activity.getApplicationContext()))
+				{
+					
+					Utils.playSoundFromRaw(activity.getApplicationContext(), R.raw.received_message);
+				}
+				
+			}
+			
+			sendUIMessage(SET_LABEL, bulkLabel);
+			
+			sendUIMessage(BULK_MESSAGE_RECEIVED, messagesList);
+			
+			sendUIMessage(SHOW_IMP_MESSAGE, new Pair<Integer, ConvMessage>(-1, pinConvMessage));
+			
+			if (ids != null && ids.length() > 0)
+			{
+				doBulkMqttPublish(ids);
+			}
+			
+		}
+	}
+	
+	/**
+	 * Adds a complete list of messages at the end of the messages list and updates the UI at once
+	 * 
+	 * @param messagesList
+	 *            The list of messages to be added
+	 */
+	
+	private void addBulkMessages(LinkedList<ConvMessage> messagesList)
+	{
+		/**
+		 * Proceeding only if the messages are not null
+		 */
+		
+		if (messagesList != null)
+		{
+			
+			/**
+			 * If we were showing the typing bubble, we remove it, add the new messages and add the typing bubble again
+			 */
+			
+			TypingNotification typingNotification = removeTypingNotification();
+			
+			mAdapter.addMessages(messagesList, messages.size());
+
+			/**
+			 * TODO : reachedEnd = false;
+			 */
+
+			ConvMessage convMessage = messagesList.get(messagesList.size() - 1);
+
+			/**
+			 * We add back the typing notification if the message was sent by the user.
+			 */
+			
+			if(typingNotification != null)
+			{
+				if (convMessage.isSent())
+				{
+					mAdapter.addMessage(new ConvMessage(typingNotification));
+				}
+				
+				else
+				{
+					if (!((GroupTypingNotification) typingNotification).getGroupParticipantList().isEmpty())
+					{
+						Logger.d(TAG, "Size in chat thread: " + ((GroupTypingNotification) typingNotification).getGroupParticipantList().size());
+						mAdapter.addMessage(new ConvMessage(typingNotification));
+					}
+				}
+			}
+			
+			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			
+			/**
+			 * Don't scroll to bottom if the user is at older messages. It's possible user might be reading them.
+			 */
+			tryScrollingToBottom(convMessage, messagesList.size());
+			
+			/**
+			 * Reset the transcript mode once the user has scrolled to the bottom
+			 */
+
+			uiHandler.sendEmptyMessage(DISABLE_TRANSCRIPT_MODE);
+		}
 	}
 	
 }

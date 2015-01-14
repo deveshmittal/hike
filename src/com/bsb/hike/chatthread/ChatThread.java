@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -151,6 +152,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	protected static final int HIDE_UP_FAST_SCROLL_INDICATOR = 18;
 	
+	protected static final int SET_LABEL = 19;
+	
+	protected static final int DISABLE_TRANSCRIPT_MODE = 20;
+	
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -270,6 +275,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HIDE_UP_FAST_SCROLL_INDICATOR:
 			hideUpFastScrollIndicator();
 			break;
+		case SET_LABEL:
+			setLabel((String) msg.obj); 
+			break;
+		case DISABLE_TRANSCRIPT_MODE:
+			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_DISABLED);
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
 			break;
@@ -315,12 +326,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		/*
 		 * Resetting the transcript mode once the list has scrolled to the bottom.
 		 */
-		/*
-		 * mHandler.post(new Runnable() {
-		 * 
-		 * @Override public void run() { mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_DISABLED); } });
-		 */
-
+		
+		uiHandler.sendEmptyMessage(DISABLE_TRANSCRIPT_MODE);
+		
 	}
 
 	protected void addMessage(ConvMessage convMessage)
@@ -1734,7 +1742,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		handleUnreadUI();
 	}
 	
-	private void showUnreadCountIndicator(int unreadCount)
+	protected void showUnreadCountIndicator(int unreadCount)
 	{
 		incrementUnreadMessageCount(unreadCount);
 		handleUnreadUI();
@@ -2103,9 +2111,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void setLabel(String label)
 	{
-		TextView mLabelTextView = (TextView) mActionBarView.findViewById(R.id.contact_name);
-		
-		mLabelTextView.setText(label);
+		if (label != null)
+		{
+			TextView mLabelTextView = (TextView) mActionBarView.findViewById(R.id.contact_name);
+
+			mLabelTextView.setText(label);
+		}
 	}
 	
 	protected void playUpDownAnimation(final View view)
@@ -2734,5 +2745,70 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private void hideUpFastScrollIndicator()
 	{
 		activity.findViewById(R.id.scroll_top_indicator).setVisibility(View.GONE);
+	}
+	
+	protected void doBulkMqttPublish(JSONArray ids)
+	{
+		JSONObject jsonObject = new JSONObject();
+
+		try
+		{
+			jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
+			jsonObject.put(HikeConstants.TO, mConversation.getMsisdn());
+			jsonObject.put(HikeConstants.DATA, ids);
+		}
+
+		catch (JSONException e)
+		{
+			Logger.wtf(TAG, "Exception in Adding bulk messages : " + e.toString());
+		}
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, jsonObject);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+	}
+	
+	/**
+	 * Used for removing the typing notification
+	 * 
+	 * @return
+	 */
+	protected TypingNotification removeTypingNotification()
+	{
+		TypingNotification typingNotification = null;
+		
+		if (!messages.isEmpty() && messages.get(messages.size() - 1).getTypingNotification() != null)
+		{
+			typingNotification = messages.get(messages.size() - 1).getTypingNotification();
+			messages.remove(messages.size() - 1);
+		}
+
+		return typingNotification;
+	}
+	
+	/**
+	 * This function tries to scroll to the bottom for new messages.
+	 * 
+	 * Don't scroll to bottom if the user is at older messages. It's possible user might be reading them.
+	 * 
+	 */
+	protected void tryScrollingToBottom(ConvMessage convMessage, int unreadCount)
+	{
+		if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
+		{
+
+			if (convMessage.getTypingNotification() == null
+					&& (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+			{
+				showUnreadCountIndicator(unreadCount);
+			}
+			
+			return;
+		}
+
+		else
+		{
+			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+		}
+
 	}
 }
