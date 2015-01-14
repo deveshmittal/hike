@@ -79,6 +79,10 @@ public class HikeConstants
 
 	public static final String MSISDN = "msisdn";
 
+	public static final String BOT_THUMBNAIL = "dp";
+
+	public static final String BOT_CHAT_THEME = "bg_id";
+
 	public static final String NEW_USER = "nu";
 
 	public static final String EMAIL = "email";
@@ -1884,6 +1888,14 @@ public class HikeConstants
 		public static final String MULTIPLE_FORWARD = "mm";
 		
 		public static final String TIP = "tip";
+
+		public static final String CREATE_BOT = "cb";
+
+		public static final String DELETE_BOT = "db";
+
+		public static final String CREATE_MULTIPLE_BOTS = "cbot";
+
+		public static final String DELETE_MULTIPLE_BOTS = "dbot";
 
 	}
 
