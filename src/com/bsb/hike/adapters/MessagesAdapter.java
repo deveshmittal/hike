@@ -3954,7 +3954,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					Utils.setupFormattedTime(durationTxt, mediaPlayer.getCurrentPosition() / 1000);
 					break;
 				case STOPPED:
-					((HoloCircularProgress) durationProgress).setProgress(0.00f);
+					((HoloCircularProgress) durationProgress).resetProgress();
 					Utils.setupFormattedTime(durationTxt, duration / 1000);
 					break;
 
