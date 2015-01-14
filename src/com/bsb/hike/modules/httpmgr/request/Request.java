@@ -2,6 +2,7 @@ package com.bsb.hike.modules.httpmgr.request;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 
 import android.text.TextUtils;
@@ -39,7 +40,7 @@ public class Request
 
 	private boolean isCancelled;
 
-	private IRequestListener requestListener;
+	private CopyOnWriteArrayList<IRequestListener> requestListeners;
 
 	private IRequestCancellationListener requestCancellationListener;
 
@@ -57,7 +58,7 @@ public class Request
 		this.priority = builder.priority;
 		this.requestType = builder.requestType;
 		this.retryPolicy = builder.retryPolicy;
-		this.requestListener = builder.requestListener;
+		this.requestListeners = builder.requestListeners;
 		this.runOnUIThread = builder.runOnUIThread;
 	}
 
@@ -151,9 +152,9 @@ public class Request
 	 * 
 	 * @return
 	 */
-	public IRequestListener getRequestListener()
+	public CopyOnWriteArrayList<IRequestListener> getRequestListeners()
 	{
-		return requestListener;
+		return requestListeners;
 	}
 
 	/**
@@ -276,6 +277,15 @@ public class Request
 		this.isCancelled = isCancelled;
 	}
 
+	public void addRequestListeners(List<IRequestListener> requestListeners)
+	{
+		if (this.requestListeners == null)
+		{
+			this.requestListeners = new CopyOnWriteArrayList<IRequestListener>();
+		}
+		this.requestListeners.addAll(requestListeners);
+	}
+
 	/**
 	 * Sets the request cancellation listener {@link IRequestCancellationListener}
 	 * 
@@ -332,7 +342,7 @@ public class Request
 
 		private IRetryPolicy retryPolicy;
 
-		private IRequestListener requestListener;
+		private CopyOnWriteArrayList<IRequestListener> requestListeners;
 
 		private boolean runOnUIThread;
 
@@ -440,7 +450,11 @@ public class Request
 		 */
 		public Builder setRequestListener(IRequestListener requestListener)
 		{
-			this.requestListener = requestListener;
+			if (this.requestListeners == null)
+			{
+				this.requestListeners = new CopyOnWriteArrayList<IRequestListener>();
+			}
+			this.requestListeners.add(requestListener);
 			return this;
 		}
 
