@@ -987,7 +987,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * Adapter has to show UI elements like tips, day/date of messages, unknown contact headers etc.
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
-		messages.addAll(mConversation.getMessages());
 
 		mMessageMap = new HashMap<Long, ConvMessage>();
 		addtoMessageMap(0, messages.size());
