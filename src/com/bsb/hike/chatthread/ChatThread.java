@@ -1444,7 +1444,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		String senderMsisdn = message.getMsisdn();
 		if (senderMsisdn == null)
 		{
-			Logger.wtf("ChatThread", "Message with missing msisdn:" + message.toString());
+			Logger.wtf(TAG, "Message with missing msisdn:" + message.toString());
 		}
 		if (msisdn.equals(senderMsisdn))
 		{

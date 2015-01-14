@@ -550,6 +550,15 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		ContactManager conMgr = ContactManager.getInstance();
 		groupConversation.setGroupParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), false, false));
 	}
+	
+	/**
+	 * Doing this here since we want to intercept a group specific message
+	 */
+	@Override
+	protected void addMessage(ConvMessage convMessage)
+	{
+		addMessage(convMessage, false);
+	}
 
 	@Override
 	protected void addMessage(ConvMessage convMessage, boolean playPinAnim)
