@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
 import android.util.SparseArray;
+
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -29,13 +30,21 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
+import com.bsb.hike.modules.contactmgr.GroupDetails;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.*;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -2507,13 +2516,51 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			final int groupIdIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ID);
 			final int groupNameIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_NAME);
 			final int groupAliveIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ALIVE);
-
 			while (groupInfoCursor.moveToNext())
 			{
 				String groupId = groupInfoCursor.getString(groupIdIdx);
 				String groupName = groupInfoCursor.getString(groupNameIdx);
 				Boolean groupAlive = groupInfoCursor.getInt(groupAliveIdx) != 0;
 				map.put(groupId, new Pair<String, Boolean>(groupName, groupAlive));
+			}
+			return map;
+		}
+		finally
+		{
+			if (null != groupInfoCursor)
+			{
+				groupInfoCursor.close();
+			}
+
+		}
+	}
+	
+	/**
+	 * Returns a hash map between group id and group name
+	 * 
+	 * @return
+	 */
+	public Map<String, GroupDetails> getIdGroupDetailsMap()
+	{
+		Cursor groupInfoCursor = null;
+		try
+		{
+			groupInfoCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.GROUP_ID, DBConstants.GROUP_NAME, DBConstants.GROUP_ALIVE, DBConstants.MUTE_GROUP }, null, null, null,
+					null, null);
+
+			Map<String, GroupDetails> map = new HashMap<String, GroupDetails>();
+
+			final int groupIdIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ID);
+			final int groupNameIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_NAME);
+			final int groupAliveIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ALIVE);
+			final int groupMuteIdx = groupInfoCursor.getColumnIndex(DBConstants.MUTE_GROUP);
+			while (groupInfoCursor.moveToNext())
+			{
+				String groupId = groupInfoCursor.getString(groupIdIdx);
+				String groupName = groupInfoCursor.getString(groupNameIdx);
+				boolean groupAlive = groupInfoCursor.getInt(groupAliveIdx) != 0;
+				boolean groupMute = groupInfoCursor.getInt(groupMuteIdx) != 0;
+				map.put(groupId, new GroupDetails(groupId, groupName, groupAlive, groupMute));
 			}
 			return map;
 		}
@@ -2580,13 +2627,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 				if (Utils.isGroupConversation(msisdn))
 				{
-					String name = ContactManager.getInstance().getName(msisdn);
-					boolean groupAlive = ContactManager.getInstance().isGroupAlive(msisdn);
+					GroupDetails details = ContactManager.getInstance().getGroupDetails(msisdn);
+					String name = details.getGroupName();
+					boolean groupAlive = details.isGroupAlive();
+					boolean isMuteGroup = details.isGroupMute();
 					if (null == name)
 					{
 						groupIds.add(msisdn);
 					}
-					conv = new GroupConversation(msisdn, name, null, groupAlive);
+					conv = new GroupConversation(msisdn, name, null, groupAlive, isMuteGroup);
 				}
 				else
 				{
@@ -3368,6 +3417,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 	public void toggleGroupMute(String groupId, boolean isMuted)
 	{
+		if (!ContactManager.getInstance().isGroupExist(groupId))
+		{
+			return ;
+		}
+		ContactManager.getInstance().setGroupMute(groupId, isMuted);
 		ContentValues contentValues = new ContentValues(1);
 		contentValues.put(DBConstants.MUTE_GROUP, isMuted);
 

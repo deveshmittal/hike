@@ -398,6 +398,8 @@ public class HikeConstants
 	public static final String FREE_SMS_PREF = "freeSmsPref";
 
 	public static final String LED_PREF = "ledPref";
+	
+	public static final String COLOR_LED_PREF = "colorLedPref";
 
 	public static final String NATIVE_JINGLE_PREF = "jinglePref";
 
@@ -436,7 +438,7 @@ public class HikeConstants
 	public static final String MESSAGES = "msgs";
 	
 	public static final String FILE_IMAGE_QUALITY = "img_quality";
-
+	
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
 	public static final String AUTO_DOWNLOAD_MEDIA_PREF = "AutoDownloadMediaPref";
@@ -885,6 +887,8 @@ public class HikeConstants
 	public static final int XHDPI_ID = 1;
 
 	public static final int XXHDPI_ID = 0;
+	
+	public static final int XXXHDPI_ID = 5;
 
 	public static final int LDPI_CACHE = 15;
 
@@ -2099,4 +2103,14 @@ public class HikeConstants
 	public static final String GCM_ID = "gcm_id";
 	
 	public static final String ADD_CATEGORY = "addCat";
+
+	public static final int LED_DEFAULT_WHITE_COLOR = 0xffffffff;
+	
+	public static final int LED_NONE_COLOR = -2; /**
+													Any Change In this Value Should be double checked 
+													as this may coincide with any other color value
+												   */
+
+	public static long STOP_NOTIF_SOUND_TIME = 3000; // In milliseconds
+
 }
