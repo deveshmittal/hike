@@ -260,10 +260,9 @@ public class HikeAlarmManager
 			DBBackupRestore.getInstance(context).backupDB();
 			DBBackupRestore.getInstance(context).scheduleNextAutoBackup();
 			break;
-		case HikeAlarmManager.PLATFORM_ALARMS:
+		default:
 			PlatformAlarmManager.processTasks(intent, context);
 			break;
-		default:
 		}
 
 	}
@@ -290,11 +289,15 @@ public class HikeAlarmManager
 	public static void processExpiredTask(Intent intent, Context context)
 	{
 		int requestCode = intent.getIntExtra(HikeAlarmManager.INTENT_EXTRA, HikeAlarmManager.REQUESTCODE_DEFAULT);
-	
+
 		HikeConversationsDatabase.getInstance().deleteFromAlarmManagerDB(requestCode);
-		
-		
-		
-		
+
+		switch (requestCode)
+		{
+		default:
+			PlatformAlarmManager.processTasks(intent, context);
+			break;
+		}
+
 	}
 }

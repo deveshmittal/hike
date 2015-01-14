@@ -6119,6 +6119,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { String.valueOf(messageId) });
 	}
 	
+	public String getMetadataOfMessage(long messageId){
+		String selection = DBConstants.MESSAGE_ID + "=?";
+		Cursor c = mDb.query(MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_METADATA }, selection, new String[] { String.valueOf(messageId) }, null, null, null);
+		if(c.moveToFirst()){
+			return c.getString(c.getColumnIndex(MESSAGE_METADATA));
+		}
+		return null;
+	}
+	
 	/**
 	 * 
 	 * @param msisdn
@@ -6131,6 +6140,50 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			return c.getInt(c.getColumnIndex(DBConstants.UNREAD_COUNT));
 		}
 		return -1;
+	}
+	
+	/*
+	 * 
+	 * metadata:{'layout_id':'','file_id':'','card_data':{},'helper_data':{}}
+	 * 
+	 * This function reads helper json given in parameter and update it in metadata of message , it inserts new keys in metadata present in helper and updates old
+	 */
+	public String updateHelperData(long messageId, String helper)
+	{
+
+		String json = getMetadataOfMessage(messageId);
+		if (json != null)
+		{
+			try
+			{
+				JSONObject metadataJSON = new JSONObject();
+				JSONObject helperData = new JSONObject(helper);
+				JSONObject oldHelper = metadataJSON.optJSONObject(HikeConstants.HELPER_DATA);
+				if (oldHelper == null)
+				{
+					oldHelper = new JSONObject();
+				}
+				Iterator<String> i = helperData.keys();
+				while (i.hasNext())
+				{
+					String key = i.next();
+					oldHelper.put(key, helperData.get(key));
+				}
+				metadataJSON.put(HikeConstants.HELPER_DATA, oldHelper.toString());
+				json = metadataJSON.toString();
+				updateMetadataOfMessage(messageId, json);
+				return json;
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			Logger.e("HikeconversationDB", "Meta data of message is null, id= " + messageId);
+		}
+		return null;
 	}
 
 }
