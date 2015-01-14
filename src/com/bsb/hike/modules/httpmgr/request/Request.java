@@ -296,6 +296,24 @@ public class Request
 		this.future = future;
 	}
 
+	/**
+	 * Sets isCancelled field to true and cancels the future of this request that has been submitted to the executor
+	 */
+	public void cancel()
+	{
+		this.isCancelled = true;
+
+		if (future != null)
+		{
+			future.cancel(true);
+		}
+
+		if (this.requestCancellationListener != null)
+		{
+			this.requestCancellationListener.onCancel();
+		}
+	}
+
 	public static class Builder
 	{
 		private long id = -1;
