@@ -6,6 +6,7 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -125,13 +126,13 @@ public class VoIPEncryptor {
 		byte[] encryptedData = null;
 		
 		try {
-			PublicKey key = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pubKey));
+			PublicKey key = KeyFactory.getInstance("RSA", "BC").generatePublic(new X509EncodedKeySpec(pubKey));
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.ENCRYPT_MODE, key);
 			encryptedData = cipher.doFinal(data);
 			
 		} catch (NoSuchAlgorithmException e) {
-			Log.d(VoIPConstants.TAG, "NoSuchAlgorithmException: " + e.toString());
+			Log.d(VoIPConstants.TAG, "rsaEncrypt NoSuchAlgorithmException: " + e.toString());
 		} catch (NoSuchPaddingException e) {
 			Log.d(VoIPConstants.TAG, "NoSuchPaddingException: " + e.toString());
 		} catch (InvalidKeyException e) {
@@ -142,6 +143,8 @@ public class VoIPEncryptor {
 			Log.d(VoIPConstants.TAG, "BadPaddingException: " + e.toString());
 		} catch (InvalidKeySpecException e) {
 			Log.d(VoIPConstants.TAG, "InvalidKeySpecException: " + e.toString());
+		} catch (NoSuchProviderException e) {
+			Log.d(VoIPConstants.TAG, "rsaEncrypt NoSuchProviderException: " + e.toString());
 		}
 
 		return encryptedData;
