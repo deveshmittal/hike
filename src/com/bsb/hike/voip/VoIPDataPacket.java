@@ -32,7 +32,7 @@ public class VoIPDataPacket {
 		ENCRYPTION_SET_OFF(14),
 		ACK (11),
 		RECORDING_SAMPLE_RATE (12),
-		RELAY_INIT (15),	// This is hard coded in server code (relay.php)
+		RELAY_INIT (15),	// This is hard coded in server code 
 		RELAY (16),
 		CURRENT_BITRATE (17),
 		REQUEST_BITRATE (18),
@@ -46,7 +46,8 @@ public class VoIPDataPacket {
 		COMM_UDP_SYNACK_RELAY (26),
 		COMM_UDP_ACK_PRIVATE (27),
 		COMM_UDP_ACK_PUBLIC (28),
-		COMM_UDP_ACK_RELAY (29)
+		COMM_UDP_ACK_RELAY (29),
+		NETWORK_QUALITY (30)
 		;
 		
 		private final int value;
@@ -121,6 +122,8 @@ public class VoIPDataPacket {
 				return COMM_UDP_ACK_PUBLIC;
 			case 29:
 				return COMM_UDP_ACK_RELAY;
+			case 30:
+				return NETWORK_QUALITY;
 			default:
 				return UPDATE;
 			}
