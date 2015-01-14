@@ -755,7 +755,7 @@ public class VoIPActivity extends Activity implements CallActions
 		GradientDrawable gd = (GradientDrawable)signalContainer.getBackground();
 
 		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
-		anim.setDuration(600);
+		anim.setDuration(800);
 
 		switch(quality)
 		{
