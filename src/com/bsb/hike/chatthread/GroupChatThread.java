@@ -339,7 +339,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 
 		if (tipView == null)
 		{
-			Logger.e("chatthread", "got imp message but type is unnknown , type " + impMessage.getMessageType());
+			Logger.e(TAG, "got imp message but type is unnknown , type " + impMessage.getMessageType());
 			return;
 		}
 		TextView text = (TextView) tipView.findViewById(R.id.text);
@@ -406,11 +406,17 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			ll.removeAllViews();
 		}
 		ll.addView(tipView, 0);
-		// to hide pin , if pin create view is visible
+		
+		/**
+		 * If we were composing a new pin and a pin arrives from somewhere else
+		 * 
+		 */
+		
 		if (activity.findViewById(R.id.impMessageCreateView).getVisibility() == View.VISIBLE)
 		{
 			tipView.setVisibility(View.GONE);
 		}
+		
 		if (animationId != -1 && !isShowingPin())
 		{
 			tipView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), animationId));
@@ -549,7 +555,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	}
 
 	@Override
-	protected void addMessage(ConvMessage convMessage)
+	protected void addMessage(ConvMessage convMessage, boolean playPinAnim)
 	{
 		TypingNotification typingNotification = null;
 
@@ -565,7 +571,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 
 		// Something related to Pins
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-			showImpMessage(convMessage, -1);
+			showImpMessage(convMessage, playPinAnim ? R.anim.up_down_fade_in :  -1);
 
 		if (convMessage.isSent())
 		{
@@ -581,7 +587,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			}
 		}
 
-		super.addMessage(convMessage);
+		super.addMessage(convMessage, playPinAnim);
 	}
 
 	/**
@@ -768,33 +774,38 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		mComposeView.addTextChangedListener(new EmoticonTextWatcher());
 		mComposeView.requestFocus();
 		content.findViewById(R.id.emo_btn).setOnClickListener(this);
-		if (tipView != null && tipView.getVisibility() == View.VISIBLE && tipView.getTag() instanceof TipType && (TipType) tipView.getTag() == TipType.PIN)
+		if (!isShowingPin() && tipView != null && tipView.getVisibility() == View.VISIBLE )
 		{
 			tipView.setVisibility(View.GONE);
-			HikeTip.closeTip(TipType.PIN, tipView, activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, activity.MODE_PRIVATE));
-			tipView = null;
 		}
 
 	}
 
 	private void destroyPinCreateView()
 	{
+		if (tipView != null)
+		{
+			if (tipView.getTag() instanceof TipType && (TipType) tipView.getTag() == TipType.PIN)
+
+			{
+				HikeTip.closeTip(TipType.PIN, tipView, activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, activity.MODE_PRIVATE));
+				tipView = null;
+			}
+
+			else
+			{
+				tipView.setVisibility(View.VISIBLE);
+			}
+		}
+
 		// AFTER PIN MODE, we make sure mComposeView is reinitialized to messaeg composer compose
+		
 		mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
 		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
 		mBottomView.setVisibility(View.VISIBLE);
 		final View v = activity.findViewById(R.id.impMessageCreateView);
-		int animId = -1;
-		if (animId != -1)
-		{
-			Animation an = AnimationUtils.loadAnimation(activity.getApplicationContext(), animId);
-			playUpDownAnimation(v);
-		}
-		else
-		{
-			v.setVisibility(View.GONE);
-		}
+		playUpDownAnimation(v);
 	}
 
 	private void sendPin()
