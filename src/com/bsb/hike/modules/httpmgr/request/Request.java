@@ -2,6 +2,7 @@ package com.bsb.hike.modules.httpmgr.request;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 
 import android.text.TextUtils;
@@ -21,7 +22,7 @@ public class Request
 
 	public static final short REQUEST_TYPE_SHORT = 0x1;
 
-	private String id;
+	private long id;
 
 	private String method;
 
@@ -39,7 +40,7 @@ public class Request
 
 	private boolean isCancelled;
 
-	private IRequestListener requestListener;
+	private CopyOnWriteArrayList<IRequestListener> requestListeners;
 
 	private IRequestCancellationListener requestCancellationListener;
 
@@ -57,7 +58,7 @@ public class Request
 		this.priority = builder.priority;
 		this.requestType = builder.requestType;
 		this.retryPolicy = builder.retryPolicy;
-		this.requestListener = builder.requestListener;
+		this.requestListeners = builder.requestListeners;
 		this.runOnUIThread = builder.runOnUIThread;
 	}
 
@@ -66,7 +67,7 @@ public class Request
 	 * 
 	 * @return
 	 */
-	public String getId()
+	public long getId()
 	{
 		return id;
 	}
@@ -151,9 +152,9 @@ public class Request
 	 * 
 	 * @return
 	 */
-	public IRequestListener getRequestListener()
+	public CopyOnWriteArrayList<IRequestListener> getRequestListeners()
 	{
-		return requestListener;
+		return requestListeners;
 	}
 
 	/**
@@ -276,6 +277,15 @@ public class Request
 		this.isCancelled = isCancelled;
 	}
 
+	public void addRequestListeners(List<IRequestListener> requestListeners)
+	{
+		if (this.requestListeners == null)
+		{
+			this.requestListeners = new CopyOnWriteArrayList<IRequestListener>();
+		}
+		this.requestListeners.addAll(requestListeners);
+	}
+
 	/**
 	 * Sets the request cancellation listener {@link IRequestCancellationListener}
 	 * 
@@ -296,9 +306,27 @@ public class Request
 		this.future = future;
 	}
 
+	/**
+	 * Sets isCancelled field to true and cancels the future of this request that has been submitted to the executor
+	 */
+	public void cancel()
+	{
+		this.isCancelled = true;
+
+		if (future != null)
+		{
+			future.cancel(true);
+		}
+
+		if (this.requestCancellationListener != null)
+		{
+			this.requestCancellationListener.onCancel();
+		}
+	}
+
 	public static class Builder
 	{
-		private String id;
+		private long id = -1;
 
 		private String method;
 
@@ -314,7 +342,7 @@ public class Request
 
 		private IRetryPolicy retryPolicy;
 
-		private IRequestListener requestListener;
+		private CopyOnWriteArrayList<IRequestListener> requestListeners;
 
 		private boolean runOnUIThread;
 
@@ -323,7 +351,7 @@ public class Request
 		 * 
 		 * @param id
 		 */
-		public Builder setId(String id)
+		public Builder setId(long id)
 		{
 			this.id = id;
 			return this;
@@ -422,7 +450,11 @@ public class Request
 		 */
 		public Builder setRequestListener(IRequestListener requestListener)
 		{
-			this.requestListener = requestListener;
+			if (this.requestListeners == null)
+			{
+				this.requestListeners = new CopyOnWriteArrayList<IRequestListener>();
+			}
+			this.requestListeners.add(requestListener);
 			return this;
 		}
 
@@ -472,6 +504,45 @@ public class Request
 			{
 				headers = new ArrayList<Header>();
 			}
+
+			if (id < 0)
+			{
+				id = hashCode();
+			}
 		}
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int urlHashCode = url.hashCode();
+		int headersHashCode = 0;
+		for (Header header : headers)
+		{
+			headersHashCode += header.hashCode();
+		}
+		int requestBodyHashCode = (null != body) ? body.hashCode() : 0;
+		return (31 * urlHashCode) + headersHashCode + requestBodyHashCode;
+	}
+
+	@Override
+	public boolean equals(Object other)
+	{
+		if (this == other)
+		{
+			return true;
+		}
+
+		if (!(other instanceof Request))
+		{
+			return false;
+		}
+
+		Request req = (Request) other;
+		if (this.getId() != req.getId())
+		{
+			return false;
+		}
+		return true;
 	}
 }
