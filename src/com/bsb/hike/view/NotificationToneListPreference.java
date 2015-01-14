@@ -1,19 +1,15 @@
 package com.bsb.hike.view;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import android.app.AlertDialog.Builder;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.ListPreference;
@@ -34,27 +30,15 @@ public class NotificationToneListPreference extends ListPreference implements Di
 
 	private int mClickedDialogEntryIndex;
 
-	private int mCancelDialogEntryIndex;
-
 	private Map<String, Uri> ringtonesNameURIMap;
 
-	private Cursor notifSoundCursor;
-
 	private static int HIKE_JINNGLE_INDEX = 2;
-
-	private RingtoneFetcherTask fetcherTask;
 
 	private static final String STATE_PARENT = "state_parent";
 
 	private static final String SOUND_PREF_KEY = "sound_pref_key";
 
 	private static final String SOUND_PREF_VALUES = "sound_pref_values";
-
-	private CharSequence[] rintoneCharSeq;
-
-	private ArrayList<String> rintoneValSeq;
-
-	private ProgressDialog progressDialog;
 
 	public NotificationToneListPreference(Context context, AttributeSet attrs)
 	{
@@ -97,9 +81,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	@Override
 	protected void onPrepareDialogBuilder(Builder builder)
 	{
-		setEntryAndValues();
 		mClickedDialogEntryIndex = getValueIndex();
-		mCancelDialogEntryIndex = getValueIndex();
 		builder.setSingleChoiceItems(this.getEntries(), mClickedDialogEntryIndex, new DialogInterface.OnClickListener()
 		{
 			public void onClick(DialogInterface dialog, int which)
@@ -151,8 +133,6 @@ public class NotificationToneListPreference extends ListPreference implements Di
 			break;
 
 		case DialogInterface.BUTTON_NEGATIVE:
-			this.setValue(this.getEntryValues()[mCancelDialogEntryIndex].toString());
-			ringtonesNameURIMap.clear();
 			dialog.dismiss();
 			break;
 
@@ -183,123 +163,18 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		return ringtoneUri;
 	}
 	
-	/**
-	 * Sets entries and Values for SoundListPref via AsyncTask
-	 */
-	public void fetchSoundPrefData()
+	private void setEntryAndValues(Map<String, Uri> ringtonesNameURIMap)
 	{
-		fetcherTask = new RingtoneFetcherTask();
-		fetcherTask.execute();
-	}
-
-	private void initRingtoneLists()
-	{
-		ringtonesNameURIMap.put(mContext.getResources().getString(R.string.notif_sound_off), null);
-		ringtonesNameURIMap.put(mContext.getResources().getString(R.string.notif_sound_default), null);
-		ringtonesNameURIMap.put(mContext.getResources().getString(R.string.notif_sound_Hike), null);
-	}
-
-	private void setEntryAndValues()
-	{
-		rintoneCharSeq = ringtonesNameURIMap.keySet().toArray(new CharSequence[ringtonesNameURIMap.size()]);
+		this.ringtonesNameURIMap = ringtonesNameURIMap;
+		CharSequence[] rintoneCharSeq = ringtonesNameURIMap.keySet().toArray(new CharSequence[ringtonesNameURIMap.size()]);
 		setEntries(rintoneCharSeq);
 		setEntryValues(rintoneCharSeq);
-	}
-
-	/**
-	 * Handles Click of Notification Option in Preferences Screen
-	 */
-	@Override
-	protected void onClick()
-	{
-		// To avoid opening of multiple Dialogs
-		this.setEnabled(false);
-
-		fetchSoundPrefData();
-
-	}
-
-	/**
-	 * 
-	 * Fetches Available Ringtones from Device
-	 * 
-	 */
-	private class RingtoneFetcherTask extends AsyncTask<Void, Void, Void>
-	{
-
-		protected void onPreExecute()
-		{
-			progressDialog = new ProgressDialog(mContext);
-			progressDialog.setMessage(mContext.getResources().getString(R.string.ringtone_loader));
-			progressDialog.show();
-			initRingtoneLists();
-		};
-
-		@Override
-		protected Void doInBackground(Void... params)
-		{
-			if (!fetcherTask.isCancelled())
-			{
-				try
-				{
-					RingtoneManager ringtoneMgr = new RingtoneManager(mContext);
-					ringtoneMgr.setType(RingtoneManager.TYPE_NOTIFICATION);
-					notifSoundCursor = ringtoneMgr.getCursor();
-					if (notifSoundCursor != null)
-					{
-						int notifSoundCount = notifSoundCursor.getCount();
-						if (notifSoundCount != 0 && notifSoundCursor.moveToFirst())
-						{
-							String ringtoneName = "";
-							while (!notifSoundCursor.isAfterLast() && notifSoundCursor.moveToNext())
-							{
-								int currentPosition = notifSoundCursor.getPosition();
-								ringtoneName = ringtoneMgr.getRingtone(currentPosition).getTitle(mContext);
-								ringtonesNameURIMap.put(ringtoneName, ringtoneMgr.getRingtoneUri(currentPosition));
-							}
-						}
-						else
-						{
-							// No Notification Tone was present in device
-						}
-
-						// The returned cursor will be the same cursor returned each time this method is called,
-						// so do not Cursor.close() the cursor. The cursor can be Cursor.deactivate() safely.
-						notifSoundCursor.deactivate();
-					}
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-			return null;
-		}
-
-		protected void onPostExecute(Void result)
-		{
-			if (!fetcherTask.isCancelled())
-			{
-				setEntryAndValues();
-				notifyChanged();
-				if (progressDialog != null)
-				{
-					progressDialog.dismiss();
-				}
-				showDialog(null);
-			}
-		}
-
 	}
 
 	@Override
 	public void onDismiss(DialogInterface dialog)
 	{
 		super.onDismiss(dialog);
-		if (fetcherTask != null && !fetcherTask.isCancelled())
-		{
-			fetcherTask.cancel(true);
-		}
 		this.setEnabled(true);
 	}
 
@@ -308,12 +183,24 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	{
 		Parcelable superState = super.onSaveInstanceState();
 
-		updateValueListFromMap();
-
 		Bundle state = new Bundle();
 		state.putParcelable(STATE_PARENT, superState);
-		state.putCharSequenceArray(SOUND_PREF_KEY, rintoneCharSeq);
-		state.putStringArrayList(SOUND_PREF_VALUES, rintoneValSeq);
+		
+		state.putStringArrayList(SOUND_PREF_KEY, new ArrayList<String>(ringtonesNameURIMap.keySet()));
+		
+		ArrayList<String> soundUriValues = new ArrayList<String>();
+		for (Uri uri : ringtonesNameURIMap.values())
+		{
+			if(uri != null)
+			{
+				soundUriValues.add(uri.toString());
+			}
+			else
+			{
+				soundUriValues.add(null);
+			}
+		}
+		state.putStringArrayList(SOUND_PREF_VALUES, soundUriValues);
 		return state;
 	}
 
@@ -323,56 +210,65 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		Bundle savedState = (Bundle) state;
 
 		Parcelable superState = savedState.getParcelable(STATE_PARENT);
-		rintoneCharSeq = savedState.getCharSequenceArray(SOUND_PREF_KEY);
-		rintoneValSeq = savedState.getStringArrayList(SOUND_PREF_VALUES);
+		ArrayList<String> keys= savedState.getStringArrayList(SOUND_PREF_KEY);
+		ArrayList<String> values = savedState.getStringArrayList(SOUND_PREF_VALUES);
 		
-		updateRingtoneMapAfterRotation();
-		
-		super.onRestoreInstanceState(superState);
-	}
-
-	/**
-	 * Updates Map after rotation
-	 */
-	private void updateRingtoneMapAfterRotation()
-	{
-		ringtonesNameURIMap.clear();
-
-		if (rintoneCharSeq != null)
+		int i = 0;
+		for (String key : keys)
 		{
-			for (int i = 0; i < rintoneCharSeq.length; i++)
+			if(values.get(i) != null)
 			{
-				Uri soundUri = rintoneValSeq.get(i) != null ? Uri.parse(rintoneValSeq.get(i)) : null;
-				ringtonesNameURIMap.put(rintoneCharSeq[i].toString(), soundUri);
-			}
-		}
-	}
-
-	/**
-	 * Updates ValueSeq from Map, so that can be store and restore after rotation
-	 */
-	private void updateValueListFromMap()
-	{
-		Iterator<Uri> iterator = ringtonesNameURIMap.values().iterator();
-		
-		if(iterator.hasNext())
-		{
-			this.rintoneValSeq = new ArrayList<String>();
-		}
-		
-		while (iterator.hasNext())
-		{
-			Uri uri = (Uri) iterator.next();
-			if (uri != null)
-			{
-				rintoneValSeq.add(uri.toString());
+				ringtonesNameURIMap.put(key, Uri.parse(values.get(i)));
 			}
 			else
 			{
-				rintoneValSeq.add(null);
+				ringtonesNameURIMap.put(key, null);
 			}
+			i++;
 		}
+		
+		setEntryAndValues(ringtonesNameURIMap);
+		super.onRestoreInstanceState(superState);
+		if(this.getDialog() == null || !this.getDialog().isShowing())
+		{
+			showDialog(null);
+		}
+		
+	}
 
-	};
+	public void setContext(Context context)
+	{
+		this.mContext = context;
+	}
 
+	public void createAndShowDialog(Map<String, Uri> ringtonesNameURIMap2)
+	{
+		dismissDialog();
+		setEntryAndValues(ringtonesNameURIMap2);
+		showDialog(null);
+	}
+	
+	public boolean isEmpty()
+	{
+		return ringtonesNameURIMap.isEmpty();
+	}
+
+	@Override
+	protected void onClick()
+	{
+		// TODO Auto-generated method stub
+		super.onClick();
+		if(isEmpty())
+		{
+			dismissDialog();
+		}
+	}
+	
+	private void dismissDialog()
+	{
+		if(this.getDialog() != null && this.getDialog().isShowing())
+		{
+			this.getDialog().dismiss();
+		}
+	}
 }
