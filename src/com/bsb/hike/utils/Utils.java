@@ -2591,25 +2591,29 @@ public class Utils
 
 	public static int getResolutionId()
 	{
-		switch (densityDpi)
+		if(densityDpi > 480)
 		{
-		case 120:
-			return HikeConstants.LDPI_ID;
-		case 160:
-			return HikeConstants.MDPI_ID;
-		case 240:
-			return HikeConstants.HDPI_ID;
-		case 320:
+			return HikeConstants.XXXHDPI_ID;
+		}
+		else if(densityDpi > 320)
+		{
+			return HikeConstants.XXHDPI_ID;
+		}
+		else if(densityDpi > 240)
+		{
 			return HikeConstants.XHDPI_ID;
-		case 213:
+		}
+		else if(densityDpi > 160)
+		{
 			return HikeConstants.HDPI_ID;
-		case 480:
-			return HikeConstants.XXHDPI_ID;
-		case 640:
-		case 400:
-			return HikeConstants.XXHDPI_ID;
-		default:
-			return HikeConstants.HDPI_ID;
+		}
+		else if(densityDpi > 120)
+		{
+			return HikeConstants.MDPI_ID;
+		}
+		else
+		{
+			return HikeConstants.LDPI_ID;
 		}
 	}
 
