@@ -239,6 +239,7 @@ public class VoIPActivity extends Activity implements CallActions
 	@Override
 	protected void onPause() {
 		super.onPause();
+		Logger.d(VoIPConstants.TAG, "onPause called");
 		sensorManager.unregisterListener(proximitySensorEventListener);
 //		Logger.w(VoIPConstants.TAG, "VoIPActivity onPause()");
 	}
@@ -463,12 +464,16 @@ public class VoIPActivity extends Activity implements CallActions
 		@SuppressLint("Wakelock") @Override
 		public void onSensorChanged(SensorEvent event) {
 
+			Logger.d(VoIPConstants.TAG, "Proximity sensor changed");
+
 			if (event.values[0] != proximitySensorMaximumRange) {
 				if (!proximityWakeLock.isHeld()) {
+					Logger.d(VoIPConstants.TAG, "Acquiring proximity sensor...");
 					proximityWakeLock.acquire();
 				}
 			} else {
 				if (proximityWakeLock.isHeld()) {
+					Logger.d(VoIPConstants.TAG, "Releasing proximity sensor...");
 					proximityWakeLock.release();
 				}
 			}
