@@ -144,7 +144,7 @@ public class FestivePopup
 
 	private static String getCatId(int popupType)
 	{
-		return "festive";
+		return "humanoid";
 	}
 
 	private static void addMoveUpAnimation(View view)
