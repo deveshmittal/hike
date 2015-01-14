@@ -1972,6 +1972,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
+	public void deleteBot(String msisdn){
+		mDb.beginTransaction();
+		mDb.delete(DBConstants.BOT_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
+		removeChatThemeForMsisdn(msisdn);
+	}
+
 	public Conversation addConversation(String msisdn, boolean onhike, String groupName, String groupOwner)
 	{
 		return addConversation(msisdn, onhike, groupName, groupOwner, null);
@@ -2072,6 +2078,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				ih.close();
 			}
 		}
+	}
+
+	public void addBot(String msisdn, String name, String metadata){
+
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.MSISDN, msisdn);
+		values.put(DBConstants.NAME, name);
+		values.put(DBConstants.CONVERSATION_METADATA, metadata);
+
+		mDb.insertWithOnConflict(DBConstants.BOT_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+
 	}
 
 	public List<ConvMessage> getConversationThread(String msisdn, int limit, Conversation conversation, long maxMsgId)
