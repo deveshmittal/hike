@@ -1,5 +1,10 @@
 package com.bsb.hike.platform;
 
+import java.util.Iterator;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -30,18 +35,39 @@ public class PlatformAlarmManager
 
 	public static final String CONV_MSISDN = "conv_msisdn";
 
-	public static final void setAlarm(Context context, String data, long messageId, long timeInMills)
+	public static final String ALARM_DATA = "alarm_data";
+
+	public static final void setAlarm(Context context, JSONObject json, long messageId, long timeInMills)
 	{
 		Intent intent = new Intent();
 		intent.putExtra(MESSAGE_ID, messageId); // for us uniqueness of a card is message id
-		intent.putExtra(PLATFORM_ALARM, data);
-		HikeAlarmManager.setAlarmwithIntentPersistance(context, timeInMills, (int) (100000 + messageId), true, intent, true); // 100000 is added to avoid conflict between
+		Iterator<String> i = json.keys();
+		try
+		{
+			if (json.has(ALARM_DATA))
+			{
+				intent.putExtra(ALARM_DATA, json.getString(ALARM_DATA));
+			}
+			while (i.hasNext())
+			{
+				String key = i.next();
+				intent.putExtra(key, json.getString(key));
+			}
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		// 100000 is added to avoid conflict between alarms at HikeAlarmManager end,Message ID Starts from 1
+		HikeAlarmManager.setAlarmwithIntentPersistance(context, timeInMills, (int) (100000 + messageId), true, intent, true);
 	}
 
 	/*
 	 * Assuming Format of metadata for platform is :
 	 * 
 	 * metadata:{'layout_id':'','file_id':'','card_data':{},'helper_data':{}}
+	 * 
+	 * On alarm of any card, we save it in ALARM TABLE
 	 */
 	public static final void processTasks(Intent intent, Context context)
 	{
