@@ -147,6 +147,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	protected static final int UPDATE_NETWORK_STATE = 16;
 	
+	protected static final int HIDE_DOWN_FAST_SCROLL_INDICATOR = 17;
+	
+	protected static final int HIDE_UP_FAST_SCROLL_INDICATOR = 18;
+	
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -259,6 +263,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case UPDATE_NETWORK_STATE:
 			updateNetworkState();
+			break;
+		case HIDE_DOWN_FAST_SCROLL_INDICATOR:
+			hideDownFastScrollIndicator();
+			break;
+		case HIDE_UP_FAST_SCROLL_INDICATOR:
+			hideUpFastScrollIndicator();
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
@@ -1260,10 +1270,48 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	}
 
 	@Override
-	public void onScrollStateChanged(AbsListView view, int scrollState)
+	public void onScrollStateChanged(AbsListView myListView, int scrollState)
 	{
-		// TODO Auto-generated method stub
+		Logger.i(TAG, "Scroll State  in chatThread : " + scrollState);
 
+		View bottomFastScrollIndicator = activity.findViewById(R.id.scroll_bottom_indicator);
+
+		View upFastScrollIndicator = activity.findViewById(R.id.scroll_top_indicator);
+
+		if (bottomFastScrollIndicator.getVisibility() == View.VISIBLE)
+		{
+			if (myListView.getLastVisiblePosition() >= messages.size() - HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
+			{
+				hideDownFastScrollIndicator();
+			}
+
+			else if (isScrollStateIdle(scrollState))
+			{
+				uiHandler.sendEmptyMessageDelayed(HIDE_DOWN_FAST_SCROLL_INDICATOR, 2000);
+			}
+		}
+
+		if (upFastScrollIndicator.getVisibility() == View.VISIBLE)
+		{
+
+			if (myListView.getLastVisiblePosition() <= HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
+			{
+				hideUpFastScrollIndicator();
+			}
+
+			else if (isScrollStateIdle(scrollState))
+			{
+				uiHandler.sendEmptyMessageDelayed(HIDE_UP_FAST_SCROLL_INDICATOR, 2000);
+			}
+		}
+
+		mAdapter.setIsListFlinging(!(isScrollStateIdle(scrollState)));
+
+	}
+
+	private boolean isScrollStateIdle(int scrollState)
+	{
+		return scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
 	}
 
 	/**
@@ -2676,5 +2724,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			return Integer.toString(counter);
 		}
+	}
+	
+	private void hideDownFastScrollIndicator()
+	{
+		activity.findViewById(R.id.scroll_bottom_indicator).setVisibility(View.GONE);
+	}
+
+	private void hideUpFastScrollIndicator()
+	{
+		activity.findViewById(R.id.scroll_top_indicator).setVisibility(View.GONE);
 	}
 }
