@@ -57,8 +57,13 @@ public class Header
 	@Override
 	public int hashCode()
 	{
-		// TODO
 		int result = name != null ? name.hashCode() : 0;
+		/*
+		 * Why 31 ?? A nice property of 31 is that the multiplication can be replaced by a shift and a subtraction for better performance
+		 * http://stackoverflow.com/questions/3869252/what-is-the-preferred-way-of-implementing-hashcode
+		 * 
+		 * Also refer Effective Java by John Bloch (Item 9: Always override hashCode when you override equals) for more details
+		 */
 		result = 31 * result + (value != null ? value.hashCode() : 0);
 		return result;
 	}
