@@ -1144,7 +1144,7 @@ public class HikeNotification
 				}
 			}
 			
-			int ledColor = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_DEFAULT_BLUE_COLOR);
+			int ledColor = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_DEFAULT_WHITE_COLOR);
 		
 			//Check if Previously any boolean Key was present for this Led
 			if(preferenceManager.contains(HikeConstants.LED_PREF))

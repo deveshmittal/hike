@@ -428,6 +428,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String NOTIFICATION_TONE_URI = "notificationToneUri";
 
+	public static final String NOTIFICATION_TONE_NAME = "notificaationToneName";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;

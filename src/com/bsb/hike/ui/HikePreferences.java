@@ -1,5 +1,7 @@
 package com.bsb.hike.ui;
 
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,6 +40,8 @@ import com.bsb.hike.tasks.BackupAccountTask;
 import com.bsb.hike.tasks.BackupAccountTask.BackupAccountListener;
 import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
+import com.bsb.hike.tasks.RingtoneFetcherTask;
+import com.bsb.hike.tasks.RingtoneFetcherTask.RingtoneFetchListener;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.CustomAlertDialog;
@@ -46,14 +50,16 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
+import com.bsb.hike.view.NotificationToneListPreference;
 import com.facebook.Session;
 
-public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener, DeleteAccountListener, BackupAccountListener
+public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, 
+							OnPreferenceChangeListener, DeleteAccountListener, BackupAccountListener, RingtoneFetchListener
 {
 
 	private enum BlockingTaskType
 	{
-		NONE, DELETING_ACCOUNT, UNLINKING_ACCOUNT, UNLINKING_TWITTER, BACKUP_ACCOUNT
+		NONE, DELETING_ACCOUNT, UNLINKING_ACCOUNT, UNLINKING_TWITTER, BACKUP_ACCOUNT, FETCH_RINGTONE
 	}
 
 	private ActivityCallableTask mTask;
@@ -276,7 +282,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				getPreferenceScreen().removePreference(resetStealthPassword);
 			}
 		}
-		
+		Preference notificationRingtonePreference = getPreferenceScreen().findPreference(HikeConstants.NOTIF_SOUND_PREF);
+		if (notificationRingtonePreference != null)
+		{
+			notificationRingtonePreference.setOnPreferenceClickListener(this);
+		}
 		setupActionBar(titleRes);
 
 	}
@@ -347,7 +357,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				title = getString(R.string.account_backup);
 				message = getString(R.string.creating_backup_message);
 				break;
-
+			case FETCH_RINGTONE:
+				mDialog = new ProgressDialog(this);
+				mDialog.setMessage(getResources().getString(R.string.ringtone_loader));
+				mDialog.show();
+				return;
 			default:
 				return;
 			}
@@ -649,7 +663,21 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			LockPattern.confirmPattern(HikePreferences.this, true);
 		}
-
+		else if(HikeConstants.NOTIF_SOUND_PREF.equals(preference.getKey()))
+		{
+			Preference notificationPreference = getPreferenceScreen().findPreference(HikeConstants.NOTIF_SOUND_PREF);
+			if(notificationPreference != null)
+			{
+				NotificationToneListPreference notifToneListPref = (NotificationToneListPreference) notificationPreference;
+				if(notifToneListPref.isEmpty())
+				{
+					RingtoneFetcherTask task = new RingtoneFetcherTask(HikePreferences.this, false, getApplicationContext());
+					blockingTaskType = BlockingTaskType.FETCH_RINGTONE;
+					setBlockingTask(task);
+					Utils.executeBoolResultAsyncTask(task);
+				}
+			}
+		}
 		return true;
 	}
 
@@ -880,6 +908,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}
 			}
 		});
+		ledPref.setTitle(ledPref.getTitle() + " - " + ledPref.getValue());
 	}
 
 	@Override
@@ -913,4 +942,17 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		 updateAccountBackupPrefView();
 	}
 
+	@Override
+	public void onRingtoneFetched(boolean isSuccess, Map<String, Uri> ringtonesNameURIMap)
+	{
+		// TODO Auto-generated method stub
+		mTask = null;
+		dismissProgressDialog();
+		Preference notificationPreference = getPreferenceScreen().findPreference(HikeConstants.NOTIF_SOUND_PREF);
+		if(notificationPreference != null)
+		{
+			NotificationToneListPreference notifToneListPref = (NotificationToneListPreference) notificationPreference;
+			notifToneListPref.createAndShowDialog(ringtonesNameURIMap);
+		}
+	}
 }
