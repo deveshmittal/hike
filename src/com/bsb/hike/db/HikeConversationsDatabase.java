@@ -4812,6 +4812,35 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
+	public HashMap addBotToHashMap(HashMap<String, String> hikeBotNamesMap)
+	{
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.BOT_TABLE, new String[] { DBConstants.MSISDN, DBConstants.NAME }, null, null, null, null, null);
+
+			while (c.moveToNext())
+			{
+				int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+				int nameIdx = c.getColumnIndex(DBConstants.NAME);
+				String msisdn = c.getString(msisdnIdx);
+				String name = c.getString(nameIdx);
+				if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(msisdn))
+				{
+					hikeBotNamesMap.put(msisdn, name);
+				}
+			}
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		return hikeBotNamesMap;
+	}
+
 	public ConvMessage showParticipantStatusMessage(String groupId)
 	{
 
