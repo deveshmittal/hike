@@ -4,8 +4,9 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -101,6 +102,7 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
@@ -1482,6 +1484,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HikePubSub.UPDATE_NETWORK_STATE:
 			uiHandler.sendEmptyMessage(UPDATE_NETWORK_STATE);
 			break;
+		case HikePubSub.BULK_MESSAGE_DELIVERED_READ:
+			onBulkMessageDeliveredRead(object);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1605,7 +1610,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
 				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.MESSAGE_FAILED,
 				HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.STICKER_CATEGORY_MAP_UPDATED,
-				HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER, HikePubSub.UPDATE_NETWORK_STATE };
+				HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.BULK_MESSAGE_RECEIVED };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -2810,5 +2815,78 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 		}
 
+	}
+	
+	protected void onBulkMessageDeliveredRead(Object object)
+	{
+		/**
+		 * Defensive check
+		 */
+		if (messages == null || messages.isEmpty())
+		{
+			return;
+		}
+
+		Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
+
+		PairModified<PairModified<Long, Set<String>>, Long> pair = messageStatusMap.get(mConversation.getMsisdn());
+
+		if (pair != null)
+		{
+			long mrMsgId = (long) pair.getFirst().getFirst();
+			long drMsgId = (long) pair.getSecond();
+
+			if (mrMsgId > drMsgId)
+			{
+				drMsgId = mrMsgId;
+			}
+
+			updateReadByInLoop(mrMsgId, pair.getFirst().getSecond());
+			
+			for (int i = messages.size() - 1; i >= 0; i--)
+			{
+				ConvMessage msg = messages.get(i);
+				if (msg != null && msg.isSent())
+				{
+
+					long id = msg.getMsgID();
+
+					if (id <= mrMsgId)
+					{
+						if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+						{
+							msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+							removeFromMessageMap(msg);
+						}
+						else
+						{
+							break;
+						}
+					}
+
+					else if (id <= drMsgId)
+					{
+						if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
+						{
+							msg.setState(ConvMessage.State.SENT_DELIVERED);
+						}
+					}
+				}
+			}
+
+			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+		}
+	}
+
+	/**
+	 * This method will be overriden by respective classes
+	 * 
+	 * @param mrMsgId
+	 * @param second
+	 */
+	
+	protected void updateReadByInLoop(long mrMsgId, Set<String> second)
+	{
+		return;
 	}
 }

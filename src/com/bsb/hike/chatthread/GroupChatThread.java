@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.json.JSONArray;
@@ -24,11 +25,9 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
@@ -1213,5 +1212,18 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			uiHandler.sendEmptyMessage(DISABLE_TRANSCRIPT_MODE);
 		}
 	}
+
+	/**
+	 * This method is used to update readByList
+	 * 
+	 */
 	
+	@Override
+	protected void updateReadByInLoop(long mrMsgId, Set<String> second)
+	{
+		for (String msgMsisdn : second)
+		{
+			groupConversation.updateReadByList(msgMsisdn, mrMsgId);
+		}
+	}
 }
