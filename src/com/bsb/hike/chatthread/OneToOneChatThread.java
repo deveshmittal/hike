@@ -362,17 +362,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	protected void addMessage(ConvMessage convMessage, boolean scrollToLast)
 	{
-		TypingNotification typingNotification = null;
-		
 		/*
 		 * If we were showing the typing bubble, we remove it from the add the new message and add the typing bubble back again
 		 */
 		
-		if (!messages.isEmpty() && messages.get(messages.size() - 1).getTypingNotification() != null)
-		{
-			typingNotification = messages.get(messages.size() - 1).getTypingNotification();
-			messages.remove(messages.size() - 1);
-		}
+		TypingNotification typingNotification = removeTypingNotification();
 		
 		/**
 		 * Adding message to the adapter
@@ -1360,9 +1354,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 			mAdapter.addMessages(messagesList, messages.size());
 
-			/**
-			 * TODO : reachedEnd = false;
-			 */
+			reachedEnd = false;
 
 			ConvMessage convMessage = messagesList.get(messagesList.size() - 1);
 

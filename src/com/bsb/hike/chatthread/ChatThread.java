@@ -300,7 +300,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		// the top
 		reachedEnd = false;
 		
-		// TODO : THIS IS TO BE BASED ON PRODUCT CALL
 		/*
 		 * Don't scroll to bottom if the user is at older messages. It's possible that the user might be reading them.
 		 */

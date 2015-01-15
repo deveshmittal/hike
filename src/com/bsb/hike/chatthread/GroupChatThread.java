@@ -567,17 +567,11 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	@Override
 	protected void addMessage(ConvMessage convMessage, boolean playPinAnim)
 	{
-		TypingNotification typingNotification = null;
-
 		/*
 		 * If we were showing the typing bubble, we remove it from the add the new message and add the typing bubble back again
 		 */
-
-		if (!messages.isEmpty() && messages.get(messages.size() - 1).getTypingNotification() != null)
-		{
-			typingNotification = messages.get(messages.size() - 1).getTypingNotification();
-			messages.remove(messages.size() - 1);
-		}
+		
+		TypingNotification typingNotification = removeTypingNotification();
 
 		// Something related to Pins
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
@@ -1188,10 +1182,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			TypingNotification typingNotification = removeTypingNotification();
 			
 			mAdapter.addMessages(messagesList, messages.size());
-
-			/**
-			 * TODO : reachedEnd = false;
-			 */
+			
+			reachedEnd = false;
 
 			ConvMessage convMessage = messagesList.get(messagesList.size() - 1);
 
