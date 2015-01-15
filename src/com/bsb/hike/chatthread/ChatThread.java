@@ -1964,7 +1964,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 		}
 
-		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+		mAdapter.notifyDataSetChanged();
 	}
 	
 	/**
@@ -2494,7 +2494,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mMessageMap.clear();
 		}
 		
-		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+		mAdapter.notifyDataSetChanged();
 		Logger.d(TAG, "Clearing conversation");
 	}
 	

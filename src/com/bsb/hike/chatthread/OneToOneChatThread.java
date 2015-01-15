@@ -608,7 +608,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			if (convMessage.isBlockAddHeader())
 			{
 				messages.remove(0);
-				uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+				mAdapter.notifyDataSetChanged();
 			}
 		}
 	}
@@ -1375,7 +1375,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				mAdapter.addMessage(new ConvMessage(typingNotification));
 			}
 
-			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			mAdapter.notifyDataSetChanged();
 
 			/**
 			 * Don't scroll to bottom if the user is at older messages. It's possible user might be reading them.
@@ -1416,7 +1416,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		updateUIForHikeStatus();
 
-		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+		mAdapter.notifyDataSetChanged();
 	}
 	
 	/**
