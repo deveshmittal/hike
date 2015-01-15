@@ -239,7 +239,14 @@ public class VoIPActivity extends Activity implements CallActions
 	@Override
 	protected void onPause() {
 		super.onPause();
-		sensorManager.unregisterListener(proximitySensorEventListener);
+		if (sensorManager != null) {
+			if (proximityWakeLock.isHeld()) {
+				Logger.d(VoIPConstants.TAG, "Screen on.");
+				proximityWakeLock.release();
+			}
+			sensorManager.unregisterListener(proximitySensorEventListener);
+		}
+		
 //		Logger.w(VoIPConstants.TAG, "VoIPActivity onPause()");
 	}
 
