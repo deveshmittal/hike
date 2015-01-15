@@ -596,17 +596,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		DayHolder dayHolder = null;
 		View v = convertView;
 		// Applicable to all kinds of messages
-        if (type >= viewTypeCount){
-            v = mChatThreadCardRenderer.getView(v, convMessage, parent);
-            DetailViewHolder holder = (DetailViewHolder) v.getTag();
-            dayHolder = holder;
-            setSenderDetails(convMessage, position, holder, false);
-            //setBubbleColor(convMessage, holder.messageContainer);
-            setTimeNStatus(position, holder, true, holder.messageContainer);
-            setSelection(convMessage, holder.selectedStateOverlay);
-        }  else
-            viewType = ViewType.values()[type];
+		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT)
+		{
+			v = mChatThreadCardRenderer.getView(v, convMessage, parent);
+			DetailViewHolder holder = (DetailViewHolder) v.getTag();
+			//dayHolder = holder;
+			//setSenderDetails(convMessage, position, holder, false);
+			//setBubbleColor(convMessage, holder.messageContainer);
+			//setTimeNStatus(position, holder, true, holder.messageContainer);
+			//setSelection(convMessage, holder.selectedStateOverlay);
+		}
 
+		else
+			viewType = ViewType.values()[type];
 
 		if (viewType == ViewType.TYPING_NOTIFICATION)
 		{
@@ -2156,7 +2158,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		if (showDayIndicator(position))
 		{
-			inflateNSetDay(convMessage, dayHolder);
+			//inflateNSetDay(convMessage, dayHolder);
 		}
 		else if (dayHolder.dayStubInflated != null)
 		{
