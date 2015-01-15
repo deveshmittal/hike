@@ -188,6 +188,8 @@ public class VoIPService extends Service {
 			String size = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
 			Logger.d(VoIPConstants.TAG, "Device frames/buffer:" + size + ", sample rate: " + rate);
 		}
+		
+		VoIPUtils.resetNotificationStatus();
 	}
 
 	@Override
@@ -213,6 +215,13 @@ public class VoIPService extends Service {
 			// Error case: we receive a call while we are connecting / connected to another call
 			if (getCallId() != 0 && partnerCallId != getCallId()) {
 				Logger.w(VoIPConstants.TAG, "Call ID mismatch. Remote: " + partnerCallId + ", Self: " + getCallId());
+				try {
+					VoIPUtils.sendMessage(intent.getStringExtra("msisdn"), 
+							HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
+							HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 				return returnInt;
 			}
 			
@@ -396,7 +405,8 @@ public class VoIPService extends Service {
 				switch (focusChange) {
 				case AudioManager.AUDIOFOCUS_GAIN:
 					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_GAIN");
-					setHold(false);
+					if (getCallDuration() > 0)
+						setHold(false);
 					break;
 				case AudioManager.AUDIOFOCUS_LOSS:
 					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_LOSS");
@@ -404,7 +414,8 @@ public class VoIPService extends Service {
 					break;
 				case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
 					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_LOSS_TRANSIENT");
-//					setHold(true);
+					if (getCallDuration() > 0)
+						setHold(true);
 					break;
 				case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
 					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
@@ -414,7 +425,7 @@ public class VoIPService extends Service {
 			}
 		};
 		
-		int result = audioManager.requestAudioFocus(mOnAudioFocusChangeListener, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN);
+		int result = audioManager.requestAudioFocus(mOnAudioFocusChangeListener, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
 		if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 			Logger.w(VoIPConstants.TAG, "Unable to gain audio focus. result: " + result);
 		} else
@@ -728,14 +739,15 @@ public class VoIPService extends Service {
 				VoIPDataPacket dp = new VoIPDataPacket(PacketType.HEARTBEAT);
 				while (keepRunning == true) {
 					sendPacket(dp, false);
-					if (isAudioRunning())
-						chronoBackup++;
 					try {
 						Thread.sleep(HEARTBEAT_INTERVAL);
 					} catch (InterruptedException e) {
 						Logger.d(VoIPConstants.TAG, "Heartbeat InterruptedException: " + e.toString());
 						break;
 					}
+
+					if (isAudioRunning())
+						chronoBackup++;
 				}
 			}
 		}).start();
@@ -1369,9 +1381,9 @@ public class VoIPService extends Service {
 					case COMM_UDP_ACK_PRIVATE:
 						Logger.d(VoIPConstants.TAG, "Received " + dataPacket.getType());
 						senderThread.interrupt();
+						clientPartner.setPreferredConnectionMethod(ConnectionMethods.PRIVATE);
 						if (connected) break;
 						synchronized (clientPartner) {
-							clientPartner.setPreferredConnectionMethod(ConnectionMethods.PRIVATE);
 							VoIPDataPacket dp = new VoIPDataPacket(PacketType.COMM_UDP_ACK_PRIVATE);
 							sendPacket(dp, true);
 						}
@@ -1382,9 +1394,9 @@ public class VoIPService extends Service {
 					case COMM_UDP_ACK_PUBLIC:
 						Logger.d(VoIPConstants.TAG, "Received " + dataPacket.getType());
 						senderThread.interrupt();
+						clientPartner.setPreferredConnectionMethod(ConnectionMethods.PUBLIC);
 						if (connected) break;
 						synchronized (clientPartner) {
-							clientPartner.setPreferredConnectionMethod(ConnectionMethods.PUBLIC);
 							VoIPDataPacket dp = new VoIPDataPacket(PacketType.COMM_UDP_ACK_PUBLIC);
 							sendPacket(dp, true);
 						}
@@ -1395,9 +1407,9 @@ public class VoIPService extends Service {
 					case COMM_UDP_ACK_RELAY:
 						Logger.d(VoIPConstants.TAG, "Received " + dataPacket.getType());
 						senderThread.interrupt();
+						clientPartner.setPreferredConnectionMethod(ConnectionMethods.RELAY);
 						if (connected) break;
 						synchronized (clientPartner) {
-							clientPartner.setPreferredConnectionMethod(ConnectionMethods.RELAY);
 							VoIPDataPacket dp = new VoIPDataPacket(PacketType.COMM_UDP_ACK_RELAY);
 							sendPacket(dp, true);
 						}
@@ -1726,7 +1738,7 @@ public class VoIPService extends Service {
 	
 	public void setHold(boolean hold) {
 		this.hold = hold;
-		Logger.w(VoIPConstants.TAG, "Changing hold to: " + hold);
+		Logger.d(VoIPConstants.TAG, "Changing hold to: " + hold);
 		
 		if (hold == true) {
 			if (recordingThread != null)
@@ -1739,6 +1751,7 @@ public class VoIPService extends Service {
 			startPlayBack();
 		}
 		
+		sendHandlerMessage(VoIPActivity.MSG_UPDATE_HOLD_BUTTON);
 	}	
 
 	public boolean getHold()
