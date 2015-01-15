@@ -1,5 +1,10 @@
 package com.bsb.hike.providers;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -8,6 +13,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.platform.content.PlatformContentConstants;
+import com.bsb.hike.platform.content.PlatformContentUtils;
 import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -20,6 +27,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
 /**
  * Provides hike contact's avatar blob data
@@ -235,6 +244,45 @@ public class HikeProvider extends ContentProvider
 	{
 		Logger.d(TAG, "Invalid access");
 		throw new UnsupportedOperationException("Invalid access");
+	}
+
+	@Override
+	public ParcelFileDescriptor openFile(Uri uri, String mode)
+	{
+
+		Log.d("FileContentProvider", "fetching: " + uri);
+
+		ParcelFileDescriptor parcel = null;
+
+		String fileNameRequested = uri.getLastPathSegment();
+		String[] name = fileNameRequested.split("\\.");
+		String prefix = name[0];
+		String suffix = name[1];
+
+		InputStream is = null;
+		try
+		{
+			String filePath = uri.toString().replace(PlatformContentConstants.CONTENT_AUTHORITY_BASE, PlatformContentConstants.PLATFORM_CONTENT_DIR);
+
+			Log.d("FileContentProvider", "FILE PATH: " + filePath);
+
+			is = new FileInputStream(filePath);
+		}
+		catch (IOException e1)
+		{
+			e1.printStackTrace();
+		}
+
+		File file = PlatformContentUtils.streamToTempFile(is, prefix, suffix);
+		try
+		{
+			parcel = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+		}
+		catch (FileNotFoundException e)
+		{
+			Log.e("FileContentProvider", "uri " + uri.toString(), e);
+		}
+		return parcel;
 	}
 
 }
