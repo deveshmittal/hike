@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,6 +77,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	private static final int BULK_MESSAGE_RECEIVED = 204;
 	
 	private static final int SHOW_IMP_MESSAGE = 205;
+	
+	private static final int GROUP_REVIVED = 206;
 	
 	private static final String TAG = "groupchatthread";
 
@@ -545,7 +547,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	protected String[] getPubSubListeners()
 	{
 		return new String[] { HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONV_META_DATA_UPDATED,
-				HikePubSub.BULK_MESSAGE_RECEIVED };
+				HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_REVIVED };
 	}
 
 	/**
@@ -688,6 +690,10 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			break;
 		case HikePubSub.BULK_MESSAGE_RECEIVED:
 			onBulkMessageReceived(object);
+			break;
+		case HikePubSub.GROUP_REVIVED:
+			onGroupRevived(object);
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching PubSub event in Group ChatThread. Calling super class' onEventReceived");
 			super.onEventReceived(type, object);
@@ -718,6 +724,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		case SHOW_IMP_MESSAGE:
 			Pair<Integer, ConvMessage> pair = (Pair<Integer, ConvMessage>) msg.obj;
 			showImpMessage(pair.second, pair.first);
+			break;
+		case GROUP_REVIVED:
+			handleGroupRevived();
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in Group ChatThread. Calling super class' handleUIMessage");
@@ -1225,5 +1234,25 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		{
 			groupConversation.updateReadByList(msgMsisdn, mrMsgId);
 		}
+	}
+	
+	private void onGroupRevived(Object object)
+	{
+		String groupId = (String) object;
+		
+		if (msisdn.equals(groupId))
+		{
+			uiHandler.sendEmptyMessage(GROUP_REVIVED);
+		}
+	}
+	
+	/**
+	 * This method is called on the UI thread
+	 * 
+	 */
+	private void handleGroupRevived()
+	{
+		toggleGroupLife(true);
+		groupConversation.setGroupMemberAliveCount(0);
 	}
 }
