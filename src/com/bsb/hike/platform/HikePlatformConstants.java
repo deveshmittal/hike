@@ -29,5 +29,6 @@ public interface HikePlatformConstants {
     String CHANNEL_SOURCE = "channelSource";
     String CLICK_TRACK_URL = "clickTrackURL";
     public static final String GAME_SDK_ID = "gamesdk";
-    
+    String MESSAGE = "message";
+	String SOURCE = "clientPkgName";
 }

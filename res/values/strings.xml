@@ -1267,5 +1267,17 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
 	<string name="connected_app_to_hike">1 app connected to hike</string>
 	<string name="confirm_disconnect_app">You will miss out on relevant benefits.</string>
     <string name="send_sticker_joy">Wish your friends with this sticker</string>
+    
+    <string name="led_color_none_key">None</string>
+    <string name="led_color_blue_key">Blue</string>
+    <string name="led_color_cyan_key">Cyan</string>
+    <string name="led_color_green_key">Green</string>
+    <string name="led_color_red_key">Red</string>
+    <string name="led_color_white_key">White</string>
+    <string name="led_color_yellow_key">Yellow</string>
+    <string name="led_color_purple_key">Purple</string>
+
+    <string name="ringtone_loader">Loading...</string>
+    
     <string name="happy_republic_day">Happy Republic Day</string>
 </resources>
