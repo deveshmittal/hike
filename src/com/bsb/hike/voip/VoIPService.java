@@ -188,6 +188,8 @@ public class VoIPService extends Service {
 			String size = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
 			Logger.d(VoIPConstants.TAG, "Device frames/buffer:" + size + ", sample rate: " + rate);
 		}
+		
+		VoIPUtils.resetNotificationStatus();
 	}
 
 	@Override
@@ -1376,9 +1378,9 @@ public class VoIPService extends Service {
 					case COMM_UDP_ACK_PRIVATE:
 						Logger.d(VoIPConstants.TAG, "Received " + dataPacket.getType());
 						senderThread.interrupt();
+						clientPartner.setPreferredConnectionMethod(ConnectionMethods.PRIVATE);
 						if (connected) break;
 						synchronized (clientPartner) {
-							clientPartner.setPreferredConnectionMethod(ConnectionMethods.PRIVATE);
 							VoIPDataPacket dp = new VoIPDataPacket(PacketType.COMM_UDP_ACK_PRIVATE);
 							sendPacket(dp, true);
 						}
@@ -1389,9 +1391,9 @@ public class VoIPService extends Service {
 					case COMM_UDP_ACK_PUBLIC:
 						Logger.d(VoIPConstants.TAG, "Received " + dataPacket.getType());
 						senderThread.interrupt();
+						clientPartner.setPreferredConnectionMethod(ConnectionMethods.PUBLIC);
 						if (connected) break;
 						synchronized (clientPartner) {
-							clientPartner.setPreferredConnectionMethod(ConnectionMethods.PUBLIC);
 							VoIPDataPacket dp = new VoIPDataPacket(PacketType.COMM_UDP_ACK_PUBLIC);
 							sendPacket(dp, true);
 						}
@@ -1402,9 +1404,9 @@ public class VoIPService extends Service {
 					case COMM_UDP_ACK_RELAY:
 						Logger.d(VoIPConstants.TAG, "Received " + dataPacket.getType());
 						senderThread.interrupt();
+						clientPartner.setPreferredConnectionMethod(ConnectionMethods.RELAY);
 						if (connected) break;
 						synchronized (clientPartner) {
-							clientPartner.setPreferredConnectionMethod(ConnectionMethods.RELAY);
 							VoIPDataPacket dp = new VoIPDataPacket(PacketType.COMM_UDP_ACK_RELAY);
 							sendPacket(dp, true);
 						}
