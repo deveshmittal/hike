@@ -9,7 +9,7 @@
 	    android:layout_width="@dimen/festive_popup_width"
 	    android:layout_height="@dimen/festive_popup_height"
 	    android:layout_gravity="center"
-	    android:background="@drawable/new_year_popup_bg"
+	    android:background="@drawable/republic_day_popup_bg"
 	    android:visibility="gone" >
 	
 	    <LinearLayout
@@ -49,7 +49,7 @@
 	            android:id="@+id/festive_header"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:text="@string/happy_new_year"
+	            android:text="@string/happy_republic_day"
 	            android:textColor="@color/white"
 	            android:textSize="20dp"
 	            android:textStyle="bold|italic" />
@@ -67,7 +67,7 @@
 	            android:layout_height="wrap_content"
 	            android:layout_marginTop="18dp"
 	            android:visibility="invisible"
-	            android:src="@drawable/hikinnewyear" />
+	            android:src="@drawable/vandemataram" />
 	    </LinearLayout>
 
 	    <ImageButton
