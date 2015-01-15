@@ -129,4 +129,8 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 		super.onResume();
 	}
 	
+	public String getContactNumber()
+	{
+		return chatThread.getContactNumber();
+	}
 }

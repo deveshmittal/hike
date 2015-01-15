@@ -1640,6 +1640,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void onPause()
 	{
 		isActivityVisible = false;
+		
+		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
 	}
 
 	/**
@@ -2875,5 +2877,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void updateReadByInLoop(long mrMsgId, Set<String> second)
 	{
 		return;
+	}
+	
+	public String getContactNumber()
+	{
+		return msisdn;
 	}
 }
