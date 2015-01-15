@@ -703,6 +703,7 @@ public class HoloCircularProgress extends View {
 	public void resetProgress()
 	{
 		mProgress = 0.0f;
+		invalidate();
 	}
 
 	public float getCurrentProgress()
