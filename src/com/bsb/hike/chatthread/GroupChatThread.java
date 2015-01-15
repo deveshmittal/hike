@@ -80,6 +80,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	
 	private static final int GROUP_REVIVED = 206;
 	
+	private static final int PARTICIPANT_JOINED_OR_LEFT_GROUP = 207;
+	
 	private static final String TAG = "groupchatthread";
 
 	protected GroupConversation groupConversation;
@@ -547,7 +549,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	protected String[] getPubSubListeners()
 	{
 		return new String[] { HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONV_META_DATA_UPDATED,
-				HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_REVIVED };
+				HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_REVIVED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP };
 	}
 
 	/**
@@ -694,6 +696,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		case HikePubSub.GROUP_REVIVED:
 			onGroupRevived(object);
 			break;
+		case HikePubSub.PARTICIPANT_JOINED_GROUP:
+			onParticipantJoinedOrLeftGroup(object, true);
+			break;
+		case HikePubSub.PARTICIPANT_LEFT_GROUP:
+			onParticipantJoinedOrLeftGroup(object, false);
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching PubSub event in Group ChatThread. Calling super class' onEventReceived");
 			super.onEventReceived(type, object);
@@ -727,6 +735,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			break;
 		case GROUP_REVIVED:
 			handleGroupRevived();
+			break;
+		case PARTICIPANT_JOINED_OR_LEFT_GROUP:
+			incrementGroupParticipants((int) msg.obj);
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in Group ChatThread. Calling super class' handleUIMessage");
@@ -1255,4 +1266,24 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		toggleGroupLife(true);
 		groupConversation.setGroupMemberAliveCount(0);
 	}
+	
+	/**
+	 * Called from PubSub Thread
+	 * 
+	 * @param object
+	 */
+	private void onParticipantJoinedOrLeftGroup(Object object, boolean joined)
+	{
+		if (groupConversation.getMsisdn().equals(((JSONObject) object).optString(HikeConstants.TO)))
+		{
+			JSONObject jObj = (JSONObject) object;
+			
+			JSONArray participants = jObj.optJSONArray(HikeConstants.DATA);
+			
+			int addPeopleCount = joined ? participants.length() : (-1 * participants.length());
+			
+			sendUIMessage(PARTICIPANT_JOINED_OR_LEFT_GROUP, addPeopleCount);
+		}
+	}
+	
 }
