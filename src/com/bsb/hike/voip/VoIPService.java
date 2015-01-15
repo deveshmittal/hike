@@ -213,6 +213,13 @@ public class VoIPService extends Service {
 			// Error case: we receive a call while we are connecting / connected to another call
 			if (getCallId() != 0 && partnerCallId != getCallId()) {
 				Logger.w(VoIPConstants.TAG, "Call ID mismatch. Remote: " + partnerCallId + ", Self: " + getCallId());
+				try {
+					VoIPUtils.sendMessage(intent.getStringExtra("msisdn"), 
+							HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
+							HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 				return returnInt;
 			}
 			
