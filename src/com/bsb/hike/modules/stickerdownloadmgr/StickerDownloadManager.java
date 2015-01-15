@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import android.content.Context;
 import android.os.Handler;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.NetworkHandler.NetworkType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
@@ -31,31 +32,22 @@ public class StickerDownloadManager
 
 	public static StickerDownloadManager getInstance()
 	{
-		if(_instance == null)
-		{
-			throw new RuntimeException("SDM not initialized");
-		}
-		else
-		{
-			return _instance;
-		}
-	}
-	
-	public static void init(Context ctx)
-	{
 		if (_instance == null)
 		{
 			synchronized (StickerDownloadManager.class)
 			{
 				if (_instance == null)
+				{
 					_instance = new StickerDownloadManager();
+					queue = new RequestQueue();
+					context = HikeMessengerApp.getInstance().getApplicationContext();
+					handler = new Handler(context.getMainLooper());
+					networkHandler = new NetworkHandler(context, queue);
+				}
 			}
 		}
+		return _instance;
 		
-		queue = new RequestQueue();
-		context = ctx;
-		handler = new Handler(context.getMainLooper());
-		networkHandler = new NetworkHandler(context, queue);
 	}
 
 	/*

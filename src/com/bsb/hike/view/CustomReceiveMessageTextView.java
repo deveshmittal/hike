@@ -53,7 +53,17 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 			int linesMaxWidth = 0;
 			int lines = 0;
 			
-			super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+			// issue : https://code.google.com/p/android/issues/detail?id=35466
+			try
+			{
+				super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+			}
+			catch (IndexOutOfBoundsException e)
+			{
+				// Fallback to plain text
+				setText(getText().toString());
+				super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+			}
 			Layout layout = getLayout();
 			lines = layout.getLineCount();
 			float lastLine = layout.getLineWidth(lines - 1);
@@ -136,6 +146,33 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 			{
 				setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
 			}
+		}
+	}
+
+	@Override
+	public void setGravity(int gravity)
+	{
+		try
+		{
+			super.setGravity(gravity);
+		}
+		catch (IndexOutOfBoundsException e)
+		{
+			setText(getText().toString());
+			super.setGravity(gravity);
+		}
+	}
+
+	@Override
+	public void setText(CharSequence text, BufferType type)
+	{
+		try
+		{
+			super.setText(text, type);
+		}
+		catch (IndexOutOfBoundsException e)
+		{
+			setText(text.toString());
 		}
 	}
 }

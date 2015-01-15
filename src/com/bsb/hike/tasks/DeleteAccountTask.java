@@ -86,17 +86,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	 */
 	private void clearAppData()
 	{
-		/**
-		 * Adding a try catch here, because StickerDownloadManager.getInstance() can throw a RuntimeException
-		 */
-		try
-		{
-			StickerDownloadManager.getInstance().shutDownAll();
-		}
-		catch (RuntimeException e)
-		{
-			Logger.e("DeleteAccountTask", "Error in StickerDownloadManager.getInstance()", e);
-		}
+		StickerDownloadManager.getInstance().shutDownAll();
 
 		/**
 		 * Clearing the shared preferences
