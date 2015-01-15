@@ -423,7 +423,7 @@ public class VoIPService extends Service {
 			}
 		};
 		
-		int result = audioManager.requestAudioFocus(mOnAudioFocusChangeListener, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN);
+		int result = audioManager.requestAudioFocus(mOnAudioFocusChangeListener, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
 		if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 			Logger.w(VoIPConstants.TAG, "Unable to gain audio focus. result: " + result);
 		} else
