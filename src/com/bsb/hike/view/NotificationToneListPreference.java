@@ -229,11 +229,6 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		
 		setEntryAndValues(ringtonesNameURIMap);
 		super.onRestoreInstanceState(superState);
-		if(this.getDialog() == null || !this.getDialog().isShowing())
-		{
-			showDialog(null);
-		}
-		
 	}
 
 	public void setContext(Context context)
