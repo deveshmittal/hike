@@ -604,7 +604,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		if (stickerAdapter != null)
-		{
+		{	
 			stickerAdapter.unregisterListeners();
 		}
 

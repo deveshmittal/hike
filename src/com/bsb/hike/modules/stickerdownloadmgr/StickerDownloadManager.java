@@ -48,14 +48,15 @@ public class StickerDownloadManager
 			synchronized (StickerDownloadManager.class)
 			{
 				if (_instance == null)
+				{
 					_instance = new StickerDownloadManager();
+					queue = new RequestQueue();
+					context = ctx;
+					handler = new Handler(context.getMainLooper());
+					networkHandler = new NetworkHandler(context, queue);
+				}
 			}
 		}
-		
-		queue = new RequestQueue();
-		context = ctx;
-		handler = new Handler(context.getMainLooper());
-		networkHandler = new NetworkHandler(context, queue);
 	}
 
 	/*
