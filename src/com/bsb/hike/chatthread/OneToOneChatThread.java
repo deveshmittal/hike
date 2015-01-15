@@ -360,26 +360,32 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	}
 
 	@Override
-	protected void addMessage(ConvMessage convMessage)
+	protected void addMessage(ConvMessage convMessage, boolean scrollToLast)
 	{
 		TypingNotification typingNotification = null;
-
+		
 		/*
 		 * If we were showing the typing bubble, we remove it from the add the new message and add the typing bubble back again
 		 */
-
+		
 		if (!messages.isEmpty() && messages.get(messages.size() - 1).getTypingNotification() != null)
 		{
 			typingNotification = messages.get(messages.size() - 1).getTypingNotification();
 			messages.remove(messages.size() - 1);
 		}
-
+		
+		/**
+		 * Adding message to the adapter
+		 */
+		
+		mAdapter.addMessage(convMessage);
+		
 		if (convMessage.getTypingNotification() == null && typingNotification != null && convMessage.isSent())
 		{
 			mAdapter.addMessage(new ConvMessage(typingNotification));
 		}
-
-		super.addMessage(convMessage);
+		
+		super.addMessage(convMessage, scrollToLast);
 	}
 	
 	/**
@@ -1377,11 +1383,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 			tryScrollingToBottom(convMessage, messagesList.size());
 
-			/**
-			 * Reset the transcript mode once the user has scrolled to the bottom
-			 */
-
-			uiHandler.sendEmptyMessage(DISABLE_TRANSCRIPT_MODE);
 		}
 	}
 	

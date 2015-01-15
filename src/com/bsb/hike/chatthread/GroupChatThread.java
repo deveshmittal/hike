@@ -564,15 +564,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		groupConversation.setGroupParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), false, false));
 	}
 	
-	/**
-	 * Doing this here since we want to intercept a group specific message
-	 */
-	@Override
-	protected void addMessage(ConvMessage convMessage)
-	{
-		addMessage(convMessage, false);
-	}
-
 	@Override
 	protected void addMessage(ConvMessage convMessage, boolean playPinAnim)
 	{
@@ -590,8 +581,15 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 
 		// Something related to Pins
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+		{
 			showImpMessage(convMessage, playPinAnim ? R.anim.up_down_fade_in :  -1);
-
+		}
+		
+		/**
+		 * Adding message to the adapter
+		 */
+		mAdapter.addMessage(convMessage);
+		
 		if (convMessage.isSent())
 		{
 			groupConversation.setupReadByList(null, convMessage.getMsgID());
@@ -1201,35 +1199,19 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			 * We add back the typing notification if the message was sent by the user.
 			 */
 			
-			if(typingNotification != null)
+			if(typingNotification != null && (!((GroupTypingNotification) typingNotification).getGroupParticipantList().isEmpty()))
 			{
-				if (convMessage.isSent())
-				{
-					mAdapter.addMessage(new ConvMessage(typingNotification));
-				}
-				
-				else
-				{
-					if (!((GroupTypingNotification) typingNotification).getGroupParticipantList().isEmpty())
-					{
-						Logger.d(TAG, "Size in chat thread: " + ((GroupTypingNotification) typingNotification).getGroupParticipantList().size());
-						mAdapter.addMessage(new ConvMessage(typingNotification));
-					}
-				}
+				Logger.d(TAG, "Size in chat thread: " + ((GroupTypingNotification) typingNotification).getGroupParticipantList().size());
+				mAdapter.addMessage(new ConvMessage(typingNotification));
 			}
 			
-			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			mAdapter.notifyDataSetChanged();
 			
 			/**
 			 * Don't scroll to bottom if the user is at older messages. It's possible user might be reading them.
 			 */
 			tryScrollingToBottom(convMessage, messagesList.size());
-			
-			/**
-			 * Reset the transcript mode once the user has scrolled to the bottom
-			 */
 
-			uiHandler.sendEmptyMessage(DISABLE_TRANSCRIPT_MODE);
 		}
 	}
 

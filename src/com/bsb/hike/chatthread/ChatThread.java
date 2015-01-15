@@ -292,8 +292,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void addMessage(ConvMessage convMessage, boolean scrollToLast)
 	{
 
-		mAdapter.addMessage(convMessage);
-		
 		addtoMessageMap(messages.size() - 1, messages.size());
 
 		mAdapter.notifyDataSetChanged();
@@ -301,35 +299,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		// Reset this boolean to load more messages when the user scrolls to
 		// the top
 		reachedEnd = false;
-		if (scrollToLast)
-		{
-			mConversationsView.setSelection(mAdapter.getCount());
-		}
-
+		
 		// TODO : THIS IS TO BE BASED ON PRODUCT CALL
 		/*
 		 * Don't scroll to bottom if the user is at older messages. It's possible that the user might be reading them.
 		 */
 		
-		if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
-		{
-			if (convMessage.getTypingNotification() == null
-					&& (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
-			{
-				showUnreadCountIndicator();
-			}
-			return;
-		}
-		else
-		{
-			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-		}
-		
-		/*
-		 * Resetting the transcript mode once the list has scrolled to the bottom.
-		 */
-		
-		uiHandler.sendEmptyMessage(DISABLE_TRANSCRIPT_MODE);
+		tryScrollingToBottom(convMessage, 0);
 		
 	}
 
@@ -1747,7 +1723,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		handleUnreadUI();
 	}
 	
-	protected void showUnreadCountIndicator(int unreadCount)
+	private void showUnreadCountIndicator(int unreadCount)
 	{
 		incrementUnreadMessageCount(unreadCount);
 		handleUnreadUI();
@@ -1822,7 +1798,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			ConvMessage convMessage = messages.get(messages.size() - 1);
 			convMessage.setTypingNotification(typingNotification);
-
 			mAdapter.notifyDataSetChanged();
 		}
 	}
@@ -1970,6 +1945,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	/**
 	 * Deletes the messages based on the message Ids present in the {@link ArrayList<Long>} in {@link Pair.second}
+	 * 
+	 * Called from the UI thread
 	 * 
 	 * @param pair
 	 */
@@ -2801,20 +2778,31 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
 		{
 
-			if (convMessage.getTypingNotification() == null
-					&& (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+			if (convMessage.getTypingNotification() == null && (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
 			{
-				showUnreadCountIndicator(unreadCount);
+				if (unreadCount == 0)
+				{
+					showUnreadCountIndicator();
+				}
+				
+				else
+				{
+					showUnreadCountIndicator(unreadCount);
+				}
 			}
 			
-			return;
 		}
 
 		else
 		{
 			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+			
+			/*
+			 * Resetting the transcript mode once the list has scrolled to the bottom.
+			 */
+			uiHandler.sendEmptyMessage(DISABLE_TRANSCRIPT_MODE);
 		}
-
+		
 	}
 	
 	protected void onBulkMessageDeliveredRead(Object object)
