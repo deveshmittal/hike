@@ -95,6 +95,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private static final int USER_JOINED_OR_LEFT = 109;
 	
+	private static final int SCHEDULE_LAST_SEEN = 110;
+	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -353,7 +355,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		// TODO Add PubSubListeners
 		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.CONTACT_ADDED, HikePubSub.CONTACT_DELETED,
 				HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START,
-				HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT };
+				HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.APP_FOREGROUNDED };
 		return oneToOneListeners;
 	}
 
@@ -529,6 +531,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case HikePubSub.USER_LEFT:
 			onUserJoinedOrLeft(object, false);
 			break;
+		case HikePubSub.APP_FOREGROUNDED:
+			onAppForegrounded();
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching PubSub event in OneToOne ChatThread. Calling super class' onEventReceived");
 			super.onEventReceived(type, object);
@@ -639,6 +644,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		case USER_JOINED_OR_LEFT:
 			userJoinedOrLeft();
+			break;
+		case SCHEDULE_LAST_SEEN :
+			scheduleLastSeen();
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
@@ -1408,5 +1416,41 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		updateUIForHikeStatus();
 
 		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+	}
+	
+	/**
+	 * PubSub thread
+	 */
+	private void onAppForegrounded()
+	{
+		if (mContactInfo != null)
+		{
+			return;
+		}
+		
+		if (!shouldShowLastSeen())
+		{
+			return;
+		}
+		
+		uiHandler.sendEmptyMessage(SCHEDULE_LAST_SEEN);
+	}
+	
+	/**
+	 * UI Thread
+	 */
+	private void scheduleLastSeen()
+	{
+		if (lastSeenScheduler == null)
+		{
+			lastSeenScheduler = LastSeenScheduler.getInstance(activity.getApplicationContext());
+		}
+		
+		else
+		{
+			lastSeenScheduler.stop(false);
+		}
+		
+		lastSeenScheduler.start(mContactInfo.getMsisdn(), this);
 	}
 }
