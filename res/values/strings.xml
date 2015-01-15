@@ -1281,8 +1281,10 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="voip_call">call</string>
     <string name="voip_call_ended">CALL ENDED</string>
     <string name="voip_on_hold">ON HOLD</string>
-    <string name="voip_incoming">...INCOMING</string>
-    <string name="voip_outgoing">...RINGING</string>
+    <string name="voip_incoming">&#8230;INCOMING</string>
+    <string name="voip_ringing">&#8230;RINGING</string>
+    <string name="voip_connecting">&#8230;CONNECTING</string>
+    <string name="voip_partner_busy">&#8230;BUSY</string>
     <string name="voip_offline_error">Network unavailable. Please try again when you have network connectivity.</string>
     <string name="voip_signal_fair">FAIR</string>
     <string name="voip_signal_good">GOOD</string>

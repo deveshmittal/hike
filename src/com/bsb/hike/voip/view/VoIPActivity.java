@@ -114,8 +114,10 @@ public class VoIPActivity extends Activity implements CallActions
 
 	private enum CallStatus
 	{
-		OUTGOING_RINGING, INCOMING_CALL, ON_HOLD, ACTIVE, ENDED
+		OUTGOING_CONNECTING, OUTGOING_RINGING, INCOMING_CALL, PARTNER_BUSY, ON_HOLD, ACTIVE, ENDED
 	}
+
+	private CallStatus currentCallStatus;
 
 	@SuppressLint("HandlerLeak") class IncomingHandler extends Handler {
 
@@ -128,6 +130,7 @@ public class VoIPActivity extends Activity implements CallActions
 				shutdown();
 				break;
 			case MSG_CONNECTION_ESTABLISHED:
+				showCallStatus(CallStatus.OUTGOING_RINGING);
 				showMessage("Connection established (" + voipService.getConnectionMethod() + ")");
 				break;
 			case MSG_AUDIO_START:
@@ -327,6 +330,7 @@ public class VoIPActivity extends Activity implements CallActions
 		
 		if (action.equals(VoIPConstants.PARTNER_IN_CALL)) {
 			showMessage("Callee is currently busy in a call.");
+			showCallStatus(CallStatus.PARTNER_BUSY);
 			if (voipService != null)
 				voipService.stop();
 		}
@@ -390,7 +394,10 @@ public class VoIPActivity extends Activity implements CallActions
 
 //		isRunning = false;
 
-		showCallStatus(CallStatus.ENDED);
+		if(currentCallStatus!=CallStatus.PARTNER_BUSY)
+		{
+			showCallStatus(CallStatus.ENDED);
+		}
 
 		if(callDuration!=null)
 		{
@@ -490,7 +497,7 @@ public class VoIPActivity extends Activity implements CallActions
 		setAvatar();
 		setContactDetails();
 		showActiveCallButtons();
-		showCallStatus(CallStatus.OUTGOING_RINGING);
+		showCallStatus(CallStatus.OUTGOING_CONNECTING);
 	}
 
 	private void setupCalleeLayout()
@@ -643,6 +650,8 @@ public class VoIPActivity extends Activity implements CallActions
 
 	private void showCallStatus(CallStatus status)
 	{
+		currentCallStatus = status;
+
 		TextView callStatusView = (TextView)findViewById(R.id.call_status);
 		Chronometer callDurationView = (Chronometer) findViewById(R.id.call_duration);
 
@@ -651,27 +660,35 @@ public class VoIPActivity extends Activity implements CallActions
 
 		switch(status)
 		{
-			case OUTGOING_RINGING:	callStatusView.startAnimation(anim);
-									callStatusView.setText(getString(R.string.voip_outgoing));
-									break;
+			case OUTGOING_CONNECTING: callStatusView.startAnimation(anim);
+									  callStatusView.setText(getString(R.string.voip_connecting));
+									  break;
 
-			case INCOMING_CALL:		callStatusView.startAnimation(anim);
-									callStatusView.setText(getString(R.string.voip_incoming));
-							    	break;
+			case OUTGOING_RINGING:	  callStatusView.startAnimation(anim);
+									  callStatusView.setText(getString(R.string.voip_ringing));
+									  break;
 
-			case ACTIVE: 			startCallDuration();
-									callStatusView.setVisibility(View.GONE);
-									callDurationView.setVisibility(View.VISIBLE);
-									break;
+			case INCOMING_CALL:		  callStatusView.startAnimation(anim);
+									  callStatusView.setText(getString(R.string.voip_incoming));
+									  break;
 
-			case ON_HOLD:			callDurationView.setVisibility(View.GONE);
-									callStatusView.setVisibility(View.VISIBLE);
-									callStatusView.startAnimation(anim);
-									callStatusView.setText(getString(R.string.voip_on_hold));
-									break;
+			case PARTNER_BUSY:		  callStatusView.startAnimation(anim);
+									  callStatusView.setText(getString(R.string.voip_partner_busy));
+									  break;
 
-			case ENDED: 			callStatusView.setText(getString(R.string.voip_call_ended));
-									break;
+			case ACTIVE: 			  startCallDuration();
+									  callStatusView.setVisibility(View.GONE);
+									  callDurationView.setVisibility(View.VISIBLE);
+									  break;
+
+			case ON_HOLD:			  callDurationView.setVisibility(View.GONE);
+									  callStatusView.setVisibility(View.VISIBLE);
+									  callStatusView.startAnimation(anim);
+									  callStatusView.setText(getString(R.string.voip_on_hold));
+									  break;
+
+			case ENDED: 			  callStatusView.setText(getString(R.string.voip_call_ended));
+									  break;
 		}
 	}
 	
