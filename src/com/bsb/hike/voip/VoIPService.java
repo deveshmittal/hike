@@ -405,7 +405,8 @@ public class VoIPService extends Service {
 				switch (focusChange) {
 				case AudioManager.AUDIOFOCUS_GAIN:
 					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_GAIN");
-					setHold(false);
+					if (getCallDuration() > 0)
+						setHold(false);
 					break;
 				case AudioManager.AUDIOFOCUS_LOSS:
 					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_LOSS");
@@ -413,7 +414,8 @@ public class VoIPService extends Service {
 					break;
 				case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
 					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_LOSS_TRANSIENT");
-//					setHold(true);
+					if (getCallDuration() > 0)
+						setHold(true);
 					break;
 				case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
 					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
@@ -737,14 +739,15 @@ public class VoIPService extends Service {
 				VoIPDataPacket dp = new VoIPDataPacket(PacketType.HEARTBEAT);
 				while (keepRunning == true) {
 					sendPacket(dp, false);
-					if (isAudioRunning())
-						chronoBackup++;
 					try {
 						Thread.sleep(HEARTBEAT_INTERVAL);
 					} catch (InterruptedException e) {
 						Logger.d(VoIPConstants.TAG, "Heartbeat InterruptedException: " + e.toString());
 						break;
 					}
+
+					if (isAudioRunning())
+						chronoBackup++;
 				}
 			}
 		}).start();
@@ -1735,7 +1738,7 @@ public class VoIPService extends Service {
 	
 	public void setHold(boolean hold) {
 		this.hold = hold;
-		Logger.w(VoIPConstants.TAG, "Changing hold to: " + hold);
+		Logger.d(VoIPConstants.TAG, "Changing hold to: " + hold);
 		
 		if (hold == true) {
 			if (recordingThread != null)
@@ -1748,6 +1751,7 @@ public class VoIPService extends Service {
 			startPlayBack();
 		}
 		
+		sendHandlerMessage(VoIPActivity.MSG_UPDATE_HOLD_BUTTON);
 	}	
 
 	public boolean getHold()

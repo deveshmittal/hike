@@ -104,6 +104,7 @@ public class VoIPActivity extends Activity implements CallActions
 	public static final int MSG_RECONNECTED = 16;
 	public static final int MSG_UPDATE_QUALITY = 17;
 	public static final int MSG_NETWORK_SUCKS = 18;
+	public static final int MSG_UPDATE_HOLD_BUTTON = 19;
 
 	private CallActionsView callActionsView;
 	private Chronometer callDuration;
@@ -174,6 +175,9 @@ public class VoIPActivity extends Activity implements CallActions
 				break;
 			case MSG_NETWORK_SUCKS:
 				showMessage("Network quality is not good enough.");
+				break;
+			case MSG_UPDATE_HOLD_BUTTON:
+				holdButton.setSelected(voipService.getHold());
 				break;
 			default:
 				super.handleMessage(msg);
@@ -630,14 +634,6 @@ public class VoIPActivity extends Activity implements CallActions
 					boolean newHold = !voipService.getHold();
 					holdButton.setSelected(newHold);
 					voipService.setHold(newHold);
-					if(newHold)
-					{
-						showCallStatus(CallStatus.ON_HOLD);
-					}
-					else
-					{
-						showCallStatus(CallStatus.ACTIVE);
-					}
 				}
 			}
 		});
