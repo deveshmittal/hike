@@ -75,6 +75,9 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.video.HikeVideoCompressor;
+import com.bsb.hike.video.VideoUtilities;
+import com.bsb.hike.video.VideoUtilities.VideoEditedInfo;
 
 public class UploadFileTask extends FileTransferBase
 {
@@ -412,6 +415,25 @@ public class UploadFileTask extends FileTransferBase
 					{
 						Logger.d(getClass().getSimpleName(), "throwing copy file exception");
 						throw new Exception(FileTransferManager.READ_FAIL);
+					}
+					hikeFile.setFile(selectedFile);
+				}
+				else if(hikeFileType == HikeFileType.VIDEO)
+				{
+					File compFile = null;
+					if(android.os.Build.VERSION.SDK_INT >= 18)
+					{
+						VideoEditedInfo info = VideoUtilities.processOpenVideo(mFile.getPath());
+						if(info != null)
+						{
+							hikeFile.setVideoEditedInfo(info);
+							compFile = HikeVideoCompressor.getInstance().compressVideo(hikeFile);
+						}
+					}
+					if(compFile != null && compFile.exists()){
+						selectedFile = compFile;
+					}else{
+						selectedFile = mFile;
 					}
 					hikeFile.setFile(selectedFile);
 				}
