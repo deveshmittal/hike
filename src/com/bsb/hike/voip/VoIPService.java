@@ -2020,7 +2020,7 @@ public class VoIPService extends Service {
 				}
 
 				sendHandlerMessage(VoIPActivity.MSG_PARTNER_SOCKET_INFO_TIMEOUT);
-				if (clientSelf.isInitiator()) {
+				if (clientSelf.isInitiator() && !reconnecting) {
 					VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1);
 					VoIPUtils.sendMissedCallNotificationToPartner(clientPartner);
 				}
