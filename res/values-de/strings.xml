@@ -1268,4 +1268,15 @@
     <string name="merry_christmas">Frohe Weihnachten</string>
     <string name="send_sticker_joy">Freunden mit diesem Sticker Wünsche senden</string>
     <string name="happy_new_year">Frohes Neues Jahr</string>
+    
+    <string name="led_color_none_key">Keine</string>
+    <string name="led_color_blue_key">Blau</string>
+    <string name="led_color_cyan_key">Cyan</string>
+    <string name="led_color_green_key">Grün</string>
+    <string name="led_color_red_key">Rot</string>
+    <string name="led_color_white_key">Weiß</string>
+    <string name="led_color_yellow_key">Gelb</string>
+    <string name="led_color_purple_key">Lila</string>
+
+    <string name="ringtone_loader">Wird geladen...</string>
 </resources>

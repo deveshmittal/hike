@@ -1268,4 +1268,15 @@
     <string name="merry_christmas">क्रिसमस की शुभकामनाएँ</string>
     <string name="send_sticker_joy">अपने दोस्तों को इस स्टिकर से शुभकामनाएँ देें</string>
     <string name="happy_new_year">नव वर्ष शुभ हो</string>
+    
+    <string name="led_color_none_key">कोई नहीं</string>
+    <string name="led_color_blue_key">नीला</string>
+    <string name="led_color_cyan_key">हरिताभ नीला</string>
+    <string name="led_color_green_key">हरा</string>
+    <string name="led_color_red_key">लाल</string>
+    <string name="led_color_white_key">सफ़ेद</string>
+    <string name="led_color_yellow_key">पीला</string>
+    <string name="led_color_purple_key">जामुनी</string>
+
+    <string name="ringtone_loader">लोड हो रहा है...</string>
 </resources>
