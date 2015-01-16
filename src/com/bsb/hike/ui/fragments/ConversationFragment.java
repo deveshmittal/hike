@@ -147,7 +147,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
-			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.SWITCH_OFF_NUX_MODE,HikePubSub.CONV_UNREAD_COUNT_MODIFIED};
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.SWITCH_OFF_NUX_MODE, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.CONV_UNREAD_COUNT_MODIFIED};
 
 	private ConversationsAdapter mAdapter;
 
@@ -1947,6 +1947,45 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			});
 		}else if(HikePubSub.CONV_UNREAD_COUNT_MODIFIED.equals(type)){
 			unreadCountModified((Message) object);
+		}
+		else if (HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type))
+		{
+			if (!isAdded())
+			{
+				return;
+			}
+			
+			Pair<String, Boolean> groupMute = (Pair<String, Boolean>) object;
+			String groupId = groupMute.first;
+			final Boolean isMuted = groupMute.second;
+
+			final Conversation conversation = mConversationsByMSISDN.get(groupId);
+			
+			if (conversation == null)
+			{
+				return ;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					View parentView = getParenViewForConversation(conversation);
+					if (parentView == null)
+					{
+						notifyDataSetChanged();
+						return;
+					}
+
+					// Updating data set for Conversation ListView
+					if (conversation instanceof GroupConversation)
+					{
+						((GroupConversation) conversation).setIsMuted(isMuted);
+					}
+
+					notifyDataSetChanged();
+				}
+			});
 		}
 	}
 	

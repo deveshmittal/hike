@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="925"
-    android:versionName="3.6.0" >
+    android:versionCode="928"
+    android:versionName="3.6.0.1" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -339,13 +339,6 @@
                 android:value="@integer/google_play_services_version" />
 
         <receiver android:name=".service.SmsMessageStatusReceiver" />
-        <receiver
-            android:name=".service.AppTrackerReceiver"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="com.android.vending.INSTALL_REFERRER" />
-            </intent-filter>
-        </receiver>
         <receiver android:name=".service.AlarmBroadcastReceiver" >
             <intent-filter>
                 <action android:name="com.bsb.hike.START_ALARM" />
