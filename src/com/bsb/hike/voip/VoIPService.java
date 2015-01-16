@@ -102,7 +102,7 @@ public class VoIPService extends Service {
 	private OpusWrapper opusWrapper;
 	private Resampler resampler;
 	private Thread partnerTimeoutThread = null;
-	private Thread recordingThread = null, playbackThread = null, sendingThread = null, receivingThread = null;
+	private Thread recordingThread = null, playbackThread = null, sendingThread = null, receivingThread = null, codecCompressionThread = null, codecDecompressionThread = null;
 	private AudioTrack audioTrack;
 	private ToneGenerator toneGenerator = null;
 	private static int callId = 0;
@@ -586,17 +586,31 @@ public class VoIPService extends Service {
 				"\nReconnect attempts: " + reconnectAttempts +
 				"\nCall duration: " + getCallDuration());
 		
+		// Terminate threads
 		if (partnerTimeoutThread != null)
 			partnerTimeoutThread.interrupt();
 
 		if (reconnectingBeepsThread != null)
 			reconnectingBeepsThread.interrupt();
+		
+		if (sendingThread != null)
+			sendingThread.interrupt();
 
-		// Hangup tone
-		/*
-		if (clientSelf.isInitiator() || connected)
-			toneGenerator.startTone(ToneGenerator.TONE_CDMA_PIP);
-		*/
+		if (receivingThread != null)
+			receivingThread.interrupt();
+		
+		if (codecDecompressionThread != null)
+			codecDecompressionThread.interrupt();
+		
+		if (codecCompressionThread != null)
+			codecCompressionThread.interrupt();
+		
+		if (playbackThread != null)
+			playbackThread.interrupt();
+		
+		if (recordingThread != null)
+			recordingThread.interrupt();
+		
 		stopRingtone();
 		stopFromSoundPool(ringtoneStreamID);
 		setSpeaker(true);
@@ -607,7 +621,6 @@ public class VoIPService extends Service {
 			opusWrapper.destroy();
 
 		keepRunning = false;
-		connected = false;
 		setCallid(0);
 		chronometer = null;
 		stopSelf();
@@ -726,6 +739,7 @@ public class VoIPService extends Service {
 			localBitrate = remoteBitrate;
 		
 		Logger.d(VoIPConstants.TAG, "Detected ideal bitrate: " + localBitrate);
+		sendHandlerMessage(VoIPActivity.MSG_CURRENT_BITRATE);
 		opusWrapper.setEncoderBitrate(localBitrate);
 	}
 	
@@ -862,7 +876,7 @@ public class VoIPService extends Service {
 	
 	private void startCodecDecompression() {
 		
-		new Thread(new Runnable() {
+		codecDecompressionThread = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -943,11 +957,13 @@ public class VoIPService extends Service {
 					}
 				}
 			}
-		}).start();
+		});
+		
+		codecDecompressionThread.start();
 	}
 	
 	private void startCodecCompression() {
-		new Thread(new Runnable() {
+		codecCompressionThread = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -988,7 +1004,9 @@ public class VoIPService extends Service {
 					}
 				}
 			}
-		}).start();
+		});
+		
+		codecCompressionThread.start();
 	}
 	
 	public void acceptIncomingCall() {
