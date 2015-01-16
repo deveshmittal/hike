@@ -888,7 +888,7 @@ public class HikeConstants
 
 	public static final int XXHDPI_ID = 0;
 	
-	public static final int XXXHDPI_ID = 5;
+	public static final int XXXHDPI_ID = 12;
 
 	public static final int LDPI_CACHE = 15;
 
