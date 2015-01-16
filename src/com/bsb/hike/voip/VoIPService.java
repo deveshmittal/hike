@@ -102,7 +102,7 @@ public class VoIPService extends Service {
 	private OpusWrapper opusWrapper;
 	private Resampler resampler;
 	private Thread partnerTimeoutThread = null;
-	private Thread recordingThread = null, playbackThread = null, sendingThread = null, receivingThread = null;
+	private Thread recordingThread = null, playbackThread = null, sendingThread = null, receivingThread = null, codecCompressionThread = null, codecDecompressionThread = null;
 	private AudioTrack audioTrack;
 	private ToneGenerator toneGenerator = null;
 	private static int callId = 0;
@@ -368,9 +368,15 @@ public class VoIPService extends Service {
 
 		int callDuration = getCallDuration();
 		String durationString = (callDuration == 0)? "" : String.format(Locale.getDefault(), " (%02d:%02d)", (callDuration / 60), (callDuration % 60));
+		String title = "Hike call with " + clientPartner.getName();
+		String text = "Call in progress " + durationString;
+
+		if (hold)
+			text = " Call on hold";
+		
 		Notification myNotification = builder
-		.setContentTitle("Hike Ongoing Call")
-		.setContentText("Call in progress " + durationString)
+		.setContentTitle(title)
+		.setContentText(text)
 		.setSmallIcon(R.drawable.ic_launcher)
 		.setContentIntent(pendingIntent)
 		.setOngoing(true)
@@ -586,17 +592,31 @@ public class VoIPService extends Service {
 				"\nReconnect attempts: " + reconnectAttempts +
 				"\nCall duration: " + getCallDuration());
 		
+		// Terminate threads
 		if (partnerTimeoutThread != null)
 			partnerTimeoutThread.interrupt();
 
 		if (reconnectingBeepsThread != null)
 			reconnectingBeepsThread.interrupt();
+		
+		if (sendingThread != null)
+			sendingThread.interrupt();
 
-		// Hangup tone
-		/*
-		if (clientSelf.isInitiator() || connected)
-			toneGenerator.startTone(ToneGenerator.TONE_CDMA_PIP);
-		*/
+		if (receivingThread != null)
+			receivingThread.interrupt();
+		
+		if (codecDecompressionThread != null)
+			codecDecompressionThread.interrupt();
+		
+		if (codecCompressionThread != null)
+			codecCompressionThread.interrupt();
+		
+		if (playbackThread != null)
+			playbackThread.interrupt();
+		
+		if (recordingThread != null)
+			recordingThread.interrupt();
+		
 		stopRingtone();
 		stopFromSoundPool(ringtoneStreamID);
 		setSpeaker(true);
@@ -607,9 +627,9 @@ public class VoIPService extends Service {
 			opusWrapper.destroy();
 
 		keepRunning = false;
-		connected = false;
 		setCallid(0);
 		chronometer = null;
+		connected = false;
 		stopSelf();
 	}
 	
@@ -726,6 +746,7 @@ public class VoIPService extends Service {
 			localBitrate = remoteBitrate;
 		
 		Logger.d(VoIPConstants.TAG, "Detected ideal bitrate: " + localBitrate);
+		sendHandlerMessage(VoIPActivity.MSG_CURRENT_BITRATE);
 		opusWrapper.setEncoderBitrate(localBitrate);
 	}
 	
@@ -862,7 +883,7 @@ public class VoIPService extends Service {
 	
 	private void startCodecDecompression() {
 		
-		new Thread(new Runnable() {
+		codecDecompressionThread = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -943,11 +964,13 @@ public class VoIPService extends Service {
 					}
 				}
 			}
-		}).start();
+		});
+		
+		codecDecompressionThread.start();
 	}
 	
 	private void startCodecCompression() {
-		new Thread(new Runnable() {
+		codecCompressionThread = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -988,7 +1011,9 @@ public class VoIPService extends Service {
 					}
 				}
 			}
-		}).start();
+		});
+		
+		codecCompressionThread.start();
 	}
 	
 	public void acceptIncomingCall() {
@@ -1123,7 +1148,7 @@ public class VoIPService extends Service {
 					index = 0;
 					
 					if (Thread.interrupted()) {
-						Logger.w(VoIPConstants.TAG, "Stopping recording thread.");
+//						Logger.w(VoIPConstants.TAG, "Stopping recording thread.");
 						break;
 					}
 				}
@@ -1215,7 +1240,7 @@ public class VoIPService extends Service {
 					}
 					
 					if (Thread.interrupted()) {
-						Logger.w(VoIPConstants.TAG, "Stopping playback thread.");
+//						Logger.w(VoIPConstants.TAG, "Stopping playback thread.");
 						break;
 					}
 				}
@@ -1995,7 +2020,7 @@ public class VoIPService extends Service {
 				}
 
 				sendHandlerMessage(VoIPActivity.MSG_PARTNER_SOCKET_INFO_TIMEOUT);
-				if (clientSelf.isInitiator()) {
+				if (clientSelf.isInitiator() && !reconnecting) {
 					VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1);
 					VoIPUtils.sendMissedCallNotificationToPartner(clientPartner);
 				}
