@@ -368,9 +368,15 @@ public class VoIPService extends Service {
 
 		int callDuration = getCallDuration();
 		String durationString = (callDuration == 0)? "" : String.format(Locale.getDefault(), " (%02d:%02d)", (callDuration / 60), (callDuration % 60));
+		String title = "Hike call with " + clientPartner.getName();
+		String text = "Call in progress " + durationString;
+
+		if (hold)
+			text = " Call on hold";
+		
 		Notification myNotification = builder
-		.setContentTitle("Hike Ongoing Call")
-		.setContentText("Call in progress " + durationString)
+		.setContentTitle(title)
+		.setContentText(text)
 		.setSmallIcon(R.drawable.ic_launcher)
 		.setContentIntent(pendingIntent)
 		.setOngoing(true)
@@ -623,6 +629,7 @@ public class VoIPService extends Service {
 		keepRunning = false;
 		setCallid(0);
 		chronometer = null;
+		connected = false;
 		stopSelf();
 	}
 	
@@ -1141,7 +1148,7 @@ public class VoIPService extends Service {
 					index = 0;
 					
 					if (Thread.interrupted()) {
-						Logger.w(VoIPConstants.TAG, "Stopping recording thread.");
+//						Logger.w(VoIPConstants.TAG, "Stopping recording thread.");
 						break;
 					}
 				}
@@ -1233,7 +1240,7 @@ public class VoIPService extends Service {
 					}
 					
 					if (Thread.interrupted()) {
-						Logger.w(VoIPConstants.TAG, "Stopping playback thread.");
+//						Logger.w(VoIPConstants.TAG, "Stopping playback thread.");
 						break;
 					}
 				}
