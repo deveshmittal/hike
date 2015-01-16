@@ -87,7 +87,7 @@ public class SoundUtils
 			mediaPlayer.reset();
 		}
 
-		mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
+		mediaPlayer.setAudioStreamType(AudioManager.STREAM_SYSTEM);
 		Resources res = context.getResources();
 		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
 
@@ -133,7 +133,7 @@ public class SoundUtils
 		{
 			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 			Ringtone r = RingtoneManager.getRingtone(context, notification);
-			r.setStreamType(AudioManager.STREAM_NOTIFICATION);
+			r.setStreamType(AudioManager.STREAM_SYSTEM);
 			r.play();
 		}
 		catch (Exception e)
@@ -164,7 +164,7 @@ public class SoundUtils
 			mediaPlayer.reset();
 		}
 
-		mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
+		mediaPlayer.setAudioStreamType(AudioManager.STREAM_SYSTEM);
 
 		try
 		{
