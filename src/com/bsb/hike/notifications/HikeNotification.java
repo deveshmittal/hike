@@ -1103,7 +1103,7 @@ public class HikeNotification
 		
 		AudioManager manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 		
-		if (!forceNotPlaySound && !manager.isMusicActive())
+		if (!forceNotPlaySound)
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 			String notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.NOTIFICATION_TONE_URI, NOTIF_SOUND_HIKE);
@@ -1111,20 +1111,13 @@ public class HikeNotification
 			{
 				Logger.i("notif", "sound " + notifSound);
 				
-				if (!NOTIF_SOUND_OFF.equals(notifSound))
+				if (manager.isMusicActive())
 				{
-					if (NOTIF_SOUND_HIKE.equals(notifSound))
-					{
-						mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
-					}
-					else if (NOTIF_SOUND_DEFAULT.equals(notifSound))
-					{
-						mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
-					}
-					else
-					{
-						mBuilder.setSound(Uri.parse(notifSound));
-					}
+					playSoundViaPlayer(notifSound);
+				}
+				else
+				{
+					playSoundViaBuilder(mBuilder, notifSound);
 				}
 
 				if (!VIB_OFF.equals(vibrate))
@@ -1240,6 +1233,44 @@ public class HikeNotification
 	private void notificationBuilderPostWork()
 	{
 		HikeAlarmManager.cancelAlarm(context, HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION);
+	}
+	
+	private void playSoundViaPlayer(String notifSound)
+	{
+		if (!NOTIF_SOUND_OFF.equals(notifSound))
+		{
+			if (NOTIF_SOUND_HIKE.equals(notifSound))
+			{
+				SoundUtils.playSoundFromRaw(context, R.raw.hike_jingle_15);
+			}
+			else if (NOTIF_SOUND_DEFAULT.equals(notifSound))
+			{
+				SoundUtils.playDefaultNotificationSound(context);
+			}
+			else
+			{
+				SoundUtils.playSound(context, Uri.parse(notifSound));
+			}
+		}
+	}
+
+	private void playSoundViaBuilder(final NotificationCompat.Builder mBuilder, String notifSound)
+	{
+		if (!NOTIF_SOUND_OFF.equals(notifSound))
+		{
+			if (NOTIF_SOUND_HIKE.equals(notifSound))
+			{
+				mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
+			}
+			else if (NOTIF_SOUND_DEFAULT.equals(notifSound))
+			{
+				mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
+			}
+			else
+			{
+				mBuilder.setSound(Uri.parse(notifSound));
+			}
+		}
 	}
 
 }
