@@ -2010,12 +2010,15 @@ public class HikeConstants
 		public static final int TEXT_PIN = 1;
 		
 		public static final int CONTENT = 2;
+
+		public static final int WEB_CONTENT = 3;
 	}
 	
 	public static interface ConvMessagePacketKeys{
 		public static final String CONTENT_TYPE = "c";
 		public static final String PIN_TYPE = "pin";
 		public static final String LOVE_ID = "loveID";
+		public static final String WEB_CONTENT_TYPE = "wc";
 	}
 	
 	public static class HASH_MESSAGE_TYPE

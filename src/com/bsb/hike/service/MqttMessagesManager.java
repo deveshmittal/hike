@@ -1,20 +1,5 @@
 package com.bsb.hike.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,16 +22,21 @@ import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
-import com.bsb.hike.models.*;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.Protip;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -62,6 +52,20 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * 
@@ -2057,6 +2061,8 @@ public class MqttMessagesManager
 
 	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
 	{
+
+		Logger.d("Gcm test", jsonObj.toString());
 		String type = jsonObj.optString(HikeConstants.TYPE);
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{

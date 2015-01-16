@@ -5,15 +5,19 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-
+import android.text.TextUtils;
 import com.bsb.hike.models.HikeAlarmManager;
+import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
+import com.bsb.hike.service.MqttMessagesManager;
 import com.bsb.hike.service.PreloadNotificationSchedular;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMBaseIntentService;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 //import com.bsb.hike.service.HikeMqttManager;
 
@@ -43,7 +47,7 @@ public class GCMIntentService extends GCMBaseIntentService
 	@Override
 	protected void onMessage(Context context, Intent intent)
 	{
-		Logger.d(getClass().getSimpleName(), "Message received: " + intent);
+
 
 		prefs = HikeSharedPreferenceUtil.getInstance(context);
 
@@ -61,6 +65,7 @@ public class GCMIntentService extends GCMBaseIntentService
 			}
 			return;
 		}
+
 
 		HikeMessengerApp app = (HikeMessengerApp) context.getApplicationContext();
 		app.connectToService();
@@ -82,8 +87,35 @@ public class GCMIntentService extends GCMBaseIntentService
 				bundle.putString(HikeConstants.Extras.OFFLINE_PUSH_KEY, jsonString);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_TO_OFFLINE_PUSH, bundle);
 			}
+		}else{
+			// join with mqtt code
+			Logger.d("Gcm test", intent.getExtras().toString());
+			String str = intent.getStringExtra("msg");
+			try
+			{
+				MqttMessagesManager.getInstance(context).saveMqttMessage(new JSONObject(str));
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+
 		}
 		context.sendBroadcast(new Intent(HikeMqttManagerNew.MQTT_CONNECTION_CHECK_ACTION).putExtra("reconnect", reconnect));
+
+	}
+
+	private void showDummyNotificationForTesting(Intent intent)
+	{
+		Logger.d(getClass().getSimpleName(), "Message received: " + intent.getExtras().toString());
+		String des = intent.getExtras().getString("d");
+		Logger.d(getClass().getSimpleName(), "Desc is : "+des);
+		if(!TextUtils.isEmpty(des))
+		{
+			HikeNotification n = HikeNotification.getInstance(getApplicationContext());
+			n.notifyStringMessage("+hike3+",des,false);
+		}
+
 	}
 
 	@Override

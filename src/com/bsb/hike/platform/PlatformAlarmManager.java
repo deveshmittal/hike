@@ -1,16 +1,10 @@
 package com.bsb.hike.platform;
 
-import java.util.Iterator;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
-
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeContentDatabase;
@@ -18,6 +12,10 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.utils.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Iterator;
 
 public class PlatformAlarmManager
 {
@@ -71,7 +69,7 @@ public class PlatformAlarmManager
 	 */
 	public static final void processTasks(Intent intent, Context context)
 	{
-		Logger.i(tag, "Process Tasks Invoked with intent :  " + intent.toString());
+		Logger.i(tag, "Process Tasks Invoked with intent :  " + intent.getExtras().toString());
 		Bundle data = intent.getExtras();
 		if (data != null && data.containsKey(PLATFORM_ALARM))
 		{

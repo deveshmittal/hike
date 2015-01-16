@@ -42,6 +42,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
+import com.bsb.hike.platform.PlatformWebMessageMetadata;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.*;
@@ -1314,6 +1315,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						convMessage.platformMessageMetadata = new PlatformMessageMetadata(metadata, getApplicationContext());
                         convMessage.setIsSent(true);
                         convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
+						multipleMessageList.add(convMessage);
+					} else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.WEB_CONTENT){
+						//Web content message
+						String metadata = msgExtrasJson.optString(HikeConstants.METADATA);
+
+						ConvMessage convMessage = new ConvMessage();
+
+						convMessage.setMessageType(MESSAGE_TYPE.WEB_CONTENT);
+						convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(metadata);
+
+						convMessage.setMessage(convMessage.platformWebMessageMetadata.getNotifText());
 						multipleMessageList.add(convMessage);
 					}
 					/*

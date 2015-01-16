@@ -6,6 +6,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.Toast;
 import com.bsb.hike.db.HikeContentDatabase;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,16 +23,18 @@ public class PlatformJavaScriptBridge
 	private static final String tag = "platformbridge";
 	Context mContext;
 	WebView mWebView;
+	ConvMessage message;
 
-	public PlatformJavaScriptBridge(Context c, WebView webView) {
+	public PlatformJavaScriptBridge(Context c, WebView webView, ConvMessage convMessage) {
 		this.mContext = c;
 		this.mWebView = webView;
+		this.message = convMessage;
 	}
 
+	@JavascriptInterface
+	public void animationComplete(String html, String hhh){
 
-	public void animationComplete(int height, int id, boolean isExpanded){
-
-		mWebView.loadUrl("javascript:getInnerHTML(\"" + id + "\")");
+		receiveInnerHTML(html, "");
 
 
 	}
@@ -42,12 +45,18 @@ public class PlatformJavaScriptBridge
 
 	}
 	@JavascriptInterface
-	public void receiveInnerHTML(String html, int id) {
-		mWebView.loadData(html,"text/html; charset=UTF-8", null);
-		mWebView.setVerticalScrollBarEnabled(false);
-		mWebView.setHorizontalScrollBarEnabled(false);
-		mWebView.addJavascriptInterface(this, HikePlatformConstants.PLATFORM_BRIDGE_NAME);
-		mWebView.getSettings().setJavaScriptEnabled(true);
+	public void receiveInnerHTML(final String html, String id) {
+		mWebView.post(new Runnable() {
+			@Override
+			public void run() {
+				mWebView.loadDataWithBaseURL("", "twtw","text/html; charset=UTF-8", null, "");
+				mWebView.setVerticalScrollBarEnabled(false);
+				mWebView.setHorizontalScrollBarEnabled(false);
+				mWebView.addJavascriptInterface(this, HikePlatformConstants.PLATFORM_BRIDGE_NAME);
+				mWebView.getSettings().setJavaScriptEnabled(true);
+			}
+		});
+
 	}
 
 	@JavascriptInterface
@@ -97,6 +106,18 @@ public class PlatformJavaScriptBridge
 		{
 			e.printStackTrace();
 		}
+	}
+
+	@JavascriptInterface
+	public void replaceMetadata(JSONObject metadata)
+	{
+		message.platformWebMessageMetadata = new PlatformWebMessageMetadata(metadata);
+	}
+
+	@JavascriptInterface
+	public void updateMetadata(JSONObject metadata)
+	{
+		message.platformWebMessageMetadata = new PlatformWebMessageMetadata(metadata);
 	}
 
 	@JavascriptInterface

@@ -2,15 +2,12 @@ package com.bsb.hike.platform;
 
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
@@ -18,7 +15,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontTextView;
 import org.json.JSONException;
@@ -51,7 +47,6 @@ public class CardRenderer implements View.OnLongClickListener {
     private static final int ARTICLE_CARD_LAYOUT_RECEIVED = 7;
     private static final int COLOR_CARD_LAYOUT_SENT = 8;
     private static final int COLOR_CARD_LAYOUT_RECEIVED = 9;
-    private static final int WEB_VIEW_LAYOUT = 6;
 
 
     public static class ViewHolder extends MessagesAdapter.DetailViewHolder {
@@ -135,8 +130,6 @@ public class CardRenderer implements View.OnLongClickListener {
                 case 5:
                     return COLOR_CARD_LAYOUT_SENT;
 
-                case 6:
-                    return WEB_VIEW_LAYOUT;
 
             }
 
@@ -157,8 +150,6 @@ public class CardRenderer implements View.OnLongClickListener {
                 case 5:
                     return COLOR_CARD_LAYOUT_RECEIVED;
 
-                case 6:
-                    return WEB_VIEW_LAYOUT;
 
             }
 
@@ -285,59 +276,6 @@ public class CardRenderer implements View.OnLongClickListener {
             cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
 
             forwardCallAction(convMessage, view);
-
-        }  if (cardType == WEB_VIEW_LAYOUT) {
-            ViewHolder viewHolder = new ViewHolder();
-            Logger.i("cardrenderer","web view layout inflated");
-                view = inflater.inflate(R.layout.html_item, parent, false);
-                WebView web = (WebView) view.findViewById(R.id.webcontent);
-                web.loadUrl("file://" + Environment.getExternalStorageDirectory().getAbsolutePath() + "/demo/fixture.html");
-
-                final PlatformJavaScriptBridge myJavaScriptInterface = new PlatformJavaScriptBridge(mContext, web);
-                web.setVerticalScrollBarEnabled(false);
-                //myJavaScriptInterface.allowUniversalAccess();
-               // myJavaScriptInterface.allowDebugging();
-                web.setHorizontalScrollBarEnabled(false);
-                web.addJavascriptInterface(myJavaScriptInterface, "PlatformBridge");
-                web.getSettings().setJavaScriptEnabled(true);
-
-               // web.loadUrl("javascript:setData(\"" + "44" + "," + "99"  + "," + convMessage.platformMessageMetadata.getHelperData() +  "\")");
-
-            web.setWebViewClient(new WebViewClient()
-                {
-
-
-                    @Override
-                    public void onPageFinished(WebView view, String url)
-                    {
-                        super.onPageFinished(view, url);
-                        view.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                        view.requestLayout();
-                        view.setVisibility(View.VISIBLE);
-                       // view.addJavascriptInterface(myJavaScriptInterface, HikePlatformConstants.PLATFORM_BRIDGE_NAME);
-                        Log.d("Height data", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
-                        Logger.d("card renderer", convMessage.toString());
-                        view.loadUrl("javascript:setDataTest(\"" + "44" +  "\")");
-                        JSONObject obj = new JSONObject();
-                        try
-                        {
-                            obj.put("msgId", convMessage.getMsgID());
-                            obj.put("msisdn", convMessage.getMsisdn());
-                           // obj.put("helperData", convMessage.platformMessageMetadata.getHelperData());
-                        }
-                        catch (JSONException e)
-                        {
-                            e.printStackTrace();
-                        }
-                        String str = String.valueOf(obj);
-                        //String webUrl = "javascript:setData('"+str+"')";
-                       // view.loadUrl(webUrl);
-                        view.loadUrl("javascript:setDataTest('" + convMessage.getMsgID() + ", " + convMessage.getMsisdn() +  "')");
-                    }
-
-                });
-
-
 
         }
 

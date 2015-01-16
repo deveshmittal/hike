@@ -1,28 +1,23 @@
 package com.bsb.hike.platform.content;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-
-import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import com.bsb.hike.HikeMessengerApp;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PlatformWebClient extends WebViewClient
 {
 
-	private Context mContext;
 
-	public PlatformWebClient(Context argContext)
-	{
-		mContext = argContext;
-	}
 
 	@Override
 	public WebResourceResponse shouldInterceptRequest(WebView view, String url)
@@ -45,7 +40,7 @@ public class PlatformWebClient extends WebViewClient
 
 		if (prefix.contains("Roboto") || prefix.contains("roboto"))
 		{
-			AssetManager assManager = mContext.getAssets();
+			AssetManager assManager = HikeMessengerApp.getInstance().getApplicationContext().getAssets();
 			try
 			{
 				wrtInputStreamm = assManager.open(PlatformContentConstants.ASSETS_FONTS_DIR + fileNameRequested);

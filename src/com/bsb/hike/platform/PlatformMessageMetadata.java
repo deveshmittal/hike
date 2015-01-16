@@ -281,6 +281,16 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
         return "";
     }
 
+    public JSONObject getHelperData(){
+
+        if (json.has(HELPER_DATA)){
+            JSONObject jsonObj = json.optJSONObject(HELPER_DATA);
+            if (null != jsonObj)
+                return jsonObj;
+        }
+        return new JSONObject();
+    }
+
     public String JSONtoString() {
         return json.toString();
     }
