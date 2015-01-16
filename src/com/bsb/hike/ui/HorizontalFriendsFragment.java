@@ -63,19 +63,20 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		if(nm.getCurrentState() == NUXConstants.NUX_NEW||NUXManager.getInstance().getCurrentState()==NUXConstants.NUX_SKIPPED)
 		{
 			maxShowListCount = nm.getNuxTaskDetailsPojo().getMin();
-			if(TextUtils.isEmpty(selectedFriendsString))
-			changeDisplayString(0);
 		}
 		// invite more nux 
 		else if(nm.getCurrentState() == NUXConstants.NUX_IS_ACTIVE)
 		{
-			maxShowListCount = nm.getNuxTaskDetailsPojo().getMax() - nm.getCountLockedContacts() - nm.getCountUnlockedSize();
+			maxShowListCount = nm.getNuxTaskDetailsPojo().getMax();
 			for (String msisdn : nm.getLockedContacts()) {
 				addContactView(msisdn, viewStack.getChildCount());
 			}
 			showNextButton(true);
-			scrollHorizontalView(maxShowListCount, viewStack.getChildAt(0).getWidth());
+			scrollHorizontalView(0, viewStack.getChildAt(0).getWidth());
+			Logger.d("UmangX", viewStack.getChildAt(0).getWidth() + "");
 		}
+		
+		//this only appears for custom message screen
 		if (!TextUtils.isEmpty(selectedFriendsString)) {
 			String[] arrmsisdn = selectedFriendsString.split(NUXConstants.STRING_SPLIT_SEPERATOR);
 			
@@ -88,8 +89,9 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 				}
 			}
 		} else {
-			for (int i = 0; i < maxShowListCount; i++) 
+			for (int i = 0; i < maxShowListCount - nm.getCountLockedContacts() - nm.getCountUnlockedContacts(); i++) 
 				addEmptyView();
+			changeDisplayString(0);
 		}
 		return v;
 	}
@@ -117,7 +119,7 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     	}
     	
     }
-    
+   
     public boolean removeView(ContactInfo contactInfo){
     	
     	if(NUXManager.getInstance().getLockedContacts().contains(contactInfo.getMsisdn()) || NUXManager.getInstance().getUnlockedContacts().contains(contactInfo.getMsisdn()))
@@ -147,8 +149,10 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
   
     
     private void showNextButton(boolean show){
+    	if(NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_NEW||NUXManager.getInstance().getCurrentState()==NUXConstants.NUX_SKIPPED)
     		nxtBtn.setEnabled(show);
     }
+
     private void changeDisplayString(int selectionCount){
     	
     	if(selectionCount >= maxShowListCount){
@@ -167,12 +171,12 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     private void scrollHorizontalView(int count, int width){
     	hsc.scrollTo(count*width, 0);
     }
+
     public boolean addView(ContactInfo contactInfo){
 		
     	if(viewMap.containsKey(contactInfo.getMsisdn())){
     		return false;
     	}
-    	
     	int index = 0,count = 0;
     	View replaceView = null;
     	for (int i = 0; i < viewStack.getChildCount(); i++) {
@@ -188,8 +192,8 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     	//count here means total non selected contacts
     	if(count == 0) return false;
     	changeDisplayString(maxShowListCount - count +1);
-    	scrollHorizontalView(maxShowListCount - count - 1, replaceView.getWidth());
     	addContactView(contactInfo.getMsisdn(), index);
+    	scrollHorizontalView(maxShowListCount - count - 1, replaceView.getWidth());
     	viewStack.removeView(replaceView);
 		return true;
     }

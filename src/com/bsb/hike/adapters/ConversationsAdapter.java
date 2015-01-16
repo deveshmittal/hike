@@ -627,10 +627,10 @@ public class ConversationsAdapter extends BaseAdapter
 
 		TextView messageView = viewHolder.subText;
 		messageView.setVisibility(View.VISIBLE);
+		updateViewsRelatedToMessageState(parentView, message, conversation);
 		
 		if(!( (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_IS_ACTIVE) &&(NUXManager.getInstance().isContactLocked(message.getMsisdn()))))
 		{
-			updateViewsRelatedToMessageState(parentView, message, conversation);
 			CharSequence markedUp = getConversationText(conversation, message);
 			messageView.setText(markedUp);
 			
@@ -667,6 +667,7 @@ public class ConversationsAdapter extends BaseAdapter
 		TextView messageView = viewHolder.subText;
 
 		TextView unreadIndicator = viewHolder.unreadIndicator;
+		boolean isNuxLocked = NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_IS_ACTIVE && NUXManager.getInstance().isContactLocked(message.getMsisdn());
 		unreadIndicator.setVisibility(View.GONE);
 		imgStatus.setVisibility(View.GONE);
 		/*
@@ -674,7 +675,11 @@ public class ConversationsAdapter extends BaseAdapter
 		 */
 		if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE || message.getState() == State.RECEIVED_UNREAD)
 		{
-			int resId = message.getImageState();
+			int resId = 0;
+			if(isNuxLocked) 
+				resId = R.drawable.ic_pending_icon;
+			else
+				message.getImageState();
 			if (resId > 0)
 			{
 				imgStatus.setImageResource(resId);
@@ -693,9 +698,9 @@ public class ConversationsAdapter extends BaseAdapter
 			}
 		}
 
-		if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+		if (message.getState() == ConvMessage.State.RECEIVED_UNREAD || isNuxLocked)
 		{
-			/* set unread messages to BLUE */
+			/* set NUX waiting or unread messages to BLUE */
 			messageView.setTextColor(context.getResources().getColor(R.color.unread_message));
 		}
 		else

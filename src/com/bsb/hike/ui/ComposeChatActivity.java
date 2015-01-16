@@ -675,7 +675,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint(R.string.nux_fwd_search_hint);
 			break;
 		case NUX_INCENTIVE_MODE:
-			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 			adapter.showCheckBoxAgainstItems(true);
 			tagEditText.clear(false);
 			adapter.removeFilter();

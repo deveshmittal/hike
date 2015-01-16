@@ -342,7 +342,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		
 		//Setting lock icon image 0 unlocked-->red ,>0<Min->orange,    ==Min&&state=completed  -->Green
 		
-		if(mmNuxManager.getCountUnlockedSize()==0)
+		if(mmNuxManager.getCountUnlockedContacts()==0)
 		{
 			//red
 		}
@@ -373,14 +373,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			butRemind.setVisibility(View.VISIBLE);
 
 			if (mmNuxManager.getCountLockedContacts()
-					+ mmNuxManager.getCountUnlockedSize() == mmDetails.getMax()) {
+					+ mmNuxManager.getCountUnlockedContacts() == mmDetails.getMax()) {
 				butInviteMore.setVisibility(View.GONE);
 			}
 		}
 		if (!(mmNuxManager.getCurrentState()==NUXConstants.COMPLETED))
 		{
-			progressNux.setProgress(NUXManager.getInstance().getCountUnlockedSize() / ((float) mmDetails.getMin()));
-			chatProgress.setText(String.format(mmReward.getStatusText(), mmNuxManager.getCountUnlockedSize(), mmDetails.getMin()));
+			progressNux.setProgress(NUXManager.getInstance().getCountUnlockedContacts() / ((float) mmDetails.getMin()));
+			chatProgress.setText(String.format(mmReward.getStatusText(), mmNuxManager.getCountUnlockedContacts(), mmDetails.getMin()));
 
 		}
 		else
@@ -451,8 +451,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				else
 				{
-					chatProgress.setText(String.format(mmReward.getStatusText(), mmNuxManager.getCountUnlockedSize(), mmDetails.getMin()));
-					progressNux.setProgress(NUXManager.getInstance().getCountUnlockedSize() / mmDetails.getMin());
+					chatProgress.setText(String.format(mmReward.getStatusText(), mmNuxManager.getCountUnlockedContacts(), mmDetails.getMin()));
+					progressNux.setProgress(NUXManager.getInstance().getCountUnlockedContacts() / mmDetails.getMin());
 				}
 				if (Utils.isHoneycombOrHigher())
 					ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).start();

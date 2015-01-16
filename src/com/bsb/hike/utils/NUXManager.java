@@ -758,7 +758,7 @@ public class NUXManager implements NUXConstants
 		return mprefs.getData(CURRENT_NUX_ACTIVITY, NUX_KILLED);
 	}
 
-	public int getCountUnlockedSize()
+	public int getCountUnlockedContacts()
 	{
 		return unlockedNUXContacts.size();
 	}
