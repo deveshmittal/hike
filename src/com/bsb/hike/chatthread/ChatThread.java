@@ -409,8 +409,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	private void initActionMode()
 	{
-		mActionMode = new HikeActionMode(activity);
-		mActionMode.setListener(this);
+		mActionMode = new HikeActionMode(activity, this);
 	}
 
 	/**

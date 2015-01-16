@@ -16,56 +16,53 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 {
 	public static interface ActionModeListener
 	{
-		public void actionModeDestroyed(int id);
+		public void actionModeDestroyed(int actionModeId);
 
-		public void doneClicked(int id);
+		public void doneClicked(int actionModeId);
 
-		public void initActionbarActionModeView(int id,View view);
+		public void initActionbarActionModeView(int actionModeId, View view);
 	}
 
-	private static final int DEFAULT_LAYOUT = R.layout.hike_action_mode;
+	private static final int DEFAULT_LAYOUT_RESID = R.layout.hike_action_mode;
 
-	protected ActionMode actionMode;
+	protected ActionMode mActionMode;
 
-	protected SherlockFragmentActivity sherlockFragmentActivity;
+	protected SherlockFragmentActivity mActivity;
 
-	private int title, save, layoutId = DEFAULT_LAYOUT, id;
+	private int actionModeTitle, doneButtonText, defaultLayoutId = DEFAULT_LAYOUT_RESID, actionModeId;
 
-	private ActionModeListener listener;
+	private ActionModeListener mListener;
 
-	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity)
+	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, ActionModeListener listener)
 	{
-		this(sherlockFragmentActivity, -1, -1, DEFAULT_LAYOUT);
+		this(sherlockFragmentActivity, -1, -1, DEFAULT_LAYOUT_RESID, listener);
 	}
 
-	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int layoutId)
+	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int layoutId, ActionModeListener listener)
 	{
-		this(sherlockFragmentActivity, -1, -1, layoutId);
+		this(sherlockFragmentActivity, -1, -1, layoutId, listener);
 	}
 
-	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int title, int save, int layoutId)
+	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int title, int save, int layoutId, ActionModeListener listener)
 	{
-		this.sherlockFragmentActivity = sherlockFragmentActivity;
-		this.layoutId = layoutId;
-		this.title = title;
-		this.save = save;
-	}
-
-	public void setListener(ActionModeListener listener)
-	{
-		this.listener = listener;
+		this.mActivity = sherlockFragmentActivity;
+		this.defaultLayoutId = layoutId;
+		this.actionModeTitle = title;
+		this.doneButtonText = save;
+		this.mListener = listener;
 	}
 
 	protected void startActionMode()
 	{
-		sherlockFragmentActivity.startActionMode(this);
+		mActivity.startActionMode(this);
 	}
 
 	@Override
 	public boolean onCreateActionMode(ActionMode mode, Menu menu)
 	{
-		this.actionMode = mode;
-		mode.setCustomView(LayoutInflater.from(sherlockFragmentActivity).inflate(layoutId, null));
+		this.mActionMode = mode;
+		mode.setCustomView(LayoutInflater.from(mActivity).inflate(defaultLayoutId, null));
+
 		return true;
 	}
 
@@ -85,38 +82,38 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	@Override
 	public void onDestroyActionMode(ActionMode mode)
 	{
-		this.actionMode = null;
-		if (listener != null)
+		this.mActionMode = null;
+		if (mListener != null)
 		{
-			listener.actionModeDestroyed(id);
+			mListener.actionModeDestroyed(actionModeId);
 		}
 		actionBarDestroyed();
 	}
 
 	public void showActionMode(int id)
 	{
-		showActionMode(id, layoutId);
+		showActionMode(id, defaultLayoutId);
 	}
 
 	public void showActionMode(int id, int layoutId)
 	{
-		this.layoutId = layoutId;
-		showActionMode(id, title, save);
+		this.defaultLayoutId = layoutId;
+		showActionMode(id, actionModeTitle, doneButtonText);
 	}
 
-	public void showActionMode(int id, int title, int save)
+	public void showActionMode(int id, int title, int doneButtonText)
 	{
-		this.id = id;
-		this.title = title;
-		this.save = save;
-		sherlockFragmentActivity.startActionMode(this);
+		this.actionModeId = id;
+		this.actionModeTitle = title;
+		this.doneButtonText = doneButtonText;
+		mActivity.startActionMode(this);
 	}
 
 	private void initDefaultView()
 	{
-		setText(R.id.title, title, -1);
-		setText(R.id.save, save, R.anim.scale_in);
-		actionMode.getCustomView().findViewById(R.id.done_container).setOnClickListener(this);
+		setText(R.id.title, actionModeTitle, -1);
+		setText(R.id.save, doneButtonText, R.anim.scale_in);
+		mActionMode.getCustomView().findViewById(R.id.done_container).setOnClickListener(this);
 	}
 
 	/**
@@ -124,15 +121,15 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	 */
 	protected void initView()
 	{
-		if (layoutId == DEFAULT_LAYOUT)
+		if (defaultLayoutId == DEFAULT_LAYOUT_RESID)
 		{
 			initDefaultView();
 		}
 		else
 		{
-			if (listener != null)
+			if (mListener != null)
 			{
-				listener.initActionbarActionModeView(id,actionMode.getCustomView());
+				mListener.initActionbarActionModeView(actionModeId, mActionMode.getCustomView());
 			}
 		}
 	}
@@ -141,11 +138,11 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	{
 		if (textId != -1)
 		{
-			TextView tv = (TextView) actionMode.getCustomView().findViewById(viewId);
+			TextView tv = (TextView) mActionMode.getCustomView().findViewById(viewId);
 			tv.setText(textId);
 			if (animId != -1)
 			{
-				tv.startAnimation(AnimationUtils.loadAnimation(sherlockFragmentActivity, animId));
+				tv.startAnimation(AnimationUtils.loadAnimation(mActivity, animId));
 			}
 			return tv;
 		}
@@ -167,17 +164,17 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 
 	protected void doneClicked()
 	{
-		if (listener != null)
+		if (mListener != null)
 		{
-			listener.doneClicked(id);
+			mListener.doneClicked(actionModeId);
 		}
 	}
 
 	public boolean onBackPressed()
 	{
-		if (actionMode != null)
+		if (mActionMode != null)
 		{
-			actionMode.finish();
+			mActionMode.finish();
 			return true;
 		}
 		return false;
@@ -185,9 +182,9 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 
 	public void finish()
 	{
-		if (actionMode != null)
+		if (mActionMode != null)
 		{
-			actionMode.finish();
+			mActionMode.finish();
 		}
 	}
 }
