@@ -20,11 +20,11 @@ public class NuxSelectFriends
 	 * @param hideList
 	 * @param toggleContactSection
 	 * @param butText
-	 * @param searchToggle
+	 * @param moduleToggle
 	 * @param contactSectionType
 	 */
 	public NuxSelectFriends(String sectionTitle, String title2, String title3, String recoSectionTitle, Set<String> recoList, ArrayList<String> hideList,
-			boolean toggleContactSection, String butText, boolean searchToggle, int contactSectionType)
+			 String butText, boolean moduleToggle, int contactSectionType)
 	{
 		super();
 		this.sectionTitle = sectionTitle;
@@ -33,9 +33,8 @@ public class NuxSelectFriends
 		this.recoSectionTitle = recoSectionTitle;
 		this.recoList = recoList;
 		this.hideList = hideList;
-		this.toggleContactSection = toggleContactSection;
 		this.butText = butText;
-		this.searchToggle = searchToggle;
+		this.moduleToggle = moduleToggle;
 		this.contactSectionType = contactSectionType;
 	}
 
@@ -95,13 +94,6 @@ public class NuxSelectFriends
 		return hideList;
 	}
 
-	/**
-	 * @return the toggleContactSection
-	 */
-	public boolean isToggleContactSection()
-	{
-		return toggleContactSection;
-	}
 
 	/**
 	 * @return the butText
@@ -114,9 +106,9 @@ public class NuxSelectFriends
 	/**
 	 * @return the searchToggle
 	 */
-	public boolean isSearchToggle()
+	public boolean isModuleToggle()
 	{
-		return searchToggle;
+		return moduleToggle;
 	}
 
 	/**
@@ -141,7 +133,7 @@ public class NuxSelectFriends
 
 	private String butText;
 
-	private boolean searchToggle;
+	private boolean moduleToggle;
 
 	private int contactSectionType;
 

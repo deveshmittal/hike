@@ -1139,7 +1139,7 @@ public class Utils
 			data.put(HikeConstants.UPGRADE, upgrade);
 			data.put(HikeConstants.SENDBOT, sendbot);
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-
+			data.put(HikeConstants.RESOLUTION_ID, Utils.getResolutionId());
 			requestAccountInfo.put(HikeConstants.DATA, data);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, requestAccountInfo);
 		}
@@ -5196,12 +5196,4 @@ public class Utils
 		return true;
 	}
 
-	public static void sendMultiConvMessage(MultipleConvMessage multiConvMessages) {
-      
-		HikeConversationsDatabase.getInstance().addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),multiConvMessages.getCreateChatThread());
-        // after DB insertion, we need to update conversation UI , so sending event which contains all contacts and last message for each contact
-        multiConvMessages.sendPubSubForConvScreenMultiMessage();
-        // publishing mqtt packet
-        HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
-    }
 }

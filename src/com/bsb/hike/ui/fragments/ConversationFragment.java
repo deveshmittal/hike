@@ -84,6 +84,7 @@ import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.NUXChatReward;
 import com.bsb.hike.models.NUXTaskDetails;
+import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -248,8 +249,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private enum footerState
 	{
-		OPEN(0), HALFOPEN(1), CLOSED(2), NONINFLATED(3);
-
+		OPEN(0), HALFOPEN(1), CLOSED(2);
+		
 		private static footerState val;
 
 		private footerState(int value)
@@ -263,6 +264,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		public static void setEnumState(footerState value)
 		{
+			Logger.d("footer","Footer state set = "+value+"");
 			val = value;
 
 		}
@@ -301,12 +303,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		rewardCard = (TextView) root.findViewById(R.id.tv_chatReward);
 
-		fillNuxFooterElements(root);
-
+		fillNuxFooterElements();
+		
 		if (!NUXManager.getInstance().isReminderReceived())
 		{
-			
-			
 			if (!Utils.isHoneycombOrHigher())
 			{
 				llChatReward.setVisibility(View.GONE);
@@ -330,48 +330,56 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else
 		{
 			NUXManager.getInstance().reminderShown();
+			footerState.setEnumState(footerState.OPEN);
+
 		}
+
 	}
 
-	private void fillNuxFooterElements(final View root)
+	private void fillNuxFooterElements()
 	{
 		NUXManager mmNuxManager = NUXManager.getInstance();
 		NUXTaskDetails mmDetails = mmNuxManager.getNuxTaskDetailsPojo();
 		NUXChatReward mmReward = mmNuxManager.getNuxChatRewardPojo();
-
+		NuxSelectFriends mmSelectFriends=mmNuxManager.getNuxSelectFriendsPojo();
+		
 		
 		//Setting lock icon image 0 unlocked-->red ,>0<Min->orange,    ==Min&&state=completed  -->Green
 		
 		if(mmNuxManager.getCountUnlockedContacts()==0)
 		{
-			//red
+			lockImage.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_lock_red));
 		}
 		else
 		{
 			lockImage.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_lock_orange));
 		}
 	
-		
-		
-		if (mmReward != null)
+		if (mmSelectFriends.isModuleToggle())
 		{
-			
-			butInviteMore.setText(mmReward.getInviteMoreButtonText());
-
-			butRemind.setText(mmReward.getRemindButtonText());
-			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_SKIPPED)
-			{
-				butRemind.setVisibility(View.GONE);
-				butInviteMore.setText(mmReward.getSelectFriendsText());
-			}
-			rewardCard.setText(String.format(mmReward.getRewardCardText(), mmDetails.getMin(), mmDetails.getIncentiveAmount()));
-
+			llChatReward.setOnClickListener(null);
+			chatProgress.setVisibility(View.GONE);
 		}
 
+		butInviteMore.setText(mmReward.getInviteMoreButtonText());
+
+		butRemind.setText(mmReward.getRemindButtonText());
+
+		rewardCard.setText(String.format(mmReward.getRewardCardText(), mmDetails.getMin(), mmDetails.getIncentiveAmount()));
+
+		if (mmNuxManager.getCurrentState() == NUXConstants.NUX_SKIPPED)
+		{
+			butRemind.setVisibility(View.GONE);
+			butInviteMore.setText(mmReward.getSelectFriendsText());
+		}
+
+		
 		
 		if (mmNuxManager.getCurrentState() == NUXConstants.NUX_IS_ACTIVE) {
 			butRemind.setVisibility(View.VISIBLE);
 
+			// condition when the total contacts selected = max,then remind button should show and invite more should be hidden
+			
 			if (mmNuxManager.getCountLockedContacts()
 					+ mmNuxManager.getCountUnlockedContacts() == mmDetails.getMax()) {
 				butInviteMore.setVisibility(View.GONE);
@@ -437,10 +445,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					llChatReward.setVisibility(View.GONE);
 				}
 				footerState.setEnumState(footerState.CLOSED);
-				break;
-			case NONINFLATED:
-				Logger.d("Footer", "noninfalted");
-				footerState.setEnumState(footerState.OPEN);
 				break;
 			case CLOSED:
 				Logger.d("Footer", "closed");
@@ -619,8 +623,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			ViewStub mmStub = (ViewStub) parent.findViewById(R.id.nux_footer);
 			mmStub.setLayoutResource(R.layout.nux_footer);
 			mmStub.inflate();
-			bindNuxViews(parent);
 			footerState.setEnumState(footerState.CLOSED);
+			bindNuxViews(parent);
+			
 		}
 		mConversationsComparator = new Conversation.ConversationComparator();
 		fetchConversations();
@@ -2628,8 +2633,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_IS_ACTIVE
 				|| (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_SKIPPED)||(NUXManager.getInstance().getCurrentState() == NUXConstants.COMPLETED))
 		{
-			bindNuxViews(parent);
-			footerState.setEnumState(footerState.CLOSED);
+			fillNuxFooterElements();
+			//footerState.setEnumState(footerState.CLOSED);
 		}
 		
 		if(NUXManager.getInstance().getCurrentState()==NUXConstants.NUX_KILLED)

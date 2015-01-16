@@ -24,6 +24,7 @@ import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.google.android.gms.internal.co;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -237,7 +238,7 @@ public class IntentManager
 		context.startActivity(in);
 	}
 
-	public static Intent openInviteFriends(Context context)
+	public static Intent openInviteFriends(Activity context)
 	{
 		// TODO Auto-generated method stub
 		Intent in = new Intent(context, NUXInviteActivity.class);
@@ -245,7 +246,7 @@ public class IntentManager
 		return in;
 	}
 	
-	public static Intent openNuxFriendSelector(Context context)
+	public static Intent openNuxFriendSelector(Activity context)
 	{
 		Intent in = new Intent(context, ComposeChatActivity.class);
 		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -254,7 +255,7 @@ public class IntentManager
 		return in;
 	}
 	
-	public static Intent openNuxCustomMessage(Context context)
+	public static Intent openNuxCustomMessage(Activity context)
 	{
 		Intent in = new Intent(context, NuxSendCustomMessageActivity.class);
 		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

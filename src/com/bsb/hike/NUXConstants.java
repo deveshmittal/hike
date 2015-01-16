@@ -37,7 +37,7 @@ public interface NUXConstants
 
 	public static final String SF_RECO_SECTION_TITLE = "recTitle";
 
-	public static final String SF_RECO_LIST = "recList";
+	public static final String SF_RECO_TOGGLE = "recTgl";
 
 	public static final String SF_HIDE_LIST = "hdeLst";
 
@@ -45,7 +45,7 @@ public interface NUXConstants
 
 	public static final String SF_BUTTON_TEXT = "nxTxt";
 
-	public static final String SF_SEARCH_TOGGLE = "srchTgl";
+	public static final String SF_MODULE_TOGGLE = "srchTgl";
 
 	public static final String SF_CONTACT_SECTION_TYPE = "cntctTyp";
 
@@ -160,5 +160,65 @@ public interface NUXConstants
 	public static final String REMINDER_RECEIVED="rem_rec";
 	
 	public static final String SELECTED_FRIENDS="selected_friends";
+	
+	public static final String NOTIFICATION_PKT="notif";
+	
+	public static final String PUSH_TYPE="push";
+	
+	public static final String PUSH_TITLE="pushTtl";
+	
+	public static final String PUSH_TEXT="pushTxt";
+	
+	public static final String PUSH_REWARD_CARD_TYPE="rwdCrdTyp";
+	
+	public static enum ENUM_PUSH_TYPE
+	{
+		PUSH_LOUD(0), PUSH_SILENT(1), PUSH_NONE(2), UNKNOWN(-1);
+
+		int val;
+
+		private ENUM_PUSH_TYPE(int val)
+		{
+			this.val = val;
+		}
+
+		public static ENUM_PUSH_TYPE getEnumValue(int val)
+		{
+			for (ENUM_PUSH_TYPE enum1 : ENUM_PUSH_TYPE.values())
+			{
+				if (enum1.val == val)
+					return enum1;
+
+			}
+			return UNKNOWN;
+		}
+	}
+
+	public static enum ENUM_REWARD_TYPE
+	{
+		COMPRESSED(0), NORMAL(1), EXPANDED(2), UNKNOWN(-1);
+
+		int val;
+
+		private ENUM_REWARD_TYPE(int val)
+		{
+			this.val = val;
+		}
+
+		public static ENUM_REWARD_TYPE getEnumValue(int val)
+		{
+			for (ENUM_REWARD_TYPE enum1 : ENUM_REWARD_TYPE.values())
+			{
+				if (enum1.val == val)
+					return enum1;
+
+			}
+			return UNKNOWN;
+		}
+	}
+
+	public static final int REWARD_TYPE_EXPANDED=0;
+	
+	public static final int REWARD_TYPE_COMPRESSED=1;
 
 }

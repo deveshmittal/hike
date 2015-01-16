@@ -1,9 +1,12 @@
 package com.bsb.hike.models;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 
-import com.bsb.hike.utils.Utils;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 
 public class NUXChatReward
 {
@@ -18,8 +21,6 @@ public class NUXChatReward
 
 	private String chatWaitingText;
 
-	private String pendingChatIcon;
-
 	private String detailsText;
 
 	private String detailsLink;
@@ -29,10 +30,14 @@ public class NUXChatReward
 	private String remindText;
 
 	private String tapToClaimLink;
-	
+
 	private String tapToClaimText;
-	
+
 	private String selectFriends;
+
+	private String pendingChatIcon;
+
+	private Bitmap pendingChatIconBitmap;
 
 	/**
 	 * @return the toggleModule
@@ -79,12 +84,8 @@ public class NUXChatReward
 	 */
 	public Bitmap getPendingChatIcon()
 	{
-		if (!TextUtils.isEmpty(pendingChatIcon))
-		{
-			return Utils.stringToBitmap(pendingChatIcon);
-		}
 
-		return null;
+		return pendingChatIconBitmap;
 	}
 
 	/**
@@ -141,7 +142,7 @@ public class NUXChatReward
 	 * @param tapToClaimLink
 	 */
 	public NUXChatReward(boolean toggleModule, String rewardCardText, String rewardCardSuccessText, String statusText, String chatWaitingText, String pendingChatIcon,
-			String detailsText, String detailsLink, String button1Text, String button2Text, String tapToClaimLink,String tapToClaimText,String selectFriends)
+			String detailsText, String detailsLink, String button1Text, String button2Text, String tapToClaimLink, String tapToClaimText, String selectFriends)
 	{
 		this.toggleModule = toggleModule;
 		this.rewardCardText = rewardCardText;
@@ -154,20 +155,45 @@ public class NUXChatReward
 		this.inviteMoreText = button1Text;
 		this.remindText = button2Text;
 		this.tapToClaimLink = tapToClaimLink;
-		this.tapToClaimText=tapToClaimText;
-		this.selectFriends=selectFriends;
+		this.tapToClaimText = tapToClaimText;
+		this.selectFriends = selectFriends;
+
+		if (!TextUtils.isEmpty(pendingChatIcon))
+		{
+			StringToBitmap mmBitmap = new StringToBitmap(pendingChatIcon);
+			HikeHandlerUtil.getInstance().postRunnableWithDelay(mmBitmap, 0);
+		}
+		else
+		{
+			pendingChatIconBitmap = BitmapFactory.decodeResource(HikeMessengerApp.getInstance().getResources(), R.drawable.ic_lock_red);
+		}
 	}
 
 	public String getTapToClaimText()
 	{
-		// TODO Auto-generated method stub
 		return tapToClaimText;
 	}
 
 	public String getSelectFriendsText()
 	{
-		// TODO Auto-generated method stub
 		return selectFriends;
+	}
+
+	class StringToBitmap implements Runnable
+	{
+		private String base64image = null;
+
+		public StringToBitmap(String base64)
+		{
+			base64image = base64;
+		}
+
+		@Override
+		public void run()
+		{
+			pendingChatIconBitmap = HikeBitmapFactory.stringToBitmap(base64image);
+		}
+
 	}
 
 }

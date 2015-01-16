@@ -34,13 +34,15 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 
-		Utils.blockOrientationChange(this);
+		
 		
 		if (Utils.requireAuth(this))
 		{
 			return;
 		}
 
+		Utils.blockOrientationChange(this);
+		
 		getSupportActionBar().hide();
 
 		HikeMessengerApp app = (HikeMessengerApp) getApplication();

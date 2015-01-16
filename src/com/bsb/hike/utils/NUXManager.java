@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
@@ -28,6 +29,8 @@ import com.bsb.hike.models.NuxCustomMessage;
 import com.bsb.hike.models.NuxInviteFriends;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.ui.HomeActivity;
 
 public class NUXManager implements NUXConstants
 {
@@ -82,7 +85,7 @@ public class NUXManager implements NUXConstants
 		activity.startActivity(IntentManager.openInviteFriends(activity));
 	}
 
-	public void startNuxCustomMessage(String selectedFriends,Activity activity)
+	public void startNuxCustomMessage(String selectedFriends, Activity activity)
 	{
 		Intent in = IntentManager.openNuxCustomMessage(activity);
 		in.putExtra(SELECTED_FRIENDS, selectedFriends);
@@ -150,7 +153,7 @@ public class NUXManager implements NUXConstants
 	{
 		return listNuxContacts;
 	}
-	
+
 	public HashSet<String> getUnlockedContacts()
 	{
 		return unlockedNUXContacts;
@@ -173,7 +176,7 @@ public class NUXManager implements NUXConstants
 		convMessage = Utils.makeConvMessage(null, message, true);
 		messageList.add(convMessage);
 		MultipleConvMessage multiConvMessages = new MultipleConvMessage(messageList, contactList, System.currentTimeMillis() / 1000, true, null);
-		Utils.sendMultiConvMessage(multiConvMessages);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_SENT, multiConvMessages);
 	}
 
 	public void parseNuxPacket(String json)
@@ -204,7 +207,7 @@ public class NUXManager implements NUXConstants
 							parseInviteFriends(mmJsonObject.optString(INVITE_FRIENDS));
 
 						if (!TextUtils.isEmpty(mmJsonObject.optString(SELECT_FRIENDS)))
-							parseselectFriends(mmJsonObject.optString(SELECT_FRIENDS));
+							parseSelectFriends(mmJsonObject.optString(SELECT_FRIENDS));
 
 						if (!TextUtils.isEmpty(mmJsonObject.optString(CUSTOM_MESSAGE)))
 							parseCustomMessage(mmJsonObject.optString(CUSTOM_MESSAGE));
@@ -213,13 +216,33 @@ public class NUXManager implements NUXConstants
 							parseChatRewards(mmJsonObject.optString(CHAT_REWARDS_BAR));
 
 					}
-
-					setCurrentState(NUX_NEW);
+					NUXTaskDetails mmDetails = getNuxTaskDetailsPojo();
+				
+					// Check for min and max should not be zero.
+					
+					if (!(mmDetails.getMin() == 0 || mmDetails.getMax() == 0 || mmDetails.getMin() > mmDetails.getMax()))
+					{
+						if (data.has(NOTIFICATION_PKT))
+							showPush(mmJsonObject.optString(NOTIFICATION_PKT));
+						setCurrentState(NUX_NEW);
+					}
 				}
 			}
 			else if (root.optString(HikeConstants.SUB_TYPE).equals(KILLNUX))
 			{
-
+				if (root.has(HikeConstants.DATA))
+				{
+					JSONObject data = root.optJSONObject(HikeConstants.DATA);
+					if (data.has(SCREENS))
+					{
+						JSONObject mmJsonObject = data.optJSONObject(SCREENS);
+						if (mmJsonObject.has(NOTIFICATION_PKT))
+						{
+							if (TextUtils.isEmpty(mmJsonObject.optString(NOTIFICATION_PKT)))
+								showPush(mmJsonObject.getString(NOTIFICATION_PKT));
+						}
+					}
+				}
 				setCurrentState(NUX_KILLED);
 				shutDownNUX();
 			}
@@ -244,7 +267,7 @@ public class NUXManager implements NUXConstants
 								parseInviteFriends(mmJsonObject.optString(INVITE_FRIENDS));
 
 							if (!TextUtils.isEmpty(mmJsonObject.optString(SELECT_FRIENDS)))
-								parseselectFriends(mmJsonObject.optString(SELECT_FRIENDS));
+								parseSelectFriends(mmJsonObject.optString(SELECT_FRIENDS));
 
 							if (!TextUtils.isEmpty(mmJsonObject.optString(CUSTOM_MESSAGE)))
 								parseCustomMessage(mmJsonObject.optString(CUSTOM_MESSAGE));
@@ -252,6 +275,8 @@ public class NUXManager implements NUXConstants
 							if (!TextUtils.isEmpty(mmJsonObject.optString(CHAT_REWARDS_BAR)))
 								parseChatRewards(mmJsonObject.optString(CHAT_REWARDS_BAR));
 
+							if (TextUtils.isEmpty(mmJsonObject.optString(NOTIFICATION_PKT)))
+								showPush(mmJsonObject.getString(NOTIFICATION_PKT));
 						}
 
 					}
@@ -281,13 +306,34 @@ public class NUXManager implements NUXConstants
 							setCurrentState(COMPLETED);
 						}
 					}
-
+					JSONObject mmJsonObject = mmdata.optJSONObject(SCREENS);
+					if (mmJsonObject != null)
+					{
+						if (TextUtils.isEmpty(mmJsonObject.optString(NOTIFICATION_PKT)))
+							showPush(mmJsonObject.getString(NOTIFICATION_PKT));
+					}
 				}
 			}
 			else if (root.optString(HikeConstants.SUB_TYPE).equals(REMINDER))
 			{
 				if (!(getCurrentState() == NUX_KILLED || getCurrentState() == COMPLETED))
 				{
+
+					if (root.has(HikeConstants.DATA))
+					{
+						JSONObject data = root.optJSONObject(HikeConstants.DATA);
+						if (data.has(SCREENS))
+						{
+							JSONObject mmJsonObject = data.optJSONObject(SCREENS);
+							if (mmJsonObject.has(NOTIFICATION_PKT))
+							{
+								if (TextUtils.isEmpty(mmJsonObject.optString(NOTIFICATION_PKT)))
+									showPush(mmJsonObject.getString(NOTIFICATION_PKT));
+							}
+						}
+					}
+					// TODO Discuss with pankaj S
+				
 					mprefs.saveData(REMINDER_RECEIVED, true);
 				}
 			}
@@ -312,12 +358,12 @@ public class NUXManager implements NUXConstants
 
 			if (newTaskDetails.has(TD_INCENTIVE_ID))
 			{
-				task_details.put(TD_INCENTIVE_ID, newTaskDetails.get(TD_INCENTIVE_ID));
+				task_details.put(TD_INCENTIVE_ID, newTaskDetails.getJSONObject(TD_INCENTIVE_ID));
 			}
 
 			if (newTaskDetails.has(TD_ACTIVITY_ID))
 			{
-				task_details.put(TD_ACTIVITY_ID, newTaskDetails.get(TD_ACTIVITY_ID));
+				task_details.put(TD_ACTIVITY_ID, newTaskDetails.getJSONObject(TD_ACTIVITY_ID));
 			}
 
 			if (newTaskDetails.has(TD_MIN_CONTACTS))
@@ -328,12 +374,10 @@ public class NUXManager implements NUXConstants
 			{
 				task_details.put(TD_MAX_CONTACTS, newTaskDetails.getInt(TD_MAX_CONTACTS));
 			}
-
 			if (newTaskDetails.has(TD_IS_SKIPPABLE))
 			{
-				task_details.put(TD_IS_SKIPPABLE, newTaskDetails.getInt(TD_IS_SKIPPABLE));
+				task_details.put(TD_IS_SKIPPABLE, newTaskDetails.getBoolean(TD_IS_SKIPPABLE));
 			}
-
 			mprefs.saveData(TASK_DETAILS, task_details.toString());
 
 		}
@@ -426,13 +470,12 @@ public class NUXManager implements NUXConstants
 		}
 		catch (JSONException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	}
 
-	public void parseselectFriends(String json)
+	public void parseSelectFriends(String json)
 	{
 		try
 		{
@@ -447,23 +490,20 @@ public class NUXManager implements NUXConstants
 			if (newselectFriend.has(SF_BUTTON_TEXT))
 				selectFriend.put(SF_BUTTON_TEXT, newselectFriend.getString(SF_BUTTON_TEXT));
 
-			if (newselectFriend.has(SF_CONTACT_SECTION_TOGGLE))
-				selectFriend.put(SF_CONTACT_SECTION_TOGGLE, newselectFriend.getBoolean(SF_CONTACT_SECTION_TOGGLE));
-
 			if (newselectFriend.has(SF_CONTACT_SECTION_TYPE))
 				selectFriend.put(SF_CONTACT_SECTION_TYPE, newselectFriend.getInt(SF_CONTACT_SECTION_TYPE));
 
 			if (newselectFriend.has(SF_HIDE_LIST))
 				selectFriend.put(SF_HIDE_LIST, newselectFriend.getJSONArray(SF_HIDE_LIST));
 
-			if (newselectFriend.has(SF_RECO_LIST))
-				selectFriend.put(SF_RECO_LIST, newselectFriend.getBoolean(SF_RECO_LIST));
+			if (newselectFriend.has(SF_RECO_TOGGLE))
+				selectFriend.put(SF_RECO_TOGGLE, newselectFriend.getBoolean(SF_RECO_TOGGLE));
 
 			if (newselectFriend.has(SF_RECO_SECTION_TITLE))
 				selectFriend.put(SF_RECO_SECTION_TITLE, newselectFriend.getString(SF_RECO_SECTION_TITLE));
 
-			if (newselectFriend.has(SF_SEARCH_TOGGLE))
-				selectFriend.put(SF_SEARCH_TOGGLE, newselectFriend.getBoolean(SF_SEARCH_TOGGLE));
+			if (newselectFriend.has(SF_MODULE_TOGGLE))
+				selectFriend.put(SF_MODULE_TOGGLE, newselectFriend.getBoolean(SF_MODULE_TOGGLE));
 
 			if (newselectFriend.has(SF_SECTION_TITLE))
 				selectFriend.put(SF_SECTION_TITLE, newselectFriend.getString(SF_SECTION_TITLE));
@@ -478,7 +518,6 @@ public class NUXManager implements NUXConstants
 		}
 		catch (JSONException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -642,12 +681,12 @@ public class NUXManager implements NUXConstants
 					String sectionTitle = select_friends.optString(SF_SECTION_TITLE, context.getString(R.string.nux_select_friends_1));
 					String recoSectionTitle = select_friends.optString(SF_RECO_SECTION_TITLE, context.getString(R.string.nux_select_friends_reconame));
 
-					if (select_friends.optBoolean(SF_RECO_LIST))
+					if (select_friends.optBoolean(SF_RECO_TOGGLE))
 					{
 						HikeSharedPreferenceUtil settings = HikeSharedPreferenceUtil.getInstance(context);
 
 						String mymsisdn = settings.getData(HikeMessengerApp.MSISDN_SETTING, "");
-						recoList=Utils.getServerRecommendedContactsSelection(settings.getData(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), mymsisdn);
+						recoList = Utils.getServerRecommendedContactsSelection(settings.getData(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), mymsisdn);
 					}
 					if (select_friends.has(SF_HIDE_LIST))
 					{
@@ -658,14 +697,12 @@ public class NUXManager implements NUXConstants
 							hideList.add(mmArray.optString(i));
 						}
 					}
-					boolean toggleContactSection = select_friends.optBoolean(SF_CONTACT_SECTION_TOGGLE);
 					String butText = select_friends.optString(SF_BUTTON_TEXT, context.getString(R.string.nux_select_friends_nextbut));
 					String title2 = select_friends.optString(SF_SECTION_TITLE2, context.getString(R.string.nux_select_friends_2));
 					String title3 = select_friends.optString(SF_SECTION_TITLE3, context.getString(R.string.nux_select_friends_3));
-					boolean searchToggle = select_friends.optBoolean(SF_SEARCH_TOGGLE);
+					boolean moduleToggle = select_friends.optBoolean(SF_MODULE_TOGGLE);
 					int contactSectionType = select_friends.optInt(SF_CONTACT_SECTION_TYPE);
-					selectFriends = new NuxSelectFriends(sectionTitle, title2, title3, recoSectionTitle, recoList, hideList, toggleContactSection, butText, searchToggle,
-							contactSectionType);
+					selectFriends = new NuxSelectFriends(sectionTitle, title2, title3, recoSectionTitle, recoList, hideList, butText, moduleToggle, contactSectionType);
 				}
 			}
 			catch (JSONException e)
@@ -741,7 +778,6 @@ public class NUXManager implements NUXConstants
 			}
 			catch (Exception e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -796,6 +832,83 @@ public class NUXManager implements NUXConstants
 		mprefs.saveData(REMINDER_RECEIVED, false);
 	}
 
+	public void showPush(String json)
+	{
+		try
+		{
+			JSONObject mmNotification = new JSONObject(json);
+			if (mmNotification.has(PUSH_TEXT) && mmNotification.has(PUSH_TYPE) && mmNotification.has(PUSH_TITLE))
+			{
+				String pushTitle = mmNotification.getString(PUSH_TEXT);
+				String pushText = mmNotification.getString(PUSH_TITLE);
+				int pushType = mmNotification.getInt(PUSH_TYPE);
+
+				{
+					switch (ENUM_PUSH_TYPE.getEnumValue(pushType))
+					{
+					case PUSH_LOUD:
+						notifyUser(pushText, pushTitle, false);
+						break;
+					case PUSH_SILENT:
+						notifyUser(pushText, pushTitle, true);
+						break;
+					case PUSH_NONE:
+						break;
+					case UNKNOWN:
+						break;
+					}
+				}
+
+				if (mmNotification.has(PUSH_REWARD_CARD_TYPE))
+				{
+					int rewardType = mmNotification.getInt(PUSH_REWARD_CARD_TYPE);
+					switch (ENUM_REWARD_TYPE.getEnumValue(rewardType))
+					{
+					case COMPRESSED:
+						reminderShown();
+						break;
+					case EXPANDED:
+						mprefs.saveData(REMINDER_RECEIVED, true);
+						break;
+					case NORMAL:
+						break;
+					case UNKNOWN:
+						break;
+					}
+
+				}
+			}
+
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	private void notifyUser(String text, String title, boolean shouldNotPlaySound)
+	{
+		Drawable drawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		Intent intent = new Intent(context, HomeActivity.class);
+		HikeNotification.getInstance(context).showBigTextStyleNotification(intent, 0, System.currentTimeMillis(), HikeNotification.HIKE_SUMMARY_NOTIFICATION_ID, title, text,
+				title, "", null, drawable, shouldNotPlaySound, 0);
+	}
+
+	public boolean showNuxScreen()
+	{
+		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_NEW)
+		{
+			if (NUXManager.getInstance().getNuxTaskDetailsPojo().isNuxSkippable())
+			{
+				NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
+			}
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * All these are testing functions will be removed afterwards.
 	 */
@@ -827,7 +940,7 @@ public class NUXManager implements NUXConstants
 			select_friends.put(SF_CONTACT_SECTION_TOGGLE, true);
 			select_friends.put(SF_SECTION_TITLE2, "progress_text");
 			select_friends.put(SF_RECO_SECTION_TITLE, "My Recoomendations");
-			select_friends.put(SF_SEARCH_TOGGLE, true);
+			select_friends.put(SF_MODULE_TOGGLE, true);
 			select_friends.put(SF_SECTION_TITLE, "section_title");
 
 			JSONArray mmarray = new JSONArray();
@@ -835,7 +948,7 @@ public class NUXManager implements NUXConstants
 			mmarray.put("+91-273623");
 			mmarray.put("+92827722");
 
-			select_friends.put(SF_RECO_LIST, mmarray);
+			select_friends.put(SF_RECO_TOGGLE, mmarray);
 
 			root.put(SELECT_FRIENDS, select_friends);
 

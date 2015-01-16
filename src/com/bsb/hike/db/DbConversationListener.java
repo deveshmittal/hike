@@ -134,7 +134,7 @@ public class DbConversationListener implements Listener
 		{
 			MultipleConvMessage multiConvMessages = (MultipleConvMessage) object;
 
-            Utils.sendMultiConvMessage(multiConvMessages);
+            sendMultiConvMessage(multiConvMessages);
 		}
 		else if (HikePubSub.MULTI_FILE_UPLOADED.equals(type))
 		{
@@ -391,7 +391,13 @@ public class DbConversationListener implements Listener
 		}
 	}
 
-    
+    private void sendMultiConvMessage(MultipleConvMessage multiConvMessages) {
+        mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),multiConvMessages.getCreateChatThread());
+        // after DB insertion, we need to update conversation UI , so sending event which contains all contacts and last message for each contact
+        multiConvMessages.sendPubSubForConvScreenMultiMessage();
+        // publishing mqtt packet
+        mPubSub.publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
+    }
 
     private void handleHikeSdkMessage(Object object){
 	//	if(object instanceof JSONObject){
@@ -414,7 +420,7 @@ public class DbConversationListener implements Listener
             convMessage.platformMessageMetadata.addThumbnailsToMetadata();
             long timeStamp = System.currentTimeMillis()/1000;
             MultipleConvMessage multipleConvMessage = new MultipleConvMessage(listOfMessages, listOfContacts, timeStamp, true, null);
-            Utils.sendMultiConvMessage(multipleConvMessage);
+            sendMultiConvMessage(multipleConvMessage);
 
         } catch (JSONException e) {
 
