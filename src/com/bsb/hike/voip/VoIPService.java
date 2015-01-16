@@ -411,12 +411,13 @@ public class VoIPService extends Service {
 				switch (focusChange) {
 				case AudioManager.AUDIOFOCUS_GAIN:
 					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_GAIN");
-					if (getCallDuration() > 0)
+					if (getCallDuration() > 0 && hold == true)
 						setHold(false);
 					break;
 				case AudioManager.AUDIOFOCUS_LOSS:
 					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_LOSS");
-					setHold(true);
+					if (getCallDuration() > 0)
+						setHold(true);
 					break;
 				case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
 					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_LOSS_TRANSIENT");
@@ -710,6 +711,7 @@ public class VoIPService extends Service {
 					toneGenerator = new ToneGenerator(AudioManager.STREAM_VOICE_CALL, 100);
 				
 				while (keepRunning) {
+					sendHandlerMessage(VoIPActivity.MSG_RECONNECTING);
 					toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP2);
 					try {
 						Thread.sleep(2000);
@@ -1762,6 +1764,10 @@ public class VoIPService extends Service {
 	}
 	
 	public void setHold(boolean hold) {
+		
+		if (this.hold == hold)
+			return;
+		
 		this.hold = hold;
 		Logger.d(VoIPConstants.TAG, "Changing hold to: " + hold);
 		
@@ -2207,7 +2213,7 @@ public class VoIPService extends Service {
 		final int TOTAL_TEST_TIME = 2;
 		final int TOTAL_TEST_BYTES = (simulateBitrate * TOTAL_TEST_TIME) / 8;
 		final int TEST_PACKETS = 35;
-		final int TIME_TO_WAIT_FOR_PACKETS = 3;
+		final int TIME_TO_WAIT_FOR_PACKETS = 1;
 		final int ACCEPTABLE_LOSS_PCT = 10;
 
 		byte[] packetData = new byte[TOTAL_TEST_BYTES / TEST_PACKETS];
@@ -2229,7 +2235,7 @@ public class VoIPService extends Service {
 				if (Thread.currentThread().isInterrupted())
 					break;
 			}
-			Thread.sleep(TIME_TO_WAIT_FOR_PACKETS);
+			Thread.sleep(TIME_TO_WAIT_FOR_PACKETS * 1000);
 		} catch (InterruptedException e) {
 			Logger.d(VoIPConstants.TAG, "Network test cancelled.");
 		}
