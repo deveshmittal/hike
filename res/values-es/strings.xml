@@ -1268,4 +1268,15 @@
     <string name="merry_christmas">Feliz Navidad</string>
     <string name="send_sticker_joy">Deséaselo a tus amigos con esta pegatina</string>
     <string name="happy_new_year">Feliz Año Nuevo</string>
+    
+    <string name="led_color_none_key">Ninguno</string>
+    <string name="led_color_blue_key">Azul</string>
+    <string name="led_color_cyan_key">Cian</string>
+    <string name="led_color_green_key">Verde</string>
+    <string name="led_color_red_key">Rojo</string>
+    <string name="led_color_white_key">Blanco</string>
+    <string name="led_color_yellow_key">Amarillo</string>
+    <string name="led_color_purple_key">Morado</string>
+
+    <string name="ringtone_loader">Cargando...</string>
 </resources>
