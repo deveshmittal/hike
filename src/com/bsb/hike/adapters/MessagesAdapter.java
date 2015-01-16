@@ -1158,12 +1158,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				videoHolder.fileThumb.setScaleType(ScaleType.CENTER);
 				videoHolder.fileThumb.setLayoutParams(fileThumbParams);
 
-				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0) && fss.getFTState() != FTState.INITIALIZED)
 				{
 					videoHolder.fileSize.setText(Utils.getSizeForDisplay((int) hikeFile.getFile().length()));
 					videoHolder.fileSize.setVisibility(View.VISIBLE);
 				}
-				else if (hikeFile.getFileSize() > 0)
+				else if (!convMessage.isSent() && hikeFile.getFileSize() > 0)
 				{
 					videoHolder.fileSize.setText(Utils.getSizeForDisplay(hikeFile.getFileSize()));
 					videoHolder.fileSize.setVisibility(View.VISIBLE);
