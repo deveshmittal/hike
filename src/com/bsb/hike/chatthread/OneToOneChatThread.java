@@ -208,20 +208,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	}
 
 	@Override
-	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
-	{
-		// TODO implement this
-		return false;
-	}
-
-	@Override
-	public boolean onTouch(View v, MotionEvent event)
-	{
-		// TODO implement this
-		return super.onTouch(v, event);
-	}
-	
-	@Override
 	protected void fetchConversationFinished(Conversation conversation)
 	{
 		super.fetchConversationFinished(conversation);

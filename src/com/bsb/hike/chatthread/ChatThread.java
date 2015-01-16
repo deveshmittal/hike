@@ -62,6 +62,7 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.adapters.MessagesAdapter;
+import com.bsb.hike.chatthread.HikeActionMode.ActionModeListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.media.AttachmentPicker;
@@ -113,7 +114,7 @@ import com.bsb.hike.utils.Utils;
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener,
 		CaptureImageListener, PickFileListener, HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>,
-		OnItemLongClickListener, OnTouchListener, OnScrollListener, Listener
+		OnItemLongClickListener, OnTouchListener, OnScrollListener, Listener, ActionModeListener
 {
 	private static final String TAG = "chatthread";
 
@@ -213,6 +214,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected boolean mUserIsBlocked;
 	
 	private boolean wasThemeClicked;
+	
+	protected HikeActionMode mActionMode;
 
 	protected Handler uiHandler = new Handler()
 	{
@@ -357,6 +360,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void initView()
 	{
 		initShareablePopup();
+		
+		initActionMode();
 
 		addOnClickListeners();
 
@@ -394,6 +399,18 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			updateSharedPopups();
 		}
 
+	}
+	
+	/**
+	 * Used for instantiating the ActionMode.
+	 * 
+	 * This should be called only once in a chatThread
+	 */
+	
+	private void initActionMode()
+	{
+		mActionMode = new HikeActionMode(activity);
+		mActionMode.setListener(this);
 	}
 
 	/**
@@ -1237,7 +1254,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3)
 	{
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -2882,5 +2898,27 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public String getContactNumber()
 	{
 		return msisdn;
+	}
+	
+	// ------------------------  ACTIONMODE CALLBACKS -------------------------------
+	/**
+	 * These methods is also overriden by {@link GroupChatThread} for pins
+	 */
+	@Override
+	public void actionModeDestroyed(int id)
+	{
+		
+	}
+	
+	@Override
+	public void doneClicked(int id)
+	{
+		
+	}
+	
+	@Override
+	public void initActionbarActionModeView(int id, View view)
+	{
+		
 	}
 }

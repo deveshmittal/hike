@@ -66,7 +66,7 @@ import com.bsb.hike.view.CustomFontEditText;
  * @generated
  */
 
-public class GroupChatThread extends ChatThread implements HashTagModeListener, ActionModeListener
+public class GroupChatThread extends ChatThread implements HashTagModeListener
 {
 	private static final int PIN_CREATE_ACTION_MODE = 201;
 	
@@ -86,10 +86,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 
 	protected GroupConversation groupConversation;
 
-	private ActionModeListener actionModeListener;
-
-	private HikeActionMode actionMode;
-
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -98,13 +94,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	public GroupChatThread(ChatThreadActivity activity, String msisdn)
 	{
 		super(activity, msisdn);
-	}
-
-	@Override
-	protected void init()
-	{
-		super.init();
-		initActionMode();
 	}
 
 	/**
@@ -784,15 +773,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		}
 	}
 
-	private void initActionMode()
-	{
-		actionMode = new HikeActionMode(activity);
-		actionMode.setListener(this);
-	}
-
 	private void showPinCreateView()
 	{
-		actionMode.showActionMode(PIN_CREATE_ACTION_MODE, R.string.create_pin, R.string.pin);
+		mActionMode.showActionMode(PIN_CREATE_ACTION_MODE, R.string.create_pin, R.string.pin);
 		// TODO : dismissPopupWindow was here : gaurav
 		final View content = activity.findViewById(R.id.impMessageCreateView);
 		content.setVisibility(View.VISIBLE);
@@ -864,7 +847,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			{
 				e.printStackTrace();
 			}
-			actionMode.finish();
+			mActionMode.finish();
 		}
 	}
 
@@ -920,11 +903,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		updateUnreadPinCount();
 	}
 	
-	public void initActionbarActionModeView(int id, View view)
-	{
-
-	}
-
 	@Override
 	public void actionModeDestroyed(int id)
 	{
@@ -944,7 +922,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			emoticonClicked();
 			break;
 		case R.id.cross: // PIN CREATE cross
-			actionMode.finish();
+			mActionMode.finish();
 			break;
 		default:
 			super.onClick(v);
