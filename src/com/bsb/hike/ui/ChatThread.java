@@ -1506,8 +1506,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
 				itemTextView.setText(item.getName());
 
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
-
 				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
 				freeSmsCount.setVisibility(View.GONE);
 
@@ -7939,8 +7937,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
 				itemTextView.setText(item.getName());
-
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
 
 				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
 				freeSmsCount.setVisibility(View.GONE);
