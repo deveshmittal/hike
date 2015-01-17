@@ -17,6 +17,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -46,9 +47,9 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		this.mContext = context;
 		this.ringtonesNameURIMap = new LinkedHashMap<String, Uri>();
 		setIcon(context, attrs);
-		this.setValueIndex(HIKE_JINNGLE_INDEX);
+		//this.setValueIndex(HIKE_JINNGLE_INDEX);
 		String defaultTone = mContext.getResources().getString(R.string.notif_sound_Hike);
-		String selectedRingtone = HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.NOTIFICATION_TONE_NAME, defaultTone);
+		String selectedRingtone = HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeConstants.NOTIF_SOUND_PREF, defaultTone);
 		setTitle(mContext.getString(R.string.notificationSoundTitle) + " - " + selectedRingtone);
 	}
 
@@ -129,6 +130,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 			String selectedRintoneUri = getFinalSelectedRingtoneUri(selectedRingtoneValue);
 			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.NOTIFICATION_TONE_URI, selectedRintoneUri);
 			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.NOTIFICATION_TONE_NAME, selectedRingtoneValue);
+			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeConstants.NOTIF_SOUND_PREF, selectedRingtoneValue);
 			dialog.dismiss();
 			break;
 
