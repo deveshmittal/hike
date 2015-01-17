@@ -2205,4 +2205,7 @@ public class HikeConstants
 
 	public static long STOP_NOTIF_SOUND_TIME = 3000; // In milliseconds
 
+	public static int DEFAULT_AVATARS[] = {R.drawable.avatar_01, R.drawable.avatar_02, R.drawable.avatar_03, R.drawable.avatar_04, R.drawable.avatar_05};
+	public static String DEFAULT_AVATAR_KEYS[] = {"avatar_01","avatar_02", "avatar_03", "avatar_04", "avatar_05"};
+	public static String IS_GROUP = "isGroup";
 }

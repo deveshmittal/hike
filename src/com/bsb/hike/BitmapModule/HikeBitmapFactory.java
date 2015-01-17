@@ -8,12 +8,16 @@ import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.view.View;
 import android.view.View.MeasureSpec;
+
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.R;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -140,6 +144,27 @@ public class HikeBitmapFactory
 		drawable.draw(canvas);
 		return bitmap;
 	}
+	
+	public static Bitmap drawableToBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+
+        Bitmap bitmap;
+        int width = Math.max(drawable.getIntrinsicWidth(), 2);
+        int height = Math.max(drawable.getIntrinsicHeight(), 2);
+        try {
+            bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+        } catch (Exception e) {
+            e.printStackTrace();
+            bitmap = null;
+        }
+
+        return bitmap;
+    }
 
 	public static Bitmap rotateBitmap(Bitmap b, int degrees)
 	{
@@ -1031,6 +1056,35 @@ public class HikeBitmapFactory
 				return new Rect(0, 0, (int) (reqHeight * srcAspect), reqHeight);
 			}
 		}
+	}
+	
+	public static BitmapDrawable getDefaultAvatar(Resources res, String msisdn, boolean hiRes)
+	{
+		boolean isGroupConversation = Utils.isGroupConversation(msisdn);
+		int index = BitmapUtils.iconHash(msisdn) % (HikeConstants.DEFAULT_AVATAR_KEYS.length);
+		
+		int defaultAvatarResId = HikeConstants.DEFAULT_AVATARS[index]; 
+		
+		Drawable layers[] = new Drawable[2];
+		layers[0] = res.getDrawable(defaultAvatarResId);
+		if (hiRes)
+		{
+			layers[1] = res.getDrawable(isGroupConversation ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
+		}
+		else
+		{
+			layers[1] = res.getDrawable(isGroupConversation ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+		}
+		LayerDrawable ld = new LayerDrawable(layers);
+		ld.setId(0, 0);
+		ld.setId(1, 1);
+		ld.setDrawableByLayerId(0, layers[0]);
+		ld.setDrawableByLayerId(1, layers[1]);
+		
+		Bitmap bmp = drawableToBitmap(ld);
+		
+		BitmapDrawable bd = getBitmapDrawable(res, bmp);
+		return bd;
 	}
 
 }
