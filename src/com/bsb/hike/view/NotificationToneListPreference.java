@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.ListPreference;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -49,7 +50,8 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		setIcon(context, attrs);
 		//this.setValueIndex(HIKE_JINNGLE_INDEX);
 		String defaultTone = mContext.getResources().getString(R.string.notif_sound_Hike);
-		String selectedRingtone = HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeConstants.NOTIF_SOUND_PREF, defaultTone);
+		String selectedRingtone = PreferenceManager.getDefaultSharedPreferences(mContext).getString(HikeConstants.NOTIF_SOUND_PREF, defaultTone);
+		HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeConstants.NOTIF_SOUND_PREF, selectedRingtone);
 		setTitle(mContext.getString(R.string.notificationSoundTitle) + " - " + selectedRingtone);
 	}
 
