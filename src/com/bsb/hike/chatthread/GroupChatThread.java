@@ -123,8 +123,13 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		mActionBar.onCreateOptionsMenu(menu, R.menu.group_chat_thread_menu, getOverFlowItems(), this);
-		return super.onCreateOptionsMenu(menu);
+		if (groupConversation != null)
+		{
+			mActionBar.onCreateOptionsMenu(menu, R.menu.group_chat_thread_menu, getOverFlowItems(), this);
+			return super.onCreateOptionsMenu(menu);
+		}
+		
+		return false;
 	}
 
 	@Override

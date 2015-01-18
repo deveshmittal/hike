@@ -111,8 +111,13 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		Logger.i(TAG, "on create options menu " + menu.hashCode());
-		mActionBar.onCreateOptionsMenu(menu, R.menu.one_one_chat_thread_menu, getOverFlowItems(), this);
-		return super.onCreateOptionsMenu(menu);
+		
+		if (mConversation != null)
+		{	mActionBar.onCreateOptionsMenu(menu, R.menu.one_one_chat_thread_menu, getOverFlowItems(), this);
+			return super.onCreateOptionsMenu(menu);
+		}
+		
+		return false;
 	}
 
 	@Override
