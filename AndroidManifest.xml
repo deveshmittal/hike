@@ -3,7 +3,7 @@
     package="com.bsb.hike"
     android:installLocation="auto"
     android:versionCode="931"
-    android:versionName="3.6.1.0116" >
+    android:versionName="3.6.1.0118" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -46,7 +46,6 @@
     <uses-permission android:name="android.permission.READ_CALL_LOG"/>
     <uses-permission android:name="android.permission.READ_PROFILE"/>
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR"/>
-    <uses-permission android:name="android.permission.CLEAR_APP_CACHE"/>
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
@@ -60,6 +59,7 @@
     <uses-permission android:name="android.permission.USE_SIP"/>
     <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
     <uses-permission android:name="android.permission.WRITE_CALL_LOG"/>
+    <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"/>
     <uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"/>
     <uses-permission android:name="android.permission.WRITE_PROFILE"/>
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
@@ -72,6 +72,8 @@
     <uses-permission android:name="com.android.voicemail.permission.ADD_VOICEMAIL"/>
     <uses-permission android:name="android.permission.SUBSCRIBED_FEEDS_READ"/>
     <uses-permission android:name="android.permission.SUBSCRIBED_FEEDS_WRITE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    
 
     <!-- C2DM -->
     <permission

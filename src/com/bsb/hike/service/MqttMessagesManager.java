@@ -1203,6 +1203,26 @@ public class MqttMessagesManager
 			int activateVoip = data.getInt(HikeConstants.VOIP_ACTIVATED);
 			editor.putInt(HikeConstants.VOIP_ACTIVATED, activateVoip);
 		}
+		if(data.has(HikeConstants.VOIP_CALL_RATE_POPUP_SHOW))
+		{
+			int showPopup = data.getInt(HikeConstants.VOIP_CALL_RATE_POPUP_SHOW);
+			if(showPopup == 1)
+			{
+				editor.putInt(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, showPopup);
+				editor.putInt(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
+			}
+			else
+			{
+				editor.remove(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP);
+				editor.remove(HikeMessengerApp.VOIP_CALL_RATE_POPUP_FREQUENCY);
+			}
+		}
+		if(data.has(HikeConstants.VOIP_CALL_RATE_POPUP_FREQ))
+		{
+			int freq = data.getInt(HikeConstants.VOIP_CALL_RATE_POPUP_FREQ);
+			editor.putInt(HikeMessengerApp.VOIP_CALL_RATE_POPUP_FREQUENCY, freq);
+			editor.putInt(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
+		}
 		if (data.has(HikeConstants.REWARDS_TOKEN))
 		{
 			String rewardToken = data.getString(HikeConstants.REWARDS_TOKEN);

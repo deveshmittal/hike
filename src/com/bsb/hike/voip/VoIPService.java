@@ -628,7 +628,10 @@ public class VoIPService extends Service {
 			opusWrapper.destroy();
 
 		keepRunning = false;
+
+		VoIPUtils.setLastCallId(getCallId());
 		setCallid(0);
+
 		chronometer = null;
 		connected = false;
 		stopSelf();
