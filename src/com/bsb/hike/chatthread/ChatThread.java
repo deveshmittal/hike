@@ -209,8 +209,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	protected View mActionBarView;
 	
-	protected boolean blockOverlay;
-	
 	private boolean wasThemeClicked;
 	
 	protected HikeActionMode mActionMode;
@@ -2163,8 +2161,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	private void showOverlay(boolean blockOverlay, String label, String formatString, String overlayBtnText)
 	{
-		this.blockOverlay = blockOverlay;
-		
 		Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
 
 		View mOverlayLayout = activity.findViewById(R.id.overlay_layout);
