@@ -29,6 +29,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.Gravity;
@@ -107,6 +108,7 @@ import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontEditText;
+import com.bsb.hike.voip.view.CallRatePopup;
 
 public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
 		View.OnClickListener
@@ -150,7 +152,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST,
 			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
-			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.CONTACT_DELETED, HikePubSub.DELETE_MESSAGE };
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.CONTACT_DELETED, HikePubSub.DELETE_MESSAGE, HikePubSub.SHOW_VOIP_CALL_RATE_POPUP };
 
 	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.STATUS_MESSAGE_RECEIVED,
 			HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
@@ -2652,6 +2654,24 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 			});
 		}
+		else if(HikePubSub.SHOW_VOIP_CALL_RATE_POPUP.equals(type))
+        {
+        	runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					if(!isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG))
+					{
+						CallRatePopup callRatePopup = new CallRatePopup();
+						FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+						fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
+						fragmentTransaction.commitAllowingStateLoss();
+					}
+				}
+			});
+        }
 	}
 
 	private StatusMessage getJoinedHikeStatus(ContactInfo contactInfo)

@@ -808,6 +808,8 @@ public class HikeConstants
 	
 	public static final String PIN_HISTORY_FRAGMENT_TAG = "pin-history-fragment";
 
+	public static final String VOIP_CALL_RATE_FRAGMENT_TAG = "voipCallRateFragmentTag";
+
 	/*
 	 * Contact Type
 	 */
@@ -1008,6 +1010,14 @@ public class HikeConstants
 	public static final String VOIP_BITRATE_WIFI = "vbw";
 
 	public static final String VOIP_ACTIVATED = "voip";
+
+	public static final String VOIP_CALL_RATE_POPUP_SHOW = "vrmc_prompt";
+
+	public static final String VOIP_CALL_RATE_POPUP_FREQ = "vrmc_freq";
+
+	public static final String VOIP_CALL_RATING = "rate";
+
+	public static final String VOIP_CALL_ID = "callid";
 
 	public static final class ResultCodes
 	{
@@ -1783,6 +1793,11 @@ public class HikeConstants
 		public static final String FESTIVE_POPUP_WISH = "fstvepopwish";
 
 		public static final String FESTIVE_POPUP_DISMISS = "fstvepopdsmss";
+
+		/*
+		 * VOIP events
+		 */
+		public static final String VOIP_CALL_RATE_POPUP_SUBMIT = "vrmcSbmt";
 	}
 
 	public static final class MqttMessageTypes

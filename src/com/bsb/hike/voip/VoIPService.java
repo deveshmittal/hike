@@ -608,7 +608,10 @@ public class VoIPService extends Service {
 
 		keepRunning = false;
 		connected = false;
+
+		VoIPUtils.setLastCallId(getCallId());
 		setCallid(0);
+
 		chronometer = null;
 		stopSelf();
 	}

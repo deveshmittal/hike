@@ -74,6 +74,7 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -214,6 +215,7 @@ import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
+import com.bsb.hike.voip.view.CallRatePopup;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener
@@ -358,7 +360,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
 			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT,HikePubSub.CONV_META_DATA_UPDATED, 
-			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED, HikePubSub.STICKER_FTUE_TIP,HikePubSub.MULTI_MESSAGE_DB_INSERTED  };
+			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED, HikePubSub.STICKER_FTUE_TIP,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SHOW_VOIP_CALL_RATE_POPUP  };
 
 	private EmoticonType emoticonType;
 
@@ -4381,6 +4383,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
                     break;
                 }
             }
+        }
+        else if(HikePubSub.SHOW_VOIP_CALL_RATE_POPUP.equals(type))
+        {
+        	runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					if(!isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG))
+					{
+						CallRatePopup callRatePopup = new CallRatePopup();
+						FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+						fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
+						fragmentTransaction.commitAllowingStateLoss();
+					}
+				}
+			});
         }
 	}
 

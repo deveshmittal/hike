@@ -28,12 +28,16 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.voip.view.VoIPActivity;
 
 public class VoIPUtils {
 
 	private static boolean notificationDisplayed = false; 
+
+	private static int lastCallId;
 	
 	public static enum ConnectionClass {
 		TwoG,
@@ -287,5 +291,56 @@ public class VoIPUtils {
 	 */
 	public static void resetNotificationStatus() {
 		notificationDisplayed = false;
+	}
+
+	public static void setLastCallId(int id)
+	{
+		lastCallId = id;
+	}
+
+	public static int getLastCallId()
+	{
+		return lastCallId;
+	}
+
+	public static void setupCallRatePopup(Context context)
+	{
+		incrementActiveCallCount(context);
+		if(shouldShowCallRatePopupNow(context))
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_VOIP_CALL_RATE_POPUP, null);
+		}
+		setupCallRatePopupNextTime(context);
+	}
+
+	private static boolean shouldShowCallRatePopupNow(Context context)
+	{
+		return HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, false);
+	}
+	
+	private static void incrementActiveCallCount(Context context)
+	{
+		int callsCount = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, ++callsCount);
+	}
+
+	private static void setupCallRatePopupNextTime(Context context)
+	{
+		HikeSharedPreferenceUtil sharedPref = HikeSharedPreferenceUtil.getInstance(context);
+		int frequency = sharedPref.getData(HikeMessengerApp.VOIP_CALL_RATE_POPUP_FREQUENCY, -1);
+		int callsCount = sharedPref.getData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
+		boolean shownAlready = sharedPref.getData(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, false);
+
+		if(callsCount == frequency)
+		{
+			// Show popup next time
+			sharedPref.saveData(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, true);
+			sharedPref.saveData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
+		}
+		else if(shownAlready)
+		{
+			// Shown for the first time, dont show later
+			sharedPref.saveData(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, false);
+		}
 	}
 }

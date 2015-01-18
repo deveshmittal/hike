@@ -42,11 +42,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.VoipProfilePicImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient;
@@ -54,6 +57,7 @@ import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPConstants.CallQuality;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPService.LocalBinder;
+import com.bsb.hike.voip.VoIPUtils;
 
 public class VoIPActivity extends Activity implements CallActions
 {
@@ -414,6 +418,11 @@ public class VoIPActivity extends Activity implements CallActions
 			callDuration.stop();
 		}
 
+		if(isCallActive)
+		{
+			VoIPUtils.setupCallRatePopup(getApplicationContext());
+		}
+		isCallActive = false;
 		new Handler().postDelayed(new Runnable()
 		{
 			@Override
