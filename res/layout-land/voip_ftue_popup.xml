@@ -86,5 +86,21 @@
             android:textSize="13dp"
             android:textStyle="italic|bold" />
     </LinearLayout>
+    
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/beta_tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/popup_content"
+        android:layout_alignTop="@id/popup_content"
+        android:layout_marginRight="-28dp"
+        android:layout_marginTop="6dp"
+        android:background="@color/blue_hike"
+        android:gravity="center"
+        android:maxLines="1"
+        android:minWidth="80dp"
+        android:text="@string/beta"
+        android:textColor="@color/white"
+        android:textSize="11dp" />
 
 </RelativeLayout>
