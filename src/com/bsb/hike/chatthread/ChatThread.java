@@ -361,10 +361,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		audioRecordView = new AudioRecordView(activity, this);
 		mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
 		
-		if(checkNetworkError())
-		{
-			showNetworkError(true);
-		}
+		showNetworkError(checkNetworkError());
 	}
 
 	/**
@@ -2146,13 +2143,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 * blockOverLay flag indicates whether this is used to block a user or not. 
 	 * This function can also be called from in zero SMS Credits case.
 	 * 
-	 * @param blockOverlay
 	 * @param label
 	 * @param formatString
 	 * @param overlayBtnText
+	 * @param str
+	 * @param drawableResId
 	 */
 	
-	private void showOverlay(boolean blockOverlay, String label, String formatString, String overlayBtnText)
+	protected void showOverlay(String label, String formatString, String overlayBtnText, SpannableString str, int drawableResId)
 	{
 		Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
 
@@ -2177,29 +2175,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		mComposeView.setEnabled(false);
 
-		if (blockOverlay)
-		{
-			overlayImg.setImageResource(R.drawable.ic_no);
-			overlayBtn.setText(overlayBtnText);
-		}
-		else
-		{
-			mConversationDb.setOverlay(false, mConversation.getMsisdn());
-			overlayImg.setImageResource(R.drawable.ic_no_credits);
-			overlayBtn.setText(overlayBtnText);
+		overlayImg.setImageResource(R.drawable.ic_no);
+		overlayBtn.setText(overlayBtnText);
 
-		}
-
-		/**
-		 * Making the blocked user's name as bold
-		 */
-		String formatted = String.format(formatString, label);
-		SpannableString str = new SpannableString(formatted);
-		if (blockOverlay)
-		{
-			int start = formatString.indexOf("%1$s");
-			str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start, start + label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		}
 		message.setText(str);
 	}
 
@@ -2210,24 +2188,21 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void showBlockOverlay(String label)
 	{
-		showOverlay(true, label, activity.getString(R.string.block_overlay_message), activity.getString(R.string.unblock_title));
-	}
-	
-	/**
-	 * Used to call {@link #showOverlay(boolean, String, String, String)} from {@link OneToOneChatThread} or {@link GroupChatThread}
-	 * 
-	 * @param label
-	 * @param formatString
-	 * @param overlayBtnText
-	 */
-	protected void showZeroCreditsOverlay(String label, String formatString, String overlayBtnText)
-	{
-		showOverlay(false, label, formatString, overlayBtnText);
+		/**
+		 * Making the blocked user's name as bold
+		 */
+		String formatString = activity.getString(R.string.block_overlay_message);
+		String formatted = String.format(formatString, label);
+		SpannableString str = new SpannableString(formatted);
+		int start = formatString.indexOf("%1$s");
+		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start, start + label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		
+		showOverlay(label, formatString, activity.getString(R.string.unblock_title), str, R.drawable.ic_no);
 	}
 	
 	private void onOverlayLayoutClicked()
 	{
-		if(activity.findViewById(R.id.overlay_layout).getVisibility() == View.VISIBLE && mUserIsBlocked)
+		if(activity.findViewById(R.id.overlay_layout).getVisibility() == View.VISIBLE && mConversation.isConvBlocked())
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, getMsisdnMainUser());
 		}

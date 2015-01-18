@@ -828,7 +828,14 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		if (!mConversationDb.wasOverlayDismissed(mConversation.getMsisdn()))
 		{
-			showZeroCreditsOverlay(getConvLabel(), activity.getApplicationContext().getString(R.string.no_credits), activity.getApplicationContext().getString(R.string.invite_now));
+			mConversationDb.setOverlay(false, mConversation.getMsisdn());
+			String formatString = activity.getString(R.string.no_credits);
+			String label = getConvLabel();
+			
+			String formatted = String.format(formatString, label);
+			SpannableString str = new SpannableString(formatted);
+			
+			showOverlay(label, formatString , activity.getString(R.string.invite_now), str, R.drawable.ic_no_credits);
 		}
 
 		// TODO : Make tipView a member of superclass ?
