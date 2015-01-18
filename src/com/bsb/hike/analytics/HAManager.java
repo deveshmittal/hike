@@ -5,7 +5,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Logger;
@@ -30,24 +29,20 @@ public class HAManager
 	
 	private ArrayList<JSONObject> eventsList;
 		
-	public static String ANALYTICS_SETTINGS = "analyticssettings";
+	public static final String ANALYTICS_SETTINGS = "analyticssettings";
 
-	public static String FILE_SIZE_LIMIT = "fileSizeLimit";
+	public static final String HOUR_TO_SEND = "hourToSend";
 
-	public static String ANALYTICS_SIZE_LIMIT = "analyticsSizeLimit";
-
-	public static String HOUR_TO_SEND = "hourToSend";
-	
-	public static String ANALYTICS_SERVICE_STATUS = "analyticsServiceStatus";
-		
 	private boolean isAnalyticsEnabled = true;
 	
 	private long fileMaxSize = AnalyticsConstants.MAX_FILE_SIZE;
 	
 	private long analyticsMaxSize = AnalyticsConstants.MAX_ANALYTICS_SIZE;
 	
+	private int hourToSend = AnalyticsConstants.HOUR_OF_DAY_TO_SEND;
+
 	private int analyticsUploadFrequency = 0;
-	
+		
 //	private NetworkListener listner;
 	
 	/**
@@ -59,12 +54,14 @@ public class HAManager
 				
 		eventsList = new ArrayList<JSONObject>();
 						
-		isAnalyticsEnabled = getPrefs().getBoolean(HAManager.ANALYTICS_SERVICE_STATUS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
+		isAnalyticsEnabled = getPrefs().getBoolean(AnalyticsConstants.ANALYTICS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
 		
-		fileMaxSize = getPrefs().getLong(HAManager.FILE_SIZE_LIMIT, AnalyticsConstants.MAX_FILE_SIZE);
+		fileMaxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_FILESIZE, AnalyticsConstants.MAX_FILE_SIZE);
 		
-		analyticsMaxSize = getPrefs().getLong(ANALYTICS_SIZE_LIMIT, AnalyticsConstants.MAX_ANALYTICS_SIZE);
-				
+		analyticsMaxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, AnalyticsConstants.MAX_ANALYTICS_SIZE);
+		
+		hourToSend = getPrefs().getInt(HOUR_TO_SEND, AnalyticsConstants.HOUR_OF_DAY_TO_SEND);
+						
 		// set wifi listener
 //		listner = new NetworkListener(this.context);
 	}
@@ -201,30 +198,12 @@ public class HAManager
 	}
 	
 	/**
-	 * sets the analytics service settings for the client
-	 * @param context application context
-	 * @param maxFileSize maximum event file size in bytes
-	 * @param maxAnalyticsSize maximum size of the total analytics data on client
-	 * @param whenToSend time(long) of the day when event file should be sent to the server
-	 * @param isServiceEnabled true if analytics service should be stopped, false otherwise
-	 */
-	public void configureAnalyticsService(long maxFileSize, long maxAnalyticsSize, int whenToSend, boolean isServiceEnabled)	
-	{
-		Editor editor = getPrefs().edit();
-		editor.putLong(HAManager.FILE_SIZE_LIMIT, AnalyticsConstants.MAX_FILE_SIZE);
-		editor.putLong(HAManager.ANALYTICS_SIZE_LIMIT, AnalyticsConstants.MAX_ANALYTICS_SIZE);
-		editor.putBoolean(HAManager.ANALYTICS_SERVICE_STATUS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
-		editor.putInt(HAManager.HOUR_TO_SEND, AnalyticsConstants.HOUR_OF_DAY_TO_SEND);
-		editor.commit();
-	}
-	
-	/**
 	 * Returns current max log file size 
 	 * @return log file size in bytes
 	 */
 	public long getMaxFileSize()	
 	{
-		return getPrefs().getLong(HAManager.FILE_SIZE_LIMIT, AnalyticsConstants.MAX_FILE_SIZE );
+		return fileMaxSize;
 	}
 	
 	/**
@@ -233,7 +212,7 @@ public class HAManager
 	 */
 	public int getWhenToSend()
 	{
-		return getPrefs().getInt(HAManager.HOUR_TO_SEND, AnalyticsConstants.HOUR_OF_DAY_TO_SEND);
+		return hourToSend;
 	}
 
 	/**
@@ -278,7 +257,7 @@ public class HAManager
 	 */
 	public long getMaxAnalyticsSizeOnClient()	
 	{
-		return getPrefs().getLong(HAManager.ANALYTICS_SIZE_LIMIT, AnalyticsConstants.MAX_ANALYTICS_SIZE );
+		return analyticsMaxSize;
 	}
 	
 	/**
