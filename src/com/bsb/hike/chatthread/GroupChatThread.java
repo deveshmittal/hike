@@ -197,7 +197,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			openProfileScreen();
 			break;
 		case R.string.mute_group:
-			muteUnmuteGroup();
+			toggleMuteGroup();
 			break;
 		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
@@ -940,7 +940,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	/**
 	 * Used to toggle mute and unmute for group
 	 */
-	private void muteUnmuteGroup()
+	private void toggleMuteGroup()
 	{
 		groupConversation.setIsMuted(!(groupConversation.isMuted()));
 		
