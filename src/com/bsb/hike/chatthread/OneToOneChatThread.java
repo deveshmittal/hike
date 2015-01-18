@@ -151,13 +151,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			list.add(item);
 		}
 		
-		list.add(new OverFlowMenuItem(isUserBlocked() ? getString(R.string.unblock_title) : getString(R.string.block_title), 0, 0, R.string.block_title));
+		list.add(new OverFlowMenuItem(mConversation.isConvBlocked() ? getString(R.string.unblock_title) : getString(R.string.block_title), 0, 0, R.string.block_title));
 		return list;
-	}
-
-	private boolean isUserBlocked()
-	{
-		return mUserIsBlocked;
 	}
 
 	private boolean isUserOnHike()
@@ -191,6 +186,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		ChatTheme chatTheme = mConversationDb.getChatThemeForMsisdn(msisdn);
 		Logger.d(TAG, "Calling setchattheme from createConversation");
 		mConversation.setTheme(chatTheme);
+		
+		mConversation.setConvBlocked(ContactManager.getInstance().isBlocked(msisdn));
+		
 		return mConversation;
 	}
 	
@@ -245,9 +243,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		 * If user is blocked
 		 */
 		
-		if (ContactManager.getInstance().isBlocked(msisdn))
+		if (mConversation.isConvBlocked())
 		{
-			mUserIsBlocked = true;
 			showBlockOverlay(getConvLabel());
 		}
 		
@@ -1191,7 +1188,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		/**
 		 * Do nothing if the user is blocked
 		 */
-		if(mUserIsBlocked)
+		if(mConversation.isConvBlocked())
 		{
 			return;
 		}

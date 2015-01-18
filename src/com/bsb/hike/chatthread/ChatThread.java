@@ -211,8 +211,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	protected boolean blockOverlay;
 	
-	protected boolean mUserIsBlocked;
-	
 	private boolean wasThemeClicked;
 	
 	protected HikeActionMode mActionMode;
@@ -351,7 +349,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		mActionBar = new HikeActionBar(activity);
 		mConversationDb = HikeConversationsDatabase.getInstance();
-		mUserIsBlocked = ContactManager.getInstance().isBlocked(msisdn);
 	}
 
 	/**
@@ -2350,7 +2347,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void blockUnBlockUser(boolean isBlocked)
 	{
-		mUserIsBlocked = isBlocked;
+		mConversation.setConvBlocked(isBlocked);
 
 		if (isBlocked)
 		{
@@ -2372,7 +2369,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void onBlockUserclicked()
 	{
-		if(mUserIsBlocked)
+		if(mConversation.isConvBlocked())
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, msisdn);
 		}

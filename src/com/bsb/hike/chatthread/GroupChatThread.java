@@ -250,6 +250,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		ChatTheme currentTheme = mConversationDb.getChatThemeForMsisdn(msisdn);
 		Logger.d("ChatThread", "Calling setchattheme from createConversation");
 		groupConversation.setTheme(currentTheme);
+		
+		groupConversation.setConvBlocked(ContactManager.getInstance().isBlocked(groupConversation.getGroupOwner()));
+		
 		return groupConversation;
 	}
 
@@ -289,10 +292,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		 * If true then show the block overlay with appropriate strings
 		 */
 		
-		if(ContactManager.getInstance().isBlocked(groupConversation.getGroupOwner()))
+		if(groupConversation.isConvBlocked())
 		{
-			mUserIsBlocked = true;
-			
 			String label = groupConversation.getGroupParticipantFirstName(groupConversation.getGroupOwner());
 					
 			showBlockOverlay(label);
