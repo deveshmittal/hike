@@ -435,7 +435,7 @@ public class VoIPActivity extends Activity implements CallActions
 			{
 				finish();
 			}
-		}, 600);
+		}, 900);
 	}
 
 	private void acquireWakeLock() {
