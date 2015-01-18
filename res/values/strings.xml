@@ -1302,4 +1302,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="led_color_purple_key">Purple</string>
     <string name="ringtone_loader">Loading...</string>
     <string name="happy_republic_day">Happy Republic Day</string>
+    <string name="beta">BETA</string>
 </resources>
