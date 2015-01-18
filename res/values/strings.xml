@@ -1270,7 +1270,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
 	<string name="connected_apps_to_hike"> %1$s apps connected to hike</string>
 	<string name="connected_app_to_hike">1 app connected to hike</string>
 	<string name="confirm_disconnect_app">You will miss out on relevant benefits.</string>
-    <string name="merry_christmas">Merry Christmas</string>
     <string name="send_sticker_joy">Wish your friends with this sticker</string>
     <string name="happy_new_year">Happy New Year</string>
     <string name="voip_call_summary_incoming">Incoming Call</string>
@@ -1306,4 +1305,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="call_rate_subheading">We\'d love to know how was the quality of your last call.</string>
     <string name="call_rate_not_now">NOT NOW</string>
     <string name="call_rate_submit">SUBMIT</string>
+    <string name="happy_republic_day">Happy Republic Day</string>
 </resources>

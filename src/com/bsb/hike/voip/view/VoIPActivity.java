@@ -184,7 +184,13 @@ public class VoIPActivity extends Activity implements CallActions
 				showMessage("Network quality is not good enough.");
 				break;
 			case MSG_UPDATE_HOLD_BUTTON:
-				holdButton.setSelected(voipService.getHold());
+				boolean hold = voipService.getHold();
+				holdButton.setSelected(hold);
+				if (hold)
+					showCallStatus(CallStatus.ON_HOLD);
+				else
+					showCallStatus(CallStatus.ACTIVE);
+
 				break;
 			default:
 				super.handleMessage(msg);
@@ -354,7 +360,6 @@ public class VoIPActivity extends Activity implements CallActions
 			if (VoIPService.isConnected() && voipService.isAudioRunning()) {
 				voipService.setHold(true);
 				showCallStatus(CallStatus.ON_HOLD);
-				holdButton.setSelected(true);
 			} else if (VoIPService.isConnected())
 				voipService.hangUp();
 			else
@@ -652,7 +657,6 @@ public class VoIPActivity extends Activity implements CallActions
 				if(isCallActive)
 				{
 					boolean newHold = !voipService.getHold();
-					holdButton.setSelected(newHold);
 					voipService.setHold(newHold);
 				}
 			}
