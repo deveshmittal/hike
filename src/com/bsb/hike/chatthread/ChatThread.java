@@ -209,8 +209,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	protected View mActionBarView;
 	
-	private boolean wasThemeClicked;
-	
 	protected HikeActionMode mActionMode;
 
 	protected Handler uiHandler = new Handler()
@@ -676,10 +674,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void themeClicked(ChatTheme theme)
 	{
 		Logger.i(TAG, "theme clicked " + theme);
-		if(theme != currentTheme)
-		{
-			wasThemeClicked = true;
-		}
 		
 		updateUIAsPerTheme(theme);
 	}
@@ -729,9 +723,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void themeCancelled()
 	{
 		Logger.i(TAG, "theme cancelled, resetting the default theme if needed.");
-		if (wasThemeClicked)
+		if (currentTheme != mAdapter.getChatTheme())
 		{
-			wasThemeClicked = false;
 			setConversationTheme(currentTheme);
 		}
 	}
