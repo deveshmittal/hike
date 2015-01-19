@@ -1382,7 +1382,7 @@ public class MqttMessagesManager
 		// server on demand analytics data to be sent from client
 		if(data.optBoolean(AnalyticsConstants.ANALYTICS))
 		{		
-			HAManager.getInstance().sendAnalyticsData();
+			HAManager.getInstance().sendAnalyticsData(true);
 		}
 	}
 
