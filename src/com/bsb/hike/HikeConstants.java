@@ -79,6 +79,10 @@ public class HikeConstants
 
 	public static final String MSISDN = "msisdn";
 
+	public static final String BOT_THUMBNAIL = "dp";
+
+	public static final String BOT_CHAT_THEME = "bg_id";
+
 	public static final String NEW_USER = "nu";
 
 	public static final String EMAIL = "email";
@@ -1887,6 +1891,15 @@ public class HikeConstants
 		
 		public static final String TIP = "tip";
 
+		public static final String CREATE_BOT = "cb";
+
+		public static final String DELETE_BOT = "db";
+
+		public static final String CREATE_MULTIPLE_BOTS = "cbot";
+
+		public static final String DELETE_MULTIPLE_BOTS = "dbot";
+
+		public static final String GCM_ECHO = "echo";
 	}
 
 	public static final class SMSNative
@@ -1998,12 +2011,15 @@ public class HikeConstants
 		public static final int TEXT_PIN = 1;
 		
 		public static final int CONTENT = 2;
+
+		public static final int WEB_CONTENT = 3;
 	}
 	
 	public static interface ConvMessagePacketKeys{
 		public static final String CONTENT_TYPE = "c";
 		public static final String PIN_TYPE = "pin";
 		public static final String LOVE_ID = "loveID";
+		public static final String WEB_CONTENT_TYPE = "wc";
 	}
 	
 	public static class HASH_MESSAGE_TYPE
@@ -2101,6 +2117,8 @@ public class HikeConstants
 	public static final String GCM_ID = "gcm_id";
 	
 	public static final String ADD_CATEGORY = "addCat";
+	
+	public static final String HELPER_DATA = "helper_data";
 
 	public static final int LED_DEFAULT_WHITE_COLOR = 0xffffffff;
 	

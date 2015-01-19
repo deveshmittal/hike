@@ -1,12 +1,6 @@
 package com.bsb.hike.platform.content;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
@@ -15,23 +9,30 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.utils.Logger;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
+@SuppressLint("NewApi")
 public class PlatformWebClient extends WebViewClient
 {
+static final String tag = "platformwebclient";
 
-	private Context mContext;
-
-	public PlatformWebClient(Context argContext)
-	{
-		mContext = argContext;
-	}
 
 	@Override
 	public WebResourceResponse shouldInterceptRequest(WebView view, String url)
 	{
-		Log.d("Call from webview", "" + url);
+		Logger.i(tag, "should intercept request "+url);
 		if (url.startsWith("http"))
 		{
-			return super.shouldInterceptRequest(view, url);
+			return  super.shouldInterceptRequest(view, url);
 		}
 
 		Uri myuri = Uri.parse(url.replace(PlatformContentConstants.CONTENT_FONTPATH_BASE, PlatformContentConstants.PLATFORM_CONTENT_DIR));
@@ -46,7 +47,7 @@ public class PlatformWebClient extends WebViewClient
 
 		if (prefix.contains("Roboto") || prefix.contains("roboto"))
 		{
-			AssetManager assManager = mContext.getAssets();
+			AssetManager assManager = HikeMessengerApp.getInstance().getApplicationContext().getAssets();
 			try
 			{
 				wrtInputStreamm = assManager.open(PlatformContentConstants.ASSETS_FONTS_DIR + fileNameRequested);

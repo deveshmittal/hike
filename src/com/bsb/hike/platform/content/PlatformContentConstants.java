@@ -1,8 +1,8 @@
 package com.bsb.hike.platform.content;
 
-import java.io.File;
-
 import android.os.Environment;
+
+import java.io.File;
 
 /**
  * Constants
@@ -22,7 +22,7 @@ public class PlatformContentConstants
 	public static final String PLATFORM_CONFIG_VERSION_ID = "version";
 
 	public static final String CONTENT_AUTHORITY_BASE = "content://com.bsb.hike.providers.HikeProvider/";
-
+	
 	public static final String CONTENT_FONTPATH_BASE = "fontpath://";
 
 	public static final String ASSETS_FONTS_DIR = "fonts/";

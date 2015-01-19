@@ -835,7 +835,7 @@
     <string name="introducing_stealth_mode">Neu: der Geheimmodus!</string>
     <string name="stealth_mode_popup_msg">Du kannst jetzt deine privaten Chats vor der Welt verbergen und mit einem Passwort schützen.</string>
     <string name="quick_setup">Schnellstarthilfe</string>
-    <string name="stealth_double_tap_tip"><![CDATA[ Dein Chat wurde verborgen! Richte ein Passwort ein, um in den Geheimmodus zu gelangen. <br> <br> <b>Tippe hier auf \'Hi\\', um loszulegen.</b> ]]></string>
+    <string name="stealth_double_tap_tip"><![CDATA[ Dein Chat wurde verborgen! Richte ein Passwort ein, um in den Geheimmodus zu gelangen. <br> <br> <b>Tippe hier auf \'Hi\', um loszulegen.</b> ]]></string>
     <string name="alp_42447968_cmd_confirm">Bestätigen</string>
     <string name="alp_42447968_cmd_continue">Weiter</string>
     <string name="alp_42447968_cmd_forgot_pattern">Muster vergessen?</string>
@@ -987,7 +987,7 @@
     <string name="email_body">Ich habe mir soeben den neuen hike-Messenger heruntergeladen. Was für ein Unterschied zu WhatsApp!\n\nHike hat tolle Sticker zu bieten und ich kann selbst bestimmen, welche Personen erfahren dürfen, wann ich zuletzt online war. Außerdem sind die Chatmotive echt cool.\n\nUnd das Beste daran ist, dass Hike einen Geheimmodus hat, über den ich private Nachrichten vor der Welt verbergen kann! Einfach spitze!\n\nLade dir die App schnell herunter: http://hike.in</string>
     <string name="email_subject">Lebe dein Leben mit hike</string>
     <string name="ftue_card_header_last_seen">Zul.online</string>
-    <string name="ftue_card_body_last_seen">Nur Favoriten können deine Zuletzt-online-Angabe & Statusmeldungen sehen</string>
+    <string name="ftue_card_body_last_seen">Nur Favoriten können deine Zuletzt-online-Angabe &amp; Statusmeldungen sehen</string>
     <string name="ftue_card_click_text_last_seen">Tippe hier, um sie auszuwählen!</string>
     <string name="ftue_card_header_hidden_mode">Geheimmodus</string>
     <string name="ftue_card_body_hidden_mode">Markiere deine Chats als verborgen und öffne sie über eine PIN</string>
@@ -1089,7 +1089,7 @@
     <string name="delete_my_account">MEIN KONTO LÖSCHEN</string>
     <string name="hike_extras">Belohnungen/Extras</string>
     <string name="mute_status_notification_header">Status und Profilbild</string>
-    <string name="mute_status_notification_subtext">Benachrichtigungen bei neuen Statusmeldungen & Profilbildern von Favoriten anzeigen</string>
+    <string name="mute_status_notification_subtext">Benachrichtigungen bei neuen Statusmeldungen &amp; Profilbildern von Favoriten anzeigen</string>
     <string name="notifications_contact_join_summary">Benachrichtigung anzeigen, wenn ein Kontakt zu hike beitritt</string>
     <string name="sticker_download_failed_large_file">Der Download ist fehlgeschlagen. Es ist nicht genügend Speicherplatz vorhanden. Bitte schaffe mehr Speicherplatz und versuche es dann erneut.</string>
 	<string name="set_profile_pic">hike-Profilbild</string>

@@ -1,20 +1,5 @@
 package com.bsb.hike.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.provider.CallLog;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -38,21 +22,25 @@ import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
-import com.bsb.hike.models.*;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.Protip;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HomeActivity;
-import com.bsb.hike.utils.*;
 import com.bsb.hike.userlogs.UserLogInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
@@ -64,6 +52,20 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * 
@@ -1301,6 +1303,20 @@ public class MqttMessagesManager
 		{
 			UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);
 		}
+		if(data.has(HikeConstants.MqttMessageTypes.CREATE_MULTIPLE_BOTS))
+		{
+			JSONArray botsTobeAdded = data.optJSONArray(HikeConstants.MqttMessageTypes.CREATE_MULTIPLE_BOTS);
+			for (int i = 0; i< botsTobeAdded.length(); i++){
+				createBot((JSONObject) botsTobeAdded.get(i));
+			}
+		}
+		if(data.has(HikeConstants.MqttMessageTypes.DELETE_MULTIPLE_BOTS))
+		{
+			JSONArray botsTobeAdded = data.optJSONArray(HikeConstants.MqttMessageTypes.DELETE_MULTIPLE_BOTS);
+			for (int i = 0; i< botsTobeAdded.length(); i++){
+				deleteBot((String) botsTobeAdded.get(i));
+			}
+		}
 
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
@@ -2045,6 +2061,8 @@ public class MqttMessagesManager
 
 	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
 	{
+
+		Logger.d("Gcm test", jsonObj.toString());
 		String type = jsonObj.optString(HikeConstants.TYPE);
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
@@ -2248,6 +2266,58 @@ public class MqttMessagesManager
 		{
 			saveTip(jsonObj);
 		}
+		else if (HikeConstants.MqttMessageTypes.CREATE_BOT.equals(type))
+		{
+			createBot(jsonObj);
+		}
+
+		else if (HikeConstants.MqttMessageTypes.DELETE_BOT.equals(type))
+		{
+			deleteBot(jsonObj.optString(HikeConstants.MSISDN));
+		}
+	}
+
+	private void deleteBot(String msisdn)
+	{
+		Utils.validateBotMsisdn(msisdn);
+		List<String> msisdns = new ArrayList<String>(1);
+		msisdns.add(msisdn);
+		convDb.deleteConversation(msisdns);
+		HikeMessengerApp.hikeBotNamesMap.remove(msisdn);
+		ContactManager.getInstance().removeIcon(msisdn);
+		convDb.deleteBot(msisdn);
+	}
+
+	private void createBot(JSONObject jsonObj)
+	{
+		String msisdn = jsonObj.optString(HikeConstants.MSISDN);
+		msisdn = Utils.validateBotMsisdn(msisdn);
+		String name = jsonObj.optString(HikeConstants.NAME);
+		String thumbnailString = jsonObj.optString(HikeConstants.BOT_THUMBNAIL);
+		ContactManager.getInstance().setIcon(msisdn, Base64.decode(thumbnailString, Base64.DEFAULT), false);
+		HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+		convDb.setChatBackground(msisdn, jsonObj.optString(HikeConstants.BOT_CHAT_THEME), System.currentTimeMillis()/1000);
+		JSONObject obj = new JSONObject();
+		try
+		{
+			obj.put(HikeConstants.NAME, name);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		convDb.addBot(msisdn, name, null);
+
+		if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
+		{
+			ContactInfo contact = new ContactInfo(msisdn, msisdn, name, msisdn);
+			contact.setFavoriteType(FavoriteType.NOT_FRIEND);
+			ContactManager.getInstance().updateContacts(contact);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_ADDED, contact);
+		}
+		HikeMessengerApp.hikeBotNamesMap.put(msisdn, name);
+
 	}
 
 	private void uploadGroupProfileImage(final String groupId, final boolean retryOnce)
@@ -2592,7 +2662,7 @@ public class MqttMessagesManager
 	/**
 	 * We call it atomic pop up , as we discard old if any when new comes --gauravKhanna
 	 * 
-	 * @param jsonObject
+	 * @param jsonObj
 	 *            - jsonFromServer
 	 * @throws JSONException
 	 */
@@ -2696,4 +2766,30 @@ public class MqttMessagesManager
 		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
 		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance(context).getData(key, "").equals(id);
 	}
+	
+	public void saveGCMMessage(JSONObject json)
+	{
+		try
+		{
+			Logger.i("gcmMqttMessage", "message received " + json.toString());
+			String type = json.optString(HikeConstants.TYPE);
+			if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type))
+			{
+				saveMessage(json);
+			}
+			else
+			{
+				Logger.e("gcmMqttMessage", "Unexpected type received via GCM mqtt equivalent messages");
+			}
+		}
+		catch (JSONException je)
+		{
+			je.printStackTrace();
+		}
+		catch (Throwable e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 }

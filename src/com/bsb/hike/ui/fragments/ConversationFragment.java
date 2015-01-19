@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Message;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.util.Pair;
@@ -146,7 +147,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
-			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.SWITCH_OFF_NUX_MODE, HikePubSub.MUTE_CONVERSATION_TOGGLED};
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.SWITCH_OFF_NUX_MODE, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.CONV_UNREAD_COUNT_MODIFIED};
 
 	private ConversationsAdapter mAdapter;
 
@@ -1944,6 +1945,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					switchOffNuxMode();
 				};
 			});
+		}else if(HikePubSub.CONV_UNREAD_COUNT_MODIFIED.equals(type)){
+			unreadCountModified((Message) object);
 		}
 		else if (HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type))
 		{
@@ -1984,6 +1987,25 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 			});
 		}
+	}
+	
+	private void unreadCountModified(Message message){
+		String msisdn = (String) message.obj;
+		final Conversation conv = mConversationsByMSISDN.get(msisdn);
+		if (conv == null)
+		{
+			return;
+		}
+		conv.setUnreadCount(message.arg1);
+		getActivity().runOnUiThread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				notifyDataSetChanged();
+			}
+		});
 	}
 
 	private Conversation getFirstConversation()

@@ -2,7 +2,9 @@ package com.bsb.hike.db;
 
 import com.bsb.hike.db.DBConstants.HIKE_CONTENT;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -42,11 +44,13 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 		for(String update : updateQueries){
 			db.execSQL(update);
 		}
+		
 		// DO any other update operation here
 	}
 	
 	private String[] getCreateQueries(){
-		String[] createAndIndexes = new String[2];
+		String[] createAndIndexes = new String[3];
+		int i=0;
 		// CREATE TABLE
 		//CONTENT TABLE -> _id,content_id,love_id,channel_id,timestamp,metadata
 		String contentTable = CREATE_TABLE +CONTENT_TABLE
@@ -58,12 +62,16 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 				+HIKE_CONTENT.TIMESTAMP+" INTEGER, "
 				+METADATA+" TEXT"
 				+")";
-		createAndIndexes[0] = contentTable;
+		createAndIndexes[i++] = contentTable;
+		// APP_ALARM TABLE - > id, data
+		String createAlarmtable = CREATE_TABLE + APP_ALARM_TABLE + "(" + HIKE_CONTENT.ID + " INTEGER UNIQUE " + ALARM_DATA + " TEXT " + ")";
+		createAndIndexes[i++] = createAlarmtable;
 		// CREATE TABLE ENDS HERE
-		//CREATE INDEXES
+		// CREATE INDEXES
 		String contentIndex = CREATE_INDEX + CONTENT_ID_INDEX + " ON "+CONTENT_TABLE +" ("+CONTENT_ID+")";
-		createAndIndexes[1] = contentIndex;
+		createAndIndexes[i++] = contentIndex;
 		// INDEX ENDS HERE
+		
 		return createAndIndexes;
 	}
 	
@@ -74,5 +82,34 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 		//UPDATE INDEXES
 		return updateAndIndexes;
 	}
+	
+	public void insertUpdateAppAlarm(int id, String data)
+	{
+		Cursor c = mDB.query(APP_ALARM_TABLE, null, HIKE_CONTENT.ID + "=?", new String[] { String.valueOf(id) }, null, null, null);
+		ContentValues cv = new ContentValues();
+		cv.put(ALARM_DATA, data);
+		if (c.moveToFirst())
+		{
+			// update query
+			mDB.update(APP_ALARM_TABLE, cv, HIKE_CONTENT.ID + "=?", new String[] { String.valueOf(id) });
+		}
+		else
+		{
+			// insert query
+			cv.put(HIKE_CONTENT.ID, id);
+			mDB.insert(data, null, cv);
+		}
+	}
+	
+	public void deleteAppAlarm(int id){
+		mDB.delete(APP_ALARM_TABLE, HIKE_CONTENT.ID + "=?", new String[] { String.valueOf(id) });
+	}
 
+	public String getAppAlarm(int id){
+		Cursor c = mDB.query(APP_ALARM_TABLE, null, HIKE_CONTENT.ID + "=?", new String[] { String.valueOf(id) }, null, null, null);
+		if(c.moveToFirst()){
+			return c.getString(c.getColumnIndex(ALARM_DATA));
+		}
+		return null;
+	}
 }

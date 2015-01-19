@@ -16,9 +16,9 @@ import java.util.Random;
 import java.util.Set;
 
 import com.bsb.hike.platform.CardComponent;
-import com.bsb.hike.platform.CardConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 
+import com.bsb.hike.platform.PlatformWebMessageMetadata;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,7 +50,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaRecorder;
@@ -78,7 +77,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -186,7 +184,6 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -2166,17 +2163,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
                         else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.CONTENT){
                             // as we will be changing msisdn and hike status while inserting in DB
-                            ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, "test", isConversationOnHike());
+                            ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, isConversationOnHike());
                             convMessage.setMessageType(MESSAGE_TYPE.CONTENT);
                             convMessage.platformMessageMetadata = new PlatformMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA), getApplicationContext());
                             convMessage.platformMessageMetadata.addThumbnailsToMetadata();
                             convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
 
-                            if(convMessage.platformMessageMetadata.layoutId == CardConstants.GAMES_CARD_LAYOUT)
-                          //  convMessage.platformMessageMetadata.changeCallToAction();
                             sendMessage(convMessage);
 
                         }
+						else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.WEB_CONTENT){
+							// as we will be changing msisdn and hike status while inserting in DB
+							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, isConversationOnHike());
+							convMessage.setMessageType(MESSAGE_TYPE.WEB_CONTENT);
+							convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
+							convMessage.setMessage(convMessage.platformWebMessageMetadata.getNotifText());
+
+							sendMessage(convMessage);
+
+						}
 						/*
 						 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 						 */
@@ -7807,6 +7812,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						if(message.contentLove!=null){
 							multiMsgFwdObject.put(HikeConstants.ConvMessagePacketKeys.LOVE_ID, message.contentLove.loveId);
 						}
+						}
+					}  else if(message.getMessageType()==MESSAGE_TYPE.WEB_CONTENT){
+						multiMsgFwdObject.put(MESSAGE_TYPE.MESSAGE_TYPE, MESSAGE_TYPE.WEB_CONTENT);
+						if(message.platformWebMessageMetadata!=null){
+							multiMsgFwdObject.put(HikeConstants.METADATA, message.platformWebMessageMetadata.JSONtoString());
+
 						}
 					}
 					else
