@@ -15,7 +15,7 @@ public interface IRequestListener
 	 * 
 	 * @param spiceException
 	 */
-	void onRequestFailure(HttpException spiceException);
+	void onRequestFailure(HttpException httpException);
 
 	/**
 	 * In case of successful request {@link Response} object will be returned to the caller
