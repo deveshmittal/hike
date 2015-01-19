@@ -64,4 +64,14 @@ public class PlatformWebMessageMetadata
 	public String JSONtoString() {
 		return json.toString();
 	}
+	
+	public String getAlarmData()
+	{
+		return getString(HikePlatformConstants.ALARM_DATA);
+	}
+	
+	private String getString(String key)
+	{
+		return json.optString(key);
+	}
 }
