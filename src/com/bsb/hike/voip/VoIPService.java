@@ -36,7 +36,6 @@ import android.media.AudioTrack.OnPlaybackPositionUpdateListener;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.media.SoundPool;
-import android.media.ToneGenerator;
 import android.media.audiofx.AcousticEchoCanceler;
 import android.media.audiofx.AutomaticGainControl;
 import android.media.audiofx.NoiseSuppressor;
@@ -103,7 +102,6 @@ public class VoIPService extends Service {
 	private Thread partnerTimeoutThread = null;
 	private Thread recordingThread = null, playbackThread = null, sendingThread = null, receivingThread = null, codecCompressionThread = null, codecDecompressionThread = null;
 	private AudioTrack audioTrack;
-	private ToneGenerator toneGenerator = null;
 	private static int callId = 0;
 	private int totalPacketsSent = 0, totalPacketsReceived = 0;
 	private NotificationManager notificationManager;
@@ -133,6 +131,7 @@ public class VoIPService extends Service {
 	private static final int SOUND_ACCEPT = R.raw.call_answer;
 	private static final int SOUND_DECLINE = R.raw.call_end;
 	private static final int SOUND_INCOMING_RINGTONE = R.raw.ring_tone;
+	private static final int SOUND_RECONNECTING = R.raw.reconnect;
 	private int ringtoneStreamID = 0;
 
 	// Network quality test
@@ -307,6 +306,7 @@ public class VoIPService extends Service {
 			String myMsisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.MSISDN_SETTING, null);
 			if (myMsisdn != null && myMsisdn.equals(intent.getStringExtra("msisdn"))) {
 				Logger.wtf(VoIPConstants.TAG, "Don't be ridiculous!");
+				stop();
 				return returnInt;
 			}
 			
@@ -361,11 +361,12 @@ public class VoIPService extends Service {
 			@Override
 			public void run() {
 				while (keepRunning) {
-					showNotification();
 					try {
 						Thread.sleep(1000);
+						showNotification();
 					} catch (InterruptedException e) {
 						// All good
+						break;
 					}
 					
 				}
@@ -508,6 +509,7 @@ public class VoIPService extends Service {
 		soundpoolMap.put(SOUND_ACCEPT, soundpool.load(getApplicationContext(), SOUND_ACCEPT, 1));
 		soundpoolMap.put(SOUND_DECLINE, soundpool.load(getApplicationContext(), SOUND_DECLINE, 1));
 		soundpoolMap.put(SOUND_INCOMING_RINGTONE, soundpool.load(getApplicationContext(), SOUND_INCOMING_RINGTONE, 1));
+		soundpoolMap.put(SOUND_RECONNECTING, soundpool.load(getApplicationContext(), SOUND_RECONNECTING, 1));
 	}
 	
 	private int playFromSoundPool(int soundId, boolean loop) {
@@ -729,17 +731,14 @@ public class VoIPService extends Service {
 			
 			@Override
 			public void run() {
-				if (toneGenerator == null)
-					toneGenerator = new ToneGenerator(AudioManager.STREAM_VOICE_CALL, 100);
-				
+				int streamId = playFromSoundPool(SOUND_RECONNECTING, true);
 				while (keepRunning) {
 					sendHandlerMessage(VoIPActivity.MSG_RECONNECTING);
-					toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP2);
 					try {
-						Thread.sleep(2000);
+						Thread.sleep(200);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
-						toneGenerator = null;
+						stopFromSoundPool(streamId);
 						break;
 					}
 				}
