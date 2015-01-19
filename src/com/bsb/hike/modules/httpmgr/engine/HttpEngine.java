@@ -34,6 +34,7 @@ public class HttpEngine
 	private ThreadPoolExecutor responseExecuter;
 
 	private HttpQueue queue;
+
 	/**
 	 * Creates a new HttpEngine
 	 */
@@ -49,7 +50,7 @@ public class HttpEngine
 		// executer used for serving response
 		responseExecuter = new ThreadPoolExecutor(0, 2 * HttpEngineConstants.CORE_POOL_SIZE + 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), Util.threadFactory(
 				"http-response", false));
-		
+
 		// underlying queue used for storing submitted and running request
 		queue = new HttpQueue();
 
@@ -68,15 +69,14 @@ public class HttpEngine
 	}
 
 	/**
-	 * Adds the queue to respective queue and submits a new request to respective executer based on request type, 
-	 * if number of requests is less than that can be served by executer
+	 * Adds the queue to respective queue and submits a new request to respective executer based on request type, if number of requests is less than that can be served by executer
 	 * 
 	 * @param request
 	 */
 	public synchronized void submit(RequestCall request)
 	{
 		queue.add(request);
-		if(queue.spaceAvailable(request.getRequestType()))
+		if (queue.spaceAvailable(request.getRequestType()))
 		{
 			submitNext(request.getRequestType());
 		}
@@ -134,8 +134,7 @@ public class HttpEngine
 	}
 
 	/**
-	 * adds new task to long or short running queue
-	 * Called from beforeExecute in executer
+	 * adds new task to long or short running queue Called from beforeExecute in executer
 	 * 
 	 * @param call
 	 */
@@ -145,8 +144,7 @@ public class HttpEngine
 	}
 
 	/**
-	 * removes task from long or short running queue
-	 * Called from beforeExecute in executer
+	 * removes task from long or short running queue Called from beforeExecute in executer
 	 * 
 	 * @param call
 	 */
@@ -163,13 +161,13 @@ public class HttpEngine
 	private void submitNext(int executerType)
 	{
 		Pair<RequestCall, Short> result = queue.getNextCall(executerType);
-		
+
 		if (result != null && result.first != null)
 		{
 			Future<?> future;
 			RequestCall call = result.first;
 			short executer = result.second;
-			
+
 			if (executer == LONG_EXECUTER)
 			{
 				future = longRequestExecuter.submit(call);
@@ -199,12 +197,12 @@ public class HttpEngine
 		shortRequestExecuter.shutdown();
 		longRequestExecuter.shutdown();
 		responseExecuter.shutdown();
-		
+
 		shortRequestExecuter = null;
 		longRequestExecuter = null;
 		responseExecuter = null;
-		
+
 		queue.shutdown();
-		
+
 	}
 }
