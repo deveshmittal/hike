@@ -136,6 +136,7 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 			setException(new StickerException(e));
 			return STResult.DOWNLOAD_FAILED;
 		}
+		StickerManager.getInstance().checkAndRemoveUpdateFlag(catId);
 		return STResult.SUCCESS;
 	}
 

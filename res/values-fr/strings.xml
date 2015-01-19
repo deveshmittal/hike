@@ -1181,7 +1181,7 @@
     <string name="auth_contacts_on_hike">Aux contacts sur hike</string>
     <string name="auth_needed_for_messaging">Aux noms, photos de profil et favoris</string>
     <string name="auth_button_deny">Non</string>
-    <string name="auth_button_accept">Connecter</string>
+    <string name="auth_button_accept">Connexion</string>
     <string name="connected_apps">Applis connectées</string>
     <string name="connected_apps_hinttext">Détails sur les applications connectées à hike</string>
     <string name="new_stickers">NOUVEAU</string>
@@ -1268,4 +1268,15 @@
     <string name="merry_christmas">Joyeux Noël</string>
     <string name="send_sticker_joy">Souhaite tes vœux à tes amis avec ce sticker</string>
     <string name="happy_new_year">Bonne année</string>
+    
+    <string name="led_color_none_key">Aucune</string>
+    <string name="led_color_blue_key">Bleu</string>
+    <string name="led_color_cyan_key">Cyan</string>
+    <string name="led_color_green_key">Vert</string>
+    <string name="led_color_red_key">Rouge</string>
+    <string name="led_color_white_key">Blanc</string>
+    <string name="led_color_yellow_key">Jaune</string>
+    <string name="led_color_purple_key">Violet</string>
+
+    <string name="ringtone_loader">Chargement...</string>
 </resources>
