@@ -20,6 +20,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
 import android.telephony.TelephonyManager;
 
 import com.bsb.hike.HikeConstants;
@@ -32,13 +33,10 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.view.IVoipCallListener;
-import com.bsb.hike.voip.view.VoIPActivity;
 
 public class VoIPUtils {
 
 	private static boolean notificationDisplayed = false; 
-
-	private static int lastCallId;
 
 	private static IVoipCallListener callListener;
 
@@ -306,22 +304,12 @@ public class VoIPUtils {
 		notificationDisplayed = false;
 	}
 
-	public static void setLastCallId(int id)
-	{
-		lastCallId = id;
-	}
-
-	public static int getLastCallId()
-	{
-		return lastCallId;
-	}
-
-	public static void setupCallRatePopup(Context context)
+	public static void setupCallRatePopup(Context context, Bundle bundle)
 	{
 		incrementActiveCallCount(context);
 		if(shouldShowCallRatePopupNow(context) && callListener!=null)
 		{
-			callListener.onVoipCallEnd();
+			callListener.onVoipCallEnd(bundle);
 		}
 		setupCallRatePopupNextTime(context);
 	}
