@@ -18,13 +18,11 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
 import android.util.SparseArray;
-
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.db.DBConstants.HIKE_CONTENT;
 import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -6307,9 +6305,40 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		if (json != null)
 		{
 			{
-				JSONObject metadataJSON = new JSONObject();
-				metadataJSON.remove(HikePlatformConstants.ALARM_DATA);
-				updateMetadataOfMessage(messageId, metadataJSON.toString());
+				JSONObject metadataJSON = null;
+				try
+				{
+					metadataJSON = new JSONObject(json);
+					metadataJSON.remove(HikePlatformConstants.ALARM_DATA);
+					updateMetadataOfMessage(messageId, metadataJSON.toString());
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+
+			}
+		}
+	}
+
+	public void insertMicroAppALarm(int messageId,String alarmData)
+	{
+		String json = getMetadataOfMessage(messageId);
+		if (json != null)
+		{
+			{
+
+				try
+				{
+					JSONObject metadataJSON = new JSONObject(json);
+					metadataJSON.put(HikePlatformConstants.ALARM_DATA, alarmData);
+					updateMetadataOfMessage(messageId, metadataJSON.toString());
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+
 			}
 		}
 	}

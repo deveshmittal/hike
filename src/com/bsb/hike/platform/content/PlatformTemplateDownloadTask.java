@@ -52,14 +52,6 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 		tempFolder.mkdirs();
 
 		File zipFile = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME, mRequest.getContentData().getId() + ".zip");
-		try
-		{
-			zipFile.createNewFile();
-		}
-		catch (IOException e1)
-		{
-			e1.printStackTrace();
-		}
 
 		// Start downloading ZIP to temporary folder
 		InputStream input = null;

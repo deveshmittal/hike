@@ -2288,15 +2288,7 @@ public class MqttMessagesManager
 		{
 			saveTip(jsonObj);
 		}
-		else if (HikeConstants.MqttMessageTypes.CREATE_BOT.equals(type))
-		{
-			createBot(jsonObj);
-		}
 
-		else if (HikeConstants.MqttMessageTypes.DELETE_BOT.equals(type))
-		{
-			deleteBot(jsonObj.optString(HikeConstants.MSISDN));
-		}
 	}
 
 	private void deleteBot(String msisdn)

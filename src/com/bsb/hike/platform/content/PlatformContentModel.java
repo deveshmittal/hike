@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
@@ -100,9 +101,14 @@ public class PlatformContentModel
 			object = new Gson().fromJson(jsonObj, PlatformContentModel.class);
 			object.card_data.addProperty(PlatformContentConstants.KEY_TEMPLATE_PATH, PlatformContentConstants.CONTENT_AUTHORITY_BASE + object.appID + File.separator);
 		}
-		catch (JsonSyntaxException e)
+		catch (JsonParseException e)
 		{
 			e.printStackTrace();
+			return null;
+		}
+		catch (IllegalArgumentException iae)
+		{
+			iae.printStackTrace();
 			return null;
 		}
 
@@ -128,9 +134,14 @@ public class PlatformContentModel
 			object.isForwardCard = true;
 			object.card_data.addProperty(PlatformContentConstants.KEY_TEMPLATE_PATH, PlatformContentConstants.CONTENT_AUTHORITY_BASE + object.appID + File.separator);
 		}
-		catch (JsonSyntaxException e)
+		catch (JsonParseException e)
 		{
 			e.printStackTrace();
+			return null;
+		}
+		catch (IllegalArgumentException iae)
+		{
+			iae.printStackTrace();
 			return null;
 		}
 		return object;

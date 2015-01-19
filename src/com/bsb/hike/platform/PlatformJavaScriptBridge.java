@@ -6,13 +6,9 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.Toast;
-
-import com.bsb.hike.adapters.MessagesAdapter;
-import com.bsb.hike.db.HikeContentDatabase;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.Logger;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,7 +39,6 @@ public class PlatformJavaScriptBridge
 
 		receiveInnerHTML(html, "");
 
-
 	}
 
 	@JavascriptInterface
@@ -51,6 +46,7 @@ public class PlatformJavaScriptBridge
 		Toast.makeText(mContext, toast , Toast.LENGTH_SHORT).show();
 
 	}
+
 	@JavascriptInterface
 	public void receiveInnerHTML(final String html, String id) {
 		mWebView.post(new Runnable() {
@@ -99,6 +95,7 @@ public class PlatformJavaScriptBridge
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
 		{
 			mWebView.getSettings().setAllowUniversalAccessFromFileURLs(true);
+			mWebView.getSettings().setAllowFileAccessFromFileURLs(true);
 		}
 	}
 
@@ -107,7 +104,7 @@ public class PlatformJavaScriptBridge
 		try
 		{
 			Logger.i(tag,"set alarm called "+json +" , mId "+ messageId +" , time "+timeInMills);
-			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), Long.valueOf(messageId), System.currentTimeMillis() + Long.valueOf(timeInMills));
+			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), Integer.parseInt(messageId), System.currentTimeMillis() + Long.valueOf(timeInMills));
 		}
 		catch (JSONException e)
 		{
@@ -140,9 +137,10 @@ public class PlatformJavaScriptBridge
 	@JavascriptInterface
 	public void updateMetadata(String messageId, String json)
 	{
+
 		try
 		{
-			Logger.i(tag, "update metadata called " + json.toString() + " , message id=" + messageId);
+			Logger.i(tag, "update metadata called " + json + " , message id=" + messageId);
 			String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata(Integer.valueOf(messageId), json);
 			message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON);
 			mWebView.post(new Runnable()
