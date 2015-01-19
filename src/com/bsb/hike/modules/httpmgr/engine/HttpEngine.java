@@ -52,7 +52,19 @@ public class HttpEngine
 		
 		// underlying queue used for storing submitted and running request
 		queue = new HttpQueue();
-		
+
+	}
+
+	public void submit(RequestCall request, long delay)
+	{
+		if (delay <= 0)
+		{
+			submit(request);
+		}
+		else
+		{
+			submitWithDelay(request, delay);
+		}
 	}
 
 	/**
