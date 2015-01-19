@@ -51,11 +51,7 @@ public class GCMIntentService extends GCMBaseIntentService
 	@Override
 	protected void onMessage(Context context, Intent intent)
 	{
-<<<<<<< HEAD
-
-=======
 		Logger.d(getClass().getSimpleName(), "Message received: " + intent.getExtras());
->>>>>>> gcmAndMqtt
 
 		prefs = HikeSharedPreferenceUtil.getInstance(context);
 
@@ -102,8 +98,7 @@ public class GCMIntentService extends GCMBaseIntentService
 					bundle.putString(HikeConstants.Extras.OFFLINE_PUSH_KEY, jsonString);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_TO_OFFLINE_PUSH, bundle);
 				}
-			}
-<<<<<<< HEAD
+			
 		}else{
 			// join with mqtt code
 			Logger.d("Gcm test", intent.getExtras().toString());
@@ -119,25 +114,10 @@ public class GCMIntentService extends GCMBaseIntentService
 
 		}
 		context.sendBroadcast(new Intent(HikeMqttManagerNew.MQTT_CONNECTION_CHECK_ACTION).putExtra("reconnect", reconnect));
+		}
 
 	}
 
-	private void showDummyNotificationForTesting(Intent intent)
-	{
-		Logger.d(getClass().getSimpleName(), "Message received: " + intent.getExtras().toString());
-		String des = intent.getExtras().getString("d");
-		Logger.d(getClass().getSimpleName(), "Desc is : "+des);
-		if(!TextUtils.isEmpty(des))
-		{
-			HikeNotification n = HikeNotification.getInstance(getApplicationContext());
-			n.notifyStringMessage("+hike3+",des,false);
-		}
-
-=======
-			context.sendBroadcast(new Intent(HikeMqttManagerNew.MQTT_CONNECTION_CHECK_ACTION).putExtra("reconnect", reconnect));
-		}
->>>>>>> gcmAndMqtt
-	}
 
 	@Override
 	protected void onRegistered(final Context context, String regId)
