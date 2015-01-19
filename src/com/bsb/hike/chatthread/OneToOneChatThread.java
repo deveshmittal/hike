@@ -21,6 +21,7 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewStub;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
@@ -1109,6 +1110,16 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 */
 	private void setupSMSToggleLayout(ChatTheme theme)
 	{
+		ViewStub viewStub = (ViewStub) activity.findViewById(R.id.sms_toggle_view_stub);
+		
+		/**
+		 * Inflating it only once when needed on demand.
+		 */
+		if(viewStub != null)
+		{
+			viewStub.inflate();
+		}
+		
 		activity.findViewById(R.id.sms_toggle_button).setVisibility(View.VISIBLE);
 		TextView smsToggleSubtext = (TextView) activity.findViewById(R.id.sms_toggle_subtext);
 		CheckBox smsToggle = (CheckBox) activity.findViewById(R.id.checkbox);
