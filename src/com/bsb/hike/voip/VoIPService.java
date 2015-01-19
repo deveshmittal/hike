@@ -2212,14 +2212,15 @@ public class VoIPService extends Service {
 					Thread.sleep(VoIPConstants.TIMEOUT_PARTNER_ANSWER);
 					if (!isAudioRunning()) {
 						// Call not answered yet?
-						sendHandlerMessage(VoIPActivity.MSG_PARTNER_ANSWER_TIMEOUT);
-						if (!reconnecting && !connected) {
+						if (connected) {
 							if (!clientSelf.isInitiator())
 								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1);
-							else
+							else {
+								sendHandlerMessage(VoIPActivity.MSG_PARTNER_ANSWER_TIMEOUT);
 								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1);
+							}
 						}
-						
+
 						stop();
 						
 					}
