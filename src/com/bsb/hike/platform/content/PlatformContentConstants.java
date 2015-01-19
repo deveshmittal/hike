@@ -9,7 +9,7 @@ import android.os.Environment;
  */
 public class PlatformContentConstants
 {
-	private static final String CONTENT_DIR_NAME = "Hike" + File.separator + "Content";
+	private static final String CONTENT_DIR_NAME = "Content";
 
 	public static final String TEMP_DIR_NAME = "Temp";
 
@@ -21,7 +21,7 @@ public class PlatformContentConstants
 
 	public static final String PLATFORM_CONFIG_VERSION_ID = "version";
 
-	public static final String CONTENT_AUTHORITY_BASE = "content://com.example.moustache/";
+	public static final String CONTENT_AUTHORITY_BASE = "content://com.bsb.hike.providers.HikeProvider/";
 
 	public static final String CONTENT_FONTPATH_BASE = "fontpath://";
 
