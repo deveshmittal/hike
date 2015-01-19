@@ -190,6 +190,7 @@ public class VoIPService extends Service {
 		}
 		
 		VoIPUtils.resetNotificationStatus();
+		startNotificationThread();
 	}
 
 	@Override
@@ -352,6 +353,25 @@ public class VoIPService extends Service {
 		stop();
 		dismissNotification();
 		Logger.d(VoIPConstants.TAG, "VoIP Service destroyed.");
+	}
+	
+	private void startNotificationThread() {
+		
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while (keepRunning) {
+					showNotification();
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// All good
+					}
+					
+				}
+			}
+		}).start();
 	}
 
 	private void showNotification() {
@@ -800,7 +820,6 @@ public class VoIPService extends Service {
 					}
 					
 					sendPacketsWaitingForAck();
-					showNotification();
 					
 					// Monitor quality of incoming data
 					if ((System.currentTimeMillis() - lastQualityReset > VoIPConstants.QUALITY_WINDOW * 1000) 
