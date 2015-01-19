@@ -1899,6 +1899,7 @@ public class HikeConstants
 
 		public static final String DELETE_MULTIPLE_BOTS = "dbot";
 
+		public static final String GCM_ECHO = "echo";
 	}
 
 	public static final class SMSNative

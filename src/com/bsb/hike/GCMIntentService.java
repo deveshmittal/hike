@@ -1,5 +1,8 @@
 package com.bsb.hike;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.MqttMessagesManager;
@@ -47,7 +51,11 @@ public class GCMIntentService extends GCMBaseIntentService
 	@Override
 	protected void onMessage(Context context, Intent intent)
 	{
+<<<<<<< HEAD
 
+=======
+		Logger.d(getClass().getSimpleName(), "Message received: " + intent.getExtras());
+>>>>>>> gcmAndMqtt
 
 		prefs = HikeSharedPreferenceUtil.getInstance(context);
 
@@ -69,24 +77,33 @@ public class GCMIntentService extends GCMBaseIntentService
 
 		HikeMessengerApp app = (HikeMessengerApp) context.getApplicationContext();
 		app.connectToService();
-		String reconnectVal = intent.getStringExtra("pushReconnect");
-		boolean reconnect = false;
-		Logger.d(getClass().getSimpleName(), "Server sent packet pushReconnect : " + reconnectVal);
-		if (RECONNECT_VALUE.equals(reconnectVal))
-			reconnect = true;
-		String jsonString = intent.getStringExtra(HikeConstants.Extras.OFFLINE_PUSH_KEY);
-		if (null != jsonString && jsonString.length() > 0)
+		String message = intent.getStringExtra("msg");
+		if (message != null)
 		{
-			Logger.d("HikeToOffline", "Gcm push received : json :" + jsonString);
-			/*
-			 * if user has turned off hike offline notification setting then dont show hike offline push
-			 */
-			if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.HIKE_OFFLINE_NOTIFICATION_PREF, true))
+			HikeHandlerUtil.getInstance().postRunnableWithDelay(new MessageArrivedRunnable(message), 0);
+		}
+		else
+		{
+			String reconnectVal = intent.getStringExtra("pushReconnect");
+			boolean reconnect = false;
+			Logger.d(getClass().getSimpleName(), "Server sent packet pushReconnect : " + reconnectVal);
+			if (RECONNECT_VALUE.equals(reconnectVal))
+				reconnect = true;
+			String jsonString = intent.getStringExtra(HikeConstants.Extras.OFFLINE_PUSH_KEY);
+			if (null != jsonString && jsonString.length() > 0)
 			{
-				Bundle bundle = new Bundle();
-				bundle.putString(HikeConstants.Extras.OFFLINE_PUSH_KEY, jsonString);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_TO_OFFLINE_PUSH, bundle);
+				Logger.d("HikeToOffline", "Gcm push received : json :" + jsonString);
+				/*
+				 * if user has turned off hike offline notification setting then dont show hike offline push
+				 */
+				if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.HIKE_OFFLINE_NOTIFICATION_PREF, true))
+				{
+					Bundle bundle = new Bundle();
+					bundle.putString(HikeConstants.Extras.OFFLINE_PUSH_KEY, jsonString);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_TO_OFFLINE_PUSH, bundle);
+				}
 			}
+<<<<<<< HEAD
 		}else{
 			// join with mqtt code
 			Logger.d("Gcm test", intent.getExtras().toString());
@@ -116,6 +133,10 @@ public class GCMIntentService extends GCMBaseIntentService
 			n.notifyStringMessage("+hike3+",des,false);
 		}
 
+=======
+			context.sendBroadcast(new Intent(HikeMqttManagerNew.MQTT_CONNECTION_CHECK_ACTION).putExtra("reconnect", reconnect));
+		}
+>>>>>>> gcmAndMqtt
 	}
 
 	@Override
@@ -148,4 +169,55 @@ public class GCMIntentService extends GCMBaseIntentService
 	{
 		Logger.d(getClass().getSimpleName(), "UNREGISTERED ID: " + regId);
 	}
+	
+	/**
+	 * This runnable to used to get message from GCM route and add to mqtt thread queue, we use mqttHandler to do same
+	 * 
+	 * Make sure you call {@link #setMessage(Message)} before submitting this runnable
+	 * @author gaurav
+	 *
+	 */
+	private class MessageArrivedRunnable implements Runnable
+	{
+		private String msg;
+
+		public MessageArrivedRunnable(String msg)
+		{
+			this.msg = msg;
+		}
+
+		@Override
+		public void run()
+		{
+			if (msg != null)
+			{
+				JSONObject json;
+				try
+				{
+					json = new JSONObject(msg);
+					String type = json.optString(HikeConstants.TYPE);
+					if (sendToMqttmanqger(json, type))
+					{
+						MqttMessagesManager.getInstance(getApplicationContext()).saveGCMMessage(json);
+					}
+					msg = null; // prevents submitting same runnable again and again
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+
+		private boolean sendToMqttmanqger(JSONObject json, String type)
+		{
+			if (HikeConstants.MqttMessageTypes.GCM_ECHO.equals(type))
+			{
+				// TODO : Code for DR comes here
+				return false;
+			}
+			return true;
+		}
+	};
 }
