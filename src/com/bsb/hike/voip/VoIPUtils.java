@@ -31,19 +31,32 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class VoIPUtils {
 
 	private static boolean notificationDisplayed = false; 
 
 	private static int lastCallId;
-	
+
+	private static IVoipCallListener callListener;
+
 	public static enum ConnectionClass {
 		TwoG,
 		ThreeG,
 		FourG,
 		WiFi,
 		Unknown
+	}
+
+	public static void setCallListener(IVoipCallListener listener)
+	{
+		callListener = listener;
+	}
+
+	public static void removeCallListener()
+	{
+		callListener = null;
 	}
 	
     public static boolean isWifiConnected(Context context) {
@@ -304,9 +317,9 @@ public class VoIPUtils {
 	public static void setupCallRatePopup(Context context)
 	{
 		incrementActiveCallCount(context);
-		if(shouldShowCallRatePopupNow(context))
+		if(shouldShowCallRatePopupNow(context) && callListener!=null)
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_VOIP_CALL_RATE_POPUP, null);
+			callListener.onVoipCallEnd();
 		}
 		setupCallRatePopupNextTime(context);
 	}
