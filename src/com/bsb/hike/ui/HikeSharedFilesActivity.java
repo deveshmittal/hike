@@ -2,11 +2,9 @@ package com.bsb.hike.ui;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,11 +14,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -44,13 +40,16 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeSharedFileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.dialog.CustomAlertDialog;
+import com.bsb.hike.dialog.HikeDialog;
+import com.bsb.hike.dialog.HikeDialogFactory;
+import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
-import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -445,22 +444,11 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		switch (item.getItemId())
 		{
 		case R.id.delete_msgs:
-			final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(HikeSharedFilesActivity.this);
-			if (selectedSharedFileItems.size() == 1)
+			HikeDialogFactory.showDialog(HikeSharedFilesActivity.this, HikeDialogFactory.DELETE_FILES_DIALOG, new HikeDialogListener()
 			{
-				deleteConfirmDialog.setHeader(R.string.confirm_delete_msg_header);
-				deleteConfirmDialog.setBody(R.string.confirm_delete_msg);
-			}
-			else
-			{
-				deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header);
-				deleteConfirmDialog.setBody(getString(R.string.confirm_delete_msgs, selectedSharedFileItems.size()));
-			}
-			View.OnClickListener dialogOkClickListener = new View.OnClickListener()
-			{
-
+				
 				@Override
-				public void onClick(View v)
+				public void positiveClicked(HikeDialog hikeDialog)
 				{
 					ArrayList<Long> msgIds = new ArrayList<Long>(selectedSharedFileItems);
 					Bundle bundle = new Bundle();
@@ -474,7 +462,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 						if(selectedSharedFileItems.contains(hsf.getMsgId()))
 						{
 							// if delete media from phone is checked
-							if(deleteConfirmDialog.isChecked() && hsf.exactFilePathFileExists())
+							if(((CustomAlertDialog) hikeDialog).isChecked() && hsf.exactFilePathFileExists())
 							{
 								hsf.getFileFromExactFilePath().delete();
 							}
@@ -483,14 +471,23 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 					}
 					
 					destroyActionMode();
-					deleteConfirmDialog.dismiss();
-				}
-			};
+					hikeDialog.dismiss();
 
-			deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
-			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel);
-			deleteConfirmDialog.show();
+				}
+				
+				@Override
+				public void neutralClicked(HikeDialog hikeDialog)
+				{
+					
+				}
+				
+				@Override
+				public void negativeClicked(HikeDialog hikeDialog)
+				{
+					
+				}
+			}, selectedSharedFileItems.size());
+			
 			return true;
 		case R.id.forward_msgs:
 			ArrayList<Long> selectedMsgIds = new ArrayList<Long>(selectedSharedFileItems);

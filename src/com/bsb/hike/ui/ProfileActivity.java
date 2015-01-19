@@ -71,6 +71,10 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.dialog.CustomAlertDialog;
+import com.bsb.hike.dialog.HikeDialog;
+import com.bsb.hike.dialog.HikeDialogFactory;
+import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
@@ -84,8 +88,6 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
-import com.bsb.hike.models.ProfileItem.ProfileContactItem.contactType;
-import com.bsb.hike.models.ProfileItem.ProfileSharedContent;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
@@ -97,7 +99,6 @@ import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
-import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -2745,15 +2746,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private void removeFromGroup(final ContactInfo contactInfo)
 	{
-		final CustomAlertDialog confirmDialog = new CustomAlertDialog(ProfileActivity.this);
-		confirmDialog.setHeader(R.string.remove_from_group);
-		String message = getString(R.string.remove_confirm, contactInfo.getFirstName());
-		confirmDialog.setBody(message);
-		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+		HikeDialogFactory.showDialog(this, HikeDialogFactory.DELETE_FROM_GROUP, new HikeDialogListener()
 		{
-
+			
 			@Override
-			public void onClick(View v)
+			public void positiveClicked(HikeDialog hikeDialog)
 			{
 				JSONObject object = new JSONObject();
 				try
@@ -2776,14 +2773,20 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 				}
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
-				confirmDialog.dismiss();
+				hikeDialog.dismiss();
 			}
-		};
-
-		confirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
-		confirmDialog.setCancelButton(R.string.no);
-		confirmDialog.show();
-
+			
+			@Override
+			public void neutralClicked(HikeDialog hikeDialog)
+			{
+			}
+			
+			@Override
+			public void negativeClicked(HikeDialog hikeDialog)
+			{
+			}
+		}, contactInfo.getFirstName());	
+		
 	}
 
 	@Override
@@ -2832,23 +2835,27 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private void showDeleteStatusConfirmationDialog(final String statusId)
 	{
-		final CustomAlertDialog confirmDialog = new CustomAlertDialog(this);
-		confirmDialog.setHeader(R.string.delete_status);
-		confirmDialog.setBody(R.string.delete_status_confirmation);
-		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+		HikeDialogFactory.showDialog(this, HikeDialogFactory.DELETE_STATUS_DIALOG, new HikeDialogListener()
 		{
-
+			
 			@Override
-			public void onClick(View v)
+			public void positiveClicked(HikeDialog hikeDialog)
 			{
 				deleteStatus(statusId);
-				confirmDialog.dismiss();
+				hikeDialog.dismiss();
 			}
-		};
-
-		confirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
-		confirmDialog.setCancelButton(R.string.no);
-		confirmDialog.show();
+			
+			@Override
+			public void neutralClicked(HikeDialog hikeDialog)
+			{
+			}
+			
+			@Override
+			public void negativeClicked(HikeDialog hikeDialog)
+			{
+				
+			}
+		}, null);
 	}
 
 	private void deleteStatus(final String statusId)

@@ -1,5 +1,7 @@
 package com.bsb.hike.dialog;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -28,8 +30,11 @@ import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.AccountAdapter;
 import com.bsb.hike.models.AccountData;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.PhonebookContact;
+import com.bsb.hike.ui.HikePreferences;
+import com.bsb.hike.ui.HikeSharedFilesActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontTextView;
@@ -51,6 +56,38 @@ public class HikeDialogFactory
 	public static final int CONTACT_SEND_DIALOG = 8;
 
 	public static final int CONTACT_SAVE_DIALOG = 9;
+	
+	public static final int CLEAR_CONVERSATION_DIALOG = 10;
+	
+	public static final int DELETE_ACCOUNT_DIALOG = 11;
+	
+	public static final int DELETE_ACCOUNT_CONFIRM_DIALOG = 12;
+	
+	public static final int FORWARD_CONFIRMATION_DIALOG = 14;
+	
+	public static final int SHOW_INVITE_CONFIRMATION_DIALOG = 15;
+	
+	public static final int UNLINK_ACCOUNT_CONFIRMATION_DIALOG = 16;
+	
+	public static final int UNLINK_FB_DIALOG = 17;
+	
+	public static final int UNLINK_TWITTER_DIALOG = 18;
+	
+	public static final int DELETE_FILES_DIALOG = 19;
+	
+	public static final int DELETE_PINS_DIALOG = 20;
+	
+	public static final int DELETE_STATUS_DIALOG = 21;
+	
+	public static final int DELETE_FROM_GROUP = 22;
+	
+	public static final int GPS_DIALOG = 23;
+	
+	public static final int DELETE_CHAT_DIALOG = 24;
+	
+	public static final int DELETE_GROUP_DIALOG = 25;
+	
+	public static final int DELETE_ALL_CONVERSATIONS = 26;
 
 	public static HikeDialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -64,23 +101,61 @@ public class HikeDialogFactory
 		{
 		case FAVORITE_ADDED_DIALOG:
 			return showAddedAsFavoriteDialog(dialogId, context, listener, data);
+			
 		case STEALTH_FTUE_DIALOG:
 			return showStealthFtuePopUp(dialogId, context, listener, true);
+			
 		case RESET_STEALTH_DIALOG:
 			return showStealthResetDialog(dialogId, context, listener, data);
+			
 		case STEALTH_FTUE_EMPTY_STATE_DIALOG:
 			return showStealthFtuePopUp(dialogId, context, listener, false);
+			
 		case SHARE_IMAGE_QUALITY_DIALOG:
 			return showImageQualityDialog(dialogId, context, listener, data);
+			
 		case SMS_CLIENT_DIALOG:
 			return showSMSClientDialog(dialogId, context, listener, data);
+			
 		case CONTACT_SEND_DIALOG:
 		case CONTACT_SAVE_DIALOG:
 			return showPhonebookContactDialog(dialogId, context, listener, data);
+			
+		case CLEAR_CONVERSATION_DIALOG:
+			return showClearConversationDialog(dialogId, context, listener);
+			
+		case DELETE_ACCOUNT_DIALOG:
+			return showDeleteAccountDialog(dialogId, context, listener);
+			
+		case DELETE_ACCOUNT_CONFIRM_DIALOG :
+			return showDeleteAccountConfirmDialog(dialogId, context, listener);
+			
+		case FORWARD_CONFIRMATION_DIALOG:
+			return showForwardConfirmationDialog(dialogId, context, listener, data);
+			
+		case SHOW_INVITE_CONFIRMATION_DIALOG:
+			return showInviteConfirmationDialog(dialogId, context, listener, data);
+			
+		case UNLINK_ACCOUNT_CONFIRMATION_DIALOG:
+		case UNLINK_FB_DIALOG:
+		case UNLINK_TWITTER_DIALOG:
+			return showUnlinkAccountDialog(dialogId, context, listener);
+			
+		case DELETE_FILES_DIALOG:
+		case DELETE_PINS_DIALOG:
+		case DELETE_STATUS_DIALOG:
+		case DELETE_FROM_GROUP:
+		case DELETE_CHAT_DIALOG:
+		case DELETE_GROUP_DIALOG:
+		case DELETE_ALL_CONVERSATIONS:
+			return showDeleteMessagesDialog(dialogId, context, listener, data);
+			
+		case GPS_DIALOG:
+			return showGPSDialog(dialogId, context, listener);
 		}
 		return null;
 	}
-
+	
 	private static HikeDialog showAddedAsFavoriteDialog(final int dialogId, Context context, final HikeDialogListener listener, Object... data)
 	{
 		String name = "";
@@ -569,6 +644,353 @@ public class HikeDialogFactory
 		{
 			throw new IllegalArgumentException(
 					"Make sure you are sending PhonebookContact object in data[0] and String for okText in data[1] and boolean to show account info in data[2] and dialog id in data[3]");
+		}
+	}
+	
+	private static HikeDialog showClearConversationDialog(int dialogId, Context context, final HikeDialogListener listener)
+	{
+		final CustomAlertDialog dialog = new CustomAlertDialog(context, dialogId);
+		
+		dialog.setHeader(R.string.clear_conversation);
+		dialog.setBody(R.string.confirm_clear_conversation);
+		
+		dialog.setOkButton(R.string.ok, new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				listener.positiveClicked(dialog);
+			}
+		});
+		dialog.setCancelButton(R.string.cancel);
+		
+		dialog.show();
+		return dialog;
+	}
+	
+	private static HikeDialog showDeleteAccountDialog(int dialogId, Context context, final HikeDialogListener listener)
+	{
+		final CustomAlertDialog correctMSISDNConfirmDialog = new CustomAlertDialog(context, dialogId);
+		
+		correctMSISDNConfirmDialog.setHeader(R.string.incorrect_msisdn_warning);
+		correctMSISDNConfirmDialog.setBody(R.string.incorrect_msisdn_msg);
+		
+		correctMSISDNConfirmDialog.setOkButton(R.string.ok, new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				listener.positiveClicked(correctMSISDNConfirmDialog);
+			}
+		});
+		
+		correctMSISDNConfirmDialog.setCancelButtonVisibility(View.GONE);
+		correctMSISDNConfirmDialog.show();
+		
+		return correctMSISDNConfirmDialog;
+	}
+	
+	private static HikeDialog showDeleteAccountConfirmDialog(int dialogId, Context context, final HikeDialogListener listener)
+	{
+		final CustomAlertDialog firstConfirmDialog = new CustomAlertDialog(context, dialogId);
+		firstConfirmDialog.setHeader(R.string.are_you_sure);
+		firstConfirmDialog.setBody(R.string.delete_confirm_msg_1);
+		
+		firstConfirmDialog.setOkButton(R.string.confirm, new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				listener.positiveClicked(firstConfirmDialog);
+			}
+		});
+		
+		firstConfirmDialog.setCancelButton(R.string.cancel, new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				listener.negativeClicked(firstConfirmDialog);
+			}
+		});
+		
+		firstConfirmDialog.show();
+		return firstConfirmDialog;
+	}
+	
+	private static HikeDialog showForwardConfirmationDialog(int dialogId, Context context, final HikeDialogListener listener, Object... data)
+	{
+		boolean isSharing = (boolean) data[0];
+		
+		ArrayList<ContactInfo> arrayList = (ArrayList<ContactInfo>) data[1];
+		final CustomAlertDialog forwardConfirmDialog = new CustomAlertDialog(context, dialogId);
+		
+		if (isSharing)
+		{
+			forwardConfirmDialog.setHeader(R.string.share);
+			forwardConfirmDialog.setBody(getForwardConfirmationText(context, arrayList, false));
+		}
+		
+		else
+		{
+			forwardConfirmDialog.setHeader(R.string.forward);
+			forwardConfirmDialog.setBody(getForwardConfirmationText(context, arrayList, true));
+		}
+		
+		forwardConfirmDialog.setOkButton(R.string.ok, new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				listener.positiveClicked(forwardConfirmDialog);
+			}
+		});
+		forwardConfirmDialog.setCancelButton(R.string.cancel);
+		forwardConfirmDialog.show();
+		
+		return forwardConfirmDialog;
+	}
+	
+	private static HikeDialog showInviteConfirmationDialog(int dialogId, Context context, final HikeDialogListener listener, Object... data)
+	{
+		final CustomAlertDialog confirmDialog = new CustomAlertDialog(context, dialogId);
+		boolean selectAllChecked = (boolean) data[0];
+		int selectedContactsSize = (int) data[1];
+		
+		if(!selectAllChecked)
+		{
+			confirmDialog.setHeader(R.string.invite_friends);
+			confirmDialog.setBody(context.getResources().getString(R.string.invite_friends_confirmation_msg, selectedContactsSize));
+		}
+		else
+		{
+			confirmDialog.setHeader(R.string.select_all_confirmation_header);
+			confirmDialog.setBody(context.getResources().getString(R.string.select_all_confirmation_msg, selectedContactsSize));
+		}
+		
+		confirmDialog.setOkButton(R.string.yes, new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				listener.positiveClicked(confirmDialog);
+			}
+		});
+		
+		confirmDialog.setCancelButton(R.string.no);
+		confirmDialog.show();
+		
+		return confirmDialog;
+	}
+	
+	private static HikeDialog showUnlinkAccountDialog(int dialogId, Context context, final HikeDialogListener listener)
+	{
+		final CustomAlertDialog confirmDialog = new CustomAlertDialog(context, dialogId);
+		
+		OnClickListener positiveListener = new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				listener.positiveClicked(confirmDialog);
+			}
+		};
+		
+		switch (dialogId)
+		{
+		case UNLINK_ACCOUNT_CONFIRMATION_DIALOG:
+			confirmDialog.setHeader(R.string.unlink_account);
+			confirmDialog.setBody(R.string.unlink_confirmation);
+			confirmDialog.setOkButton(R.string.unlink_account, positiveListener);
+			confirmDialog.setCancelButton(R.string.cancel);
+			break;
+			
+		case UNLINK_FB_DIALOG:
+			confirmDialog.setHeader(R.string.unlink_facebook);
+			confirmDialog.setBody(R.string.unlink_facebook_confirmation);
+			confirmDialog.setOkButton(R.string.unlink, positiveListener);
+			confirmDialog.setCancelButton(R.string.cancel);
+			break;
+			
+		case UNLINK_TWITTER_DIALOG:
+			confirmDialog.setHeader(R.string.unlink_twitter);
+			confirmDialog.setBody(R.string.unlink_twitter_confirmation);
+			confirmDialog.setOkButton(R.string.unlink, positiveListener);
+			confirmDialog.setCancelButton(R.string.cancel);
+			break;
+		}
+		
+		confirmDialog.show();
+		
+		return confirmDialog;
+	}
+	
+	private static HikeDialog showDeleteMessagesDialog(int dialogId, Context context, final HikeDialogListener listener, Object... data)
+	{
+		final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(context, dialogId);
+		
+		OnClickListener positiveListener = new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				listener.positiveClicked(deleteConfirmDialog);
+			}
+		};
+		
+		switch (dialogId)
+		{
+		case DELETE_FILES_DIALOG:
+			deleteConfirmDialog.setBody((String) (((int) data[0] == 1) ? R.string.confirm_delete_msg : context.getString(R.string.confirm_delete_msgs, (int) data[0])));
+			deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header);
+			deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
+			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			break;
+			
+		case DELETE_PINS_DIALOG:
+			deleteConfirmDialog.setBody((String) (((int) data[0] == 1) ? R.string.confirm_delete_pin : context.getString(R.string.confirm_delete_pins, (int) data[0])));
+			deleteConfirmDialog.setHeader(R.string.confirm_delete_pin_header);
+			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			break;
+			
+		case DELETE_STATUS_DIALOG:
+			deleteConfirmDialog.setHeader(R.string.delete_status);
+			deleteConfirmDialog.setBody(R.string.delete_status_confirmation);
+			deleteConfirmDialog.setOkButton(R.string.ok, positiveListener);
+			deleteConfirmDialog.setCancelButton(R.string.no);
+			break;
+			
+		case DELETE_FROM_GROUP:
+			deleteConfirmDialog.setHeader(R.string.remove_from_group);
+			deleteConfirmDialog.setBody(context.getString(R.string.remove_confirm, (String) data[0]));
+			deleteConfirmDialog.setOkButton(R.string.yes, positiveListener);
+			deleteConfirmDialog.setCancelButton(R.string.no);
+			break;
+			
+		case DELETE_CHAT_DIALOG:
+			deleteConfirmDialog.setHeader(R.string.delete);
+			deleteConfirmDialog.setBody(context.getString(R.string.confirm_delete_chat_msg, (String) data[0]));
+			deleteConfirmDialog.setOkButton(R.string.yes, positiveListener);
+			deleteConfirmDialog.setCancelButton(R.string.no);
+			break;
+			
+		case DELETE_GROUP_DIALOG:
+			deleteConfirmDialog.setHeader(R.string.delete);
+			deleteConfirmDialog.setBody(context.getString(R.string.confirm_delete_group_msg, (String) data[0]));
+			deleteConfirmDialog.setOkButton(android.R.string.ok, positiveListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			break;
+			
+		case DELETE_ALL_CONVERSATIONS:
+			deleteConfirmDialog.setHeader(R.string.deleteconversations);
+			deleteConfirmDialog.setBody(R.string.delete_all_question);
+			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			break;
+		}
+		
+		deleteConfirmDialog.show();
+		
+		return deleteConfirmDialog;
+	}
+	
+	private static HikeDialog showGPSDialog(int dialogId, Context context, final HikeDialogListener listener, Object... data)
+	{
+		final CustomAlertDialog alert = new CustomAlertDialog(context, dialogId);
+		alert.setHeader(R.string.location);
+		alert.setBody((int) data[0]);
+		
+		OnClickListener onClickListener = new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				switch (v.getId())
+				{
+				case R.id.btn_ok:
+					listener.positiveClicked(alert);
+					break;
+				case R.id.btn_cancel:
+					listener.negativeClicked(alert);
+					break;
+				}
+				
+			}
+		};
+		alert.setOkButton(android.R.string.ok, onClickListener);
+		alert.setCancelButton(R.string.cancel, onClickListener);
+		alert.show();
+		
+		return alert;
+	}
+	
+	private static String getForwardConfirmationText(Context context, ArrayList<ContactInfo> arrayList, boolean forwarding)
+	{
+		// multi forward case
+		if (forwarding)
+		{
+			return arrayList.size() == 1 ? context.getResources().getString(R.string.forward_to_singular) : context.getResources().getString(R.string.forward_to_plural,
+					arrayList.size());
+		}
+		StringBuilder sb = new StringBuilder();
+
+		int lastIndex = arrayList.size() - 1;
+
+		boolean moreNamesThanMaxCount = false;
+		if (lastIndex < 0)
+		{
+			lastIndex = 0;
+		}
+		else if (lastIndex == 1)
+		{
+			/*
+			 * We increment the last index if its one since we can accommodate another name in this case.
+			 */
+			// lastIndex++;
+			moreNamesThanMaxCount = true;
+		}
+		else if (lastIndex > 0)
+		{
+			moreNamesThanMaxCount = true;
+		}
+
+		for (int i = arrayList.size() - 1; i >= lastIndex; i--)
+		{
+			sb.append(arrayList.get(i).getFirstName());
+			if (i > lastIndex + 1)
+			{
+				sb.append(", ");
+			}
+			else if (i == lastIndex + 1)
+			{
+				if (moreNamesThanMaxCount)
+				{
+					sb.append(", ");
+				}
+				else
+				{
+					sb.append(" and ");
+				}
+			}
+		}
+		String readByString = sb.toString();
+		if (moreNamesThanMaxCount)
+		{
+			return context.getResources().getString(R.string.share_with_names_numbers, readByString, lastIndex);
+		}
+		else
+		{
+			return context.getResources().getString(R.string.share_with, readByString);
 		}
 	}
 

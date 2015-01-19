@@ -1,16 +1,15 @@
-package com.bsb.hike.utils;
+package com.bsb.hike.dialog;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.TextView;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.TextView;
 
 import com.bsb.hike.R;
 
-public class CustomAlertDialog extends Dialog
+public class CustomAlertDialog extends HikeDialog
 {
 
 	TextView header;
@@ -22,10 +21,15 @@ public class CustomAlertDialog extends Dialog
 	Button btnCancel;
 	
 	CheckBox bodyCheckBox;
-
-	public CustomAlertDialog(Context context)
+	
+	public CustomAlertDialog(Context context, int dialogId)
 	{
-		super(context, R.style.Theme_CustomDialog);
+		super(context, R.style.Theme_CustomDialog, dialogId);
+		initViews();
+	}
+
+	private void initViews()
+	{
 		this.setContentView(R.layout.operator_alert_popup);
 		this.setCancelable(true);
 
@@ -36,6 +40,7 @@ public class CustomAlertDialog extends Dialog
 		bodyCheckBox = (CheckBox) findViewById(R.id.body_checkbox);
 
 		bodyCheckBox.setVisibility(View.GONE);
+
 	}
 
 	public void setHeader(String headerText)

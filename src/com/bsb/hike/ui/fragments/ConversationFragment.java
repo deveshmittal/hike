@@ -29,7 +29,6 @@ import android.provider.ContactsContract.Intents.Insert;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -68,7 +67,6 @@ import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.HikeFragmentable;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -573,48 +571,54 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				else if (getString(R.string.delete_chat).equals(option))
 				{
-					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
-					deleteConfirmDialog.setHeader(R.string.delete);
-					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_chat_msg, conv.getLabel()));
-					
-					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					HikeDialogFactory.showDialog(getActivity(), HikeDialogFactory.DELETE_CHAT_DIALOG, new HikeDialogListener()
 					{
-
+						
 						@Override
-						public void onClick(View v)
+						public void positiveClicked(HikeDialog hikeDialog)
 						{
 							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
 							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
 							Utils.executeConvAsyncTask(task, conv);
-							deleteConfirmDialog.dismiss();
+							hikeDialog.dismiss();
 						}
-					};
-
-					deleteConfirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
-					deleteConfirmDialog.setCancelButton(R.string.no);
-					deleteConfirmDialog.show();
+						
+						@Override
+						public void neutralClicked(HikeDialog hikeDialog)
+						{
+						}
+						
+						@Override
+						public void negativeClicked(HikeDialog hikeDialog)
+						{
+						}
+					}, conv.getLabel());
+					
 				}
 				else if (getString(R.string.delete_leave).equals(option))
 				{
-					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
-					deleteConfirmDialog.setHeader(R.string.delete);
-					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_group_msg, conv.getLabel()));
-					
-					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					HikeDialogFactory.showDialog(getActivity(), HikeDialogFactory.DELETE_GROUP_DIALOG, new HikeDialogListener()
 					{
-
+						
 						@Override
-						public void onClick(View v)
+						public void positiveClicked(HikeDialog hikeDialog)
 						{
 							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
 							deleteConversation(conv);
-							deleteConfirmDialog.dismiss();
+							hikeDialog.dismiss();
 						}
-					};
-
-					deleteConfirmDialog.setOkButton(android.R.string.ok, dialogOkClickListener);
-					deleteConfirmDialog.setCancelButton(R.string.cancel);
-					deleteConfirmDialog.show();
+						
+						@Override
+						public void neutralClicked(HikeDialog hikeDialog)
+						{
+						}
+						
+						@Override
+						public void negativeClicked(HikeDialog hikeDialog)
+						{
+						}
+					}, conv.getLabel());
+					
 				}
 				else if (getString(R.string.email_conversations).equals(option))
 				{
@@ -743,25 +747,28 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	}
 
 
-	protected void clearConversation(final Conversation conv) {
-		final CustomAlertDialog clearConfirmDialog = new CustomAlertDialog(this.getActivity());
-		clearConfirmDialog.setHeader(R.string.clear_conversation);
-		clearConfirmDialog.setBody(R.string.confirm_clear_conversation);
-		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+	protected void clearConversation(final Conversation conv)
+	{
+		HikeDialogFactory.showDialog(this.getActivity(), HikeDialogFactory.CLEAR_CONVERSATION_DIALOG, new HikeDialogListener()
 		{
 
 			@Override
-			public void onClick(View v)
+			public void positiveClicked(HikeDialog hikeDialog)
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_CONVERSATION, conv.getMsisdn());
-				clearConfirmDialog.dismiss();
+				hikeDialog.dismiss();
 			}
-		};
 
-		clearConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
-		clearConfirmDialog.setCancelButton(R.string.cancel);
-		clearConfirmDialog.show();
-		
+			@Override
+			public void neutralClicked(HikeDialog hikeDialog)
+			{
+			}
+
+			@Override
+			public void negativeClicked(HikeDialog hikeDialog)
+			{
+			}
+		}, null);
 	}
 
 	private void fetchConversations()
@@ -2231,14 +2238,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (!mAdapter.isEmpty())
 		{
 			Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
-			final CustomAlertDialog deleteDialog = new CustomAlertDialog(getActivity());
-			deleteDialog.setHeader(R.string.deleteconversations);
-			deleteDialog.setBody(R.string.delete_all_question);
-			OnClickListener deleteAllOkClickListener = new OnClickListener()
+			HikeDialogFactory.showDialog(getActivity(), HikeDialogFactory.DELETE_ALL_CONVERSATIONS, new HikeDialogListener()
 			{
 
 				@Override
-				public void onClick(View v)
+				public void positiveClicked(HikeDialog hikeDialog)
 				{
 					Conversation[] convs = new Conversation[mAdapter.getCount()];
 					for (int i = 0; i < convs.length; i++)
@@ -2251,14 +2255,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
 					task.execute(convs);
-					deleteDialog.dismiss();
+					hikeDialog.dismiss();
 				}
-			};
 
-			deleteDialog.setOkButton(R.string.delete, deleteAllOkClickListener);
-			deleteDialog.setCancelButton(R.string.cancel);
+				@Override
+				public void neutralClicked(HikeDialog hikeDialog)
+				{
+				}
 
-			deleteDialog.show();
+				@Override
+				public void negativeClicked(HikeDialog hikeDialog)
+				{
+				}
+			}, null);
 		}
 	}
 

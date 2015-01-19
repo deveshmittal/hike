@@ -100,7 +100,6 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.utils.ChatTheme;
-import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
@@ -877,6 +876,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			dialog.dismiss();
 			break;
 		case HikeDialogFactory.CONTACT_SAVE_DIALOG:
+			break;
+		case HikeDialogFactory.CLEAR_CONVERSATION_DIALOG:
+			clearConversation();
+			dialog.dismiss();
 			break;
 		}
 
@@ -2441,24 +2444,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	private void showClearConversationDialog()
 	{
-		final CustomAlertDialog dialog = new CustomAlertDialog(activity);
-		dialog.setHeader(R.string.clear_conversation);
-		dialog.setBody(R.string.confirm_clear_conversation);
-		dialog.setOkButton(R.string.ok, new View.OnClickListener()
-		{
-			
-			@Override
-			public void onClick(View v)
-			{
-				clearConversation();
-				dialog.dismiss();
-			}
-		});
-		dialog.setCancelButton(R.string.cancel);
-		
-		
-
-		dialog.show();
+		HikeDialogFactory.showDialog(activity, HikeDialogFactory.CLEAR_CONVERSATION_DIALOG, this, null);
 	}
 	
 	/**
