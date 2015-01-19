@@ -1,7 +1,6 @@
 package com.bsb.hike.modules.stickerdownloadmgr;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -67,7 +66,6 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 		largeStickerPath = dirPath + HikeConstants.LARGE_STICKER_ROOT + "/" + stkId;
 		String smallStickerPath = dirPath + HikeConstants.SMALL_STICKER_ROOT + "/" + stkId;
 		
-		FileOutputStream fos = null;
 		try
 		{
 			File largeDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
@@ -137,22 +135,6 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 			Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
 			setException(new StickerException(e));
 			return STResult.DOWNLOAD_FAILED;
-		}
-		finally
-		{
-			try
-			{
-				if (fos != null)
-				{
-					fos.close();
-				}
-			}
-			catch (IOException e)
-			{
-				Logger.e(getClass().getSimpleName(), "Error while closing file", e);
-				setException(new StickerException(StickerException.ERROR_CLOSING_FILE));
-				return STResult.DOWNLOAD_FAILED;
-			}
 		}
 		return STResult.SUCCESS;
 	}
