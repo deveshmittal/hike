@@ -363,7 +363,8 @@ public class VoIPService extends Service {
 				while (keepRunning) {
 					try {
 						Thread.sleep(1000);
-						showNotification();
+						if (keepRunning)
+							showNotification();
 					} catch (InterruptedException e) {
 						// All good
 						break;
