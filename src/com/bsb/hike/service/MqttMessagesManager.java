@@ -1,5 +1,6 @@
 package com.bsb.hike.service;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -38,6 +39,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HomeActivity;
@@ -48,10 +50,12 @@ import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.FestivePopup;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1849,11 +1853,29 @@ public class MqttMessagesManager
 		else if(subType.equals(HikeConstants.REPUBLIC_DAY_POPUP))
 		{
 			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.REPUBLIC_DAY_POPUP);
+		}else if(HikeConstants.PLAY_NOTIFICATION.equals(subType))
+		{
+			playNotification(jsonObj);
 		}
 		else
 		{
 			// updatePopUpData
 			updateAtomicPopUpData(jsonObj);
+		}
+	}
+	
+	private void playNotification(JSONObject jsonObj)
+	{
+		JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+		String body = data.optString(HikeConstants.BODY);
+		String destination = data.optString("u");
+
+		if (data.optBoolean(HikeConstants.PUSH, true) && !TextUtils.isEmpty(destination) && !TextUtils.isEmpty(body))
+		{
+				// chat thread -- by default silent is true, so no sound
+				boolean silent = data.optBoolean(HikeConstants.SILENT, true);
+				// open respective chat thread
+				HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
 		}
 	}
 
