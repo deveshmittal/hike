@@ -36,7 +36,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.chatthread.HikeActionMode.ActionModeListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ConvMessage;
@@ -53,7 +52,7 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.HikeTip.TipType;
-import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
@@ -890,7 +889,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		{
 			Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
 			
-			Intent intent = IntentManager.getGroupProfileIntent(activity.getApplicationContext(), msisdn);
+			Intent intent = IntentFactory.getGroupProfileIntent(activity.getApplicationContext(), msisdn);
 			
 			activity.startActivity(intent);
 		}

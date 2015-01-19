@@ -74,7 +74,7 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.HikeTip.TipType;
-import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -1315,13 +1315,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true);
 					editor.commit();
 					updateOverFlowMenuNotification();
-					intent = IntentManager.getGamingIntent(HomeActivity.this);
+					intent = IntentFactory.getGamingIntent(HomeActivity.this);
 					break;
 				case 4:
 					editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true);
 					editor.commit();
 					updateOverFlowMenuNotification();
-					intent = IntentManager.getRewardsIntent(HomeActivity.this);
+					intent = IntentFactory.getRewardsIntent(HomeActivity.this);
 					break;
 				case 5:
 					intent = new Intent(HomeActivity.this, SettingsActivity.class);

@@ -101,7 +101,7 @@ import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
@@ -751,7 +751,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void startHikeGallary(boolean onHike)
 	{
-		Intent imageIntent = IntentManager.getHileGallaryShare(activity.getApplicationContext(), null, onHike);
+		Intent imageIntent = IntentFactory.getHileGallaryShare(activity.getApplicationContext(), null, onHike);
 		activity.startActivityForResult(imageIntent, 1);
 	}
 

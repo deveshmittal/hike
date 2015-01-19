@@ -18,7 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
-import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 
 public class AttachmentPicker extends OverFlowMenuLayout {
@@ -151,27 +151,27 @@ public class AttachmentPicker extends OverFlowMenuLayout {
 				switch (item.id) {
 				case CAMERA:
 					requestCode = CAMERA;
-					pickIntent = IntentManager.getImageCaptureIntent(context);
+					pickIntent = IntentFactory.getImageCaptureIntent(context);
 					break;
 				case VIDEO:
 					requestCode = VIDEO;
-					pickIntent = IntentManager.getVideoRecordingIntent();
+					pickIntent = IntentFactory.getVideoRecordingIntent();
 					break;
 				case AUDIO:
 					requestCode = AUDIO;
-					pickIntent = IntentManager.getAudioShareIntent(context);
+					pickIntent = IntentFactory.getAudioShareIntent(context);
 					break;
 				case LOCATOIN:
 					requestCode = LOCATOIN;
-					pickIntent = IntentManager.getLocationPickerIntent(context);
+					pickIntent = IntentFactory.getLocationPickerIntent(context);
 					break;
 				case CONTACT:
 					requestCode = CONTACT;
-					pickIntent = IntentManager.getContactPickerIntent();
+					pickIntent = IntentFactory.getContactPickerIntent();
 					break;
 				case FILE:
 					requestCode = FILE;
-					pickIntent = IntentManager.getFileSelectActivityIntent(context);
+					pickIntent = IntentFactory.getFileSelectActivityIntent(context);
 					break;
 				case GALLERY:
 					listener.itemClicked(item);

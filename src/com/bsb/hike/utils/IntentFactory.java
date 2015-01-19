@@ -31,7 +31,7 @@ import com.bsb.hike.ui.ShareLocation;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 
-public class IntentManager {
+public class IntentFactory {
 	public static void openSetting(Context context) {
 		context.startActivity(new Intent(context, SettingsActivity.class));
 	}

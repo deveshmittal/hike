@@ -3306,7 +3306,7 @@ public class Utils
 				public void onClick(View v)
 				{
 					Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.MENU_CALL);
-					Intent callIntent = IntentManager.getCallIntent(mContactNumber);
+					Intent callIntent = IntentFactory.getCallIntent(mContactNumber);
 					activity.startActivity(callIntent);
 					dialog.dismiss();
 				}
@@ -3327,7 +3327,7 @@ public class Utils
 		else
 		{
 			Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.MENU_CALL);
-			Intent callIntent = IntentManager.getCallIntent(mContactNumber);
+			Intent callIntent = IntentFactory.getCallIntent(mContactNumber);
 			activity.startActivity(callIntent);
 		}
 	}

@@ -6,8 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.content.ContentValues;
@@ -19,16 +17,13 @@ import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
@@ -48,7 +43,7 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
@@ -1216,7 +1211,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			return;
 		}
 		
-		Intent profileIntent = IntentManager.getSingleProfileIntent(activity.getApplicationContext(), mConversation.isOnhike(), msisdn);
+		Intent profileIntent = IntentFactory.getSingleProfileIntent(activity.getApplicationContext(), mConversation.isOnhike(), msisdn);
 		
 		activity.startActivity(profileIntent);
 	}
