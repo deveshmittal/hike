@@ -1080,8 +1080,10 @@ public class VoIPService extends Service {
 					// Attach noise suppressor
 					if (NoiseSuppressor.isAvailable()) {
 						NoiseSuppressor ns = NoiseSuppressor.create(recorder.getAudioSessionId());
-						Logger.d(VoIPConstants.TAG, "Initial NS status: " + ns.getEnabled());
-						if (ns != null) ns.setEnabled(true);
+						if (ns != null) {
+							Logger.d(VoIPConstants.TAG, "Initial NS status: " + ns.getEnabled());
+							ns.setEnabled(true);
+						}
 					} else {
 						Logger.d(VoIPConstants.TAG, "Noise suppression not available.");
 					}
@@ -1089,8 +1091,10 @@ public class VoIPService extends Service {
 					// Attach echo cancellation
 					if (AcousticEchoCanceler.isAvailable()) {
 						AcousticEchoCanceler aec = AcousticEchoCanceler.create(recorder.getAudioSessionId());
-						Logger.d(VoIPConstants.TAG, "Initial AEC status: " + aec.getEnabled());
-						if (aec != null) aec.setEnabled(true);
+						if (aec != null) { 
+							Logger.d(VoIPConstants.TAG, "Initial AEC status: " + aec.getEnabled());
+							aec.setEnabled(true);
+						}
 					} else {
 						Logger.d(VoIPConstants.TAG, "Echo cancellation not available.");
 					}
@@ -1098,8 +1102,10 @@ public class VoIPService extends Service {
 					// Attach gain control
 					if (AutomaticGainControl.isAvailable()) {
 						AutomaticGainControl agc = AutomaticGainControl.create(recorder.getAudioSessionId());
-						Logger.d(VoIPConstants.TAG, "Initial AGC status: " + agc.getEnabled());
-						if (agc != null) agc.setEnabled(true);
+						if (agc != null) {
+							Logger.d(VoIPConstants.TAG, "Initial AGC status: " + agc.getEnabled());
+							agc.setEnabled(true);
+						}
 					} else {
 						Logger.d(VoIPConstants.TAG, "Automatic gain control not available.");
 					}
