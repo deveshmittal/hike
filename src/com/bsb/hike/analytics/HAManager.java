@@ -333,16 +333,26 @@ public class HAManager
 	/**
 	 * Used to send the analytics data to the server
 	 */
-	public void sendAnalyticsData()
+	public boolean sendAnalyticsData(boolean isOnDemand)
 	{
+		boolean isUserConnected = false;
+		
 		dumpMostRecentEvents();
 		
-		// if total logged data is less than threshold value or wifi is available, try sending all the data else delete normal priority data
-		if(!((AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance().getMaxAnalyticsSizeOnClient()) || 
-				(Utils.getNetworkType(context) == ConnectivityManager.TYPE_WIFI)))
-		{
-			AnalyticsStore.getInstance(context).deleteNormalPriorityData();
+		if(Utils.isUserOnline(context))
+		{			
+			if(!isOnDemand)
+			{
+				// if total logged data is less than threshold value or wifi is available, try sending all the data else delete normal priority data
+				if(!((Utils.getNetworkType(context) == ConnectivityManager.TYPE_WIFI) || 
+						(AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance().getMaxAnalyticsSizeOnClient())))
+				{
+					AnalyticsStore.getInstance(context).deleteNormalPriorityData();
+				}
+			}
+			new Thread(AnalyticsSender.getInstance(context)).start();
+			isUserConnected = true;			
 		}
-		new Thread(AnalyticsSender.getInstance(context)).start();
+		return isUserConnected;
 	}	
 }

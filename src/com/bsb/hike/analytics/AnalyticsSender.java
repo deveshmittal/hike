@@ -180,21 +180,29 @@ public class AnalyticsSender implements Runnable
 		
 		HAManager instance = HAManager.getInstance();
 
-		instance.sendAnalyticsData();
 		long nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend(), 0, 0, 0);
-		
-		// reschedule next alarm UPLOAD_TIME_MULTIPLE hours later from the default alarm time 
-		if(instance.getAnalyticsUploadFrequency() < AnalyticsConstants.ANALYTICS_UPLOAD_FREQUENCY)
+
+		if(!instance.sendAnalyticsData(false))
 		{
-			nextSchedule += AnalyticsConstants.UPLOAD_TIME_MULTIPLE * AnalyticsConstants.ONE_HOUR;			
-			instance.incrementAnalyticsUploadFrequency();
+			int freq = instance.getAnalyticsUploadFrequency();
+			
+			// set alarm for post 4 hours if there is no network
+			if(freq < AnalyticsConstants.ANALYTICS_UPLOAD_FREQUENCY)
+			{
+				nextSchedule = System.currentTimeMillis() + freq * AnalyticsConstants.UPLOAD_TIME_MULTIPLE * AnalyticsConstants.ONE_HOUR;			
+				instance.incrementAnalyticsUploadFrequency();
+			}
+			else
+			{
+				instance.resetAnalyticsUploadFrequency();				
+			}
 		}
-		// if data has been tried to send ANALYTICS_UPLOAD_FREQUENCY times in a day, reset the alarm for the same time next day
+		// regular path will set alarm for same time next day
 		else
 		{
-			nextSchedule += AnalyticsConstants.ONE_DAY;			
-			instance.resetAnalyticsUploadFrequency();			
+			nextSchedule += AnalyticsConstants.ONE_DAY;
 		}
+		
 		HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);		
 	}
 	

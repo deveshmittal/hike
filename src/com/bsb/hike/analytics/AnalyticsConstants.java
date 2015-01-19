@@ -18,7 +18,7 @@ public class AnalyticsConstants
 	public static int HOUR_OF_DAY_TO_SEND = 8;
 	
 	/** number of times upload should be tried in one day */
-	public static int ANALYTICS_UPLOAD_FREQUENCY = 3;
+	public static int ANALYTICS_UPLOAD_FREQUENCY = 2;
 	
 	/** try sending analytics data every 4 hours */
 	public static int UPLOAD_TIME_MULTIPLE = 4;
