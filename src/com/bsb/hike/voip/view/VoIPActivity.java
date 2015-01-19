@@ -255,7 +255,7 @@ public class VoIPActivity extends Activity implements CallActions
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (sensorManager != null) {
+		if (sensorManager != null && VoIPService.isConnected() != true) {
 			if (proximityWakeLock.isHeld()) {
 				Logger.d(VoIPConstants.TAG, "Screen on.");
 				proximityWakeLock.release();
@@ -263,7 +263,7 @@ public class VoIPActivity extends Activity implements CallActions
 			sensorManager.unregisterListener(proximitySensorEventListener);
 		}
 		
-//		Logger.w(VoIPConstants.TAG, "VoIPActivity onPause()");
+		Logger.d(VoIPConstants.TAG, "VoIPActivity onPause()");
 	}
 
 	@Override
@@ -494,7 +494,8 @@ public class VoIPActivity extends Activity implements CallActions
 		@SuppressLint("Wakelock") @Override
 		public void onSensorChanged(SensorEvent event) {
 
-			Logger.d(VoIPConstants.TAG, "Proximity sensor changed");
+			Logger.d(VoIPConstants.TAG, "Proximity sensor changed. Value: " + event.values[0]
+					+ ", max: " + proximitySensorMaximumRange);
 
 			if (event.values[0] != proximitySensorMaximumRange) {
 				if (!proximityWakeLock.isHeld()) {
