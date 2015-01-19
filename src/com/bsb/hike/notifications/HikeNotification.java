@@ -1110,8 +1110,8 @@ public class HikeNotification
 			if (!shouldNotPlayNotification)
 			{
 				Logger.i("notif", "sound " + notifSound);
-				
-				if (manager.isMusicActive())
+				int earPhoneState = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.EARPHONE_STATE, -1);
+				if (manager.isMusicActive() || earPhoneState == EarPhonePluginReceiver.PLUGGED)
 				{
 					playSoundViaPlayer(notifSound);
 				}

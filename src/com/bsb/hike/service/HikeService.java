@@ -45,6 +45,7 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.HikeSDKRequestHandler;
 import com.bsb.hike.service.HikeMqttManagerNew.IncomingHandler;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
+import com.bsb.hike.notifications.EarPhonePluginReceiver;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
@@ -176,6 +177,8 @@ public class HikeService extends Service
 
 	private boolean isInitialized;
 
+	private EarPhonePluginReceiver earPhonePluginReceiver;
+	
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -295,6 +298,9 @@ public class HikeService extends Service
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
 
+		earPhonePluginReceiver = new EarPhonePluginReceiver();
+		IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+	    registerReceiver(earPhonePluginReceiver, filter);
 		setInitialized(true);
 	}
 
@@ -409,6 +415,8 @@ public class HikeService extends Service
 			unregisterReceiver(postSignupProfilePic);
 			postSignupProfilePic = null;
 		}
+		
+		unregisterReceiver(earPhonePluginReceiver);
 
 	}
 

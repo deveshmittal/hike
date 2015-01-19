@@ -2110,5 +2110,7 @@ public class HikeConstants
 												   */
 
 	public static long STOP_NOTIF_SOUND_TIME = 3000; // In milliseconds
+	
+	public static final String EARPHONE_STATE = "earphone_state";
 
 }
