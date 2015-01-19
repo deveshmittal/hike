@@ -128,7 +128,7 @@ public class VoIPActivity extends Activity implements CallActions
 			switch (msg.what) {
 			case MSG_SHUTDOWN_ACTIVITY:
 				Logger.d(VoIPConstants.TAG, "Shutting down..");
-				shutdown();
+				shutdown(msg.getData());
 				break;
 			case MSG_CONNECTION_ESTABLISHED:
 				showCallStatus(CallStatus.OUTGOING_RINGING);
@@ -394,7 +394,7 @@ public class VoIPActivity extends Activity implements CallActions
 		}
 	}
 
-	private void shutdown() {
+	private void shutdown(Bundle bundle) {
 		
 		try {
 			if (isBound) {
@@ -420,7 +420,7 @@ public class VoIPActivity extends Activity implements CallActions
 
 		if(isCallActive)
 		{
-			VoIPUtils.setupCallRatePopup(getApplicationContext());
+			VoIPUtils.setupCallRatePopup(getApplicationContext(), bundle);
 		}
 		isCallActive = false;
 		new Handler().postDelayed(new Runnable()

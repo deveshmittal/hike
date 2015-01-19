@@ -16,13 +16,16 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPUtils;
 
 public class CallRatePopup extends SherlockDialogFragment
 {
-	private static int rating = -1;
+	private int rating = -1;
 	
 	private final String TAG = "CallRatePopup";
+
+	private int isCallInitiator, callId;
 
 	public CallRatePopup(){
 	}
@@ -32,14 +35,21 @@ public class CallRatePopup extends SherlockDialogFragment
 	{
 		super.onCreate(savedInstanceState);
 		setStyle(DialogFragment.STYLE_NO_TITLE, R.style.Theme_CustomDialog);
+		Bundle bundle = getArguments();
+		if(bundle!=null)
+		{
+			isCallInitiator = bundle.getInt(VoIPConstants.IS_CALL_INITIATOR);
+			callId = bundle.getInt(VoIPConstants.CALL_ID);
+		}
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) 
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) 
 	{
 		View view = inflater.inflate(R.layout.voip_call_rate_popup, container, false);
 		getDialog().setCanceledOnTouchOutside(true);
 		setCancelable(true);
+
 		view.findViewById(R.id.call_rate_dismiss).setOnClickListener(new OnClickListener() {
 				
 				@Override
@@ -60,8 +70,9 @@ public class CallRatePopup extends SherlockDialogFragment
 		final LinearLayout starsContainer = (LinearLayout)view.findViewById(R.id.star_rate_container);
 		int childCount = starsContainer.getChildCount();
 		
-		if(rating!=-1)
+		if(bundle!=null)
 		{
+			rating = bundle.getInt("rating");
 			for(int i=0; i<=rating; i++)
 			{
 				starsContainer.getChildAt(i).setSelected(true);
@@ -121,7 +132,8 @@ public class CallRatePopup extends SherlockDialogFragment
 			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.CLICK);
 			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.VOIP_CALL_RATE_POPUP_SUBMIT);
 			metadata.put(HikeConstants.VOIP_CALL_RATING, rating+1);
-			metadata.put(HikeConstants.VOIP_CALL_ID, VoIPUtils.getLastCallId());
+			metadata.put(HikeConstants.VOIP_CALL_ID, callId);
+			metadata.put(HikeConstants.VOIP_IS_CALLER, isCallInitiator);
 
 			data.put(HikeConstants.METADATA, metadata);
 
@@ -137,6 +149,7 @@ public class CallRatePopup extends SherlockDialogFragment
 	public void onSaveInstanceState(Bundle outState) 
 	{
 		super.onSaveInstanceState(outState);
+		outState.putInt("rating", rating);
 	}
 	
 }

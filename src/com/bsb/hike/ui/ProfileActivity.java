@@ -3079,7 +3079,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	}
 
 	@Override
-	public void onVoipCallEnd() 
+	public void onVoipCallEnd(final Bundle bundle) 
 	{
 		runOnUiThread(new Runnable()
 		{
@@ -3090,6 +3090,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				if(!isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG))
 				{
 					CallRatePopup callRatePopup = new CallRatePopup();
+					callRatePopup.setArguments(bundle);
+
 					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 					fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
 					fragmentTransaction.commitAllowingStateLoss();

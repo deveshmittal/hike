@@ -41,6 +41,7 @@ import android.media.audiofx.AutomaticGainControl;
 import android.media.audiofx.NoiseSuppressor;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
@@ -607,7 +608,11 @@ public class VoIPService extends Service {
 		
 		Logger.d(VoIPConstants.TAG, "VoIPService stop()");
 		
-		sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY);
+		Bundle bundle = new Bundle();
+		bundle.putInt(VoIPConstants.CALL_ID, getCallId());
+		bundle.putInt(VoIPConstants.IS_CALL_INITIATOR, clientPartner.isInitiator() ? 0 : 1);
+		sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY, bundle);
+
 		Logger.d(VoIPConstants.TAG, "Bytes sent / received: " + totalBytesSent + " / " + totalBytesReceived +
 				"\nPackets sent / received: " + totalPacketsSent + " / " + totalPacketsReceived +
 				"\nPure voice bytes: " + rawVoiceSent +
@@ -651,7 +656,6 @@ public class VoIPService extends Service {
 
 		keepRunning = false;
 
-		VoIPUtils.setLastCallId(getCallId());
 		setCallid(0);
 
 		chronometer = null;
@@ -701,6 +705,18 @@ public class VoIPService extends Service {
 	private void sendHandlerMessage(int message) {
 		Message msg = Message.obtain();
 		msg.what = message;
+		try {
+			if (mMessenger != null)
+				mMessenger.send(msg);
+		} catch (RemoteException e) {
+			Logger.e(VoIPConstants.TAG, "Messenger RemoteException: " + e.toString());
+		}
+	}
+
+	private void sendHandlerMessage(int message, Bundle bundle) {
+		Message msg = Message.obtain();
+		msg.what = message;
+		msg.setData(bundle);
 		try {
 			if (mMessenger != null)
 				mMessenger.send(msg);
