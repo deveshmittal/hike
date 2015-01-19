@@ -57,9 +57,7 @@ public class SoundUtils
 		public boolean onError(MediaPlayer mp, int what, int extra)
 		{
 			Logger.e("SoundUtils", "MediaPlayer -- OnERROR!!! WHAT:: " + what + " EXTRAS:: " + extra);
-			// This is being removed as onError and on IOEx was called together so accessing 
-			// stopMediaPlayerProperly at same time causing NPE
-			//stopMediaPlayerProperly();
+			mediaPlayer.reset();
 			return true;
 		}
 	};
@@ -91,16 +89,8 @@ public class SoundUtils
 
 		Logger.i("sound", "playing sound " + soundId);
 
-		// Initializing Player if it has been killed by onErrorListener
-		if (mediaPlayer == null)
-		{
-			mediaPlayer = new MediaPlayer();
-		}
-		else
-		{
-			// resetting media player
-			mediaPlayer.reset();
-		}
+		// resetting media player
+		mediaPlayer.reset();
 
 		mContext = context;
 		mediaPlayer.setAudioStreamType(AudioManager.STREAM_SYSTEM);
@@ -173,16 +163,8 @@ public class SoundUtils
 		// remove any previous handler
 		soundHandler.removeCallbacks(stopSoundRunnable);
 
-		// Initializing Player if it has been killed by onErrorListener
-		if (mediaPlayer == null)
-		{
-			mediaPlayer = new MediaPlayer();
-		}
-		else
-		{
-			// resetting media player
-			mediaPlayer.reset();
-		}
+		// resetting media player
+		mediaPlayer.reset();
 
 		mediaPlayer.setAudioStreamType(AudioManager.STREAM_SYSTEM);
 		mContext = context;
@@ -245,13 +227,6 @@ public class SoundUtils
 	{
 		soundHandler.removeCallbacks(stopSoundRunnable);
 
-		// Add NULL check here because media player, on throwing exception calls this method again.
-		// Which results in stopMediaPlayerProperly() method to be called twice.
-		if (mediaPlayer != null)
-		{
-			mediaPlayer.stop();
-			mediaPlayer.release();
-			mediaPlayer = null;
-		}
+		mediaPlayer.reset();
 	}
 }
