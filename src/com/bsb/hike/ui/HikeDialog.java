@@ -11,6 +11,8 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -183,6 +185,7 @@ public class HikeDialog
 		dialog.setContentView(R.layout.voip_ftue_popup);
 		dialog.setCancelable(true);
 		TextView okBtn = (TextView) dialog.findViewById(R.id.awesomeButton);
+		View betaTag = (View) dialog.findViewById(R.id.beta_tag);
 		
 		okBtn.setOnClickListener(new OnClickListener()
 		{
@@ -197,6 +200,10 @@ public class HikeDialog
 			}
 		});
 
+		RotateAnimation animation = new RotateAnimation(0.0f, 45.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		animation.setDuration(1);
+		animation.setFillAfter(true);
+		betaTag.startAnimation(animation);
 		dialog.show();
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_VOIP_INTRO_TIP, true);
 		return dialog;
