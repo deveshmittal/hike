@@ -1663,7 +1663,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * Pause any onGoing loaders for MessagesAdapter
 		 */
 		
-		pauseImageLoaders();
+		resumeImageLoaders();
 		
 		/**
 		 * Clear any pending notifications
@@ -2643,7 +2643,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	}
 	
-	private void pauseImageLoaders()
+	private void resumeImageLoaders()
 	{
 		if (mAdapter != null)
 		{
