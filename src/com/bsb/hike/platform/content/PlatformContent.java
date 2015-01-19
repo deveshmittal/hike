@@ -1,11 +1,5 @@
 package com.bsb.hike.platform.content;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-
 import android.util.Log;
 
 public class PlatformContent
@@ -29,10 +23,19 @@ public class PlatformContent
 	public static PlatformContentRequest getContent(final String contentData, PlatformContentListener<PlatformContentModel> listener)
 	{
 		PlatformContentRequest request = PlatformContentRequest.make(PlatformContentModel.make(contentData), listener);
-		PlatformContentLoader.getLoader().handleRequest(request);
-		return request;
+		if (request != null)
+		{
+			PlatformContentLoader.getLoader().handleRequest(request);
+			return request;
+		}
+		else
+		{
+			Log.e("PlatformContent", "Incorrect content data");
+			return null;
+		}
+
 	}
-	
+
 	/**
 	 * Gets well formed HTML content.
 	 * 
@@ -47,8 +50,17 @@ public class PlatformContent
 	public static PlatformContentRequest getForwardCardContent(final String contentData, PlatformContentListener<PlatformContentModel> listener)
 	{
 		PlatformContentRequest request = PlatformContentRequest.make(PlatformContentModel.makeForwardCardModel(contentData), listener);
-		PlatformContentLoader.getLoader().handleRequest(request);
-		return request;
+
+		if (request != null)
+		{
+			PlatformContentLoader.getLoader().handleRequest(request);
+			return request;
+		}
+		else
+		{
+			Log.e("PlatformContent", "Incorrect content data");
+			return null;
+		}
 	}
 
 	public static boolean cancelRequest(PlatformContentRequest argRequest)
@@ -59,40 +71,6 @@ public class PlatformContent
 	public static void cancelAllRequests()
 	{
 		PlatformRequestManager.removeAll();
-	}
-
-	protected static String readDataFromFile(File file)
-	{
-		
-		Log.d("READING DATA FROM FILE: ", file.getAbsolutePath());
-		// Read text from file
-		StringBuilder text = new StringBuilder();
-
-		try
-		{
-			BufferedReader br = new BufferedReader(new FileReader(file));
-
-			String line;
-
-			while ((line = br.readLine()) != null)
-			{
-				text.append(line);
-			}
-
-			br.close();
-		}
-		catch (FileNotFoundException fnfe)
-		{
-			// Template not found
-			fnfe.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			// Template not found
-			e.printStackTrace();
-		}
-		
-		return text.toString();
 	}
 
 }

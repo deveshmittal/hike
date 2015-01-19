@@ -59,7 +59,7 @@ class PlatformTemplateEngine
 
 		if (contentDataMap == null)
 		{
-			// TODO Handle
+			return false;
 		}
 
 		String formedData = null;
@@ -71,6 +71,7 @@ class PlatformTemplateEngine
 		catch (MustacheException mex)
 		{
 			mex.printStackTrace();
+			return false;
 		}
 
 		if (formedData != null)

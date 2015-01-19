@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -27,6 +28,7 @@ public class PlatformWebClient extends WebViewClient
 	@Override
 	public WebResourceResponse shouldInterceptRequest(WebView view, String url)
 	{
+		Log.d("Call from webview", "" + url);
 		if (url.startsWith("http"))
 		{
 			return super.shouldInterceptRequest(view, url);
@@ -38,7 +40,6 @@ public class PlatformWebClient extends WebViewClient
 		String[] name = fileNameRequested.split("\\.");
 		String prefix = name[0];
 		String suffix = name[1];
-		System.out.println("PREFIX " + prefix + " SUFIX " + suffix);
 
 		InputStream wrtInputStreamm = null;
 		WebResourceResponse response = null;

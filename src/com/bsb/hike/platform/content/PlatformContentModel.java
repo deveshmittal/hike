@@ -27,7 +27,7 @@ public class PlatformContentModel
 	 * The layout_id.
 	 */
 	private String layout_id;
-	
+
 	private String layout_url;
 
 	/**
@@ -51,6 +51,10 @@ public class PlatformContentModel
 	 */
 	private String formedData;
 
+	private int mHash = -1;
+
+	private int mTemplateHash;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -59,7 +63,11 @@ public class PlatformContentModel
 	@Override
 	public int hashCode()
 	{
-		return new String(appID + layout_id + version + card_data).hashCode();
+		if (mHash == -1)
+		{
+			mHash = new String(appID + layout_id + version + card_data).hashCode();
+		}
+		return mHash;
 	}
 
 	/**
@@ -69,7 +77,11 @@ public class PlatformContentModel
 	 */
 	public int templateHashCode()
 	{
-		return new String(layout_id + version).hashCode();
+		if (mTemplateHash == -1)
+		{
+			mTemplateHash = new String(layout_id + version).hashCode();
+		}
+		return mTemplateHash;
 	}
 
 	/**
@@ -95,8 +107,9 @@ public class PlatformContentModel
 		catch (JSONException e)
 		{
 			e.printStackTrace();
-			// TODO Handle
+			return null;
 		}
+		
 		return object;
 	}
 
@@ -124,7 +137,7 @@ public class PlatformContentModel
 		catch (JSONException e)
 		{
 			e.printStackTrace();
-			// TODO Handle
+			return null;
 		}
 		return object;
 	}

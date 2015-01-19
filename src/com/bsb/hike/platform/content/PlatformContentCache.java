@@ -80,7 +80,10 @@ class PlatformContentCache
 	public static void putTemplate(int hashCode, Template template)
 	{
 		Log.d(TAG, "putting template in cache");
-		templateCache.put(hashCode, template);
+		if (template != null)
+		{
+			templateCache.put(hashCode, template);
+		}
 	}
 
 	/**
@@ -105,7 +108,7 @@ class PlatformContentCache
 
 		File file = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + content.getContentData().getId(), content.getContentData().getTag());
 
-		String templateString = PlatformContent.readDataFromFile(file);
+		String templateString = PlatformContentUtils.readDataFromFile(file);
 
 		if (TextUtils.isEmpty(templateString))
 		{
@@ -134,7 +137,6 @@ class PlatformContentCache
 		{
 			String[] fileList = file.list(new FilenameFilter()
 			{
-
 				@Override
 				public boolean accept(File dir, String filename)
 				{
@@ -158,7 +160,7 @@ class PlatformContentCache
 			{
 				File configFile = new File(file.getAbsolutePath() + File.separator + fileList[0]);
 
-				String configFileData = PlatformContent.readDataFromFile(configFile);
+				String configFileData = PlatformContentUtils.readDataFromFile(configFile);
 
 				if (TextUtils.isEmpty(configFileData))
 				{

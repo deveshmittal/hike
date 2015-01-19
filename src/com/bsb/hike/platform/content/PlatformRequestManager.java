@@ -154,9 +154,7 @@ class PlatformRequestManager
 
 		Log.d(TAG, "remove request - " + argRequest.getContentData().getContentJSON());
 
-		boolean status = false;
-
-		status = requestQueue.remove(argRequest);
+		boolean status = requestQueue.remove(argRequest);
 
 		PlatformContentLoader.getLoader().post(new Runnable()
 		{
