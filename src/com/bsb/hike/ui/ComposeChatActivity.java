@@ -679,6 +679,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			tagEditText.clear(false);
 			adapter.removeFilter();
 			adapter.clearAllSelection(true);
+			adapter.setNuxStateActive(true);
 			NUXManager nm  = NUXManager.getInstance();
 			adapter.preSelectContacts(nm.getLockedContacts(), nm.getUnlockedContacts());
 			System.out.print("INSIDE NUX");

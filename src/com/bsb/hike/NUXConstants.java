@@ -216,6 +216,31 @@ public interface NUXConstants
 			return UNKNOWN;
 		}
 	}
+	
+	public static enum ContactSectionTypeEnum
+    {
+        all(0), hike(1), nonhike(2), both(3), none(4), unknown(-1);
+
+        private int value;
+
+        public int getValue()
+        {
+            return value;
+        }
+
+        private ContactSectionTypeEnum(int value)
+        {
+            this.value = value;
+        }
+
+        public static ContactSectionTypeEnum getEnum(int value)
+        {
+            for (ContactSectionTypeEnum enum1 : ContactSectionTypeEnum.values())
+                if (enum1.value == value)
+                    return enum1;
+            return unknown;
+        }
+    }
 
 	public static final int REWARD_TYPE_EXPANDED=0;
 	

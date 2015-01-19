@@ -104,6 +104,8 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 	private boolean fetchSmsContacts;
 	
 	private boolean fetchHikeContacts;
+
+	private boolean fetchFavContacts;
 	
 	private boolean fetchRecents;
 	
@@ -117,17 +119,17 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 	public FetchFriendsTask(FriendsAdapter friendsAdapter, Context context, List<ContactInfo> friendsList, List<ContactInfo> hikeContactsList, List<ContactInfo> smsContactsList,
 			List<ContactInfo> recentContactsList,List<ContactInfo> recentlyJoinedHikeContactsList, List<ContactInfo> friendsStealthList, List<ContactInfo> hikeStealthContactsList, List<ContactInfo> smsStealthContactsList, List<ContactInfo> recentsStealthList, List<ContactInfo> filteredFriendsList,
-			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, boolean fetchSmsContacts, boolean checkFavTypeInComparision, boolean fetchRecents, boolean fetchRecentlyJoined, boolean showDefaultEmptyList, boolean fetchHikeContacts)
+			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, boolean fetchSmsContacts, boolean checkFavTypeInComparision, boolean fetchRecents, boolean fetchRecentlyJoined, boolean showDefaultEmptyList, boolean fetchHikeContacts, boolean fetchFavContacts)
 	{
 		this(friendsAdapter, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, recentlyJoinedHikeContactsList,friendsStealthList, hikeStealthContactsList, smsStealthContactsList, recentsStealthList, filteredFriendsList,
-				filteredHikeContactsList, filteredSmsContactsList, null,null, null, null, null, null, null, false, null, false, fetchSmsContacts, checkFavTypeInComparision, fetchRecents , fetchRecentlyJoined, showDefaultEmptyList, fetchHikeContacts);
+				filteredHikeContactsList, filteredSmsContactsList, null,null, null, null, null, null, null, false, null, false, fetchSmsContacts, checkFavTypeInComparision, fetchRecents , fetchRecentlyJoined, showDefaultEmptyList, fetchHikeContacts, fetchFavContacts);
 	}
 
 	public FetchFriendsTask(FriendsAdapter friendsAdapter, Context context, List<ContactInfo> friendsList, List<ContactInfo> hikeContactsList, List<ContactInfo> smsContactsList, List<ContactInfo> recentContactsList, List<ContactInfo> recentlyJoinedHikeContactsList,
 			List<ContactInfo> friendsStealthList, List<ContactInfo> hikeStealthContactsList, List<ContactInfo> smsStealthContactsList, List<ContactInfo> recentsStealthList, List<ContactInfo> filteredFriendsList,
 			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, List<ContactInfo> groupsList, List<ContactInfo> groupsStealthList,
 			List<ContactInfo> filteredGroupsList, List<ContactInfo> filteredRecentsList,List<ContactInfo> filteredRecentlyJoinedContactsList, Map<String, ContactInfo> selectedPeople, String sendingMsisdn, boolean fetchGroups, String existingGroupId, boolean creatingOrEditingGrou,
-			boolean fetchSmsContacts, boolean checkFavTypeInComparision, boolean fetchRecents , boolean fetchRecentlyJoined, boolean showDefaultEmptyList, boolean fetchHikeContacts)
+			boolean fetchSmsContacts, boolean checkFavTypeInComparision, boolean fetchRecents , boolean fetchRecentlyJoined, boolean showDefaultEmptyList, boolean fetchHikeContacts, boolean fetchFavContacts)
 	{
 		this.friendsAdapter = friendsAdapter;
 
@@ -163,6 +165,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 		this.fetchSmsContacts = fetchSmsContacts;
 		this.fetchHikeContacts = fetchHikeContacts;
+		this.fetchFavContacts = fetchFavContacts;
 		this.checkFavTypeInComparision = checkFavTypeInComparision;
 		this.fetchRecents = fetchRecents;
 		this.fetchRecentlyJoined = fetchRecentlyJoined;
@@ -263,7 +266,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			FavoriteType favoriteType = contactInfo.getFavoriteType();
 
 			addToRecentlyJoinedIfNeeded(contactInfo);
-			if (shouldAddToFavorites(favoriteType))
+			if (shouldAddToFavorites(favoriteType) && fetchFavContacts)
 			{
 				friendTaskList.add(contactInfo);
 			}
