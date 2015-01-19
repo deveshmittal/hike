@@ -394,8 +394,6 @@ public class HikePubSub implements Runnable
 	
 	public static final String USER_JOINED_NOTIFICATION = "userJoinedNotification";
 
-	public static final String SHOW_VOIP_CALL_RATE_POPUP = "showVoipCallRatePopup";
-
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
