@@ -208,9 +208,8 @@ public class OkClient implements IClient
 	 * @return
 	 * @throws CloneNotSupportedException
 	 */
-	OkClient clone(ClientOptions clientOptions) throws CloneNotSupportedException
+	public OkClient clone(ClientOptions clientOptions)
 	{
-		// TODO Auto-generated method stub
 		return new OkClient(setClientParameters(client.clone(), clientOptions));
 	}
 
