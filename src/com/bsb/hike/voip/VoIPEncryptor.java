@@ -38,6 +38,8 @@ public class VoIPEncryptor {
 	
 	private byte[] sessionKey = null;
 	
+	private SecureRandom sr;
+	
 	enum EncryptionStage {
 		STAGE_INITIAL,
 		STAGE_GOT_PUBLIC_KEY,
@@ -45,29 +47,35 @@ public class VoIPEncryptor {
 		STAGE_READY
 	}
 	
-	public VoIPEncryptor() {
+	@SuppressLint("TrulyRandom") public VoIPEncryptor() {
 		kpg = null;
 		publicKey = null;
 		privateKey = null;
 		aesKeySpec = null;
 		aesEncryptCipher = null;
 		aesDecryptCipher = null;
+		
+		PRNGFixes.apply();
+		sr = new SecureRandom();
+
 	}
 
-	@SuppressLint("TrulyRandom") public void initKeys() {
+	public void initKeys() {
 		if (kpg != null)
 			return;		
 		
 		try {
 			// Get RSA public / private keys
-			kpg = KeyPairGenerator.getInstance("RSA");
-			kpg.initialize(RSA_KEY_SIZE);
+			kpg = KeyPairGenerator.getInstance("RSA", "BC");
+			kpg.initialize(RSA_KEY_SIZE, sr);
 			KeyPair kp = kpg.genKeyPair();
 			publicKey = kp.getPublic();
 			privateKey = kp.getPrivate();
 			
 		} catch (NoSuchAlgorithmException e) {
 			Log.d(VoIPConstants.TAG, "NoSuchAlgorithmException: " + e.toString());
+		} catch (NoSuchProviderException e) {
+			Log.d(VoIPConstants.TAG, "initKeys NoSuchProviderException: " + e.toString());
 		}
 	}
 	
@@ -78,8 +86,6 @@ public class VoIPEncryptor {
 		
 		// Generate session key
 		sessionKey = new byte[AES_KEY_SIZE / 8];
-		PRNGFixes.apply();
-		SecureRandom sr = new SecureRandom();
 		Log.d(VoIPConstants.TAG, "New AES key generated.");
 		sr.nextBytes(sessionKey);
 		aesKeySpec = null;
@@ -127,7 +133,7 @@ public class VoIPEncryptor {
 		
 		try {
 			PublicKey key = KeyFactory.getInstance("RSA", "BC").generatePublic(new X509EncodedKeySpec(pubKey));
-			Cipher cipher = Cipher.getInstance("RSA");
+			Cipher cipher = Cipher.getInstance("RSA", "BC");
 			cipher.init(Cipher.ENCRYPT_MODE, key);
 			encryptedData = cipher.doFinal(data);
 			
@@ -154,7 +160,7 @@ public class VoIPEncryptor {
 		byte[] decryptedData = null;
 		
 		try {
-			Cipher cipher = Cipher.getInstance("RSA");
+			Cipher cipher = Cipher.getInstance("RSA", "BC");
 			cipher.init(Cipher.DECRYPT_MODE, privateKey);
 			decryptedData = cipher.doFinal(data);
 		} catch (NoSuchAlgorithmException e) {
@@ -167,6 +173,8 @@ public class VoIPEncryptor {
 			Log.d(VoIPConstants.TAG, "IllegalBlockSizeException: " + e.toString());
 		} catch (BadPaddingException e) {
 			Log.d(VoIPConstants.TAG, "BadPaddingException: " + e.toString());
+		} catch (NoSuchProviderException e) {
+			Log.d(VoIPConstants.TAG, "rsaDecrypt NoSuchProviderException: " + e.toString());
 		}
 		
 		return decryptedData;
@@ -184,7 +192,7 @@ public class VoIPEncryptor {
 			if (aesKeySpec == null)
 				aesKeySpec = new SecretKeySpec(sessionKey, "AES");
 			if (aesEncryptCipher == null) {
-				aesEncryptCipher = Cipher.getInstance("AES");
+				aesEncryptCipher = Cipher.getInstance("AES", "BC");
 				aesEncryptCipher.init(Cipher.ENCRYPT_MODE, aesKeySpec);
 			}
 			encryptedData = aesEncryptCipher.doFinal(data);
@@ -199,6 +207,8 @@ public class VoIPEncryptor {
 			Log.d(VoIPConstants.TAG, "IllegalBlockSizeException: " + e.toString());
 		} catch (BadPaddingException e) {
 			Log.d(VoIPConstants.TAG, "BadPaddingException: " + e.toString());
+		} catch (NoSuchProviderException e) {
+			Log.d(VoIPConstants.TAG, "aesEncrypt NoSuchProviderException: " + e.toString());
 		}
 		
 		return encryptedData;
@@ -216,7 +226,7 @@ public class VoIPEncryptor {
 			if (aesKeySpec == null)
 				aesKeySpec = new SecretKeySpec(sessionKey, "AES");
 			if (aesDecryptCipher == null) {
-				aesDecryptCipher = Cipher.getInstance("AES");
+				aesDecryptCipher = Cipher.getInstance("AES", "BC");
 				aesDecryptCipher.init(Cipher.DECRYPT_MODE, aesKeySpec);
 			}
 			decryptedData = aesDecryptCipher.doFinal(data);
@@ -231,6 +241,8 @@ public class VoIPEncryptor {
 			Log.d(VoIPConstants.TAG, "IllegalBlockSizeException: " + e.toString());
 		} catch (BadPaddingException e) {
 			Log.d(VoIPConstants.TAG, "BadPaddingException: " + e.toString());
+		} catch (NoSuchProviderException e) {
+			Log.d(VoIPConstants.TAG, "aesDecrypt NoSuchProviderException: " + e.toString());
 		}
 		
 		return decryptedData;

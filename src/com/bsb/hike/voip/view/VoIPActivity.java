@@ -41,14 +41,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.VoipProfilePicImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient;
@@ -135,7 +132,7 @@ public class VoIPActivity extends Activity implements CallActions
 				break;
 			case MSG_CONNECTION_ESTABLISHED:
 				showCallStatus(CallStatus.OUTGOING_RINGING);
-				showMessage("Connection established (" + voipService.getConnectionMethod() + ")");
+//				showMessage("Connection established (" + voipService.getConnectionMethod() + ")");
 				break;
 			case MSG_AUDIO_START:
 				isCallActive = true;
@@ -144,43 +141,43 @@ public class VoIPActivity extends Activity implements CallActions
 				activateActiveCallButtons();
 				break;
 			case MSG_ENCRYPTION_INITIALIZED:
-				showMessage("Encryption initialized.");
+//				showMessage("Encryption initialized.");
 				break;
 			case MSG_INCOMING_CALL_DECLINED:
 				// VoIPUtils.addMessageToChatThread(VoIPActivity.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
 				break;
 			case MSG_OUTGOING_CALL_DECLINED:
-				showMessage("Call was declined.");
+//				showMessage("Call was declined.");
 				break;
 			case MSG_CONNECTION_FAILURE:
-				showMessage("Error: Unable to establish connection.");
+				showMessage("Unable to connect your call.");
 				break;
 			case MSG_CURRENT_BITRATE:
-				int bitrate = voipService.getBitrate();
-				showMessage("Bitrate: " + bitrate);
+//				int bitrate = voipService.getBitrate();
+//				showMessage("Bitrate: " + bitrate);
 				break;
 			case MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE:
 				showMessage("Unable to connect to network. Please try again later.");
 				voipService.stop();
 				break;
 			case MSG_PARTNER_SOCKET_INFO_TIMEOUT:
-				showMessage("Partner is not responding.");
+//				showMessage("Partner is not responding.");
 				break;
 			case MSG_PARTNER_ANSWER_TIMEOUT:
-				showMessage("No response.");
+//				showMessage("No response.");
 				break;
 			case MSG_RECONNECTING:
-				showMessage("Reconnecting..");
+				showMessage("Reconnecting your call..");
 				break;
 			case MSG_RECONNECTED:
-				showMessage("Reconnected!");
+//				showMessage("Reconnected!");
 				break;
 			case MSG_UPDATE_QUALITY:
 				CallQuality quality = voipService.getQuality();
 				showSignalStrength(quality);
 				break;
 			case MSG_NETWORK_SUCKS:
-				showMessage("Network quality is not good enough.");
+				showMessage("Your network quality is poor. Please call after some time.");
 				break;
 			case MSG_UPDATE_HOLD_BUTTON:
 				boolean hold = voipService.getHold();
@@ -251,7 +248,7 @@ public class VoIPActivity extends Activity implements CallActions
 		super.onResume();
 		initProximitySensor();
 	}
-
+	
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -281,7 +278,6 @@ public class VoIPActivity extends Activity implements CallActions
 		}
 		
 //		isRunning = false;
-
 		if(callActionsView!=null)
 		{
 			callActionsView.stopPing();
@@ -323,7 +319,7 @@ public class VoIPActivity extends Activity implements CallActions
 		if (action.equals(VoIPConstants.PARTNER_REQUIRES_UPGRADE)) {
 			String message = intent.getStringExtra("message");
 			if (message == null || message.isEmpty())
-				message = "Callee needs to upgrade their client.";
+				message = "Your friend needs to upgrade their client.";
 			showMessage(message);
 			if (voipService != null)
 				voipService.stop();
@@ -332,7 +328,7 @@ public class VoIPActivity extends Activity implements CallActions
 		if (action.equals(VoIPConstants.PARTNER_INCOMPATIBLE)) {
 			String message = intent.getStringExtra("message");
 			if (message == null || message.isEmpty())
-				message = "Callee is on an incompatible client.";
+				message = "Your friend is on an incompatible client.";
 			showMessage(message);
 			if (voipService != null)
 				voipService.stop();
@@ -348,18 +344,18 @@ public class VoIPActivity extends Activity implements CallActions
 		}
 		
 		if (action.equals(VoIPConstants.PARTNER_IN_CALL)) {
-			showMessage("Callee is currently busy in a call.");
+			showMessage("Your friend is busy on another call.");
 			showCallStatus(CallStatus.PARTNER_BUSY);
 			if (voipService != null)
 				voipService.stop();
 		}
 		
 		if (action.equals(VoIPConstants.PUT_CALL_ON_HOLD)) {
-			showMessage("Receiving cellular call.");
-			if (VoIPService.isConnected() && voipService.isAudioRunning()) {
+			showMessage("Your Hike Call has been put on hold.");
+			if (VoIPService.isConnected() && voipService != null && voipService.isAudioRunning()) {
 				voipService.setHold(true);
 				showCallStatus(CallStatus.ON_HOLD);
-			} else if (VoIPService.isConnected())
+			} else if (VoIPService.isConnected() && voipService != null)
 				voipService.hangUp();
 			else
 				if (voipService != null)
@@ -466,7 +462,7 @@ public class VoIPActivity extends Activity implements CallActions
 			public void run() {
 				if (toast != null)
 					toast.cancel();
-				toast = Toast.makeText(VoIPActivity.this, message, Toast.LENGTH_SHORT);
+				toast = Toast.makeText(VoIPActivity.this, message, Toast.LENGTH_LONG);
 				toast.show();
 			}
 		});
@@ -494,17 +490,17 @@ public class VoIPActivity extends Activity implements CallActions
 		@SuppressLint("Wakelock") @Override
 		public void onSensorChanged(SensorEvent event) {
 
-			Logger.d(VoIPConstants.TAG, "Proximity sensor changed. Value: " + event.values[0]
-					+ ", max: " + proximitySensorMaximumRange);
+//			Logger.d(VoIPConstants.TAG, "Proximity sensor changed. Value: " + event.values[0]
+//					+ ", max: " + proximitySensorMaximumRange);
 
 			if (event.values[0] != proximitySensorMaximumRange) {
 				if (!proximityWakeLock.isHeld()) {
-					Logger.d(VoIPConstants.TAG, "Acquiring proximity sensor...");
+//					Logger.d(VoIPConstants.TAG, "Acquiring proximity sensor...");
 					proximityWakeLock.acquire();
 				}
 			} else {
 				if (proximityWakeLock.isHeld()) {
-					Logger.d(VoIPConstants.TAG, "Releasing proximity sensor...");
+//					Logger.d(VoIPConstants.TAG, "Releasing proximity sensor...");
 					proximityWakeLock.release();
 				}
 			}
