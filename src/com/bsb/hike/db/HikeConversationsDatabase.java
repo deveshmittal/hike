@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
 import android.util.SparseArray;
+
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -29,13 +30,21 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
+import com.bsb.hike.modules.contactmgr.GroupDetails;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.*;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -2507,13 +2516,51 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			final int groupIdIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ID);
 			final int groupNameIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_NAME);
 			final int groupAliveIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ALIVE);
-
 			while (groupInfoCursor.moveToNext())
 			{
 				String groupId = groupInfoCursor.getString(groupIdIdx);
 				String groupName = groupInfoCursor.getString(groupNameIdx);
 				Boolean groupAlive = groupInfoCursor.getInt(groupAliveIdx) != 0;
 				map.put(groupId, new Pair<String, Boolean>(groupName, groupAlive));
+			}
+			return map;
+		}
+		finally
+		{
+			if (null != groupInfoCursor)
+			{
+				groupInfoCursor.close();
+			}
+
+		}
+	}
+	
+	/**
+	 * Returns a hash map between group id and group name
+	 * 
+	 * @return
+	 */
+	public Map<String, GroupDetails> getIdGroupDetailsMap()
+	{
+		Cursor groupInfoCursor = null;
+		try
+		{
+			groupInfoCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.GROUP_ID, DBConstants.GROUP_NAME, DBConstants.GROUP_ALIVE, DBConstants.MUTE_GROUP }, null, null, null,
+					null, null);
+
+			Map<String, GroupDetails> map = new HashMap<String, GroupDetails>();
+
+			final int groupIdIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ID);
+			final int groupNameIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_NAME);
+			final int groupAliveIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ALIVE);
+			final int groupMuteIdx = groupInfoCursor.getColumnIndex(DBConstants.MUTE_GROUP);
+			while (groupInfoCursor.moveToNext())
+			{
+				String groupId = groupInfoCursor.getString(groupIdIdx);
+				String groupName = groupInfoCursor.getString(groupNameIdx);
+				boolean groupAlive = groupInfoCursor.getInt(groupAliveIdx) != 0;
+				boolean groupMute = groupInfoCursor.getInt(groupMuteIdx) != 0;
+				map.put(groupId, new GroupDetails(groupId, groupName, groupAlive, groupMute));
 			}
 			return map;
 		}
@@ -2580,13 +2627,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 				if (Utils.isGroupConversation(msisdn))
 				{
-					String name = ContactManager.getInstance().getName(msisdn);
-					boolean groupAlive = ContactManager.getInstance().isGroupAlive(msisdn);
+					GroupDetails details = ContactManager.getInstance().getGroupDetails(msisdn);
+					String name = details.getGroupName();
+					boolean groupAlive = details.isGroupAlive();
+					boolean isMuteGroup = details.isGroupMute();
 					if (null == name)
 					{
 						groupIds.add(msisdn);
 					}
-					conv = new GroupConversation(msisdn, name, null, groupAlive);
+					conv = new GroupConversation(msisdn, name, null, groupAlive, isMuteGroup);
 				}
 				else
 				{
@@ -3368,6 +3417,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 	public void toggleGroupMute(String groupId, boolean isMuted)
 	{
+		if (!ContactManager.getInstance().isGroupExist(groupId))
+		{
+			return ;
+		}
+		ContactManager.getInstance().setGroupMute(groupId, isMuted);
 		ContentValues contentValues = new ContentValues(1);
 		contentValues.put(DBConstants.MUTE_GROUP, isMuted);
 
@@ -5971,6 +6025,89 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		rowId = (int) mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
 
 		return rowId < 0 ? false : true;
+	}
+	
+	/**
+	 * Used to persist the changes made to the {@link StickerCategory#isUpdateAvailable()} flag
+	 * 
+	 * @param category
+	 */
+	public void saveUpdateFlagOfStickerCategory(StickerCategory category)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.UPDATE_AVAILABLE, category.isUpdateAvailable());
+
+		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { category.getCategoryId() });
+
+	}
+	
+	public void saveUpdateFlagOfStickerCategory(List<StickerCategory> stickerCategories)
+	{
+		try
+		{
+			mDb.beginTransaction();
+			for (StickerCategory stickerCategory : stickerCategories)
+			{
+				saveUpdateFlagOfStickerCategory(stickerCategory);
+			}
+			mDb.setTransactionSuccessful();
+		}
+		catch (Exception e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception : ", e);
+			e.printStackTrace();
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
+	}
+	
+	public StickerCategory getStickerCategoryforId(String categoryId)
+	{
+		Cursor c = null;
+		StickerCategory stickerCategory = null;
+		
+		try
+		{
+			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, null, DBConstants._ID + "=?", new String[] { categoryId }, null, null, null);
+			stickerCategory = parseStickerCategoryCursor(c);
+		}
+
+		catch (Exception e)
+		{
+			Logger.wtf("StickerManager", "Exception in getStickerCategoryforId  : " + e.toString());
+		}
+		
+		finally
+		{
+			if(c != null)
+			{
+				c.close();
+			}
+		}
+		
+		return stickerCategory;
+	}
+	
+	private StickerCategory parseStickerCategoryCursor(Cursor c)
+	{
+		StickerCategory stickerCategory = null;
+		if(c.moveToFirst())
+		{
+			String categoryId = c.getString(c.getColumnIndex(DBConstants._ID));
+			String categoryName = c.getString(c.getColumnIndex(DBConstants.CATEGORY_NAME));
+			boolean updateAvailable = c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
+			boolean isVisible = c.getInt(c.getColumnIndex(DBConstants.IS_VISIBLE)) == 1;
+			boolean isCustom = c.getInt(c.getColumnIndex(DBConstants.IS_CUSTOM)) == 1;
+			int catIndex = c.getInt(c.getColumnIndex(DBConstants.CATEGORY_INDEX));
+			int categorySize = c.getInt(c.getColumnIndex(DBConstants.CATEGORY_SIZE));
+			int totalStickers = c.getInt(c.getColumnIndex(DBConstants.TOTAL_NUMBER));
+			
+			stickerCategory = new StickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, totalStickers, categorySize);
+		}
+		
+		return stickerCategory;
 	}
 
 }

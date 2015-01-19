@@ -52,7 +52,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	private StickerLoader worker;
 	
 	private StickerOtherIconLoader stickerOtherIconLoader;
-
+	
 	private class StickerPageObjects
 	{
 		private GridView stickerGridView;
@@ -423,7 +423,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 
 		spo.getStickerGridView().setVisibility(View.VISIBLE);
-		final List<Sticker> stickersList = category.getStickerList(activity);
+		final List<Sticker> stickersList = category.getStickerList();
 		final List<StickerPageAdapterItem> stickerPageList = StickerManager.getInstance().generateStickerPageAdapterItemList(stickersList);
 		
 		/**
@@ -435,22 +435,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 		
 		int state = category.getState();
-		
-		/**
-		 * To cater to a corner case, where server sent an update available packet, and before a user could download the new updates for a pack, the user received the new stickers.
-		 * In that case, the updateAvailable flag still remains true for that category. 
-		 * Thus, we are removing it incase the count of stickers in folder == the actual stickers
-		 */
-		
-		if(category.isUpdateAvailable() && stickersList.size() > 0 && (stickersList.size() == category.getTotalStickers()))
-		{
-			category.setUpdateAvailable(false);
-			if(category.getState() == StickerCategory.UPDATE)
-			{
-				category.setState(StickerCategory.NONE);
-			}
-		}
-		
+
 		/* We add UI elements based on the current state of the sticker category*/
 		addStickerPageAdapterItem(category, stickerPageList);
 		/**
@@ -522,5 +507,5 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		return stickerCategoryList.get(index);
 	}
-
+	
 }

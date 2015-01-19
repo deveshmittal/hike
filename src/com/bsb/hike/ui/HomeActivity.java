@@ -280,7 +280,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private void setupFestivePopup()
 	{
 		final int festivePopupType = accountPrefs.getInt(HikeConstants.SHOW_FESTIVE_POPUP, -1);
-		if (festivePopupType != -1)
+		if (festivePopupType == FestivePopup.REPUBLIC_DAY_POPUP)
 		{
 			if(FestivePopup.isPastFestiveDate(festivePopupType))
 			{
@@ -289,10 +289,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			else if(dialogShowing == null)
 			{
 				ViewStub festiveView = (ViewStub) findViewById(R.id.festive_view_stub);
-				if(festivePopupType == FestivePopup.NEW_YEAR_POPUP)
-				{
-					festiveView.setLayoutResource(R.layout.new_year_popup);
-				}
 				festiveView.setOnInflateListener(new ViewStub.OnInflateListener()
 				{
 					@Override

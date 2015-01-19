@@ -689,14 +689,7 @@
 	    <item name="android:layout_height">0.5dp</item>
 	    <item name="android:background">@drawable/home_list_divider</item>
 	</style>
-	
-	<style name="PinsReadContainer">
-	    <item name="android:layout_marginLeft">8dp</item>
-	    <item name="android:layout_marginRight">8dp</item>
-	    <item name="android:layout_marginTop">8dp</item>
-        <item name="android:background">@drawable/pins_bg_read_selector</item>
-	</style>
-	
+		
 	<style name="DiwaliPopupButton">
 	    <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">match_parent</item>
