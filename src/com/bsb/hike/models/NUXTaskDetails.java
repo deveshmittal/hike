@@ -1,13 +1,14 @@
 package com.bsb.hike.models;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import android.text.TextUtils;
+/**
+ * 
+ * @author himanshu
+ *This class has all the details regarding the nux task
+ */
+		
 
-import com.bsb.hike.NUXConstants;
-
-public class NUXTaskDetails implements NUXConstants
+public class NUXTaskDetails
 {
 
 	private String incentiveId;
@@ -18,8 +19,6 @@ public class NUXTaskDetails implements NUXConstants
 
 	private int incentiveAmount;
 
-	private boolean isNuxSkippable;
-
 	/**
 	 * @param incentiveId
 	 * @param activityId
@@ -28,16 +27,14 @@ public class NUXTaskDetails implements NUXConstants
 	 * @param min
 	 * @param max
 	 * @param incentiveAmount
-	 * @param isNuxSkippable
 	 */
-	public NUXTaskDetails(String incentiveId, String activityId, int min, int max, int incentiveAmount, boolean isNuxSkippable)
+	public NUXTaskDetails(String incentiveId, String activityId, int min, int max, int incentiveAmount)
 	{
 		super();
 		this.incentiveId = incentiveId;
 		this.activityId = activityId;
 		this.min = min;
 		this.max = max;
-		this.isNuxSkippable = isNuxSkippable;
 		this.incentiveAmount = incentiveAmount;
 	}
 
@@ -78,10 +75,5 @@ public class NUXTaskDetails implements NUXConstants
 	public int getIncentiveAmount()
 	{
 		return incentiveAmount;
-	}
-
-	public boolean isNuxSkippable()
-	{
-		return isNuxSkippable;
 	}
 }

@@ -1,6 +1,13 @@
 package com.bsb.hike.models;
 
-import java.util.ArrayList;
+
+/**
+ * 
+ * @author himanshu
+ * 
+ * This class provides all the details to the custom message activity.
+ *
+ */
 
 public class NuxCustomMessage
 {

@@ -7,8 +7,14 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.utils.Utils;
 
+/**
+ * 
+ * @author himanshu 
+ * 
+ * This class provides details to the invite friends activity.
+ *
+ */
 public class NuxInviteFriends
 {
 	private String mainReward;
@@ -19,23 +25,25 @@ public class NuxInviteFriends
 
 	private boolean toggleskipbutton;
 
-	private String image;
-
 	private Bitmap bitmap;
 
 	StringToBitmap mmStringToBitmap;
-	public NuxInviteFriends(String mainReward, String subTextReward, String buttext, String image, boolean skip_toggle_button)
-	{
 
+	Boolean isNuxSkippable;
+
+	public NuxInviteFriends(String mainReward, String subTextReward, String buttext, String image, boolean skip_toggle_button, boolean isNuxSkippable)
+	{
 		this.mainReward = mainReward;
 		this.subTextReward = subTextReward;
 		this.buttext = buttext;
-		this.image = image;
 		this.toggleskipbutton = skip_toggle_button;
+
+		this.isNuxSkippable = isNuxSkippable;
 		if (!TextUtils.isEmpty(image))
 		{
-			mmStringToBitmap = new StringToBitmap(image);
-			HikeHandlerUtil.getInstance().postRunnableWithDelay(mmStringToBitmap, 0);
+			// mmStringToBitmap = new StringToBitmap(image);
+			// HikeHandlerUtil.getInstance().postRunnableWithDelay(mmStringToBitmap, 0);
+			bitmap = HikeBitmapFactory.stringToBitmap(image);
 		}
 		else
 		{
@@ -98,6 +106,11 @@ public class NuxInviteFriends
 	public Bitmap getImageBitmap()
 	{
 		return bitmap;
+	}
+
+	public boolean isNuxSkippable()
+	{
+		return isNuxSkippable;
 	}
 
 }

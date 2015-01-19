@@ -8,10 +8,16 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 
+
+/**
+ * 
+ * @author himanshu
+ * 
+ * This class contains all information regarding the footer shown in conversation list in case of NUX is there.
+ *
+ */
 public class NUXChatReward
 {
-
-	private boolean toggleModule;
 
 	private String rewardCardText;
 
@@ -38,14 +44,6 @@ public class NUXChatReward
 	private String pendingChatIcon;
 
 	private Bitmap pendingChatIconBitmap;
-
-	/**
-	 * @return the toggleModule
-	 */
-	public boolean isToggleModule()
-	{
-		return toggleModule;
-	}
 
 	/**
 	 * @return the rewardCardText
@@ -141,10 +139,9 @@ public class NUXChatReward
 	 * @param button2Text
 	 * @param tapToClaimLink
 	 */
-	public NUXChatReward(boolean toggleModule, String rewardCardText, String rewardCardSuccessText, String statusText, String chatWaitingText, String pendingChatIcon,
+	public NUXChatReward(String rewardCardText, String rewardCardSuccessText, String statusText, String chatWaitingText, String pendingChatIcon,
 			String detailsText, String detailsLink, String button1Text, String button2Text, String tapToClaimLink, String tapToClaimText, String selectFriends)
 	{
-		this.toggleModule = toggleModule;
 		this.rewardCardText = rewardCardText;
 		this.rewardCardSuccessText = rewardCardSuccessText;
 		this.statusText = statusText;
@@ -160,8 +157,9 @@ public class NUXChatReward
 
 		if (!TextUtils.isEmpty(pendingChatIcon))
 		{
-			StringToBitmap mmBitmap = new StringToBitmap(pendingChatIcon);
-			HikeHandlerUtil.getInstance().postRunnableWithDelay(mmBitmap, 0);
+			//StringToBitmap mmBitmap = new StringToBitmap(pendingChatIcon);
+			//HikeHandlerUtil.getInstance().postRunnableWithDelay(mmBitmap, 0);
+			pendingChatIconBitmap = HikeBitmapFactory.stringToBitmap(pendingChatIcon);
 		}
 		else
 		{

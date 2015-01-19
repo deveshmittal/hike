@@ -355,6 +355,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			lockImage.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_lock_orange));
 		}
 	
+		// Module toggle true:no select friends and custom message screen shown hence hiding the buttons and the making the chat reward not tappable
 		if (mmSelectFriends.isModuleToggle())
 		{
 			llChatReward.setOnClickListener(null);
@@ -367,6 +368,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		rewardCard.setText(String.format(mmReward.getRewardCardText(), mmDetails.getMin(), mmDetails.getIncentiveAmount()));
 
+		//NUX Skipped state ...
+		
 		if (mmNuxManager.getCurrentState() == NUXConstants.NUX_SKIPPED)
 		{
 			butRemind.setVisibility(View.GONE);
@@ -395,7 +398,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			// Reward Unlocked.
 			
-			
 			lockImage.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_nux_unlocked));
 
 			chatProgress.setText(mmReward.getTapToClaimText());
@@ -405,8 +407,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			llChatReward.setOnClickListener(null);
 			
 			progressNux.setProgress(0f);
-			
-						
 		}
 	}
 
@@ -642,7 +642,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	public void onDestroy()
 	{
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
-
+		
 		if (!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 		{
 			// if stealth setup is not done and user has marked some chats as stealth unmark all of them

@@ -31,8 +31,18 @@ import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.ui.HomeActivity;
+import static com.bsb.hike.NUXConstants.*;
 
-public class NUXManager implements NUXConstants
+
+/**
+ * 
+ * 
+ * @author himanshu
+ * 
+ * A class that managers all states ,contact related to NUX.
+ *
+ */
+public class NUXManager
 {
 	private static final NUXManager mmManager = new NUXManager();
 
@@ -94,7 +104,15 @@ public class NUXManager implements NUXConstants
 
 	public void startNuxSelector(Activity activity)
 	{
-		activity.startActivity(IntentManager.openNuxFriendSelector(activity));
+		if (getNuxSelectFriendsPojo().isModuleToggle())
+		{
+			activity.finish();
+			setCurrentState(NUX_IS_ACTIVE);
+		}
+		else
+		{
+			activity.startActivity(IntentManager.openNuxFriendSelector(activity));
+		}
 	}
 
 	public void saveNUXContact(HashSet<String> msisdn)
@@ -217,6 +235,7 @@ public class NUXManager implements NUXConstants
 
 					}
 					NUXTaskDetails mmDetails = getNuxTaskDetailsPojo();
+					getNuxInviteFriendsPojo();
 				
 					// Check for min and max should not be zero.
 					
@@ -374,10 +393,7 @@ public class NUXManager implements NUXConstants
 			{
 				task_details.put(TD_MAX_CONTACTS, newTaskDetails.getInt(TD_MAX_CONTACTS));
 			}
-			if (newTaskDetails.has(TD_IS_SKIPPABLE))
-			{
-				task_details.put(TD_IS_SKIPPABLE, newTaskDetails.getBoolean(TD_IS_SKIPPABLE));
-			}
+		
 			mprefs.saveData(TASK_DETAILS, task_details.toString());
 
 		}
@@ -423,6 +439,10 @@ public class NUXManager implements NUXConstants
 			if (newinviteFriends.has(INVITEFRDS_TEXT))
 			{
 				inviteFriends.put(INVITEFRDS_TEXT, newinviteFriends.getString(INVITEFRDS_TEXT));
+			}
+			if (newinviteFriends.has(INVITE_NUX_IS_SKIPPABLE))
+			{
+				inviteFriends.put(INVITE_NUX_IS_SKIPPABLE, newinviteFriends.getBoolean(INVITE_NUX_IS_SKIPPABLE));
 			}
 
 			mprefs.saveData(INVITE_FRIENDS, inviteFriends.toString());
@@ -550,9 +570,6 @@ public class NUXManager implements NUXConstants
 			if (newChatReward.has(CR_DETAILS_TEXT))
 				chatReward.put(CR_DETAILS_TEXT, newChatReward.getString(CR_DETAILS_TEXT));
 
-			if (newChatReward.has(CR_MODULE_TOGGLE))
-				chatReward.put(CR_MODULE_TOGGLE, newChatReward.getString(CR_MODULE_TOGGLE));
-
 			if (newChatReward.has(CR_PENDINGCHAT_ICON))
 				chatReward.put(CR_PENDINGCHAT_ICON, newChatReward.getString(CR_PENDINGCHAT_ICON));
 
@@ -649,12 +666,10 @@ public class NUXManager implements NUXConstants
 
 				int min = task_details.optInt(TD_MIN_CONTACTS, context.getResources().getInteger(R.integer.nux_min_contacts));
 				int max = task_details.optInt(TD_MAX_CONTACTS, context.getResources().getInteger(R.integer.nux_max_contacts));
-				boolean isNuxSkippable = task_details.optBoolean(TD_IS_SKIPPABLE, true);
-				taskDetails = new NUXTaskDetails(incentiveId, activityId, min, max, incentiveAmount, isNuxSkippable);
+				taskDetails = new NUXTaskDetails(incentiveId, activityId, min, max, incentiveAmount);
 			}
 			catch (JSONException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -700,7 +715,7 @@ public class NUXManager implements NUXConstants
 					String butText = select_friends.optString(SF_BUTTON_TEXT, context.getString(R.string.nux_select_friends_nextbut));
 					String title2 = select_friends.optString(SF_SECTION_TITLE2, context.getString(R.string.nux_select_friends_2));
 					String title3 = select_friends.optString(SF_SECTION_TITLE3, context.getString(R.string.nux_select_friends_3));
-					boolean moduleToggle = select_friends.optBoolean(SF_MODULE_TOGGLE);
+					boolean moduleToggle = select_friends.optBoolean(SF_MODULE_TOGGLE,false);
 					int contactSectionType = select_friends.optInt(SF_CONTACT_SECTION_TYPE);
 					selectFriends = new NuxSelectFriends(sectionTitle, title2, title3, recoSectionTitle, recoList, hideList, butText, moduleToggle, contactSectionType);
 				}
@@ -732,12 +747,12 @@ public class NUXManager implements NUXConstants
 					boolean skip_toggle_button = incentive_reward.optBoolean(INVITEFRDS_SKIP_TOGGLE_BUTTON);
 					String title = incentive_reward.optString(INVITEFRDS_MAIN_TITLE, context.getString(R.string.nux_invitefrnds_reward));
 					String buttext = incentive_reward.optString(INVITEFRDS_BUT_TEXT, context.getString(R.string.nux_invitefrnds_buttext));
-					inviteFriends = new NuxInviteFriends(title, text, buttext, image, skip_toggle_button);
+					boolean isNuxSkippable = incentive_reward.optBoolean(INVITE_NUX_IS_SKIPPABLE, true);
+					inviteFriends = new NuxInviteFriends(title, text, buttext, image, skip_toggle_button,isNuxSkippable);
 				}
 			}
 			catch (JSONException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -758,7 +773,6 @@ public class NUXManager implements NUXConstants
 					chatrewardobj = new JSONObject();
 				{
 
-					boolean toggleModule = chatrewardobj.optBoolean(CR_MODULE_TOGGLE);
 					String rewardCardText = chatrewardobj.optString(CR_REWARD_CARD_TEXT, context.getString(R.string.reward_card_objective));
 					String rewardCardSuccessText = chatrewardobj.optString(CR_REWARD_CARD_SUCCESS_TEXT, context.getString(R.string.reward_card_success));
 					String statusText = chatrewardobj.optString(CR_STATUS_TEXT, context.getString(R.string.status_text));
@@ -771,7 +785,7 @@ public class NUXManager implements NUXConstants
 					String tapToClaimLink = chatrewardobj.optString(CR_TAPTOCLAIM);
 					String tapToClaimText = chatrewardobj.optString(CR_TAPTOCLAIMTEXT, context.getString(R.string.tap_to_claim));
 					String selectFriends = chatrewardobj.optString(CR_SELECTFRIENDS, context.getString(R.string.select_friends));
-					chatReward = new NUXChatReward(toggleModule, rewardCardText, rewardCardSuccessText, statusText, chatWaitingText, pendingChatIcon, detailsText, detailsLink,
+					chatReward = new NUXChatReward(rewardCardText, rewardCardSuccessText, statusText, chatWaitingText, pendingChatIcon, detailsText, detailsLink,
 							button1Text, button2Text, tapToClaimLink, tapToClaimText, selectFriends);
 
 				}
@@ -816,7 +830,6 @@ public class NUXManager implements NUXConstants
 		}
 		catch (JSONException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -844,16 +857,15 @@ public class NUXManager implements NUXConstants
 				int pushType = mmNotification.getInt(PUSH_TYPE);
 
 				{
-					switch (ENUM_PUSH_TYPE.getEnumValue(pushType))
+					switch (PushTypeEnum.getEnumValue(pushType))
 					{
-					case PUSH_LOUD:
+					case PUSH:
 						notifyUser(pushText, pushTitle, false);
 						break;
-					case PUSH_SILENT:
+					case SILENT:
 						notifyUser(pushText, pushTitle, true);
 						break;
-					case PUSH_NONE:
-						break;
+					case NONE:
 					case UNKNOWN:
 						break;
 					}
@@ -862,7 +874,7 @@ public class NUXManager implements NUXConstants
 				if (mmNotification.has(PUSH_REWARD_CARD_TYPE))
 				{
 					int rewardType = mmNotification.getInt(PUSH_REWARD_CARD_TYPE);
-					switch (ENUM_REWARD_TYPE.getEnumValue(rewardType))
+					switch (RewardTypeEnum.getEnumValue(rewardType))
 					{
 					case COMPRESSED:
 						reminderShown();
@@ -871,7 +883,6 @@ public class NUXManager implements NUXConstants
 						mprefs.saveData(REMINDER_RECEIVED, true);
 						break;
 					case NORMAL:
-						break;
 					case UNKNOWN:
 						break;
 					}
@@ -900,7 +911,7 @@ public class NUXManager implements NUXConstants
 	{
 		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_NEW)
 		{
-			if (NUXManager.getInstance().getNuxTaskDetailsPojo().isNuxSkippable())
+			if (NUXManager.getInstance().getNuxInviteFriendsPojo().isNuxSkippable())
 			{
 				NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
 			}
@@ -962,7 +973,6 @@ public class NUXManager implements NUXConstants
 		}
 		catch (JSONException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

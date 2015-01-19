@@ -3,6 +3,14 @@ package com.bsb.hike.models;
 import java.util.ArrayList;
 import java.util.Set;
 
+
+/**
+ * 
+ * @author himanshu
+ * 
+ * This class has all the details that will be supplied to Select friends screen ..
+ *
+ */
 public class NuxSelectFriends
 {
 
@@ -23,8 +31,8 @@ public class NuxSelectFriends
 	 * @param moduleToggle
 	 * @param contactSectionType
 	 */
-	public NuxSelectFriends(String sectionTitle, String title2, String title3, String recoSectionTitle, Set<String> recoList, ArrayList<String> hideList,
-			 String butText, boolean moduleToggle, int contactSectionType)
+	public NuxSelectFriends(String sectionTitle, String title2, String title3, String recoSectionTitle, Set<String> recoList, ArrayList<String> hideList, String butText,
+			boolean moduleToggle, int contactSectionType)
 	{
 		super();
 		this.sectionTitle = sectionTitle;
@@ -94,7 +102,6 @@ public class NuxSelectFriends
 		return hideList;
 	}
 
-
 	/**
 	 * @return the butText
 	 */
@@ -104,7 +111,7 @@ public class NuxSelectFriends
 	}
 
 	/**
-	 * @return the searchToggle
+	 * @return the NUXModuleToggle
 	 */
 	public boolean isModuleToggle()
 	{
@@ -136,30 +143,5 @@ public class NuxSelectFriends
 	private boolean moduleToggle;
 
 	private int contactSectionType;
-
-	public enum s2ContactSectionTypeEnum
-	{
-		all(0), hike(1), nonhike(2), both(3), none(4), unknown(-1);
-
-		private int value;
-
-		public int getValue()
-		{
-			return value;
-		}
-
-		private s2ContactSectionTypeEnum(int value)
-		{
-			this.value = value;
-		}
-
-		public static s2ContactSectionTypeEnum getEnum(int value)
-		{
-			for (s2ContactSectionTypeEnum enum1 : s2ContactSectionTypeEnum.values())
-				if (enum1.value == value)
-					return enum1;
-			return unknown;
-		}
-	}
 
 }

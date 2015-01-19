@@ -1,6 +1,7 @@
 package com.bsb.hike;
 
-public interface NUXConstants
+
+public class NUXConstants
 {
 
 	public static final String NUX_SHARED_PREF = "nux_shared_pref";
@@ -24,6 +25,8 @@ public interface NUXConstants
 	public static final String INVITEFRDS_SKIP_TOGGLE_BUTTON = "nxTgl";
 
 	public static final String INVITEFRDS_IMAGE = "img";
+	
+	public static final String INVITE_NUX_IS_SKIPPABLE = "isSkpble";
 
 	public static final String INVITE_FRIENDS = "s1";
 
@@ -45,7 +48,7 @@ public interface NUXConstants
 
 	public static final String SF_BUTTON_TEXT = "nxTxt";
 
-	public static final String SF_MODULE_TOGGLE = "srchTgl";
+	public static final String SF_MODULE_TOGGLE = "mdlTgl";
 
 	public static final String SF_CONTACT_SECTION_TYPE = "cntctTyp";
 
@@ -75,11 +78,7 @@ public interface NUXConstants
 
 	public static final String TD_MAX_CONTACTS = "max";
 	
-	public static final String TD_IS_SKIPPABLE = "sskppbl";
-
 	public static final String CHAT_REWARDS_BAR = "s4";
-
-	public static final String CR_MODULE_TOGGLE = "mdlTgl";
 
 	public static final String CR_REWARD_CARD_TEXT = "rwdCrdTxt";
 
@@ -101,9 +100,9 @@ public interface NUXConstants
 
 	public static final String CR_TAPTOCLAIM = "tpToClmLnk";
 	
-	public static final String CR_TAPTOCLAIMTEXT="tptoclmtxt";
+	public static final String CR_TAPTOCLAIMTEXT="sttsTxtSccss";
 	
-	public static final String CR_SELECTFRIENDS="slctfrnd";
+	public static final String CR_SELECTFRIENDS="bttn0Txt";
 
 	public static final String CURRENT_NUX_ACTIVITY = "current_nux_activity";
 
@@ -171,20 +170,19 @@ public interface NUXConstants
 	
 	public static final String PUSH_REWARD_CARD_TYPE="rwdCrdTyp";
 	
-	public static enum ENUM_PUSH_TYPE
+	public static enum PushTypeEnum
 	{
-		PUSH_LOUD(0), PUSH_SILENT(1), PUSH_NONE(2), UNKNOWN(-1);
-
+		NONE(0), SILENT(1), PUSH(2), UNKNOWN(-1);
 		int val;
 
-		private ENUM_PUSH_TYPE(int val)
+		private PushTypeEnum(int val)
 		{
 			this.val = val;
 		}
 
-		public static ENUM_PUSH_TYPE getEnumValue(int val)
+		public static PushTypeEnum getEnumValue(int val)
 		{
-			for (ENUM_PUSH_TYPE enum1 : ENUM_PUSH_TYPE.values())
+			for (PushTypeEnum enum1 : PushTypeEnum.values())
 			{
 				if (enum1.val == val)
 					return enum1;
@@ -194,20 +192,19 @@ public interface NUXConstants
 		}
 	}
 
-	public static enum ENUM_REWARD_TYPE
+	public static enum RewardTypeEnum
 	{
 		COMPRESSED(0), NORMAL(1), EXPANDED(2), UNKNOWN(-1);
-
 		int val;
 
-		private ENUM_REWARD_TYPE(int val)
+		private RewardTypeEnum(int val)
 		{
 			this.val = val;
 		}
 
-		public static ENUM_REWARD_TYPE getEnumValue(int val)
+		public static RewardTypeEnum getEnumValue(int val)
 		{
-			for (ENUM_REWARD_TYPE enum1 : ENUM_REWARD_TYPE.values())
+			for (RewardTypeEnum enum1 : RewardTypeEnum.values())
 			{
 				if (enum1.val == val)
 					return enum1;

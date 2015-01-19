@@ -33,8 +33,6 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 	{
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-
-		
 		
 		if (Utils.requireAuth(this))
 		{
@@ -84,7 +82,6 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 	{
 		NUXManager mmNuxManager = NUXManager.getInstance();
 		NuxInviteFriends mmInviteFriends = mmNuxManager.getNuxInviteFriendsPojo();
-
 		if (mmInviteFriends != null)
 		{
 			if (!TextUtils.isEmpty(mmInviteFriends.getButText()))
@@ -124,7 +121,9 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 			break;
 
 		case R.id.but_inviteFrnds:
+		
 			NUXManager.getInstance().startNuxSelector(this);
+		
 			break;
 		}
 
