@@ -19,6 +19,9 @@ import com.bsb.hike.HikeConstants;
 
 public class SoundUtils
 {
+	private static int systemStreamVol;
+	
+	private static Context mContext;
 
 	private static Handler soundHandler = new Handler(Looper.getMainLooper());
 
@@ -31,6 +34,7 @@ public class SoundUtils
 		public void run()
 		{
 			mediaPlayer.reset();
+			setCurrentVolume(mContext, AudioManager.STREAM_SYSTEM, systemStreamVol);
 		}
 	};
 
@@ -42,6 +46,7 @@ public class SoundUtils
 		{
 			mediaPlayer.reset();
 			soundHandler.removeCallbacks(stopSoundRunnable);
+			setCurrentVolume(mContext, AudioManager.STREAM_SYSTEM, systemStreamVol);
 		}
 	};
 
@@ -59,6 +64,16 @@ public class SoundUtils
 		}
 	};
 
+	private static Runnable resetSystemStreamVolRunnable = new Runnable()
+	{
+
+		@Override
+		public void run()
+		{
+			setCurrentVolume(mContext, AudioManager.STREAM_SYSTEM, systemStreamVol);
+		}
+	};
+	
 	public static boolean isTickSoundEnabled(Context context)
 	{
 		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -87,7 +102,9 @@ public class SoundUtils
 			mediaPlayer.reset();
 		}
 
+		mContext = context;
 		mediaPlayer.setAudioStreamType(AudioManager.STREAM_SYSTEM);
+		setVolToSystemStreamVol(context);
 		Resources res = context.getResources();
 		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
 
@@ -134,7 +151,10 @@ public class SoundUtils
 			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 			Ringtone r = RingtoneManager.getRingtone(context, notification);
 			r.setStreamType(AudioManager.STREAM_SYSTEM);
+			mContext = context;
+			setVolToSystemStreamVol(context);
 			r.play();
+			soundHandler.postDelayed(resetSystemStreamVolRunnable, HikeConstants.STOP_NOTIF_SOUND_TIME);
 		}
 		catch (Exception e)
 		{
@@ -165,7 +185,9 @@ public class SoundUtils
 		}
 
 		mediaPlayer.setAudioStreamType(AudioManager.STREAM_SYSTEM);
-
+		mContext = context;
+		setVolToSystemStreamVol(context);
+		
 		try
 		{
 			mediaPlayer.setDataSource(context, soundUri);
@@ -194,6 +216,13 @@ public class SoundUtils
 		}
 	}
 
+	public static void setVolToSystemStreamVol(Context context)
+	{
+		systemStreamVol = getCurrentVolume(context, AudioManager.STREAM_SYSTEM);
+		int notifVol = getCurrentVolume(context, AudioManager.STREAM_NOTIFICATION);
+		setCurrentVolume(context, AudioManager.STREAM_SYSTEM, notifVol);
+	}
+	
 	public static int getCurrentVolume(Context context, int streamType)
 	{
 		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
