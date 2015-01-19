@@ -49,4 +49,6 @@ public interface HikePlatformConstants
 	public static final String MESSAGE_ID = "message_id";
 
 	public static final String CONV_MSISDN = "conv_msisdn";
+	
+	String ALARM_DATA = "alarm_data";
 }

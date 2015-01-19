@@ -18,11 +18,13 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
 import android.util.SparseArray;
+
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.db.DBConstants.HIKE_CONTENT;
 import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -46,6 +48,7 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
 import com.bsb.hike.modules.contactmgr.GroupDetails;
 import com.bsb.hike.platform.ContentLove;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
 import com.bsb.hike.ui.ChatThread;
@@ -55,6 +58,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,7 +77,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBConstants,HIKE_CONV_DB
+public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBConstants, HIKE_CONV_DB
 {
 
 	private SQLiteDatabase mDb;
@@ -6266,4 +6270,47 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return null;
 	}
 
+	public String updateJSONMetadata(int messageId, String newMeta)
+	{
+		String json = getMetadataOfMessage(messageId);
+		if (json != null)
+		{
+			try
+			{
+				JSONObject metadataJSON = new JSONObject(json);
+				JSONObject newMetaData = new JSONObject(newMeta);
+				Iterator<String> i = newMetaData.keys();
+				while (i.hasNext())
+				{
+					String key = i.next();
+					metadataJSON.put(key, newMetaData.get(key));
+				}
+				json = metadataJSON.toString();
+				updateMetadataOfMessage(messageId, json);
+				return json;
+			}
+			catch (JSONException e)
+			{
+				Logger.e("HikeconversationDB", "JSOn Exception = " + e.getMessage());
+			}
+		}
+		else
+		{
+			Logger.e("HikeconversationDB", "Meta data of message is null, id= " + messageId);
+		}
+		return null;
+	}
+
+	public void deleteAppAlarm(int messageId)
+	{
+		String json = getMetadataOfMessage(messageId);
+		if (json != null)
+		{
+			{
+				JSONObject metadataJSON = new JSONObject();
+				metadataJSON.remove(HikePlatformConstants.ALARM_DATA);
+				updateMetadataOfMessage(messageId, metadataJSON.toString());
+			}
+		}
+	}
 }
