@@ -62,7 +62,6 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.OkHttpClient;
@@ -431,6 +430,12 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String STICKER_SETTING_UNCHECK_BOX_CLICKED = "stickerSettingUnCheckBoxClicked";
 
 	public static final String RETRY_NOTIFICATION_COOL_OFF_TIME = "retryNotificationCoolOffTime";
+	
+	public static final String LED_NOTIFICATION_COLOR_CODE = "led_notification_color_code";
+
+	public static final String NOTIFICATION_TONE_URI = "notificationToneUri";
+
+	public static final String NOTIFICATION_TONE_NAME = "notificaationToneName";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -469,6 +474,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public Handler appStateHandler;
 	
 	private StickerManager sm;
+	
+	private static HikeMessengerApp _instance;
 	
 	RegisterToGCMTrigger mmRegisterToGCMTrigger = null;
 
@@ -641,6 +648,8 @@ public void onTrimMemory(int level)
 		ErrorReporter.getInstance().setReportSender(customReportSender);
 
 		super.onCreate();
+		
+		_instance = this;
 
 		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
 
@@ -735,16 +744,9 @@ public void onTrimMemory(int level)
 
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
 
-		// adding a check here for MobileAppTracker SDK update case
 		// we use this preference to check if this is a fresh install case or an
 		// update case
 		// in case of an update the SSL pref would not be null
-		TrackerUtil tUtil = TrackerUtil.getInstance(this.getApplicationContext());
-		if (tUtil != null)
-		{
-			tUtil.setTrackOptions(!preferenceManager.contains(HikeConstants.SSL_PREF));
-			Logger.d(getClass().getSimpleName(), "Init for apptracker sdk finished" + !preferenceManager.contains(HikeConstants.SSL_PREF));
-		}
 
 		boolean isSAUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE);
 
@@ -841,7 +843,10 @@ public void onTrimMemory(int level)
 		registerReceivers();
 	}
 	
-	
+	public static HikeMessengerApp getInstance()
+	{
+		return _instance;
+	}
 
 	private void registerReceivers()
 	{
