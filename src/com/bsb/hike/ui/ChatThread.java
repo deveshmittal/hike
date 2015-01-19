@@ -18,6 +18,7 @@ import java.util.Set;
 import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.CardConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -206,6 +207,7 @@ import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
@@ -606,7 +608,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		if (stickerAdapter != null)
-		{
+		{	
 			stickerAdapter.unregisterListeners();
 		}
 
@@ -3470,9 +3472,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
-				if (activityVisible && Utils.isPlayTickSound(getApplicationContext()))
+				if (activityVisible && SoundUtils.isTickSoundEnabled(getApplicationContext()))
 				{
-					Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
+					SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
 				}
 				runOnUiThread(new Runnable()
 				{
@@ -4202,9 +4204,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 
 					label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
-					if (activityVisible && Utils.isPlayTickSound(getApplicationContext()))
+					if (activityVisible && SoundUtils.isTickSoundEnabled(getApplicationContext()))
 					{
-						Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
+						SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
 					}
 				}
 				final String convLabel = label;
@@ -4364,8 +4366,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
                 if (msisdn.equals(mContactNumber)) {
 
-                    if (activityVisible && Utils.isPlayTickSound(getApplicationContext())) {
-                        Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
+                    if (activityVisible && SoundUtils.isTickSoundEnabled(getApplicationContext())) 
+                    {
+                    	SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
                     }
 
                     runOnUiThread(new Runnable() {
@@ -4404,9 +4407,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		
 		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 		{
-			if (activityVisible && (!msg.isTickSoundPlayed()) && Utils.isPlayTickSound(getApplicationContext()))
+			if (activityVisible && (!msg.isTickSoundPlayed()) && SoundUtils.isTickSoundEnabled(getApplicationContext()))
 			{
-				Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
+				SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
 			}
 			msg.setTickSoundPlayed(true);
 			msg.setState(ConvMessage.State.SENT_CONFIRMED);

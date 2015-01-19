@@ -106,12 +106,15 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 				}
 				
 
+				
 				String urlString = AccountUtils.base + "/stickers";
 				if (AccountUtils.ssl)
 				{
 					urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers";
 				}
 				setDownloadUrl(urlString);
+				
+				Logger.d(StickerDownloadManager.TAG,  "Sticker Download Task Request : " + request.toString());
 				Logger.d(StickerDownloadManager.TAG,  "Starting download task : " + taskId + " url : " + urlString );
 				JSONObject response = (JSONObject) download(request, HttpRequestType.POST);
 
