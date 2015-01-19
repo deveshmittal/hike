@@ -642,10 +642,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			v = mChatThreadCardRenderer.getView(v, convMessage, parent);
 			DetailViewHolder holder = (DetailViewHolder) v.getTag();
 			dayHolder = holder;
-			//setSenderDetails(convMessage, position, holder, false);
-			//setBubbleColor(convMessage, holder.messageContainer);
-			//setTimeNStatus(position, holder, true, holder.messageContainer);
-			//setSelection(convMessage, holder.selectedStateOverlay);
+			setSenderDetails(convMessage, position, holder, false);
+			setTimeNStatus(position, holder, true, holder.messageContainer);
+			setSelection(convMessage, holder.selectedStateOverlay);
 		}
 		else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT) {
 
