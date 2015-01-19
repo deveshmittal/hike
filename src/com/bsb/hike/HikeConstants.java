@@ -1009,9 +1009,9 @@ public class HikeConstants
 
 	public static final String VOIP_ACTIVATED = "voip";
 
-	public static final String VOIP_CALL_RATE_POPUP_SHOW = "vrmc_prompt";
+	public static final String VOIP_CALL_RATE_POPUP_SHOW = "vrmcs";
 
-	public static final String VOIP_CALL_RATE_POPUP_FREQ = "vrmc_freq";
+	public static final String VOIP_CALL_RATE_POPUP_FREQ = "vrmcf";
 
 	public static final String VOIP_CALL_RATING = "rate";
 

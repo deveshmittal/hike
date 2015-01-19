@@ -1208,7 +1208,7 @@ public class MqttMessagesManager
 			int showPopup = data.getInt(HikeConstants.VOIP_CALL_RATE_POPUP_SHOW);
 			if(showPopup == 1)
 			{
-				editor.putInt(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, showPopup);
+				editor.putBoolean(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, true);
 				editor.putInt(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
 			}
 			else
