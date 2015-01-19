@@ -1090,7 +1090,7 @@ public class MqttMessagesManager
 		}
 		if (data.has(HikeConstants.METADATA) )
 		{
-			JSONObject mmobObject = data.optJSONObject(HikeConstants.METADATA);
+			JSONObject mmobObject = data.getJSONObject(HikeConstants.METADATA);
 			if (mmobObject.has(HikeConstants.NUX))
 				NUXManager.getInstance().parseNuxPacket(mmobObject.getJSONObject(HikeConstants.NUX).toString());
 		}
@@ -1303,11 +1303,10 @@ public class MqttMessagesManager
 		}
 		if (data.has(HikeConstants.METADATA))
 		{
-			JSONObject mmobObject = data.optJSONObject(HikeConstants.METADATA);
+			JSONObject mmobObject = data.getJSONObject(HikeConstants.METADATA);
 			if (mmobObject.has(HikeConstants.NUX))
 				NUXManager.getInstance().parseNuxPacket(mmobObject.getJSONObject(HikeConstants.NUX).toString());
 		}
-
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
 		
@@ -2259,6 +2258,10 @@ public class MqttMessagesManager
 		{
 			saveTip(jsonObj);
 		}
+		else if(HikeConstants.MqttMessageTypes.NUX.equals(type))
+		{
+			saveNuxPacket(jsonObj);
+		}
 	}
 
 	private void uploadGroupProfileImage(final String groupId, final boolean retryOnce)
@@ -2706,5 +2709,10 @@ public class MqttMessagesManager
 	{
 		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
 		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance(context).getData(key, "").equals(id);
+	}
+	
+	private void saveNuxPacket(JSONObject jsonObject)
+	{
+		NUXManager.getInstance().parseNuxPacket(jsonObject.toString());
 	}
 }

@@ -17,6 +17,24 @@ public class NuxSelectFriends
 	private String sectionTitle;
 
 	private String title2;
+	
+	private String title3;
+
+	private String recoSectionTitle;
+
+	private boolean toggleRecoSection;
+
+	private Set<String> recoList;
+
+	private ArrayList<String> hideList;
+
+	private boolean toggleContactSection;
+
+	private String butText;
+
+	private boolean moduleToggle;
+
+	private int contactSectionType;
 
 	/**
 	 * @param sectionTitle
@@ -126,22 +144,5 @@ public class NuxSelectFriends
 		return contactSectionType;
 	}
 
-	private String title3;
-
-	private String recoSectionTitle;
-
-	private boolean toggleRecoSection;
-
-	private Set<String> recoList;
-
-	private ArrayList<String> hideList;
-
-	private boolean toggleContactSection;
-
-	private String butText;
-
-	private boolean moduleToggle;
-
-	private int contactSectionType;
 
 }

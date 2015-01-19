@@ -73,7 +73,6 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 			}
 			showNextButton(true);
 			scrollHorizontalView(0, viewStack.getChildAt(0).getWidth());
-			Logger.d("UmangX", viewStack.getChildAt(0).getWidth() + "");
 		}
 		
 		//this only appears for custom message screen
@@ -228,7 +227,13 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 					nm.sendMsisdnListToServer(contactsDisplayed);
 					nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
 					Intent intent = new Intent(getActivity(), HomeActivity.class);
-					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					if(nm.getNuxInviteFriendsPojo().isNuxSkippable()){
+						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						
+					}else{
+						intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+					}
 					startActivity(intent);
 					
 				}

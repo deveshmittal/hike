@@ -16,6 +16,7 @@ import com.bsb.hike.models.NuxInviteFriends;
 import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
 
@@ -33,11 +34,6 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 	{
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-		
-		if (Utils.requireAuth(this))
-		{
-			return;
-		}
 
 		Utils.blockOrientationChange(this);
 		

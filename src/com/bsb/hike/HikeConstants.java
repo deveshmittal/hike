@@ -1888,6 +1888,8 @@ public class HikeConstants
 		public static final String MULTIPLE_FORWARD = "mm";
 		
 		public static final String TIP = "tip";
+		
+		public static final String NUX = "nux";
 
 	}
 

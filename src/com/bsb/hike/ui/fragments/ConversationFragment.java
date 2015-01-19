@@ -359,7 +359,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (mmSelectFriends.isModuleToggle())
 		{
 			llChatReward.setOnClickListener(null);
-			chatProgress.setVisibility(View.GONE);
 		}
 
 		butInviteMore.setText(mmReward.getInviteMoreButtonText());
@@ -403,10 +402,25 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			chatProgress.setText(mmReward.getTapToClaimText());
 
 			rewardCard.setText(String.format(mmReward.getRewardCardSuccessText(), mmDetails.getIncentiveAmount()));
+			
+			
+			if (footerState.getEnum() == footerState.OPEN)
+			{
+				if (Utils.isHoneycombOrHigher())
+
+				{
+					ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).setDuration(0).start();
+				}
+				else
+				{
+					llInviteOptions.setVisibility(View.GONE);
+				}
+				footerState.setEnumState(footerState.HALFOPEN);
+			}
 
 			llChatReward.setOnClickListener(null);
 			
-			progressNux.setProgress(0f);
+			progressNux.setVisibility(View.GONE);
 		}
 	}
 
