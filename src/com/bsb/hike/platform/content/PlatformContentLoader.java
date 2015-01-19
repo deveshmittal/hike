@@ -78,7 +78,8 @@ class PlatformContentLoader extends Handler
 			}
 			else
 			{
-				// TODO Handle
+				// Incorrect data. Could not execute. Remove request from queue.
+				PlatformRequestManager.remove(argContentRequest);
 			}
 		}
 		else

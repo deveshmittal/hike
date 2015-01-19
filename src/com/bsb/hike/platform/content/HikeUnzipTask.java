@@ -13,10 +13,16 @@ import java.util.zip.ZipFile;
 import android.os.AsyncTask;
 import android.util.Log;
 
+/**
+ * Unzips ZIP file. Contains both methods unzipAsync() and unzip() which runs in non-blocking and blocking mode respectively.
+ * 
+ * @author Atul M
+ * 
+ */
 public class HikeUnzipTask extends Observable
 {
 
-	private static final String TAG = "UnZip";
+	private static final String TAG = "HikeUnzipTask";
 
 	private String mFilePath, mDestinationPath;
 
@@ -36,10 +42,20 @@ public class HikeUnzipTask extends Observable
 		return mDestinationPath;
 	}
 
-	public void unzip()
+	public void unzipAsync()
 	{
 		Log.d(TAG, "unzipping " + mFilePath + " to " + mDestinationPath);
 		new UnZipTask().execute(mFilePath, mDestinationPath);
+	}
+
+	public void unzip()
+	{
+		Log.d(TAG, "unzipping " + mFilePath + " to " + mDestinationPath);
+		UnZipTask unzipTask = new UnZipTask();
+		if (unzipTask.doInBackground(mFilePath, mDestinationPath))
+		{
+			unzipTask.onPostExecute(true);
+		}
 	}
 
 	private class UnZipTask extends AsyncTask<String, Void, Boolean>
@@ -74,7 +90,7 @@ public class HikeUnzipTask extends Observable
 		@Override
 		protected void onPostExecute(Boolean result)
 		{
-			System.out.println("UNZIP COMPLETE");
+			Log.e(TAG, "Unzip Complete");
 			setChanged();
 			notifyObservers();
 		}
@@ -121,5 +137,6 @@ public class HikeUnzipTask extends Observable
 				throw new RuntimeException("Can not create dir " + dir);
 			}
 		}
+
 	}
 }

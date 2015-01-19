@@ -12,9 +12,9 @@ public class PlatformContentRequest
 	public static byte STATE_WAIT = 2;
 
 	public static byte STATE_CANCELLED = 3;
-	
+
 	public static byte STATE_PROBABLY_DEAD = 4;
-	
+
 	public static byte STATE_PROCESSING = 5;
 
 	private PlatformContentModel mContentData;
@@ -31,6 +31,10 @@ public class PlatformContentRequest
 
 	public static PlatformContentRequest make(PlatformContentModel contentData, PlatformContentListener<PlatformContentModel> contentListner)
 	{
+		if (contentData == null)
+		{
+			return null;
+		}
 		return new PlatformContentRequest(contentData, contentListner);
 	}
 

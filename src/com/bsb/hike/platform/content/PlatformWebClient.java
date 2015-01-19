@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -40,7 +41,6 @@ static final String tag = "platformwebclient";
 		String[] name = fileNameRequested.split("\\.");
 		String prefix = name[0];
 		String suffix = name[1];
-		System.out.println("PREFIX " + prefix + " SUFIX " + suffix);
 
 		InputStream wrtInputStreamm = null;
 		WebResourceResponse response = null;

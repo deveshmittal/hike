@@ -1,9 +1,11 @@
 package com.bsb.hike.platform.content;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -57,6 +59,26 @@ public class PlatformContentUtils
 		catch (IOException e)
 		{
 			e.printStackTrace();
+		}
+		finally
+		{
+
+			try
+			{
+				if (in != null)
+				{
+					in.close();
+				}
+
+				if (out != null)
+				{
+					out.close();
+				}
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
 		}
 
 		return tempFile;
@@ -123,5 +145,76 @@ public class PlatformContentUtils
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	protected static String readDataFromFile(File file)
+	{
+
+		Log.d("READING DATA FROM FILE: ", file.getAbsolutePath());
+		// Read text from file
+		StringBuilder text = new StringBuilder();
+
+		BufferedReader br = null;
+		try
+		{
+			br = new BufferedReader(new FileReader(file));
+
+			String line;
+
+			while ((line = br.readLine()) != null)
+			{
+				text.append(line);
+			}
+		}
+		catch (FileNotFoundException fnfe)
+		{
+			// Template not found
+			fnfe.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			// Template not found
+			e.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				if (br != null)
+				{
+					br.close();
+				}
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		return text.toString();
+	}
+
+	public static boolean deleteDirectory(File path)
+	{
+		if (path.exists())
+		{
+			File[] files = path.listFiles();
+			if (files == null)
+			{
+				return true;
+			}
+			for (int i = 0; i < files.length; i++)
+			{
+				if (files[i].isDirectory())
+				{
+					deleteDirectory(files[i]);
+				}
+				else
+				{
+					files[i].delete();
+				}
+			}
+		}
+		return (path.delete());
 	}
 }

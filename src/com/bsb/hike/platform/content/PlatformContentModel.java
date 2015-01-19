@@ -2,14 +2,12 @@ package com.bsb.hike.platform.content;
 
 import java.io.File;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * Content model
@@ -27,7 +25,7 @@ public class PlatformContentModel
 	 * The layout_id.
 	 */
 	private String layout_id;
-	
+
 	private String layout_url;
 
 	/**
@@ -38,7 +36,7 @@ public class PlatformContentModel
 	/**
 	 * The content data.
 	 */
-	private String card_data;
+	private JsonObject card_data;
 
 	private String fwdcard_data;
 
@@ -51,6 +49,10 @@ public class PlatformContentModel
 	 */
 	private String formedData;
 
+	private int mHash = -1;
+
+	private int mTemplateHash = -1;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -59,7 +61,11 @@ public class PlatformContentModel
 	@Override
 	public int hashCode()
 	{
-		return new String(appID + layout_id + version + card_data).hashCode();
+		if (mHash == -1)
+		{
+			mHash = new String(appID + layout_id + version + card_data).hashCode();
+		}
+		return mHash;
 	}
 
 	/**
@@ -69,9 +75,13 @@ public class PlatformContentModel
 	 */
 	public int templateHashCode()
 	{
-		return new String(layout_id + version).hashCode();
+		if (mTemplateHash == -1)
+		{
+			mTemplateHash = new String(layout_id + version).hashCode();
+		}
+		return mTemplateHash;
 	}
-
+	
 	/**
 	 * Make.
 	 * 
@@ -84,19 +94,18 @@ public class PlatformContentModel
 		Log.d(TAG, "making PlatformContentModel");
 		JsonParser parser = new JsonParser();
 		JsonObject jsonObj = (JsonObject) parser.parse(contentData);
-		PlatformContentModel object = new Gson().fromJson(jsonObj, PlatformContentModel.class);
+		PlatformContentModel object = null;
 		try
 		{
-			JSONObject json = new JSONObject(object.card_data);
-			json.putOpt(PlatformContentConstants.KEY_TEMPLATE_PATH, PlatformContentConstants.CONTENT_AUTHORITY_BASE + object.appID + File.separator);
-			object.card_data = json.toString();
-			json = null;
+			object = new Gson().fromJson(jsonObj, PlatformContentModel.class);
+			object.card_data.addProperty(PlatformContentConstants.KEY_TEMPLATE_PATH, PlatformContentConstants.CONTENT_AUTHORITY_BASE + object.appID + File.separator);
 		}
-		catch (JSONException e)
+		catch (JsonSyntaxException e)
 		{
 			e.printStackTrace();
-			// TODO Handle
+			return null;
 		}
+
 		return object;
 	}
 
@@ -112,19 +121,17 @@ public class PlatformContentModel
 		Log.d(TAG, "making PlatformContentModel");
 		JsonParser parser = new JsonParser();
 		JsonObject jsonObj = (JsonObject) parser.parse(contentData);
-		PlatformContentModel object = new Gson().fromJson(jsonObj, PlatformContentModel.class);
-		object.isForwardCard = true;
+		PlatformContentModel object = null;
 		try
 		{
-			JSONObject json = new JSONObject(object.card_data);
-			json.putOpt(PlatformContentConstants.KEY_TEMPLATE_PATH, PlatformContentConstants.CONTENT_AUTHORITY_BASE + object.appID + File.separator);
-			object.card_data = json.toString();
-			json = null;
+			object = new Gson().fromJson(jsonObj, PlatformContentModel.class);
+			object.isForwardCard = true;
+			object.card_data.addProperty(PlatformContentConstants.KEY_TEMPLATE_PATH, PlatformContentConstants.CONTENT_AUTHORITY_BASE + object.appID + File.separator);
 		}
-		catch (JSONException e)
+		catch (JsonSyntaxException e)
 		{
 			e.printStackTrace();
-			// TODO Handle
+			return null;
 		}
 		return object;
 	}
@@ -191,20 +198,20 @@ public class PlatformContentModel
 		}
 		else
 		{
-			return card_data;
+			return card_data.toString();
 		}
 	}
 
-	/**
-	 * Sets the content data.
-	 * 
-	 * @param card_data
-	 *            the new content data
-	 */
-	public void setContentData(String contentData)
-	{
-		this.card_data = contentData;
-	}
+//	/**
+//	 * Sets the content data.
+//	 * 
+//	 * @param card_data
+//	 *            the new content data
+//	 */
+//	public void setContentData(String contentData)
+//	{
+//		this.card_data = contentData;
+//	}
 
 	/**
 	 * Gets the hot data.

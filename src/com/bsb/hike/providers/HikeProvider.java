@@ -222,7 +222,35 @@ public class HikeProvider extends ContentProvider
 	@Override
 	public String getType(Uri uri)
 	{
-		return null;
+		String fileNameRequested = uri.getLastPathSegment();
+		String[] name = fileNameRequested.split("\\.");
+
+		try
+		{
+			String suffix = name[1];
+
+			if (suffix.equals("css"))
+			{
+				return "text/css";
+			}
+			else if (suffix.equals("png"))
+			{
+				return "image/png";
+			}
+			else if (suffix.equals("js"))
+			{
+				return "application/javascript";
+			}
+			else
+			{
+				return "text/plain";
+			}
+		}
+		catch (ArrayIndexOutOfBoundsException aiobe)
+		{
+			aiobe.printStackTrace();
+			throw new UnsupportedOperationException("Cannot recognize MIME type");
+		}
 	}
 
 	@Override
@@ -285,4 +313,5 @@ public class HikeProvider extends ContentProvider
 		return parcel;
 	}
 
+	
 }
