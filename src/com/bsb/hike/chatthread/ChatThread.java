@@ -64,6 +64,11 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.chatthread.HikeActionMode.ActionModeListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.dialog.HikeDialog;
+import com.bsb.hike.dialog.HikeDialogFactory;
+import com.bsb.hike.dialog.HikeDialogListener;
+import com.bsb.hike.filetransfer.FileSavedState;
+import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.media.AttachmentPicker;
 import com.bsb.hike.media.AudioRecordView;
@@ -92,12 +97,8 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
-import com.bsb.hike.ui.HikeDialog;
-import com.bsb.hike.ui.HikeDialog.HDialog;
-import com.bsb.hike.ui.HikeDialog.HHikeDialogListener;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -113,8 +114,8 @@ import com.bsb.hike.utils.Utils;
  */
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener,
-		CaptureImageListener, PickFileListener, HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>,
-		OnItemLongClickListener, OnTouchListener, OnScrollListener, Listener, ActionModeListener
+		CaptureImageListener, PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>,
+		OnItemLongClickListener, OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener
 {
 	private static final String TAG = "chatthread";
 
@@ -851,7 +852,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void contactOnActivityResult(int resultCode, Intent data)
 	{
 		PhonebookContact contact = PickContactParser.onActivityResult(resultCode, data, activity.getApplicationContext());
-		HikeDialog.showDialog(activity, HikeDialog.CONTACT_SEND_DIALOG, this, contact, getString(R.string.send), false);
+		HikeDialogFactory.showDialog(activity, HikeDialogFactory.CONTACT_SEND_DIALOG, this, contact, getString(R.string.send), false);
 	}
 
 	protected void initialiseContactTransfer(JSONObject contactJson)
@@ -861,28 +862,28 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	}
 
 	@Override
-	public void negativeClicked(int id, HDialog dialog)
+	public void negativeClicked(HikeDialog dialog)
 	{
 
 	}
 
 	@Override
-	public void positiveClicked(int id, HDialog dialog)
+	public void positiveClicked(HikeDialog dialog)
 	{
-		switch (id)
+		switch (dialog.getId())
 		{
-		case HikeDialog.CONTACT_SEND_DIALOG:
+		case HikeDialogFactory.CONTACT_SEND_DIALOG:
 			initialiseContactTransfer(((PhonebookContact) dialog.data).jsonData);
 			dialog.dismiss();
 			break;
-		case HikeDialog.CONTACT_SAVE_DIALOG:
+		case HikeDialogFactory.CONTACT_SAVE_DIALOG:
 			break;
 		}
 
 	}
 
 	@Override
-	public void neutralClicked(int id, HDialog dialog)
+	public void neutralClicked(HikeDialog dialog)
 	{
 
 	}

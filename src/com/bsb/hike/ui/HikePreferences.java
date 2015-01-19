@@ -1,11 +1,8 @@
 package com.bsb.hike.ui;
 
-import java.text.SimpleDateFormat;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -34,21 +31,20 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.db.DBBackupRestore;
-import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.dialog.HikeDialog;
+import com.bsb.hike.dialog.HikeDialogFactory;
+import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.BackupAccountTask;
 import com.bsb.hike.tasks.BackupAccountTask.BackupAccountListener;
 import com.bsb.hike.tasks.DeleteAccountTask;
-import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
-import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
+import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
 import com.facebook.Session;
@@ -604,12 +600,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				dialogStrings[1] = getString(R.string.initiate_reset_stealth_body);
 				dialogStrings[2] = getString(R.string.confirm);
 				dialogStrings[3] = getString(R.string.cancel);
-
-				HikeDialog.showDialog(this, HikeDialog.RESET_STEALTH_DIALOG, new HikeDialog.HikeDialogListener()
+				
+				HikeDialogFactory.showDialog(this, HikeDialogFactory.RESET_STEALTH_DIALOG, new HikeDialogListener()
 				{
 
 					@Override
-					public void positiveClicked(Dialog dialog)
+					public void positiveClicked(HikeDialog hikeDialog)
 					{
 						HikeSharedPreferenceUtil.getInstance(getApplicationContext()).saveData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, System.currentTimeMillis());
 
@@ -622,30 +618,25 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						startActivity(intent);
 
-						dialog.dismiss();
+						hikeDialog.dismiss();
 						Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_INIT);
 					}
 
 					@Override
-					public void neutralClicked(Dialog dialog)
+					public void neutralClicked(HikeDialog hikeDialog)
 					{
 
 					}
 
 					@Override
-					public void negativeClicked(Dialog dialog)
+					public void negativeClicked(HikeDialog hikeDialog)
 					{
-						dialog.dismiss();
+						hikeDialog.dismiss();
 					}
 
-					@Override
-					public void onSucess(Dialog dialog)
-					{
-						// TODO Auto-generated method stub
-						
-					}
 				}, dialogStrings);
 			}
+
 		}
 		else if(HikeConstants.CHANGE_STEALTH_PASSCODE.equals(preference.getKey()))
 		{

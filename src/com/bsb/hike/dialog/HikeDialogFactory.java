@@ -1,6 +1,5 @@
-package com.bsb.hike.ui;
+package com.bsb.hike.dialog;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -31,12 +30,11 @@ import com.bsb.hike.adapters.AccountAdapter;
 import com.bsb.hike.models.AccountData;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.PhonebookContact;
-import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontTextView;
 
-public class HikeDialog
+public class HikeDialogFactory
 {
 	public static final int FAVORITE_ADDED_DIALOG = 2;
 
@@ -54,45 +52,36 @@ public class HikeDialog
 
 	public static final int CONTACT_SAVE_DIALOG = 9;
 
-	// public static Dialog showDialog(Context context, int whichDialog, Object... data)
-	// {
-	// return showDialog(context, whichDialog, null, data);
-	// }
+	public static HikeDialog showDialog(Context context, int whichDialog, Object... data)
+	{
+		return showDialog(context, whichDialog, null, data);
+	}
 
-	public static Dialog showDialog(Context context, int whichDialog, HikeDialogListener listener, Object... data)
+	public static HikeDialog showDialog(Context context, int dialogId, HikeDialogListener listener, Object... data)
 	{
 
-		switch (whichDialog)
+		switch (dialogId)
 		{
 		case FAVORITE_ADDED_DIALOG:
-			return showAddedAsFavoriteDialog(context, listener, data);
+			return showAddedAsFavoriteDialog(dialogId, context, listener, data);
 		case STEALTH_FTUE_DIALOG:
-			return showStealthFtuePopUp(context, listener, true);
+			return showStealthFtuePopUp(dialogId, context, listener, true);
 		case RESET_STEALTH_DIALOG:
-			return showStealthResetDialog(context, listener, data);
+			return showStealthResetDialog(dialogId, context, listener, data);
 		case STEALTH_FTUE_EMPTY_STATE_DIALOG:
-			return showStealthFtuePopUp(context, listener, false);
+			return showStealthFtuePopUp(dialogId, context, listener, false);
 		case SHARE_IMAGE_QUALITY_DIALOG:
-			return showImageQualityDialog(context, listener, data);
+			return showImageQualityDialog(dialogId, context, listener, data);
 		case SMS_CLIENT_DIALOG:
-			return showSMSClientDialog(context, listener, data);
-		}
-		return null;
-	}
-
-	public static Dialog showDialog(Context context, int whichDialog, HHikeDialogListener listener, Object... data)
-	{
-
-		switch (whichDialog)
-		{
+			return showSMSClientDialog(dialogId, context, listener, data);
 		case CONTACT_SEND_DIALOG:
 		case CONTACT_SAVE_DIALOG:
-			return showPhonebookContactDialog(context, listener, whichDialog, data);
+			return showPhonebookContactDialog(dialogId, context, listener, data);
 		}
 		return null;
 	}
 
-	private static Dialog showAddedAsFavoriteDialog(Context context, final HikeDialogListener listener, Object... data)
+	private static HikeDialog showAddedAsFavoriteDialog(final int dialogId, Context context, final HikeDialogListener listener, Object... data)
 	{
 		String name = "";
 		try
@@ -103,15 +92,15 @@ public class HikeDialog
 		{
 			throw new IllegalArgumentException("Make sure You are sending one string , that is name to fill with in dialog");
 		}
-		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.added_as_favorite_pop_up);
-		dialog.setCancelable(true);
-		TextView heading = (TextView) dialog.findViewById(R.id.addedYouAsFavHeading);
+		final HikeDialog hikeDialog = new HikeDialog(context, R.style.Theme_CustomDialog);
+		hikeDialog.setContentView(R.layout.added_as_favorite_pop_up);
+		hikeDialog.setCancelable(true);
+		TextView heading = (TextView) hikeDialog.findViewById(R.id.addedYouAsFavHeading);
 		heading.setText(context.getString(R.string.addedYouAsFavorite, name));
-		TextView des = (TextView) dialog.findViewById(R.id.addedYouAsFavDescription);
+		TextView des = (TextView) hikeDialog.findViewById(R.id.addedYouAsFavDescription);
 		des.setText(Html.fromHtml(context.getString(R.string.addedYouFrindDescription, name, name)));
-		View no = dialog.findViewById(R.id.noButton);
-		View yes = dialog.findViewById(R.id.yesButton);
+		View no = hikeDialog.findViewById(R.id.noButton);
+		View yes = hikeDialog.findViewById(R.id.yesButton);
 		OnClickListener clickListener = new OnClickListener()
 		{
 
@@ -123,21 +112,21 @@ public class HikeDialog
 				case R.id.noButton:
 					if (listener != null)
 					{
-						listener.negativeClicked(dialog);
+						listener.negativeClicked(hikeDialog);
 					}
 					else
 					{
-						dialog.dismiss();
+						hikeDialog.dismiss();
 					}
 					break;
 				case R.id.yesButton:
 					if (listener != null)
 					{
-						listener.positiveClicked(dialog);
+						listener.positiveClicked(hikeDialog);
 					}
 					else
 					{
-						dialog.dismiss();
+						hikeDialog.dismiss();
 					}
 					break;
 				}
@@ -146,19 +135,19 @@ public class HikeDialog
 		};
 		no.setOnClickListener(clickListener);
 		yes.setOnClickListener(clickListener);
-		dialog.show();
-		return dialog;
+		hikeDialog.show();
+		return hikeDialog;
 	}
 
-	private static Dialog showStealthFtuePopUp(final Context context, final HikeDialogListener listener, boolean isStealthFtueDialog)
+	private static HikeDialog showStealthFtuePopUp(final int dialogId, final Context context, final HikeDialogListener listener, boolean isStealthFtueDialog)
 	{
-		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.stealth_ftue_popup);
-		dialog.setCancelable(true);
-		TextView okBtn = (TextView) dialog.findViewById(R.id.awesomeButton);
-		TextView body = (TextView) dialog.findViewById(R.id.body);
-		
-		if(isStealthFtueDialog)
+		final HikeDialog hikeDialog = new HikeDialog(context, R.style.Theme_CustomDialog);
+		hikeDialog.setContentView(R.layout.stealth_ftue_popup);
+		hikeDialog.setCancelable(true);
+		TextView okBtn = (TextView) hikeDialog.findViewById(R.id.awesomeButton);
+		TextView body = (TextView) hikeDialog.findViewById(R.id.body);
+
+		if (isStealthFtueDialog)
 		{
 			body.setText(R.string.stealth_mode_popup_msg);
 			okBtn.setText(R.string.quick_setup);
@@ -168,7 +157,7 @@ public class HikeDialog
 			body.setText(R.string.stealth_mode_empty_conv_popup_msg);
 			okBtn.setText(android.R.string.ok);
 		}
-		
+
 		okBtn.setOnClickListener(new OnClickListener()
 		{
 
@@ -177,38 +166,38 @@ public class HikeDialog
 			{
 				if (listener != null)
 				{
-					listener.neutralClicked(dialog);
+					listener.neutralClicked(hikeDialog);
 				}
 				else
 				{
-					dialog.dismiss();
+					hikeDialog.dismiss();
 				}
-				
-				dialog.dismiss();
+
+				hikeDialog.dismiss();
 			}
 		});
 
-		dialog.show();
-		return dialog;
+		hikeDialog.show();
+		return hikeDialog;
 	}
 
-	private static Dialog showStealthResetDialog(Context context, final HikeDialogListener listener, Object... data)
+	private static HikeDialog showStealthResetDialog(final int dialogId, Context context, final HikeDialogListener listener, Object... data)
 	{
-		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.stealth_ftue_popup);
-		dialog.setCancelable(true);
+		final HikeDialog hikeDialog = new HikeDialog(context, R.style.Theme_CustomDialog);
+		hikeDialog.setContentView(R.layout.stealth_ftue_popup);
+		hikeDialog.setCancelable(true);
 
 		String header = (String) data[0];
 		String body = (String) data[1];
 		String okBtnString = (String) data[2];
 		String cancelBtnString = (String) data[3];
 
-		TextView headerText = (TextView) dialog.findViewById(R.id.header);
-		TextView bodyText = (TextView) dialog.findViewById(R.id.body);
-		TextView cancelBtn = (TextView) dialog.findViewById(R.id.noButton);
-		TextView okBtn = (TextView) dialog.findViewById(R.id.awesomeButton);
+		TextView headerText = (TextView) hikeDialog.findViewById(R.id.header);
+		TextView bodyText = (TextView) hikeDialog.findViewById(R.id.body);
+		TextView cancelBtn = (TextView) hikeDialog.findViewById(R.id.noButton);
+		TextView okBtn = (TextView) hikeDialog.findViewById(R.id.awesomeButton);
 
-		dialog.findViewById(R.id.btn_separator).setVisibility(View.VISIBLE);
+		hikeDialog.findViewById(R.id.btn_separator).setVisibility(View.VISIBLE);
 
 		cancelBtn.setVisibility(View.VISIBLE);
 
@@ -223,7 +212,7 @@ public class HikeDialog
 			@Override
 			public void onClick(View v)
 			{
-				listener.positiveClicked(dialog);
+				listener.positiveClicked(hikeDialog);
 			}
 		});
 
@@ -233,42 +222,41 @@ public class HikeDialog
 			@Override
 			public void onClick(View v)
 			{
-				listener.negativeClicked(dialog);
+				listener.negativeClicked(hikeDialog);
 			}
 		});
 
-		dialog.show();
-		return dialog;
+		hikeDialog.show();
+		return hikeDialog;
 	}
-	
-	private static Dialog showImageQualityDialog(final Context context, final HikeDialogListener listener, Object... data)
+
+	private static HikeDialog showImageQualityDialog(int dialogId, final Context context, final HikeDialogListener listener, Object... data)
 	{
-		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.image_quality_popup);
-		dialog.setCancelable(true);
-		dialog.setCanceledOnTouchOutside(true);
+		final HikeDialog hikeDialog = new HikeDialog(context, R.style.Theme_CustomDialog);
+		hikeDialog.setContentView(R.layout.image_quality_popup);
+		hikeDialog.setCancelable(true);
+		hikeDialog.setCanceledOnTouchOutside(true);
 		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		final Editor editor = appPrefs.edit();
 		int quality = ImageQuality.QUALITY_DEFAULT;
-		final LinearLayout small_ll = (LinearLayout) dialog.findViewById(R.id.hike_small_container);
-		final LinearLayout medium_ll = (LinearLayout) dialog.findViewById(R.id.hike_medium_container);
-		final LinearLayout original_ll = (LinearLayout) dialog.findViewById(R.id.hike_original_container);
-		final CheckBox small = (CheckBox) dialog.findViewById(R.id.hike_small_checkbox);
-		final CheckBox medium = (CheckBox) dialog.findViewById(R.id.hike_medium_checkbox);
-		final CheckBox original = (CheckBox) dialog.findViewById(R.id.hike_original_checkbox);
-		CustomFontTextView header = (CustomFontTextView) dialog.findViewById(R.id.image_quality_popup_header);
-		CustomFontTextView smallSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_small_cftv);
-		CustomFontTextView mediumSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_medium_cftv);
-		CustomFontTextView originalSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_original_cftv);
-		Button once = (Button) dialog.findViewById(R.id.btn_just_once);
-		
-		if(data!=null)
+		final LinearLayout small_ll = (LinearLayout) hikeDialog.findViewById(R.id.hike_small_container);
+		final LinearLayout medium_ll = (LinearLayout) hikeDialog.findViewById(R.id.hike_medium_container);
+		final LinearLayout original_ll = (LinearLayout) hikeDialog.findViewById(R.id.hike_original_container);
+		final CheckBox small = (CheckBox) hikeDialog.findViewById(R.id.hike_small_checkbox);
+		final CheckBox medium = (CheckBox) hikeDialog.findViewById(R.id.hike_medium_checkbox);
+		final CheckBox original = (CheckBox) hikeDialog.findViewById(R.id.hike_original_checkbox);
+		CustomFontTextView smallSize = (CustomFontTextView) hikeDialog.findViewById(R.id.image_quality_small_cftv);
+		CustomFontTextView mediumSize = (CustomFontTextView) hikeDialog.findViewById(R.id.image_quality_medium_cftv);
+		CustomFontTextView originalSize = (CustomFontTextView) hikeDialog.findViewById(R.id.image_quality_original_cftv);
+		Button once = (Button) hikeDialog.findViewById(R.id.btn_just_once);
+
+		if (data != null)
+		{
+			Long[] dataBundle = (Long[]) data;
+			int smallsz, mediumsz, originalsz;
+			if (dataBundle.length > 0)
 			{
-			Long[] dataBundle = (Long[])data;
-			int smallsz,mediumsz,originalsz;
-			if(dataBundle.length>0)
-				{
-				
+
 				originalsz = dataBundle[1].intValue();
 				smallsz = (int) (dataBundle[0] * HikeConstants.IMAGE_SIZE_SMALL);
 				mediumsz = (int) (dataBundle[0] * HikeConstants.IMAGE_SIZE_MEDIUM);
@@ -277,21 +265,21 @@ public class HikeDialog
 					smallsz = originalsz;
 					smallSize.setVisibility(View.GONE);
 				}
-				if(mediumsz >= originalsz)
+				if (mediumsz >= originalsz)
 				{
 					mediumsz = originalsz;
 					mediumSize.setVisibility(View.GONE);
 					// if medium option text size is gone, so is small's
 					smallSize.setVisibility(View.GONE);
 				}
-				smallSize.setText(" (" + Utils.getSizeForDisplay(smallsz)+ ")");
+				smallSize.setText(" (" + Utils.getSizeForDisplay(smallsz) + ")");
 				mediumSize.setText(" (" + Utils.getSizeForDisplay(mediumsz) + ")");
 				originalSize.setText(" (" + Utils.getSizeForDisplay(originalsz) + ")");
 			}
 		}
-		
+
 		showImageQualityOption(quality, small, medium, original);
-		
+
 		OnClickListener imageQualityDialogOnClickListener = new OnClickListener()
 		{
 			@Override
@@ -312,7 +300,7 @@ public class HikeDialog
 				case R.id.btn_just_once:
 					saveImageQualitySettings(editor, small, medium, original);
 					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, false);
-					callOnSucess(listener, dialog);
+					callOnSucess(listener, hikeDialog);
 					break;
 				}
 			}
@@ -323,10 +311,10 @@ public class HikeDialog
 		original_ll.setOnClickListener(imageQualityDialogOnClickListener);
 		once.setOnClickListener(imageQualityDialogOnClickListener);
 
-		dialog.show();
-		return dialog;
+		hikeDialog.show();
+		return hikeDialog;
 	}
-	
+
 	private static void showImageQualityOption(int quality, CheckBox small, CheckBox medium, CheckBox original)
 	{
 		switch (quality)
@@ -348,7 +336,7 @@ public class HikeDialog
 			break;
 		}
 	}
-		
+
 	private static void saveImageQualitySettings(Editor editor, CheckBox small, CheckBox medium, CheckBox original)
 	{
 		// TODO Auto-generated method stub
@@ -367,35 +355,35 @@ public class HikeDialog
 		editor.commit();
 	}
 
-	private static void callOnSucess(HikeDialogListener listener, Dialog dialog)
+	private static void callOnSucess(HikeDialogListener listener, HikeDialog hikeDialog)
 	{
 		// TODO Auto-generated method stub
 		if (listener != null)
 		{
-			listener.onSucess(dialog);
+			listener.positiveClicked(hikeDialog);
 		}
 		else
 		{
-			dialog.dismiss();
+			hikeDialog.dismiss();
 		}
 	}
 
-	private static Dialog showSMSClientDialog(Context context, final HikeDialogListener listener, Object... data)
+	private static HikeDialog showSMSClientDialog(int dialogId, Context context, final HikeDialogListener listener, Object... data)
 	{
-		return showSMSClientDialog(context, listener, (Boolean) data[0], (CompoundButton) data[1], (Boolean) data[2]);
+		return showSMSClientDialog(dialogId, context, listener, (Boolean) data[0], (CompoundButton) data[1], (Boolean) data[2]);
 	}
-	
-	private static Dialog showSMSClientDialog(final Context context, final HikeDialogListener listener, final boolean triggeredFromToggle, 
-			final CompoundButton checkBox, final boolean showingNativeInfoDialog )
-	{
-		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.enable_sms_client_popup);
-		dialog.setCancelable(showingNativeInfoDialog);
 
-		TextView header = (TextView) dialog.findViewById(R.id.header);
-		TextView body = (TextView) dialog.findViewById(R.id.body);
-		Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
-		Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+	private static HikeDialog showSMSClientDialog(final int dialogId, final Context context, final HikeDialogListener listener, final boolean triggeredFromToggle,
+			final CompoundButton checkBox, final boolean showingNativeInfoDialog)
+	{
+		final HikeDialog hikeDialog = new HikeDialog(context, R.style.Theme_CustomDialog);
+		hikeDialog.setContentView(R.layout.enable_sms_client_popup);
+		hikeDialog.setCancelable(showingNativeInfoDialog);
+
+		TextView header = (TextView) hikeDialog.findViewById(R.id.header);
+		TextView body = (TextView) hikeDialog.findViewById(R.id.body);
+		Button btnOk = (Button) hikeDialog.findViewById(R.id.btn_ok);
+		Button btnCancel = (Button) hikeDialog.findViewById(R.id.btn_cancel);
 
 		header.setText(showingNativeInfoDialog ? R.string.native_header : R.string.use_hike_for_sms);
 		body.setText(showingNativeInfoDialog ? R.string.native_info : R.string.use_hike_for_sms_info);
@@ -417,11 +405,11 @@ public class HikeDialog
 			@Override
 			public void onClick(View v)
 			{
-				listener.positiveClicked(dialog);
+				listener.positiveClicked(hikeDialog);
 			}
 		});
 
-		dialog.setOnCancelListener(new OnCancelListener()
+		hikeDialog.setOnCancelListener(new OnCancelListener()
 		{
 
 			@Override
@@ -440,22 +428,22 @@ public class HikeDialog
 			@Override
 			public void onClick(View v)
 			{
-				listener.negativeClicked(dialog);
+				listener.negativeClicked(hikeDialog);
 			}
 		});
 
-		dialog.show();
-		return dialog;
+		hikeDialog.show();
+		return hikeDialog;
 	}
 
-	private static Dialog showPhonebookContactDialog(Context context, final HHikeDialogListener listener, int id, Object... data)
+	private static HikeDialog showPhonebookContactDialog(int dialogId, Context context, final HikeDialogListener listener, Object... data)
 	{
 		try
 		{
 			PhonebookContact contact = (PhonebookContact) data[0];
 			String okText = (String) data[1];
 			Boolean showAccountInfo = (Boolean) data[2];
-			final ContactDialog contactDialog = new ContactDialog(context, R.style.Theme_CustomDialog, id);
+			final ContactDialog contactDialog = new ContactDialog(context, R.style.Theme_CustomDialog, dialogId);
 			contactDialog.setContentView(R.layout.contact_share_info);
 			contactDialog.data = contact;
 			ViewGroup parent = (ViewGroup) contactDialog.findViewById(R.id.parent);
@@ -551,7 +539,7 @@ public class HikeDialog
 				{
 					if (listener != null)
 					{
-						listener.positiveClicked(contactDialog.id, contactDialog);
+						listener.positiveClicked(contactDialog);
 					}
 					else
 					{
@@ -566,7 +554,7 @@ public class HikeDialog
 				{
 					if (listener != null)
 					{
-						listener.negativeClicked(contactDialog.id, contactDialog);
+						listener.negativeClicked(contactDialog);
 					}
 					else
 					{
@@ -580,46 +568,8 @@ public class HikeDialog
 		catch (ClassCastException c)
 		{
 			throw new IllegalArgumentException(
-					"Make sure you are sending  PhonebookContact object in data[0] and String for okText in data[1] and boolean to show account info in data[2] and dialog id in data[3]");
+					"Make sure you are sending PhonebookContact object in data[0] and String for okText in data[1] and boolean to show account info in data[2] and dialog id in data[3]");
 		}
 	}
 
-	public static interface HikeDialogListener
-	{
-		public void negativeClicked(Dialog dialog);
-
-		public void positiveClicked(Dialog dialog);
-
-		public void neutralClicked(Dialog dialog);
-
-		public void onSucess(Dialog dialog);
-	}
-
-	public static class HDialog extends Dialog
-	{
-		public final int id;
-		public Object data;
-		public HDialog(Context context, int theme, int id)
-		{
-			super(context, theme);
-			this.id = id;
-		}
-
-		public HDialog(Context context, int id)
-		{
-			super(context);
-			this.id = id;
-		}
-
-	}
-
-	public static interface HHikeDialogListener
-	{
-		public void negativeClicked(int id, HDialog dialog);
-
-		public void positiveClicked(int id, HDialog dialog);
-
-		public void neutralClicked(int id, HDialog dialog);
-
-	}
 }
