@@ -4,10 +4,15 @@ import android.content.Context;
 import android.os.Build;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
+import android.widget.BaseAdapter;
 import android.widget.Toast;
+
+import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.db.HikeContentDatabase;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.Logger;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,11 +29,13 @@ public class PlatformJavaScriptBridge
 	Context mContext;
 	WebView mWebView;
 	ConvMessage message;
+	BaseAdapter adapter;
 
-	public PlatformJavaScriptBridge(Context c, WebView webView, ConvMessage convMessage) {
+	public PlatformJavaScriptBridge(Context c, WebView webView, ConvMessage convMessage,BaseAdapter adapter) {
 		this.mContext = c;
 		this.mWebView = webView;
 		this.message = convMessage;
+		this.adapter = adapter;
 	}
 
 	@JavascriptInterface
@@ -96,11 +103,11 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void setAlarm(String json, long messageId, long timeInMills){
+	public void setAlarm(String json, String messageId, String timeInMills){
 		try
 		{
 			Logger.i(tag,"set alarm called "+json +" , mId "+ messageId +" , time "+timeInMills);
-			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), messageId, timeInMills);
+			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), Long.valueOf(messageId), System.currentTimeMillis() + Long.valueOf(timeInMills));
 		}
 		catch (JSONException e)
 		{
@@ -122,7 +129,7 @@ public class PlatformJavaScriptBridge
 
 	@JavascriptInterface
 	public void deleteAlarm(int id) {
-		HikeContentDatabase.getInstance(mContext).deleteAppAlarm(id);
+		HikeConversationsDatabase.getInstance().deleteAppAlarm(Integer.valueOf(id));
 	}
 
 	@JavascriptInterface
@@ -130,7 +137,30 @@ public class PlatformJavaScriptBridge
 		Logger.v(tag, data);
 	}
 
-
+	@JavascriptInterface
+	public void updateMetadata(String messageId, String json)
+	{
+		try
+		{
+			Logger.i(tag, "update metadata called " + json.toString() + " , message id=" + messageId);
+			String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata(Integer.valueOf(messageId), json);
+			message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON);
+			mWebView.post(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					adapter.notifyDataSetChanged();
+					
+				}
+			});
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
 
 }
 

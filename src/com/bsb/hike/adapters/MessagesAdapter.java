@@ -336,7 +336,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		hqThumbLoader.setImageFadeIn(false);
 		hqThumbLoader.setDefaultDrawableNull(false);
 		this.mChatThreadCardRenderer = new CardRenderer(context);
-		this.mWebViewCardRenderer = new WebViewCardRenderer(context, convMessages);
+		this.mWebViewCardRenderer = new WebViewCardRenderer(context, convMessages,this);
 
 	}
 
