@@ -355,7 +355,7 @@ public class VoIPActivity extends Activity implements CallActions
 			if (VoIPService.isConnected() && voipService != null && voipService.isAudioRunning()) {
 				voipService.setHold(true);
 				showCallStatus(CallStatus.ON_HOLD);
-			} else if (VoIPService.isConnected())
+			} else if (VoIPService.isConnected() && voipService != null)
 				voipService.hangUp();
 			else
 				if (voipService != null)
