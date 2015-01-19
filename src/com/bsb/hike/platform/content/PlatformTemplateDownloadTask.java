@@ -52,11 +52,20 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 		tempFolder.mkdirs();
 
 		File zipFile = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME, mRequest.getContentData().getId() + ".zip");
+		try
+		{
+			zipFile.createNewFile();
+		}
+		catch (IOException e1)
+		{
+			e1.printStackTrace();
+		}
 
 		// Start downloading ZIP to temporary folder
 		InputStream input = null;
 		OutputStream output = null;
 		HttpURLConnection connection = null;
+		boolean isDownloaded = false;
 		try
 		{
 			URL url = new URL(templateDownloadUrl);
@@ -80,6 +89,7 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 			{
 				output.write(data, 0, count);
 			}
+			isDownloaded = true;
 		}
 		catch (IOException e)
 		{
@@ -107,51 +117,35 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 				connection.disconnect();
 		}
 
-		File existingVersionApp = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + mRequest.getContentData().getId());
-		if (existingVersionApp.exists())
+		if (isDownloaded)
 		{
-			// delete existing app
-			existingVersionApp.delete();
-		}
-
-		// unzip
-		unzipWebFile(zipFile.getAbsolutePath(), PlatformContentConstants.PLATFORM_CONTENT_DIR, new Observer()
-		{
-			@Override
-			public void update(Observable observable, Object data)
+			File existingVersionApp = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + mRequest.getContentData().getId());
+			if (existingVersionApp.exists())
 			{
-				// delete temp folder
-				File tempFolder = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME);
-				deleteDirectory(tempFolder);
-				PlatformRequestManager.setReadyState(mRequest);
+				// delete existing app
+				existingVersionApp.delete();
 			}
-		});
+
+			// unzip
+			unzipWebFile(zipFile.getAbsolutePath(), PlatformContentConstants.PLATFORM_CONTENT_DIR, new Observer()
+			{
+				@Override
+				public void update(Observable observable, Object data)
+				{
+					// delete temp folder
+					File tempFolder = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME);
+					PlatformContentUtils.deleteDirectory(tempFolder);
+					PlatformRequestManager.setReadyState(mRequest);
+				}
+			});
+		}
+		else
+		{
+			// Could not download template files due to come reason. TODO We can implement retry here. Leaving for v1.
+			PlatformRequestManager.remove(mRequest);
+		}
 
 		return null;
-	}
-
-	public static boolean deleteDirectory(File path)
-	{
-		if (path.exists())
-		{
-			File[] files = path.listFiles();
-			if (files == null)
-			{
-				return true;
-			}
-			for (int i = 0; i < files.length; i++)
-			{
-				if (files[i].isDirectory())
-				{
-					deleteDirectory(files[i]);
-				}
-				else
-				{
-					files[i].delete();
-				}
-			}
-		}
-		return (path.delete());
 	}
 
 	private void unzipWebFile(String zipFilePath, String unzipLocation, Observer observer)
