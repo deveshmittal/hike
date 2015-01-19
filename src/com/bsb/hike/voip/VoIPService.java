@@ -33,7 +33,6 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.AudioTrack.OnPlaybackPositionUpdateListener;
-import android.media.MediaRecorder;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.media.SoundPool;
@@ -1394,7 +1393,6 @@ public class VoIPService extends Service {
 					
 					// Latency tracking
 					if (dataPacket.getTimestamp() > 0) {
-						// TODO
 					}
 					
 					if (dataPacket.getType() == null) {
@@ -2258,7 +2256,7 @@ public class VoIPService extends Service {
 		Logger.d(VoIPConstants.TAG, "Testing network with " + TEST_PACKETS + " packets of " + packetData.length + " bytes over " + TOTAL_TEST_TIME + " seconds.");
 		
 		try {
-			for (int bytesSent = 0; bytesSent < TOTAL_TEST_BYTES && keepRunning; bytesSent += packetData.length) {
+			for (int i = 0; i < TEST_PACKETS; i++) {
 				sendPacket(dp, false);
 				Thread.sleep((TOTAL_TEST_TIME * 1000) / TEST_PACKETS);
 				if (Thread.currentThread().isInterrupted())

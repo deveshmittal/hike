@@ -31,7 +31,6 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.voip.view.VoIPActivity;
 
 public class VoIPUtils {
 
@@ -141,7 +140,7 @@ public class VoIPUtils {
     		
     	Logger.d(VoIPConstants.TAG, "Adding message to chat thread. Message: " + messageType + ", Duration: " + duration);
     	HikeConversationsDatabase mConversationDb = HikeConversationsDatabase.getInstance();
-    	Conversation mConversation = mConversationDb.getConversation(clientPartner.getPhoneNumber(), HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, Utils.isGroupConversation(clientPartner.getPhoneNumber()));	// TODO: possible crash here
+    	Conversation mConversation = mConversationDb.getConversation(clientPartner.getPhoneNumber(), HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, Utils.isGroupConversation(clientPartner.getPhoneNumber()));	
     	long timestamp = System.currentTimeMillis() / 1000;
     	if (timeStamp > 0)
     	{
@@ -202,7 +201,6 @@ public class VoIPUtils {
 			Logger.d(VoIPConstants.TAG, "Sent missed call notifier to partner.");
 			
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		
