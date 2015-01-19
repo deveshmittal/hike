@@ -390,6 +390,7 @@
             android:name=".voip.view.VoIPActivity"
             android:theme="@style/TranslucentBlack"
             android:launchMode="singleTask"
+            android:excludeFromRecents="true"
             android:label="@string/title_activity_vo_ip" >
         </activity>
         

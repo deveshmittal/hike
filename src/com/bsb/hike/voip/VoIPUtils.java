@@ -199,7 +199,7 @@ public class VoIPUtils {
 			message.put(HikeConstants.DATA, data);
 			
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
-			Logger.d(VoIPConstants.TAG, "Sent missed call notifer to partner.");
+			Logger.d(VoIPConstants.TAG, "Sent missed call notifier to partner.");
 			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block

@@ -190,6 +190,7 @@ public class VoIPService extends Service {
 		}
 		
 		VoIPUtils.resetNotificationStatus();
+		startNotificationThread();
 	}
 
 	@Override
@@ -352,6 +353,25 @@ public class VoIPService extends Service {
 		stop();
 		dismissNotification();
 		Logger.d(VoIPConstants.TAG, "VoIP Service destroyed.");
+	}
+	
+	private void startNotificationThread() {
+		
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while (keepRunning) {
+					showNotification();
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// All good
+					}
+					
+				}
+			}
+		}).start();
 	}
 
 	private void showNotification() {
@@ -800,7 +820,6 @@ public class VoIPService extends Service {
 					}
 					
 					sendPacketsWaitingForAck();
-					showNotification();
 					
 					// Monitor quality of incoming data
 					if ((System.currentTimeMillis() - lastQualityReset > VoIPConstants.QUALITY_WINDOW * 1000) 
@@ -2193,14 +2212,15 @@ public class VoIPService extends Service {
 					Thread.sleep(VoIPConstants.TIMEOUT_PARTNER_ANSWER);
 					if (!isAudioRunning()) {
 						// Call not answered yet?
-						sendHandlerMessage(VoIPActivity.MSG_PARTNER_ANSWER_TIMEOUT);
-						if (!reconnecting && !connected) {
+						if (connected) {
 							if (!clientSelf.isInitiator())
 								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1);
-							else
+							else {
+								sendHandlerMessage(VoIPActivity.MSG_PARTNER_ANSWER_TIMEOUT);
 								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1);
+							}
 						}
-						
+
 						stop();
 						
 					}
