@@ -104,7 +104,7 @@ public class PlatformJavaScriptBridge
 		try
 		{
 			Logger.i(tag,"set alarm called "+json +" , mId "+ messageId +" , time "+timeInMills);
-			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), Long.valueOf(messageId), System.currentTimeMillis() + Long.valueOf(timeInMills));
+			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), Integer.parseInt(messageId), System.currentTimeMillis() + Long.valueOf(timeInMills));
 		}
 		catch (JSONException e)
 		{
@@ -137,9 +137,10 @@ public class PlatformJavaScriptBridge
 	@JavascriptInterface
 	public void updateMetadata(String messageId, String json)
 	{
+
 		try
 		{
-			Logger.i(tag, "update metadata called " + json.toString() + " , message id=" + messageId);
+			Logger.i(tag, "update metadata called " + json + " , message id=" + messageId);
 			String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata(Integer.valueOf(messageId), json);
 			message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON);
 			mWebView.post(new Runnable()

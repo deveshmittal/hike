@@ -7,7 +7,6 @@ import android.os.Message;
 import android.text.TextUtils;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.HikeContentDatabase;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.notifications.HikeNotification;
@@ -17,25 +16,11 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 
-public class PlatformAlarmManager
+public class PlatformAlarmManager implements HikePlatformConstants
 {
 	private static final String tag = "platformAlarmManager";
 
-	public static final String PLATFORM_ALARM = "platform_alarm";
-	
-	public static final String NOTIFICATION = "notification";
-
-	public static final String NOTIFICATION_SOUND = "notification_sound";
-
-	public static final String INCREASE_UNREAD = "inc_unread";
-
-	public static final String MESSAGE_ID = "message_id";
-
-	public static final String CONV_MSISDN = "conv_msisdn";
-
-	public static final String ALARM_DATA = "alarm_data";
-
-	public static final void setAlarm(Context context, JSONObject json, long messageId, long timeInMills)
+	public static final void setAlarm(Context context, JSONObject json, int messageId, long timeInMills)
 	{
 		Intent intent = new Intent();
 		intent.putExtra(MESSAGE_ID, messageId); // for us uniqueness of a card is message id
@@ -71,17 +56,18 @@ public class PlatformAlarmManager
 	{
 		Logger.i(tag, "Process Tasks Invoked with intent :  " + intent.getExtras().toString());
 		Bundle data = intent.getExtras();
-		if (data != null && data.containsKey(PLATFORM_ALARM))
+		if (data != null && data.containsKey(HikePlatformConstants.ALARM_DATA))
 		{
+
 			int messageId = data.getInt(MESSAGE_ID);
 			if (messageId != 0) // validation
 			{
-				HikeContentDatabase.getInstance(context).insertUpdateAppAlarm(messageId, data.getString(PLATFORM_ALARM));
+				HikeConversationsDatabase.getInstance().insertMicroAppALarm(messageId, data.getString(HikePlatformConstants.ALARM_DATA));
 				increaseUnreadCount(data, context);
-				showNotification(data,context);
+				showNotification(data, context);
 				Message m = Message.obtain();
 				m.arg1 = messageId;
-				m.obj = data.get(PLATFORM_ALARM);
+				m.obj = data.get(ALARM_DATA);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.PLATFORM_CARD_ALARM, m);
 			}
 		}

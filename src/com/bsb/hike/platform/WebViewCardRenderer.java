@@ -1,18 +1,13 @@
 package com.bsb.hike.platform;
 
-import java.util.ArrayList;
-
-import android.app.AlertDialog;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.JsResult;
-import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
-
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.platform.content.PlatformContent;
@@ -20,6 +15,8 @@ import com.bsb.hike.platform.content.PlatformContentListener;
 import com.bsb.hike.platform.content.PlatformContentModel;
 import com.bsb.hike.platform.content.PlatformWebClient;
 import com.bsb.hike.utils.Logger;
+
+import java.util.ArrayList;
 
 /**
  * Created by shobhitmandloi on 14/01/15.
@@ -143,7 +140,8 @@ public class WebViewCardRenderer extends BaseAdapter
 			view.loadUrl("javascript:setData(" + "'" + convMessage.getMsgID() + "','" + convMessage.getMsisdn() + "','" + convMessage.platformWebMessageMetadata.getHelperData()
 					+ "')");
 			String alarmData = convMessage.platformWebMessageMetadata.getAlarmData();
-			if (alarmData != null)
+			Logger.d(tag, "alarm data to html is " + alarmData);
+			if (!TextUtils.isEmpty(alarmData))
 			{
 				view.loadUrl("javascript:alarmPlayed(" + "'" + alarmData + "')");
 			}
