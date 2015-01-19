@@ -169,6 +169,22 @@ public class IntentManager
 		
 		return intent;
 	}
+	
+	public static Intent getWebViewActivityIntent(Context context, String url, String title)
+	{
+
+		Intent intent = new Intent(context.getApplicationContext(), WebViewActivity.class);
+		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, url);
+
+		if (!TextUtils.isEmpty(title))
+		{
+			intent.putExtra(HikeConstants.Extras.TITLE, title);
+		}
+		intent.putExtra(HikeConstants.Extras.WEBVIEW_ALLOW_LOCATION, true);
+
+		return intent;
+
+	}
 
 	public static Intent getForwardStickerIntent(Context context, String stickerId, String categoryId, boolean isFtueFwd)
 	{

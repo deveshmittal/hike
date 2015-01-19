@@ -2128,5 +2128,13 @@ public class HikeConstants
 												   */
 
 	public static long STOP_NOTIF_SOUND_TIME = 3000; // In milliseconds
+	
+	public static final String PLAY_NOTIFICATION = "notif";
+	
+	public static final String SILENT = "silent";
+	
+	public static final String LOUD = "loud";
+	
+	public static final String OFF = "off";
 
 }
