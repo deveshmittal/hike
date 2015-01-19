@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import android.text.TextUtils;
 
 import com.bsb.hike.modules.httpmgr.Header;
+import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
@@ -44,7 +45,11 @@ public class Request
 
 	private IRequestCancellationListener requestCancellationListener;
 
+	private IPreProcessListener preProcessListener;
+
 	private boolean runOnUIThread;
+
+	private boolean asynchronous;
 
 	private Future<?> future;
 
@@ -59,7 +64,9 @@ public class Request
 		this.requestType = builder.requestType;
 		this.retryPolicy = builder.retryPolicy;
 		this.requestListeners = builder.requestListeners;
+		this.preProcessListener = builder.preProcessListener;
 		this.runOnUIThread = builder.runOnUIThread;
+		this.asynchronous = builder.asynchronous;
 	}
 
 	/**
@@ -158,6 +165,16 @@ public class Request
 	}
 
 	/**
+	 * Returns the {@link IPreProcessListener} object
+	 * 
+	 * @return
+	 */
+	public IPreProcessListener getPreProcessListener()
+	{
+		return preProcessListener;
+	}
+
+	/**
 	 * Returns the {@link IRequestCancellationListener} object used when request is cancelled
 	 * 
 	 * @return
@@ -175,6 +192,16 @@ public class Request
 	public boolean isRunOnUIThread()
 	{
 		return runOnUIThread;
+	}
+
+	/**
+	 * Returns true if the request to be executed asynchronously (Non blocking call) otherwise false
+	 * 
+	 * @return
+	 */
+	public boolean isAsynchronous()
+	{
+		return asynchronous;
 	}
 
 	/**
@@ -344,7 +371,11 @@ public class Request
 
 		private CopyOnWriteArrayList<IRequestListener> requestListeners;
 
+		private IPreProcessListener preProcessListener;
+
 		private boolean runOnUIThread;
+
+		private boolean asynchronous;
 
 		/**
 		 * Sets the unique id of the request
@@ -459,6 +490,18 @@ public class Request
 		}
 
 		/**
+		 * Sets the {@link IPreProcessListener} object to the request which will be used to perfoem background task other than http call
+		 * 
+		 * @param preProcessListener
+		 * @return
+		 */
+		public Builder setPreProcessListener(IPreProcessListener preProcessListener)
+		{
+			this.preProcessListener = preProcessListener;
+			return this;
+		}
+
+		/**
 		 * Sets the boolean whether request should be eun on ui thread or not
 		 * 
 		 * @param runOnUIThread
@@ -466,6 +509,18 @@ public class Request
 		public Builder setRunOnUIThread(boolean runOnUIThread)
 		{
 			this.runOnUIThread = runOnUIThread;
+			return this;
+		}
+
+		/**
+		 * Sets the asynchronous field , pass true if this request should be executed asynchronously (non blocking)
+		 * 
+		 * @param async
+		 * @return
+		 */
+		public Builder setAsynchronous(boolean async)
+		{
+			this.asynchronous = async;
 			return this;
 		}
 
