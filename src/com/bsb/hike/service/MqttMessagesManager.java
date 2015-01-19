@@ -2799,6 +2799,10 @@ public class MqttMessagesManager
 			{
 				saveMessage(json);
 			}
+			else if (HikeConstants.MqttMessageTypes.POPUP.equals(type))
+			{
+				savePopup(json);
+			}
 			else
 			{
 				Logger.e("gcmMqttMessage", "Unexpected type received via GCM mqtt equivalent messages");
