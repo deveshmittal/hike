@@ -47,7 +47,7 @@ public class Request
 
 	private IPreProcessListener preProcessListener;
 
-	private boolean runOnUIThread;
+	private boolean responseOnUIThread;
 
 	private boolean asynchronous;
 
@@ -65,7 +65,7 @@ public class Request
 		this.retryPolicy = builder.retryPolicy;
 		this.requestListeners = builder.requestListeners;
 		this.preProcessListener = builder.preProcessListener;
-		this.runOnUIThread = builder.runOnUIThread;
+		this.responseOnUIThread = builder.responseOnUIThread;
 		this.asynchronous = builder.asynchronous;
 	}
 
@@ -189,9 +189,9 @@ public class Request
 	 * 
 	 * @return
 	 */
-	public boolean isRunOnUIThread()
+	public boolean isResponseOnUIThread()
 	{
-		return runOnUIThread;
+		return responseOnUIThread;
 	}
 
 	/**
@@ -373,7 +373,7 @@ public class Request
 
 		private IPreProcessListener preProcessListener;
 
-		private boolean runOnUIThread;
+		private boolean responseOnUIThread;
 
 		private boolean asynchronous;
 
@@ -506,9 +506,9 @@ public class Request
 		 * 
 		 * @param runOnUIThread
 		 */
-		public Builder setRunOnUIThread(boolean runOnUIThread)
+		public Builder setResponseOnUIThread(boolean responseOnUIThread)
 		{
-			this.runOnUIThread = runOnUIThread;
+			this.responseOnUIThread = responseOnUIThread;
 			return this;
 		}
 
