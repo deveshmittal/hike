@@ -263,7 +263,7 @@ public class VoIPActivity extends Activity implements CallActions
 		Logger.d(VoIPConstants.TAG, "VoIPActivity onPause()");
 	}
 
-	@Override
+	@SuppressLint("Wakelock") @Override
 	protected void onDestroy() {
 		
 		if (voipService != null)
@@ -284,6 +284,15 @@ public class VoIPActivity extends Activity implements CallActions
 			callActionsView = null;
 		}
 
+		// Proximity sensor
+		if (sensorManager != null) {
+			if (proximityWakeLock.isHeld()) {
+				Logger.d(VoIPConstants.TAG, "Screen on.");
+				proximityWakeLock.release();
+			}
+			sensorManager.unregisterListener(proximitySensorEventListener);
+		}
+		
 		Logger.w(VoIPConstants.TAG, "VoIPActivity onDestroy()");
 		super.onDestroy();
 	}

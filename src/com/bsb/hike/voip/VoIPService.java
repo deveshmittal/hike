@@ -323,6 +323,16 @@ public class VoIPService extends Service {
 				}
 				return returnInt;
 			}
+
+			// Edge case: call button was hit for someone we are already speaking with. 
+			if (getCallId() > 0 && clientPartner.getPhoneNumber().equals(intent.getStringExtra("msisdn"))) {
+				// Show activity
+				Logger.d(VoIPConstants.TAG, "Restoring activity..");
+				Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
+				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(i);
+				return returnInt;
+			}
 			
 			if (getCallId() > 0) {
 				Logger.e(VoIPConstants.TAG, "Error. Already in a call.");
@@ -377,6 +387,10 @@ public class VoIPService extends Service {
 	}
 
 	private void showNotification() {
+		
+		if (!connected)
+			return;
+		
 //		Logger.d(VoIPConstants.TAG, "Showing notification..");
 		Intent myIntent = new Intent(getApplicationContext(), VoIPActivity.class);
 		myIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -395,6 +409,9 @@ public class VoIPService extends Service {
 
 		if (hold)
 			text = " Call on hold";
+		
+		if (clientPartner.getName() == null)
+			title = "Hike call";
 		
 		Notification myNotification = builder
 		.setContentTitle(title)
@@ -850,13 +867,10 @@ public class VoIPService extends Service {
 						else 
 							newQuality = CallQuality.WEAK;
 
-						if (newQuality != currentCallQuality) {
-							currentCallQuality = newQuality;
-							sendHandlerMessage(VoIPActivity.MSG_UPDATE_QUALITY);
-						}
-						
+						currentCallQuality = newQuality;
 						qualityCounter = 0;
 						lastQualityReset = System.currentTimeMillis();
+						sendHandlerMessage(VoIPActivity.MSG_UPDATE_QUALITY);
 					}
 					
 					// Drop packets if getting left behind
@@ -1079,7 +1093,8 @@ public class VoIPService extends Service {
 		Logger.d(VoIPConstants.TAG, "Starting audio record / playback.");
 		startRecording();
 		startPlayBack();
-		partnerTimeoutThread.interrupt();
+		if (partnerTimeoutThread != null)
+			partnerTimeoutThread.interrupt();
 		stopRingtone();
 		stopFromSoundPool(ringtoneStreamID);
 		playFromSoundPool(SOUND_ACCEPT, false);
@@ -1572,7 +1587,7 @@ public class VoIPService extends Service {
 	
 	private void sendPacket(VoIPDataPacket dp, boolean requiresAck) {
 		
-		if (dp == null)
+		if (dp == null || keepRunning == false)
 			return;
 		
 		if (socket == null) {
