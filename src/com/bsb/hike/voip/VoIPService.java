@@ -488,7 +488,6 @@ public class VoIPService extends Service {
 	}
 	
 	private void releaseAudioManager() {
-		Logger.w(VoIPConstants.TAG, "Releasing audio.");
 		if (audioManager != null) {
 			audioManager.abandonAudioFocus(mOnAudioFocusChangeListener);
 			restoreAudioSettings();
@@ -499,9 +498,9 @@ public class VoIPService extends Service {
 			try {
 				Thread.sleep(1500);
 			} catch (InterruptedException e) {
-				Logger.w(VoIPConstants.TAG, "releaseAudioManager() InterruptedException: " + e.toString());
+				Logger.d(VoIPConstants.TAG, "releaseAudioManager() InterruptedException: " + e.toString());
 			}
-			Logger.w(VoIPConstants.TAG, "Releasing soundpool.");
+			Logger.d(VoIPConstants.TAG, "Releasing soundpool.");
 			soundpool.release();
 			soundpool = null;
 		}
@@ -1419,6 +1418,7 @@ public class VoIPService extends Service {
 						totalPacketsReceived++;
 					} catch (IOException e) {
 						Logger.e(VoIPConstants.TAG, "startReceiving() IOException: " + e.toString());
+						break;
 					}
 					
 					byte[] realData = new byte[packet.getLength()];
