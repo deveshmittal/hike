@@ -488,17 +488,23 @@ public class VoIPService extends Service {
 	}
 	
 	private void releaseAudioManager() {
+		Logger.w(VoIPConstants.TAG, "Releasing audio.");
 		if (audioManager != null) {
 			audioManager.abandonAudioFocus(mOnAudioFocusChangeListener);
 			restoreAudioSettings();
 		}
 		
-		/*
 		if (soundpool != null) {
+			// Sleep for a little bit so the hangup sound can finish playing. 
+			try {
+				Thread.sleep(1500);
+			} catch (InterruptedException e) {
+				Logger.w(VoIPConstants.TAG, "releaseAudioManager() InterruptedException: " + e.toString());
+			}
+			Logger.w(VoIPConstants.TAG, "Releasing soundpool.");
 			soundpool.release();
 			soundpool = null;
 		}
-		*/
 	}
 
 	@SuppressLint("InlinedApi") private void setAudioModeInCall() {
@@ -547,11 +553,7 @@ public class VoIPService extends Service {
 	
 	private void stopFromSoundPool(int streamID) {
 		if (soundpool != null)
-		{
 			soundpool.stop(streamID);
-			soundpool.release();
-			soundpool = null;
-		}
 	}
 	
 	public void setMessenger(Messenger messenger) {
@@ -640,11 +642,11 @@ public class VoIPService extends Service {
 				"\nDropped decoded packets: " + droppedDecodedPackets +
 				"\nReconnect attempts: " + reconnectAttempts +
 				"\nCall duration: " + getCallDuration());
+		
 		//
 		if(socket != null)
-		{
 			socket.close();
-		}
+		
 		// Terminate threads
 		if (partnerTimeoutThread != null)
 			partnerTimeoutThread.interrupt();
@@ -674,8 +676,6 @@ public class VoIPService extends Service {
 		stopFromSoundPool(ringtoneStreamID);
 		setSpeaker(true);
 		playFromSoundPool(SOUND_DECLINE, false);
-		stopFromSoundPool(SOUND_DECLINE);
-		releaseAudioManager();
 		
 		if (opusWrapper != null)
 			opusWrapper.destroy();
@@ -690,6 +690,8 @@ public class VoIPService extends Service {
 			chronometer = null;
 		}
 		connected = false;
+
+		releaseAudioManager();
 		stopSelf();
 	}
 	
@@ -1480,7 +1482,8 @@ public class VoIPService extends Service {
 					case COMM_UDP_SYNACK_PRIVATE:
 					case COMM_UDP_ACK_PRIVATE:
 						Logger.d(VoIPConstants.TAG, "Received " + dataPacket.getType());
-						senderThread.interrupt();
+						if (senderThread != null)
+							senderThread.interrupt();
 						clientPartner.setPreferredConnectionMethod(ConnectionMethods.PRIVATE);
 						if (connected) break;
 						synchronized (clientPartner) {
@@ -1493,7 +1496,8 @@ public class VoIPService extends Service {
 					case COMM_UDP_SYNACK_PUBLIC:
 					case COMM_UDP_ACK_PUBLIC:
 						Logger.d(VoIPConstants.TAG, "Received " + dataPacket.getType());
-						senderThread.interrupt();
+						if (senderThread != null)
+							senderThread.interrupt();
 						clientPartner.setPreferredConnectionMethod(ConnectionMethods.PUBLIC);
 						if (connected) break;
 						synchronized (clientPartner) {
@@ -1506,7 +1510,8 @@ public class VoIPService extends Service {
 					case COMM_UDP_SYNACK_RELAY:
 					case COMM_UDP_ACK_RELAY:
 						Logger.d(VoIPConstants.TAG, "Received " + dataPacket.getType());
-						senderThread.interrupt();
+						if (senderThread != null)
+							senderThread.interrupt();
 						clientPartner.setPreferredConnectionMethod(ConnectionMethods.RELAY);
 						if (connected) break;
 						synchronized (clientPartner) {
@@ -2214,7 +2219,8 @@ public class VoIPService extends Service {
 					e.printStackTrace();
 				}
 
-				senderThread.interrupt();
+				if (senderThread != null)
+					senderThread.interrupt();
 //				receivingThread.interrupt();
 				establishingConnection = false;
 				if (reconnectingBeepsThread != null)
