@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -175,6 +176,11 @@ public class GCMIntentService extends GCMBaseIntentService
 			if (HikeConstants.MqttMessageTypes.GCM_ECHO.equals(type))
 			{
 				// TODO : Code for DR comes here
+				JSONObject data = json.optJSONObject(HikeConstants.DATA);
+				if (data != null)
+				{
+					Utils.sendLogEvent(data,HikeConstants.MqttMessageTypes.GCM_ECHO);
+				}
 				return false;
 			}
 			return true;
