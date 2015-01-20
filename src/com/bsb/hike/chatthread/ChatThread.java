@@ -271,10 +271,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			updateNetworkState();
 			break;
 		case HIDE_DOWN_FAST_SCROLL_INDICATOR:
-			hideDownFastScrollIndicator();
+			hideView(R.id.scroll_bottom_indicator);
 			break;
 		case HIDE_UP_FAST_SCROLL_INDICATOR:
-			hideUpFastScrollIndicator();
+			hideView(R.id.scroll_top_indicator);
 			break;
 		case SET_LABEL:
 			setLabel((String) msg.obj); 
@@ -1275,7 +1275,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			if (myListView.getLastVisiblePosition() >= messages.size() - HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 			{
-				hideDownFastScrollIndicator();
+				hideView(R.id.scroll_bottom_indicator);
 			}
 
 			else if (isScrollStateIdle(scrollState))
@@ -1289,7 +1289,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 			if (myListView.getLastVisiblePosition() <= HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 			{
-				hideUpFastScrollIndicator();
+				hideView(R.id.scroll_top_indicator);
 			}
 
 			else if (isScrollStateIdle(scrollState))
@@ -1742,6 +1742,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		
 	}
 	
+	protected void hideView(int viewId)
+	{
+		activity.findViewById(viewId).setVisibility(View.GONE);
+	}
+
+	protected void showView(int viewId)
+	{
+		activity.findViewById(viewId).setVisibility(View.VISIBLE);
+	}
+	
 	private void unreadCounterClicked()
 	{
 		mConversationsView.setSelection(mAdapter.getCount() - unreadMessageCount - 1);
@@ -1751,13 +1761,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private void hideUnreadCountIndicator()
 	{
 		unreadMessageCount = 0;
-		activity.findViewById(R.id.new_message_indicator).setVisibility(View.GONE);
+		hideView(R.id.new_message_indicator);
 	}
 
 	private void bottomScrollIndicatorClicked()
 	{
 		mConversationsView.setSelection(messages.size() - 1);
-		activity.findViewById(R.id.scroll_bottom_indicator);
+		hideView(R.id.scroll_bottom_indicator);
 	}
 	
 	private void incrementUnreadMessageCount(int count)
@@ -1785,9 +1795,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		/**
 		 * fast scroll indicator and unread message should not show simultaneously
 		 */
-
-		activity.findViewById(R.id.scroll_bottom_indicator).setVisibility(View.GONE);
-		activity.findViewById(R.id.new_message_indicator).setVisibility(View.VISIBLE);
+		hideView(R.id.scroll_bottom_indicator);
+		showView(R.id.new_message_indicator);
 
 		TextView indicatorText = (TextView) activity.findViewById(R.id.indicator_text);
 		indicatorText.setVisibility(View.VISIBLE);
@@ -2727,16 +2736,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			return Integer.toString(counter);
 		}
-	}
-	
-	private void hideDownFastScrollIndicator()
-	{
-		activity.findViewById(R.id.scroll_bottom_indicator).setVisibility(View.GONE);
-	}
-
-	private void hideUpFastScrollIndicator()
-	{
-		activity.findViewById(R.id.scroll_top_indicator).setVisibility(View.GONE);
 	}
 	
 	protected void doBulkMqttPublish(JSONArray ids)

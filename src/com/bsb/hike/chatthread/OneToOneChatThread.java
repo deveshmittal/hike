@@ -769,7 +769,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		if (mConversation.isOnhike())
 		{
-			removeSMSToggle();
+			hideView(R.id.sms_toggle_button);
 			nonZeroCredits();
 		}
 
@@ -778,14 +778,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			updateChatMetadata();
 		}
 
-	}
-	
-	/**
-	 * Used for making SMS Toggle view invisible
-	 */
-	private void removeSMSToggle()
-	{
-		activity.findViewById(R.id.sms_toggle_button).setVisibility(View.GONE);
 	}
 	
 	private void nonZeroCredits()
@@ -800,8 +792,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			mComposeView.setEnabled(true);
 		}
 
-		activity.findViewById(R.id.info_layout).setVisibility(View.GONE);
-		activity.findViewById(R.id.emoticon_btn).setVisibility(View.VISIBLE);
+		hideView(R.id.info_layout);
+		showView(R.id.emoticon_btn);
 
 		activity.findViewById(R.id.emoticon_btn).setEnabled(true);
 		activity.findViewById(R.id.sticker_btn).setEnabled(true);
@@ -826,8 +818,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		mComposeView.setHint(activity.getString(R.string.zero_sms_hint));
 		mComposeView.setEnabled(false);
-		activity.findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
-		activity.findViewById(R.id.emoticon_btn).setVisibility(View.GONE);
+		
+		showView(R.id.info_layout);
+		hideView(R.id.emoticon_btn);
 
 		activity.findViewById(R.id.emoticon_btn).setEnabled(false);
 		activity.findViewById(R.id.sticker_btn).setEnabled(false);
@@ -1120,7 +1113,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			viewStub.inflate();
 		}
 		
-		activity.findViewById(R.id.sms_toggle_button).setVisibility(View.VISIBLE);
+		showView(R.id.sms_toggle_button);
 		TextView smsToggleSubtext = (TextView) activity.findViewById(R.id.sms_toggle_subtext);
 		CheckBox smsToggle = (CheckBox) activity.findViewById(R.id.checkbox);
 		TextView hikeSmsText = (TextView) activity.findViewById(R.id.hike_text);
