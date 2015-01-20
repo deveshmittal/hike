@@ -4035,7 +4035,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		// Coz there might be cases when user manualy removes the tip
 		if (!isHikeOfflineTipShowing)
 		{
-			scheduleHikeOfflineTip();
+			//scheduleHikeOfflineTip();
 		}
 	}
 
@@ -4093,7 +4093,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		if (!isHikeOfflineTipShowing)
 		{
-			scheduleHikeOfflineTip();
+			//scheduleHikeOfflineTip();
 		}
 	}
 

@@ -1868,7 +1868,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * This is a hackish check. For some cases we were getting convMsg in another user's messageMap. which should not happen ideally. that was leading to showing hikeOfflineTip
 		 * in wrong ChatThread.
 		 */
-		if (msg == null || TextUtils.isEmpty(msg.getMsisdn()) || !msg.getMsisdn().equals(msgId))
+		if (msg == null || TextUtils.isEmpty(msg.getMsisdn()) || !msg.getMsisdn().equals(msisdn))
 		{
 			Logger.i("ChatThread", "We are getting a wrong msisdn convMessage object in " + msisdn + " ChatThread");
 			return false;
