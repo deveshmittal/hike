@@ -16,13 +16,12 @@ import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 
 public class SoundUtils
 {
 	private static int systemStreamVol;
 	
-	private static Context mContext;
-
 	private static Handler soundHandler = new Handler(Looper.getMainLooper());
 
 	private static MediaPlayer mediaPlayer = new MediaPlayer();
@@ -34,7 +33,7 @@ public class SoundUtils
 		public void run()
 		{
 			mediaPlayer.reset();
-			setCurrentVolume(mContext, AudioManager.STREAM_SYSTEM, systemStreamVol);
+			setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 		}
 	};
 
@@ -46,7 +45,7 @@ public class SoundUtils
 		{
 			mediaPlayer.reset();
 			soundHandler.removeCallbacks(stopSoundRunnable);
-			setCurrentVolume(mContext, AudioManager.STREAM_SYSTEM, systemStreamVol);
+			setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 		}
 	};
 
@@ -58,6 +57,7 @@ public class SoundUtils
 		{
 			Logger.e("SoundUtils", "MediaPlayer -- OnERROR!!! WHAT:: " + what + " EXTRAS:: " + extra);
 			mediaPlayer.reset();
+			setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 			return true;
 		}
 	};
@@ -68,7 +68,7 @@ public class SoundUtils
 		@Override
 		public void run()
 		{
-			setCurrentVolume(mContext, AudioManager.STREAM_SYSTEM, systemStreamVol);
+			setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 		}
 	};
 	
@@ -86,15 +86,16 @@ public class SoundUtils
 	 */
 	public static void playSoundFromRaw(final Context context, int soundId)
 	{
-
 		Logger.i("sound", "playing sound " + soundId);
+
+		// remove any previous handler
+		soundHandler.removeCallbacks(stopSoundRunnable);
 
 		// resetting media player
 		mediaPlayer.reset();
 
-		mContext = context;
 		mediaPlayer.setAudioStreamType(AudioManager.STREAM_SYSTEM);
-		setVolToSystemStreamVol(context);
+		setSystemStreamVolToNotifStreamVol(context);
 		Resources res = context.getResources();
 		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
 
@@ -103,15 +104,7 @@ public class SoundUtils
 			mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
 			afd.close();
 
-			mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-			{
-
-				@Override
-				public void onCompletion(MediaPlayer mp)
-				{
-					mp.reset();
-				}
-			});
+			mediaPlayer.setOnCompletionListener(completeListener);
 			mediaPlayer.setOnErrorListener(errorListener);
 			mediaPlayer.prepare();
 			mediaPlayer.start();
@@ -141,13 +134,13 @@ public class SoundUtils
 			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 			Ringtone r = RingtoneManager.getRingtone(context, notification);
 			r.setStreamType(AudioManager.STREAM_SYSTEM);
-			mContext = context;
-			setVolToSystemStreamVol(context);
+			setSystemStreamVolToNotifStreamVol(context);
 			r.play();
 			soundHandler.postDelayed(resetSystemStreamVolRunnable, HikeConstants.STOP_NOTIF_SOUND_TIME);
 		}
 		catch (Exception e)
 		{
+			setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 			e.printStackTrace();
 		}
 	}
@@ -167,8 +160,7 @@ public class SoundUtils
 		mediaPlayer.reset();
 
 		mediaPlayer.setAudioStreamType(AudioManager.STREAM_SYSTEM);
-		mContext = context;
-		setVolToSystemStreamVol(context);
+		setSystemStreamVolToNotifStreamVol(context);
 		
 		try
 		{
@@ -198,7 +190,11 @@ public class SoundUtils
 		}
 	}
 
-	public static void setVolToSystemStreamVol(Context context)
+	/**
+	 * This sets vol of SYSTEM_STREAM to vol of STREAM_NOTIFICATION
+	 * @param context
+	 */
+	public static void setSystemStreamVolToNotifStreamVol(Context context)
 	{
 		systemStreamVol = getCurrentVolume(context, AudioManager.STREAM_SYSTEM);
 		int notifVol = getCurrentVolume(context, AudioManager.STREAM_NOTIFICATION);
@@ -228,5 +224,7 @@ public class SoundUtils
 		soundHandler.removeCallbacks(stopSoundRunnable);
 
 		mediaPlayer.reset();
+		
+		setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 	}
 }
