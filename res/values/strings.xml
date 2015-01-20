@@ -1302,7 +1302,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="led_color_purple_key">Purple</string>
     <string name="ringtone_loader">Loading...</string>
     <string name="call_rate_heading">Rate your call</string>
-    <string name="call_rate_subheading">We\'d love to know how was the quality of your last call.</string>
+    <string name="call_rate_subheading">We\'d love to know how the quality of your last call was</string>
     <string name="call_rate_not_now">NOT NOW</string>
     <string name="call_rate_submit">SUBMIT</string>
     <string name="happy_republic_day">Happy Republic Day</string>
