@@ -305,6 +305,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	 * this variable will point to first ConvMessage object which is stuck in tick and have not sent as sms till now. if there is no such message than this should point to null.
 	 */
 	private ConvMessage firstPendingConvMessage = null;
+	
+	/**
+	 * This variable is used to determine whether HiketoOffline tip is showing or not
+	 */
+	private boolean isHikeOfflineTipShowing;
 
 	public MessagesAdapter(Context context, List<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
@@ -2871,7 +2876,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				status.setImageResource(smsDrawableResId);
 				return;
 			}
-			else if (chatThread.isHikeOfflineTipShowing())
+			else if (isHikeOfflineTipShowing)
 			{
 				status.setImageResource(boltDrawableResId);
 				return;
@@ -4022,28 +4027,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return unsentMessages;
 	}
 
-	public void addToUndeliverdMessage(final ConvMessage convMessage)
+	public void addToUndeliverdMessage(ConvMessage convMessage)
 	{
-		chatThread.runOnUiThread(new Runnable()
+		undeliveredMessages.put(convMessage.getMsgID(), convMessage);
+		updateFirstPendingConvMessage();
+		// We need to schedule hike offline tip always when it is not there
+		// Coz there might be cases when user manualy removes the tip
+		if (!isHikeOfflineTipShowing)
 		{
-
-			@Override
-			public void run()
-			{
-				if (convMessage.isSMS())
-				{
-					return;
-				}
-				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
-				updateFirstPendingConvMessage();
-				// We need to schedule hike offline tip always when it is not there
-				// Coz there might be cases when user manualy removes the tip
-				if (!chatThread.isHikeOfflineTipShowing())
-				{
-					scheduleHikeOfflineTip();
-				}
-			}
-		});
+			scheduleHikeOfflineTip();
+		}
 	}
 
 	public void removeFromUndeliverdMessage(final ConvMessage convMessage)
@@ -4098,7 +4091,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			updateFirstPendingConvMessage();
 		}
-		if (!chatThread.isHikeOfflineTipShowing())
+		if (!isHikeOfflineTipShowing)
 		{
 			scheduleHikeOfflineTip();
 		}
@@ -4242,5 +4235,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public int getUndeliveredMessagesCount()
 	{
 		return undeliveredMessages.size();
+	}
+
+	/**
+	 * @return the isHikeOfflineTipShowing
+	 */
+	public boolean isHikeOfflineTipShowing()
+	{
+		return isHikeOfflineTipShowing;
+	}
+
+	/**
+	 * @param isHikeOfflineTipShowing the isHikeOfflineTipShowing to set
+	 */
+	public void setHikeOfflineTipShowing(boolean isHikeOfflineTipShowing)
+	{
+		this.isHikeOfflineTipShowing = isHikeOfflineTipShowing;
 	}
 }

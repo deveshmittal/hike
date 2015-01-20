@@ -93,6 +93,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private static final int SCHEDULE_LAST_SEEN = 110;
 	
+	private static final int ADD_TO_UNDELIVERED_MESSAGE = 111;
+	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -536,7 +538,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				ConvMessage msg = findMessageById(msgId);
 				if (!msg.isSMS())
 				{
-					mAdapter.addToUndeliverdMessage(msg);
+					sendUIMessage(ADD_TO_UNDELIVERED_MESSAGE, msg);
 				}
 			}
 			return true;
@@ -631,6 +633,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		case SCHEDULE_LAST_SEEN :
 			scheduleLastSeen();
+			break;
+		case ADD_TO_UNDELIVERED_MESSAGE:
+			mAdapter.addToUndeliverdMessage((ConvMessage) msg.obj);
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
