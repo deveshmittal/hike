@@ -1112,7 +1112,7 @@ public class HikeNotification
 				Logger.i("notif", "sound " + notifSound);
 				if (!NOTIF_SOUND_OFF.equals(notifSound))
 				{
-					if (manager.isMusicActive() || EarPhonePluginReceiver.EAR_PHONE_STATE == EarPhonePluginReceiver.PLUGGED)
+					if (!Utils.isUserInCall(context) &&(manager.isMusicActive() || EarPhonePluginReceiver.EAR_PHONE_STATE == EarPhonePluginReceiver.PLUGGED))
 					{
 						playSoundViaPlayer(notifSound);
 					}

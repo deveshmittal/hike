@@ -5063,5 +5063,19 @@ public class Utils
 		}
 		return true;
 	}
+	
+	/**
+	 * Tells if User is on Telephonic Call
+	 * @param context
+	 * @return
+	 */
+	public static boolean isUserInCall(Context context) {
+        boolean callActive = false;
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        if (telephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE)
+            callActive = true;
+        
+        return callActive;
+    } 
 
 }
