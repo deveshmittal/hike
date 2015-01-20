@@ -1,14 +1,19 @@
 package com.bsb.hike.platform.content;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.annotations.Expose;
 
 /**
  * Content model
@@ -16,32 +21,6 @@ import com.google.gson.JsonSyntaxException;
 public class PlatformContentModel
 {
 	private static String TAG = "PlatformContentModel";
-
-	/**
-	 * The appID.
-	 */
-	private String appID;
-
-	/**
-	 * The layout_id.
-	 */
-	private String layout_id;
-
-	private String layout_url;
-
-	/**
-	 * The version.
-	 */
-	private String version;
-
-	/**
-	 * The content data.
-	 */
-	private JsonObject card_data;
-
-	private String fwdcard_data;
-
-	private String fwdlayout_id;
 
 	boolean isForwardCard;
 
@@ -54,6 +33,12 @@ public class PlatformContentModel
 
 	private int mTemplateHash = -1;
 
+	@Expose
+	public PlatformCardObjectModel cardObj;
+
+	@Expose
+	public PlatformCardObjectModel fwdCardObj;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -64,7 +49,7 @@ public class PlatformContentModel
 	{
 		if (mHash == -1)
 		{
-			mHash = new String(appID + layout_id + version + card_data).hashCode();
+			mHash = new String(cardObj.appName + cardObj.layoutId + cardObj.appVersion + cardObj.ld).hashCode();
 		}
 		return mHash;
 	}
@@ -78,11 +63,11 @@ public class PlatformContentModel
 	{
 		if (mTemplateHash == -1)
 		{
-			mTemplateHash = new String(layout_id + version).hashCode();
+			mTemplateHash = new String(cardObj.layoutId + cardObj.appVersion).hashCode();
 		}
 		return mTemplateHash;
 	}
-	
+
 	/**
 	 * Make.
 	 * 
@@ -99,7 +84,7 @@ public class PlatformContentModel
 		try
 		{
 			object = new Gson().fromJson(jsonObj, PlatformContentModel.class);
-			object.card_data.addProperty(PlatformContentConstants.KEY_TEMPLATE_PATH, PlatformContentConstants.CONTENT_AUTHORITY_BASE + object.appID + File.separator);
+			object.cardObj.ld.addProperty(PlatformContentConstants.KEY_TEMPLATE_PATH, PlatformContentConstants.CONTENT_AUTHORITY_BASE + object.cardObj.appName + File.separator);
 		}
 		catch (JsonParseException e)
 		{
@@ -115,36 +100,71 @@ public class PlatformContentModel
 		return object;
 	}
 
-	/**
-	 * Make forward card data
-	 * 
-	 * @param card_data
-	 *            the content data
-	 * @return the platform content model
-	 */
-	public static PlatformContentModel makeForwardCardModel(String contentData)
+	public static String getForwardData(String originalData)
 	{
-		Log.d(TAG, "making PlatformContentModel");
-		JsonParser parser = new JsonParser();
-		JsonObject jsonObj = (JsonObject) parser.parse(contentData);
-		PlatformContentModel object = null;
-		try
+		String forwardData = null;
+
+		PlatformContentModel originalModel = make(originalData);
+
+		mergeObjects(originalModel.cardObj, originalModel.fwdCardObj);
+
+		forwardData = new Gson().toJson(originalModel);
+
+		return forwardData;
+	}
+
+	private static boolean mergeObjects(Object toObj, Object fromObj)
+	{
+		if (toObj != null && fromObj != null)
 		{
-			object = new Gson().fromJson(jsonObj, PlatformContentModel.class);
-			object.isForwardCard = true;
-			object.card_data.addProperty(PlatformContentConstants.KEY_TEMPLATE_PATH, PlatformContentConstants.CONTENT_AUTHORITY_BASE + object.appID + File.separator);
+			Field[] fields = PlatformCardObjectModel.class.getDeclaredFields();
+
+			int fieldLength = fields.length;
+
+			for (int i = 0; i < fieldLength; i++)
+			{
+				try
+				{
+					Field field = fields[i];
+
+					if (field.getType().equals(JsonObject.class))
+					{
+						JsonObject fromJsonObject = (JsonObject) field.get(fromObj);
+
+						JsonObject toJsonObject = (JsonObject) field.get(toObj);
+
+						if (fromJsonObject == null || toJsonObject == null)
+						{
+							continue;
+						}
+
+						Set<Entry<String, JsonElement>> set = fromJsonObject.entrySet();
+
+						Iterator<Entry<String, JsonElement>> setIterator = set.iterator();
+
+						while (setIterator.hasNext())
+						{
+							Entry<String, JsonElement> entry = setIterator.next();
+							toJsonObject.add(entry.getKey(), entry.getValue());
+						}
+					}
+					else
+					{
+						Object fwdCardFieldValue = field.get(fromObj);
+
+						if (fwdCardFieldValue != null)
+						{
+							field.set(toObj, fwdCardFieldValue);
+						}
+					}
+				}
+				catch (IllegalAccessException iae)
+				{
+					iae.printStackTrace();
+				}
+			}
 		}
-		catch (JsonParseException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-		catch (IllegalArgumentException iae)
-		{
-			iae.printStackTrace();
-			return null;
-		}
-		return object;
+		return true;
 	}
 
 	/**
@@ -154,25 +174,7 @@ public class PlatformContentModel
 	 */
 	public String getTag()
 	{
-		if (isForwardCard)
-		{
-			return fwdlayout_id;
-		}
-		else
-		{
-			return layout_id;
-		}
-	}
-
-	/**
-	 * Sets the layout_id.
-	 * 
-	 * @param layout_id
-	 *            the new layout_id
-	 */
-	public void setTag(String tag)
-	{
-		this.layout_id = tag;
+		return cardObj.layoutId;
 	}
 
 	/**
@@ -182,18 +184,7 @@ public class PlatformContentModel
 	 */
 	public String getVersion()
 	{
-		return version;
-	}
-
-	/**
-	 * Sets the version.
-	 * 
-	 * @param version
-	 *            the new version
-	 */
-	public void setVersion(String version)
-	{
-		this.version = version;
+		return cardObj.appVersion;
 	}
 
 	/**
@@ -203,26 +194,8 @@ public class PlatformContentModel
 	 */
 	public String getContentJSON()
 	{
-		if (isForwardCard)
-		{
-			return fwdcard_data;
-		}
-		else
-		{
-			return card_data.toString();
-		}
+		return cardObj.ld.toString();
 	}
-
-//	/**
-//	 * Sets the content data.
-//	 * 
-//	 * @param card_data
-//	 *            the new content data
-//	 */
-//	public void setContentData(String contentData)
-//	{
-//		this.card_data = contentData;
-//	}
 
 	/**
 	 * Gets the hot data.
@@ -252,7 +225,7 @@ public class PlatformContentModel
 	 */
 	public String getId()
 	{
-		return appID;
+		return cardObj.appName;
 	}
 
 	/**
@@ -263,7 +236,7 @@ public class PlatformContentModel
 	 */
 	public void setId(String id)
 	{
-		this.appID = id;
+		this.cardObj.appName = id;
 	}
 
 	private PlatformContentModel()
@@ -274,37 +247,134 @@ public class PlatformContentModel
 	@Override
 	public String toString()
 	{
-		return card_data + formedData;
-	}
-
-	public String getFwdcard_data()
-	{
-		return fwdcard_data;
-	}
-
-	public void setFwdcard_data(String fwdcard_data)
-	{
-		this.fwdcard_data = fwdcard_data;
-	}
-
-	public String getFwdlayout_id()
-	{
-		return fwdlayout_id;
-	}
-
-	public void setFwdlayout_id(String fwdlayout_id)
-	{
-		this.fwdlayout_id = fwdlayout_id;
+		return "" + cardObj.ld + formedData;
 	}
 
 	public String getLayout_url()
 	{
-		return layout_url;
+		return cardObj.appPackage;
 	}
 
-	public void setLayout_url(String layout_url)
+	class PlatformCardObjectModel
 	{
-		this.layout_url = layout_url;
+
+		public String getAppName()
+		{
+			return appName;
+		}
+
+		public void setAppName(String appName)
+		{
+			this.appName = appName;
+		}
+
+		public String getAppVersion()
+		{
+			return appVersion;
+		}
+
+		public void setAppVersion(String appVersion)
+		{
+			this.appVersion = appVersion;
+		}
+
+		public String getLayoutId()
+		{
+			return layoutId;
+		}
+
+		public void setLayoutId(String layoutId)
+		{
+			this.layoutId = layoutId;
+		}
+
+		public String getAppPackage()
+		{
+			return appPackage;
+		}
+
+		public void setAppPackage(String appPackage)
+		{
+			this.appPackage = appPackage;
+		}
+
+		public String getPush()
+		{
+			return push;
+		}
+
+		public void setPush(String push)
+		{
+			this.push = push;
+		}
+
+		public String getNotifText()
+		{
+			return notifText;
+		}
+
+		public void setNotifText(String notifText)
+		{
+			this.notifText = notifText;
+		}
+
+		public String getHm()
+		{
+			return hm;
+		}
+
+		public void setHm(String hm)
+		{
+			this.hm = hm;
+		}
+
+		public JsonObject getLd()
+		{
+			return ld;
+		}
+
+		public void setLd(JsonObject ld)
+		{
+			this.ld = ld;
+		}
+
+		public JsonObject getHd()
+		{
+			return hd;
+		}
+
+		public void setHd(JsonObject hd)
+		{
+			this.hd = hd;
+		}
+
+		@Expose
+		public String appName;
+
+		@Expose
+		public String appVersion;
+
+		@Expose
+		public String layoutId;
+
+		@Expose
+		public String appPackage;
+
+		@Expose
+		public String push;
+
+		@Expose
+		public String notifText;
+
+		@Expose
+		public String hm;
+
+		@Expose
+		public JsonObject ld;
+
+		@Expose
+		public JsonObject hd;
+
 	}
 
 }
