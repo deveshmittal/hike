@@ -102,7 +102,7 @@ public class PlatformJavaScriptBridge
 		try
 		{
 			Logger.i(tag,"set alarm called "+json +" , mId "+ messageId +" , time "+timeInMills);
-			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), Integer.parseInt(messageId), System.currentTimeMillis() + Long.valueOf(timeInMills));
+			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), Integer.parseInt(messageId),  Long.valueOf(timeInMills));
 		}
 		catch (JSONException e)
 		{
