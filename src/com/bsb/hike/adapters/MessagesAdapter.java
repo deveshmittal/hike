@@ -113,8 +113,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION, UNKNOWN_BLOCK_ADD, PIN_TEXT_SENT, PIN_TEXT_RECEIVE
 	}
 
-	;
-
 	private int viewTypeCount = ViewType.values().length;
 
 	public static class DayHolder
@@ -647,8 +645,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			setSelection(convMessage, holder.selectedStateOverlay);
 		}
 		else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT) {
-
+			//Calling the getView of another adapter to show html cards.
 			v = mWebViewCardRenderer.getView(position, convertView, parent);
+			WebViewCardRenderer.WebViewHolder holder = (WebViewCardRenderer.WebViewHolder) v.getTag();
+			setSelection(convMessage, holder.selectedStateOverlay);
 		}
 		else
 			viewType = ViewType.values()[type];

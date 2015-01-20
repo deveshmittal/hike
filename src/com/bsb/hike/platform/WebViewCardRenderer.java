@@ -45,11 +45,12 @@ public class WebViewCardRenderer extends BaseAdapter
 		this.convMessages = convMessages;
 	}
 
-	private static class WebViewHolder
+	public static class WebViewHolder
 	{
 
 		WebView myBrowser;
 		PlatformJavaScriptBridge platformJavaScriptBridge;
+		public View selectedStateOverlay;
 	}
 
 	private WebViewHolder initializaHolder(WebViewHolder holder, View view, ConvMessage convMessage)
