@@ -892,7 +892,7 @@ public class HikeConstants
 
 	public static final int XXHDPI_ID = 0;
 	
-	public static final int XXXHDPI_ID = 5;
+	public static final int XXXHDPI_ID = 12;
 
 	public static final int LDPI_CACHE = 15;
 
@@ -1896,6 +1896,7 @@ public class HikeConstants
 		public static final String DELETE_MULTIPLE_BOTS = "dbot";
 
 		public static final String GCM_ECHO = "echo";
+
 	}
 
 	public static final class SMSNative
