@@ -400,9 +400,10 @@ public class ConvMessage
 
 		this.mMessage = "";
 		this.mTimestamp = System.currentTimeMillis() / 1000;
-		if (obj.has(HikeConstants.DATA))
+		JSONObject data = obj.optJSONObject(HikeConstants.DATA);
+		if(data!=null)
 		{
-			mTimestamp = obj.getJSONObject(HikeConstants.DATA).optLong(HikeConstants.TIMESTAMP, mTimestamp);
+			mTimestamp = data.optLong(HikeConstants.TIMESTAMP, mTimestamp);
 		}
 		switch (this.participantInfoState)
 		{

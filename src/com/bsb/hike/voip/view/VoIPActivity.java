@@ -352,8 +352,8 @@ public class VoIPActivity extends Activity implements CallActions
 		}
 		
 		if (action.equals(VoIPConstants.PUT_CALL_ON_HOLD)) {
-			showMessage("Your Hike Call has been put on hold.");
 			if (VoIPService.isConnected() && voipService != null && voipService.isAudioRunning()) {
+				showMessage("Your Hike Call has been put on hold.");
 				voipService.setHold(true);
 				showCallStatus(CallStatus.ON_HOLD);
 			} else if (VoIPService.isConnected() && voipService != null)

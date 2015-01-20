@@ -390,7 +390,7 @@ public class VoIPService extends Service {
 
 		int callDuration = getCallDuration();
 		String durationString = (callDuration == 0)? "" : String.format(Locale.getDefault(), " (%02d:%02d)", (callDuration / 60), (callDuration % 60));
-		String title = "Hike call with " + clientPartner.getName();
+		String title = "Hike Call with " + clientPartner.getName();
 		String text = "Call in progress " + durationString;
 
 		if (hold)
