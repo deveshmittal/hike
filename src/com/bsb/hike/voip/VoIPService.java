@@ -1113,6 +1113,7 @@ public class VoIPService extends Service {
 				int audioSource = VoIPUtils.getAudioSource();
 				recorder = new AudioRecord(audioSource, AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizeRecording);
 
+				/*
 				if (android.os.Build.VERSION.SDK_INT >= 16) {
 					// Attach noise suppressor
 					if (NoiseSuppressor.isAvailable()) {
@@ -1147,7 +1148,7 @@ public class VoIPService extends Service {
 						Logger.d(VoIPConstants.TAG, "Automatic gain control not available.");
 					}
 				}
-				
+				*/
 				// Start recording audio from the mic
 				try {
 					recorder.startRecording();
