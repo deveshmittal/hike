@@ -47,7 +47,6 @@ public class CallRatePopup extends SherlockDialogFragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) 
 	{
 		View view = inflater.inflate(R.layout.voip_call_rate_popup, container, false);
-		getDialog().setCanceledOnTouchOutside(true);
 		setCancelable(true);
 
 		view.findViewById(R.id.call_rate_dismiss).setOnClickListener(new OnClickListener() {
