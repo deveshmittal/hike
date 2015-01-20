@@ -290,7 +290,8 @@ public class VoIPUtils {
 		
 		Logger.d(VoIPConstants.TAG, "Phone model: " + model);
 		
-		if (model.contains("Nexus 5"))
+		if (model.contains("Nexus 5") || 
+				model.contains("Nexus 4"))
 			source = MediaRecorder.AudioSource.VOICE_RECOGNITION;
 		
 		return source;
