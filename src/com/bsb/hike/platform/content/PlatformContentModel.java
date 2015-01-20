@@ -107,6 +107,8 @@ public class PlatformContentModel
 		PlatformContentModel originalModel = make(originalData);
 
 		mergeObjects(originalModel.cardObj, originalModel.fwdCardObj);
+		
+		originalModel.fwdCardObj = null;
 
 		forwardData = new Gson().toJson(originalModel);
 
