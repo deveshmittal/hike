@@ -2991,22 +2991,31 @@ public class Utils
 
 	public static void sendLogEvent(JSONObject data)
 	{
+		sendLogEvent(data, null);
+	}
+	
+	public static void sendLogEvent(JSONObject data, String subType){
+
 		JSONObject object = new JSONObject();
 		try
 		{
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
 			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-
+			if(!TextUtils.isEmpty(subType)){
+				JSONObject md = new JSONObject();
+				md.put(HikeConstants.SUB_TYPE, subType);
+				data.put(HikeConstants.METADATA, md);
+			}
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
-
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
 		}
 		catch (JSONException e)
 		{
 			Logger.w("LogEvent", e);
 		}
+	
 	}
 
 	private static void sendSMSSyncLogEvent(boolean syncing)
