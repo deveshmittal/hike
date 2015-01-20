@@ -13,8 +13,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -26,6 +28,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -35,7 +38,6 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
@@ -68,8 +70,6 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
-import com.bsb.hike.filetransfer.FileSavedState;
-import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.media.AttachmentPicker;
 import com.bsb.hike.media.AudioRecordView;
@@ -160,6 +160,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	protected static final int DISABLE_TRANSCRIPT_MODE = 20;
 	
+	protected static final int STICKER_CATEGORY_MAP_UPDATED = 21;
+	
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -212,6 +214,22 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	protected HikeActionMode mActionMode;
 	
+	private class ChatThreadBroadcasts extends BroadcastReceiver
+	{
+		@Override
+		public void onReceive(Context context, Intent intent)
+		{
+			switch (intent.getAction())
+			{
+			case StickerManager.STICKERS_UPDATED:
+			case StickerManager.MORE_STICKERS_DOWNLOADED:
+			case StickerManager.STICKERS_DOWNLOADED:
+				mStickerPicker.updateIconPageIndicator();
+			}
+		}
+	}
+
+	private ChatThreadBroadcasts mBroadCastReceiver;
 
 	protected Handler uiHandler = new Handler()
 	{
@@ -281,6 +299,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case DISABLE_TRANSCRIPT_MODE:
 			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_DISABLED);
+			break;
+		case STICKER_CATEGORY_MAP_UPDATED:
+			mStickerPicker.updateStickerAdapter();
+			mStickerPicker.updateIconPageIndicator();
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
@@ -425,7 +447,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private void initStickerPicker()
 	{
-		mStickerPicker = new StickerPicker(activity.getApplicationContext(), this);
+		mStickerPicker = new StickerPicker(activity, this);
 	}
 
 	private void initEmoticonPicker()
@@ -744,6 +766,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		return false;
 	}
+	
+	private void removeBroadcastReceiver()
+	{
+		if (mBroadCastReceiver != null)
+		{
+			LocalBroadcastManager.getInstance(activity).unregisterReceiver(mBroadCastReceiver);
+		}
+	}
 
 	private void removePubSubListeners()
 	{
@@ -1004,6 +1034,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		setMessagesRead(); //Setting messages as read if there are any unread ones
 		
 		activity.invalidateOptionsMenu(); //Calling the onCreate menu here
+		
+		// Register broadcasts
+		mBroadCastReceiver = new ChatThreadBroadcasts();
+		
+		IntentFilter intentFilter = new IntentFilter(StickerManager.STICKERS_UPDATED);
+		intentFilter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
+		intentFilter.addAction(StickerManager.STICKERS_DOWNLOADED);
+		
+		LocalBroadcastManager.getInstance(activity).registerReceiver(mBroadCastReceiver, intentFilter);
 	}
 
 	/*
@@ -1470,6 +1509,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HikePubSub.BULK_MESSAGE_DELIVERED_READ:
 			onBulkMessageDeliveredRead(object);
 			break;
+		case HikePubSub.STICKER_CATEGORY_MAP_UPDATED:
+			uiHandler.sendEmptyMessage(STICKER_CATEGORY_MAP_UPDATED);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1630,6 +1672,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void onDestroy()
 	{
 		removePubSubListeners();
+		
+		removeBroadcastReceiver();
 		
 		releaseComposeViewWatcher();
 		

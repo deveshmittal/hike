@@ -10,8 +10,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.models.Sticker;
@@ -22,7 +20,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
-public class StickerPicker implements OnClickListener, ShareablePopup, Listener
+public class StickerPicker implements OnClickListener, ShareablePopup
 {
 
 	public interface StickerPickerListener
@@ -41,6 +39,8 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 	private View viewToDisplay;
 
 	private int mLayoutResId = -1;
+	
+	private StickerEmoticonIconPageIndicator mIconPageIndicator;
 
 	private static final String TAG = "StickerPicker";
 
@@ -54,7 +54,6 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 	{
 		this.mContext = context;
 		this.listener = listener;
-		registerPubSub();
 	}
 
 	/**
@@ -166,7 +165,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 
 		stickerAdapter = new StickerAdapter(mContext, listener);
 
-		StickerEmoticonIconPageIndicator mIconPageIndicator = (StickerEmoticonIconPageIndicator) view.findViewById(R.id.sticker_icon_indicator);
+		mIconPageIndicator = (StickerEmoticonIconPageIndicator) view.findViewById(R.id.sticker_icon_indicator);
 
 		View shopIcon = (view.findViewById(R.id.shop_icon));
 
@@ -222,15 +221,15 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 
 	private void shopIconClicked()
 	{
-		if (!HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false)) // The shop icon would be blue unless the user clicks
+		if (!HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false)) // The shop icon would be blue unless the user clicks
 		// on it once
 		{
-			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
+			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
 		}
-		if (HikeSharedPreferenceUtil.getInstance(mContext).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false)) // The shop icon would be blue unless the user clicks
+		if (HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false)) // The shop icon would be blue unless the user clicks
 		// on it once
 		{
-			HikeSharedPreferenceUtil.getInstance(mContext).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
+			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
 		}
 		Intent i = new Intent(mContext, StickerShopActivity.class);
 		/**
@@ -303,50 +302,23 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 		this.listener = mListener;
 	}
 	
-	private void registerPubSub()
+	public void updateStickerAdapter()
 	{
-		HikeMessengerApp.getPubSub().addListeners(this, new String[] {HikePubSub.STICKER_CATEGORY_MAP_UPDATED});
-	}
-	
-	private void updateStickerAdapter()
-	{
-		if (stickerAdapter != null && viewToDisplay != null)
+		if (stickerAdapter != null)
 		{
 			/**
 			 * Calling this on UI Thread. Still not 100% sure about this though.
 			 */
 			stickerAdapter.instantiateStickerList();
-			viewToDisplay.post(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					stickerAdapter.notifyDataSetChanged();
-
-				}
-			});
+			stickerAdapter.notifyDataSetChanged();
 		}
 	}
 
-	/**
-	 * (non-Javadoc)
-	 * @see com.bsb.hike.HikePubSub.Listener#onEventReceived(java.lang.String, java.lang.Object)
-	 */
-	
-	@Override
-	public void onEventReceived(String type, Object object)
+	public void updateIconPageIndicator()
 	{
-		Logger.d(TAG, "Inside onEvent Received of PubSub thread. " + type);
-		
-		switch (type)
+		if (mIconPageIndicator != null)
 		{
-		case HikePubSub.STICKER_CATEGORY_MAP_UPDATED:
-			updateStickerAdapter();
-			break;
-		default:
-			Logger.e(TAG, "PubSub Registered But Not used : " + type);
-			break;
+			mIconPageIndicator.notifyDataSetChanged();
 		}
 	}
 }
