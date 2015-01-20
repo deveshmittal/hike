@@ -1101,10 +1101,12 @@ public class HikeNotification
 		//Reset ticker text since we dont want to tick older messages
 		hikeNotifMsgStack.setTickerText(null);
 		
-		if (!forceNotPlaySound)
+		AudioManager manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+		
+		if (!forceNotPlaySound && !manager.isMusicActive())
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-			String notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.NOTIFICATION_TONE_URI, NOTIF_SOUND_HIKE);
+			String notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
 			if (!shouldNotPlayNotification)
 			{
 				Logger.i("notif", "sound " + notifSound);
@@ -1113,15 +1115,16 @@ public class HikeNotification
 				{
 					if (NOTIF_SOUND_HIKE.equals(notifSound))
 					{
-						SoundUtils.playSoundFromRaw(context, R.raw.hike_jingle_15);
+						mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
 					}
 					else if (NOTIF_SOUND_DEFAULT.equals(notifSound))
 					{
-						SoundUtils.playDefaultNotificationSound(context);
+						mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
 					}
 					else
 					{
-						SoundUtils.playSound(context, Uri.parse(notifSound));
+						notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.NOTIFICATION_TONE_URI, NOTIF_SOUND_HIKE);
+						mBuilder.setSound(Uri.parse(notifSound));
 					}
 				}
 

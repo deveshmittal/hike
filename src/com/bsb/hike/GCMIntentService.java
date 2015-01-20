@@ -6,11 +6,11 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.bsb.hike.models.HikeAlarmManager;
-import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.MqttMessagesManager;
@@ -48,7 +48,7 @@ public class GCMIntentService extends GCMBaseIntentService
 	@Override
 	protected void onMessage(Context context, Intent intent)
 	{
-		Logger.d(getClass().getSimpleName(), "Message received: " + intent.getExtras());
+		Logger.d(getClass().getSimpleName(), "Message received: " + intent);
 
 		prefs = HikeSharedPreferenceUtil.getInstance(context);
 
@@ -69,34 +69,26 @@ public class GCMIntentService extends GCMBaseIntentService
 
 		HikeMessengerApp app = (HikeMessengerApp) context.getApplicationContext();
 		app.connectToService();
-		String message = intent.getStringExtra("msg");
-		if (message != null)
+		String reconnectVal = intent.getStringExtra("pushReconnect");
+		boolean reconnect = false;
+		Logger.d(getClass().getSimpleName(), "Server sent packet pushReconnect : " + reconnectVal);
+		if (RECONNECT_VALUE.equals(reconnectVal))
+			reconnect = true;
+		String jsonString = intent.getStringExtra(HikeConstants.Extras.OFFLINE_PUSH_KEY);
+		if (null != jsonString && jsonString.length() > 0)
 		{
-			HikeHandlerUtil.getInstance().postRunnableWithDelay(new MessageArrivedRunnable(message), 0);
-		}
-		else
-		{
-			String reconnectVal = intent.getStringExtra("pushReconnect");
-			boolean reconnect = false;
-			Logger.d(getClass().getSimpleName(), "Server sent packet pushReconnect : " + reconnectVal);
-			if (RECONNECT_VALUE.equals(reconnectVal))
-				reconnect = true;
-			String jsonString = intent.getStringExtra(HikeConstants.Extras.OFFLINE_PUSH_KEY);
-			if (null != jsonString && jsonString.length() > 0)
+			Logger.d("HikeToOffline", "Gcm push received : json :" + jsonString);
+			/*
+			 * if user has turned off hike offline notification setting then dont show hike offline push
+			 */
+			if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.HIKE_OFFLINE_NOTIFICATION_PREF, true))
 			{
-				Logger.d("HikeToOffline", "Gcm push received : json :" + jsonString);
-				/*
-				 * if user has turned off hike offline notification setting then dont show hike offline push
-				 */
-				if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.HIKE_OFFLINE_NOTIFICATION_PREF, true))
-				{
-					Bundle bundle = new Bundle();
-					bundle.putString(HikeConstants.Extras.OFFLINE_PUSH_KEY, jsonString);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_TO_OFFLINE_PUSH, bundle);
-				}
+				Bundle bundle = new Bundle();
+				bundle.putString(HikeConstants.Extras.OFFLINE_PUSH_KEY, jsonString);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_TO_OFFLINE_PUSH, bundle);
 			}
-			context.sendBroadcast(new Intent(HikeMqttManagerNew.MQTT_CONNECTION_CHECK_ACTION).putExtra("reconnect", reconnect));
 		}
+		context.sendBroadcast(new Intent(HikeMqttManagerNew.MQTT_CONNECTION_CHECK_ACTION).putExtra("reconnect", reconnect));
 	}
 
 	@Override

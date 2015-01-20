@@ -1830,13 +1830,9 @@ public class MqttMessagesManager
 				}
 			}
 		}
-		else if(subType.equals(HikeConstants.XMAS_POPUP))
+		else if(subType.equals(HikeConstants.REPUBLIC_DAY_POPUP))
 		{
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.XMAS_POPUP);
-		}
-		else if(subType.equals(HikeConstants.NEW_YEAR_POPUP))
-		{
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.NEW_YEAR_POPUP);
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.REPUBLIC_DAY_POPUP);
 		}
 		else
 		{
@@ -2700,30 +2696,4 @@ public class MqttMessagesManager
 		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
 		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance(context).getData(key, "").equals(id);
 	}
-	
-	public void saveGCMMessage(JSONObject json)
-	{
-		try
-		{
-			Logger.i("gcmMqttMessage", "message received " + json.toString());
-			String type = json.optString(HikeConstants.TYPE);
-			if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type))
-			{
-				saveMessage(json);
-			}
-			else
-			{
-				Logger.e("gcmMqttMessage", "Unexpected type received via GCM mqtt equivalent messages");
-			}
-		}
-		catch (JSONException je)
-		{
-			je.printStackTrace();
-		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
 }
