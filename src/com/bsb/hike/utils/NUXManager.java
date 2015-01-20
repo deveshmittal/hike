@@ -30,6 +30,7 @@ import com.bsb.hike.models.NuxInviteFriends;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.ui.HomeActivity;
 import static com.bsb.hike.NUXConstants.*;
 
@@ -241,8 +242,8 @@ public class NUXManager
 					
 					if (!(mmDetails.getMin() == 0 || mmDetails.getMax() == 0 || mmDetails.getMin() > mmDetails.getMax()))
 					{
-						if (data.has(NOTIFICATION_PKT))
-							showPush(mmJsonObject.optString(NOTIFICATION_PKT));
+						if (mmJsonObject.has(NOTIFICATION_PKT))
+							showPush(mmJsonObject.getString(NOTIFICATION_PKT));
 						setCurrentState(NUX_NEW);
 					}
 				}
@@ -346,14 +347,12 @@ public class NUXManager
 							JSONObject mmJsonObject = data.optJSONObject(SCREENS);
 							if (mmJsonObject.has(NOTIFICATION_PKT))
 							{
-								if (TextUtils.isEmpty(mmJsonObject.optString(NOTIFICATION_PKT)))
+								if (TextUtils.isEmpty(mmJsonObject.getString(NOTIFICATION_PKT)))
 									showPush(mmJsonObject.getString(NOTIFICATION_PKT));
 							}
 						}
 					}
-					// TODO Discuss with pankaj S
 				
-					mprefs.saveData(REMINDER_RECEIVED, true);
 				}
 			}
 
@@ -399,7 +398,6 @@ public class NUXManager
 		}
 		catch (JSONException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -886,25 +884,22 @@ public class NUXManager
 					case UNKNOWN:
 						break;
 					}
-
 				}
 			}
-
 		}
 		catch (JSONException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	}
 
-	private void notifyUser(String text, String title, boolean shouldNotPlaySound)
+	public void notifyUser(String text, String title, boolean shouldNotPlaySound)
 	{
 		Drawable drawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
 		Intent intent = new Intent(context, HomeActivity.class);
 		HikeNotification.getInstance(context).showBigTextStyleNotification(intent, 0, System.currentTimeMillis(), HikeNotification.HIKE_SUMMARY_NOTIFICATION_ID, title, text,
-				title, "", null, drawable, shouldNotPlaySound, 0);
+				title, "", null, drawable, false, 0);
 	}
 
 	public boolean showNuxScreen()

@@ -163,7 +163,7 @@ public class NUXChatReward
 		}
 		else
 		{
-			pendingChatIconBitmap = BitmapFactory.decodeResource(HikeMessengerApp.getInstance().getResources(), R.drawable.ic_lock_red);
+			pendingChatIconBitmap = BitmapFactory.decodeResource(HikeMessengerApp.getInstance().getResources(), R.drawable.ic_pending_icon);
 		}
 	}
 
