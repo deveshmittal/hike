@@ -93,7 +93,7 @@ public class VoIPService extends Service {
 	private int totalBytesSent = 0, totalBytesReceived = 0, rawVoiceSent = 0;
 	private VoIPEncryptor encryptor = new VoIPEncryptor();
 	private VoIPEncryptor.EncryptionStage encryptionStage;
-	private boolean mute, hold, speaker, vibratorEnabled = true;
+	private boolean mute, hold, speaker, vibratorEnabled = true, remoteHold = false;
 	private boolean audioStarted = false;
 	private int droppedDecodedPackets = 0;
 	private int minBufSizePlayback;
@@ -855,7 +855,9 @@ public class VoIPService extends Service {
 					
 					// Monitor quality of incoming data
 					if ((System.currentTimeMillis() - lastQualityReset > VoIPConstants.QUALITY_WINDOW * 1000) 
-							&& getCallDuration() > VoIPConstants.QUALITY_WINDOW) {
+							&& getCallDuration() > VoIPConstants.QUALITY_WINDOW
+							&& remoteHold == false) {
+						
 						CallQuality newQuality;
 						int idealPacketCount = (AUDIO_SAMPLE_RATE * VoIPConstants.QUALITY_WINDOW) / OpusWrapper.OPUS_FRAME_SIZE; 
 						if (qualityCounter >= idealPacketCount)
@@ -1577,6 +1579,15 @@ public class VoIPService extends Service {
 					default:
 						Logger.w(VoIPConstants.TAG, "Received unexpected packet: " + dataPacket.getType());
 						break;
+						
+					case HOLD_ON:
+						remoteHold = true;
+						break;
+						
+					case HOLD_OFF:
+						remoteHold = false;
+						break;
+						
 					}
 				}
 			}
@@ -1821,15 +1832,15 @@ public class VoIPService extends Service {
 		return audioStarted;
 	}
 	
-	public void setHold(boolean hold) {
+	public void setHold(boolean newHold) {
 		
-		if (this.hold == hold)
+		if (this.hold == newHold)
 			return;
 		
-		this.hold = hold;
-		Logger.d(VoIPConstants.TAG, "Changing hold to: " + hold);
+		this.hold = newHold;
+		Logger.d(VoIPConstants.TAG, "Changing hold to: " + newHold);
 		
-		if (hold == true) {
+		if (newHold == true) {
 			if (recordingThread != null)
 				recordingThread.interrupt();
 			if (playbackThread != null)
@@ -1841,6 +1852,21 @@ public class VoIPService extends Service {
 		}
 		
 		sendHandlerMessage(VoIPActivity.MSG_UPDATE_HOLD_BUTTON);
+		
+		// Send hold status to partner
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				VoIPDataPacket dp = null;
+				if (hold == true)
+					dp = new VoIPDataPacket(PacketType.HOLD_ON);
+				else
+					dp = new VoIPDataPacket(PacketType.HOLD_OFF);
+				sendPacket(dp, true);
+			}
+		}).start();
+			
 	}	
 
 	public boolean getHold()
