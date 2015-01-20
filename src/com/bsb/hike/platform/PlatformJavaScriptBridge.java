@@ -35,10 +35,8 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void animationComplete(String html, String hhh){
-
-		receiveInnerHTML(html, "");
-
+	public void animationComplete(String html, String id){
+		Logger.i(tag, "on animation complete "+mWebView.getTag());
 	}
 
 	@JavascriptInterface
