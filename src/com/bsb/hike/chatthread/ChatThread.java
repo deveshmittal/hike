@@ -35,6 +35,7 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
@@ -210,6 +211,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected View mActionBarView;
 	
 	protected HikeActionMode mActionMode;
+	
 
 	protected Handler uiHandler = new Handler()
 	{
@@ -1695,6 +1697,48 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mComposeViewWatcher.setBtnEnabled();
 			mComposeView.requestFocus();
 		}
+		
+	}
+	
+	/**
+	 * This method will be called either user is returning after pressing home or screen lock ,
+	 * 
+	 * if user came after pressing home, then soft keyboard respects softinputstate , i.e : if keyboard was visible and softinputmode is set as visible , then soft keyboard will
+	 * become visible
+	 * 
+	 * But if it is called after screen lock , then soft input keyboard maintains its state , it does not change, if it was visible earlier, it will be visible this time as well ,
+	 * so we simply return as it does not effect our sticker pallete -- gauravKhanna
+	 */
+
+	public void onRestart()
+	{
+		/*if (wasScreenOffEvent)
+		{
+			wasScreenOffEvent = false;
+			return;
+		}*/
+		
+		Logger.d(TAG, "ChatThread : onRestart called");
+		/**
+		 * Something related to Stickers : 
+		 * 
+		 * 	int softInput = getWindow().getAttributes().softInputMode;
+		if (softInput == WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE || softInput == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+		{
+			// keyboard will come for sure
+			if (isEmoticonPalleteVisible())
+			{
+				resizeMainheight(0, false);
+			}
+			return;
+		}
+		// mean last time it was above keyboard, so no guarantee of keyboard, simply discard it
+		if (isEmoticonPalleteVisible() && findViewById(R.id.chat_layout).getPaddingBottom() == 0)
+		{
+			dismissPopupWindow();
+
+		}
+		 */
 		
 	}
 	

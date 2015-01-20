@@ -129,6 +129,13 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 		super.onResume();
 	}
 	
+	@Override
+	protected void onRestart()
+	{
+		chatThread.onRestart();
+		super.onRestart();
+	}
+	
 	public String getContactNumber()
 	{
 		return chatThread.getContactNumber();
