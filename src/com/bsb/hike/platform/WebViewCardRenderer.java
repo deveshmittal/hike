@@ -56,11 +56,22 @@ public class WebViewCardRenderer extends BaseAdapter
 	private WebViewHolder initializaHolder(WebViewHolder holder, View view, ConvMessage convMessage)
 	{
 		holder.myBrowser = (WebView) view.findViewById(R.id.webcontent);
-		holder.myBrowser.setVerticalScrollBarEnabled(false);
-		holder.myBrowser.setHorizontalScrollBarEnabled(false);
 		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, this);
+		holder.selectedStateOverlay = view.findViewById(R.id.selected_state_overlay);
+		webViewStates(holder, convMessage);
 
 		return holder;
+	}
+
+	private void webViewStates(WebViewHolder holder, ConvMessage convMessage)
+	{
+		holder.myBrowser.setVerticalScrollBarEnabled(false);
+		holder.myBrowser.setHorizontalScrollBarEnabled(false);
+		holder.myBrowser.addJavascriptInterface(holder.platformJavaScriptBridge, HikePlatformConstants.PLATFORM_BRIDGE_NAME);
+		holder.platformJavaScriptBridge.allowUniversalAccess();
+		holder.platformJavaScriptBridge.allowDebugging();
+		holder.myBrowser.getSettings().setJavaScriptEnabled(true);
+
 	}
 
 	@Override
@@ -102,32 +113,34 @@ public class WebViewCardRenderer extends BaseAdapter
 
 		final WebView web = viewHolder.myBrowser;
 
-		final WebViewHolder finalViewHolder = viewHolder;
 		Object webtag = web.getTag();
-		if(webtag ==null || (long)webtag != getItemId(position)){
-			Logger.i(tag, "either tag is null or reused "+webtag);
-		PlatformContent.getContent(convMessage.platformWebMessageMetadata.JSONtoString(), new PlatformContentListener<PlatformContentModel>()
+		if (webtag == null || (Long) webtag != getItemId(position))
 		{
-			public void onComplete(PlatformContentModel content)
+			Logger.i(tag, "either tag is null or reused " + webtag);
+			PlatformContent.getContent(convMessage.platformWebMessageMetadata.JSONtoString(), new PlatformContentListener<PlatformContentModel>()
 			{
-				web.setTag(getItemId(position));
-				fillContent(web, convMessage, finalViewHolder, content);
-			}
-		});
-		}else{
+				public void onComplete(PlatformContentModel content)
+				{
+					web.setTag(getItemId(position));
+					fillContent(web, content, convMessage);
+				}
+			});
+		}
+		else
+		{
 			Logger.i(tag, "either tag is not null ");
 		}
+
 		return view;
 
 	}
-	private void fillContent(WebView web,ConvMessage convMessage,WebViewHolder finalViewHolder,PlatformContentModel content){
-		web.addJavascriptInterface(finalViewHolder.platformJavaScriptBridge, HikePlatformConstants.PLATFORM_BRIDGE_NAME);
-		finalViewHolder.platformJavaScriptBridge.allowUniversalAccess();
-		finalViewHolder.platformJavaScriptBridge.allowDebugging();
-		web.getSettings().setJavaScriptEnabled(true);
+
+	private void fillContent(WebView web, PlatformContentModel content, ConvMessage convMessage)
+	{
 		web.setWebViewClient(new CustomWebViewClient(convMessage));
 		web.loadDataWithBaseURL("", content.getFormedData(), "text/html", "UTF-8", "");
 	}
+
 	private class CustomWebViewClient extends PlatformWebClient
 	{
 
@@ -146,7 +159,8 @@ public class WebViewCardRenderer extends BaseAdapter
 			view.setVisibility(View.VISIBLE);
 			Log.d(tag, "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
 			Logger.d(tag, "conv message passed to webview " + convMessage);
-			view.loadUrl("javascript:setData(" + "'" + convMessage.getMsgID() + "','" + convMessage.getMsisdn() + "','" + convMessage.platformWebMessageMetadata.getHelperData()
+			Logger.d(tag, "Platform message metadata is" + convMessage.platformWebMessageMetadata.JSONtoString());
+			view.loadUrl("javascript:setData(" + "'" + convMessage.getMsgID() + "','" + convMessage.getMsisdn() + "','" + convMessage.platformWebMessageMetadata.getHelperData().toString()
 					+ "')");
 			String alarmData = convMessage.platformWebMessageMetadata.getAlarmData();
 			Logger.d(tag, "alarm data to html is " + alarmData);
