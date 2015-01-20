@@ -383,7 +383,7 @@ public class VoIPService extends Service {
 					
 				}
 			}
-		}).start();
+		}, "NOTIFICATION_THREAD").start();
 	}
 
 	private void showNotification() {
@@ -547,7 +547,11 @@ public class VoIPService extends Service {
 	
 	private void stopFromSoundPool(int streamID) {
 		if (soundpool != null)
+		{
 			soundpool.stop(streamID);
+			soundpool.release();
+			soundpool = null;
+		}
 	}
 	
 	public void setMessenger(Messenger messenger) {
@@ -636,7 +640,11 @@ public class VoIPService extends Service {
 				"\nDropped decoded packets: " + droppedDecodedPackets +
 				"\nReconnect attempts: " + reconnectAttempts +
 				"\nCall duration: " + getCallDuration());
-		
+		//
+		if(socket != null)
+		{
+			socket.close();
+		}
 		// Terminate threads
 		if (partnerTimeoutThread != null)
 			partnerTimeoutThread.interrupt();
@@ -666,6 +674,7 @@ public class VoIPService extends Service {
 		stopFromSoundPool(ringtoneStreamID);
 		setSpeaker(true);
 		playFromSoundPool(SOUND_DECLINE, false);
+		stopFromSoundPool(SOUND_DECLINE);
 		releaseAudioManager();
 		
 		if (opusWrapper != null)
@@ -674,8 +683,12 @@ public class VoIPService extends Service {
 		keepRunning = false;
 
 		setCallid(0);
-
-		chronometer = null;
+		
+		if(chronometer != null)
+		{
+			chronometer.stop();
+			chronometer = null;
+		}
 		connected = false;
 		stopSelf();
 	}
@@ -689,7 +702,7 @@ public class VoIPService extends Service {
 				sendPacket(dp, true);
 				stop();
 			}
-		}).start();
+		},"HANG_UP_THREAD").start();
 		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration(), -1);
 	}
 	
@@ -702,7 +715,7 @@ public class VoIPService extends Service {
 				sendPacket(dp, true);
 				stop();
 			}
-		}).start();
+		},"REJECT_INCOMING_CALL_THREAD").start();
 		
 		// sendHandlerMessage(VoIPActivity.MSG_INCOMING_CALL_DECLINED);
 		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1);
@@ -777,7 +790,7 @@ public class VoIPService extends Service {
 					}
 				}
 			}
-		});
+		}, "RECONNECT_THREAD");
 		reconnectingBeepsThread.start();
 	}
 	
@@ -828,7 +841,7 @@ public class VoIPService extends Service {
 						chronoBackup++;
 				}
 			}
-		}).start();
+		}, "SEND_HEART_BEAT_THREAD").start();
 		
 		// Listening for heartbeat, and housekeeping
 		new Thread(new Runnable() {
@@ -905,7 +918,7 @@ public class VoIPService extends Service {
 					
 				}
 			}
-		}).start();
+		}, "LISTEN_HEART_BEAT_THREAD").start();
 		
 	}
 	
@@ -1019,7 +1032,7 @@ public class VoIPService extends Service {
 					}
 				}
 			}
-		});
+		}, "CODE_DECOMPRESSION_THREAD");
 		
 		codecDecompressionThread.start();
 	}
@@ -1066,7 +1079,7 @@ public class VoIPService extends Service {
 					}
 				}
 			}
-		});
+		}, "CODE_COMPRESSION_THREAD");
 		
 		codecCompressionThread.start();
 	}
@@ -1080,7 +1093,7 @@ public class VoIPService extends Service {
 				VoIPDataPacket dp = new VoIPDataPacket(PacketType.START_VOICE);
 				sendPacket(dp, true);
 			}
-		}).start();
+		}, "ACCEPT_INCOMING_CALL_THREAD").start();
 
 		startRecordingAndPlayback();
 	}
@@ -1113,7 +1126,7 @@ public class VoIPService extends Service {
 				dp.write(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(localBitrate).array());
 				sendPacket(dp, true);
 			}
-		}).start();
+		}, "SEND_CURRENT_BITRATE").start();
 	}
 	
 	private void startRecording() {
@@ -1222,7 +1235,7 @@ public class VoIPService extends Service {
 				
 				recorder.release();
 			}
-		});
+		}, "RECORDING_THREAD");
 		
 		recordingThread.start();
 	}
@@ -1315,7 +1328,7 @@ public class VoIPService extends Service {
 					audioTrack = null;
 				}
 			}
-		});
+		}, "PLAY_BACK_THREAD");
 		
 		playbackThread.start();
 	}
@@ -1371,7 +1384,7 @@ public class VoIPService extends Service {
 					}
 				}
 			}
-		});
+		}, "VOIP_SEND_THREAD");
 		
 		sendingThread.start();
 	}
@@ -1591,7 +1604,7 @@ public class VoIPService extends Service {
 					}
 				}
 			}
-		});
+		}, "VOIP_RECEIVE_THREAD");
 		
 		receivingThread.start();
 	}
@@ -1787,7 +1800,7 @@ public class VoIPService extends Service {
 					Logger.d(VoIPConstants.TAG, "Encryption ready.");
 				}
 			}
-		}).start();
+		}, "EXCHANGE_CRYPTO_THREAD").start();
 	}
 
 	public int adjustBitrate(int delta) {
@@ -2023,7 +2036,7 @@ public class VoIPService extends Service {
 					sendHandlerMessage(VoIPActivity.MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE);
 				}
 			}
-		});
+		}, "ICE_THREAD");
 		
 		iceThread.start();
 		
@@ -2116,7 +2129,7 @@ public class VoIPService extends Service {
 				}
 				stop();					
 			}
-		});
+		}, "PARTNER_TIMEOUT_THREAD");
 		
 		partnerTimeoutThread.start();
 	}
@@ -2180,7 +2193,7 @@ public class VoIPService extends Service {
 					}
 				}
 			}
-		});
+		}, "SENDER_THREAD");
 		
 		startReceiving();
 		senderThread.start();
@@ -2284,7 +2297,7 @@ public class VoIPService extends Service {
 					// Do nothing, all is good
 				}
 			}
-		});
+		}, "PARTNER_TIMEOUT_THREAD");
 		
 		partnerTimeoutThread.start();
 	}
