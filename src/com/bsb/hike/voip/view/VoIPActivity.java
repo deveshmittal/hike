@@ -202,6 +202,7 @@ public class VoIPActivity extends Activity implements CallActions
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			isBound = false;
+			voipService = null;
 			Logger.d(VoIPConstants.TAG, "VoIPService disconnected.");
 		}
 
@@ -724,7 +725,7 @@ public class VoIPActivity extends Activity implements CallActions
 		String mappedId = clientPartner.getPhoneNumber() + ProfileActivity.PROFILE_PIC_SUFFIX;
 		int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
 
-		VoipProfilePicImageLoader profileImageLoader = new VoipProfilePicImageLoader(this, mBigImageSize);
+		VoipProfilePicImageLoader profileImageLoader = new VoipProfilePicImageLoader(getApplicationContext(), mBigImageSize);
 	    profileImageLoader.setDefaultAvatarIfNoCustomIcon(true);
 	    profileImageLoader.setDefaultAvatarScaleType(ScaleType.CENTER);
 	    profileImageLoader.setDefaultAvatarBounds(LayoutParams.MATCH_PARENT, (int)(250*Utils.densityMultiplier));

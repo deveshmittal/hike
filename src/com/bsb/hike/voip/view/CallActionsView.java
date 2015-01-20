@@ -75,6 +75,7 @@ public class CallActionsView extends RelativeLayout
     	if(glowPadView!=null)
     	{
     		glowPadView.stopPing();
+    		glowPadView = null;
     	}
     }
 
