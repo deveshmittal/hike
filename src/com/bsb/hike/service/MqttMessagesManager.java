@@ -1,6 +1,5 @@
 package com.bsb.hike.service;
 
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -50,12 +49,10 @@ import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.FestivePopup;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -2293,7 +2290,7 @@ public class MqttMessagesManager
 
 	private void deleteBot(String msisdn)
 	{
-		Utils.validateBotMsisdn(msisdn);
+		msisdn = Utils.validateBotMsisdn(msisdn);
 		List<String> msisdns = new ArrayList<String>(1);
 		msisdns.add(msisdn);
 		convDb.deleteConversation(msisdns);
@@ -2308,19 +2305,15 @@ public class MqttMessagesManager
 		msisdn = Utils.validateBotMsisdn(msisdn);
 		String name = jsonObj.optString(HikeConstants.NAME);
 		String thumbnailString = jsonObj.optString(HikeConstants.BOT_THUMBNAIL);
-		ContactManager.getInstance().setIcon(msisdn, Base64.decode(thumbnailString, Base64.DEFAULT), false);
-		HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+		if (!TextUtils.isEmpty(thumbnailString))
+		{
+			ContactManager.getInstance().setIcon(msisdn, Base64.decode(thumbnailString, Base64.DEFAULT), false);
+			HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+		}
+
 		convDb.setChatBackground(msisdn, jsonObj.optString(HikeConstants.BOT_CHAT_THEME), System.currentTimeMillis()/1000);
-		JSONObject obj = new JSONObject();
-		try
-		{
-			obj.put(HikeConstants.NAME, name);
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
+
 		convDb.addBot(msisdn, name, null);
 
 		if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
