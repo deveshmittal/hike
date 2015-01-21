@@ -325,7 +325,9 @@ public class VoIPService extends Service {
 			}
 
 			// Edge case: call button was hit for someone we are already speaking with. 
-			if (getCallId() > 0 && clientPartner.getPhoneNumber().equals(intent.getStringExtra("msisdn"))) {
+			if (getCallId() > 0 
+					&& clientPartner.getPhoneNumber().equals(intent.getStringExtra("msisdn"))
+					&& isAudioRunning() == true) {
 				// Show activity
 				Logger.d(VoIPConstants.TAG, "Restoring activity..");
 				Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
@@ -695,6 +697,8 @@ public class VoIPService extends Service {
 			chronometer = null;
 		}
 		connected = false;
+		socketInfoReceived = false;
+		audioStarted = false;
 
 		releaseAudioManager();
 		stopSelf();
