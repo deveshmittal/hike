@@ -9,27 +9,20 @@ import org.json.JSONObject;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.content.LocalBroadcastManager;
-import android.telephony.TelephonyManager;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -39,19 +32,13 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.models.HikeAlarmManager;
+import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.HikeSDKRequestHandler;
-import com.bsb.hike.service.HikeMqttManagerNew.IncomingHandler;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
-import com.bsb.hike.notifications.EarPhonePluginReceiver;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
-import com.bsb.hike.ui.HikeAuthActivity;
-import com.bsb.hike.ui.SignupActivity;
-import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -177,8 +164,6 @@ public class HikeService extends Service
 
 	private boolean isInitialized;
 
-	private EarPhonePluginReceiver earPhonePluginReceiver;
-	
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -298,9 +283,6 @@ public class HikeService extends Service
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
 
-		earPhonePluginReceiver = new EarPhonePluginReceiver();
-		IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
-	    registerReceiver(earPhonePluginReceiver, filter);
 		setInitialized(true);
 	}
 
@@ -416,8 +398,6 @@ public class HikeService extends Service
 			postSignupProfilePic = null;
 		}
 		
-		unregisterReceiver(earPhonePluginReceiver);
-
 	}
 
 	/************************************************************************/
