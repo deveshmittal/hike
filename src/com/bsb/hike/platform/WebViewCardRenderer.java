@@ -47,7 +47,7 @@ public class WebViewCardRenderer extends BaseAdapter
 
 	public static class WebViewHolder
 	{
-
+		long id;
 		WebView myBrowser;
 		PlatformJavaScriptBridge platformJavaScriptBridge;
 		public View selectedStateOverlay;
@@ -96,32 +96,29 @@ public class WebViewCardRenderer extends BaseAdapter
 	public View getView(final int position, View convertView, ViewGroup parent)
 	{
 		Logger.i(tag, "get view with called with position " + position);
-		WebViewHolder viewHolder = new WebViewHolder();
+
 		View view = convertView;
 		final ConvMessage convMessage = (ConvMessage) getItem(position);
 		LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (view == null)
 		{
+			WebViewHolder viewHolder = new WebViewHolder();
 			view = inflater.inflate(R.layout.html_item, parent, false);
 			initializaHolder(viewHolder, view, convMessage);
 			view.setTag(viewHolder);
 		}
-		else
-		{
-			viewHolder = (WebViewHolder) view.getTag();
-		}
+		final WebViewHolder viewHolder = (WebViewHolder) view.getTag();
 
 		final WebView web = viewHolder.myBrowser;
 
-		Object webtag = web.getTag();
-		if (webtag == null || (Long) webtag != getItemId(position))
+		if (viewHolder.id != getItemId(position))
 		{
-			Logger.i(tag, "either tag is null or reused " + webtag);
+			Logger.i(tag, "either tag is null or reused ");
 			PlatformContent.getContent(convMessage.platformWebMessageMetadata.JSONtoString(), new PlatformContentListener<PlatformContentModel>()
 			{
 				public void onComplete(PlatformContentModel content)
 				{
-					web.setTag(getItemId(position));
+					viewHolder.id = getItemId(position);
 					fillContent(web, content, convMessage);
 				}
 			});
