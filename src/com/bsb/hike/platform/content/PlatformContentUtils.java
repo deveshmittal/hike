@@ -32,6 +32,11 @@ public class PlatformContentUtils
 		File tempFile = null;
 		try
 		{
+			//Hack to increase size of file name. Min 3 is required.
+			if (prefix.length() <= 2)
+			{
+				prefix = prefix.concat("00");
+			}
 			tempFile = File.createTempFile(prefix, suffix);
 		}
 		catch (IOException e)
