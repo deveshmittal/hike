@@ -14,6 +14,8 @@ public class IncomingCallListener extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		
 		String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
+		// Android bug
+		// EXTRA_STATE_RINGING can be called twice sometimes
 		if (TelephonyManager.EXTRA_STATE_RINGING.equals(state)) {
 			// We have an incoming call
 			if (VoIPService.isConnected()) {

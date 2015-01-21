@@ -197,7 +197,7 @@ public class VoIPService extends Service {
 		
 		int returnInt = super.onStartCommand(intent, flags, startId);
 		
-//		Logger.d(VoIPConstants.TAG, "VoIPService onStartCommand()");
+		Logger.d(VoIPConstants.TAG, "VoIPService onStartCommand()");
 
 		if (intent == null)
 			return returnInt;
@@ -256,9 +256,12 @@ public class VoIPService extends Service {
 			clientPartner.setInitiator(intent.getBooleanExtra("initiator", true));
 			clientSelf.setInitiator(!clientPartner.isInitiator());
 
-//			Logger.d(VoIPConstants.TAG, "Setting our relay to: " + intent.getStringExtra("relay"));
+			Logger.d(VoIPConstants.TAG, "Setting our relay to: " + 
+					intent.getStringExtra("relay") + ":" + intent.getIntExtra("relayport", VoIPConstants.ICEServerPort));
 			clientSelf.setRelayAddress(intent.getStringExtra("relay"));
 			clientPartner.setRelayAddress(intent.getStringExtra("relay"));
+			clientSelf.setRelayPort(intent.getIntExtra("relayport", VoIPConstants.ICEServerPort));
+			clientPartner.setRelayPort(intent.getIntExtra("relayport", VoIPConstants.ICEServerPort));
 
 			// Error case: we are receiving a delayed v0 message for a call we 
 			// initiated earlier. 
@@ -314,18 +317,13 @@ public class VoIPService extends Service {
 			// Error case: we are in a cellular call
 			if (VoIPUtils.isUserInCall(getApplicationContext())) {
 				Log.w(VoIPConstants.TAG, "We are already in a cellular call.");
-				try {
-					VoIPUtils.sendMessage(intent.getStringExtra("msisdn"), 
-							HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
-							HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
 				return returnInt;
 			}
 
 			// Edge case: call button was hit for someone we are already speaking with. 
-			if (getCallId() > 0 && clientPartner.getPhoneNumber().equals(intent.getStringExtra("msisdn"))) {
+			if (getCallId() > 0 
+					&& clientPartner.getPhoneNumber().equals(intent.getStringExtra("msisdn"))
+					&& isAudioRunning() == true) {
 				// Show activity
 				Logger.d(VoIPConstants.TAG, "Restoring activity..");
 				Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
@@ -459,7 +457,7 @@ public class VoIPService extends Service {
 						setHold(true);
 					break;
 				case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-					Logger.w(VoIPConstants.TAG, "AUDIOFOCUS_LOSS_TRANSIENT");
+					Logger.d(VoIPConstants.TAG, "AUDIOFOCUS_LOSS_TRANSIENT");
 					if (getCallDuration() > 0)
 						setHold(true);
 					break;
@@ -621,11 +619,19 @@ public class VoIPService extends Service {
 		}
 	}
 	
+
+	/**
+	 * Terminate the service. 
+	 */
 	public void stop() {
-		if (keepRunning == false) {
-			// Logger.w(VoIPConstants.TAG, "Trying to stop a stopped service?");
-			sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY);
-			return;
+
+		synchronized (this) {
+			if (keepRunning == false) {
+				// Logger.w(VoIPConstants.TAG, "Trying to stop a stopped service?");
+				sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY);
+				return;
+			}
+			keepRunning = false;
 		}
 		
 		Logger.d(VoIPConstants.TAG, "VoIPService stop()");
@@ -679,8 +685,6 @@ public class VoIPService extends Service {
 		if (opusWrapper != null)
 			opusWrapper.destroy();
 
-		keepRunning = false;
-
 		setCallid(0);
 		
 		if(chronometer != null)
@@ -689,6 +693,8 @@ public class VoIPService extends Service {
 			chronometer = null;
 		}
 		connected = false;
+		socketInfoReceived = false;
+		audioStarted = false;
 
 		releaseAudioManager();
 		stopSelf();
@@ -883,10 +889,13 @@ public class VoIPService extends Service {
 						else 
 							newQuality = CallQuality.WEAK;
 
-						currentCallQuality = newQuality;
+						if (currentCallQuality != newQuality) {
+							currentCallQuality = newQuality;
+							sendHandlerMessage(VoIPActivity.MSG_UPDATE_QUALITY);
+						}
+
 						qualityCounter = 0;
 						lastQualityReset = System.currentTimeMillis();
-						sendHandlerMessage(VoIPActivity.MSG_UPDATE_QUALITY);
 					}
 					
 					// Drop packets if getting left behind
@@ -1655,7 +1664,7 @@ public class VoIPService extends Service {
 		try {
 			DatagramPacket packet = null;
 			if (dp.getType() == PacketType.RELAY_INIT)
-				packet = new DatagramPacket(packetData, packetData.length, InetAddress.getByName(clientSelf.getRelayAddress()), VoIPConstants.ICEServerPort);
+				packet = new DatagramPacket(packetData, packetData.length, InetAddress.getByName(clientSelf.getRelayAddress()), clientSelf.getRelayPort());
 			else
 				packet = new DatagramPacket(packetData, packetData.length, clientPartner.getCachedInetAddress(), clientPartner.getPreferredPort());
 				
@@ -1909,7 +1918,7 @@ public class VoIPService extends Service {
 
 	private void playIncomingCallRingtone() {
 		// Ringer
-		Log.w(VoIPConstants.TAG, "Playing ringtone.");
+		Log.d(VoIPConstants.TAG, "Playing ringtone.");
 		Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 		if (ringtone == null)
 			ringtone = RingtoneManager.getRingtone(getApplicationContext(), notification);
@@ -1971,6 +1980,7 @@ public class VoIPService extends Service {
 					 */
 					if (clientSelf.isInitiator()) {
 						clientSelf.setRelayAddress(host.getHostAddress());
+						clientSelf.setRelayPort(VoIPUtils.getRelayPort(getApplicationContext()));
 					}
 
 					VoIPDataPacket dp = new VoIPDataPacket(PacketType.RELAY_INIT);
@@ -2082,6 +2092,7 @@ public class VoIPService extends Service {
 			socketData.put("externalIP", clientSelf.getExternalIPAddress());
 			socketData.put("externalPort", clientSelf.getExternalPort());
 			socketData.put("relay", clientSelf.getRelayAddress());
+			socketData.put("relayport", clientSelf.getRelayPort());
 			socketData.put("callId", getCallId());
 			socketData.put("initiator", clientSelf.isInitiator());
 			socketData.put("reconnecting", reconnecting);
@@ -2148,6 +2159,11 @@ public class VoIPService extends Service {
 		if (!reconnecting && (establishingConnection || connected)) {
 			Logger.w(VoIPConstants.TAG, "Already trying to establish connection.");
 //			sendSocketInfoToPartner();
+			return;
+		}
+		
+		if (socket == null) {
+			Logger.w(VoIPConstants.TAG, "establishConnection() called with null socket.");
 			return;
 		}
 		
@@ -2326,6 +2342,7 @@ public class VoIPService extends Service {
 		startReceiving();
 		
 		clientPartner.setRelayAddress(clientSelf.getRelayAddress());
+		clientPartner.setRelayPort(clientSelf.getRelayPort());
 		clientPartner.setPreferredConnectionMethod(ConnectionMethods.RELAY);
 
 		networkQualityPacketsReceived = 0;
