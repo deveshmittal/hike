@@ -254,10 +254,8 @@ public class VoIPActivity extends Activity implements CallActions
 	protected void onPause() {
 		super.onPause();
 		if (sensorManager != null && VoIPService.isConnected() != true) {
-			if (proximityWakeLock != null && proximityWakeLock.isHeld()) {
-				Logger.d(VoIPConstants.TAG, "Screen on.");
+			if (proximityWakeLock != null) 
 				proximityWakeLock.release();
-			}
 			sensorManager.unregisterListener(proximitySensorEventListener);
 		}
 		
@@ -287,10 +285,8 @@ public class VoIPActivity extends Activity implements CallActions
 
 		// Proximity sensor
 		if (sensorManager != null) {
-			if (proximityWakeLock != null && proximityWakeLock.isHeld()) {
-				Logger.d(VoIPConstants.TAG, "Screen on.");
+			if (proximityWakeLock != null) 
 				proximityWakeLock.release();
-			}
 			sensorManager.unregisterListener(proximitySensorEventListener);
 		}
 		
