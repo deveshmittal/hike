@@ -149,6 +149,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 
 	private static final int STAGING_BROKER_PORT_NUMBER_SSL = 8883;
 
+	private static final int DEV_STAGING_BROKER_PORT_NUMBER = 1883;
+
+	private static final int DEV_STAGING_BROKER_PORT_NUMBER_SSL = 8883;
+
 	private static final int FALLBACK_BROKER_PORT_NUMBER = 5222;
 	
 	// this represents number of msgs published whose callback is not yet arrived
@@ -414,11 +418,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 			return;
 		}
 
-		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION, true);
+		int whichServer = settings.getInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, AccountUtils._PRODUCTION_HOST);
+		
+		brokerHostName = whichServer == AccountUtils._PRODUCTION_HOST ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
 
-		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
-
-		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
+		brokerPortNumber = whichServer == AccountUtils._PRODUCTION_HOST ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
 				: STAGING_BROKER_PORT_NUMBER);
 
 		Logger.d(TAG, "Broker host name: " + brokerHostName);
@@ -770,14 +774,17 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 
 	private String getServerUri(boolean ssl)
 	{
-		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION, true);
+		int whichServer = settings.getInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, AccountUtils._PRODUCTION_HOST);
 
-		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
+		brokerHostName = (whichServer == AccountUtils._PRODUCTION_HOST ? PRODUCTION_BROKER_HOST_NAME : (whichServer == AccountUtils._DEV_STAGING_HOST)? AccountUtils.DEV_STAGING_HOST:STAGING_BROKER_HOST_NAME);
 
-		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
+		brokerPortNumber = whichServer == AccountUtils._PRODUCTION_HOST ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
 				: STAGING_BROKER_PORT_NUMBER);
+		if(whichServer == AccountUtils._DEV_STAGING_HOST){
+			brokerPortNumber = ssl ? DEV_STAGING_BROKER_PORT_NUMBER_SSL: DEV_STAGING_BROKER_PORT_NUMBER;
+		}
 
-		if (!production)
+		if (!(whichServer == AccountUtils._PRODUCTION_HOST))
 		{
 			return brokerHostName + ":" + brokerPortNumber;
 		}

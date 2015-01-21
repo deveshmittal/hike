@@ -1269,4 +1269,27 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="merry_christmas">Merry Christmas</string>
     <string name="send_sticker_joy">Wish your friends with this sticker</string>
     <string name="happy_new_year">Happy New Year</string>
+    <string name="nux_invitefrnds_skip">SKIP</string>
+    <string name="nux_invitefrnds_reward">Earn a free talktime worth Rs 100!</string>
+    <string name="nux_invitefrnds_objective">Start a chat with your friends.Unlock your talktime reward when any 3 of them message you back</string>
+    <string name="nux_invitefrnds_buttext">SELECT FRIENDS TO CHAT</string>
+    <string name="tap_to_claim">TAP TO CLAIM</string>
+    <string name="reward_card_success">Congrats! You\'ve unlocked %d free SMS!</string>
+    <string name="reward_card_objective">Chat with %1$d friends and get %2$d free SMS.</string>
+    <string name="details_text">VIEW DETAILS</string>
+    <string name="status_text">%1$d/%2$d</string>
+    <string name="incentive_amount">50</string>
+    <string name="chat_waiting_text">Waiting to respond!</string>
+    <string name="nux_remind">Remind</string>
+    <string name="nux_invite_more">Invite More</string>
+    <string name="select_friends">SELECT FRIENDS</string>
+    <string name="custom_message">I love the stickers on hike! Chat with me on hike now!</string>
+    <string name="custome_message_send_button">SEND</string>
+    <string name="custom_message_hint">Tap to enter your custom message. It\'ll be sent to the friends you select!</string>
+    <string name="nux_select_friends_1">Who\'re your best friends</string>
+    <string name="nux_select_friends_2">Pick %d more!</string>
+    <string name="nux_select_friends_3">Good to go!</string>
+    <string name="nux_select_friends_reconame">RECOMMENDED</string>
+    <string name="nux_select_friends_nextbut">NEXT</string>
+
 </resources>

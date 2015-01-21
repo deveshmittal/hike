@@ -1348,6 +1348,8 @@ public class HikeConstants
 		public static final String SDK_CONNECTION_TYPE = "connection_type";
 
 		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
+		
+		public static final String NUX_INCENTIVE_MODE = "showNuxIncentiveMode";
 	}
 
 	public static final class LogEvent
@@ -1886,6 +1888,8 @@ public class HikeConstants
 		public static final String MULTIPLE_FORWARD = "mm";
 		
 		public static final String TIP = "tip";
+		
+		public static final String NUX = "nux";
 
 	}
 

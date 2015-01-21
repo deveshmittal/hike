@@ -148,6 +148,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String TOTAL_CREDITS_PER_MONTH = HikeConstants.TOTAL_CREDITS_PER_MONTH;
 
 	public static final String PRODUCTION = "production";
+	
+	public static final String PRODUCTION_HOST_TOGGLE = "productionHostToggle";
 
 	public static final String COUNTRY_CODE = "countryCode";
 
@@ -463,6 +465,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	
 	private StickerManager sm;
 	
+	private static HikeMessengerApp _instance;
+	
 	RegisterToGCMTrigger mmRegisterToGCMTrigger = null;
 
 	SendGCMIdToServerTrigger mmGcmIdToServerTrigger = null;
@@ -634,6 +638,8 @@ public void onTrimMemory(int level)
 		ErrorReporter.getInstance().setReportSender(customReportSender);
 
 		super.onCreate();
+		
+		_instance = this;
 
 		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
 
@@ -776,7 +782,7 @@ public void onTrimMemory(int level)
 			editor.commit();
 		}
 
-		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), Utils.switchSSLOn(getApplicationContext()));
+		Utils.setupServerURL(settings.getInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, AccountUtils._PRODUCTION_HOST), Utils.switchSSLOn(getApplicationContext()));
 
 		typingNotificationMap = new HashMap<String, TypingNotification>();
 
@@ -834,7 +840,10 @@ public void onTrimMemory(int level)
 		registerReceivers();
 	}
 	
-	
+	public static HikeMessengerApp getInstance()
+	{
+		return _instance;
+	}
 
 	private void registerReceivers()
 	{

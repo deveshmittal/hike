@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -19,7 +20,9 @@ import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
@@ -86,17 +89,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	 */
 	private void clearAppData()
 	{
-		/**
-		 * Adding a try catch here, because StickerDownloadManager.getInstance() can throw a RuntimeException
-		 */
-		try
-		{
-			StickerDownloadManager.getInstance().shutDownAll();
-		}
-		catch (RuntimeException e)
-		{
-			Logger.e("DeleteAccountTask", "Error in StickerDownloadManager.getInstance()", e);
-		}
+		StickerDownloadManager.getInstance().shutDownAll();
 
 		/**
 		 * Clearing the shared preferences
@@ -108,7 +101,8 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		appPrefEditor.clear();
 		editor.commit();
 		appPrefEditor.commit();
-
+		
+		NUXManager.getInstance().shutDownNUX();
 		/**
 		 * Unregister from GCM service
 		 */
