@@ -197,7 +197,7 @@ public class VoIPService extends Service {
 		
 		int returnInt = super.onStartCommand(intent, flags, startId);
 		
-//		Logger.d(VoIPConstants.TAG, "VoIPService onStartCommand()");
+		Logger.d(VoIPConstants.TAG, "VoIPService onStartCommand()");
 
 		if (intent == null)
 			return returnInt;
@@ -621,19 +621,20 @@ public class VoIPService extends Service {
 		}
 	}
 	
-	/**
-	 * This method terminates the service. 
-	 * It is "synchronized" because of an android bug which may cause 
-	 * EXTRA_STATE_RINGING to be fired twice while listening for incoming calls.
-	 */
-	public synchronized void stop() {
-		if (keepRunning == false) {
-			// Logger.w(VoIPConstants.TAG, "Trying to stop a stopped service?");
-			sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY);
-			return;
-		}
 
-		keepRunning = false;
+	/**
+	 * Terminate the service. 
+	 */
+	public void stop() {
+
+		synchronized (this) {
+			if (keepRunning == false) {
+				// Logger.w(VoIPConstants.TAG, "Trying to stop a stopped service?");
+				sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY);
+				return;
+			}
+			keepRunning = false;
+		}
 		
 		Logger.d(VoIPConstants.TAG, "VoIPService stop()");
 		
@@ -2153,6 +2154,11 @@ public class VoIPService extends Service {
 		if (!reconnecting && (establishingConnection || connected)) {
 			Logger.w(VoIPConstants.TAG, "Already trying to establish connection.");
 //			sendSocketInfoToPartner();
+			return;
+		}
+		
+		if (socket == null) {
+			Logger.w(VoIPConstants.TAG, "establishConnection() called with null socket.");
 			return;
 		}
 		
