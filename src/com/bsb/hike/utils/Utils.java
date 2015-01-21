@@ -348,31 +348,6 @@ public class Utils
 		return mInFromLeft;
 	}
 
-	public static Intent createIntentFromContactInfo(final ContactInfo contactInfo, boolean openKeyBoard)
-	{
-		Intent intent = new Intent();
-
-		// If the contact info was made using a group conversation, then the
-		// Group ID is in the contact ID
-		boolean isGroupConv = Utils.isGroupConversation(contactInfo.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.MSISDN, isGroupConv ? contactInfo.getId() : contactInfo.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, isGroupConv ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD);
-		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
-		return intent;
-	}
-	
-	public static Intent createIntentFromMsisdn(String msisdnOrGroupId, boolean openKeyBoard)
-	{
-		Intent intent = new Intent();
-
-		// If the contact info was made using a group conversation, then the
-		// Group ID is in the contact ID
-		intent.putExtra(HikeConstants.Extras.MSISDN, msisdnOrGroupId);
-		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, Utils.isGroupConversation(msisdnOrGroupId) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD);
-		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
-		return intent;
-	}
-
 	/** Create a File for saving an image or video */
 	public static File getOutputMediaFile(HikeFileType type, String orgFileName, boolean isSent)
 	{

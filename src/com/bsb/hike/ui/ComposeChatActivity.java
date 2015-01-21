@@ -75,6 +75,7 @@ import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
@@ -721,7 +722,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, gcjJson);
 
 		ContactInfo conversationContactInfo = new ContactInfo(groupId, groupId, groupId, groupId);
-		Intent intent = Utils.createIntentFromContactInfo(conversationContactInfo, true);
+		Intent intent = IntentFactory.createIntentFromContactInfo(conversationContactInfo, true);
 		intent.setClass(this, ChatThreadActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
@@ -894,7 +895,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		Intent presentIntent = getIntent();
 		if(isSharingFile){
-	        Intent intent = Utils.createIntentFromContactInfo(arrayList.get(0), true);
+	        Intent intent = IntentFactory.createIntentFromContactInfo(arrayList.get(0), true);
 	        intent.setClass(this, ChatThreadActivity.class);
 	        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	        String type = presentIntent.getType();
@@ -915,7 +916,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			Intent intent = null;
 			if(arrayList.size()==1){
 				// forwarding to 1 is special case , we want to create conversation if does not exist and land to recipient
-				intent = Utils.createIntentFromMsisdn(arrayList.get(0).getMsisdn(), false);
+				intent = IntentFactory.createIntentFromMsisdn(arrayList.get(0).getMsisdn(), false);
 				intent.putExtras(presentIntent);
 				intent.setClass(this, ChatThreadActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -926,7 +927,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				if(presentIntent.hasExtra(HikeConstants.Extras.PREV_MSISDN)){
 					// open chat thread from where we initiated
 					String id = presentIntent.getStringExtra(HikeConstants.Extras.PREV_MSISDN);
-					intent = Utils.createIntentFromMsisdn(id, false);
+					intent = IntentFactory.createIntentFromMsisdn(id, false);
 					intent.setClass(this, ChatThreadActivity.class);
 				}else{
 					//home activity
