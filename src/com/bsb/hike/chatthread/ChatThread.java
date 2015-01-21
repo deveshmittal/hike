@@ -447,6 +447,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		activity.findViewById(R.id.send_message).setOnClickListener(this);
 		activity.findViewById(R.id.new_message_indicator).setOnClickListener(this);
 		activity.findViewById(R.id.scroll_bottom_indicator).setOnClickListener(this);
+		activity.findViewById(R.id.scroll_top_indicator).setOnClickListener(this);
 	}
 
 	private void initStickerPicker()
@@ -586,6 +587,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case R.id.overlay_button:
 			onOverlayLayoutClicked();
+			break;
+		case R.id.scroll_top_indicator:
+			mConversationsView.setSelection(0);
+			hideView(R.id.scroll_top_indicator);
 			break;
 		default:
 			Logger.e(TAG, "onClick Registered but not added in onClick : " + v.toString());
