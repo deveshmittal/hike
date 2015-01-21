@@ -23,6 +23,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -725,6 +726,10 @@ public class ConversationsAdapter extends BaseAdapter
 			messageView.setText(messageText);
 			imgStatus.setImageResource(imageId);
 			imgStatus.setVisibility(View.VISIBLE);
+			
+			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) messageView.getLayoutParams();
+			lp.setMargins((int) (5 * Utils.densityMultiplier), lp.topMargin, lp.rightMargin, lp.bottomMargin);
+			messageView.setLayoutParams(lp);
 		}
 		/*
 		 * If the message is a status message, we only show an indicator if the status of the message is unread.
@@ -748,6 +753,10 @@ public class ConversationsAdapter extends BaseAdapter
 			else
 			{
 			}
+			
+			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) messageView.getLayoutParams();
+			lp.setMargins(0, lp.topMargin, lp.rightMargin, lp.bottomMargin);
+			messageView.setLayoutParams(lp);
 		}
 
 		if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
