@@ -2009,8 +2009,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 	public void deleteBot(String msisdn){
 		mDb.beginTransaction();
-		mDb.delete(DBConstants.BOT_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
-		removeChatThemeForMsisdn(msisdn);
+		try
+		{
+			mDb.delete(DBConstants.BOT_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
+			removeChatThemeForMsisdn(msisdn);
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
 	}
 
 	public Conversation addConversation(String msisdn, boolean onhike, String groupName, String groupOwner)
