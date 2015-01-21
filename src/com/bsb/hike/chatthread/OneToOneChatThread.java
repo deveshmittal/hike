@@ -751,7 +751,13 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		if (mConversation.isOnhike())
 		{
-			hideView(R.id.sms_toggle_button);
+			/**
+			 * since this is a view stub, so can return null 
+			 */
+			if(activity.findViewById(R.id.sms_toggle_button) != null)
+			{
+				hideView(R.id.sms_toggle_button);
+			}
 			nonZeroCredits();
 		}
 
