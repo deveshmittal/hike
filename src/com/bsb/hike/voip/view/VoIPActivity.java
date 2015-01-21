@@ -175,6 +175,7 @@ public class VoIPActivity extends Activity implements CallActions
 			case MSG_UPDATE_QUALITY:
 				CallQuality quality = voipService.getQuality();
 				showSignalStrength(quality);
+				Logger.d(VoIPConstants.TAG, "Updating call quality to: " + quality);
 				break;
 			case MSG_NETWORK_SUCKS:
 				showMessage("Your network quality is poor. Please call after some time.");
