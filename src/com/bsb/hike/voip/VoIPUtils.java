@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -348,5 +349,17 @@ public class VoIPUtils {
 			// Shown for the first time, dont show later
 			sharedPref.saveData(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, false);
 		}
+	}
+	
+	/**
+	 * Returns the relay port that should be used. 
+	 * This can be set by the server, and otherwise defaults to VoIPConstants.ICEServerPort
+	 * @return
+	 */
+	public static int getRelayPort(Context context) {
+		
+		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		int port = prefs.getInt(HikeConstants.VOIP_RELAY_SERVER_PORT, VoIPConstants.ICEServerPort);
+		return port;
 	}
 }

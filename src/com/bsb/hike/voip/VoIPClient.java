@@ -19,6 +19,7 @@ public class VoIPClient  {
 	private ConnectionMethods preferredConnectionMethod = ConnectionMethods.UNKNOWN;
 	private InetAddress cachedInetAddress = null;
 	private String relayAddress;
+	private int relayPort;
 	
 	public enum ConnectionMethods {
 		UNKNOWN,
@@ -119,7 +120,7 @@ public class VoIPClient  {
 		else if (preferredConnectionMethod == ConnectionMethods.PUBLIC)
 			port = getExternalPort();
 		else
-			port = VoIPConstants.ICEServerPort;
+			port = relayPort;
 		return port;
 	}
 	
@@ -142,6 +143,14 @@ public class VoIPClient  {
 	
 	public void setRelayAddress(String relayAddress) {
 		this.relayAddress = relayAddress;
+	}
+
+	public int getRelayPort() {
+		return relayPort;
+	}
+
+	public void setRelayPort(int relayPort) {
+		this.relayPort = relayPort;
 	}
 
 }

@@ -1222,6 +1222,11 @@ public class MqttMessagesManager
 				editor.remove(HikeMessengerApp.VOIP_CALL_RATE_POPUP_FREQUENCY);
 			}
 		}
+		if (data.has(HikeConstants.VOIP_RELAY_SERVER_PORT))
+		{
+			int port = data.getInt(HikeConstants.VOIP_RELAY_SERVER_PORT);
+			editor.putInt(HikeConstants.VOIP_RELAY_SERVER_PORT, port);
+		}
 		if (data.has(HikeConstants.REWARDS_TOKEN))
 		{
 			String rewardToken = data.getString(HikeConstants.REWARDS_TOKEN);
@@ -2193,6 +2198,7 @@ public class MqttMessagesManager
 					i.putExtra("externalIP", metadataJSON.getString("externalIP"));
 					i.putExtra("externalPort", metadataJSON.getInt("externalPort"));
 					i.putExtra("relay", metadataJSON.getString("relay"));
+					i.putExtra("relayport", metadataJSON.getInt("relayport"));
 					i.putExtra("reconnecting", metadataJSON.getBoolean("reconnecting"));
 					i.putExtra("initiator", metadataJSON.getBoolean("initiator"));
 					i.putExtra("callId", metadataJSON.getInt("callId"));

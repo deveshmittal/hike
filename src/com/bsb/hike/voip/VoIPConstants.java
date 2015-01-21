@@ -40,7 +40,7 @@ public class VoIPConstants {
 	
 	// Default bitrates
 	public static final int BITRATE_2G = 12000;
-	public static final int BITRATE_3G = 24000;
+	public static final int BITRATE_3G = 16000;
 	public static final int BITRATE_WIFI = 48000;
 
 	public static final String CALL_ID = "callId";

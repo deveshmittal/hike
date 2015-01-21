@@ -1013,6 +1013,8 @@ public class HikeConstants
 
 	public static final String VOIP_CALL_RATE_POPUP_FREQ = "vrmcf";
 
+	public static final String VOIP_RELAY_SERVER_PORT = "rsport";
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
