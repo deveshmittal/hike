@@ -23,10 +23,9 @@ public class IncomingCallListener extends BroadcastReceiver {
 				// Put it on hold
 				Log.d(VoIPConstants.TAG, "Detected incoming call. Putting VoIP on hold.");
 				Intent i = new Intent(context, VoIPActivity.class);
-				i.putExtra("action", VoIPConstants.PUT_CALL_ON_HOLD);
+				i.putExtra("action", VoIPConstants.INCOMING_NATIVE_CALL_HOLD);
 				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 				context.startActivity(i);
-				
 			}
 		}
 	}

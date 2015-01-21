@@ -1013,12 +1013,6 @@ public class HikeConstants
 
 	public static final String VOIP_CALL_RATE_POPUP_FREQ = "vrmcf";
 
-	public static final String VOIP_CALL_RATING = "rate";
-
-	public static final String VOIP_CALL_ID = "callid";
-
-	public static final String VOIP_IS_CALLER = "caller";
-
 	public static final String VOIP_RELAY_SERVER_PORT = "rsport";
 
 	public static final class ResultCodes
@@ -1799,7 +1793,29 @@ public class HikeConstants
 		/*
 		 * VOIP events
 		 */
+		public static final String VOIP = "voip";
+
 		public static final String VOIP_CALL_RATE_POPUP_SUBMIT = "vrmcSbmt";
+
+		public static final String VOIP_CALL_CLICK = "cs";
+
+		public static final String VOIP_CALL_ACCEPT = "ca";
+
+		public static final String VOIP_CALL_REJECT = "cr";
+
+		public static final String VOIP_CALL_SPEAKER = "spk";
+
+		public static final String VOIP_CALL_MUTE = "mut";
+
+		public static final String VOIP_CALL_HOLD = "hld";
+
+		public static final String VOIP_CALL_END = "ce";
+
+		public static final String VOIP_CALL_DROP = "cd";
+
+		public static final String VOIP_NATIVE_CALL_INTERRUPT = "tci";
+
+		public static final String VOIP_CALL_RELAY = "cpur";
 	}
 
 	public static final class MqttMessageTypes
@@ -1959,7 +1975,6 @@ public class HikeConstants
 		public static final String VOIP_MSG_TYPE_MISSED_CALL_INCOMING = "vmci";
 
 		public static final String VOIP_MSG_TYPE_MISSED_CALL_OUTGOING = "vmco";
-
 	}
 	
 	public static final class SMSNative

@@ -1210,18 +1210,17 @@ public class MqttMessagesManager
 			{
 				editor.putBoolean(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, true);
 				editor.putInt(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
+				if(data.has(HikeConstants.VOIP_CALL_RATE_POPUP_FREQ))
+				{
+					int freq = data.getInt(HikeConstants.VOIP_CALL_RATE_POPUP_FREQ);
+					editor.putInt(HikeMessengerApp.VOIP_CALL_RATE_POPUP_FREQUENCY, freq);
+				}
 			}
 			else
 			{
 				editor.remove(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP);
 				editor.remove(HikeMessengerApp.VOIP_CALL_RATE_POPUP_FREQUENCY);
 			}
-		}
-		if(data.has(HikeConstants.VOIP_CALL_RATE_POPUP_FREQ))
-		{
-			int freq = data.getInt(HikeConstants.VOIP_CALL_RATE_POPUP_FREQ);
-			editor.putInt(HikeMessengerApp.VOIP_CALL_RATE_POPUP_FREQUENCY, freq);
-			editor.putInt(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
 		}
 		if (data.has(HikeConstants.VOIP_RELAY_SERVER_PORT))
 		{

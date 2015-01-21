@@ -58,6 +58,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient.ConnectionMethods;
 import com.bsb.hike.voip.VoIPConstants.CallQuality;
 import com.bsb.hike.voip.VoIPDataPacket.PacketType;
@@ -120,6 +121,7 @@ public class VoIPService extends Service {
 	private Thread senderThread, reconnectingBeepsThread;
 	private Ringtone ringtone;
 	private Vibrator vibrator = null;
+	private int callSource = -1;
 
 	// Call quality fields
 	private int qualityCounter = 0;
@@ -171,6 +173,9 @@ public class VoIPService extends Service {
 		
 		clientPartner = new VoIPClient();
 		clientSelf = new VoIPClient();
+		String myMsisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.MSISDN_SETTING, null);
+		clientSelf.setPhoneNumber(myMsisdn);
+
 		setCallid(0);
 		encryptionStage = EncryptionStage.STAGE_INITIAL;
 		initAudioManager();
@@ -341,6 +346,7 @@ public class VoIPService extends Service {
 			clientPartner.setPhoneNumber(intent.getStringExtra("msisdn"));
 			clientSelf.setInitiator(true);
 			clientPartner.setInitiator(false);
+			callSource = intent.getIntExtra("call_source", -1);
 			setCallid(new Random().nextInt(99999999));
 			Logger.d(VoIPConstants.TAG, "Making outgoing call to: " + clientPartner.getPhoneNumber() + ", id: " + getCallId());
 			
@@ -350,6 +356,7 @@ public class VoIPService extends Service {
 			startActivity(i);
 			
 			retrieveExternalSocket();
+			sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_CLICK);
 		}
 
 		return returnInt;
@@ -409,7 +416,7 @@ public class VoIPService extends Service {
 			text = " Call on hold";
 		
 		if (clientPartner.getName() == null)
-			title = "Hike call";
+			title = "Hike Call";
 		
 		Notification myNotification = builder
 		.setContentTitle(title)
@@ -647,6 +654,15 @@ public class VoIPService extends Service {
 				"\nDropped decoded packets: " + droppedDecodedPackets +
 				"\nReconnect attempts: " + reconnectAttempts +
 				"\nCall duration: " + getCallDuration());
+
+		if(getCallDuration() > 0)
+		{
+			sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_END);
+		}
+		if(reconnecting)
+		{
+			sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_DROP);
+		}
 		
 		//
 		if(socket != null)
@@ -726,7 +742,7 @@ public class VoIPService extends Service {
 		
 		// sendHandlerMessage(VoIPActivity.MSG_INCOMING_CALL_DECLINED);
 		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1);
-
+		sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_REJECT);
 	}
 	
 	public void setMute(boolean mute)
@@ -1106,6 +1122,7 @@ public class VoIPService extends Service {
 		}, "ACCEPT_INCOMING_CALL_THREAD").start();
 
 		startRecordingAndPlayback();
+		sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_ACCEPT);
 	}
 	
 	private void startRecordingAndPlayback() {
@@ -1114,7 +1131,12 @@ public class VoIPService extends Service {
 			Logger.d(VoIPConstants.TAG, "Audio already started.");
 			return;
 		}
-		
+
+		if(clientPartner.getPreferredConnectionMethod() == ConnectionMethods.RELAY)
+		{
+			sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_RELAY);
+		}
+
 		Logger.d(VoIPConstants.TAG, "Starting audio record / playback.");
 		startRecording();
 		startPlayBack();
@@ -2371,6 +2393,50 @@ public class VoIPService extends Service {
 		clientPartner.setPreferredConnectionMethod(ConnectionMethods.UNKNOWN);
 		
 		return good;
+	}
+
+	public void sendAnalyticsEvent(String ek)
+	{
+		sendAnalyticsEvent(ek, -1);
+	}
+
+	public void sendAnalyticsEvent(String ek, int value)
+	{
+		try
+		{
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
+
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.VOIP);
+			metadata.put(HikeConstants.EVENT_KEY, ek);
+			metadata.put(VoIPConstants.Analytics.IS_CALLER, clientPartner.isInitiator() ? 0 : 1);
+			metadata.put(VoIPConstants.Analytics.PARTNER_MSISDN, clientPartner.getPhoneNumber());
+			metadata.put(VoIPConstants.Analytics.CALL_ID, getCallId());
+			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, VoIPUtils.getConnectionClass(getApplicationContext()).ordinal());
+
+			if(ek.equals(HikeConstants.LogEvent.VOIP_CALL_CLICK))
+			{
+				metadata.put(VoIPConstants.Analytics.CALL_SOURCE, callSource);
+			}
+			else if(ek.equals(HikeConstants.LogEvent.VOIP_CALL_END) || ek.equals(HikeConstants.LogEvent.VOIP_CALL_DROP) || ek.equals(HikeConstants.LogEvent.VOIP_CALL_REJECT))
+			{
+				metadata.put(VoIPConstants.Analytics.DATA_SENT, totalBytesSent);
+				metadata.put(VoIPConstants.Analytics.DATA_RECEIVED, totalBytesReceived);
+			}
+			else if(ek.equals(HikeConstants.LogEvent.VOIP_CALL_SPEAKER) || ek.equals(HikeConstants.LogEvent.VOIP_CALL_HOLD) || ek.equals(HikeConstants.LogEvent.VOIP_CALL_MUTE))
+			{
+				metadata.put(VoIPConstants.Analytics.STATE, value);
+			}
+
+			data.put(HikeConstants.METADATA, metadata);
+
+			Utils.sendLogEvent(data);
+		}
+		catch (JSONException e)
+		{
+			Logger.w("VoipService", "Invalid json");
+		}
 	}
 }
 

@@ -192,6 +192,7 @@ import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
 import com.bsb.hike.voip.VoIPService;
+import com.bsb.hike.voip.VoIPUtils;
 import com.bsb.hike.voip.view.VoIPActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -3391,7 +3392,7 @@ public class Utils
 		return (voipActivated == 0)? true : true;
 	}
 
-	public static void onCallClicked(Context context, final String mContactNumber)
+	public static void onCallClicked(Context context, final String mContactNumber, VoIPUtils.CallSource source)
 	{
 		if(!isUserOnline(context))
 		{
@@ -3401,6 +3402,7 @@ public class Utils
 		Intent i = new Intent(context, VoIPService.class);
 		i.putExtra("action", "outgoingcall");
 		i.putExtra("msisdn", mContactNumber);
+		i.putExtra("call_source", source.ordinal());
 		context.startService(i);
 	}
 
