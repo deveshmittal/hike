@@ -3389,7 +3389,7 @@ public class Utils
 	public static boolean isVoipActivated(Context context)
 	{
 		int voipActivated = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.VOIP_ACTIVATED, 0);
-		return (voipActivated == 0)? true : true;
+		return (voipActivated == 0)? false : true;
 	}
 
 	public static void onCallClicked(Context context, final String mContactNumber, VoIPUtils.CallSource source)

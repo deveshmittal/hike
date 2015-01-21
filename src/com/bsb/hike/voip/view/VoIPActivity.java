@@ -65,7 +65,7 @@ public class VoIPActivity extends Activity implements CallActions
 	 * Two changes need to be reverted before this code is pushed to production.
 	 * 
 	 * 1. This build connects to DMQTT.
-	 * 2. VoIP is enabled by default with code in HomeActivity onCreate().
+	 * 
 	 * 
 	 *   
 	 *   
