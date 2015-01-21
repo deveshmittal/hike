@@ -402,6 +402,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		mActionBar = new HikeActionBar(activity);
 		mConversationDb = HikeConversationsDatabase.getInstance();
+		sharedPreference = HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext());
 	}
 
 	/**
