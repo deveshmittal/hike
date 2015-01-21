@@ -621,12 +621,19 @@ public class VoIPService extends Service {
 		}
 	}
 	
-	public void stop() {
+	/**
+	 * This method terminates the service. 
+	 * It is "synchronized" because of an android bug which may cause 
+	 * EXTRA_STATE_RINGING to be fired twice while listening for incoming calls.
+	 */
+	public synchronized void stop() {
 		if (keepRunning == false) {
 			// Logger.w(VoIPConstants.TAG, "Trying to stop a stopped service?");
 			sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY);
 			return;
 		}
+
+		keepRunning = false;
 		
 		Logger.d(VoIPConstants.TAG, "VoIPService stop()");
 		
@@ -678,8 +685,6 @@ public class VoIPService extends Service {
 		
 		if (opusWrapper != null)
 			opusWrapper.destroy();
-
-		keepRunning = false;
 
 		setCallid(0);
 		
