@@ -171,10 +171,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		
-		// TODO! Remove me!
-		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.VOIP_ACTIVATED, 1);
-		
 		super.onCreate(savedInstanceState);
 		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
 		{
