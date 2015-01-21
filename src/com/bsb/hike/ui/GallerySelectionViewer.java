@@ -33,6 +33,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.GalleryAdapter;
+import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
@@ -138,7 +139,10 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET));
 		intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
-
+		if(getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CHAT_THREAD, false))
+		{
+			intent.putExtra(HikeConstants.Extras.FROM_CHAT_THREAD, true);
+		}
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		startActivity(intent);
@@ -530,15 +534,33 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 				@Override
 				public void run()
 				{
-					Intent intent = new Intent(GallerySelectionViewer.this, ChatThread.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
-					startActivity(intent);
-
 					if (progressDialog != null)
 					{
 						progressDialog.dismiss();
 						progressDialog = null;
+					}
+					
+					/**
+					 * This flag indicates whether this was opened from chatThread or not
+					 */
+					boolean isFromChatThread = getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CHAT_THREAD, false);
+					
+					if (!isFromChatThread)
+					{
+						String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+						String whichChatThread = Utils.isGroupConversation(msisdn) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD;
+
+						Intent intent = new Intent(GallerySelectionViewer.this, ChatThreadActivity.class);
+						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+						intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, whichChatThread);
+						startActivity(intent);
+					}
+					
+					else
+					{
+						setResult(RESULT_OK);
+						finish();
 					}
 				}
 			});
