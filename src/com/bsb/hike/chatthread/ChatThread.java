@@ -195,6 +195,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected boolean isActivityVisible = true;
 
 	protected boolean reachedEnd = false;
+	
+	private int currentFirstVisibleItem = Integer.MAX_VALUE;
+	
+	protected boolean loadingMoreMessages;
 
 	private String[] mPubSubListeners;
 
@@ -968,7 +972,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 * This method calls {@link #fetchConversation(String)} in UI or non UI thread, depending upon async variable For non UI, it starts asyncloader, see {@link ConversationLoader}
 	 * 
 	 * @param async
-	 * @param convId
 	 */
 	protected final void fetchConversation(boolean async)
 	{
@@ -982,6 +985,29 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			fetchConversation();
 		}
 	}
+	
+	/**
+	 * This method calls {@link #fetchConversation(String)} in UI or non UI thread, depending upon async variable For non UI, it starts asyncloader, see {@link ConversationLoader}
+	 * 
+	 * @param async
+	 */
+	protected final void loadMessage(boolean async)
+	{
+		Logger.i(TAG, "Load Messages called from onScroll  : Async Call ? " + async);
+		
+		if (async)
+		{
+			/**
+			 * Calling restart loader here since if we use initLoader, for subsequent calls, loaderManager would deliver the same result instead of calling load in background again.
+			 */
+			activity.getSupportLoaderManager().restartLoader(LOAD_MORE_MESSAGES, null, this);
+		}
+		
+		else
+		{
+			loadMoreMessages();
+		}
+	}
 
 	/**
 	 * This method is either called in either UI thread or non UI, check {@link #fetchConversation(boolean, String)}
@@ -993,8 +1019,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 * This method is called in NON UI thread when list view scrolls
 	 * 
 	 * @return
+	 * 		List of ConvMessages
 	 */
-	protected abstract List<ConvMessage> loadMessages();
+	protected List<ConvMessage> loadMoreMessages()
+	{
+		int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
+		
+		long firstMsgId = messages.get(startIndex).getMsgID();
+		Logger.i(TAG, "inside background thread: loading more messages " + firstMsgId);
+		
+		return mConversationDb.getConversationThread(msisdn, HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME, mConversation, firstMsgId);
+	}
 
 	protected abstract int getContentView();
 	
@@ -1128,17 +1163,23 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 			else
 			{
-				mConversationsView.setSelection(mAdapter.getCount());
+				mConversationsView.setSelection(messages.size());
 			}
 		}
 		else
 		{
-			mConversationsView.setSelection(mAdapter.getCount());
+			mConversationsView.setSelection(messages.size());
 		}
 		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
+		
+		/**
+		 * Hacky fix to ensure onScroll is not called for the first time
+		 */
+		loadingMoreMessages = true;
 		mConversationsView.setOnScrollListener(this);
-
+		loadingMoreMessages = false;
+				
 		updateUIAsPerTheme(mConversation.getTheme());// it has to be done after setting adapter
 
 		/**
@@ -1167,9 +1208,37 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			Logger.e(TAG, "load message failed");
 		}
 		else
-		{
-			mAdapter.addMessages(list, mAdapter.getCount());
-			mAdapter.notifyDataSetChanged();
+		{	
+			if (!list.isEmpty())
+			{
+				Logger.i(TAG, "Adding 'n' new messages in the list : " + list.size());
+				int scrollOffset = 0;
+				
+				int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
+				
+				int firstVisibleItem = mConversationsView.getFirstVisiblePosition();
+				
+				if (mConversationsView.getChildAt(0) != null)
+				{
+					scrollOffset = mConversationsView.getChildAt(0).getTop();
+				}
+
+				mAdapter.addMessages(list, startIndex);
+				addtoMessageMap(startIndex, startIndex + list.size());
+				
+				mAdapter.notifyDataSetChanged();
+				mConversationsView.setSelectionFromTop(firstVisibleItem + list.size(), scrollOffset);
+			}
+			
+			else
+			{
+				/*
+				 * This signifies that we've reached the end. No need to query the db anymore unless we add a new message.
+				 */
+				reachedEnd = true;
+			}
+			
+			loadingMoreMessages = false;
 		}
 	}
 
@@ -1209,16 +1278,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		else if (loader.loaderId == LOAD_MORE_MESSAGES)
 		{
-			if (arg1 == null)
-			{
-				loadMessagesFinished(null);
-			}
-			else
-			{
-				loadMessagesFinished((List<ConvMessage>) arg1);
-			}
-
+			loadMessagesFinished((List<ConvMessage>) arg1);
 		}
+
 		else
 		{
 			throw new IllegalStateException("Expected data is either Conversation OR List<ConvMessages> , please check " + arg0.getClass().getCanonicalName());
@@ -1248,14 +1310,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			this.loaderId = loaderId;
 			this.chatThread = new WeakReference<ChatThread>(chatThread);
 		}
-
+		
 		@Override
 		public Object loadInBackground()
 		{
 			Logger.i(TAG, "load in background of conversation loader");
+			
 			if (chatThread.get() != null)
 			{
-				return loaderId == FETCH_CONV ? conversation = chatThread.get().fetchConversation() : loaderId == LOAD_MORE_MESSAGES ? list = chatThread.get().loadMessages() : null;
+				return loaderId == FETCH_CONV ? (conversation = chatThread.get().fetchConversation()) : (loaderId == LOAD_MORE_MESSAGES ? list = chatThread.get().loadMoreMessages() : null);
 			}
 			return null;
 		}
@@ -1291,8 +1354,64 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
-		// TODO Auto-generated method stub
+		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
+		{
+			int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
 
+			/*
+			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
+			 */
+			if (messages.size() <= startIndex || messages.get(startIndex) == null)
+			{
+				return;
+			}
+
+			loadingMoreMessages = true;
+			Logger.d(TAG,"Calling load more messages : ");
+			loadMessage(true);
+		}
+
+		View unreadMessageIndicator = activity.findViewById(R.id.new_message_indicator);
+
+		if (unreadMessageIndicator.getVisibility() == View.VISIBLE && mConversationsView.getLastVisiblePosition() > messages.size() - unreadMessageCount - 2)
+		{
+			hideUnreadCountIndicator();
+		}
+
+		if (view.getLastVisiblePosition() < messages.size() - HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
+		{
+			if (currentFirstVisibleItem < firstVisibleItem)
+			{
+				if (unreadMessageIndicator.getVisibility() == View.GONE)
+				{
+					showView(R.id.scroll_bottom_indicator);
+				}
+
+				hideView(R.id.scroll_top_indicator);
+			}
+
+			else if (currentFirstVisibleItem > firstVisibleItem)
+			{
+				hideView(R.id.scroll_bottom_indicator);
+				/*
+				 * if user is viewing message less than certain position in chatthread we should not show topfast scroll.
+				 */
+				if (firstVisibleItem > HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
+				{
+					showView(R.id.scroll_top_indicator);
+				}
+				else
+				{
+					hideView(R.id.scroll_top_indicator);
+				}
+			}
+		}
+		else
+		{
+			hideView(R.id.scroll_bottom_indicator);
+			hideView(R.id.scroll_top_indicator);
+		}
+		currentFirstVisibleItem = firstVisibleItem;
 	}
 
 	@Override
@@ -1798,7 +1917,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	private void unreadCounterClicked()
 	{
-		mConversationsView.setSelection(mAdapter.getCount() - unreadMessageCount - 1);
+		mConversationsView.setSelection(messages.size() - unreadMessageCount - 1);
 		hideUnreadCountIndicator();
 	}
 	

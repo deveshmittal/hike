@@ -196,13 +196,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	}
 	
 	@Override
-	protected List<ConvMessage> loadMessages()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	@Override
 	protected int getContentView()
 	{
 		return R.layout.chatthread;

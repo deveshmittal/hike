@@ -269,13 +269,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	}
 
 	@Override
-	protected List<ConvMessage> loadMessages()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	protected int getContentView()
 	{
 		return R.layout.chatthread;
