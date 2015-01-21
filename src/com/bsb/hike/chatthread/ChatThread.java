@@ -452,7 +452,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private void initEmoticonPicker()
 	{
-		mEmoticonPicker = new EmoticonPicker(activity.getApplicationContext(), this);
+		mEmoticonPicker = new EmoticonPicker(activity, this);
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu)
