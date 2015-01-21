@@ -61,8 +61,11 @@ public class CallRatePopup extends SherlockDialogFragment
 			
 			@Override
 			public void onClick(View v) {
-				submitRating();
-				dismiss();
+				if(rating >= 0)
+				{
+					submitRating();
+					dismiss();
+				}
 			}
 		});
 
@@ -128,11 +131,11 @@ public class CallRatePopup extends SherlockDialogFragment
 			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
 
 			JSONObject metadata = new JSONObject();
-			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.CLICK);
+			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.VOIP);
 			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.VOIP_CALL_RATE_POPUP_SUBMIT);
-			metadata.put(HikeConstants.VOIP_CALL_RATING, rating+1);
-			metadata.put(HikeConstants.VOIP_CALL_ID, callId);
-			metadata.put(HikeConstants.VOIP_IS_CALLER, isCallInitiator);
+			metadata.put(VoIPConstants.Analytics.CALL_RATING, rating+1);
+			metadata.put(VoIPConstants.Analytics.CALL_ID, callId);
+			metadata.put(VoIPConstants.Analytics.IS_CALLER, isCallInitiator);
 
 			data.put(HikeConstants.METADATA, metadata);
 

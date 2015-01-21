@@ -41,6 +41,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
@@ -360,11 +361,12 @@ public class VoIPActivity extends Activity implements CallActions
 				voipService.stop();
 		}
 		
-		if (action.equals(VoIPConstants.PUT_CALL_ON_HOLD)) {
+		if (action.equals(VoIPConstants.INCOMING_NATIVE_CALL_HOLD)) {
 			if (VoIPService.isConnected() && voipService != null && voipService.isAudioRunning()) {
 				showMessage("Your Hike Call has been put on hold.");
 				voipService.setHold(true);
 				showCallStatus(CallStatus.ON_HOLD);
+				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_NATIVE_CALL_INTERRUPT);
 			} else if (VoIPService.isConnected() && voipService != null)
 				voipService.hangUp();
 			else
@@ -640,6 +642,7 @@ public class VoIPActivity extends Activity implements CallActions
 					boolean newMute = !voipService.getMute();
 					muteButton.setSelected(newMute);
 					voipService.setMute(newMute);
+					voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_MUTE, newMute ? 1 : 0);
 				}
 			}
 		});
@@ -652,6 +655,7 @@ public class VoIPActivity extends Activity implements CallActions
 				boolean newSpeaker = !voipService.getSpeaker();
 				speakerButton.setSelected(newSpeaker);
 				voipService.setSpeaker(newSpeaker);
+				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_SPEAKER, newSpeaker ? 1 : 0);
 			}
 		});
 
@@ -664,6 +668,7 @@ public class VoIPActivity extends Activity implements CallActions
 				{
 					boolean newHold = !voipService.getHold();
 					voipService.setHold(newHold);
+					voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_HOLD, newHold ? 1 : 0);
 				}
 			}
 		});

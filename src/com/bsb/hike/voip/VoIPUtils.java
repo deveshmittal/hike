@@ -48,6 +48,11 @@ public class VoIPUtils {
 		Unknown
 	}
 
+	public static enum CallSource
+	{
+		CHAT_THREAD, PROFILE_ACTIVITY
+	}
+
 	public static void setCallListener(IVoipCallListener listener)
 	{
 		callListener = listener;

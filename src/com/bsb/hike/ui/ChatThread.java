@@ -1364,7 +1364,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		switch (item.getItemId())
 		{
 		case R.id.voip_call:
-			Utils.onCallClicked(this, mContactNumber);
+			Utils.onCallClicked(this, mContactNumber, VoIPUtils.CallSource.CHAT_THREAD);
 			break;
 		case R.id.attachment:
 			// hide pop up if any
