@@ -184,23 +184,23 @@ public class AnalyticsSender implements Runnable
 
 		if(!instance.sendAnalyticsData(false))
 		{
-			int freq = instance.getAnalyticsUploadFrequency();
+			int freq = instance.getAnalyticsUploadRetryCount();
 			
 			// set alarm for post 4 hours if there is no network
 			if(freq < AnalyticsConstants.ANALYTICS_UPLOAD_FREQUENCY)
 			{
 				nextSchedule = System.currentTimeMillis() + freq * AnalyticsConstants.UPLOAD_TIME_MULTIPLE * AnalyticsConstants.ONE_HOUR;			
-				instance.incrementAnalyticsUploadFrequency();
+				instance.incrementAnalyticsUploadRetryCount();
 			}
 			else
 			{
-				instance.resetAnalyticsUploadFrequency();				
+				instance.resetAnalyticsUploadRetryCount();				
 			}
 		}
 		// regular path will set alarm for same time next day
 		else
 		{
-			nextSchedule += AnalyticsConstants.ONE_DAY;
+			nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;
 		}
 		
 		HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);		

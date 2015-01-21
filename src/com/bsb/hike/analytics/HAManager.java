@@ -1,6 +1,8 @@
 package com.bsb.hike.analytics;
 
 import java.util.ArrayList;
+import java.util.Random;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.content.Context;
@@ -31,16 +33,16 @@ public class HAManager
 		
 	public static final String ANALYTICS_SETTINGS = "analyticssettings";
 
-	public static final String HOUR_TO_SEND = "hourToSend";
-
 	private boolean isAnalyticsEnabled = true;
 	
 	private long fileMaxSize = AnalyticsConstants.MAX_FILE_SIZE;
 	
 	private long analyticsMaxSize = AnalyticsConstants.MAX_ANALYTICS_SIZE;
-	
-	private int hourToSend = AnalyticsConstants.HOUR_OF_DAY_TO_SEND;
 
+	private int analyticsSendFreq = AnalyticsConstants.DEFAULT_SEND_FREQUENCY;
+
+	private int hourToSend;
+	
 	private int analyticsUploadFrequency = 0;
 		
 //	private NetworkListener listner;
@@ -60,8 +62,10 @@ public class HAManager
 		
 		analyticsMaxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, AnalyticsConstants.MAX_ANALYTICS_SIZE);
 		
-		hourToSend = getPrefs().getInt(HOUR_TO_SEND, AnalyticsConstants.HOUR_OF_DAY_TO_SEND);
-						
+		hourToSend = getRandomTime();
+
+		analyticsSendFreq = getPrefs().getInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY, AnalyticsConstants.DEFAULT_SEND_FREQUENCY);
+
 		// set wifi listener
 //		listner = new NetworkListener(this.context);
 	}
@@ -250,7 +254,23 @@ public class HAManager
 	{
 		analyticsMaxSize = size;
 	}
-	
+
+	/**
+	 * Used to set the analytics send frequency
+	 * @param 
+	 */
+	public void setAnalyticsSendFrequency(int freq)
+	{
+		analyticsSendFreq = freq;
+	}
+
+	/**
+	 * Used to get the current frequency to send analytics data
+	 */
+	public int getAnalyticsSendFrequency()
+	{
+		return analyticsSendFreq;
+	}
 	/**
 	 * Used to get the maximum analytics size on the client
 	 * @return size of analytics in Kbs
@@ -273,7 +293,7 @@ public class HAManager
 	 * Returns how many times in the day analytics data has been tried to upload
 	 * @return frequency in int
 	 */
-	protected int getAnalyticsUploadFrequency()
+	protected int getAnalyticsUploadRetryCount()
 	{
 		return analyticsUploadFrequency;
 	}
@@ -281,7 +301,7 @@ public class HAManager
 	/**
 	 * Resets the upload frequency to 0
 	 */
-	protected void resetAnalyticsUploadFrequency()
+	protected void resetAnalyticsUploadRetryCount()
 	{
 		analyticsUploadFrequency = 0;
 	}
@@ -289,7 +309,7 @@ public class HAManager
 	/**
 	 * Increments the analytics upload frequency
 	 */
-	protected void incrementAnalyticsUploadFrequency()
+	protected void incrementAnalyticsUploadRetryCount()
 	{
 		analyticsUploadFrequency++;
 	}
@@ -355,4 +375,17 @@ public class HAManager
 		}
 		return isUserConnected;
 	}	
+	
+	/**
+	 * Used to generate a random time in the range 0-23 at which analytics data will be sent to the server
+	 * @return random time in range 0-23
+	 */
+	private int getRandomTime()
+	{
+		Random rand = new Random();
+		
+		int time = rand.nextInt(24);
+		
+		return time;
+	}
 }

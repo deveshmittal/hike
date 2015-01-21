@@ -27,6 +27,8 @@ public class AnalyticsConstants
 	
 	public static final int MAX_EVENTS_IN_MEMORY = 50;
 	
+	public static final int DEFAULT_SEND_FREQUENCY = 24;
+	
 	public static final String HTTP_UPLOAD_URL = "http://staging.im.hike.in/v1/logs/analytics"; 
 	
 	public static final String EVENT_FILE_DIR = "/Analytics";
@@ -70,6 +72,8 @@ public class AnalyticsConstants
 	public static final String ANALYTICS_FILESIZE = "analyticsfs";
 	
 	public static final String ANALYTICS_TOTAL_SIZE = "totalfs";
+	
+	public static final String ANALYTICS_SEND_FREQUENCY = "analyticsfreq";
 	
 	public static final String EVENT_SUB_TYPE = "st";
 	
