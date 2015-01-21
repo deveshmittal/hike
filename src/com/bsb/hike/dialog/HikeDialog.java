@@ -19,12 +19,6 @@ public class HikeDialog extends Dialog
 		this.id = id;
 	}
 
-	public HikeDialog(Context context, int id)
-	{
-		super(context);
-		this.id = id;
-	}
-
 	/**
 	 * @return the id
 	 */
