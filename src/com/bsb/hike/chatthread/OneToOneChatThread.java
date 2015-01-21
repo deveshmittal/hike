@@ -158,22 +158,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		return list;
 	}
 
-	private boolean isUserOnHike()
-	{
-		return true;
-	}
+	//private boolean isUserOnHike()
+	//{
+	//	return true;
+//	}
 
-	@Override
-	protected void initAttachmentPicker(boolean addContact)
-	{
-		super.initAttachmentPicker(isUserOnHike());
-	}
-
-	@Override
-	protected void startHikeGallary(boolean onHike)
-	{
-		super.startHikeGallary(isUserOnHike());
-	}
 	
 	@Override
 	protected Conversation fetchConversation()
@@ -433,7 +422,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				removeFromMessageMap(msg);
 			}
 		}
-		if (isUserOnHike())
+		if (mConversation.isOnhike())
 		{
 			uiHandler.sendEmptyMessage(REMOVE_UNDELIVERED_MESSAGES);
 		}
@@ -447,7 +436,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		// TODO Auto-generated method stub
 		if (super.onMessageDelivered(object))
 		{
-			if (isUserOnHike())
+			if (mConversation.isOnhike())
 			{
 				Pair<String, Long> pair = (Pair<String, Long>) object;
 				long msgID = pair.second;

@@ -1292,6 +1292,8 @@ public class HikeConstants
 		public static final String DELETED_MESSAGE_TYPE = "deletedMessageType";
 
 		public static final String CURRENT_POSITION = "currentPosition";
+		
+		public static final String FROM_CHAT_THREAD = "fromCt";
 	}
 
 	public static final class LogEvent

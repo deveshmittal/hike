@@ -515,7 +515,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			emailChat();
 			break;
 		case AttachmentPicker.GALLERY:
-			startHikeGallary(true);
+			startHikeGallery(mConversation.isOnhike());
 			break;
 		default:
 			break;
@@ -678,7 +678,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void showAttchmentPicker()
 	{
-		initAttachmentPicker(true);
+		initAttachmentPicker(mConversation.isOnhike());
 		int width = (int) (Utils.densityMultiplier * 270);
 		int xOffset = -(int) (276 * Utils.densityMultiplier);
 		int yOffset = -(int) (0.5 * Utils.densityMultiplier);
@@ -793,10 +793,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	}
 
-	protected void startHikeGallary(boolean onHike)
+	private void startHikeGallery(boolean onHike)
 	{
-		Intent imageIntent = IntentFactory.getHileGallaryShare(activity.getApplicationContext(), null, onHike);
-		activity.startActivityForResult(imageIntent, 1);
+		Intent imageIntent = IntentFactory.getHikeGallaryShare(activity.getApplicationContext(), msisdn, onHike);
+		imageIntent.putExtra(HikeConstants.Extras.FROM_CHAT_THREAD, true);
+		activity.startActivityForResult(imageIntent, AttachmentPicker.GALLERY);
 	}
 
 	protected void shareCapturedImage(int resultCode, Intent data)
