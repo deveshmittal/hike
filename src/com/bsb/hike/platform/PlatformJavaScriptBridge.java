@@ -1,6 +1,7 @@
 package com.bsb.hike.platform;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -8,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.Toast;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -193,6 +195,13 @@ public class PlatformJavaScriptBridge
 		{
 			e.printStackTrace();
 		}
+	}
+
+	@JavascriptInterface
+	public void openFullPage(String title, String url)
+	{
+		Intent intent = IntentManager.getWebViewActivityIntent(mContext, url, title);
+		mContext.startActivity(intent);
 	}
 
 }
