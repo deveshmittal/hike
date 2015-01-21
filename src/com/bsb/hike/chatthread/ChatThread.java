@@ -782,7 +782,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private void removePubSubListeners()
 	{
 		Logger.d(TAG, "removing pubSub listeners");
-		HikeMessengerApp.getPubSub().removeListeners(this, mPubSubListeners);
+		if (mPubSubListeners != null)
+		{
+			HikeMessengerApp.getPubSub().removeListeners(this, mPubSubListeners);
+		}
 	}
 
 	protected void startHikeGallary(boolean onHike)
