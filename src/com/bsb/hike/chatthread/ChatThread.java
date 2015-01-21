@@ -12,19 +12,36 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorDescription;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.OperationApplicationException;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.provider.ContactsContract.CommonDataKinds.Event;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.RawContacts;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -38,7 +55,9 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
@@ -47,12 +66,16 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,9 +87,11 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.adapters.AccountAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.chatthread.HikeActionMode.ActionModeListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.dialog.ContactDialog;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
@@ -89,6 +114,9 @@ import com.bsb.hike.media.StickerPicker;
 import com.bsb.hike.media.StickerPicker.StickerPickerListener;
 import com.bsb.hike.media.ThemePicker;
 import com.bsb.hike.media.ThemePicker.ThemePickerListener;
+import com.bsb.hike.models.AccountData;
+import com.bsb.hike.models.ContactInfoData;
+import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -105,6 +133,7 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
@@ -1087,6 +1116,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		intentFilter.addAction(StickerManager.STICKERS_DOWNLOADED);
 		
 		LocalBroadcastManager.getInstance(activity).registerReceiver(mBroadCastReceiver, intentFilter);
+		
+		takeActionBasedOnIntent();
 	}
 
 	/*
@@ -1196,6 +1227,35 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 		addToPubSub();
 
+	}
+	
+	protected void takeActionBasedOnIntent()
+	{
+		Intent intent = activity.getIntent();
+		
+		/**
+		 * 1. Has an existing message in intent
+		 */
+		if (intent.hasExtra(HikeConstants.Extras.MSG))
+		{
+			String msg = intent.getStringExtra(HikeConstants.Extras.MSG);
+			mComposeView.setText(msg);
+			mComposeView.setSelection(mComposeView.length());
+			SmileyParser.getInstance().addSmileyToEditable(mComposeView.getText(), false);
+		}
+		
+		else if (intent.hasExtra(HikeConstants.Extras.CONTACT_ID))
+		{
+			String contactId = intent.getStringExtra(HikeConstants.Extras.CONTACT_ID);
+			if (TextUtils.isEmpty(contactId))
+			{
+				Toast.makeText(activity.getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+			}
+			else
+			{
+				getContactData(contactId);
+			}
+		}
 	}
 
 	/*
@@ -3085,4 +3145,398 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		
 	}
+	
+	// ------------------------  ACTIONMODE CALLBACKs ENDS -------------------------------
+	
+	private void getContactData(String contactId)
+	{
+		StringBuilder mimeTypes = new StringBuilder("(");
+		mimeTypes.append(DatabaseUtils.sqlEscapeString(Phone.CONTENT_ITEM_TYPE) + ",");
+		mimeTypes.append(DatabaseUtils.sqlEscapeString(Email.CONTENT_ITEM_TYPE) + ",");
+		mimeTypes.append(DatabaseUtils.sqlEscapeString(StructuredPostal.CONTENT_ITEM_TYPE) + ",");
+		mimeTypes.append(DatabaseUtils.sqlEscapeString(Event.CONTENT_ITEM_TYPE) + ",");
+		mimeTypes.append(DatabaseUtils.sqlEscapeString(StructuredName.CONTENT_ITEM_TYPE) + ")");
+		
+		String selection = Data.CONTACT_ID + " =? AND " + Data.MIMETYPE + " IN " + mimeTypes.toString();
+
+		String[] projection = new String[] { Data.DATA1, Data.DATA2, Data.DATA3, Data.MIMETYPE, Data.DISPLAY_NAME };
+
+		Cursor c = activity.getContentResolver().query(Data.CONTENT_URI, projection, selection, new String[] { contactId }, null);
+
+		int data1Idx = c.getColumnIndex(Data.DATA1);
+		int data2Idx = c.getColumnIndex(Data.DATA2);
+		int data3Idx = c.getColumnIndex(Data.DATA3);
+		int mimeTypeIdx = c.getColumnIndex(Data.MIMETYPE);
+		int nameIdx = c.getColumnIndex(Data.DISPLAY_NAME);
+
+		JSONObject contactJson = new JSONObject();
+
+		JSONArray phoneNumbersJson = null;
+		JSONArray emailsJson = null;
+		JSONArray addressesJson = null;
+		JSONArray eventsJson = null;
+
+		List<ContactInfoData> items = new ArrayList<ContactInfoData>();
+		
+		String name = null;
+		try
+		{
+			while (c.moveToNext())
+			{
+				String mimeType = c.getString(mimeTypeIdx);
+
+				if (!contactJson.has(HikeConstants.NAME))
+				{
+					String dispName = c.getString(nameIdx);
+					contactJson.put(HikeConstants.NAME, dispName);
+					name = dispName;
+				}
+
+				if (Phone.CONTENT_ITEM_TYPE.equals(mimeType))
+				{
+
+					if (phoneNumbersJson == null)
+					{
+						phoneNumbersJson = new JSONArray();
+						contactJson.put(HikeConstants.PHONE_NUMBERS, phoneNumbersJson);
+					}
+
+					String type = Phone.getTypeLabel(getResources(), c.getInt(data2Idx), c.getString(data3Idx)).toString();
+					String msisdn = c.getString(data1Idx);
+
+					JSONObject data = new JSONObject();
+					data.put(type, msisdn);
+					phoneNumbersJson.put(data);
+
+					items.add(new ContactInfoData(DataType.PHONE_NUMBER, msisdn, type));
+				}
+				else if (Email.CONTENT_ITEM_TYPE.equals(mimeType))
+				{
+
+					if (emailsJson == null)
+					{
+						emailsJson = new JSONArray();
+						contactJson.put(HikeConstants.EMAILS, emailsJson);
+					}
+
+					String type = Email.getTypeLabel(getResources(), c.getInt(data2Idx), c.getString(data3Idx)).toString();
+					String email = c.getString(data1Idx);
+
+					JSONObject data = new JSONObject();
+					data.put(type, email);
+					emailsJson.put(data);
+
+					items.add(new ContactInfoData(DataType.EMAIL, email, type));
+				}
+				else if (StructuredPostal.CONTENT_ITEM_TYPE.equals(mimeType))
+				{
+
+					if (addressesJson == null)
+					{
+						addressesJson = new JSONArray();
+						contactJson.put(HikeConstants.ADDRESSES, addressesJson);
+					}
+
+					String type = StructuredPostal.getTypeLabel(getResources(), c.getInt(data2Idx), c.getString(data3Idx)).toString();
+					String address = c.getString(data1Idx);
+
+					JSONObject data = new JSONObject();
+					data.put(type, address);
+					addressesJson.put(data);
+
+					items.add(new ContactInfoData(DataType.ADDRESS, address, type));
+				}
+				else if (Event.CONTENT_ITEM_TYPE.equals(mimeType))
+				{
+
+					if (eventsJson == null)
+					{
+						eventsJson = new JSONArray();
+						contactJson.put(HikeConstants.EVENTS, eventsJson);
+					}
+
+					String event;
+					int eventType = c.getInt(data2Idx);
+					if (eventType == Event.TYPE_ANNIVERSARY)
+					{
+						event = getString(R.string.anniversary);
+					}
+					else if (eventType == Event.TYPE_OTHER)
+					{
+						event = getString(R.string.other);
+					}
+					else if (eventType == Event.TYPE_BIRTHDAY)
+					{
+						event = getString(R.string.birthday);
+					}
+					else
+					{
+						event = c.getString(data3Idx);
+					}
+					String type = event.toString();
+					String eventDate = c.getString(data1Idx);
+
+					JSONObject data = new JSONObject();
+					data.put(type, eventDate);
+					eventsJson.put(data);
+
+					items.add(new ContactInfoData(DataType.EVENT, eventDate, type));
+				}
+			}
+		}
+		catch (JSONException e)
+		{
+			Logger.e(TAG, "Invalid JSON", e);
+		}
+
+		Logger.d(TAG, "Data of contact is : " + contactJson.toString());
+		clearTempData();
+		showContactDetails(items, name, contactJson, false);
+	}
+	
+	private void clearTempData()
+	{
+		Editor editor = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, activity.MODE_PRIVATE).edit();
+		editor.remove(HikeMessengerApp.TEMP_NAME);
+		editor.remove(HikeMessengerApp.TEMP_NUM);
+		editor.commit();
+	}
+	
+	private void showContactDetails(final List<ContactInfoData> items, final String name, final JSONObject contactInfo, final boolean saveContact)
+	{
+		final ContactDialog contactDialog = new ContactDialog(activity, R.style.Theme_CustomDialog, -1);
+		contactDialog.setContentView(R.layout.contact_share_info);
+
+		ViewGroup parent = (ViewGroup) contactDialog.findViewById(R.id.parent);
+		TextView contactName = (TextView) contactDialog.findViewById(R.id.contact_name);
+		ListView contactDetails = (ListView) contactDialog.findViewById(R.id.contact_details);
+		Button yesBtn = (Button) contactDialog.findViewById(R.id.btn_ok);
+		Button noBtn = (Button) contactDialog.findViewById(R.id.btn_cancel);
+		View accountContainer = contactDialog.findViewById(R.id.account_container);
+		final Spinner accounts = (Spinner) contactDialog.findViewById(R.id.account_spinner);
+		final TextView accountInfo = (TextView) contactDialog.findViewById(R.id.account_info);
+
+		int screenHeight = getResources().getDisplayMetrics().heightPixels;
+		int dialogWidth = (int) getResources().getDimension(R.dimen.contact_info_width);
+		int dialogHeight = (int) (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? ((3 * screenHeight) / 4)
+				: FrameLayout.LayoutParams.MATCH_PARENT);
+		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(dialogWidth, dialogHeight);
+		lp.topMargin = (int) (5 * Utils.densityMultiplier);
+		lp.bottomMargin = (int) (5 * Utils.densityMultiplier);
+
+		parent.setLayoutParams(lp);
+
+		contactDialog.setViewReferences(parent, accounts);
+
+		yesBtn.setText(saveContact ? R.string.save : R.string.send);
+
+		if (saveContact)
+		{
+			accountContainer.setVisibility(View.VISIBLE);
+			accounts.setAdapter(new AccountAdapter(activity.getApplicationContext(), getAccountList()));
+			if (accounts.getSelectedItem() != null)
+			{
+				accountInfo.setText(((AccountData) accounts.getSelectedItem()).getName());
+			}
+			else
+			{
+				accountInfo.setText(R.string.device);
+			}
+		}
+		else
+		{
+			accountContainer.setVisibility(View.GONE);
+		}
+
+		accountContainer.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				accounts.performClick();
+			}
+		});
+
+		accounts.setOnItemSelectedListener(new OnItemSelectedListener()
+		{
+
+			@Override
+			public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id)
+			{
+				accountInfo.setText(((AccountData) accounts.getSelectedItem()).getName());
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0)
+			{
+			}
+
+		});
+
+		contactName.setText(name);
+		contactDetails.setAdapter(new ArrayAdapter<ContactInfoData>(activity.getApplicationContext(), R.layout.contact_share_item, R.id.info_value, items)
+		{
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent)
+			{
+				View v = super.getView(position, convertView, parent);
+				ContactInfoData contactInfoData = getItem(position);
+
+				TextView header = (TextView) v.findViewById(R.id.info_head);
+				header.setText(contactInfoData.getDataSubType());
+
+				TextView details = (TextView) v.findViewById(R.id.info_value);
+				details.setText(contactInfoData.getData());
+				return v;
+			}
+
+		});
+		yesBtn.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				if (saveContact)
+				{
+					if (accounts.getSelectedItem() != null)
+					{
+						saveContact(items, accounts, name);
+					}
+					else
+					{
+						Utils.addToContacts(items, name, activity);
+					}
+				}
+				else
+				{
+					initialiseContactTransfer(contactInfo);
+				}
+				contactDialog.dismiss();
+			}
+		});
+		noBtn.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				contactDialog.dismiss();
+			}
+		});
+		contactDialog.show();
+	}
+
+	private void saveContact(List<ContactInfoData> items, Spinner accountSpinner, String name)
+	{
+
+		AccountData accountData = (AccountData) accountSpinner.getSelectedItem();
+
+		ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+		int rawContactInsertIndex = ops.size();
+
+		ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI).withValue(RawContacts.ACCOUNT_TYPE, accountData.getType())
+				.withValue(RawContacts.ACCOUNT_NAME, accountData.getName()).build());
+
+		for (ContactInfoData contactInfoData : items)
+		{
+			switch (contactInfoData.getDataType())
+			{
+			case ADDRESS:
+				ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI).withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, StructuredPostal.CONTENT_ITEM_TYPE).withValue(StructuredPostal.DATA, contactInfoData.getData())
+						.withValue(StructuredPostal.TYPE, StructuredPostal.TYPE_CUSTOM).withValue(StructuredPostal.LABEL, contactInfoData.getDataSubType()).build());
+				break;
+			case EMAIL:
+				ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI).withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, Email.CONTENT_ITEM_TYPE).withValue(Email.DATA, contactInfoData.getData()).withValue(Email.TYPE, Email.TYPE_CUSTOM)
+						.withValue(Email.LABEL, contactInfoData.getDataSubType()).build());
+				break;
+			case EVENT:
+				ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI).withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, Event.CONTENT_ITEM_TYPE).withValue(Event.DATA, contactInfoData.getData()).withValue(Event.TYPE, Event.TYPE_CUSTOM)
+						.withValue(Event.LABEL, contactInfoData.getDataSubType()).build());
+				break;
+			case PHONE_NUMBER:
+				ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI).withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE).withValue(Phone.NUMBER, contactInfoData.getData()).withValue(Phone.TYPE, Phone.TYPE_CUSTOM)
+						.withValue(Phone.LABEL, contactInfoData.getDataSubType()).build());
+				break;
+			}
+		}
+		ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI).withValueBackReference(Data.RAW_CONTACT_ID, rawContactInsertIndex)
+				.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE).withValue(StructuredName.DISPLAY_NAME, name).build());
+		boolean contactSaveSuccessful;
+		try
+		{
+			activity.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+			contactSaveSuccessful = true;
+		}
+		catch (RemoteException e)
+		{
+			e.printStackTrace();
+			contactSaveSuccessful = false;
+		}
+		catch (OperationApplicationException e)
+		{
+			e.printStackTrace();
+			contactSaveSuccessful = false;
+		}
+		Toast.makeText(activity.getApplicationContext(), contactSaveSuccessful ? R.string.contact_saved : R.string.contact_not_saved, Toast.LENGTH_SHORT).show();
+	}
+	
+	private List<AccountData> getAccountList()
+	{
+		Account[] a = AccountManager.get(activity.getApplicationContext()).getAccounts();
+		// Clear out any old data to prevent duplicates
+		List<AccountData> accounts = new ArrayList<AccountData>();
+
+		// Get account data from system
+		AuthenticatorDescription[] accountTypes = AccountManager.get(activity.getApplicationContext()).getAuthenticatorTypes();
+
+		// Populate tables
+		for (int i = 0; i < a.length; i++)
+		{
+			// The user may have multiple accounts with the same name, so we
+			// need to construct a
+			// meaningful display name for each.
+			String type = a[i].type;
+			/*
+			 * Only showing the user's google accounts
+			 */
+			if (!"com.google".equals(type))
+			{
+				continue;
+			}
+			String systemAccountType = type;
+			AuthenticatorDescription ad = getAuthenticatorDescription(systemAccountType, accountTypes);
+			AccountData data = new AccountData(a[i].name, ad, activity.getApplicationContext());
+			accounts.add(data);
+		}
+
+		return accounts;
+	}
+	
+	/**
+	 * Obtain the AuthenticatorDescription for a given account type.
+	 * 
+	 * @param type
+	 *            The account type to locate.
+	 * @param dictionary
+	 *            An array of AuthenticatorDescriptions, as returned by AccountManager.
+	 * @return The description for the specified account type.
+	 */
+	private AuthenticatorDescription getAuthenticatorDescription(String type, AuthenticatorDescription[] dictionary)
+	{
+		for (int i = 0; i < dictionary.length; i++)
+		{
+			if (dictionary[i].type.equals(type))
+			{
+				return dictionary[i];
+			}
+		}
+		// No match found
+		throw new RuntimeException("Unable to find matching authenticator");
+	}
+
 }

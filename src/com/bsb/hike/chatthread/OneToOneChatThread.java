@@ -1427,4 +1427,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		
 		lastSeenScheduler.start(mContactInfo.getMsisdn(), this);
 	}
+	
+	@Override
+	protected void takeActionBasedOnIntent()
+	{
+		super.takeActionBasedOnIntent();
+	}
+	
 }

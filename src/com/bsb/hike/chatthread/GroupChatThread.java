@@ -1236,4 +1236,10 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		}
 	}
 	
+	@Override
+	protected void takeActionBasedOnIntent()
+	{
+		super.takeActionBasedOnIntent();
+	}
+	
 }
