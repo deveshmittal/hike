@@ -106,7 +106,10 @@ public class GCMIntentService extends GCMBaseIntentService
 			String str = intent.getStringExtra("msg");
 			try
 			{
-				MqttMessagesManager.getInstance(context).saveMqttMessage(new JSONObject(str));
+				if (!TextUtils.isEmpty(str))
+				{
+					MqttMessagesManager.getInstance(context).saveMqttMessage(new JSONObject(str));
+				}
 			}
 			catch (JSONException e)
 			{
