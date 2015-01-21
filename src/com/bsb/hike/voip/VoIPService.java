@@ -314,13 +314,6 @@ public class VoIPService extends Service {
 			// Error case: we are in a cellular call
 			if (VoIPUtils.isUserInCall(getApplicationContext())) {
 				Log.w(VoIPConstants.TAG, "We are already in a cellular call.");
-				try {
-					VoIPUtils.sendMessage(intent.getStringExtra("msisdn"), 
-							HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
-							HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
 				return returnInt;
 			}
 
@@ -893,10 +886,13 @@ public class VoIPService extends Service {
 						else 
 							newQuality = CallQuality.WEAK;
 
-						currentCallQuality = newQuality;
+						if (currentCallQuality != newQuality) {
+							currentCallQuality = newQuality;
+							sendHandlerMessage(VoIPActivity.MSG_UPDATE_QUALITY);
+						}
+
 						qualityCounter = 0;
 						lastQualityReset = System.currentTimeMillis();
-						sendHandlerMessage(VoIPActivity.MSG_UPDATE_QUALITY);
 					}
 					
 					// Drop packets if getting left behind
