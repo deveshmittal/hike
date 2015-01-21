@@ -224,8 +224,7 @@ public class IntentFactory {
 		if (selectedFile == null) {
 			Toast.makeText(
 					context,
-					context.getResources().getString(
-							R.string.no_external_storage), Toast.LENGTH_LONG)
+							R.string.no_external_storage, Toast.LENGTH_LONG)
 					.show();
 			return null;
 		}
@@ -259,7 +258,7 @@ public class IntentFactory {
 		return new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
 	}
 
-	public static Intent getHileGallaryShare(Context context, String msisdn,
+	public static Intent getHikeGallaryShare(Context context, String msisdn,
 			boolean onHike) {
 		Intent imageIntent = new Intent(context, GalleryActivity.class);
 		imageIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
