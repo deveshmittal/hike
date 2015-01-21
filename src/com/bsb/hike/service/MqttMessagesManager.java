@@ -1321,6 +1321,12 @@ public class MqttMessagesManager
 			editor.putLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, size);
 			HAManager.getInstance().setAnalyticsMaxSizeOnClient(size);
 		}
+		if(data.has(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY))
+		{
+			int freq = data.getInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY);
+			editor.putInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY, freq);
+			HAManager.getInstance().setAnalyticsSendFrequency(freq);
+		}
 		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
