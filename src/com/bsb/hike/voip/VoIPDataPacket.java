@@ -47,7 +47,9 @@ public class VoIPDataPacket {
 		COMM_UDP_ACK_PRIVATE (27),
 		COMM_UDP_ACK_PUBLIC (28),
 		COMM_UDP_ACK_RELAY (29),
-		NETWORK_QUALITY (30)
+		NETWORK_QUALITY (30),
+		HOLD_ON (31), 
+		HOLD_OFF (32)
 		;
 		
 		private final int value;
@@ -124,6 +126,10 @@ public class VoIPDataPacket {
 				return COMM_UDP_ACK_RELAY;
 			case 30:
 				return NETWORK_QUALITY;
+			case 31:
+				return HOLD_ON;
+			case 32:
+				return HOLD_OFF;
 			default:
 				return UPDATE;
 			}

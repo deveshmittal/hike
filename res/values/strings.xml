@@ -1252,7 +1252,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="nux_fwd_search_hint">Names go here...</string>
     <string name="recently_joined_hike">RECENTLY JOINED HIKE</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_vo_ip">VoIPActivity</string>
     <string name="creating_backup_message">Creating a backup of your account. Daily backups occur at 3:00 AM</string>
     <string name="restore">Restore</string>
     <string name="delete_account_description">delete all your messages, backup, free SMS and hike rewards</string>
