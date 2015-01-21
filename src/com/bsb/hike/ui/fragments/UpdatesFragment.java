@@ -23,6 +23,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.CentralTimelineAdapter;
+import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -158,7 +159,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		}
 		Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(null, statusMessage.getMsisdn(), statusMessage.getNotNullName(), statusMessage.getMsisdn()), true);
 		intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
-		intent.setClass(getActivity(), ChatThread.class);
+		intent.setClass(getActivity(), ChatThreadActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 		getActivity().finish();

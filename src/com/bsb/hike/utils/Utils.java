@@ -354,7 +354,9 @@ public class Utils
 
 		// If the contact info was made using a group conversation, then the
 		// Group ID is in the contact ID
-		intent.putExtra(HikeConstants.Extras.MSISDN, Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo.getId() : contactInfo.getMsisdn());
+		boolean isGroupConv = Utils.isGroupConversation(contactInfo.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.MSISDN, isGroupConv ? contactInfo.getId() : contactInfo.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, isGroupConv ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD);
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}
@@ -366,6 +368,7 @@ public class Utils
 		// If the contact info was made using a group conversation, then the
 		// Group ID is in the contact ID
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdnOrGroupId);
+		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, Utils.isGroupConversation(msisdnOrGroupId) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD);
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}

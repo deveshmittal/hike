@@ -42,6 +42,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.FileListAdapter;
+import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
@@ -285,8 +286,10 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 						{
 							return;
 						}
-						Intent intent = new Intent(FileSelectActivity.this, ChatThread.class);
-						intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.MSISDN));
+						Intent intent = new Intent(FileSelectActivity.this, ChatThreadActivity.class);
+						String msisdn = getIntent().getStringExtra(HikeConstants.MSISDN);
+						intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+						intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, Utils.isGroupConversation(msisdn) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD);
 						intent.putExtra(HikeConstants.Extras.FILE_PATH, file.getAbsolutePath());
 						intent.putExtra(HikeConstants.Extras.FILE_TYPE, item.getMimeType());
 						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -713,9 +716,11 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 				@Override
 				public void run()
 				{
-					Intent intent = new Intent(FileSelectActivity.this, ChatThread.class);
+					Intent intent = new Intent(FileSelectActivity.this, ChatThreadActivity.class);
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
+					String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+					intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+					intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, Utils.isGroupConversation(msisdn) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD);
 					startActivity(intent);
 
 					if (progressDialog != null)

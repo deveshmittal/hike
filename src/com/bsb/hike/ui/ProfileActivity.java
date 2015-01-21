@@ -70,6 +70,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ProfileAdapter;
+import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.dialog.CustomAlertDialog;
 import com.bsb.hike.dialog.HikeDialog;
@@ -1974,7 +1975,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private void openChatThread(ContactInfo contactInfo)
 	{
 		Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
-		intent.setClass(this, ChatThread.class);
+		intent.setClass(this, ChatThreadActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		if (getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false))
 		{
@@ -1987,9 +1988,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		Utils.logEvent(ProfileActivity.this, HikeConstants.LogEvent.ADD_PARTICIPANT);
 
-		Intent intent = new Intent(ProfileActivity.this, ChatThread.class);
-		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mLocalMSISDN);
+		Intent intent = new Intent(ProfileActivity.this, ChatThreadActivity.class);
+		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, HikeConstants.Extras.GROUP_CHAT_THREAD);
+		intent.putExtra(HikeConstants.Extras.MSISDN, mLocalMSISDN);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 

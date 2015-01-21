@@ -68,6 +68,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
@@ -2656,7 +2657,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						// Group ID is in the contact ID
 						intent.putExtra(HikeConstants.Extras.MSISDN, message.getGroupParticipantMsisdn());
 						intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
-						intent.setClass(context, ChatThread.class);
+						intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, HikeConstants.Extras.GROUP_CHAT_THREAD);
+						intent.setClass(context, ChatThreadActivity.class);
 						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						context.startActivity(intent);
 					}

@@ -27,6 +27,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ImageViewerInfo;
@@ -645,7 +646,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 
 			Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(null, statusMessage.getMsisdn(), statusMessage.getNotNullName(), statusMessage.getMsisdn()), true);
 			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
-			intent.setClass(context, ChatThread.class);
+			intent.setClass(context, ChatThreadActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			context.startActivity(intent);
 			context.finish();

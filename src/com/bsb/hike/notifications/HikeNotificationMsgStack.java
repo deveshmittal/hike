@@ -21,10 +21,12 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.utils.Utils;
 
 /**
  * This class is responsible for maintaining states of ConvMessages to be used for showing Android notifications.
@@ -289,8 +291,9 @@ public class HikeNotificationMsgStack implements Listener
 			else
 			{
 
-				mNotificationIntent = new Intent(mContext, ChatThread.class);
+				mNotificationIntent = new Intent(mContext, ChatThreadActivity.class);
 				mNotificationIntent.putExtra(HikeConstants.Extras.MSISDN, lastAddedMsisdn);
+				mNotificationIntent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, Utils.isGroupConversation(lastAddedMsisdn) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD);
 				mNotificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 				/*
