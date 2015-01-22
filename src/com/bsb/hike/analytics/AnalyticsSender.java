@@ -212,6 +212,10 @@ public class AnalyticsSender implements Runnable
 	 */
 	private void upload(String fileName)
 	{
+		if(fileName.endsWith(AnalyticsConstants.SRC_FILE_EXTENSION))
+		{
+			return;
+		}
 		while(true)
 		{
 			String absolutePath = context.getFilesDir() + AnalyticsConstants.EVENT_FILE_DIR + File.separator + fileName;
@@ -232,9 +236,10 @@ public class AnalyticsSender implements Runnable
 			{
 				postCall.addHeader("Connection", "Keep-Alive");
 				postCall.addHeader("Content-Name", fileName);
+				postCall.addHeader("Content-Encoding", "gzip");
 				postCall.addHeader("Cookie", "user=" + token + ";UID=" + uId);
 				postCall.setEntity(new FileEntity(new File(absolutePath), "text/plain"));
-				
+
 				response = httpClient.execute(postCall);			
 			}
 			catch(SocketTimeoutException e)
