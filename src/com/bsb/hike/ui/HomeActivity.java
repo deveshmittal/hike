@@ -172,7 +172,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
+		if (Utils.requireAuth(this))
 		{
 			return;
 		}
@@ -392,7 +392,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		super.onNewIntent(intent);
 
-		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
+		if (Utils.requireAuth(this))
 		{
 			return;
 		}
@@ -719,7 +719,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
 		}
-		Utils.requestAccountInfo(false, HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false));
+		Utils.requestAccountInfo(false, false);
 		Utils.sendLocaleToServer(HomeActivity.this);
 		deviceDetailsSent = true;
 	}
