@@ -2420,7 +2420,6 @@ public class VoIPService extends Service {
 			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.VOIP);
 			metadata.put(HikeConstants.EVENT_KEY, ek);
 			metadata.put(VoIPConstants.Analytics.IS_CALLER, clientPartner.isInitiator() ? 0 : 1);
-			metadata.put(VoIPConstants.Analytics.PARTNER_MSISDN, clientPartner.getPhoneNumber());
 			metadata.put(VoIPConstants.Analytics.CALL_ID, getCallId());
 			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, VoIPUtils.getConnectionClass(getApplicationContext()).ordinal());
 
@@ -2440,7 +2439,7 @@ public class VoIPService extends Service {
 
 			data.put(HikeConstants.METADATA, metadata);
 
-			Utils.sendLogEvent(data);
+			Utils.sendLogEvent(data, null, clientPartner.getPhoneNumber());
 		}
 		catch (JSONException e)
 		{
