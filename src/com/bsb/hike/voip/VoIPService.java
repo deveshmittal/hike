@@ -2275,8 +2275,8 @@ public class VoIPService extends Service {
 				
 				if (connected == true) {
 					Logger.d(VoIPConstants.TAG, "UDP connection established :) " + clientPartner.getPreferredConnectionMethod());
-					sendHandlerMessage(VoIPActivity.MSG_CONNECTION_ESTABLISHED);
 					if (clientSelf.isInitiator() && !reconnecting) {
+						sendHandlerMessage(VoIPActivity.CONNECTION_ESTABLISHED_FIRST_TIME);
 //						playOnSpeaker(R.raw.ring_tone, true);
 						setAudioModeInCall();
 						ringtoneStreamID = playFromSoundPool(SOUND_INCOMING_RINGTONE, true);
