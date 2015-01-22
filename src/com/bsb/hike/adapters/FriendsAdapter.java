@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
@@ -140,7 +141,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	private ContactFilter contactFilter;
 
-	private String queryText;
+	protected String queryText;
 
 	private boolean lastSeenPref;
 
@@ -163,6 +164,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected FriendsListFetchedCallback friendsListFetchedCallback;
 
 	protected LastSeenComparator lastSeenComparator;
+
+	protected Map<String, Integer> contactSpanStartIndexes;
 
 	public FriendsAdapter(Context context, ListView listView, FriendsListFetchedCallback friendsListFetchedCallback, LastSeenComparator lastSeenComparator)
 	{
@@ -201,6 +204,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		lastStatusMessagesMap = new HashMap<String, StatusMessage>();
 
 		listFetchedOnce = false;
+
+		contactSpanStartIndexes = new HashMap<String, Integer>();
 	}
 
 	public void executeFetchTask()
@@ -233,6 +238,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		protected FilterResults performFiltering(CharSequence constraint)
 		{
 			FilterResults results = new FilterResults();
+			contactSpanStartIndexes.clear();
 
 			if (!TextUtils.isEmpty(constraint))
 			{
@@ -289,35 +295,50 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 			try
 			{
+
 				for (ContactInfo info : allList)
 				{
 					String name = info.getName();
-					if (name != null)
+					boolean endReached = false;
+					boolean found = false;
+					int startIndex = 0;
+					while(!endReached && name!=null)
 					{
 						name = name.toLowerCase();
-						// for word boundary
-						try
+						if(name.startsWith(textToBeFiltered))
 						{
-							if (name.contains(textToBeFiltered))
+							found = true;
+							break;
+						}
+						else
+						{
+							String tokens[] = name.split(" ", 2);
+							if(tokens.length > 1)
 							{
-								listToUpdate.add(info);
-								continue;
+								startIndex += tokens[0].length() + 1;
+								name = tokens[1];
+							}
+							else
+							{
+								endReached = true;
 							}
 						}
-						catch (Exception e)
-						{
-						}
 					}
-
-					String msisdn = info.getMsisdn();
-					if (msisdn != null && !Utils.isGroupConversation(msisdn))
+					if(found)
 					{
-						// word boundary is not working because of +91 , resolve later --gauravKhanna
-						if (msisdn.contains(textToBeFiltered))
+						contactSpanStartIndexes.put(info.getMsisdn(), startIndex);
+						listToUpdate.add(info);
+					}
+					else
+					{
+						String msisdn = info.getMsisdn();
+						if (msisdn != null && !Utils.isGroupConversation(msisdn))
 						{
-							listToUpdate.add(info);
+							if(msisdn.contains(textToBeFiltered))
+							{
+								listToUpdate.add(info);
+							}
 						}
-
 					}
 				}
 			}
@@ -1037,7 +1058,25 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 			updateViewsRelatedToAvatar(convertView, contactInfo);
 
-			name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getMsisdn() : contactInfo.getName());
+			String contactName = contactInfo.getName();
+			String msisdn = contactInfo.getMsisdn();
+
+			if(TextUtils.isEmpty(contactName))
+			{
+				name.setText(msisdn);
+			}
+			else
+			{
+				Integer startIndex = contactSpanStartIndexes.get(msisdn);
+				if(startIndex!=null)
+				{
+					name.setText(getSpanText(contactName, startIndex), TextView.BufferType.SPANNABLE);
+				}
+				else
+				{
+					name.setText(contactName);
+				}
+			}
 
 			if (viewType == ViewType.FRIEND || viewType == ViewType.FRIEND_REQUEST || viewType == ViewType.FTUE_CONTACT)
 			{
@@ -1231,6 +1270,13 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		}
 
 		return convertView;
+	}
+
+	protected SpannableString getSpanText(String text, Integer start)
+	{
+		SpannableString spanName = new SpannableString(text);
+		spanName.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.blue_color_span)), start, start+queryText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		return spanName;
 	}
 
 	private void updateViewsRelatedToAvatar(View parentView, ContactInfo contactInfo)
