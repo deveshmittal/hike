@@ -3,7 +3,7 @@
     package="com.bsb.hike"
     android:installLocation="auto"
     android:versionCode="937"
-    android:versionName="3.6.5.0121" >
+    android:versionName="3.6.6.50" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -34,9 +34,9 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" /> <!-- Needed to switch to speakerphone for VoIP -->
     
     <!-- New Permissions Added -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>
     <uses-permission android:name="android.permission.GLOBAL_SEARCH"/>
     <uses-permission android:name="android.permission.MANAGE_DOCUMENTS"/>

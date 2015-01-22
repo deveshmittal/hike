@@ -58,26 +58,6 @@ import com.bsb.hike.voip.VoIPUtils;
 
 public class VoIPActivity extends Activity implements CallActions
 {
-	
-	/**
-	 * PAY ATTENTION!! TODO!
-	 * 
-	 * Two changes need to be reverted before this code is pushed to production.
-	 * 
-	 * 1. This build connects to DMQTT.
-	 * 2. VoIP is enabled by default with code in HomeActivity onCreate().
-	 * 
-	 *   
-	 *   
-	 *   
-	 *   
-	 *   
-	 *   
-	 *   
-	 *   
-	 *   
-	 */
-
 	static final int PROXIMITY_SCREEN_OFF_WAKELOCK = 32;
 //	public static boolean isRunning = false;
 
@@ -91,7 +71,7 @@ public class VoIPActivity extends Activity implements CallActions
 	private float proximitySensorMaximumRange;
 
 	public static final int MSG_SHUTDOWN_ACTIVITY = 1;
-	public static final int MSG_CONNECTION_ESTABLISHED = 2;
+	public static final int CONNECTION_ESTABLISHED_FIRST_TIME = 2;
 	public static final int MSG_AUDIO_START = 3;
 	public static final int MSG_ENCRYPTION_INITIALIZED = 4;
 	public static final int MSG_OUTGOING_CALL_DECLINED = 5;
@@ -131,7 +111,7 @@ public class VoIPActivity extends Activity implements CallActions
 				Logger.d(VoIPConstants.TAG, "Shutting down..");
 				shutdown(msg.getData());
 				break;
-			case MSG_CONNECTION_ESTABLISHED:
+			case CONNECTION_ESTABLISHED_FIRST_TIME:
 				showCallStatus(CallStatus.OUTGOING_RINGING);
 //				showMessage("Connection established (" + voipService.getConnectionMethod() + ")");
 				break;
