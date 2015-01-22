@@ -2992,10 +2992,10 @@ public class Utils
 
 	public static void sendLogEvent(JSONObject data)
 	{
-		sendLogEvent(data, null);
+		sendLogEvent(data, null, null);
 	}
 	
-	public static void sendLogEvent(JSONObject data, String subType){
+	public static void sendLogEvent(JSONObject data, String subType, String toMsisdn){
 
 		JSONObject object = new JSONObject();
 		try
@@ -3007,6 +3007,10 @@ public class Utils
 				JSONObject md = new JSONObject();
 				md.put(HikeConstants.SUB_TYPE, subType);
 				data.put(HikeConstants.METADATA, md);
+			}
+			if(!TextUtils.isEmpty(toMsisdn))
+			{
+				object.put(HikeConstants.TO, toMsisdn);
 			}
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
