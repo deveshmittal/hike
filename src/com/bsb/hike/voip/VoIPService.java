@@ -1965,11 +1965,13 @@ public class VoIPService extends Service {
 		ringtone.play();		
 		
 		// Vibrator
-		if (vibratorEnabled == true) {
-			vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-			if (vibrator != null) {
-				long[] pattern = {0, 500, 1000};
-				vibrator.vibrate(pattern, 0);
+		synchronized (this) {
+			if (vibratorEnabled == true) {
+				vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+				if (vibrator != null) {
+					long[] pattern = {0, 500, 1000};
+					vibrator.vibrate(pattern, 0);
+				}
 			}
 		}
 	}
@@ -1987,10 +1989,12 @@ public class VoIPService extends Service {
 			Logger.w(VoIPConstants.TAG, "stopRingtone() IllegalStateException: " + e.toString());
 		}
 		
-		// stop vibrating
-		if (vibrator != null) {
-			vibrator.cancel();
-			vibrator = null;
+		synchronized (this) {
+			// stop vibrating
+			if (vibrator != null) {
+				vibrator.cancel();
+				vibrator = null;
+			}
 		}
 	}
 	
