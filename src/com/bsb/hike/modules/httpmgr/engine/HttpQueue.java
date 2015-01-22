@@ -9,6 +9,7 @@ import android.util.Pair;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.RequestCall;
 import com.bsb.hike.utils.Logger;
+import static com.bsb.hike.modules.httpmgr.engine.HttpEngineConstants.CORE_POOL_SIZE;
 
 public class HttpQueue
 {
@@ -25,7 +26,7 @@ public class HttpQueue
 
 	private Deque<RequestCall> shortRunningQueue;
 
-	private short MAX_QUEUE_SIZE = HttpEngineConstants.CORE_POOL_SIZE;
+	private short MAX_QUEUE_SIZE = CORE_POOL_SIZE;
 
 	HttpQueue()
 	{

@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import android.os.Build;
 
 import com.bsb.hike.modules.httpmgr.request.RequestCall;
+import static com.bsb.hike.modules.httpmgr.engine.HttpEngineConstants.KEEP_ALIVE_TIME;
 
 /**
  * 
@@ -48,7 +49,7 @@ public class HttpExecuter extends ScheduledThreadPoolExecutor
 	@Override
 	public void setKeepAliveTime(long time, TimeUnit unit)
 	{
-		super.setKeepAliveTime(HttpEngineConstants.KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS);
+		super.setKeepAliveTime(KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS);
 	}
 
 	@Override

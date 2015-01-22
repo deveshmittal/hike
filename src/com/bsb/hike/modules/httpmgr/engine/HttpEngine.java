@@ -13,6 +13,7 @@ import com.bsb.hike.modules.httpmgr.request.RequestCall;
 import com.bsb.hike.modules.httpmgr.response.ResponseCall;
 import com.bsb.hike.utils.Logger;
 import com.squareup.okhttp.internal.Util;
+import static com.bsb.hike.modules.httpmgr.engine.HttpEngineConstants.CORE_POOL_SIZE;
 
 /**
  * 
@@ -41,14 +42,14 @@ public class HttpEngine
 	public HttpEngine()
 	{
 		// executer used for serving short requests
-		shortRequestExecuter = new HttpExecuter(this, SHORT_EXECUTER, HttpEngineConstants.CORE_POOL_SIZE, Utils.threadFactory("short-thread", false),
+		shortRequestExecuter = new HttpExecuter(this, SHORT_EXECUTER, CORE_POOL_SIZE, Utils.threadFactory("short-thread", false),
 				Utils.rejectedExecutionHandler());
 
 		// executer used for serving long requests
-		longRequestExecuter = new HttpExecuter(this, LONG_EXECUTER, HttpEngineConstants.CORE_POOL_SIZE, Utils.threadFactory("long-thread", false), Utils.rejectedExecutionHandler());
+		longRequestExecuter = new HttpExecuter(this, LONG_EXECUTER, CORE_POOL_SIZE, Utils.threadFactory("long-thread", false), Utils.rejectedExecutionHandler());
 
 		// executer used for serving response
-		responseExecuter = new ThreadPoolExecutor(0, 2 * HttpEngineConstants.CORE_POOL_SIZE + 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), Util.threadFactory(
+		responseExecuter = new ThreadPoolExecutor(0, 2 * CORE_POOL_SIZE + 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), Util.threadFactory(
 				"http-response", false));
 
 		// underlying queue used for storing submitted and running request
