@@ -24,7 +24,7 @@ import com.bsb.hike.utils.Logger;
 public class AttachmentPicker extends OverFlowMenuLayout
 {
 
-	private static final String tag = "attachmentPicker";
+	private static final String TAG = "attachmentPicker";
 
 	public static final int CAMERA = 313;
 
@@ -184,7 +184,7 @@ public class AttachmentPicker extends OverFlowMenuLayout
 				}
 				else
 				{
-					Logger.e(tag, "intent is null !!");
+					Logger.e(TAG, "intent is null !!");
 				}
 			}
 		});

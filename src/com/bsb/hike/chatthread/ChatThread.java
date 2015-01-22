@@ -519,7 +519,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (requestCode)
 		{
 		case AttachmentPicker.CAMERA:
-			CaptureImageParser.parseOnActivityResult(activity, resultCode, data, this);
+			CaptureImageParser.parseCameraResult(activity, resultCode, data, this);
 			break;
 		case AttachmentPicker.AUDIO:
 		case AttachmentPicker.VIDEO:
@@ -838,12 +838,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void uploadFile(Uri uri, HikeFileType fileType)
 	{
 		Logger.i(TAG, "upload file , uri " + uri + " filetype " + fileType);
+		FileTransferManager.getInstance(activity.getApplicationContext()).uploadFile(uri, fileType, msisdn, mConversation.isOnhike());
 	}
 
-	protected void UploadFile(String filePath, HikeFileType fileType)
+	protected void uploadFile(String filePath, HikeFileType fileType)
 	{
 		Logger.i(TAG, "upload file , filepath " + filePath + " filetype " + fileType);
+		initialiseFileTransfer(filePath, null, fileType, null, false, -1, false);
 	}
+	
 
 	protected void showToast(int messageId)
 	{
@@ -859,13 +862,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void imageCaptured(String imagePath)
 	{
-		UploadFile(imagePath, HikeFileType.IMAGE);
+		uploadFile(imagePath, HikeFileType.IMAGE);
 	}
 
 	@Override
 	public void imageCaptureFailed()
 	{
 		showToast(R.string.error_capture);
+		clearTempData();
 	}
 
 	@Override
@@ -874,10 +878,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (requestCode)
 		{
 		case AttachmentPicker.AUDIO:
-			UploadFile(filePath, HikeFileType.AUDIO);
+			uploadFile(filePath, HikeFileType.AUDIO);
 			break;
 		case AttachmentPicker.VIDEO:
-			UploadFile(filePath, HikeFileType.VIDEO);
+			uploadFile(filePath, HikeFileType.VIDEO);
 			break;
 		}
 
