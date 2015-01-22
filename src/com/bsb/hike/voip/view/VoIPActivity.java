@@ -91,7 +91,7 @@ public class VoIPActivity extends Activity implements CallActions
 	private float proximitySensorMaximumRange;
 
 	public static final int MSG_SHUTDOWN_ACTIVITY = 1;
-	public static final int MSG_CONNECTION_ESTABLISHED = 2;
+	public static final int CONNECTION_ESTABLISHED_FIRST_TIME = 2;
 	public static final int MSG_AUDIO_START = 3;
 	public static final int MSG_ENCRYPTION_INITIALIZED = 4;
 	public static final int MSG_OUTGOING_CALL_DECLINED = 5;
@@ -131,7 +131,7 @@ public class VoIPActivity extends Activity implements CallActions
 				Logger.d(VoIPConstants.TAG, "Shutting down..");
 				shutdown(msg.getData());
 				break;
-			case MSG_CONNECTION_ESTABLISHED:
+			case CONNECTION_ESTABLISHED_FIRST_TIME:
 				showCallStatus(CallStatus.OUTGOING_RINGING);
 //				showMessage("Connection established (" + voipService.getConnectionMethod() + ")");
 				break;
