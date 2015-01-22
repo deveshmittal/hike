@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -12,11 +11,9 @@ import android.webkit.WebViewClient;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Logger;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
