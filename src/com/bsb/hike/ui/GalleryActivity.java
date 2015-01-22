@@ -381,7 +381,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			{
 				intent.putExtra(HikeConstants.Extras.FROM_CHAT_THREAD, isFromChatThread);
 			}
-			startActivity(intent);
+			startActivityForResult(intent, AttachmentPicker.GALLERY);
 		}
 		else
 		{
