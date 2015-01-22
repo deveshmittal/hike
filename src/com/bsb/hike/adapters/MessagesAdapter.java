@@ -54,6 +54,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.Spinner;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -69,6 +70,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.chatthread.ChatThreadActivity;
+import com.bsb.hike.dialog.ContactDialog;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
@@ -84,6 +86,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.MessageMetadata;
@@ -3235,11 +3238,47 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private void saveContact(HikeFile hikeFile)
 	{
 
-		String name = hikeFile.getDisplayName();
+		final String name = hikeFile.getDisplayName();
 
-		List<ContactInfoData> items = Utils.getContactDataFromHikeFile(hikeFile);
-
-		chatThread.showContactDetails(items, name, null, true);
+		final List<ContactInfoData> items = Utils.getContactDataFromHikeFile(hikeFile);
+		
+		PhonebookContact contact = new PhonebookContact();
+		contact.name = name;
+		contact.items = items;
+		
+		HikeDialogFactory.showDialog(context, HikeDialogFactory.CONTACT_SAVE_DIALOG, new HikeDialogListener()
+		{
+			
+			@Override
+			public void positiveClicked(HikeDialog hikeDialog)
+			{
+				Spinner accounts = (Spinner) ((ContactDialog) hikeDialog).findViewById(R.id.account_spinner);
+				
+				if (accounts.getSelectedItem() != null)
+				{
+					Utils.addToContacts(items, name, context, accounts);
+				}
+				
+				else
+				{
+					Utils.addToContacts(items, name, context);
+				}
+				
+				hikeDialog.dismiss();
+			}
+			
+			@Override
+			public void neutralClicked(HikeDialog hikeDialog)
+			{
+				
+			}
+			
+			@Override
+			public void negativeClicked(HikeDialog hikeDialog)
+			{
+				
+			}
+		}, contact, context.getString(R.string.save), true);
 	}
 
 	/*
