@@ -1,6 +1,20 @@
 package com.bsb.hike.modules.httpmgr.engine;
 
+import static com.bsb.hike.modules.httpmgr.exception.HttpException.REASON_CODE_AUTH_FAILURE;
+import static com.bsb.hike.modules.httpmgr.exception.HttpException.REASON_CODE_CONNECTION_TIMEOUT;
+import static com.bsb.hike.modules.httpmgr.exception.HttpException.REASON_CODE_MALFORMED_URL;
+import static com.bsb.hike.modules.httpmgr.exception.HttpException.REASON_CODE_NO_NETWORK;
+import static com.bsb.hike.modules.httpmgr.exception.HttpException.REASON_CODE_SERVER_ERROR;
+import static com.bsb.hike.modules.httpmgr.exception.HttpException.REASON_CODE_SOCKET_TIMEOUT;
+import static com.bsb.hike.modules.httpmgr.exception.HttpException.REASON_CODE_UNEXPECTED_ERROR;
+import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
+import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
+
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+
+import org.apache.http.conn.ConnectTimeoutException;
 
 import com.bsb.hike.modules.httpmgr.DefaultHeaders;
 import com.bsb.hike.modules.httpmgr.client.IClient;
@@ -29,6 +43,8 @@ public class RequestExecuter
 	private HttpEngine engine;
 
 	private IResponseListener listener;
+
+	private Response response;
 
 	public RequestExecuter(IClient client, HttpEngine engine, Request request, IResponseListener listener)
 	{
@@ -141,7 +157,7 @@ public class RequestExecuter
 		{
 			if (!request.isCancelled())
 			{
-				listener.onResponse(null, new HttpException("No network available"));
+				listener.onResponse(null, new HttpException(REASON_CODE_NO_NETWORK));
 				return;
 			}
 		}
@@ -152,19 +168,60 @@ public class RequestExecuter
 			{
 				return;
 			}
-			Response response = client.execute(request);
 
 			/**
 			 * add default headers to the request
 			 */
 			DefaultHeaders.applyDefaultHeaders(request);
 
+			response = client.execute(request);
+
+			if (response.getStatusCode() < 200 || response.getStatusCode() > 299)
+			{
+				throw new IOException();
+			}
+
+			// positive response 
 			listener.onResponse(response, null);
 		}
-		catch (Exception ex)
+		catch (SocketTimeoutException ex)
 		{
-			ex.printStackTrace();
-			handleException(ex);
+			handleRetry(ex, REASON_CODE_SOCKET_TIMEOUT);
+		}
+		catch (ConnectTimeoutException ex)
+		{
+			handleRetry(ex, REASON_CODE_CONNECTION_TIMEOUT);
+		}
+		catch (MalformedURLException ex)
+		{
+			handleException(ex, REASON_CODE_MALFORMED_URL);
+		}
+		catch (IOException ex)
+		{
+			int statusCode = 0;
+			if (response != null)
+			{
+				statusCode = response.getStatusCode();
+			}
+			else
+			{
+				handleRetry(ex, REASON_CODE_NO_NETWORK);
+				return;
+			}
+			
+			if (statusCode == HTTP_UNAUTHORIZED || statusCode == HTTP_FORBIDDEN)
+			{
+				handleException(ex, REASON_CODE_AUTH_FAILURE);
+			}
+			else
+			{
+				handleException(ex, REASON_CODE_SERVER_ERROR);
+				return;
+			}
+		}
+		catch (Throwable ex)
+		{
+			handleException(ex, REASON_CODE_UNEXPECTED_ERROR);
 		}
 	}
 
@@ -173,16 +230,9 @@ public class RequestExecuter
 	 * 
 	 * @param ex
 	 */
-	private void handleException(Exception ex)
+	private void handleException(Throwable ex, int reasonCode)
 	{
-		if (ex instanceof IOException)
-		{
-			handleRetry((IOException) ex);
-		}
-		else
-		{
-			listener.onResponse(null, new HttpException(ex));
-		}
+		listener.onResponse(null, new HttpException(reasonCode, ex));
 	}
 
 	/**
@@ -190,9 +240,9 @@ public class RequestExecuter
 	 * 
 	 * @param ex
 	 */
-	private void handleRetry(IOException ex)
+	private void handleRetry(Exception ex, int responseCode)
 	{
-		HttpException httpException = new HttpException(ex);
+		HttpException httpException = new HttpException(responseCode, ex);
 		if (null != request.getRetryPolicy())
 		{
 			IRetryPolicy retryPolicy = request.getRetryPolicy();
