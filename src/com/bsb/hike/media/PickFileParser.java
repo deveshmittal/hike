@@ -19,7 +19,7 @@ public class PickFileParser
 		public void pickFileFailed(int requestCode);
 	}
 
-	public static void OnActivityResult(int requestCode, int resultCode, Intent data, PickFileListener listener, Activity activity)
+	public static void onAudioOrVideoResult(int requestCode, int resultCode, Intent data, PickFileListener listener, Activity activity)
 	{
 		if (resultCode == Activity.RESULT_OK)
 		{

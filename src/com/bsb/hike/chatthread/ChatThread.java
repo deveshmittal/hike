@@ -523,7 +523,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case AttachmentPicker.AUDIO:
 		case AttachmentPicker.VIDEO:
-			PickFileParser.OnActivityResult(requestCode, resultCode, data, this, activity);
+			PickFileParser.onAudioOrVideoResult(requestCode, resultCode, data, this, activity);
 			break;
 		case AttachmentPicker.LOCATOIN:
 			break;
