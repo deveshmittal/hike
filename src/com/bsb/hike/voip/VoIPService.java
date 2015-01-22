@@ -846,7 +846,9 @@ public class VoIPService extends Service {
 		
 		Logger.d(VoIPConstants.TAG, "Detected ideal bitrate: " + localBitrate);
 		sendHandlerMessage(VoIPActivity.MSG_CURRENT_BITRATE);
-		opusWrapper.setEncoderBitrate(localBitrate);
+		
+		if (opusWrapper != null)
+			opusWrapper.setEncoderBitrate(localBitrate);
 	}
 	
 	private void startHeartbeat() {
