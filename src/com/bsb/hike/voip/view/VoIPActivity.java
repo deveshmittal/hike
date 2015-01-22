@@ -106,6 +106,7 @@ public class VoIPActivity extends Activity implements CallActions
 	public static final int MSG_UPDATE_QUALITY = 17;
 	public static final int MSG_NETWORK_SUCKS = 18;
 	public static final int MSG_UPDATE_HOLD_BUTTON = 19;
+	public static final int MSG_ALREADY_IN_CALL = 20;
 
 	private CallActionsView callActionsView;
 	private Chronometer callDuration;
@@ -188,7 +189,9 @@ public class VoIPActivity extends Activity implements CallActions
 					showCallStatus(CallStatus.ON_HOLD);
 				else
 					showCallStatus(CallStatus.ACTIVE);
-
+				break;
+			case MSG_ALREADY_IN_CALL:
+				showMessage("Already in call. Please try again later.");
 				break;
 			default:
 				super.handleMessage(msg);
