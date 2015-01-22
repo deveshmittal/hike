@@ -322,6 +322,7 @@ public class VoIPService extends Service {
 			// Error case: we are in a cellular call
 			if (VoIPUtils.isUserInCall(getApplicationContext())) {
 				Log.w(VoIPConstants.TAG, "We are already in a cellular call.");
+				sendHandlerMessage(VoIPActivity.MSG_ALREADY_IN_CALL);
 				return returnInt;
 			}
 
@@ -339,6 +340,7 @@ public class VoIPService extends Service {
 			
 			if (getCallId() > 0) {
 				Logger.e(VoIPConstants.TAG, "Error. Already in a call.");
+				sendHandlerMessage(VoIPActivity.MSG_ALREADY_IN_CALL);
 				return returnInt;
 			}
 			
@@ -636,6 +638,8 @@ public class VoIPService extends Service {
 			if (keepRunning == false) {
 				// Logger.w(VoIPConstants.TAG, "Trying to stop a stopped service?");
 				sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY);
+				connected = false;
+				setCallid(0);
 				return;
 			}
 			keepRunning = false;
@@ -802,8 +806,8 @@ public class VoIPService extends Service {
 			@Override
 			public void run() {
 				int streamId = playFromSoundPool(SOUND_RECONNECTING, true);
+				sendHandlerMessage(VoIPActivity.MSG_RECONNECTING);
 				while (keepRunning) {
-					sendHandlerMessage(VoIPActivity.MSG_RECONNECTING);
 					try {
 						Thread.sleep(200);
 					} catch (InterruptedException e) {
@@ -877,7 +881,7 @@ public class VoIPService extends Service {
 						// Logger.w(VoIPConstants.TAG, "Heartbeat failure. Reconnecting.. ");
 						if (clientSelf.isInitiator() && isConnected() && isAudioRunning())
 							reconnect();
-						else if (!isConnected())	// Give me the call receiver time so the initiator can reestablish connection.
+						else if (!isConnected())	// Give the call receiver time so the initiator can reestablish connection.
 							hangUp();
 					}
 					
@@ -1939,6 +1943,11 @@ public class VoIPService extends Service {
 	}
 
 	private void playIncomingCallRingtone() {
+		
+		// Edge case: caller hung up before we started playing ringtone. 
+		if (keepRunning == false)
+			return;
+			
 		// Ringer
 		Log.d(VoIPConstants.TAG, "Playing ringtone.");
 		Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
