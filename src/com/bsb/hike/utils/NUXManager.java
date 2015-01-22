@@ -194,7 +194,8 @@ public class NUXManager
 
 		convMessage = Utils.makeConvMessage(null, message, true);
 		messageList.add(convMessage);
-		MultipleConvMessage multiConvMessages = new MultipleConvMessage(messageList, contactList, System.currentTimeMillis() / 1000, true, null);
+		Logger.d("UmangX", "Nux Manager seding nwo : "  +System.currentTimeMillis() );
+		MultipleConvMessage multiConvMessages = new MultipleConvMessage(messageList, contactList, System.currentTimeMillis() / 1000 , true, null);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_SENT, multiConvMessages);
 	}
 
@@ -899,7 +900,7 @@ public class NUXManager
 		Drawable drawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
 		Intent intent = new Intent(context, HomeActivity.class);
 		HikeNotification.getInstance(context).showBigTextStyleNotification(intent, 0, System.currentTimeMillis(), HikeNotification.HIKE_SUMMARY_NOTIFICATION_ID, title, text,
-				title, "", null, drawable, false, 0);
+				title, "", null, drawable, shouldNotPlaySound, 0);
 	}
 
 	public boolean showNuxScreen()

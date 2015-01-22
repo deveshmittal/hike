@@ -467,7 +467,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
 				Intent intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
-				intent.putExtra(HikeConstants.Extras.EDIT, true);
+				intent.putExtra(HikeConstants.Extras.EDIT , true);
 				
 				newConversationIndicator.setVisibility(View.GONE);
 				startActivity(intent);

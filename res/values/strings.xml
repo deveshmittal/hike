@@ -1283,9 +1283,9 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="nux_remind">Remind</string>
     <string name="nux_invite_more">Invite More</string>
     <string name="select_friends">SELECT FRIENDS</string>
-    <string name="custom_message">I love the stickers on hike! Chat with me on hike now!</string>
+    <string name="custom_message">Chat with me on Hike now!</string>
     <string name="custome_message_send_button">SEND</string>
-    <string name="custom_message_hint">Tap to enter your custom message. It\'ll be sent to the friends you select!</string>
+    <string name="custom_message_hint">Tap to enter your custom message.</string>
     <string name="nux_select_friends_1">Who\'re your best friends</string>
     <string name="nux_select_friends_2">Pick %d more!</string>
     <string name="nux_select_friends_3">Good to go!</string>

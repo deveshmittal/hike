@@ -371,7 +371,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else if (isForwardingMessage && !isSharingFile)
 		{
-			setMode(nuxIncentiveMode ? NUX_INCENTIVE_MODE : (nuxInviteMode ? NUX_INVITE_MODE : MULTIPLE_FWD));
+			setMode(nuxInviteMode ? NUX_INVITE_MODE : MULTIPLE_FWD);
 		}
 		else if(nuxIncentiveMode)
 		{
@@ -540,7 +540,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						tagEditText.toggleTag(name, contactInfo.getMsisdn(),contactInfo);
 					else {
 						//newFragment.toggleViews(contactInfo);
-						
+						adapter.removeFilter();
+						tagEditText.clear(false);
 						if (adapter.isContactAdded(contactInfo)) {
 							if(newFragment.removeView(contactInfo)) adapter.removeContact(contactInfo);;
 
@@ -672,7 +673,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.removeFilter();
 			adapter.clearAllSelection(true);
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
-			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint(R.string.nux_fwd_search_hint);
+			tagEditText.setHint(R.string.nux_fwd_search_hint);
 			break;
 		case NUX_INCENTIVE_MODE:
 			adapter.showCheckBoxAgainstItems(true);
@@ -684,7 +685,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.preSelectContacts(nm.getLockedContacts(), nm.getUnlockedContacts());
 			System.out.print("INSIDE NUX");
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
-			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint(R.string.nux_fwd_search_hint);
+			tagEditText.setHint(R.string.search_hint);
 			break;
 		}
 		if(!nuxIncentiveMode) 

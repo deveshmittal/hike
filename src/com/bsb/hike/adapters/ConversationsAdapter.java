@@ -639,6 +639,7 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 		
 		TextView tsView = viewHolder.timeStamp;
+
 		tsView.setText(message.getTimestampFormatted(true, context));
 	}
 
