@@ -802,8 +802,8 @@ public class VoIPService extends Service {
 			@Override
 			public void run() {
 				int streamId = playFromSoundPool(SOUND_RECONNECTING, true);
+				sendHandlerMessage(VoIPActivity.MSG_RECONNECTING);
 				while (keepRunning) {
-					sendHandlerMessage(VoIPActivity.MSG_RECONNECTING);
 					try {
 						Thread.sleep(200);
 					} catch (InterruptedException e) {
