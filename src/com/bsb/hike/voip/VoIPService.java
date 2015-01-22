@@ -1297,7 +1297,13 @@ public class VoIPService extends Service {
 				Logger.d(VoIPConstants.TAG, "minBufSizePlayback: " + minBufSizePlayback);
 			
 				setAudioModeInCall();
-				audioTrack = new AudioTrack(AudioManager.STREAM_VOICE_CALL, playbackSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizePlayback, AudioTrack.MODE_STREAM);
+				try {
+					audioTrack = new AudioTrack(AudioManager.STREAM_VOICE_CALL, playbackSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizePlayback, AudioTrack.MODE_STREAM);
+				} catch (IllegalArgumentException e) {
+					Logger.w(VoIPConstants.TAG, "Unable to initialize AudioTrack: " + e.toString());
+					hangUp();
+					return;
+				}
 				
 				// Audiotrack monitor
 				audioTrack.setPlaybackPositionUpdateListener(new OnPlaybackPositionUpdateListener() {
