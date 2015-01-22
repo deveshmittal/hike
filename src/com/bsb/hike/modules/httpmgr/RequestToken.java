@@ -1,0 +1,42 @@
+package com.bsb.hike.modules.httpmgr;
+
+import com.bsb.hike.modules.httpmgr.client.ClientOptions;
+import com.bsb.hike.modules.httpmgr.request.Request;
+
+/**
+ * Provides a mechanism for executing or canceling a http request without giving access to the request class outside the http manager
+ * 
+ * @author sidharth
+ * 
+ */
+public class RequestToken
+{
+	private Request request;
+
+	public RequestToken(Request request)
+	{
+		this.request = request;
+	}
+
+	/**
+	 * 
+	 */
+	public void execute()
+	{
+		HttpManager.getInstance().addRequest(request);
+	}
+	
+	public void execute(ClientOptions options)
+	{
+		HttpManager.getInstance().addRequest(request, options);
+	}
+
+	/**
+	 * 
+	 */
+	public void cancel()
+	{
+		HttpManager.getInstance().cancel(request);
+	}
+
+}

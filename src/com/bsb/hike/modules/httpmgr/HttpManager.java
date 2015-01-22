@@ -5,7 +5,6 @@ import com.bsb.hike.modules.httpmgr.engine.HttpEngine;
 import com.bsb.hike.modules.httpmgr.engine.RequestListenerNotifier;
 import com.bsb.hike.modules.httpmgr.engine.RequestProcessor;
 import com.bsb.hike.modules.httpmgr.request.Request;
-import com.bsb.hike.modules.httpmgr.request.RequestToken;
 
 /**
  * This class will be used for initialization by and outside world and for adding or canceling a request by {@link RequestToken}
@@ -26,7 +25,7 @@ public class HttpManager
 		requestProcessor = new RequestProcessor(options, engine, notifier);
 	}
 
-	HttpManager getInstance()
+	static HttpManager getInstance()
 	{
 		return _instance;
 	}
