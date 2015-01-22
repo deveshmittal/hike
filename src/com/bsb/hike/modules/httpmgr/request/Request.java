@@ -8,6 +8,8 @@ import java.util.concurrent.Future;
 import android.text.TextUtils;
 
 import com.bsb.hike.modules.httpmgr.Header;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.request.facade.IRequestFacade;
 import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
@@ -17,7 +19,7 @@ import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
 /**
  * Encapsulates all of the information necessary to make an HTTP request.
  */
-public class Request
+public class Request implements IRequestFacade
 {
 	public static final short REQUEST_TYPE_LONG = 0x0;
 
@@ -52,7 +54,7 @@ public class Request
 	private boolean asynchronous;
 
 	private Future<?> future;
-
+	
 	private Request(Builder builder)
 	{
 		this.id = builder.id;
@@ -332,7 +334,7 @@ public class Request
 	{
 		this.future = future;
 	}
-
+	
 	/**
 	 * Sets isCancelled field to true and cancels the future of this request that has been submitted to the executor
 	 */

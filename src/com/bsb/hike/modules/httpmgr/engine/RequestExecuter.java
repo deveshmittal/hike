@@ -7,6 +7,7 @@ import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.network.NetworkChecker;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.RequestCall;
+import com.bsb.hike.modules.httpmgr.request.facade.RequestFacade;
 import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
@@ -41,7 +42,7 @@ public class RequestExecuter
 	 */
 	private void preProcess()
 	{
-		request.getPreProcessListener().doInBackground();
+		request.getPreProcessListener().doInBackground(new RequestFacade(request));
 	}
 
 	/**
