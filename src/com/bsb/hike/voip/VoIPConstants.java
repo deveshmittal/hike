@@ -3,19 +3,6 @@ package com.bsb.hike.voip;
 public class VoIPConstants {
 	public static final String TAG = "VoIP";
 	
-	/*
-	// Connection setup constants
-	public static final String COMM_UDP_SYN_PUBLIC = "synpublic";
-	public static final String COMM_UDP_SYN_PRIVATE = "synprivate";
-	public static final String COMM_UDP_SYN_RELAY = "synrelay";
-	public static final String COMM_UDP_SYNACK_PUBLIC = "synackpublic";
-	public static final String COMM_UDP_SYNACK_PRIVATE = "synackprivate";
-	public static final String COMM_UDP_SYNACK_RELAY = "synackrelay";
-	public static final String COMM_UDP_ACK_PRIVATE = "ackprivate";
-	public static final String COMM_UDP_ACK_PUBLIC = "ackpublic";
-	public static final String COMM_UDP_ACK_RELAY = "ar";
-	*/
-	
 	// Relay and ICE server 
 	public static final String ICEServerName = "relay.hike.in";
 	public static final int ICEServerPort = 9999;
@@ -53,8 +40,6 @@ public class VoIPConstants {
 		public static final String CALL_ID = "callid";
 
 		public static final String IS_CALLER = "caller";
-
-		public static final String PARTNER_MSISDN = "pmsisdn";
 
 		public static final String NETWORK_TYPE = "net";
 

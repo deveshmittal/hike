@@ -179,6 +179,7 @@ public class VoIPService extends Service {
 		setCallid(0);
 		encryptionStage = EncryptionStage.STAGE_INITIAL;
 		initAudioManager();
+		keepRunning = true;
 		
 		if (resamplerEnabled)
 			playbackSampleRate = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_VOICE_CALL);
@@ -345,6 +346,7 @@ public class VoIPService extends Service {
 			}
 			
 			// we are making an outgoing call
+			keepRunning = true;
 			clientPartner.setPhoneNumber(intent.getStringExtra("msisdn"));
 			clientSelf.setInitiator(true);
 			clientPartner.setInitiator(false);
@@ -1358,10 +1360,14 @@ public class VoIPService extends Service {
 				}
 				
 				if (audioTrack != null) {
-					audioTrack.pause();
-					audioTrack.flush();
-					audioTrack.release();
-					audioTrack = null;
+					try {
+						audioTrack.pause();
+						audioTrack.flush();
+						audioTrack.release();
+						audioTrack = null;
+					} catch (IllegalStateException e) {
+						Logger.w(VoIPConstants.TAG, "Audiotrack IllegalStateException: " + e.toString());
+					}
 				}
 			}
 		}, "PLAY_BACK_THREAD");
@@ -1694,7 +1700,7 @@ public class VoIPService extends Service {
 			else
 				packet = new DatagramPacket(packetData, packetData.length, clientPartner.getCachedInetAddress(), clientPartner.getPreferredPort());
 				
-//			Logger.d(VoIPConstants.TAG, "Sending type: " + dp.getType() + " to: " + clientPartner.getCachedInetAddress() + ":" + clientPartner.getPreferredPort());
+//			Logger.d(VoIPConstants.TAG, "Sending type: " + dp.getType() + " to: " + packet.getAddress() + ":" + packet.getPort());
 			socket.send(packet);
 			totalBytesSent += packet.getLength();
 			totalPacketsSent++;
@@ -1969,10 +1975,14 @@ public class VoIPService extends Service {
 	public void stopRingtone()
 	{
 		// Stop ringtone if playing
-		if (ringtone != null && ringtone.isPlaying())
-		{
-			ringtone.stop();
-			ringtone = null;
+		try {
+			if (ringtone != null && ringtone.isPlaying())
+			{
+				ringtone.stop();
+				ringtone = null;
+			}
+		} catch (IllegalStateException e) {
+			Logger.w(VoIPConstants.TAG, "stopRingtone() IllegalStateException: " + e.toString());
 		}
 		
 		// stop vibrating
@@ -2420,7 +2430,6 @@ public class VoIPService extends Service {
 			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.VOIP);
 			metadata.put(HikeConstants.EVENT_KEY, ek);
 			metadata.put(VoIPConstants.Analytics.IS_CALLER, clientPartner.isInitiator() ? 0 : 1);
-			metadata.put(VoIPConstants.Analytics.PARTNER_MSISDN, clientPartner.getPhoneNumber());
 			metadata.put(VoIPConstants.Analytics.CALL_ID, getCallId());
 			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, VoIPUtils.getConnectionClass(getApplicationContext()).ordinal());
 
@@ -2440,7 +2449,7 @@ public class VoIPService extends Service {
 
 			data.put(HikeConstants.METADATA, metadata);
 
-			Utils.sendLogEvent(data);
+			Utils.sendLogEvent(data, null, clientPartner.getPhoneNumber());
 		}
 		catch (JSONException e)
 		{

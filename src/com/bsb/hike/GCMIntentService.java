@@ -181,7 +181,7 @@ public class GCMIntentService extends GCMBaseIntentService
 				JSONObject data = json.optJSONObject(HikeConstants.DATA);
 				if (data != null)
 				{
-					Utils.sendLogEvent(data,HikeConstants.MqttMessageTypes.GCM_ECHO);
+					Utils.sendLogEvent(data, HikeConstants.MqttMessageTypes.GCM_ECHO, null);
 				}
 				return false;
 			}

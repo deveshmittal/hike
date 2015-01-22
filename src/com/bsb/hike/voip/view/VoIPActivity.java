@@ -139,7 +139,7 @@ public class VoIPActivity extends Activity implements CallActions
 //				showMessage("Bitrate: " + bitrate);
 				break;
 			case MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE:
-				showMessage("Unable to connect to network. Please try again later.");
+				showMessage("Unable to connect to network.");
 				voipService.stop();
 				break;
 			case MSG_PARTNER_SOCKET_INFO_TIMEOUT:
@@ -160,7 +160,7 @@ public class VoIPActivity extends Activity implements CallActions
 				Logger.d(VoIPConstants.TAG, "Updating call quality to: " + quality);
 				break;
 			case MSG_NETWORK_SUCKS:
-				showMessage("Your network quality is poor. Please call after some time.");
+				showMessage("Your network quality is poor.");
 				break;
 			case MSG_UPDATE_HOLD_BUTTON:
 				boolean hold = voipService.getHold();
