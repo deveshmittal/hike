@@ -1,6 +1,7 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -179,7 +180,6 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.FtueActivity;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeDialog;
@@ -674,18 +674,6 @@ public class Utils
 		}
 		if (!currentAppVersion.equals("") && !currentAppVersion.equals(actualAppVersion))
 		{
-			return true;
-		}
-		return false;
-	}
-
-	public static boolean showNuxScreen(Activity activity)
-	{
-		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if (settings.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false))
-		{
-			activity.startActivity(new Intent(activity, FtueActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-			activity.finish();
 			return true;
 		}
 		return false;

@@ -523,12 +523,6 @@ public class HikeConstants
 
 	public static final String SINGLE_INVITE_SMS_ALERT_CHECKED = "singleSmsAlertChecked";
 	
-	public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
-	
-	public static final String SHOW_NUX_SCREEN = "show_nux_screen";
-		
-	public static final String NUX_STICKER_DETAILS = "nuxStickerDetails";
-	
 	public static final String FTUE_ADD_SMS_ALERT_CHECKED = "ftueSmsAlertChecked";
 
 	public static final String IS_GAMES_ITEM_CLICKED = "isGamesItemClicked";
@@ -984,15 +978,7 @@ public class HikeConstants
 	public static final String SUCCESSFUL_SELECTIONS = "s";
 	
 	public static final String DRAWABLE = "drawable";
-	
-	public static final String NUX_STICKERS = "stickers";
-	
-	public static final String SHOW_NUX_INVITE_MODE = "showNuxInviteMode";
-
-	public static final String NUX_HOME_INVITE_FOOTER = "nuxHomeInviteFooter";
-
-	public static final String NUX_INVITE_FORWARD = "nuxInviteForward";
-	
+		
 	public static final String SELF_HIKE_ID = "-1";
 
 	public static final class ResultCodes
@@ -1340,12 +1326,6 @@ public class HikeConstants
 		public static final String DELETED_MESSAGE_TYPE = "deletedMessageType";
 
 		public static final String CURRENT_POSITION = "currentPosition";
-		
-		public static final String FTUE_FORWARD = "ftueForward";
-		
-		public static final String FTUE_STICKER_ID_LIST = "ftueStickerIdsList";
-		
-		public static final String FTUE_STICKER_CATEGORY_LIST = "ftueStickerCategoryList";
 		
 		public static final String SDK_THIRD_PARTY_PKG = "third_party_app_pkg";
 		
@@ -1709,19 +1689,6 @@ public class HikeConstants
 		public static final String ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED = "atomicAppHikeExtraClick";
 
 		public static final String ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED = "atomicAppHikeRewardsClick";
-
-		/*
-		 * NUX Events 
-		 */
-		public static final String NUX_STICKER_CLICKED = "nuxStckrClk";
-
-		public static final String NUX_STICKER_FORWARD = "nuxStckrFwd";
-
-		public static final String NUX_INVITE_BUTTON_CLICKED = "nuxInvteBtnClk";
-
-		public static final String NUX_INVITE_SENT = "nuxInvteSent";
-
-		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
 		
 		/*
 		 * Account Backup Events
