@@ -1,16 +1,17 @@
 package com.bsb.hike.analytics;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
-
+import java.util.zip.GZIPOutputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import android.content.Context;
-
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.utils.Logger;
@@ -80,12 +81,12 @@ public class AnalyticsStore
 		if(priority == EventPriority.NORMAL)
 		{
 			fileName = AnalyticsConstants.NORMAL_EVENT_FILE_NAME + Long.toString(System.currentTimeMillis()) + 
-				 AnalyticsConstants.FILE_EXTENSION;
+				 AnalyticsConstants.SRC_FILE_EXTENSION;
 		}
 		else if(priority == EventPriority.HIGH)
 		{
 			fileName = AnalyticsConstants.IMP_EVENT_FILE_NAME + Long.toString(System.currentTimeMillis()) + 
-					 AnalyticsConstants.FILE_EXTENSION;			
+					 AnalyticsConstants.SRC_FILE_EXTENSION;			
 		}
 		return fileName;
 	}
@@ -125,6 +126,7 @@ public class AnalyticsStore
 		String fileName = generateNewEventFileName(priority);
 
 		String dirName = this.context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
+		
 		File dir = new File(dirName);
 
 		if(!dir.exists())
@@ -151,13 +153,13 @@ public class AnalyticsStore
 	/**
 	 * writes the event json to the file
 	 */
-	protected void dumpEvents(final ArrayList<JSONObject> eventJsons)
+	protected void dumpEvents(final ArrayList<JSONObject> eventJsons, final boolean isOnDemand)
 	{		
 		new Thread(new Runnable() 
 		{			
 			@Override
 			public void run() 
-			{					
+			{			
 				FileWriter fileWriter = null;
 				StringBuilder normal = new StringBuilder();
 				StringBuilder high = new StringBuilder();
@@ -194,13 +196,17 @@ public class AnalyticsStore
 						if(getFileSize(EventPriority.NORMAL) >= AnalyticsConstants.MAX_FILE_SIZE)
 						{
 							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "normal priority file size reached its limit! " + normalPriorityEventFile.getName());
+							compressAndDeleteOriginalFile(normalPriorityEventFile.getAbsolutePath());
 							normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
 						}
-
 						fileWriter = new FileWriter(normalPriorityEventFile, true);
 						fileWriter.write(normal.toString());
 
-						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to the file!");
+						if(isOnDemand)
+						{
+							compressAndDeleteOriginalFile(normalPriorityEventFile.getAbsolutePath());
+						}
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to normal file!");
 					}
 					if(high.length() > 0)
 					{
@@ -212,10 +218,17 @@ public class AnalyticsStore
 						if(getFileSize(EventPriority.HIGH) >= AnalyticsConstants.MAX_FILE_SIZE)
 						{
 							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "high priority file size reached its limit! " + highPriorityEventFile.getName());
+							compressAndDeleteOriginalFile(highPriorityEventFile.getAbsolutePath());
 							highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
 						}
 						fileWriter = new FileWriter(normalPriorityEventFile, true);
 						fileWriter.write(normal.toString());
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to imp file!");
+
+						if(isOnDemand)
+						{
+							compressAndDeleteOriginalFile(highPriorityEventFile.getAbsolutePath());
+						}
 					}	
 				}
 				catch (IOException e)
@@ -321,5 +334,61 @@ public class AnalyticsStore
 				file[i].delete();
 			}
 		}
+	}
+	
+	/**
+	 * Used to compress the text file to gzip file
+	 * @param fileUrl is the file path to be compressed
+	 * @throws IOException 
+	 */
+	private void gzipFile(String srcFileUrl) throws IOException
+	{	
+		String destFileUrl = srcFileUrl.replace(AnalyticsConstants.SRC_FILE_EXTENSION, AnalyticsConstants.DEST_FILE_EXTENSION);
+
+		byte[] buffer = new byte[4096];
+		
+		GZIPOutputStream gzos = null;
+		FileInputStream fis = null;
+		try
+		{
+			gzos = new GZIPOutputStream(new FileOutputStream(destFileUrl));
+
+			fis = new FileInputStream(srcFileUrl);
+
+			int len;
+
+			while ((len = fis.read(buffer)) > 0) 
+			{
+				gzos.write(buffer, 0, len);
+			}	 
+		}
+		catch(FileNotFoundException ex)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "ioExcepion while compressing file");
+		}
+		finally
+		{
+			if(fis != null)
+			{
+				fis.close();
+			}
+			if(gzos != null)
+			{
+				gzos.finish();
+				gzos.close();
+			}
+		}
+	}
+	
+	/**
+	 * Used to compress file with a given path in gzip format and then deletes it
+	 * @param filePath of the file to be compressed to gzip
+	 * @throws IOException thrown by gzipFile() method
+	 */
+	private void compressAndDeleteOriginalFile(String filePath) throws IOException
+	{
+		gzipFile(filePath);
+		
+		new File(filePath).delete();
 	}
 }

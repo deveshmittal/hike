@@ -183,7 +183,7 @@ public class HAManager
 			
 			eventsList.clear();
 			
-			AnalyticsStore.getInstance(this.context).dumpEvents(jsons);
+			AnalyticsStore.getInstance(this.context).dumpEvents(jsons, false);
 
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "writer thread started!");
 		}
@@ -197,7 +197,7 @@ public class HAManager
 			
 			eventsList.clear();
 			
-			AnalyticsStore.getInstance(this.context).dumpEvents(jsons);
+			AnalyticsStore.getInstance(this.context).dumpEvents(jsons, true);
 		}
 	}
 	
@@ -216,6 +216,8 @@ public class HAManager
 	 */
 	public int getWhenToSend()
 	{
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Alarm-time :" + hourToSend);
+		
 		return hourToSend;
 	}
 
