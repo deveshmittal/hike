@@ -137,7 +137,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 	// constant used internally to schedule the next ping event
 	public static final String MQTT_CONNECTION_CHECK_ACTION = "com.bsb.hike.PING";
 
-	private static final String PRODUCTION_BROKER_HOST_NAME = "dmqtt.im.hike.in";
+	private static final String PRODUCTION_BROKER_HOST_NAME = "mqtt.im.hike.in";
 
 	private static final String STAGING_BROKER_HOST_NAME = AccountUtils.STAGING_HOST;
 

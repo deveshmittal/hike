@@ -58,26 +58,6 @@ import com.bsb.hike.voip.VoIPUtils;
 
 public class VoIPActivity extends Activity implements CallActions
 {
-	
-	/**
-	 * PAY ATTENTION!! TODO!
-	 * 
-	 * Two changes need to be reverted before this code is pushed to production.
-	 * 
-	 * 1. This build connects to DMQTT.
-	 * 
-	 * 
-	 *   
-	 *   
-	 *   
-	 *   
-	 *   
-	 *   
-	 *   
-	 *   
-	 *   
-	 */
-
 	static final int PROXIMITY_SCREEN_OFF_WAKELOCK = 32;
 //	public static boolean isRunning = false;
 
