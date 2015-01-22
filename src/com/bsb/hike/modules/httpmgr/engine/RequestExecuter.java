@@ -2,6 +2,7 @@ package com.bsb.hike.modules.httpmgr.engine;
 
 import java.io.IOException;
 
+import com.bsb.hike.modules.httpmgr.DefaultHeaders;
 import com.bsb.hike.modules.httpmgr.client.IClient;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.network.NetworkChecker;
@@ -152,6 +153,12 @@ public class RequestExecuter
 				return;
 			}
 			Response response = client.execute(request);
+
+			/**
+			 * add default headers to the request
+			 */
+			DefaultHeaders.applyDefaultHeaders(request);
+
 			listener.onResponse(response, null);
 		}
 		catch (Exception ex)
