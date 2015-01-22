@@ -526,6 +526,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			PickFileParser.onAudioOrVideoResult(requestCode, resultCode, data, this, activity);
 			break;
 		case AttachmentPicker.LOCATOIN:
+			onShareLocation(data);
 			break;
 		case AttachmentPicker.CONTACT:
 			contactOnActivityResult(resultCode, data);
@@ -902,7 +903,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	}
 
-	protected void locationOnActivityResult(Intent data)
+	protected void onShareLocation(Intent data)
 	{
 		if (data == null)
 		{
@@ -919,7 +920,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void initialiseLocationTransfer(double latitude, double longitude, int zoomLevel)
 	{
-		FileTransferManager.getInstance(activity.getApplicationContext()).uploadLocation(null, latitude, longitude, zoomLevel, isOnHike());
+		clearTempData();
+		FileTransferManager.getInstance(activity.getApplicationContext()).uploadLocation(msisdn, latitude, longitude, zoomLevel, mConversation.isOnhike());
 	}
 
 	protected boolean isOnHike()
@@ -3762,5 +3764,5 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		FileTransferManager.getInstance(activity.getApplicationContext()).uploadFile(msisdn, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile,
 				mConversation.isOnhike(), recordingDuration);
 	}
-
+	
 }
