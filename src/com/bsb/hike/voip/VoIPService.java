@@ -1975,10 +1975,14 @@ public class VoIPService extends Service {
 	public void stopRingtone()
 	{
 		// Stop ringtone if playing
-		if (ringtone != null && ringtone.isPlaying())
-		{
-			ringtone.stop();
-			ringtone = null;
+		try {
+			if (ringtone != null && ringtone.isPlaying())
+			{
+				ringtone.stop();
+				ringtone = null;
+			}
+		} catch (IllegalStateException e) {
+			Logger.w(VoIPConstants.TAG, "stopRingtone() IllegalStateException: " + e.toString());
 		}
 		
 		// stop vibrating
