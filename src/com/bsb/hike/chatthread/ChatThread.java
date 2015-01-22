@@ -529,7 +529,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			onShareLocation(data);
 			break;
 		case AttachmentPicker.CONTACT:
-			contactOnActivityResult(resultCode, data);
+			onShareContact(resultCode, data);
 			break;
 		}
 	}
@@ -929,16 +929,28 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		return true;
 	}
 
-	protected void contactOnActivityResult(int resultCode, Intent data)
+	protected void onShareContact(int resultCode, Intent data)
 	{
-		PhonebookContact contact = PickContactParser.onActivityResult(resultCode, data, activity.getApplicationContext());
-		HikeDialogFactory.showDialog(activity, HikeDialogFactory.CONTACT_SEND_DIALOG, this, contact, getString(R.string.send), false);
+		PhonebookContact contact = PickContactParser.onContactResult(resultCode, data, activity.getApplicationContext());
+		if (contact != null)
+		{
+			HikeDialogFactory.showDialog(activity, HikeDialogFactory.CONTACT_SEND_DIALOG, this, contact, getString(R.string.send), false);
+		}
+	}
+	
+	private void onForwardContact(String contactId)
+	{
+		PhonebookContact contact = PickContactParser.getContactData(contactId, activity);
+		if (contact != null)
+		{
+			HikeDialogFactory.showDialog(activity, HikeDialogFactory.CONTACT_SEND_DIALOG, this, contact, getString(R.string.send), false);
+		}
 	}
 
 	protected void initialiseContactTransfer(JSONObject contactJson)
 	{
-		Logger.v(TAG, "initiate contact transfer " + contactJson.toString());
-		// FileTransferManager.getInstance(activity.getApplicationContext()).uploadContact(null, contactJson, isOnHike());
+		Logger.i(TAG, "initiate contact transfer " + contactJson.toString());
+		FileTransferManager.getInstance(activity.getApplicationContext()).uploadContact(msisdn, contactJson, mConversation.isOnhike());
 	}
 
 	@Override
@@ -1263,7 +1275,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 			else
 			{
-				getContactData(contactId);
+				onForwardContact(contactId);
 			}
 		}
 
@@ -3332,283 +3344,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	// ------------------------ ACTIONMODE CALLBACKs ENDS -------------------------------
 
-	private void getContactData(String contactId)
-	{
-		StringBuilder mimeTypes = new StringBuilder("(");
-		mimeTypes.append(DatabaseUtils.sqlEscapeString(Phone.CONTENT_ITEM_TYPE) + ",");
-		mimeTypes.append(DatabaseUtils.sqlEscapeString(Email.CONTENT_ITEM_TYPE) + ",");
-		mimeTypes.append(DatabaseUtils.sqlEscapeString(StructuredPostal.CONTENT_ITEM_TYPE) + ",");
-		mimeTypes.append(DatabaseUtils.sqlEscapeString(Event.CONTENT_ITEM_TYPE) + ",");
-		mimeTypes.append(DatabaseUtils.sqlEscapeString(StructuredName.CONTENT_ITEM_TYPE) + ")");
-
-		String selection = Data.CONTACT_ID + " =? AND " + Data.MIMETYPE + " IN " + mimeTypes.toString();
-
-		String[] projection = new String[] { Data.DATA1, Data.DATA2, Data.DATA3, Data.MIMETYPE, Data.DISPLAY_NAME };
-
-		Cursor c = activity.getContentResolver().query(Data.CONTENT_URI, projection, selection, new String[] { contactId }, null);
-
-		int data1Idx = c.getColumnIndex(Data.DATA1);
-		int data2Idx = c.getColumnIndex(Data.DATA2);
-		int data3Idx = c.getColumnIndex(Data.DATA3);
-		int mimeTypeIdx = c.getColumnIndex(Data.MIMETYPE);
-		int nameIdx = c.getColumnIndex(Data.DISPLAY_NAME);
-
-		JSONObject contactJson = new JSONObject();
-
-		JSONArray phoneNumbersJson = null;
-		JSONArray emailsJson = null;
-		JSONArray addressesJson = null;
-		JSONArray eventsJson = null;
-
-		List<ContactInfoData> items = new ArrayList<ContactInfoData>();
-
-		String name = null;
-		try
-		{
-			while (c.moveToNext())
-			{
-				String mimeType = c.getString(mimeTypeIdx);
-
-				if (!contactJson.has(HikeConstants.NAME))
-				{
-					String dispName = c.getString(nameIdx);
-					contactJson.put(HikeConstants.NAME, dispName);
-					name = dispName;
-				}
-
-				if (Phone.CONTENT_ITEM_TYPE.equals(mimeType))
-				{
-
-					if (phoneNumbersJson == null)
-					{
-						phoneNumbersJson = new JSONArray();
-						contactJson.put(HikeConstants.PHONE_NUMBERS, phoneNumbersJson);
-					}
-
-					String type = Phone.getTypeLabel(getResources(), c.getInt(data2Idx), c.getString(data3Idx)).toString();
-					String msisdn = c.getString(data1Idx);
-
-					JSONObject data = new JSONObject();
-					data.put(type, msisdn);
-					phoneNumbersJson.put(data);
-
-					items.add(new ContactInfoData(DataType.PHONE_NUMBER, msisdn, type));
-				}
-				else if (Email.CONTENT_ITEM_TYPE.equals(mimeType))
-				{
-
-					if (emailsJson == null)
-					{
-						emailsJson = new JSONArray();
-						contactJson.put(HikeConstants.EMAILS, emailsJson);
-					}
-
-					String type = Email.getTypeLabel(getResources(), c.getInt(data2Idx), c.getString(data3Idx)).toString();
-					String email = c.getString(data1Idx);
-
-					JSONObject data = new JSONObject();
-					data.put(type, email);
-					emailsJson.put(data);
-
-					items.add(new ContactInfoData(DataType.EMAIL, email, type));
-				}
-				else if (StructuredPostal.CONTENT_ITEM_TYPE.equals(mimeType))
-				{
-
-					if (addressesJson == null)
-					{
-						addressesJson = new JSONArray();
-						contactJson.put(HikeConstants.ADDRESSES, addressesJson);
-					}
-
-					String type = StructuredPostal.getTypeLabel(getResources(), c.getInt(data2Idx), c.getString(data3Idx)).toString();
-					String address = c.getString(data1Idx);
-
-					JSONObject data = new JSONObject();
-					data.put(type, address);
-					addressesJson.put(data);
-
-					items.add(new ContactInfoData(DataType.ADDRESS, address, type));
-				}
-				else if (Event.CONTENT_ITEM_TYPE.equals(mimeType))
-				{
-
-					if (eventsJson == null)
-					{
-						eventsJson = new JSONArray();
-						contactJson.put(HikeConstants.EVENTS, eventsJson);
-					}
-
-					String event;
-					int eventType = c.getInt(data2Idx);
-					if (eventType == Event.TYPE_ANNIVERSARY)
-					{
-						event = getString(R.string.anniversary);
-					}
-					else if (eventType == Event.TYPE_OTHER)
-					{
-						event = getString(R.string.other);
-					}
-					else if (eventType == Event.TYPE_BIRTHDAY)
-					{
-						event = getString(R.string.birthday);
-					}
-					else
-					{
-						event = c.getString(data3Idx);
-					}
-					String type = event.toString();
-					String eventDate = c.getString(data1Idx);
-
-					JSONObject data = new JSONObject();
-					data.put(type, eventDate);
-					eventsJson.put(data);
-
-					items.add(new ContactInfoData(DataType.EVENT, eventDate, type));
-				}
-			}
-		}
-		catch (JSONException e)
-		{
-			Logger.e(TAG, "Invalid JSON", e);
-		}
-
-		Logger.d(TAG, "Data of contact is : " + contactJson.toString());
-		clearTempData();
-		showContactDetails(items, name, contactJson, false);
-	}
-
 	private void clearTempData()
 	{
 		Editor editor = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, activity.MODE_PRIVATE).edit();
 		editor.remove(HikeMessengerApp.TEMP_NAME);
 		editor.remove(HikeMessengerApp.TEMP_NUM);
 		editor.commit();
-	}
-
-	private void showContactDetails(final List<ContactInfoData> items, final String name, final JSONObject contactInfo, final boolean saveContact)
-	{
-		final ContactDialog contactDialog = new ContactDialog(activity, R.style.Theme_CustomDialog, -1);
-		contactDialog.setContentView(R.layout.contact_share_info);
-
-		ViewGroup parent = (ViewGroup) contactDialog.findViewById(R.id.parent);
-		TextView contactName = (TextView) contactDialog.findViewById(R.id.contact_name);
-		ListView contactDetails = (ListView) contactDialog.findViewById(R.id.contact_details);
-		Button yesBtn = (Button) contactDialog.findViewById(R.id.btn_ok);
-		Button noBtn = (Button) contactDialog.findViewById(R.id.btn_cancel);
-		View accountContainer = contactDialog.findViewById(R.id.account_container);
-		final Spinner accounts = (Spinner) contactDialog.findViewById(R.id.account_spinner);
-		final TextView accountInfo = (TextView) contactDialog.findViewById(R.id.account_info);
-
-		int screenHeight = getResources().getDisplayMetrics().heightPixels;
-		int dialogWidth = (int) getResources().getDimension(R.dimen.contact_info_width);
-		int dialogHeight = (int) (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? ((3 * screenHeight) / 4)
-				: FrameLayout.LayoutParams.MATCH_PARENT);
-		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(dialogWidth, dialogHeight);
-		lp.topMargin = (int) (5 * Utils.densityMultiplier);
-		lp.bottomMargin = (int) (5 * Utils.densityMultiplier);
-
-		parent.setLayoutParams(lp);
-
-		contactDialog.setViewReferences(parent, accounts);
-
-		yesBtn.setText(saveContact ? R.string.save : R.string.send);
-
-		if (saveContact)
-		{
-			accountContainer.setVisibility(View.VISIBLE);
-			accounts.setAdapter(new AccountAdapter(activity.getApplicationContext(), getAccountList()));
-			if (accounts.getSelectedItem() != null)
-			{
-				accountInfo.setText(((AccountData) accounts.getSelectedItem()).getName());
-			}
-			else
-			{
-				accountInfo.setText(R.string.device);
-			}
-		}
-		else
-		{
-			accountContainer.setVisibility(View.GONE);
-		}
-
-		accountContainer.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				accounts.performClick();
-			}
-		});
-
-		accounts.setOnItemSelectedListener(new OnItemSelectedListener()
-		{
-
-			@Override
-			public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id)
-			{
-				accountInfo.setText(((AccountData) accounts.getSelectedItem()).getName());
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0)
-			{
-			}
-
-		});
-
-		contactName.setText(name);
-		contactDetails.setAdapter(new ArrayAdapter<ContactInfoData>(activity.getApplicationContext(), R.layout.contact_share_item, R.id.info_value, items)
-		{
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent)
-			{
-				View v = super.getView(position, convertView, parent);
-				ContactInfoData contactInfoData = getItem(position);
-
-				TextView header = (TextView) v.findViewById(R.id.info_head);
-				header.setText(contactInfoData.getDataSubType());
-
-				TextView details = (TextView) v.findViewById(R.id.info_value);
-				details.setText(contactInfoData.getData());
-				return v;
-			}
-
-		});
-		yesBtn.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				if (saveContact)
-				{
-					if (accounts.getSelectedItem() != null)
-					{
-						saveContact(items, accounts, name);
-					}
-					else
-					{
-						Utils.addToContacts(items, name, activity);
-					}
-				}
-				else
-				{
-					initialiseContactTransfer(contactInfo);
-				}
-				contactDialog.dismiss();
-			}
-		});
-		noBtn.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				contactDialog.dismiss();
-			}
-		});
-		contactDialog.show();
 	}
 
 	private void saveContact(List<ContactInfoData> items, Spinner accountSpinner, String name)

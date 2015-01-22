@@ -27,7 +27,7 @@ import com.bsb.hike.models.PhonebookContact;
 
 public class PickContactParser
 {
-	public static PhonebookContact onActivityResult(int resultCode, Intent data, Context context)
+	public static PhonebookContact onContactResult(int resultCode, Intent data, Context context)
 	{
 		if (resultCode != Activity.RESULT_OK || data == null || data.getData() == null)
 		{
