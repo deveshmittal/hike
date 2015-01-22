@@ -20,7 +20,7 @@ public class PlatformContent
 	 * 
 	 * @return the content
 	 */
-	public static PlatformContentRequest getContent(final String contentData, PlatformContentListener<PlatformContentModel> listener)
+	public static PlatformContentRequest getContent(String contentData, PlatformContentListener<PlatformContentModel> listener)
 	{
 		PlatformContentRequest request = PlatformContentRequest.make(PlatformContentModel.make(contentData), listener);
 		if (request != null)
@@ -36,31 +36,9 @@ public class PlatformContent
 
 	}
 
-	/**
-	 * Gets well formed HTML content.
-	 * 
-	 * @param contentData
-	 *            the content data
-	 * @param listener
-	 *            the listener
-	 * @return new request made, use this for cancelling requests
-	 * 
-	 * @return the content
-	 */
-	public static PlatformContentRequest getForwardCardContent(final String contentData, PlatformContentListener<PlatformContentModel> listener)
+	public static String getForwardCardData(String contentData)
 	{
-		PlatformContentRequest request = PlatformContentRequest.make(PlatformContentModel.makeForwardCardModel(contentData), listener);
-
-		if (request != null)
-		{
-			PlatformContentLoader.getLoader().handleRequest(request);
-			return request;
-		}
-		else
-		{
-			Log.e("PlatformContent", "Incorrect content data");
-			return null;
-		}
+		return PlatformContentModel.getForwardData(contentData);
 	}
 
 	public static boolean cancelRequest(PlatformContentRequest argRequest)
