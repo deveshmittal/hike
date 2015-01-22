@@ -515,7 +515,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		// TODO Auto-generated method stub
 		if (super.setStateAndUpdateView(msgId, updateView))
 		{
-			if (isOnHike())
+			if (mConversation.isOnhike())
 			{
 				ConvMessage msg = findMessageById(msgId);
 				if (!msg.isSMS())

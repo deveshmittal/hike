@@ -528,6 +528,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case AttachmentPicker.LOCATOIN:
 			onShareLocation(data);
 			break;
+		case AttachmentPicker.FILE:
+			onShareFile(data);
+			break;
 		case AttachmentPicker.CONTACT:
 			onShareContact(resultCode, data);
 			break;
@@ -659,7 +662,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			return null; // Do not create message
 		}
-		ConvMessage convMessage = Utils.makeConvMessage(msisdn, message, isOnHike());
+		ConvMessage convMessage = Utils.makeConvMessage(msisdn, message, mConversation.isOnhike());
 		// TODO : PinShowing related code -gaurav
 		mComposeView.setText("");
 		if (mComposeViewWatcher != null)
@@ -922,11 +925,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		clearTempData();
 		FileTransferManager.getInstance(activity.getApplicationContext()).uploadLocation(msisdn, latitude, longitude, zoomLevel, mConversation.isOnhike());
-	}
-
-	protected boolean isOnHike()
-	{
-		return true;
 	}
 
 	protected void onShareContact(int resultCode, Intent data)
@@ -1284,34 +1282,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 		else if (intent.hasExtra(HikeConstants.Extras.FILE_PATH))
 		{
-			String fileKey = null;
-
-			if (intent.hasExtra(HikeConstants.Extras.FILE_KEY))
-			{
-				fileKey = intent.getStringExtra(HikeConstants.Extras.FILE_KEY);
-			}
-			String filePath = intent.getStringExtra(HikeConstants.Extras.FILE_PATH);
-			String fileType = intent.getStringExtra(HikeConstants.Extras.FILE_TYPE);
-
-			boolean isRecording = false;
-			long recordingDuration = -1;
-
-			if (intent.hasExtra(HikeConstants.Extras.RECORDING_TIME))
-			{
-				recordingDuration = intent.getLongExtra(HikeConstants.Extras.RECORDING_TIME, -1);
-				isRecording = true;
-				fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
-			}
-
-			if (filePath == null)
-			{
-				Toast.makeText(activity.getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
-			}
-			else
-			{
-				initiateFileTransferFromIntentData(fileType, filePath, fileKey, isRecording, recordingDuration);
-			}
-
+			onShareFile(intent);
 			// Making sure the file does not get forwarded again on
 			// orientation change.
 			intent.removeExtra(HikeConstants.Extras.FILE_PATH);
@@ -3506,4 +3477,34 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				mConversation.isOnhike(), recordingDuration);
 	}
 	
+	private void onShareFile(Intent intent)
+	{
+		String fileKey = null;
+
+		if (intent.hasExtra(HikeConstants.Extras.FILE_KEY))
+		{
+			fileKey = intent.getStringExtra(HikeConstants.Extras.FILE_KEY);
+		}
+		String filePath = intent.getStringExtra(HikeConstants.Extras.FILE_PATH);
+		String fileType = intent.getStringExtra(HikeConstants.Extras.FILE_TYPE);
+
+		boolean isRecording = false;
+		long recordingDuration = -1;
+
+		if (intent.hasExtra(HikeConstants.Extras.RECORDING_TIME))
+		{
+			recordingDuration = intent.getLongExtra(HikeConstants.Extras.RECORDING_TIME, -1);
+			isRecording = true;
+			fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
+		}
+
+		if (filePath == null)
+		{
+			Toast.makeText(activity.getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+		}
+		else
+		{
+			initiateFileTransferFromIntentData(fileType, filePath, fileKey, isRecording, recordingDuration);
+		}
+	}
 }
