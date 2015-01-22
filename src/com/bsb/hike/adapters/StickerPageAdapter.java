@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.media.StickerPicker.StickerPickerListener;
+import com.bsb.hike.media.StickerPickerListener;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;

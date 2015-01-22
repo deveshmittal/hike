@@ -20,14 +20,8 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
-public class StickerPicker implements OnClickListener, ShareablePopup
+public class StickerPicker implements OnClickListener, ShareablePopup, StickerPickerListener
 {
-
-	public interface StickerPickerListener
-	{
-		public void stickerSelected(Sticker sticker, String source);
-	}
-
 	private StickerPickerListener listener;
 
 	private Context mContext;
@@ -163,7 +157,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 			throw new IllegalArgumentException("View Pager was not found in the view passed.");
 		}
 
-		stickerAdapter = new StickerAdapter(mContext, listener);
+		stickerAdapter = new StickerAdapter(mContext, this);
 
 		mIconPageIndicator = (StickerEmoticonIconPageIndicator) view.findViewById(R.id.sticker_icon_indicator);
 
@@ -319,6 +313,15 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 		if (mIconPageIndicator != null)
 		{
 			mIconPageIndicator.notifyDataSetChanged();
+		}
+	}
+
+	@Override
+	public void stickerSelected(Sticker sticker, String source)
+	{
+		if (listener != null)
+		{
+			listener.stickerSelected(sticker, source);
 		}
 	}
 }

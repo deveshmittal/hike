@@ -10,7 +10,7 @@ import android.widget.ImageView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.media.EmoticonPicker.EmoticonPickerListener;
+import com.bsb.hike.media.EmoticonPickerListener;
 import com.bsb.hike.utils.Logger;
 
 public class EmoticonPageAdapter extends BaseAdapter implements OnClickListener

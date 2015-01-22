@@ -43,7 +43,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
-import com.bsb.hike.media.EmoticonPicker.EmoticonPickerListener;
+import com.bsb.hike.media.EmoticonPickerListener;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.tasks.HikeHTTPTask;

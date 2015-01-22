@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 
 import com.bsb.hike.R;
-import com.bsb.hike.media.EmoticonPicker.EmoticonPickerListener;
+import com.bsb.hike.media.EmoticonPickerListener;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
