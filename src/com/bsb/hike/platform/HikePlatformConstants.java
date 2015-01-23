@@ -32,7 +32,7 @@ public interface HikePlatformConstants
 	public static final String GAME_SDK_ID = "gamesdk";
 	String MESSAGE = "message";
 	String SOURCE = "clientPkgName";
-	String HELPER_DATA = "helperData";
+	String HELPER_DATA = "helper_data";
 
 	public static final String PLATFORM_BRIDGE_NAME = "PlatformBridge";
 

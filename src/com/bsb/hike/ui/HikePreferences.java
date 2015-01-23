@@ -908,6 +908,19 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}
 			}
 		});
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		if(preferenceManager.contains(HikeConstants.LED_PREF))
+		{
+			boolean led = preferenceManager.getBoolean(HikeConstants.LED_PREF, true);
+			if (!led)
+			{
+				ledPref.setDefaultValue(HikeConstants.LED_NONE_COLOR);
+				ledPref.setValueIndex(0);
+			}
+			
+			//removing previous Key
+			preferenceManager.edit().remove(HikeConstants.LED_PREF).commit();
+		}
 		ledPref.setTitle(ledPref.getTitle() + " - " + ledPref.getValue());
 	}
 
