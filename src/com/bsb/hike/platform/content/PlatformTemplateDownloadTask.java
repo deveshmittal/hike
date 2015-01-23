@@ -10,10 +10,12 @@ import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
 
+import com.bsb.hike.platform.content.PlatformContent.ErrorCode;
+
 import android.os.AsyncTask;
 
 /**
- * TODO Download and set template in SD card
+ * Download and store template
  * 
  * @author Atul M
  * 
@@ -44,6 +46,13 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 	@Override
 	protected Void doInBackground(Void... params)
 	{
+
+//		if (PlatformContentCache.getTemplate(mRequest) != null)
+//		{
+//			PlatformRequestManager.setReadyState(mRequest);
+//			return null;
+//		}
+		
 		// Fetch S3 URL
 		String templateDownloadUrl = mRequest.getContentData().getLayout_url();
 
@@ -58,6 +67,7 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 		OutputStream output = null;
 		HttpURLConnection connection = null;
 		boolean isDownloaded = false;
+
 		try
 		{
 			URL url = new URL(templateDownloadUrl);
@@ -66,9 +76,17 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 
 			if (connection.getResponseCode() != HttpURLConnection.HTTP_OK)
 			{
-				throw new IllegalStateException("Server returned HTTP " + connection.getResponseCode() + " " + connection.getResponseMessage());
+				throw new IOException("Server returned HTTP " + connection.getResponseCode() + " " + connection.getResponseMessage());
 			}
+		}
+		catch (IOException ioe)
+		{
+			ioe.printStackTrace();
+			PlatformRequestManager.reportFailure(mRequest, ErrorCode.LOW_CONNECTIVITY);
+		}
 
+		try
+		{
 			// download the file
 			input = connection.getInputStream();
 
@@ -83,13 +101,15 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 			}
 			isDownloaded = true;
 		}
-		catch (IOException e)
+		catch (IOException ioe)
 		{
-			e.printStackTrace();
+			ioe.printStackTrace();
+			PlatformRequestManager.reportFailure(mRequest, ErrorCode.STORAGE_FULL);
 		}
-		catch (IllegalStateException e)
+		catch (IllegalStateException ise)
 		{
-			e.printStackTrace();
+			ise.printStackTrace();
+			PlatformRequestManager.reportFailure(mRequest, ErrorCode.UNKNOWN);
 		}
 		finally
 		{
@@ -97,27 +117,21 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 			{
 				if (output != null)
 					output.close();
+
 				if (input != null)
 					input.close();
+
+				if (connection != null)
+					connection.disconnect();
 			}
 			catch (IOException ignored)
 			{
 				// Do nothing
 			}
-
-			if (connection != null)
-				connection.disconnect();
 		}
 
 		if (isDownloaded)
 		{
-			File existingVersionApp = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + mRequest.getContentData().getId());
-			if (existingVersionApp.exists())
-			{
-				// delete existing app
-				existingVersionApp.delete();
-			}
-
 			// unzip
 			unzipWebFile(zipFile.getAbsolutePath(), PlatformContentConstants.PLATFORM_CONTENT_DIR, new Observer()
 			{

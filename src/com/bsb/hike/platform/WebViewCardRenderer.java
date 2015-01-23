@@ -16,6 +16,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.platform.content.PlatformContent.ErrorCode;
 import com.bsb.hike.platform.content.PlatformContentListener;
 import com.bsb.hike.platform.content.PlatformContentModel;
 import com.bsb.hike.platform.content.PlatformWebClient;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
  */
 public class WebViewCardRenderer extends BaseAdapter
 {
-	
+
 	static final String tag = "webviewcardRenderer";
 
 	private static final int WEBVIEW_CARD = 0;
@@ -51,11 +52,11 @@ public class WebViewCardRenderer extends BaseAdapter
 		this.mContext = context;
 		this.convMessages = convMessages;
 	}
-	
-	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages,BaseAdapter adapter)
+
+	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages, BaseAdapter adapter)
 	{
 		this.mContext = context;
-		this.adapter =  adapter;
+		this.adapter = adapter;
 		this.convMessages = convMessages;
 	}
 
@@ -64,7 +65,9 @@ public class WebViewCardRenderer extends BaseAdapter
 		long id = 0;
 
 		WebView myBrowser;
+
 		PlatformJavaScriptBridge platformJavaScriptBridge;
+
 		public View selectedStateOverlay;
 
 		private void initializeHolderForForward(View view, boolean isReceived)
@@ -204,6 +207,14 @@ public class WebViewCardRenderer extends BaseAdapter
 			Logger.i(tag, "either tag is null or reused ");
 			PlatformContent.getContent(convMessage.platformWebMessageMetadata.JSONtoString(), new PlatformContentListener<PlatformContentModel>()
 			{
+
+				@Override
+				public void onFailure(ErrorCode reason)
+				{
+					// TODO Auto-generated method stub
+
+				}
+
 				public void onComplete(PlatformContentModel content)
 				{
 					viewHolder.id = getItemId(position);
@@ -245,8 +256,8 @@ public class WebViewCardRenderer extends BaseAdapter
 			Log.d(tag, "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
 			Logger.d(tag, "conv message passed to webview " + convMessage);
 			Logger.d(tag, "Platform message metadata is" + convMessage.platformWebMessageMetadata.JSONtoString());
-			view.loadUrl("javascript:setData(" + "'" + convMessage.getMsgID() + "','" + convMessage.getMsisdn() + "','" + convMessage.platformWebMessageMetadata.getHelperData().toString()
-					+ "')");
+			view.loadUrl("javascript:setData(" + "'" + convMessage.getMsgID() + "','" + convMessage.getMsisdn() + "','"
+					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "')");
 			String alarmData = convMessage.platformWebMessageMetadata.getAlarmData();
 			Logger.d(tag, "alarm data to html is " + alarmData);
 			if (!TextUtils.isEmpty(alarmData))

@@ -1,5 +1,7 @@
 package com.bsb.hike.platform.content;
 
+import com.bsb.hike.platform.content.PlatformContent.ErrorCode;
+
 /**
  * The listener interface for receiving platformContent events. The class that is interested in processing a platformContent event implements this interface, and the object created
  * with that class is registered with a component using the component's <code>addPlatformContentListener<code> method. When
@@ -21,4 +23,5 @@ public abstract class PlatformContentListener<T>
 	 */
 	public abstract void onComplete(T content);
 
+	public abstract void onFailure(ErrorCode reason);
 }
