@@ -5080,4 +5080,16 @@ public class Utils
 		return true;
 	}
 
+	public static boolean isBot(String msisdn)
+	{
+		if (HikeMessengerApp.hikeBotNamesMap != null)
+		{
+			return HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn);
+		}
+		else
+		{
+			//Not probable
+			return false;
+		}
+	}
 }
