@@ -25,7 +25,15 @@ public class WebViewCardRenderer extends BaseAdapter
 {
 	
 	static final String tag = "webviewcardRenderer";
-	
+
+	private static final int WEBVIEW_CARD = 0;
+
+	private static final int FORWARD_WEBVIEW_CARD_RECEIVED = 1;
+
+	private static final int FORWARD_WEBVIEW_CARD_SENT = 2;
+
+	private static final int WEBVIEW_CARD_COUNT = 3;
+
 	Context mContext;
 
 	ArrayList<ConvMessage> convMessages;
@@ -73,6 +81,31 @@ public class WebViewCardRenderer extends BaseAdapter
 		holder.myBrowser.getSettings().setJavaScriptEnabled(true);
 
 	}
+
+	@Override
+	public int getItemViewType(int position)
+	{
+		if (convMessages.get(position).getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
+		{
+			return WEBVIEW_CARD;
+		}
+		else if (convMessages.get(position).isSent())
+		{
+			return FORWARD_WEBVIEW_CARD_SENT;
+		}
+		else
+		{
+			return FORWARD_WEBVIEW_CARD_RECEIVED;
+		}
+
+	}
+
+	@Override
+	public int getViewTypeCount()
+	{
+		return WEBVIEW_CARD_COUNT;
+	}
+
 
 	@Override
 	public int getCount()
