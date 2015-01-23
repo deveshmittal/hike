@@ -7,13 +7,13 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.NuxInviteFriends;
 import com.bsb.hike.ui.utils.RecyclingImageView;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
@@ -111,24 +111,30 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		switch (v.getId())
 		{
 		case R.id.but_skip:
-			IntentManager.openHomeActivity(this);
+		//	IntentManager.openHomeActivity(this);
 			NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
 			finish();
 			break;
 
 		case R.id.but_inviteFrnds:
-		
+
 			NUXManager.getInstance().startNuxSelector(this);
-		
+
 			break;
 		}
 
 	}
 
 	@Override
+	protected void onStop()
+	{
+		super.onStop();
+		finish();
+	}
+	
+	@Override
 	protected void onDestroy()
 	{
-		// TODO Auto-generated method stub
 		super.onDestroy();
 	}
 }

@@ -2,6 +2,7 @@ package com.bsb.hike.models;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
@@ -711,7 +712,7 @@ public class ConvMessage
 
 	public String getTimestampFormatted(boolean pretty, Context context)
 	{
-		return Utils.getFormattedTime(pretty, context, mTimestamp);
+		return DateUtils.getRelativeTimeSpanString(mTimestamp*1000, System.currentTimeMillis(),DateUtils.SECOND_IN_MILLIS)+"";//Utils.getFormattedTime(pretty, context, mTimestamp);
 	}
 
 	public String getMessageDate(Context context)

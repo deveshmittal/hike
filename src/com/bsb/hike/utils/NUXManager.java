@@ -30,7 +30,6 @@ import com.bsb.hike.models.NuxInviteFriends;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
-import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.ui.HomeActivity;
 import static com.bsb.hike.NUXConstants.*;
 
@@ -178,6 +177,14 @@ public class NUXManager
 		return unlockedNUXContacts;
 	}
 
+	
+	/**
+	 * 
+	 * Sending a Multiforward message to all the contacts selected.
+	 * 
+	 * @param msisdn
+	 * @param message
+	 */
 	public void sendMessage(HashSet<String> msisdn, String message)
 	{
 		ConvMessage convMessage = null;
@@ -189,12 +196,15 @@ public class NUXManager
 		for (String number : msisdn)
 		{
 			contactList.add(ContactManager.getInstance().getContact(number, true, true, false));
-
+			
 		}
 
 		convMessage = Utils.makeConvMessage(null, message, true);
+//		convMessage.setMessage(message);
+//		long mTimestamp=System.currentTimeMillis()/1000;
+//		convMessage.setTimestamp(mTimestamp);
+		//Logger.d("prettyTime","send Message "+mTimestamp+"");
 		messageList.add(convMessage);
-		Logger.d("UmangX", "Nux Manager seding nwo : "  +System.currentTimeMillis() );
 		MultipleConvMessage multiConvMessages = new MultipleConvMessage(messageList, contactList, System.currentTimeMillis() / 1000 , true, null);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_SENT, multiConvMessages);
 	}
@@ -241,10 +251,11 @@ public class NUXManager
 				
 					// Check for min and max should not be zero.
 					
-					if (!(mmDetails.getMin() == 0 || mmDetails.getMax() == 0 || mmDetails.getMin() > mmDetails.getMax()))
+					if(isNUXValid())
 					{
 						if (mmJsonObject.has(NOTIFICATION_PKT))
 							showPush(mmJsonObject.getString(NOTIFICATION_PKT));
+						mprefs.saveData(REMINDER_RECEIVED, true);
 						setCurrentState(NUX_NEW);
 					}
 				}
@@ -259,7 +270,7 @@ public class NUXManager
 						JSONObject mmJsonObject = data.optJSONObject(SCREENS);
 						if (mmJsonObject.has(NOTIFICATION_PKT))
 						{
-							if (TextUtils.isEmpty(mmJsonObject.optString(NOTIFICATION_PKT)))
+							if (!TextUtils.isEmpty(mmJsonObject.optString(NOTIFICATION_PKT)))
 								showPush(mmJsonObject.getString(NOTIFICATION_PKT));
 						}
 					}
@@ -296,10 +307,14 @@ public class NUXManager
 							if (!TextUtils.isEmpty(mmJsonObject.optString(CHAT_REWARDS_BAR)))
 								parseChatRewards(mmJsonObject.optString(CHAT_REWARDS_BAR));
 
-							if (TextUtils.isEmpty(mmJsonObject.optString(NOTIFICATION_PKT)))
+							if (!TextUtils.isEmpty(mmJsonObject.optString(NOTIFICATION_PKT)))
 								showPush(mmJsonObject.getString(NOTIFICATION_PKT));
 						}
 
+					}
+					if (!isNUXValid())
+					{
+						shutDownNUX();
 					}
 				}
 			}
@@ -330,14 +345,14 @@ public class NUXManager
 					JSONObject mmJsonObject = mmdata.optJSONObject(SCREENS);
 					if (mmJsonObject != null)
 					{
-						if (TextUtils.isEmpty(mmJsonObject.optString(NOTIFICATION_PKT)))
+						if (!TextUtils.isEmpty(mmJsonObject.optString(NOTIFICATION_PKT)))
 							showPush(mmJsonObject.getString(NOTIFICATION_PKT));
 					}
 				}
 			}
 			else if (root.optString(HikeConstants.SUB_TYPE).equals(REMINDER))
 			{
-				if (!(getCurrentState() == NUX_KILLED || getCurrentState() == COMPLETED))
+				if (!(getCurrentState() == NUX_KILLED))
 				{
 
 					if (root.has(HikeConstants.DATA))
@@ -348,7 +363,7 @@ public class NUXManager
 							JSONObject mmJsonObject = data.optJSONObject(SCREENS);
 							if (mmJsonObject.has(NOTIFICATION_PKT))
 							{
-								if (TextUtils.isEmpty(mmJsonObject.getString(NOTIFICATION_PKT)))
+								if (!TextUtils.isEmpty(mmJsonObject.getString(NOTIFICATION_PKT)))
 									showPush(mmJsonObject.getString(NOTIFICATION_PKT));
 							}
 						}
@@ -364,6 +379,16 @@ public class NUXManager
 		}
 	}
 
+	private boolean isNUXValid()
+	{
+		NUXTaskDetails mmDetails = getNuxTaskDetailsPojo();
+		if (mmDetails.getMin() == 0 || mmDetails.getMax() == 0 || mmDetails.getMin() > mmDetails.getMax()||ContactManager.getInstance().getAllContacts().size()<mmDetails.getMin())
+		{
+			return false;
+		}
+		return true;
+	}
+	
 	private void parseTaskDetails(String json)
 	{
 		JSONObject task_details = null;
@@ -631,6 +656,12 @@ public class NUXManager
 		return customMessage;
 	}
 
+	/**
+	 * 
+	 * @return
+	 * 
+	 * POJO for task details
+	 */
 	public NUXTaskDetails getNuxTaskDetailsPojo()
 	{
 		if (taskDetails == null)
@@ -675,6 +706,13 @@ public class NUXManager
 		return taskDetails;
 	}
 
+	
+	/**
+	 * 
+	 * @return
+	 * 
+	 * POJO for Friend Selector screen
+	 */
 	public NuxSelectFriends getNuxSelectFriendsPojo()
 	{
 		if (selectFriends == null)
@@ -728,6 +766,12 @@ public class NUXManager
 		return selectFriends;
 	}
 
+	/**
+	 * 
+	 * @return
+	 * 
+	 * POJO for nux start screen ,i.e invite friends
+	 */
 	public NuxInviteFriends getNuxInviteFriendsPojo()
 	{
 		JSONObject incentive_reward = null;
@@ -759,6 +803,13 @@ public class NUXManager
 		return inviteFriends;
 	}
 
+	/**
+	 * 
+	 * @return
+	 * 
+	 * POJO for footer in the conversation list
+	 */
+	
 	public NUXChatReward getNuxChatRewardPojo()
 	{
 		if (chatReward == null)
@@ -844,6 +895,15 @@ public class NUXManager
 		mprefs.saveData(REMINDER_RECEIVED, false);
 	}
 
+	public void showReminder()
+	{
+		mprefs.saveData(REMINDER_RECEIVED, true);
+		
+	}
+	/**
+	 * showing push notifications.
+	 * @param json
+	 */
 	public void showPush(String json)
 	{
 		try
@@ -895,7 +955,7 @@ public class NUXManager
 
 	}
 
-	public void notifyUser(String text, String title, boolean shouldNotPlaySound)
+	private void notifyUser(String text, String title, boolean shouldNotPlaySound)
 	{
 		Drawable drawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
 		Intent intent = new Intent(context, HomeActivity.class);
@@ -903,6 +963,12 @@ public class NUXManager
 				title, "", null, drawable, shouldNotPlaySound, 0);
 	}
 
+	/**
+	 * 
+	 * @return
+	 * 
+	 * decides to show the nux or not.
+	 */
 	public boolean showNuxScreen()
 	{
 		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_NEW)
@@ -916,7 +982,16 @@ public class NUXManager
 		}
 		return false;
 	}
-
+	
+	public int getStealthModeTipConversationNumber()
+	{
+		if(getCurrentState()!=NUX_KILLED)
+		{
+			return getNuxTaskDetailsPojo().getMin()+2;
+		}
+		return 3;
+	}
+	
 	/**
 	 * All these are testing functions will be removed afterwards.
 	 */
@@ -973,5 +1048,7 @@ public class NUXManager
 			e.printStackTrace();
 		}
 	}
+
+
 
 }

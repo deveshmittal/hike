@@ -387,5 +387,6 @@
     <color name="nux_invite_button">#0f8fe1</color>
     <color name="nux_chat_reward_status">#ffab0a</color>
     <color name="nux_disabled_text">#aeafb0</color>
+    <color name="nuxunlocked">#6bbe00</color>
 </resources>
 	
