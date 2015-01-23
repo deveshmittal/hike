@@ -29,7 +29,7 @@ public class AnalyticsStore
 	private File normalPriorityEventFile;
 	
 	private File highPriorityEventFile;
-	
+		
 	/**
 	 * Constructor
 	 * @param context application context
@@ -37,7 +37,7 @@ public class AnalyticsStore
 	private AnalyticsStore(Context context)
 	{
 		this.context = context.getApplicationContext();
-				
+						
 		try 
 		{
 			normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
@@ -124,10 +124,8 @@ public class AnalyticsStore
 		File eventFile = null;
 		
 		String fileName = generateNewEventFileName(priority);
-
-		String dirName = this.context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
 		
-		File dir = new File(dirName);
+		File dir = new File(HAManager.getInstance().getAnalyticsDirectory());
 
 		if(!dir.exists())
 		{
@@ -297,7 +295,7 @@ public class AnalyticsStore
 	{
 		long dirSize = 0;
 		
-		File dir = new File(context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR + File.separator);
+		File dir = new File(HAManager.getInstance().getAnalyticsDirectory() + File.separator);
 
 		File[] file = dir.listFiles();
 
@@ -318,7 +316,7 @@ public class AnalyticsStore
 	 */
 	public void deleteNormalPriorityData()
 	{
-		File dir = new File(context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR + File.separator);
+		File dir = new File(HAManager.getInstance().getAnalyticsDirectory() + File.separator);
 
 		File[] file = dir.listFiles();
 

@@ -8,6 +8,8 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.os.Environment;
+
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -45,6 +47,8 @@ public class HAManager
 	
 	private int analyticsUploadFrequency = 0;
 		
+	private String analyticsDirectory;
+
 //	private NetworkListener listner;
 	
 	/**
@@ -53,7 +57,12 @@ public class HAManager
 	private HAManager() 
 	{		
 		this.context = HikeMessengerApp.getInstance().getApplicationContext(); 
-				
+		
+//		analyticsDirectory = context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
+
+		// analytics data moved to external storage for QA to manually check the files
+		analyticsDirectory = Environment.getExternalStorageDirectory() + AnalyticsConstants.EVENT_FILE_DIR;
+
 		eventsList = new ArrayList<JSONObject>();
 						
 		isAnalyticsEnabled = getPrefs().getBoolean(AnalyticsConstants.ANALYTICS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
@@ -389,5 +398,14 @@ public class HAManager
 		int time = rand.nextInt(24);
 		
 		return time;
+	}
+	
+	/**
+	 * Used to return the directory in which analytics data is saved
+	 * @return analytics directory
+	 */
+	public String getAnalyticsDirectory()
+	{
+		return analyticsDirectory;
 	}
 }
