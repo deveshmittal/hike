@@ -1002,7 +1002,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void audioRecordSuccess(String filePath, long duration)
 	{
 		Logger.i(TAG, "Audio Recorded " + filePath + "--" + duration);
-		// initialiseFileTransfer(filePath, null, HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true, duration, false);
+		initialiseFileTransfer(filePath, null, HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true, duration, false);
 
 	}
 
