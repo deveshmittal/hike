@@ -39,6 +39,8 @@ public class PlatformContentModel
 	@Expose
 	public PlatformCardObjectModel fwdCardObj;
 
+	private int mAppHash;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -69,6 +71,20 @@ public class PlatformContentModel
 	}
 
 	/**
+	 * Template hash code. Replace with template UID
+	 * 
+	 * @return the int
+	 */
+	public int appHashCode()
+	{
+		if (mAppHash == -1)
+		{
+			mAppHash = new String(cardObj.appName + cardObj.appVersion).hashCode();
+		}
+		return mAppHash;
+	}
+
+	/**
 	 * Make.
 	 * 
 	 * @param card_data
@@ -96,6 +112,12 @@ public class PlatformContentModel
 			iae.printStackTrace();
 			return null;
 		}
+		catch (Exception e)
+		{
+			// We dont want app to crash, instead safely provide control in onFailure
+			e.printStackTrace();
+			return null;
+		}
 
 		return object;
 	}
@@ -107,7 +129,7 @@ public class PlatformContentModel
 		PlatformContentModel originalModel = make(originalData);
 
 		mergeObjects(originalModel.cardObj, originalModel.fwdCardObj);
-		
+
 		originalModel.fwdCardObj = null;
 
 		forwardData = new Gson().toJson(originalModel);
@@ -221,7 +243,7 @@ public class PlatformContentModel
 	}
 
 	/**
-	 * Gets the appID.
+	 * Gets the appID. This is same as the name of folder in which HTML templates are saved.
 	 * 
 	 * @return the appID
 	 */

@@ -1,9 +1,13 @@
 package com.bsb.hike.platform.content;
 
+import java.util.ArrayList;
+
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
 import com.bsb.hike.models.HikeHandlerUtil;
+import com.bsb.hike.platform.content.PlatformContent.ErrorCode;
 import com.samskivert.mustache.Template;
 
 /**
@@ -79,22 +83,41 @@ class PlatformContentLoader extends Handler
 			else
 			{
 				// Incorrect data. Could not execute. Remove request from queue.
+				PlatformRequestManager.reportFailure(argContentRequest, PlatformContent.ErrorCode.INVALID_DATA);
 				PlatformRequestManager.remove(argContentRequest);
 			}
 		}
 		else
 		{
-			// Fetch from remote
-			getTemplateFromRemote(argContentRequest);
+			if (argContentRequest.getState() != PlatformContentRequest.STATE_CANCELLED)
+			{
+				// Fetch from remote
+				getTemplateFromRemote(argContentRequest);
+			}
 		}
 	}
 
 	private void getTemplateFromRemote(PlatformContentRequest argContentRequest)
 	{
+		PlatformRequestManager.setWaitState(argContentRequest);
+		
+		argContentRequest.getListener().onFailure(ErrorCode.DOWNLOADING);
+		
+		// Check if this is already being downloaded
+		ArrayList<Integer> currentDownloadingTemplates = PlatformRequestManager.getCurrentDownloadingTemplates();
+
+		for (Integer downloadingTemplateCode : currentDownloadingTemplates)
+		{
+			if (downloadingTemplateCode.compareTo(argContentRequest.getContentData().appHashCode()) == 0)
+			{
+				return;
+			}
+		}
+
 		Log.d(TAG, "fetching template from remote");
 
-		PlatformRequestManager.setWaitState(argContentRequest);
+		new PlatformTemplateDownloadTask(argContentRequest).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
 
-		new PlatformTemplateDownloadTask(argContentRequest).execute();
+		PlatformRequestManager.getCurrentDownloadingTemplates().add(argContentRequest.getContentData().appHashCode());
 	}
 }
