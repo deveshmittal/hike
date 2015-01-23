@@ -187,7 +187,15 @@ public class WebViewCardRenderer extends BaseAdapter
 			view.setTag(viewHolder);
 			Logger.d(tag, "inflated");
 		}
+
 		final WebViewHolder viewHolder = (WebViewHolder) view.getTag();
+
+		int height = convMessage.platformWebMessageMetadata.getCardHeight();
+		if (height != 0)
+		{
+			int minHeight  = (int) (height * Utils.densityMultiplier);
+			view.setMinimumHeight(minHeight);
+		}
 
 		final WebView web = viewHolder.myBrowser;
 
