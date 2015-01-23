@@ -6335,7 +6335,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			{
 				JSONObject metadataJSON = new JSONObject();
 				JSONObject helperData = new JSONObject(helper);
-				JSONObject oldHelper = metadataJSON.optJSONObject(HikeConstants.HELPER_DATA);
+				JSONObject oldHelper = metadataJSON.optJSONObject(HikePlatformConstants.HELPER_DATA);
 				if (oldHelper == null)
 				{
 					oldHelper = new JSONObject();
@@ -6346,7 +6346,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					String key = i.next();
 					oldHelper.put(key, helperData.get(key));
 				}
-				metadataJSON.put(HikeConstants.HELPER_DATA, oldHelper.toString());
+				metadataJSON.put(HikePlatformConstants.HELPER_DATA, oldHelper.toString());
 				json = metadataJSON.toString();
 				updateMetadataOfMessage(messageId, json);
 				return json;
@@ -6376,7 +6376,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				while (i.hasNext())
 				{
 					String key = i.next();
-					metadataJSON.put(key, newMetaData.get(key));
+					if (newMetaData.get(key) != null)
+					{
+						//Algo is that there might be JSONObject as the value and we might want to update some keys inside that JSONObject, so we are using the try
+						//catch block for that. If JSONException is thrown, we will directly update the JSON, else will iterate again and then update.
+						try
+						{
+
+							JSONObject newMetaJSON = new JSONObject(String.valueOf(newMetaData.get(key)));
+							JSONObject metaJSON = new JSONObject(String.valueOf(metadataJSON.get(key)));
+							Iterator<String> index = newMetaJSON.keys();
+							while (index.hasNext())
+							{
+								String indexKey = index.next();
+								metaJSON.put(indexKey, newMetaJSON.get(indexKey));
+							}
+							metadataJSON.put(key, metaJSON);
+							Logger.d(mContext.getClass().getSimpleName(), "values are JSONObject, so updating the iterated JSON.");
+						}
+						catch (JSONException e)
+						{
+							Logger.d(mContext.getClass().getSimpleName(), "JSON exception thrown, so updating the original JSON directly.");
+							metadataJSON.put(key, newMetaData.get(key));
+						}
+
+					}
 				}
 				json = metadataJSON.toString();
 				updateMetadataOfMessage(messageId, json);

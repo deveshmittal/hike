@@ -2118,8 +2118,6 @@ public class HikeConstants
 	
 	public static final String ADD_CATEGORY = "addCat";
 	
-	public static final String HELPER_DATA = "helper_data";
-
 	public static final int LED_DEFAULT_WHITE_COLOR = 0xffffffff;
 	
 	public static final int LED_NONE_COLOR = -2; /**
