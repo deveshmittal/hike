@@ -654,6 +654,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			WebViewCardRenderer.WebViewHolder holder = (WebViewCardRenderer.WebViewHolder) v.getTag();
 			setSelection(convMessage, holder.selectedStateOverlay);
 		}
+		else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT) {
+			//Calling the getView of another adapter to show html cards.
+			v = mWebViewCardRenderer.getView(position, convertView, parent);
+			WebViewCardRenderer.WebViewHolder holder = (WebViewCardRenderer.WebViewHolder) v.getTag();
+			dayHolder = holder;
+			setSelection(convMessage, holder.selectedStateOverlay);
+			setSenderDetails(convMessage, position, holder, false);
+			setTimeNStatus(position, holder, true, holder.messageContainer);
+		}
 		else
 			viewType = ViewType.values()[type];
 
