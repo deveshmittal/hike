@@ -10,9 +10,21 @@ public class PlatformWebMessageMetadata
 {
 	private String notifText = "";
 
-	private JSONObject helperData = new JSONObject();
+	private JSONObject helperData;
+
+	private int cardHeight;
 
 	private JSONObject cardData = new JSONObject();
+
+	public int getCardHeight()
+	{
+		return cardHeight;
+	}
+
+	public void setCardHeight(int cardHeight)
+	{
+		this.cardHeight = cardHeight;
+	}
 
 	public String getNotifText()
 	{
@@ -49,8 +61,17 @@ public class PlatformWebMessageMetadata
 	public PlatformWebMessageMetadata(JSONObject metadata)
 	{
 		this.json = metadata;
-		if (metadata.has(HikePlatformConstants.HELPER_DATA)){
-			setHelperData(metadata.optJSONObject(HikePlatformConstants.HELPER_DATA));
+		if (metadata.has(HikePlatformConstants.CARD_OBJECT))
+		{
+			JSONObject cardobj = metadata.optJSONObject(HikePlatformConstants.CARD_OBJECT);
+			if (cardobj.has(HikePlatformConstants.HELPER_DATA))
+			{
+				setHelperData(cardobj.optJSONObject(HikePlatformConstants.HELPER_DATA));
+			}
+		}
+
+		if (metadata.has(HikePlatformConstants.HEIGHT)){
+			setCardHeight(Integer.parseInt(metadata.optString(HikePlatformConstants.HEIGHT)));
 		}
 
 

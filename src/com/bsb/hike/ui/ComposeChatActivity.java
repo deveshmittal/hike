@@ -43,6 +43,7 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.*;
@@ -1316,14 +1317,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
                         convMessage.setIsSent(true);
                         convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
 						multipleMessageList.add(convMessage);
-					} else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.WEB_CONTENT){
+					} else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.WEB_CONTENT || msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.FORWARD_WEB_CONTENT){
 						//Web content message
 						String metadata = msgExtrasJson.optString(HikeConstants.METADATA);
 
 						ConvMessage convMessage = new ConvMessage();
 
-						convMessage.setMessageType(MESSAGE_TYPE.WEB_CONTENT);
-						convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(metadata);
+						convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
+						convMessage.platformWebMessageMetadata =  new PlatformWebMessageMetadata(PlatformContent.getForwardCardData(metadata));
 
 						convMessage.setMessage(convMessage.platformWebMessageMetadata.getNotifText());
 						multipleMessageList.add(convMessage);

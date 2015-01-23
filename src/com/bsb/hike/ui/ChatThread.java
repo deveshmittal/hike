@@ -19,6 +19,7 @@ import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.content.PlatformContent;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -2176,6 +2177,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							// as we will be changing msisdn and hike status while inserting in DB
 							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, isConversationOnHike());
 							convMessage.setMessageType(MESSAGE_TYPE.WEB_CONTENT);
+							convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
+							convMessage.setMessage(convMessage.platformWebMessageMetadata.getNotifText());
+
+							sendMessage(convMessage);
+
+						}
+						else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.FORWARD_WEB_CONTENT){
+							// as we will be changing msisdn and hike status while inserting in DB
+							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, isConversationOnHike());
+							convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 							convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
 							convMessage.setMessage(convMessage.platformWebMessageMetadata.getNotifText());
 
@@ -7813,10 +7824,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							multiMsgFwdObject.put(HikeConstants.ConvMessagePacketKeys.LOVE_ID, message.contentLove.loveId);
 						}
 						}
-					}  else if(message.getMessageType()==MESSAGE_TYPE.WEB_CONTENT){
-						multiMsgFwdObject.put(MESSAGE_TYPE.MESSAGE_TYPE, MESSAGE_TYPE.WEB_CONTENT);
+					}  else if(message.getMessageType()==MESSAGE_TYPE.WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT){
+						multiMsgFwdObject.put(MESSAGE_TYPE.MESSAGE_TYPE, MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 						if(message.platformWebMessageMetadata!=null){
-							multiMsgFwdObject.put(HikeConstants.METADATA, message.platformWebMessageMetadata.JSONtoString());
+							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
 
 						}
 					}

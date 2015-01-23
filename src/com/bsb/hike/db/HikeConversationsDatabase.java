@@ -711,6 +711,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		if (oldVersion < 33){
 			String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.BOT_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.NAME + " TEXT, " + DBConstants.CONVERSATION_METADATA + " TEXT)";
 			db.execSQL(sql);
+
+		}
+
+		if (oldVersion < 34) {
+			String sql2 = CREATE_TABLE + DBConstants.ALARM_MGR_TABLE + "(" + _ID + " INTEGER PRIMARY KEY, " + TIME + " TEXT, " + DBConstants.WILL_WAKE_CPU + " INTEGER, " + DBConstants.INTENT
+					+ " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
+			db.execSQL(sql2);
 		}
 	}
 
@@ -1399,7 +1406,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
         if(conv.getMessageType() == com.bsb.hike.HikeConstants.MESSAGE_TYPE.CONTENT) {
             insertStatement.bindString(messageMetadataColumn, conv.platformMessageMetadata != null ? conv.platformMessageMetadata.JSONtoString() : "");
 
-        } else if(conv.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT) {
+        } else if(conv.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || conv.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT) {
 			insertStatement.bindString(messageMetadataColumn, conv.platformWebMessageMetadata != null ? conv.platformWebMessageMetadata.JSONtoString() : "");
 
 		}else
@@ -2009,8 +2016,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 	public void deleteBot(String msisdn){
 		mDb.beginTransaction();
-		mDb.delete(DBConstants.BOT_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
-		removeChatThemeForMsisdn(msisdn);
+		try
+		{
+			mDb.delete(DBConstants.BOT_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
+			removeChatThemeForMsisdn(msisdn);
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
 	}
 
 	public Conversation addConversation(String msisdn, boolean onhike, String groupName, String groupOwner)
@@ -5325,7 +5339,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			{
                 if(message.getMessageType() == com.bsb.hike.HikeConstants.MESSAGE_TYPE.CONTENT){
                     message.platformMessageMetadata = new PlatformMessageMetadata(metadata, mContext);
-                }else if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT){
+                }else if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || message.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT){
 					message.platformWebMessageMetadata = new PlatformWebMessageMetadata(metadata);
 				}else{
                     message.setMetadata(metadata);
@@ -6321,7 +6335,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			{
 				JSONObject metadataJSON = new JSONObject();
 				JSONObject helperData = new JSONObject(helper);
-				JSONObject oldHelper = metadataJSON.optJSONObject(HikeConstants.HELPER_DATA);
+				JSONObject oldHelper = metadataJSON.optJSONObject(HikePlatformConstants.HELPER_DATA);
 				if (oldHelper == null)
 				{
 					oldHelper = new JSONObject();
@@ -6332,7 +6346,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					String key = i.next();
 					oldHelper.put(key, helperData.get(key));
 				}
-				metadataJSON.put(HikeConstants.HELPER_DATA, oldHelper.toString());
+				metadataJSON.put(HikePlatformConstants.HELPER_DATA, oldHelper.toString());
 				json = metadataJSON.toString();
 				updateMetadataOfMessage(messageId, json);
 				return json;
@@ -6362,7 +6376,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				while (i.hasNext())
 				{
 					String key = i.next();
-					metadataJSON.put(key, newMetaData.get(key));
+					if (newMetaData.get(key) != null)
+					{
+						//Algo is that there might be JSONObject as the value and we might want to update some keys inside that JSONObject, so we are using the try
+						//catch block for that. If JSONException is thrown, we will directly update the JSON, else will iterate again and then update.
+						try
+						{
+
+							JSONObject newMetaJSON = new JSONObject(String.valueOf(newMetaData.get(key)));
+							JSONObject metaJSON = new JSONObject(String.valueOf(metadataJSON.get(key)));
+							Iterator<String> index = newMetaJSON.keys();
+							while (index.hasNext())
+							{
+								String indexKey = index.next();
+								metaJSON.put(indexKey, newMetaJSON.get(indexKey));
+							}
+							metadataJSON.put(key, metaJSON);
+							Logger.d(mContext.getClass().getSimpleName(), "values are JSONObject, so updating the iterated JSON.");
+						}
+						catch (JSONException e)
+						{
+							Logger.d(mContext.getClass().getSimpleName(), "JSON exception thrown, so updating the original JSON directly.");
+							metadataJSON.put(key, newMetaData.get(key));
+						}
+
+					}
 				}
 				json = metadataJSON.toString();
 				updateMetadataOfMessage(messageId, json);
