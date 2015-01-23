@@ -69,7 +69,7 @@ public class PlatformContentModel
 		}
 		return mTemplateHash;
 	}
-	
+
 	/**
 	 * Template hash code. Replace with template UID
 	 * 
@@ -112,6 +112,12 @@ public class PlatformContentModel
 			iae.printStackTrace();
 			return null;
 		}
+		catch (Exception e)
+		{
+			// We dont want app to crash, instead safely provide control in onFailure
+			e.printStackTrace();
+			return null;
+		}
 
 		return object;
 	}
@@ -123,7 +129,7 @@ public class PlatformContentModel
 		PlatformContentModel originalModel = make(originalData);
 
 		mergeObjects(originalModel.cardObj, originalModel.fwdCardObj);
-		
+
 		originalModel.fwdCardObj = null;
 
 		forwardData = new Gson().toJson(originalModel);
