@@ -1,22 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:background="@color/transparent"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+
     <WebView
-            android:id="@+id/webcontent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:background="@color/transparent"
-            android:layout_gravity="center"
-            />
+        android:layout_margin="10dp"
+        android:background="@color/green"
+        android:id="@+id/webcontent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        
+         />
+
+    <RelativeLayout
+        android:background="@color/red_color_span"
+        android:visibility="gone"
+        android:id="@+id/loader"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ImageView
+            android:src="@drawable/hikelogo"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
 
     <include
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignBottom="@id/webcontent"
-            android:layout_alignTop="@id/webcontent"
-            layout="@layout/message_overlay"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@id/webcontent"
+        android:layout_alignTop="@id/webcontent"
+        layout="@layout/message_overlay" />
 
 </RelativeLayout>
