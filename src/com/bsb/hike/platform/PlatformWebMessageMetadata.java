@@ -68,11 +68,11 @@ public class PlatformWebMessageMetadata
 			{
 				setHelperData(cardobj.optJSONObject(HikePlatformConstants.HELPER_DATA));
 			}
+			if (cardobj.has(HikePlatformConstants.HEIGHT)){
+				setCardHeight(Integer.parseInt(cardobj.optString(HikePlatformConstants.HEIGHT)));
+			}
 		}
 
-		if (metadata.has(HikePlatformConstants.HEIGHT)){
-			setCardHeight(Integer.parseInt(metadata.optString(HikePlatformConstants.HEIGHT)));
-		}
 
 
 	}
