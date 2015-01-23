@@ -2289,7 +2289,7 @@ public class Utils
 		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		int ringerMode = audioManager.getRingerMode();
 
-		if (ringerMode != AudioManager.RINGER_MODE_SILENT)
+		if (ringerMode != AudioManager.RINGER_MODE_SILENT && !Utils.isUserInAnyTypeOfCall(context))
 		{
 			Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 			if (vibrator != null)
@@ -5028,5 +5028,20 @@ public class Utils
 		}
 		return true;
 	}
+	
+	/**
+	 * Tells if User is on Telephonic/Audio/Vedio/Voip Call
+	 * @param context
+	 * @return
+	 */
+	public static boolean isUserInAnyTypeOfCall(Context context) {
+		
+		AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        
+		boolean callMode = manager.getMode() == AudioManager.MODE_IN_COMMUNICATION 
+				|| manager.getMode() == AudioManager.MODE_IN_CALL;
+        
+		return callMode;
+    } 
 
 }

@@ -16,10 +16,12 @@ import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 
 public class SoundUtils
 {
-
+	private static int systemStreamVol;
+	
 	private static Handler soundHandler = new Handler(Looper.getMainLooper());
 
 	private static MediaPlayer mediaPlayer = new MediaPlayer();
@@ -31,6 +33,7 @@ public class SoundUtils
 		public void run()
 		{
 			mediaPlayer.reset();
+			setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 		}
 	};
 
@@ -42,6 +45,7 @@ public class SoundUtils
 		{
 			mediaPlayer.reset();
 			soundHandler.removeCallbacks(stopSoundRunnable);
+			setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 		}
 	};
 
@@ -52,13 +56,22 @@ public class SoundUtils
 		public boolean onError(MediaPlayer mp, int what, int extra)
 		{
 			Logger.e("SoundUtils", "MediaPlayer -- OnERROR!!! WHAT:: " + what + " EXTRAS:: " + extra);
-			// This is being removed as onError and on IOEx was called together so accessing 
-			// stopMediaPlayerProperly at same time causing NPE
-			//stopMediaPlayerProperly();
+			mediaPlayer.reset();
+			setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 			return true;
 		}
 	};
 
+	private static Runnable resetSystemStreamVolRunnable = new Runnable()
+	{
+
+		@Override
+		public void run()
+		{
+			setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
+		}
+	};
+	
 	public static boolean isTickSoundEnabled(Context context)
 	{
 		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -73,21 +86,16 @@ public class SoundUtils
 	 */
 	public static void playSoundFromRaw(final Context context, int soundId)
 	{
-
 		Logger.i("sound", "playing sound " + soundId);
 
-		// Initializing Player if it has been killed by onErrorListener
-		if (mediaPlayer == null)
-		{
-			mediaPlayer = new MediaPlayer();
-		}
-		else
-		{
-			// resetting media player
-			mediaPlayer.reset();
-		}
+		// remove any previous handler
+		soundHandler.removeCallbacks(stopSoundRunnable);
 
-		mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
+		// resetting media player
+		mediaPlayer.reset();
+
+		mediaPlayer.setAudioStreamType(AudioManager.STREAM_SYSTEM);
+		setSystemStreamVolToNotifStreamVol(context);
 		Resources res = context.getResources();
 		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
 
@@ -96,15 +104,7 @@ public class SoundUtils
 			mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
 			afd.close();
 
-			mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-			{
-
-				@Override
-				public void onCompletion(MediaPlayer mp)
-				{
-					mp.reset();
-				}
-			});
+			mediaPlayer.setOnCompletionListener(completeListener);
 			mediaPlayer.setOnErrorListener(errorListener);
 			mediaPlayer.prepare();
 			mediaPlayer.start();
@@ -133,12 +133,18 @@ public class SoundUtils
 		{
 			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 			Ringtone r = RingtoneManager.getRingtone(context, notification);
-			r.setStreamType(AudioManager.STREAM_NOTIFICATION);
+			r.setStreamType(AudioManager.STREAM_SYSTEM);
+			setSystemStreamVolToNotifStreamVol(context);
 			r.play();
+			soundHandler.postDelayed(resetSystemStreamVolRunnable, HikeConstants.STOP_NOTIF_SOUND_TIME);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
+		}
+		finally
+		{
+			setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 		}
 	}
 
@@ -153,19 +159,12 @@ public class SoundUtils
 		// remove any previous handler
 		soundHandler.removeCallbacks(stopSoundRunnable);
 
-		// Initializing Player if it has been killed by onErrorListener
-		if (mediaPlayer == null)
-		{
-			mediaPlayer = new MediaPlayer();
-		}
-		else
-		{
-			// resetting media player
-			mediaPlayer.reset();
-		}
+		// resetting media player
+		mediaPlayer.reset();
 
-		mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
-
+		mediaPlayer.setAudioStreamType(AudioManager.STREAM_SYSTEM);
+		setSystemStreamVolToNotifStreamVol(context);
+		
 		try
 		{
 			mediaPlayer.setDataSource(context, soundUri);
@@ -194,6 +193,17 @@ public class SoundUtils
 		}
 	}
 
+	/**
+	 * This sets vol of SYSTEM_STREAM to vol of STREAM_NOTIFICATION
+	 * @param context
+	 */
+	public static void setSystemStreamVolToNotifStreamVol(Context context)
+	{
+		systemStreamVol = getCurrentVolume(context, AudioManager.STREAM_SYSTEM);
+		int notifVol = getCurrentVolume(context, AudioManager.STREAM_NOTIFICATION);
+		setCurrentVolume(context, AudioManager.STREAM_SYSTEM, notifVol);
+	}
+	
 	public static int getCurrentVolume(Context context, int streamType)
 	{
 		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -216,13 +226,8 @@ public class SoundUtils
 	{
 		soundHandler.removeCallbacks(stopSoundRunnable);
 
-		// Add NULL check here because media player, on throwing exception calls this method again.
-		// Which results in stopMediaPlayerProperly() method to be called twice.
-		if (mediaPlayer != null)
-		{
-			mediaPlayer.stop();
-			mediaPlayer.release();
-			mediaPlayer = null;
-		}
+		mediaPlayer.reset();
+		
+		setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 	}
 }
