@@ -2010,6 +2010,8 @@ public class HikeConstants
 		public static final int CONTENT = 2;
 
 		public static final int WEB_CONTENT = 3;
+
+		public static final int FORWARD_WEB_CONTENT = 4;
 	}
 	
 	public static interface ConvMessagePacketKeys{
@@ -2017,6 +2019,7 @@ public class HikeConstants
 		public static final String PIN_TYPE = "pin";
 		public static final String LOVE_ID = "loveID";
 		public static final String WEB_CONTENT_TYPE = "wc";
+		public static final String FORWARD_WEB_CONTENT_TYPE = "fwc";
 	}
 	
 	public static class HASH_MESSAGE_TYPE
@@ -2115,8 +2118,6 @@ public class HikeConstants
 	
 	public static final String ADD_CATEGORY = "addCat";
 	
-	public static final String HELPER_DATA = "helper_data";
-
 	public static final int LED_DEFAULT_WHITE_COLOR = 0xffffffff;
 	
 	public static final int LED_NONE_COLOR = -2; /**

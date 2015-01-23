@@ -75,7 +75,7 @@ public class GCMIntentService extends GCMBaseIntentService
 		HikeMessengerApp app = (HikeMessengerApp) context.getApplicationContext();
 		app.connectToService();
 		String message = intent.getStringExtra("msg");
-		if (message != null)
+		if (!TextUtils.isEmpty(message))
 		{
 			HikeHandlerUtil.getInstance().postRunnableWithDelay(new MessageArrivedRunnable(message), 0);
 		}
@@ -100,19 +100,6 @@ public class GCMIntentService extends GCMBaseIntentService
 					HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_TO_OFFLINE_PUSH, bundle);
 				}
 			
-		}else{
-			// join with mqtt code
-			Logger.d("Gcm test", intent.getExtras().toString());
-			String str = intent.getStringExtra("msg");
-			try
-			{
-				MqttMessagesManager.getInstance(context).saveMqttMessage(new JSONObject(str));
-			}
-			catch (JSONException e)
-			{
-				e.printStackTrace();
-			}
-
 		}
 		context.sendBroadcast(new Intent(HikeMqttManagerNew.MQTT_CONNECTION_CHECK_ACTION).putExtra("reconnect", reconnect));
 		}

@@ -564,6 +564,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			return viewTypeCount + mChatThreadCardRenderer.getItemViewType(convMessage);
 		}
+		else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT)
+		{
+			return viewTypeCount + mChatThreadCardRenderer.getCardCount() + mWebViewCardRenderer.getItemViewType(position);
+		}
 		else if (convMessage.getUnreadCount() > 0)
 		{
 			type = ViewType.UNREAD_COUNT;
@@ -619,7 +623,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public int getViewTypeCount()
 	{
-		return viewTypeCount + mChatThreadCardRenderer.getCardCount();
+		return viewTypeCount + mChatThreadCardRenderer.getCardCount() + mWebViewCardRenderer.getViewTypeCount();
 	}
 
 	@Override
@@ -649,6 +653,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			v = mWebViewCardRenderer.getView(position, convertView, parent);
 			WebViewCardRenderer.WebViewHolder holder = (WebViewCardRenderer.WebViewHolder) v.getTag();
 			setSelection(convMessage, holder.selectedStateOverlay);
+		}
+		else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT) {
+			//Calling the getView of another adapter to show html cards.
+			v = mWebViewCardRenderer.getView(position, convertView, parent);
+			WebViewCardRenderer.WebViewHolder holder = (WebViewCardRenderer.WebViewHolder) v.getTag();
+			dayHolder = holder;
+			setSelection(convMessage, holder.selectedStateOverlay);
+			setSenderDetails(convMessage, position, holder, false);
+			setTimeNStatus(position, holder, true, holder.messageContainer);
 		}
 		else
 			viewType = ViewType.values()[type];

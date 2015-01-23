@@ -1,32 +1,31 @@
 package com.bsb.hike.utils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.R;
-import com.bsb.hike.ui.ComposeChatActivity;
-import com.bsb.hike.ui.ConnectedAppsActivity;
-import com.bsb.hike.ui.CreditsActivity;
-import com.bsb.hike.ui.HikeAuthActivity;
-import com.bsb.hike.ui.HikeListActivity;
-import com.bsb.hike.ui.HikePreferences;
-import com.bsb.hike.ui.HomeActivity;
-import com.bsb.hike.ui.SettingsActivity;
-import com.bsb.hike.ui.SignupActivity;
-import com.bsb.hike.ui.TimelineActivity;
-import com.bsb.hike.ui.WebViewActivity;
-import com.bsb.hike.ui.WelcomeActivity;
-import com.google.android.gms.internal.co;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Message;
 import android.text.TextUtils;
 import android.widget.Toast;
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.ConnectedAppsActivity;
+import com.bsb.hike.ui.CreditsActivity;
+import com.bsb.hike.ui.HikeAuthActivity;
+import com.bsb.hike.ui.HikeListActivity;
+import com.bsb.hike.ui.HikePreferences;
+import com.bsb.hike.ui.SettingsActivity;
+import com.bsb.hike.ui.SignupActivity;
+import com.bsb.hike.ui.TimelineActivity;
+import com.bsb.hike.ui.WebViewActivity;
+import com.bsb.hike.ui.WelcomeActivity;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class IntentManager
 {
@@ -184,6 +183,35 @@ public class IntentManager
 
 		return intent;
 
+	}
+
+	public static Intent getForwardIntentForConvMessage(Context context, ConvMessage convMessage, String metadata)
+	{
+		Intent intent = new Intent(context, ComposeChatActivity.class);
+		intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+		JSONArray multipleMsgArray = new JSONArray();
+		JSONObject multiMsgFwdObject = new JSONObject();
+		try
+		{
+			multiMsgFwdObject.put(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE, convMessage.getMessageType());
+			if (metadata != null)
+			{
+				multiMsgFwdObject.put(HikeConstants.METADATA, metadata);
+			}
+			multipleMsgArray.put(multiMsgFwdObject);
+		}
+		catch (JSONException e)
+		{
+			Logger.e(context.getClass().getSimpleName(), "Invalid JSON", e);
+		}
+		String phoneNumber = convMessage.getMsisdn();
+		ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNo(phoneNumber);
+		String mContactName = contactInfo.getName();
+		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
+		intent.putExtra(HikeConstants.Extras.PREV_MSISDN, convMessage.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
+
+		return intent;
 	}
 
 	public static Intent getForwardStickerIntent(Context context, String stickerId, String categoryId, boolean isFtueFwd)
