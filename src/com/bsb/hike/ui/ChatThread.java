@@ -155,6 +155,7 @@ import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
+import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
@@ -1434,14 +1435,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				optionsList.add(new OverFlowMenuItem(getString(R.string.call), 1));
 			}
-			
-			if(mUserIsBlocked)
+
+			if (!mConversation.getMsisdn().equals(HikeConstants.FTUE_HIKE_DAILY) && !mConversation.getMsisdn().equals(HikeConstants.FTUE_TEAMHIKE_MSISDN))
 			{
-				optionsList.add(new OverFlowMenuItem(getString(R.string.unblock_title), 6));
-			}
-			else
-			{
-				optionsList.add(new OverFlowMenuItem(getString(R.string.block_title), 6));
+				if (mUserIsBlocked)
+				{
+					optionsList.add(new OverFlowMenuItem(getString(R.string.unblock_title), 6));
+				}
+				else
+				{
+					optionsList.add(new OverFlowMenuItem(getString(R.string.block_title), 6));
+				}
 			}
 		}
 
@@ -1451,8 +1455,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			optionsList.add(new OverFlowMenuItem(getString(isMuted ? R.string.unmute_group : R.string.mute_group), 2));
 		}
-		
-		if (mConversation.isBotConv())
+
+		if (mConversation.isBotConv()
+				&& (!mConversation.getMsisdn().equals(HikeConstants.FTUE_HIKE_DAILY) && !mConversation.getMsisdn().equals(HikeConstants.FTUE_TEAMHIKE_MSISDN)))
 		{
 			boolean isMuted = mConversation.isMutedBotConv(false);
 
