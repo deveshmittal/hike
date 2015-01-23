@@ -3,6 +3,8 @@ package com.bsb.hike.platform.content;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.bsb.hike.platform.content.PlatformContent.ErrorCode;
+
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -12,7 +14,7 @@ class PlatformRequestManager
 	private static String TAG = "PlatformRequestManager";
 
 	@SuppressWarnings("serial")
-	private static ArrayList<PlatformContentRequest> requestQueue = new ArrayList<PlatformContentRequest>()
+	private volatile static ArrayList<PlatformContentRequest> requestQueue = new ArrayList<PlatformContentRequest>()
 	{
 		public boolean add(PlatformContentRequest object)
 		{
@@ -35,7 +37,12 @@ class PlatformRequestManager
 		};
 	};
 
-	private static ArrayList<Integer> currentDownloadingTemplates = new ArrayList<Integer>();
+	private static volatile ArrayList<Integer> currentDownloadingTemplates = new ArrayList<Integer>();
+
+	public static ArrayList<Integer> getCurrentDownloadingTemplates()
+	{
+		return currentDownloadingTemplates;
+	}
 
 	/**
 	 * Add request to executing pool. Check for wait states. Check for duplicates (change priority)
@@ -44,19 +51,19 @@ class PlatformRequestManager
 	 */
 	public static void addRequest(PlatformContentRequest argRequest)
 	{
-		Log.d(TAG, "addRequest");
-		int newTemplate = argRequest.getContentData().templateHashCode();
-
-		for (Integer downloadingTemplate : currentDownloadingTemplates)
-		{
-			if (downloadingTemplate.intValue() == newTemplate)
-			{
-				Log.d(TAG, "template for request is being downloaded, set wait state");
-
-				// Template for request is being downloaded
-				setWaitState(argRequest);
-			}
-		}
+		// Log.d(TAG, "addRequest");
+		// int newTemplate = argRequest.getContentData().templateHashCode();
+		//
+		// for (Integer downloadingTemplate : currentDownloadingTemplates)
+		// {
+		// if (downloadingTemplate.intValue() == newTemplate)
+		// {
+		// Log.d(TAG, "template for request is being downloaded, set wait state");
+		//
+		// // Template for request is being downloaded
+		// setWaitState(argRequest);
+		// }
+		// }
 
 		requestQueue.add(argRequest);
 
@@ -114,17 +121,16 @@ class PlatformRequestManager
 
 	public static void setState(PlatformContentRequest argRequest, byte newStateId)
 	{
-
 		if (argRequest == null)
 		{
 			return;
 		}
 
-		int templateId = argRequest.getContentData().templateHashCode();
+		int appId = argRequest.getContentData().appHashCode();
 
 		for (PlatformContentRequest savedReq : requestQueue)
 		{
-			if (savedReq.getContentData().templateHashCode() == templateId)
+			if (savedReq.getContentData().appHashCode() == appId)
 			{
 				savedReq.setState(newStateId);
 			}
@@ -166,6 +172,11 @@ class PlatformRequestManager
 		});
 
 		return status;
+	}
+
+	public static void reportFailure(PlatformContentRequest argRequest, ErrorCode error)
+	{
+		argRequest.getListener().onFailure(error);
 	}
 
 	public static void removeAll()
@@ -218,6 +229,11 @@ class PlatformRequestManager
 				}
 			}
 		});
+
+		if (!requestQueue.isEmpty())
+		{
+			processNextRequest();
+		}
 	}
 
 }

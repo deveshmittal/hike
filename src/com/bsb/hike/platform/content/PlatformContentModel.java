@@ -39,6 +39,8 @@ public class PlatformContentModel
 	@Expose
 	public PlatformCardObjectModel fwdCardObj;
 
+	private int mAppHash;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -66,6 +68,20 @@ public class PlatformContentModel
 			mTemplateHash = new String(cardObj.layoutId + cardObj.appVersion).hashCode();
 		}
 		return mTemplateHash;
+	}
+	
+	/**
+	 * Template hash code. Replace with template UID
+	 * 
+	 * @return the int
+	 */
+	public int appHashCode()
+	{
+		if (mAppHash == -1)
+		{
+			mAppHash = new String(cardObj.appName + cardObj.appVersion).hashCode();
+		}
+		return mAppHash;
 	}
 
 	/**
@@ -221,7 +237,7 @@ public class PlatformContentModel
 	}
 
 	/**
-	 * Gets the appID.
+	 * Gets the appID. This is same as the name of folder in which HTML templates are saved.
 	 * 
 	 * @return the appID
 	 */

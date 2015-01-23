@@ -97,14 +97,14 @@ class PlatformContentCache
 	{
 		Log.d(TAG, "loading template from disk");
 
-		if (verifyVersion(content))
-		{
-			// Continue loading
-		}
-		else
-		{
-			return null;
-		}
+		// if (verifyVersion(content))
+		// {
+		// // Continue loading
+		// }
+		// else
+		// {
+		// return null;
+		// }
 
 		File file = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + content.getContentData().getId(), content.getContentData().getTag());
 
@@ -121,10 +121,13 @@ class PlatformContentCache
 
 		if (downloadedTemplate == null)
 		{
-			// TODO Handle
+			PlatformRequestManager.reportFailure(content, PlatformContent.ErrorCode.INVALID_DATA);
+			PlatformRequestManager.remove(content);
 		}
-
-		templateCache.put(content.getContentData().templateHashCode(), downloadedTemplate);
+		else
+		{
+			templateCache.put(content.getContentData().templateHashCode(), downloadedTemplate);
+		}
 
 		return downloadedTemplate;
 	}
@@ -137,7 +140,7 @@ class PlatformContentCache
 		{
 			String[] fileList = file.list(new FilenameFilter()
 			{
-				@Override
+				@Override 
 				public boolean accept(File dir, String filename)
 				{
 					if (filename.equals(PlatformContentConstants.PLATFORM_CONFIG_FILE_NAME))

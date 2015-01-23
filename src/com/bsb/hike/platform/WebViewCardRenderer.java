@@ -11,6 +11,7 @@ import android.widget.BaseAdapter;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.platform.content.PlatformContent.ErrorCode;
 import com.bsb.hike.platform.content.PlatformContentListener;
 import com.bsb.hike.platform.content.PlatformContentModel;
 import com.bsb.hike.platform.content.PlatformWebClient;
@@ -113,6 +114,13 @@ public class WebViewCardRenderer extends BaseAdapter
 				web.getSettings().setJavaScriptEnabled(true);
 				web.setWebViewClient(new CustomWebViewClient(convMessage));
 				web.loadDataWithBaseURL("", content.getFormedData(), "text/html", "UTF-8", "");
+			}
+
+			@Override
+			public void onFailure(ErrorCode reason)
+			{
+				// TODO Auto-generated method stub
+				
 			}});
 		
 		return view;

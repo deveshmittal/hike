@@ -9,6 +9,11 @@ public class PlatformContent
 		// Classic singleton
 	}
 
+	public static enum ErrorCode
+	{
+		INVALID_DATA, LOW_CONNECTIVITY, STORAGE_FULL, UNKNOWN, DOWNLOADING
+	}
+
 	/**
 	 * Gets well formed HTML content.
 	 * 
@@ -31,6 +36,7 @@ public class PlatformContent
 		else
 		{
 			Log.e("PlatformContent", "Incorrect content data");
+			listener.onFailure(ErrorCode.INVALID_DATA);
 			return null;
 		}
 
