@@ -1107,14 +1107,14 @@ public class HikeNotification
 		if (!forceNotPlaySound)
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-			if (!shouldNotPlayNotification && ((manager.getMode() != AudioManager.MODE_IN_COMMUNICATION 
-					|| manager.getMode() != AudioManager.MODE_IN_CALL)))
+			
+			if (!shouldNotPlayNotification && !Utils.isUserInAnyTypeOfCall(context))
 			{
 				String notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
 				Logger.i("notif", "sound " + notifSound);
 				if (!NOTIF_SOUND_OFF.equals(notifSound))
 				{
-					if (!Utils.isUserInCall(context) &&(manager.isMusicActive() || manager.isWiredHeadsetOn()))
+					if (manager.isMusicActive() || manager.isWiredHeadsetOn())
 					{
 						playSoundViaPlayer(notifSound);
 					}
