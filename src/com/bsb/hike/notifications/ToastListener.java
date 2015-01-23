@@ -202,7 +202,7 @@ public class ToastListener implements Listener
 				return;
 			}
 
-			if (isGroupConversationAndMuted(message.getMsisdn()))
+			if (isConversationMuted(message.getMsisdn()))
 			{
 				return;
 			}
@@ -478,7 +478,7 @@ public class ToastListener implements Listener
 						Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
 						continue;
 					}
-					if (isGroupConversationAndMuted(message.getMsisdn()))
+					if (isConversationMuted(message.getMsisdn()))
 					{
 						Logger.d(getClass().getSimpleName(), "Group has been muted");
 						continue;
@@ -540,13 +540,21 @@ public class ToastListener implements Listener
 		}
 	}
 
-	private boolean isGroupConversationAndMuted(String msisdn)
+	private boolean isConversationMuted(String msisdn)
 	{
 		if ((Utils.isGroupConversation(msisdn)))
 		{
 			if (HikeConversationsDatabase.getInstance().isGroupMuted(msisdn))
 			{
 				Logger.d(getClass().getSimpleName(), "Group has been muted");
+				return true;
+			}
+		}
+		else if (Utils.isBot(msisdn))
+		{
+			if (HikeConversationsDatabase.getInstance().isBotMuted(msisdn))
+			{
+				Logger.d(getClass().getSimpleName(), "Bot has been muted");
 				return true;
 			}
 		}

@@ -5,7 +5,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 public interface DBConstants
 {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 34;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 36;
 
 	public static final int USERS_DATABASE_VERSION = 15;
 
@@ -106,6 +106,8 @@ public interface DBConstants
 	public static final String EMOTICON_INDEX = "emoticonIdx";
 
 	public static final String MUTE_GROUP = "muteGroup";
+	
+	public static final String IS_MUTE = "isMute";
 
 	public static final String FAVORITES_TABLE = "favoritesTable";
 

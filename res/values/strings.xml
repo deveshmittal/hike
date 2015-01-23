@@ -1280,4 +1280,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="ringtone_loader">Loading...</string>
     
     <string name="happy_republic_day">Happy Republic Day</string>
+    
+    <string name="mute">Mute</string>
+    <string name="unmute">Unmute</string>
 </resources>
