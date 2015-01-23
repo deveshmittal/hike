@@ -80,7 +80,7 @@ public class FileTransferManager extends BroadcastReceiver
 
 	private ExecutorService pool;
 
-	public static FileTransferManager _instance = null;
+	public static volatile FileTransferManager _instance = null;
 
 	private SharedPreferences settings;
 

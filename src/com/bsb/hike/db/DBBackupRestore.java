@@ -29,7 +29,7 @@ public class DBBackupRestore
 	 * 	DBBackupRestore is a singleton class that performs are the backup/restore related
 	 * 	operations
 	 */
-	private static DBBackupRestore _instance = null;
+	private static volatile DBBackupRestore _instance = null;
 
 	private static final String HIKE_PACKAGE_NAME = "com.bsb.hike";
 
@@ -41,7 +41,7 @@ public class DBBackupRestore
 
 	private static final String[] resetTableNames = { DBConstants.STICKER_SHOP_TABLE, DBConstants.STICKER_CATEGORIES_TABLE };
 
-	private Context mContext;
+	private final Context mContext;
 
 	private DBBackupRestore(Context context)
 	{

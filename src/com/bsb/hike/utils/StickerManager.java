@@ -196,7 +196,7 @@ public class StickerManager
 	
 	private static final String REMOVE_LEGACY_GREEN_DOTS = "removeLegacyGreenDots";
 	
-	private Map<String, StickerCategory> stickerCategoriesMap;
+	private final Map<String, StickerCategory> stickerCategoriesMap;
 	
 	public static final int DEFAULT_POSITION = 3;
 	
@@ -213,7 +213,7 @@ public class StickerManager
 
 	private static SharedPreferences preferenceManager;
 
-	private static StickerManager instance;
+	private static volatile StickerManager instance;
 	
 	public static StickerManager getInstance()
 	{
