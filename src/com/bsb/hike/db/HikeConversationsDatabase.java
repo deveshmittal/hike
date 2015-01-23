@@ -711,6 +711,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		if (oldVersion < 33){
 			String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.BOT_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.NAME + " TEXT, " + DBConstants.CONVERSATION_METADATA + " TEXT)";
 			db.execSQL(sql);
+
+		}
+
+		if (oldVersion < 34) {
+			String sql2 = CREATE_TABLE + DBConstants.ALARM_MGR_TABLE + "(" + _ID + " INTEGER PRIMARY KEY, " + TIME + " TEXT, " + DBConstants.WILL_WAKE_CPU + " INTEGER, " + DBConstants.INTENT
+					+ " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
+			db.execSQL(sql2);
 		}
 	}
 
