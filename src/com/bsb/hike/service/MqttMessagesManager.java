@@ -2314,7 +2314,7 @@ public class MqttMessagesManager
 
 		convDb.setChatBackground(msisdn, jsonObj.optString(HikeConstants.BOT_CHAT_THEME), System.currentTimeMillis()/1000);
 
-		convDb.addBot(msisdn, name, null);
+		convDb.insertBot(msisdn, name, null, 0);
 
 		if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
 		{

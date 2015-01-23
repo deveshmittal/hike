@@ -1430,7 +1430,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (!(mConversation instanceof GroupConversation))
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.call), 1));
+			if (!mConversation.isBotConv())
+			{
+				optionsList.add(new OverFlowMenuItem(getString(R.string.call), 1));
+			}
+			
 			if(mUserIsBlocked)
 			{
 				optionsList.add(new OverFlowMenuItem(getString(R.string.unblock_title), 6));
@@ -1446,8 +1450,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			boolean isMuted = ((GroupConversation) mConversation).isMuted();
 
 			optionsList.add(new OverFlowMenuItem(getString(isMuted ? R.string.unmute_group : R.string.mute_group), 2));
-
 		}
+		
+		if (mConversation.isBotConv())
+		{
+			boolean isMuted = mConversation.isMutedBotConv(false);
+
+			optionsList.add(new OverFlowMenuItem(getString(isMuted ? R.string.unmute : R.string.mute), 2));
+		}
+		
 		optionsList.add(new OverFlowMenuItem(getString(R.string.clear_chat), 5));
 		if(messages.size() > 0)
 		{
@@ -1525,12 +1536,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Utils.onCallClicked(ChatThread.this, mContactNumber);
 					break;
 				case 2:
-					GroupConversation groupConversation = (GroupConversation) mConversation;
+					if (mConversation.isBotConv())
+					{
+						mConversation.setBotConvMute(!mConversation.isMutedBotConv(false));
+						
+						HikeMessengerApp.getPubSub().publish(HikePubSub.MUTE_CONVERSATION_TOGGLED,
+								new Pair<String, Boolean>(mConversation.getMsisdn(), mConversation.isMutedBotConv(false)));
+					}
+					else
+					{
+						GroupConversation groupConversation = (GroupConversation) mConversation;
 
-					groupConversation.setIsMuted(!groupConversation.isMuted());
+						groupConversation.setIsMuted(!groupConversation.isMuted());
 
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MUTE_CONVERSATION_TOGGLED,
-							new Pair<String, Boolean>(groupConversation.getMsisdn(), groupConversation.isMuted()));
+						HikeMessengerApp.getPubSub().publish(HikePubSub.MUTE_CONVERSATION_TOGGLED,
+								new Pair<String, Boolean>(groupConversation.getMsisdn(), groupConversation.isMuted()));
+					}
 					break;
 				case 3:
 					EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(ChatThread.this, null);
@@ -2651,6 +2672,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				toggleConversationMuteViewVisibility(false);
 			}
 
+		}
+		else if (mConversation.isBotConv())
+		{
+			if (!checkNetworkError())
+			{
+				toggleConversationMuteViewVisibility(mConversation.isMutedBotConv(false));
+			}
+			else
+			{
+				toggleConversationMuteViewVisibility(false);
+			}
 		}
 		else
 		{
@@ -3798,7 +3830,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return;
 			}
 			final Boolean isMuted = groupMute.second;
-			((GroupConversation) mConversation).setIsMuted(isMuted);
+
+			if (!Utils.isBot(groupMute.first))
+			{
+				((GroupConversation) mConversation).setIsMuted(isMuted);
+			}
+
 			runOnUiThread(new Runnable()
 			{
 				@Override
@@ -3822,7 +3859,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					if (checkNetworkError())
 					{
 						showNetworkError(true);
-						if (mConversation instanceof GroupConversation)
+						if (mConversation instanceof GroupConversation || mConversation.isBotConv())
 						{
 							toggleConversationMuteViewVisibility(false);
 						}
@@ -3833,6 +3870,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						if (mConversation instanceof GroupConversation)
 						{
 							toggleConversationMuteViewVisibility(((GroupConversation) mConversation).isMuted());
+						}
+						else if (mConversation.isBotConv())
+						{
+							toggleConversationMuteViewVisibility(mConversation.isMutedBotConv(false));
 						}
 					}
 				}

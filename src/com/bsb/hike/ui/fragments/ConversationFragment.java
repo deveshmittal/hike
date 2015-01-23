@@ -1982,6 +1982,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					{
 						((GroupConversation) conversation).setIsMuted(isMuted);
 					}
+					else if (conversation.isBotConv())
+					{
+						conversation.isMutedBotConv(true);
+					}
 
 					notifyDataSetChanged();
 				}
