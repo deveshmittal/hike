@@ -154,7 +154,7 @@ public class AnalyticsSender implements Runnable
 	{
 		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Looking files in directory :" + context.getFilesDir() + "/Analytics/");
 		
-		File dir = new File(context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR + File.separator);
+		File dir = new File(HAManager.getInstance().getAnalyticsDirectory() + File.separator);
 
 		String[] fileNames = dir.list();
 		
@@ -218,7 +218,7 @@ public class AnalyticsSender implements Runnable
 		}
 		while(true)
 		{
-			String absolutePath = context.getFilesDir() + AnalyticsConstants.EVENT_FILE_DIR + File.separator + fileName;
+			String absolutePath = HAManager.getInstance().getAnalyticsDirectory() + File.separator + fileName;
 	
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "uploading file :" + absolutePath);		
 			
