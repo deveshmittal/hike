@@ -254,9 +254,16 @@ public class DbConversationListener implements Listener
 			String id = groupMute.first;
 			boolean mute = groupMute.second;
 
-			mConversationDb.toggleGroupMute(id, mute);
+			if (Utils.isBot(id))
+			{
+				// TODO Do we have to do MQTT PUBLISH here?
+			}
+			else
+			{
+				mConversationDb.toggleGroupMute(id, mute);
 
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, serializeMsg(mute ? HikeConstants.MqttMessageTypes.MUTE : HikeConstants.MqttMessageTypes.UNMUTE, id));
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH, serializeMsg(mute ? HikeConstants.MqttMessageTypes.MUTE : HikeConstants.MqttMessageTypes.UNMUTE, id));
+			}
 		}
 		else if (HikePubSub.DELETE_STATUS.equals(type))
 		{

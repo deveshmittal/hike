@@ -695,29 +695,39 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			editor.putInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1);
 			editor.commit();
 		}
-		
-		/**
-		 * We introduced content here, so love concept came in message table for content shared by people.
-         * Ref count is introduced to keep a track on the number of messages where this thumbnail is attached.
-		 */
-        if (oldVersion < 32){
-            String alter2 = "ALTER TABLE " + DBConstants.FILE_THUMBNAIL_TABLE + " ADD COLUMN " + REF_COUNT + " INTEGER";
-            db.execSQL(alter2);
-            
-            String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER";
-			db.execSQL(alter);
-        }
 
-		if (oldVersion < 33){
-			String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.BOT_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.NAME + " TEXT, " + DBConstants.CONVERSATION_METADATA + " TEXT)";
+		/**
+		 * We introduced content here, so love concept came in message table for content shared by people. Ref count is introduced to keep a track on the number of messages where
+		 * this thumbnail is attached.
+		 */
+		if (oldVersion < 32)
+		{
+			String alter2 = "ALTER TABLE " + DBConstants.FILE_THUMBNAIL_TABLE + " ADD COLUMN " + REF_COUNT + " INTEGER";
+			db.execSQL(alter2);
+
+			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER";
+			db.execSQL(alter);
+		}
+
+		if (oldVersion < 33)
+		{
+			String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.BOT_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.NAME + " TEXT, "
+					+ DBConstants.CONVERSATION_METADATA + " TEXT)";
 			db.execSQL(sql);
 
 		}
 
-		if (oldVersion < 34) {
-			String sql2 = CREATE_TABLE + DBConstants.ALARM_MGR_TABLE + "(" + _ID + " INTEGER PRIMARY KEY, " + TIME + " TEXT, " + DBConstants.WILL_WAKE_CPU + " INTEGER, " + DBConstants.INTENT
-					+ " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
+		if (oldVersion < 34)
+		{
+			String sql2 = CREATE_TABLE + DBConstants.ALARM_MGR_TABLE + "(" + _ID + " INTEGER PRIMARY KEY, " + TIME + " TEXT, " + DBConstants.WILL_WAKE_CPU + " INTEGER, "
+					+ DBConstants.INTENT + " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
 			db.execSQL(sql2);
+		}
+
+		if (oldVersion < 35)
+		{
+			String alter = "ALTER TABLE " + DBConstants.BOT_TABLE + " ADD COLUMN " + DBConstants.IS_MUTE + " INTEGER DEFAULT 0";
+			db.execSQL(alter);
 		}
 	}
 
@@ -725,7 +735,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	{
 		onUpgrade(mDb, oldVersion, newVersion);
 	}
-	
+
 	public void clearTable(String table)
 	{
 		mDb.delete(table, null, null);
@@ -2129,15 +2139,57 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
-	public void addBot(String msisdn, String name, String metadata){
-
+	public void insertBot(String msisdn, String name, String metadata, int isMute)
+	{
 		ContentValues values = new ContentValues();
 		values.put(DBConstants.MSISDN, msisdn);
 		values.put(DBConstants.NAME, name);
 		values.put(DBConstants.CONVERSATION_METADATA, metadata);
-
+		values.put(DBConstants.IS_MUTE, isMute);
 		mDb.insertWithOnConflict(DBConstants.BOT_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+	}
 
+	public void updateBot(String msisdn, String name, String metadata, int isMute)
+	{
+		ContentValues values = new ContentValues();
+		if (!TextUtils.isEmpty(name))
+		{
+			values.put(DBConstants.NAME, name);
+		}
+		if (!TextUtils.isEmpty(metadata))
+		{
+			values.put(DBConstants.CONVERSATION_METADATA, metadata);
+		}
+		if (isMute != -1)
+		{
+			values.put(DBConstants.IS_MUTE, isMute);
+		}
+		mDb.updateWithOnConflict(DBConstants.BOT_TABLE, values, DBConstants.MSISDN + "=?", new String[] { msisdn }, SQLiteDatabase.CONFLICT_REPLACE);
+	}
+
+	public boolean isBotMuted(String msisdn)
+	{
+		Cursor c = null;
+		int muteInt = 0;
+		try
+		{
+			String selection = DBConstants.MSISDN + " = ?";
+
+			c = mDb.query(DBConstants.BOT_TABLE, new String[] { DBConstants.IS_MUTE }, selection, new String[] { msisdn }, null, null, null, null);
+
+			if (c.moveToFirst())
+			{
+				muteInt = c.getInt(c.getColumnIndex(DBConstants.IS_MUTE));
+			}
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		return muteInt == 0 ? false : true;
 	}
 
 	public List<ConvMessage> getConversationThread(String msisdn, int limit, Conversation conversation, long maxMsgId)
