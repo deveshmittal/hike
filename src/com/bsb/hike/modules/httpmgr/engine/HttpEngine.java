@@ -127,11 +127,10 @@ public class HttpEngine
 	 * 
 	 * @param executerType
 	 */
-	synchronized void fetchNextTask(short executerType)
+	synchronized void fetchNextTask(short executerType, RequestCall call)
 	{
-
+		solveStarvation(executerType, call);
 		submitNext(executerType);
-		solveStarvation(executerType);
 	}
 
 	/**
@@ -185,9 +184,9 @@ public class HttpEngine
 		}
 	}
 
-	private void solveStarvation(short executerType)
+	private void solveStarvation(short executerType, RequestCall call)
 	{
-		// TODO
+		queue.solveStarvation(executerType, call);
 	}
 
 	/**

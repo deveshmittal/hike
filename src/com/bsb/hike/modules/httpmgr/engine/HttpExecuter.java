@@ -57,7 +57,7 @@ public class HttpExecuter extends ScheduledThreadPoolExecutor
 	{
 		super.afterExecute(r, t);
 		engine.removeRunningTask((RequestCall) r, executerType); // removes this request from running task queue
-		engine.fetchNextTask(executerType); // fetch the next task to execute
+		engine.fetchNextTask(executerType, (RequestCall) r); // fetch the next task to execute
 	}
 
 }
