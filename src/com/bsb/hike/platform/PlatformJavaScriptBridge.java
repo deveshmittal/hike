@@ -3,6 +3,7 @@ package com.bsb.hike.platform;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.text.TextUtils;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
@@ -236,9 +237,20 @@ public class PlatformJavaScriptBridge
 	@JavascriptInterface
 	public void openFullPage(String title, String url)
 	{
-		Intent intent = IntentManager.getWebViewActivityIntent(mContext, url, title);
-		mContext.startActivity(intent);
+		Logger.i(tag, "open full page called with title " + title + " , and url = " + url);
+		final Intent intent = IntentManager.getWebViewActivityIntent(mContext, url, title);
+		mWebView.post(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				mContext.startActivity(intent);
+			}
+		}) ;
+
 	}
+
+
 
 }
 
