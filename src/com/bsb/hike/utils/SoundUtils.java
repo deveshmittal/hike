@@ -140,8 +140,11 @@ public class SoundUtils
 		}
 		catch (Exception e)
 		{
-			setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 			e.printStackTrace();
+		}
+		finally
+		{
+			setCurrentVolume(HikeMessengerApp.getInstance().getApplicationContext(), AudioManager.STREAM_SYSTEM, systemStreamVol);
 		}
 	}
 
