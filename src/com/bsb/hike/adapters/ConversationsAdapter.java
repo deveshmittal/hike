@@ -633,7 +633,7 @@ public class ConversationsAdapter extends BaseAdapter
 				muteIcon.setVisibility(View.GONE);
 			}
 		}
-		else if (conversation.isBotConv())
+		else if (conversation.isBotConv() && muteIcon != null)
 		{
 			if (conversation.isMutedBotConv(false))
 			{
