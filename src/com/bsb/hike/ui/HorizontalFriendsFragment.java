@@ -113,10 +113,18 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     		contactView.setTag(msisdn);
         	TextView tv = (TextView)contactView.findViewById(R.id.msisdn);
         	ImageView iv = (ImageView ) contactView.findViewById(R.id.profile_image);
-        	iv.setScaleType(ScaleType.CENTER_INSIDE);
-			iv.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
-			iv.setImageResource(R.drawable.ic_profile);
+        	
+			if(ContactManager.getInstance().getIcon(msisdn, true) ==null){
+				iv.setScaleType(ScaleType.CENTER_INSIDE);
+				iv.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
+				iv.setImageResource(R.drawable.ic_profile);
+			}
+			else
+			{
+				iv.setImageDrawable(ContactManager.getInstance().getIcon(msisdn, true));
+			}
         	ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
+        	
         	if(contactInfo != null)
         		tv.setText(contactInfo.getFirstNameAndSurname());
         	else

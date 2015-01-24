@@ -712,7 +712,7 @@ public class ConvMessage
 
 	public String getTimestampFormatted(boolean pretty, Context context)
 	{
-		return DateUtils.getRelativeTimeSpanString(mTimestamp*1000, System.currentTimeMillis(),DateUtils.SECOND_IN_MILLIS)+"";//Utils.getFormattedTime(pretty, context, mTimestamp);
+		return Utils.getFormattedTime(pretty, context, mTimestamp);
 	}
 
 	public String getMessageDate(Context context)

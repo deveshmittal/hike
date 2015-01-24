@@ -46,6 +46,8 @@ public class NUXManager
 {
 	private static final NUXManager mmManager = new NUXManager();
 
+	
+
 	private HashSet<String> listNuxContacts;
 
 	private HashSet<String> unlockedNUXContacts;
@@ -255,7 +257,7 @@ public class NUXManager
 					{
 						if (mmJsonObject.has(NOTIFICATION_PKT))
 							showPush(mmJsonObject.getString(NOTIFICATION_PKT));
-						mprefs.saveData(REMINDER_RECEIVED, true);
+						//mprefs.saveData(REMINDER_RECEIVED, true);
 						setCurrentState(NUX_NEW);
 					}
 				}
@@ -893,13 +895,28 @@ public class NUXManager
 	public void reminderShown()
 	{
 		mprefs.saveData(REMINDER_RECEIVED, false);
+		mprefs.saveData(REMINDER_NORMAL, false);
 	}
 
-	public void showReminder()
+	
+	
+
+	public boolean isReminderNormal()
 	{
-		mprefs.saveData(REMINDER_RECEIVED, true);
-		
+		return mprefs.getData(REMINDER_NORMAL, false);
 	}
+	
+	public boolean wantToInfalte()
+	{
+		NuxSelectFriends mmSelectFriends = getNuxSelectFriendsPojo();
+		if ((mmSelectFriends.isModuleToggle() || getCurrentState() == NUXConstants.COMPLETED||isReminderNormal()))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	
 	/**
 	 * showing push notifications.
 	 * @param json
@@ -940,8 +957,11 @@ public class NUXManager
 						break;
 					case EXPANDED:
 						mprefs.saveData(REMINDER_RECEIVED, true);
+						mprefs.saveData(REMINDER_NORMAL, false);
 						break;
 					case NORMAL:
+						mprefs.saveData(REMINDER_RECEIVED, true);
+						mprefs.saveData(REMINDER_NORMAL, true);
 					case UNKNOWN:
 						break;
 					}

@@ -170,6 +170,8 @@ public class NUXConstants
 	
 	public static final String PUSH_REWARD_CARD_TYPE="rwdCrdTyp";
 	
+	public static final String REMINDER_NORMAL = "rem_normal";
+	
 	public static enum PushTypeEnum
 	{
 		NONE(0), SILENT(1), PUSH(2), UNKNOWN(-1);

@@ -683,7 +683,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.setNuxStateActive(true);
 			NUXManager nm  = NUXManager.getInstance();
 			adapter.preSelectContacts(nm.getLockedContacts(), nm.getUnlockedContacts());
-			System.out.print("INSIDE NUX");
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
 			tagEditText.setHint(R.string.search_hint);
 			break;

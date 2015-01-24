@@ -161,7 +161,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			return;
 		}
 				
-		onCreateNux();
+		if (NUXManager.getInstance().showNuxScreen())
+		{
+			NUXManager.getInstance().startNUX(this);
+			if (!NUXManager.getInstance().getNuxInviteFriendsPojo().isNuxSkippable())
+			{
+				finish();
+				return;
+			}
+			
+		}
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 		HikeMessengerApp app = (HikeMessengerApp) getApplication();
@@ -387,16 +396,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			return;
 		}
 
-		onCreateNux();
-		
-		if (mainFragment != null)
-		{
-			mainFragment.onNewintent(intent);
-		}
-	}
-
-	private void onCreateNux()
-	{
 		if (NUXManager.getInstance().showNuxScreen())
 		{
 			NUXManager.getInstance().startNUX(this);
@@ -404,9 +403,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				finish();
 			}
-			
+			return;
+		}
+		
+		if (mainFragment != null)
+		{
+			mainFragment.onNewintent(intent);
 		}
 	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
