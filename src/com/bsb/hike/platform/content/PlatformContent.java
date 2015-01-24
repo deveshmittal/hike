@@ -1,9 +1,16 @@
 package com.bsb.hike.platform.content;
 
+import java.io.File;
+
+import com.bsb.hike.HikeMessengerApp;
+
 import android.util.Log;
 
 public class PlatformContent
 {
+
+	private static byte isInitialized = 0;
+
 	private PlatformContent()
 	{
 		// Classic singleton
@@ -27,6 +34,13 @@ public class PlatformContent
 	 */
 	public static PlatformContentRequest getContent(String contentData, PlatformContentListener<PlatformContentModel> listener)
 	{
+		if (isInitialized == 0)
+		{
+			PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
+					+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
+			isInitialized = 1;
+		}
+
 		PlatformContentRequest request = PlatformContentRequest.make(PlatformContentModel.make(contentData), listener);
 		if (request != null)
 		{

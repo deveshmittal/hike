@@ -2,31 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    >
+    android:background="@color/transparent" >
 
     <WebView
-        android:layout_margin="10dp"
-        android:background="@color/green"
         android:id="@+id/webcontent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        
-         />
-
-    <RelativeLayout
-        android:background="@color/red_color_span"
-        android:visibility="gone"
-        android:id="@+id/loader"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <ImageView
-            android:src="@drawable/hikelogo"
-            android:layout_centerInParent="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </RelativeLayout>
+        android:layout_margin="10dp"
+        android:background="@color/transparent" />
 
     <include
         android:layout_width="match_parent"

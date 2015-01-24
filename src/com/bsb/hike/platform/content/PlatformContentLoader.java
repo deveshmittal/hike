@@ -3,6 +3,7 @@ package com.bsb.hike.platform.content;
 import java.util.ArrayList;
 
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
