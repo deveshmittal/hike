@@ -2204,7 +2204,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber,msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE), isConversationOnHike());
 							convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 							convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
-							                                                                                  :q
+
 							sendMessage(convMessage);
 
 						}
@@ -7862,6 +7862,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 					}  else if(message.getMessageType()==MESSAGE_TYPE.WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT){
 						multiMsgFwdObject.put(MESSAGE_TYPE.MESSAGE_TYPE, MESSAGE_TYPE.FORWARD_WEB_CONTENT);
+						multiMsgFwdObject.put(HikeConstants.HIKE_MESSAGE, message.getMessage());
 						if(message.platformWebMessageMetadata!=null){
 							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
 
