@@ -105,11 +105,13 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 		{
 			ioe.printStackTrace();
 			PlatformRequestManager.reportFailure(mRequest, ErrorCode.STORAGE_FULL);
+			PlatformRequestManager.remove(mRequest);
 		}
 		catch (IllegalStateException ise)
 		{
 			ise.printStackTrace();
 			PlatformRequestManager.reportFailure(mRequest, ErrorCode.UNKNOWN);
+			PlatformRequestManager.remove(mRequest);
 		}
 		finally
 		{

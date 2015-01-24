@@ -138,12 +138,12 @@ class PlatformRequestManager
 
 	}
 
-	public static void setWaitState(PlatformContentRequest argRequest)
+	public static synchronized void setWaitState(PlatformContentRequest argRequest)
 	{
 		setState(argRequest, PlatformContentRequest.STATE_WAIT);
 	}
 
-	public static void setReadyState(PlatformContentRequest argRequest)
+	public static synchronized void setReadyState(PlatformContentRequest argRequest)
 	{
 		setState(argRequest, PlatformContentRequest.STATE_READY);
 		processNextRequest();

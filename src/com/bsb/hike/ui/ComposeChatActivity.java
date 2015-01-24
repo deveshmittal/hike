@@ -1322,11 +1322,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						String metadata = msgExtrasJson.optString(HikeConstants.METADATA);
 
 						ConvMessage convMessage = new ConvMessage();
-
+						convMessage.setIsSent(true);
 						convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 						convMessage.platformWebMessageMetadata =  new PlatformWebMessageMetadata(PlatformContent.getForwardCardData(metadata));
 
-						convMessage.setMessage(convMessage.platformWebMessageMetadata.getNotifText());
+						convMessage.setMessage(msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE));
 						multipleMessageList.add(convMessage);
 					}
 					/*
