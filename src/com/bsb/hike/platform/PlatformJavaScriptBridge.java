@@ -11,11 +11,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
-
-import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.platform.content.PlatformContent;
@@ -221,7 +217,6 @@ public class PlatformJavaScriptBridge
 				}
 			}
 
-			message.setMessageType(HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 			final Intent intent = IntentManager.getForwardIntentForConvMessage(mContext, message, PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
 			mWebView.post(new Runnable()
 			{

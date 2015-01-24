@@ -2205,7 +2205,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber,msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE), isConversationOnHike());
 							convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 							convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
-
 							sendMessage(convMessage);
 
 						}

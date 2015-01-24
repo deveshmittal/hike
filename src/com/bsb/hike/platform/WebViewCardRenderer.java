@@ -6,7 +6,8 @@ import java.util.HashMap;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Message;
-import android.support.v4.util.LruCache;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -83,6 +84,12 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 		public View selectedStateOverlay;
 
+		public View loadingSpinner;
+
+		public View cardFadeScreen;
+
+		public View loadingFailed;
+
 		private void initializeHolderForForward(View view, boolean isReceived)
 		{
 			time = (TextView) view.findViewById(R.id.time);
@@ -105,11 +112,14 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	}
 
-	private WebViewHolder initializaHolder(WebViewHolder holder, View view, ConvMessage convMessage)
+	private WebViewHolder initializeHolder(WebViewHolder holder, View view, ConvMessage convMessage)
 	{
 		holder.myBrowser = (WebView) view.findViewById(R.id.webcontent);
 		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, this);
 		holder.selectedStateOverlay = view.findViewById(R.id.selected_state_overlay);
+		holder.loadingSpinner = view.findViewById(R.id.loading_data);
+		holder.cardFadeScreen = view.findViewById(R.id.card_fade_screen);
+		holder.loadingFailed = view.findViewById(R.id.loading_failed);
 		webViewStates(holder);
 
 		return holder;
@@ -150,7 +160,6 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		return WEBVIEW_CARD_COUNT;
 	}
 
-
 	@Override
 	public int getCount()
 	{
@@ -181,21 +190,22 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			Logger.i(tag, "view inflated");
 			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			WebViewHolder viewHolder = new WebViewHolder();
-			switch (type){
+			switch (type)
+			{
 			case WEBVIEW_CARD:
 				view = inflater.inflate(R.layout.html_item, parent, false);
-				initializaHolder(viewHolder, view, convMessage);
+				initializeHolder(viewHolder, view, convMessage);
 				break;
 
-			case FORWARD_WEBVIEW_CARD_SENT :
+			case FORWARD_WEBVIEW_CARD_SENT:
 				view = inflater.inflate(R.layout.forward_html_item_sent, parent, false);
-				initializaHolder(viewHolder, view, convMessage);
+				initializeHolder(viewHolder, view, convMessage);
 				viewHolder.initializeHolderForForward(view, false);
 				break;
 
 			case FORWARD_WEBVIEW_CARD_RECEIVED:
 				view = inflater.inflate(R.layout.forward_html_item_received, parent, false);
-				initializaHolder(viewHolder, view, convMessage);
+				initializeHolder(viewHolder, view, convMessage);
 				viewHolder.initializeHolderForForward(view, true);
 				break;
 			}
@@ -203,10 +213,10 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			view.setTag(viewHolder);
 			Logger.d(tag, "inflated");
 			int height = convMessage.platformWebMessageMetadata.getCardHeight();
-			Logger.i(tag, "minimum height given in card is ="+height);
+			Logger.i(tag, "minimum height given in card is =" + height);
 			if (height != 0)
 			{
-				int minHeight  = (int) (height * Utils.densityMultiplier);
+				int minHeight = (int) (height * Utils.densityMultiplier);
 				LayoutParams lp = viewHolder.myBrowser.getLayoutParams();
 				lp.height = minHeight;
 				viewHolder.myBrowser.setLayoutParams(lp);
@@ -219,23 +229,43 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 		final WebViewHolder viewHolder = (WebViewHolder) view.getTag();
 
-		
-
 		final WebView web = viewHolder.myBrowser;
-		web.setTag(view);
-		
-		
+
 		if (viewHolder.id != getItemId(position))
 		{
-			Logger.i(tag, "either tag is null or reused ");
+
+			viewHolder.loadingSpinner.setVisibility(View.VISIBLE);
+
+			viewHolder.cardFadeScreen.setVisibility(View.VISIBLE);
+
+			viewHolder.loadingFailed.setVisibility(View.GONE);
+
 			PlatformContent.getContent(convMessage.platformWebMessageMetadata.JSONtoString(), new PlatformContentListener<PlatformContentModel>()
 			{
 
 				@Override
 				public void onFailure(ErrorCode reason)
 				{
-					// TODO Auto-generated method stub
+					uiHandler.post(new Runnable()
+					{
 
+						@Override
+						public void run()
+						{
+							viewHolder.cardFadeScreen.setVisibility(View.GONE);
+							viewHolder.loadingSpinner.setVisibility(View.GONE);
+
+						}
+					});
+
+					uiHandler.postDelayed(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							viewHolder.loadingFailed.setVisibility(View.VISIBLE);
+						}
+					}, 300);
 				}
 
 				public void onComplete(PlatformContentModel content)
@@ -271,23 +301,16 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			this.convMessage = convMessage;
 		}
-		
-		
-		
+
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon)
 		{
 			super.onPageStarted(view, url, favicon);
-			View main = (View) view.getTag();
-//			main.findViewById(R.id.loader).setVisibility(View.VISIBLE);
 		}
 
 		@Override
 		public void onPageFinished(WebView view, String url)
 		{
-//			LayoutParams lp = view.getLayoutParams();
-//			lp.height = LayoutParams.WRAP_CONTENT;
-//			view.setLayoutParams(lp);
 			Log.d(tag, "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
 			view.loadUrl("javascript:setData(" + "'" + convMessage.getMsgID() + "','" + convMessage.getMsisdn() + "','"
 					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "')");
@@ -299,6 +322,25 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				cardAlarms.remove(convMessage.getMsgID());
 			}
 			super.onPageFinished(view, url);
+			try
+			{
+				final ViewGroup viewGroup = (ViewGroup) view.getParent();
+
+				viewGroup.findViewById(R.id.loading_data).setVisibility(View.GONE);
+
+				uiHandler.postDelayed(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						viewGroup.findViewById(R.id.card_fade_screen).setVisibility(View.GONE);
+					}
+				}, 300);
+			}
+			catch (NullPointerException npe)
+			{
+				npe.printStackTrace();
+			}
 			View main = (View) view.getTag();
 			// main.findViewById(R.id.loader).setVisibility(View.GONE);
 		}
@@ -326,4 +368,6 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		}
 	}
 
+	// TODO Replace with HikeUiHandler utility
+	static Handler uiHandler = new Handler(Looper.getMainLooper());
 }

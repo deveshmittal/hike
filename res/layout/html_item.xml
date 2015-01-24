@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
     android:background="@color/transparent" >
 
     <WebView
@@ -18,5 +19,33 @@
         android:layout_alignBottom="@id/webcontent"
         android:layout_alignTop="@id/webcontent"
         layout="@layout/message_overlay" />
+
+    <View
+        android:id="@+id/card_fade_screen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_alignBottom="@+id/webcontent"
+        android:layout_alignTop="@+id/webcontent"
+        android:background="@android:color/white"
+        android:visibility="visible" />
+
+    <include
+        android:id="@+id/loading_data"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@+id/webcontent"
+        android:layout_alignTop="@+id/webcontent"
+        layout="@layout/platform_card_loading"
+        android:visibility="visible" />
+
+    <include
+        android:id="@+id/loading_failed"
+        android:layout_width="match_parent"
+        android:layout_alignBottom="@+id/webcontent"
+        android:layout_alignTop="@+id/webcontent"
+        android:layout_height="match_parent"
+        layout="@layout/platform_card_loading_failed"
+        android:visibility="gone" />
 
 </RelativeLayout>
