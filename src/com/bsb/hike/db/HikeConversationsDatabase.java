@@ -6385,9 +6385,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		{
 			try
 			{
-				JSONObject metadataJSON = new JSONObject();
+				JSONObject metadataJSON = new JSONObject(json);
 				JSONObject helperData = new JSONObject(helper);
-				JSONObject oldHelper = metadataJSON.optJSONObject(HikePlatformConstants.HELPER_DATA);
+				JSONObject cardObj = metadataJSON.optJSONObject(HikePlatformConstants.CARD_OBJECT);
+				JSONObject oldHelper = cardObj.optJSONObject(HikePlatformConstants.HELPER_DATA);
 				if (oldHelper == null)
 				{
 					oldHelper = new JSONObject();
@@ -6398,7 +6399,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					String key = i.next();
 					oldHelper.put(key, helperData.get(key));
 				}
-				metadataJSON.put(HikePlatformConstants.HELPER_DATA, oldHelper.toString());
+				cardObj.put(HikePlatformConstants.HELPER_DATA, oldHelper);
+				metadataJSON.put(HikePlatformConstants.CARD_OBJECT, cardObj);
 				json = metadataJSON.toString();
 				updateMetadataOfMessage(messageId, json);
 				return json;
