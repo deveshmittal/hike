@@ -4348,4 +4348,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		return false;
 	}
+	
+	public void onDestroy()
+	{
+		if (mWebViewCardRenderer != null)
+		{
+			mWebViewCardRenderer.onDestroy();
+		}
+	}
 }

@@ -1,9 +1,11 @@
 package com.bsb.hike.platform;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Message;
 import android.support.v4.util.LruCache;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,6 +20,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
@@ -32,7 +37,7 @@ import com.bsb.hike.utils.Utils;
 /**
  * Created by shobhitmandloi on 14/01/15.
  */
-public class WebViewCardRenderer extends BaseAdapter
+public class WebViewCardRenderer extends BaseAdapter implements Listener
 {
 
 	static final String tag = "webviewcardRenderer";
@@ -51,10 +56,14 @@ public class WebViewCardRenderer extends BaseAdapter
 
 	BaseAdapter adapter;
 
+	private HashMap<Integer, String> cardAlarms;
+
 	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages)
 	{
 		this.mContext = context;
 		this.convMessages = convMessages;
+		cardAlarms = new HashMap<Integer, String>();
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.PLATFORM_CARD_ALARM, this);
 	}
 
 	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages, BaseAdapter adapter)
@@ -239,6 +248,8 @@ public class WebViewCardRenderer extends BaseAdapter
 		else
 		{
 			Logger.i(tag, "either tag is not null ");
+			viewHolder.myBrowser.loadUrl("javascript:alarmPlayed(" + "'" + cardAlarms.get(convMessage.getMsgID()) + "')");
+			cardAlarms.remove(convMessage.getMsgID());
 		}
 
 		return view;
@@ -285,10 +296,33 @@ public class WebViewCardRenderer extends BaseAdapter
 			if (!TextUtils.isEmpty(alarmData))
 			{
 				view.loadUrl("javascript:alarmPlayed(" + "'" + alarmData + "')");
+				cardAlarms.remove(convMessage.getMsgID());
 			}
 			super.onPageFinished(view, url);
 			View main = (View) view.getTag();
-//			main.findViewById(R.id.loader).setVisibility(View.GONE);
+			// main.findViewById(R.id.loader).setVisibility(View.GONE);
+		}
+	}
+
+	public void onDestroy()
+	{
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PLATFORM_CARD_ALARM, this);
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		if (HikePubSub.PLATFORM_CARD_ALARM.equals(type))
+		{
+			if (object instanceof Message)
+			{
+				Message m = (Message) object;
+				cardAlarms.put(m.arg1, (String) m.obj);
+			}
+			else
+			{
+				Logger.e(tag, "Expected Message in PubSub but received " + object.getClass());
+			}
 		}
 	}
 
