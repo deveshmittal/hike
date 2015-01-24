@@ -116,7 +116,14 @@ class PlatformContentLoader extends Handler
 
 		Log.d(TAG, "fetching template from remote");
 
-		new PlatformTemplateDownloadTask(argContentRequest).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1)
+		{
+			new PlatformTemplateDownloadTask(argContentRequest).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+		}
+		else
+		{
+			new PlatformTemplateDownloadTask(argContentRequest).execute();
+		}
 
 		PlatformRequestManager.getCurrentDownloadingTemplates().add(argContentRequest.getContentData().appHashCode());
 	}
