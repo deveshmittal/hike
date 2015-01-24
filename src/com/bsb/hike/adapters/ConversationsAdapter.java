@@ -677,16 +677,16 @@ public class ConversationsAdapter extends BaseAdapter
 		if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE || message.getState() == State.RECEIVED_UNREAD)
 		{
 			int resId = 0;
-			if(isNuxLocked) 
+			if(isNuxLocked)
 				resId = R.drawable.ic_pending_icon;
 			else
-				message.getImageState();
+				resId = message.getImageState();
 			if (resId > 0)
 			{
 				imgStatus.setImageResource(resId);
 				imgStatus.setVisibility(View.VISIBLE);
 			}
-			else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0)
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0 && !message.isSent())
 			{
 				unreadIndicator.setVisibility(View.VISIBLE);
 

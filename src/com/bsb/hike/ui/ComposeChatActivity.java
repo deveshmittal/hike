@@ -369,13 +369,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 			setMode(FTUE_FWD);
 		}
-		else if (isForwardingMessage && !isSharingFile)
-		{
-			setMode(nuxInviteMode ? NUX_INVITE_MODE : MULTIPLE_FWD);
-		}
 		else if(nuxIncentiveMode)
 		{
 			setMode(NUX_INCENTIVE_MODE);
+		}
+		else if (isForwardingMessage && !isSharingFile)
+		{
+			setMode(nuxInviteMode ? NUX_INVITE_MODE : MULTIPLE_FWD);
 		}
 		else
 		{
