@@ -268,7 +268,7 @@ public class WebViewCardRenderer extends BaseAdapter
 		{
 			super.onPageStarted(view, url, favicon);
 			View main = (View) view.getTag();
-			main.findViewById(R.id.loader).setVisibility(View.VISIBLE);
+//			main.findViewById(R.id.loader).setVisibility(View.VISIBLE);
 		}
 
 		@Override
@@ -288,7 +288,7 @@ public class WebViewCardRenderer extends BaseAdapter
 			}
 			super.onPageFinished(view, url);
 			View main = (View) view.getTag();
-			main.findViewById(R.id.loader).setVisibility(View.GONE);
+//			main.findViewById(R.id.loader).setVisibility(View.GONE);
 		}
 	}
 

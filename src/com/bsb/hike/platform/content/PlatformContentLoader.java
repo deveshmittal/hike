@@ -3,6 +3,7 @@ package com.bsb.hike.platform.content;
 import java.util.ArrayList;
 
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
@@ -116,7 +117,14 @@ class PlatformContentLoader extends Handler
 
 		Log.d(TAG, "fetching template from remote");
 
-		new PlatformTemplateDownloadTask(argContentRequest).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1)
+		{
+			new PlatformTemplateDownloadTask(argContentRequest).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+		}
+		else
+		{
+			new PlatformTemplateDownloadTask(argContentRequest).execute();
+		}
 
 		PlatformRequestManager.getCurrentDownloadingTemplates().add(argContentRequest.getContentData().appHashCode());
 	}
