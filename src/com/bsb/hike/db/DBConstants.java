@@ -5,7 +5,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 public interface DBConstants
 {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 36;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 35;
 
 	public static final int USERS_DATABASE_VERSION = 15;
 
