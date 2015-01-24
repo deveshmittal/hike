@@ -1283,4 +1283,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     
     <string name="mute">Mute</string>
     <string name="unmute">Unmute</string>
+    <string name="card_loading">LOADING</string>
 </resources>
