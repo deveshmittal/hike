@@ -6399,8 +6399,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					String key = i.next();
 					oldHelper.put(key, helperData.get(key));
 				}
-				cardObj.put(HikePlatformConstants.HELPER_DATA, oldHelper.toString());
-				metadataJSON.put(HikePlatformConstants.CARD_OBJECT, cardObj.toString());
+				cardObj.put(HikePlatformConstants.HELPER_DATA, oldHelper);
+				metadataJSON.put(HikePlatformConstants.CARD_OBJECT, cardObj);
 				json = metadataJSON.toString();
 				updateMetadataOfMessage(messageId, json);
 				return json;
