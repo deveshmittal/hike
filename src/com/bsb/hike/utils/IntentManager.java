@@ -198,6 +198,7 @@ public class IntentManager
 			{
 				multiMsgFwdObject.put(HikeConstants.METADATA, metadata);
 			}
+			multiMsgFwdObject.put(HikeConstants.HIKE_MESSAGE, convMessage.getMessage());
 			multipleMsgArray.put(multiMsgFwdObject);
 		}
 		catch (JSONException e)
