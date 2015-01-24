@@ -11,9 +11,11 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.utils.Logger;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 public class PlatformAlarmManager implements HikePlatformConstants
@@ -63,16 +65,18 @@ public class PlatformAlarmManager implements HikePlatformConstants
 			if (messageId != 0) // validation
 			{
 				HikeConversationsDatabase.getInstance().insertMicroAppALarm(messageId, data.getString(HikePlatformConstants.ALARM_DATA));
-				increaseUnreadCount(data, context);
-				showNotification(data, context);
-				Message m = Message.obtain();
-				m.arg1 = messageId;
-				m.obj = data.get(ALARM_DATA);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.PLATFORM_CARD_ALARM, m);
+				if (!deleteMessage(messageId, data, context))
+				{
+					increaseUnreadCount(data, context);
+					showNotification(data, context);
+					Message m = Message.obtain();
+					m.arg1 = messageId;
+					m.obj = data.get(ALARM_DATA);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.PLATFORM_CARD_ALARM, m);
+				}
 			}
 		}
 	}
-
 
 	private static void increaseUnreadCount(Bundle data, Context context)
 	{
@@ -96,15 +100,33 @@ public class PlatformAlarmManager implements HikePlatformConstants
 		}
 	}
 
-	private static void showNotification(Bundle data,Context context)
+	private static void showNotification(Bundle data, Context context)
 	{
 		if (data.containsKey(CONV_MSISDN))
 		{
 			String message = data.getString(NOTIFICATION);
-			if(TextUtils.isEmpty(message)){
+			if (TextUtils.isEmpty(message))
+			{
 				boolean playSound = data.getBoolean(NOTIFICATION_SOUND);
 				HikeNotification.getInstance(context).notifyStringMessage(data.getString(CONV_MSISDN), message, !playSound);
 			}
 		}
+	}
+
+	private static boolean deleteMessage(long messageId, Bundle data, Context context)
+	{
+		if (data.containsKey(DELETE_CARD) && data.containsKey(CONV_MSISDN))
+		{
+			String toDelete = data.getString(DELETE_CARD);
+			if (Boolean.valueOf(toDelete))
+			{
+				String msisdn = data.getString(CONV_MSISDN);
+				ArrayList<Long> list = new ArrayList<Long>();
+				list.add(messageId);
+				HikeConversationsDatabase.getInstance().deleteMessages(list, msisdn, null);
+				return true;
+			}
+		}
+		return false;
 	}
 }

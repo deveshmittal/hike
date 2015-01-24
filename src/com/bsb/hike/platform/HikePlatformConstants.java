@@ -53,4 +53,6 @@ public interface HikePlatformConstants
 	public static final String CONV_MSISDN = "conv_msisdn";
 	
 	String ALARM_DATA = "alarm_data";
+	
+	String DELETE_CARD = "delete_card";
 }
