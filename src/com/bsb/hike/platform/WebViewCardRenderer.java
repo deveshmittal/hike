@@ -1,16 +1,22 @@
 package com.bsb.hike.platform;
 
+import java.util.ArrayList;
+
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
@@ -22,8 +28,6 @@ import com.bsb.hike.platform.content.PlatformContentModel;
 import com.bsb.hike.platform.content.PlatformWebClient;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-
-import java.util.ArrayList;
 
 /**
  * Created by shobhitmandloi on 14/01/15.
@@ -163,9 +167,9 @@ public class WebViewCardRenderer extends BaseAdapter
 		int type = getItemViewType(position);
 		View view = convertView;
 		final ConvMessage convMessage = (ConvMessage) getItem(position);
-
 		if (view == null)
 		{
+			Logger.i(tag, "view inflated");
 			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			WebViewHolder viewHolder = new WebViewHolder();
 			switch (type){
@@ -189,19 +193,29 @@ public class WebViewCardRenderer extends BaseAdapter
 
 			view.setTag(viewHolder);
 			Logger.d(tag, "inflated");
+			int height = convMessage.platformWebMessageMetadata.getCardHeight();
+			Logger.i(tag, "minimum height given in card is ="+height);
+			if (height != 0)
+			{
+				int minHeight  = (int) (height * Utils.densityMultiplier);
+				LayoutParams lp = viewHolder.myBrowser.getLayoutParams();
+				lp.height = minHeight;
+				viewHolder.myBrowser.setLayoutParams(lp);
+			}
+		}
+		else
+		{
+			Logger.i(tag, "view reused");
 		}
 
 		final WebViewHolder viewHolder = (WebViewHolder) view.getTag();
 
-		int height = convMessage.platformWebMessageMetadata.getCardHeight();
-		if (height != 0)
-		{
-			int minHeight  = (int) (height * Utils.densityMultiplier);
-			view.setMinimumHeight(minHeight);
-		}
+		
 
 		final WebView web = viewHolder.myBrowser;
-
+		web.setTag(view);
+		
+		
 		if (viewHolder.id != getItemId(position))
 		{
 			Logger.i(tag, "either tag is null or reused ");
@@ -246,16 +260,24 @@ public class WebViewCardRenderer extends BaseAdapter
 		{
 			this.convMessage = convMessage;
 		}
+		
+		
+		
+		@Override
+		public void onPageStarted(WebView view, String url, Bitmap favicon)
+		{
+			super.onPageStarted(view, url, favicon);
+			View main = (View) view.getTag();
+			main.findViewById(R.id.loader).setVisibility(View.VISIBLE);
+		}
 
 		@Override
 		public void onPageFinished(WebView view, String url)
 		{
-			view.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-			view.requestLayout();
-			view.setVisibility(View.VISIBLE);
+//			LayoutParams lp = view.getLayoutParams();
+//			lp.height = LayoutParams.WRAP_CONTENT;
+//			view.setLayoutParams(lp);
 			Log.d(tag, "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
-			Logger.d(tag, "conv message passed to webview " + convMessage);
-			Logger.d(tag, "Platform message metadata is" + convMessage.platformWebMessageMetadata.JSONtoString());
 			view.loadUrl("javascript:setData(" + "'" + convMessage.getMsgID() + "','" + convMessage.getMsisdn() + "','"
 					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "')");
 			String alarmData = convMessage.platformWebMessageMetadata.getAlarmData();
@@ -265,6 +287,8 @@ public class WebViewCardRenderer extends BaseAdapter
 				view.loadUrl("javascript:alarmPlayed(" + "'" + alarmData + "')");
 			}
 			super.onPageFinished(view, url);
+			View main = (View) view.getTag();
+			main.findViewById(R.id.loader).setVisibility(View.GONE);
 		}
 	}
 
