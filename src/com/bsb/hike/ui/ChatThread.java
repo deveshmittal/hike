@@ -1788,7 +1788,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// Sticker message is a non text message.
 			selectedNonTextMsg(isMsgSelected);
 		}
-        else if (message.getMessageType() == MESSAGE_TYPE.CONTENT)
+        else if (message.getMessageType() == MESSAGE_TYPE.CONTENT || message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
         {
             // Content card is a non text message.
             selectedNonTextMsg(isMsgSelected);
@@ -2199,26 +2199,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
                             sendMessage(convMessage);
 
                         }
-						else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.WEB_CONTENT){
+						else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.WEB_CONTENT || msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.FORWARD_WEB_CONTENT){
 							// as we will be changing msisdn and hike status while inserting in DB
-							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, isConversationOnHike());
-							convMessage.setMessageType(MESSAGE_TYPE.WEB_CONTENT);
-							convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
-							convMessage.setMessage(convMessage.platformWebMessageMetadata.getNotifText());
-
-							sendMessage(convMessage);
-
-						}
-						else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.FORWARD_WEB_CONTENT){
-							// as we will be changing msisdn and hike status while inserting in DB
-							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, isConversationOnHike());
+							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber,msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE), isConversationOnHike());
 							convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 							convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
-							convMessage.setMessage(convMessage.platformWebMessageMetadata.getNotifText());
-
+							                                                                                  :q
 							sendMessage(convMessage);
 
 						}
+
 						/*
 						 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 						 */
