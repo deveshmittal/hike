@@ -83,6 +83,8 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 		{
 			ioe.printStackTrace();
 			PlatformRequestManager.reportFailure(mRequest, ErrorCode.LOW_CONNECTIVITY);
+			PlatformRequestManager.remove(mRequest);
+			return null;
 		}
 
 		try
