@@ -164,12 +164,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (NUXManager.getInstance().showNuxScreen())
 		{
 			NUXManager.getInstance().startNUX(this);
-			if (!NUXManager.getInstance().getNuxInviteFriendsPojo().isNuxSkippable())
-			{
-				finish();
-				return;
-			}
-			
+			return;
+
 		}
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
@@ -399,10 +395,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (NUXManager.getInstance().showNuxScreen())
 		{
 			NUXManager.getInstance().startNUX(this);
-			if (!NUXManager.getInstance().getNuxInviteFriendsPojo().isNuxSkippable())
-			{
-				finish();
-			}
 			return;
 		}
 		

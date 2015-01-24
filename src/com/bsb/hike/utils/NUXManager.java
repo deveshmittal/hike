@@ -95,6 +95,7 @@ public class NUXManager
 	public void startNUX(Activity activity)
 	{
 		activity.startActivity(IntentManager.openInviteFriends(activity));
+		activity.finish();
 	}
 
 	public void startNuxCustomMessage(String selectedFriends, Activity activity)
@@ -616,6 +617,9 @@ public class NUXManager
 
 			if (newChatReward.has(CR_SELECTFRIENDS))
 				chatReward.put(CR_SELECTFRIENDS, newChatReward.getString(CR_SELECTFRIENDS));
+			
+			mprefs.saveData(CHAT_REWARDS_BAR, chatReward.toString());
+			
 
 		}
 		catch (JSONException e)

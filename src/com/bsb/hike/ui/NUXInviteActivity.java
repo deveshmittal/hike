@@ -113,6 +113,7 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		case R.id.but_skip:
 		//	IntentManager.openHomeActivity(this);
 			NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
+			startActivity(Utils.getHomeActivityIntent(this));
 			finish();
 			break;
 

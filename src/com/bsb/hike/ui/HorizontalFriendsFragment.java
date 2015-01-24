@@ -239,23 +239,18 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 					HashSet<String> contactsNux = new HashSet<String>(viewMap.keySet());
 					nm.startNuxCustomMessage(contactsNux.toString().replace("[", "").replace("]", ""), getActivity());
 					
-					
-				} else if (getActivity() instanceof NuxSendCustomMessageActivity)
-				{
-					nm.sendMessage(contactsDisplayed, ((NuxSendCustomMessageActivity)getActivity()).getCustomMessage());
-					nm.saveNUXContact(contactsDisplayed);
-					nm.sendMsisdnListToServer(contactsDisplayed);
-					nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
-					Intent intent = new Intent(getActivity(), HomeActivity.class);
-					if(nm.getNuxInviteFriendsPojo().isNuxSkippable()){
-						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-						
-					}else{
-						intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-					}
-					startActivity(intent);
-					
+			}
+			else if (getActivity() instanceof NuxSendCustomMessageActivity)
+			{
+				nm.sendMessage(contactsDisplayed, ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage());
+				nm.saveNUXContact(contactsDisplayed);
+				nm.sendMsisdnListToServer(contactsDisplayed);
+				nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
+				Intent intent = new Intent(getActivity(), HomeActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+				startActivity(intent);
+
 				}
 				break;
 		}
