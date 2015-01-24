@@ -247,7 +247,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
 		db.execSQL(sql);
 
-		sql = CREATE_TABLE + DBConstants.BOT_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.NAME + " TEXT, " + DBConstants.CONVERSATION_METADATA + " TEXT)";
+		sql = CREATE_TABLE + DBConstants.BOT_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.NAME + " TEXT, " + DBConstants.CONVERSATION_METADATA + " TEXT, "+ DBConstants.IS_MUTE + " INTEGER DEFAULT 0)";
 		db.execSQL(sql);
 	}
 
