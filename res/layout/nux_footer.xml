@@ -19,8 +19,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:paddingBottom="14dp"
-        android:paddingTop="8dp"
+        android:paddingBottom="13dp"
+        android:paddingTop="13dp"
         android:src="@drawable/btn_uparrow" >
     </com.bsb.hike.ui.utils.RecyclingImageView>
 

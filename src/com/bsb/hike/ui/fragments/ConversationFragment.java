@@ -306,9 +306,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private void changeFooterState()
 	{
 		Logger.d("footer","changeFooterState");
-		if(!NUXManager.getInstance().isReminderReceived())	
+		if (!NUXManager.getInstance().isReminderReceived())
 		{
-		if (!Utils.isHoneycombOrHigher())
+			if (!Utils.isHoneycombOrHigher())
 			{
 				llChatReward.setVisibility(View.GONE);
 				llInviteOptions.setVisibility(View.GONE);
@@ -316,7 +316,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			else
 			{
 				/**
-				 * Adding an Global Listener to close the footer on opening ...   
+				 * Adding an Global Listener to close the footer on opening ...
 				 */
 				llInviteOptions.addOnLayoutChangeListener(new OnLayoutChangeListener()
 				{
@@ -332,9 +332,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else
 		{
-			
+
 			footerState.setEnumState(footerState.OPEN);
-			
+
 			/**
 			 * Check that reminder ==normal or not
 			 */
@@ -498,13 +498,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					});
 				}
 			}
+
+			else
+			{
+				llInviteOptions.setVisibility(View.GONE);
+			}
+
+			footerState.setEnumState(footerState.HALFOPEN);
+			changeFooterControllerBackground(footerState.HALFOPEN);
 		}
-		else
-		{
-			llInviteOptions.setVisibility(View.GONE);
-		}
-		footerState.setEnumState(footerState.HALFOPEN);
-		changeFooterControllerBackground(footerState.HALFOPEN);
 	}
 
 	@Override

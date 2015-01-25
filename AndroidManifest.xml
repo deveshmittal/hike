@@ -263,10 +263,12 @@
         </activity>    
           <activity
             android:name="com.bsb.hike.ui.NUXInviteActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize">
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait">
         </activity> 
         <activity
             android:name="com.bsb.hike.ui.NuxSendCustomMessageActivity"
+              android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>     
         <activity
