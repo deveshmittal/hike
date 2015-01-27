@@ -274,7 +274,7 @@ public class ConversationsAdapter extends BaseAdapter
 			if(!stealthFtueTipAnimated)
 			{
 				stealthFtueTipAnimated = true;
-				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.densityMultiplier, 0);
+				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.scaledDensityMultiplier, 0);
 				animation.setDuration(300);
 				parent.startAnimation(animation);
 			}
@@ -324,7 +324,7 @@ public class ConversationsAdapter extends BaseAdapter
 			if(!resetStealthTipAnimated)
 			{
 				resetStealthTipAnimated = true;
-				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.densityMultiplier, 0);
+				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.scaledDensityMultiplier, 0);
 				animation.setDuration(300);
 				parent.startAnimation(animation);
 			}

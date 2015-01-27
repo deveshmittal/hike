@@ -1007,8 +1007,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setSenderDetails(convMessage, position, wtHolder, true);
 
 				ShapeDrawable circle = new ShapeDrawable(new OvalShape());
-				circle.setIntrinsicHeight((int) (36 * Utils.densityMultiplier));
-				circle.setIntrinsicWidth((int) (36 * Utils.densityMultiplier));
+				circle.setIntrinsicHeight((int) (36 * Utils.scaledDensityMultiplier));
+				circle.setIntrinsicWidth((int) (36 * Utils.scaledDensityMultiplier));
 				if (convMessage.isSent())
 				{
 					/* label outgoing hike conversations in green */
@@ -1183,16 +1183,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (showThumbnail && thumbnail != null)
 				{
 					videoHolder.fileThumb.setScaleType(ScaleType.CENTER);
-					fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
+					fileThumbParams.height = (int) (150 * Utils.scaledDensityMultiplier);
 					fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail.getIntrinsicHeight());
 					/*
 					 * fixed the bug when image thumbnail is very big. By specifying a maximum width for the thumbnail so that download button can also fit to the screen.
 					 */
 
 					// Set Thumbnail Width
-					int maxWidth = (int) (250 * Utils.densityMultiplier);
+					int maxWidth = (int) (250 * Utils.scaledDensityMultiplier);
 					fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
-					int minWidth = (int) (119 * Utils.densityMultiplier);
+					int minWidth = (int) (119 * Utils.scaledDensityMultiplier);
 					fileThumbParams.width = Math.max(fileThumbParams.width, minWidth);
 					if (fileThumbParams.width == minWidth)
 					{
@@ -1204,7 +1204,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 
 					// Set Thumbnail Height
-					int minHeight = (int) (70 * Utils.densityMultiplier);
+					int minHeight = (int) (70 * Utils.scaledDensityMultiplier);
 					fileThumbParams.height = Math.max(fileThumbParams.height, minHeight);
 					if (fileThumbParams.height == minHeight)
 					{
@@ -1342,16 +1342,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (showThumbnail && thumbnail != null)
 				{
 					imageHolder.fileThumb.setScaleType(ScaleType.CENTER_CROP);
-					fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
+					fileThumbParams.height = (int) (150 * Utils.scaledDensityMultiplier);
 					fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail.getIntrinsicHeight());
 					/*
 					 * fixed the bug when image thumbnail is very big. By specifying a maximum width for the thumbnail so that download button can also fit to the screen.
 					 */
 
 					// Set Thumbnail Width
-					int maxWidth = (int) (250 * Utils.densityMultiplier);
+					int maxWidth = (int) (250 * Utils.scaledDensityMultiplier);
 					fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
-					int minWidth = (int) (119 * Utils.densityMultiplier);
+					int minWidth = (int) (119 * Utils.scaledDensityMultiplier);
 					fileThumbParams.width = Math.max(fileThumbParams.width, minWidth);
 					if (fileThumbParams.width == minWidth)
 					{
@@ -1363,7 +1363,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 
 					// Set Thumbnail Height
-					int minHeight = (int) (70 * Utils.densityMultiplier);
+					int minHeight = (int) (70 * Utils.scaledDensityMultiplier);
 					fileThumbParams.height = Math.max(fileThumbParams.height, minHeight);
 					if (fileThumbParams.height == minHeight)
 					{
@@ -1908,7 +1908,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			participantInfoHolder.container.setVisibility(View.VISIBLE);
 			ParticipantInfoState infoState = convMessage.getParticipantInfoState();
 			((ViewGroup) participantInfoHolder.container).removeAllViews();
-			int positiveMargin = (int) (8 * Utils.densityMultiplier);
+			int positiveMargin = (int) (8 * Utils.scaledDensityMultiplier);
 			int left = 0;
 			int top = 0;
 			int right = 0;
@@ -2660,7 +2660,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		Logger.d(getClass().getSimpleName(), "creating default thumb. . . ");
 		int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_thumbnail_size);
 		// int pixels = (int) (250 * Utils.densityMultiplier);
-		Logger.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
+		Logger.d(getClass().getSimpleName(), "density: " + Utils.scaledDensityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
 		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg))

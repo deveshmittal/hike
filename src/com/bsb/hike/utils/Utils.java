@@ -206,6 +206,8 @@ public class Utils
 
 	private static TranslateAnimation mInFromRight;
 
+	public static float scaledDensityMultiplier = 1.0f;
+	
 	public static float densityMultiplier = 1.0f;
 
 	public static int densityDpi;
@@ -946,8 +948,9 @@ public class Utils
 	 */
 	public static void setDensityMultiplier(DisplayMetrics displayMetrics)
 	{
-		Utils.densityMultiplier = displayMetrics.scaledDensity;
+		Utils.scaledDensityMultiplier = displayMetrics.scaledDensity;
 		Utils.densityDpi = displayMetrics.densityDpi;
+		Utils.densityMultiplier = displayMetrics.density;
 	}
 
 	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
@@ -2445,7 +2448,7 @@ public class Utils
 	 */
 	public static boolean loadOnUiThread()
 	{
-		return ((int) 10 * Utils.densityMultiplier) > 10;
+		return ((int) 10 * Utils.scaledDensityMultiplier) > 10;
 	}
 
 	public static void hideSoftKeyboard(Context context, View v)
@@ -3384,7 +3387,7 @@ public class Utils
 
 		Bitmap bitmap = HikeBitmapFactory.drawableToBitmap(avatarDrawable, Bitmap.Config.RGB_565);
 
-		int dimension = (int) (Utils.densityMultiplier * 48);
+		int dimension = (int) (Utils.scaledDensityMultiplier * 48);
 
 		Bitmap scaled = HikeBitmapFactory.createScaledBitmap(bitmap, dimension, dimension, Bitmap.Config.RGB_565, false, true, true);
 		bitmap = null;
@@ -3634,7 +3637,7 @@ public class Utils
 		String res = height + "x" + width;
 		String operator = manager.getSimOperatorName();
 		String circle = manager.getSimOperator();
-		String pdm = Float.toString(Utils.densityMultiplier);
+		String pdm = Float.toString(Utils.scaledDensityMultiplier);
 
 		jsonObject.put(HikeConstants.RESOLUTION, res);
 		jsonObject.put(HikeConstants.OPERATOR, operator);
@@ -4624,7 +4627,7 @@ public class Utils
 		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
 		 */
 		int inSampleSize = 1;
-		if (!chatTheme.isTiled() && Utils.densityMultiplier < 2)
+		if (!chatTheme.isTiled() && Utils.scaledDensityMultiplier < 2)
 		{
 			inSampleSize = 2;
 		}

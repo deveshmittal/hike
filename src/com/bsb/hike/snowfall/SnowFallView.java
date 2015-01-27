@@ -69,7 +69,7 @@ public class SnowFallView extends View
 		snow_flake_count = Math.max(width, height) / 48;
 		coords = new int[snow_flake_count][];
 		drawables.clear();
-		int durationMultiplier = (int) (20 / Utils.densityMultiplier);
+		int durationMultiplier = (int) (20 / Utils.scaledDensityMultiplier);
 		for (int i = 0; i < snow_flake_count; i++)
 		{
 			Animation animation = new TranslateAnimation(0, height / 10 - random.nextInt(height / 5), 0, height + 50);
@@ -78,7 +78,7 @@ public class SnowFallView extends View
 			animation.initialize(10, 10, 10, 10);
 			animation.setInterpolator(interpolator);
 
-			int startYDisp = (int) (45 * Utils.densityMultiplier);
+			int startYDisp = (int) (45 * Utils.scaledDensityMultiplier);
 			coords[i] = new int[] { random.nextInt(width), -startYDisp - height/100 };
 			drawables.add(new AnimateDrawable(snow_flake, snow_flake_large, snow_flake_trans, animation));
 			animation.setStartOffset((random.nextInt(6 * height) * i)/10);

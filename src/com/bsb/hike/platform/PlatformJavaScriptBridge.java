@@ -275,7 +275,7 @@ public class PlatformJavaScriptBridge
 	@JavascriptInterface
 	public void onResize(String height)
 	{
-		Logger.i(tag, "onresize called with height=" + height);
+		Logger.i(tag, "onresize called with height=" +(Integer.parseInt(height)*Utils.densityMultiplier));
 		resizeWebview(height);
 	}
 

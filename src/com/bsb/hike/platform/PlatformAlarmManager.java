@@ -105,9 +105,12 @@ public class PlatformAlarmManager implements HikePlatformConstants
 		if (data.containsKey(CONV_MSISDN))
 		{
 			String message = data.getString(NOTIFICATION);
-			if (TextUtils.isEmpty(message))
+			if (!TextUtils.isEmpty(message))
 			{
-				boolean playSound = data.getBoolean(NOTIFICATION_SOUND);
+				String playS = data.getString(NOTIFICATION_SOUND);
+				
+				boolean playSound = playS!=null ? Boolean.valueOf(playS) : false;
+				
 				HikeNotification.getInstance(context).notifyStringMessage(data.getString(CONV_MSISDN), message, !playSound);
 			}
 		}
