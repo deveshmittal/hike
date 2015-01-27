@@ -10,10 +10,15 @@
         android:layout_height="match_parent" >
     </LinearLayout>
 
+    <include
+        android:id="@+id/search_empty_view"
+        layout="@layout/list_empty_view"
+        android:visibility="gone" />
+
     <ListView
         android:id="@id/android:list"
         style="@style/HomeList"
-        android:dividerHeight="0dp"
-        android:divider="@null" />
+        android:divider="@null"
+        android:dividerHeight="0dp" />
 
 </RelativeLayout>

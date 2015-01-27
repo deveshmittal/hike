@@ -1,6 +1,13 @@
 package com.bsb.hike.adapters;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -9,9 +16,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.TextAppearanceSpan;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +33,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -32,11 +45,13 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.ConversationTip;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
@@ -71,11 +86,31 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private List<Conversation> conversationList;
 
+	private List<Conversation> phoneBookContacts;
+
+	private List<Conversation> filteredConversationList;
+
+	private List<Conversation> filteredphoneBookContacts;
+
+	private List<Conversation> completeList;
+
+	private Set<Conversation> stealthConversations;
+
+	private Map<String, Integer> convSpanStartIndexes;
+
+	private Integer searchQueryLength;
+
 	private Context context;
 
 	private ListView listView;
 	
 	private LayoutInflater inflater;
+
+	private ContactFilter contactFilter;
+
+	public Set<String> conversationsMsisdns;
+
+	private boolean isSearchMode = false;
 
 	private enum ViewType
 	{
@@ -105,10 +140,11 @@ public class ConversationsAdapter extends BaseAdapter
 		ImageView muteIcon;
 	}
 
-	public ConversationsAdapter(Context context, List<Conversation> objects, ListView listView)
+	public ConversationsAdapter(Context context, List<Conversation> displayedConversations, Set<Conversation> stealthConversations, ListView listView)
 	{
 		this.context = context;
-		this.conversationList = objects;
+		this.completeList = displayedConversations;
+		this.stealthConversations = stealthConversations;
 		this.listView = listView;
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -116,18 +152,23 @@ public class ConversationsAdapter extends BaseAdapter
 		iconLoader.setImageFadeIn(false);
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 		itemsToAnimat = new SparseBooleanArray();
+		contactFilter = new ContactFilter();
+		filteredConversationList = new ArrayList<Conversation>();
+		filteredphoneBookContacts = new ArrayList<Conversation>();
+		conversationList = new ArrayList<Conversation>();
+		convSpanStartIndexes = new HashMap<String, Integer>();
 	}
 
 	@Override
 	public int getCount()
 	{
-		return conversationList.size();
+		return completeList.size();
 	}
 
 	@Override
 	public Conversation getItem(int position)
 	{
-		return conversationList.get(position);
+		return completeList.get(position);
 	}
 
 	@Override
@@ -141,14 +182,9 @@ public class ConversationsAdapter extends BaseAdapter
 		return ViewType.values().length;
 	}
 
-	public void remove(Conversation conversation)
-	{
-		conversationList.remove(conversation);
-	}
-
 	public void clear()
 	{
-		conversationList.clear();
+		completeList.clear();
 	}
 
 	@Override
@@ -186,6 +222,11 @@ public class ConversationsAdapter extends BaseAdapter
 			}
 		}
 		return ViewType.CONVERSATION.ordinal();
+	}
+
+	public List<Conversation> getCompleteList()
+	{
+		return completeList;
 	}
 
 	@Override
@@ -432,7 +473,7 @@ public class ConversationsAdapter extends BaseAdapter
 					Logger.i("tip", "on cross click ");
 					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
 					// make sure it is on 0 position
-					conversationList.remove((int) ((Integer) v.getTag()));
+					completeList.remove((int) ((Integer) v.getTag()));
 					notifyDataSetChanged();
 				}
 			});
@@ -477,6 +518,179 @@ public class ConversationsAdapter extends BaseAdapter
 		updateViewsRelatedToMute(v, conversation);
 		
 		return v;
+	}
+
+	public void setupSearch()
+	{
+		isSearchMode = true;
+		conversationList.clear();
+		conversationsMsisdns = new HashSet<String>();
+		for(Conversation conv : completeList)
+		{
+			conversationList.add(conv);
+			conversationsMsisdns.add(conv.getMsisdn());
+		}
+		FetchPhoneBookContactsTask fetchContactsTask = new FetchPhoneBookContactsTask();
+		Utils.executeAsyncTask(fetchContactsTask);
+	}
+
+	public void removeSearch()
+	{
+		isSearchMode = false;
+		conversationsMsisdns = null;
+		searchQueryLength = 0;
+		/*
+		 * Purposely returning conversation list on the UI thread on collapse to avoid showing ftue empty state. 
+		 */
+		completeList.clear();
+		completeList.addAll(conversationList);
+		notifyDataSetChanged();
+	}
+
+	private class FetchPhoneBookContactsTask extends AsyncTask<Void, Void, Void>
+	{
+		List<Conversation> otherConversations = new ArrayList<Conversation>();
+
+		@Override
+		protected Void doInBackground(Void... arg0)
+		{
+			List<ContactInfo> allContacts = ContactManager.getInstance().getAllContacts();
+			for(ContactInfo contact : allContacts)
+			{
+				Conversation conv = new Conversation(contact.getMsisdn(), contact.getName(), contact.isOnhike());
+				if(stealthConversations.contains(conv) || conversationsMsisdns.contains(contact.getMsisdn()))
+				{
+					continue;
+				}
+				ConvMessage message = new ConvMessage("Start a new chat", contact.getMsisdn(), 0, State.RECEIVED_READ);
+				List<ConvMessage> messagesList = new ArrayList<ConvMessage>();
+				messagesList.add(message);
+				conv.setMessages(messagesList);
+				otherConversations.add(conv);
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result)
+		{
+			phoneBookContacts = otherConversations;
+			super.onPostExecute(result);
+		}
+	}
+
+	public void onQueryChanged(String s)
+	{
+		searchQueryLength = s.length();
+		contactFilter.filter(s);
+	}
+
+	private class ContactFilter extends Filter
+	{
+		@Override
+		protected FilterResults performFiltering(CharSequence constraint)
+		{
+			FilterResults results = new FilterResults();
+			convSpanStartIndexes.clear();
+
+			if (!TextUtils.isEmpty(constraint))
+			{
+
+				String textToBeFiltered = constraint.toString().toLowerCase().trim();
+				Logger.d("gaurav","constraint: " + constraint + ", text: " + textToBeFiltered + ",");
+
+				List<Conversation> filteredConversationsList = new ArrayList<Conversation>();
+				List<Conversation> filteredphoneBookContacts = new ArrayList<Conversation>();
+
+				filterList(conversationList, filteredConversationsList, textToBeFiltered);
+				filterList(phoneBookContacts, filteredphoneBookContacts, textToBeFiltered);
+
+				List<List<Conversation>> resultList = new ArrayList<List<Conversation>>();
+				resultList.add(filteredConversationsList);
+				resultList.add(filteredphoneBookContacts);
+
+				results.values = resultList;
+			}
+			else
+			{
+				results.values = makeOriginalList();
+			}
+			results.count = 1;
+			return results;
+		}
+
+		private void filterList(List<Conversation> allList, List<Conversation> listToUpdate, String textToBeFiltered)
+		{
+
+			try
+			{
+				for (Conversation info : allList)
+				{
+					String name = info.getContactName();
+					boolean found = false;
+					int startIndex = 0;
+					name = name.toLowerCase();
+					if (name.startsWith(textToBeFiltered))
+					{
+						found = true;
+						convSpanStartIndexes.put(info.getMsisdn(), startIndex);
+					}
+					else if (name.contains(" " + textToBeFiltered))
+					{
+						found = true;
+						startIndex = name.indexOf(" " + textToBeFiltered) + 1;
+						convSpanStartIndexes.put(info.getMsisdn(), startIndex);
+					}
+					else if (textToBeFiltered.equals("group") && Utils.isGroupConversation(info.getMsisdn()))
+					{
+						found = true;
+					}
+					if(found)
+					{
+						listToUpdate.add(info);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.d(getClass().getSimpleName(), "Exception while filtering conversation contacts." + ex);
+			}
+		}
+
+		@Override
+		protected void publishResults(CharSequence constraint, FilterResults results)
+		{
+			List<List<Conversation>> resultList = (List<List<Conversation>>) results.values;
+
+			filteredConversationList.clear();
+			filteredConversationList.addAll(resultList.get(0));
+
+			filteredphoneBookContacts.clear();
+
+			// makeOriginalList returns only conversationList.
+			if(phoneBookContacts!=null && !phoneBookContacts.isEmpty() && resultList.size() > 1)
+			{
+				filteredphoneBookContacts.addAll(resultList.get(1));
+			}
+
+			makeCompleteList();
+
+			notifyDataSetChanged();
+		}
+	}
+
+	protected List<List<Conversation>> makeOriginalList()
+	{
+		List<List<Conversation>> resultList = new ArrayList<List<Conversation>>();
+		resultList.add(conversationList);
+		return resultList;
+	}
+
+	public void makeCompleteList()
+	{
+		completeList.clear();
+		completeList.addAll(filteredConversationList);
+		completeList.addAll(filteredphoneBookContacts);
 	}
 
 	private void resetAtomicPopUpKey(int position)
@@ -589,7 +803,18 @@ public class ConversationsAdapter extends BaseAdapter
 		TextView contactView = viewHolder.headerText;
 		String name = conversation.getLabel();
 
-		contactView.setText(name);
+		Integer startSpanIndex = convSpanStartIndexes.get(conversation.getMsisdn());
+		if(startSpanIndex!=null)
+		{
+			SpannableString spanName = new SpannableString(name);
+			spanName.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.blue_color_span)), startSpanIndex, startSpanIndex+searchQueryLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			contactView.setText(spanName, TextView.BufferType.SPANNABLE);
+		}
+		else
+		{
+			contactView.setText(name);
+		}
+
 		if (conversation instanceof GroupConversation)
 		{
 			contactView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_group, 0, 0, 0);
@@ -661,7 +886,14 @@ public class ConversationsAdapter extends BaseAdapter
 		messageView.setVisibility(View.VISIBLE);
 		messageView.setText(markedUp);
 		TextView tsView = viewHolder.timeStamp;
-		tsView.setText(message.getTimestampFormatted(true, context));
+		if(conversationsMsisdns!=null && !conversationsMsisdns.contains(conversation.getMsisdn()))
+		{
+			tsView.setText("");
+		}
+		else
+		{
+			tsView.setText(message.getTimestampFormatted(true, context));
+		}
 	}
 
 	public void updateViewsRelatedToMessageState(View parentView, ConvMessage message, Conversation conversation)
@@ -1004,4 +1236,74 @@ public class ConversationsAdapter extends BaseAdapter
 	{
 		return iconLoader;
 	}
+
+	public void addToLists(Conversation conv)
+	{
+		completeList.add(conv);
+		conversationList.add(conv);
+		if(conversationsMsisdns!=null)
+		{
+			conversationsMsisdns.add(conv.getMsisdn());
+		}
+		if(phoneBookContacts!=null)
+		{
+			phoneBookContacts.remove(conv);
+		}
+	}
+
+	public void addToLists(Set<Conversation> list)
+	{
+		completeList.addAll(list);
+		conversationList.addAll(list);
+		if(conversationsMsisdns!=null)
+		{
+			for(Conversation conv : list)
+			{
+				conversationsMsisdns.add(conv.getMsisdn());
+			}
+		}
+		if(phoneBookContacts!=null)
+		{
+			phoneBookContacts.removeAll(list);
+		}
+	}
+
+	public void removeStealthConversationsFromLists()
+	{
+		for (Iterator<Conversation> iter = completeList.iterator(); iter.hasNext();)
+		{
+			Object object = iter.next();
+			if (object == null)
+			{
+				continue;
+			}
+			Conversation conv = (Conversation) object;
+			if (conv.isStealth())
+			{
+				iter.remove();
+				conversationList.remove(conv);
+				if(conversationsMsisdns!=null)
+				{
+					conversationsMsisdns.remove(conv.getMsisdn());
+				}
+			}
+		}
+	}
+
+	public void sortLists(Comparator<? super Conversation> mConversationsComparator)
+	{
+		Collections.sort(completeList, mConversationsComparator);
+		Collections.sort(conversationList, mConversationsComparator);
+	}
+
+	public void remove(Conversation conv)
+	{
+		completeList.remove(conv);
+		conversationList.remove(conv);
+		if(conversationsMsisdns!=null)
+		{
+			conversationsMsisdns.remove(conv.getMsisdn());
+		}
+	}
+
 }
