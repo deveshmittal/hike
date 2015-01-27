@@ -1,11 +1,13 @@
 package com.bsb.hike.platform;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +21,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
@@ -33,7 +38,7 @@ import com.bsb.hike.utils.Utils;
 /**
  * Created by shobhitmandloi on 14/01/15.
  */
-public class WebViewCardRenderer extends BaseAdapter
+public class WebViewCardRenderer extends BaseAdapter implements Listener
 {
 
 	static final String tag = "webviewcardRenderer";
@@ -52,17 +57,15 @@ public class WebViewCardRenderer extends BaseAdapter
 
 	BaseAdapter adapter;
 
-	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages)
-	{
-		this.mContext = context;
-		this.convMessages = convMessages;
-	}
+	private HashMap<Integer, String> cardAlarms;
 
 	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages, BaseAdapter adapter)
 	{
 		this.mContext = context;
 		this.adapter = adapter;
 		this.convMessages = convMessages;
+		cardAlarms = new HashMap<Integer, String>();
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.PLATFORM_CARD_ALARM, this);
 	}
 
 	public static class WebViewHolder extends MessagesAdapter.DetailViewHolder
@@ -81,6 +84,8 @@ public class WebViewCardRenderer extends BaseAdapter
 
 		public View loadingFailed;
 
+		public CustomWebViewClient webViewClient;
+		
 		private void initializeHolderForForward(View view, boolean isReceived)
 		{
 			time = (TextView) view.findViewById(R.id.time);
@@ -106,10 +111,11 @@ public class WebViewCardRenderer extends BaseAdapter
 	private WebViewHolder initializeHolder(WebViewHolder holder, View view, ConvMessage convMessage)
 	{
 		holder.myBrowser = (WebView) view.findViewById(R.id.webcontent);
-		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, this);
+		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, adapter);
 		holder.selectedStateOverlay = view.findViewById(R.id.selected_state_overlay);
 		holder.loadingSpinner = view.findViewById(R.id.loading_data);
 		holder.cardFadeScreen = view.findViewById(R.id.card_fade_screen);
+		holder.webViewClient = new CustomWebViewClient(convMessage, holder);
 		holder.loadingFailed = view.findViewById(R.id.loading_failed);
 		webViewStates(holder);
 
@@ -121,6 +127,7 @@ public class WebViewCardRenderer extends BaseAdapter
 		holder.myBrowser.setVerticalScrollBarEnabled(false);
 		holder.myBrowser.setHorizontalScrollBarEnabled(false);
 		holder.myBrowser.addJavascriptInterface(holder.platformJavaScriptBridge, HikePlatformConstants.PLATFORM_BRIDGE_NAME);
+		holder.myBrowser.setWebViewClient(holder.webViewClient);
 		holder.platformJavaScriptBridge.allowUniversalAccess();
 		holder.platformJavaScriptBridge.allowDebugging();
 		holder.myBrowser.getSettings().setJavaScriptEnabled(true);
@@ -202,6 +209,7 @@ public class WebViewCardRenderer extends BaseAdapter
 			}
 
 			view.setTag(viewHolder);
+			viewHolder.myBrowser.setTag(viewHolder);
 			Logger.d(tag, "inflated");
 			int height = convMessage.platformWebMessageMetadata.getCardHeight();
 			Logger.i(tag, "minimum height given in card is =" + height);
@@ -262,22 +270,29 @@ public class WebViewCardRenderer extends BaseAdapter
 				public void onComplete(PlatformContentModel content)
 				{
 					viewHolder.id = getItemId(position);
-					fillContent(web, content, convMessage);
+					fillContent(web, content, convMessage,viewHolder);
 				}
 			});
 		}
 		else
 		{
 			Logger.i(tag, "either tag is not null ");
+			int mId = (int)convMessage.getMsgID();
+			if (cardAlarms.containsKey(mId))
+			{
+				viewHolder.myBrowser.loadUrl("javascript:alarmPlayed(" + "'" + cardAlarms.get(mId) + "')");
+				cardAlarms.remove(mId);
+			}
 		}
 
 		return view;
 
 	}
 
-	private void fillContent(WebView web, PlatformContentModel content, ConvMessage convMessage)
+	private void fillContent(WebView web, PlatformContentModel content, ConvMessage convMessage,WebViewHolder holder)
 	{
-		web.setWebViewClient(new CustomWebViewClient(convMessage));
+		holder.webViewClient.convMessage = convMessage;
+		holder.platformJavaScriptBridge.updateConvMessage(convMessage);
 		web.loadDataWithBaseURL("", content.getFormedData(), "text/html", "UTF-8", "");
 	}
 
@@ -285,10 +300,11 @@ public class WebViewCardRenderer extends BaseAdapter
 	{
 
 		ConvMessage convMessage;
-
-		public CustomWebViewClient(ConvMessage convMessage)
+		WebViewHolder holder;
+		public CustomWebViewClient(ConvMessage convMessage,WebViewHolder holder)
 		{
 			this.convMessage = convMessage;
+			this.holder = holder;
 		}
 
 		@Override
@@ -308,6 +324,7 @@ public class WebViewCardRenderer extends BaseAdapter
 			if (!TextUtils.isEmpty(alarmData))
 			{
 				view.loadUrl("javascript:alarmPlayed(" + "'" + alarmData + "')");
+				cardAlarms.remove(convMessage.getMsgID());
 			}
 			super.onPageFinished(view, url);
 			try
@@ -329,7 +346,37 @@ public class WebViewCardRenderer extends BaseAdapter
 			{
 				npe.printStackTrace();
 			}
+		}
+	}
 
+	public void onDestroy()
+	{
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PLATFORM_CARD_ALARM, this);
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		if (HikePubSub.PLATFORM_CARD_ALARM.equals(type))
+		{
+			if (object instanceof Message)
+			{
+				Message m = (Message) object;
+				cardAlarms.put(m.arg1, (String) m.obj);
+				uiHandler.post(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						adapter.notifyDataSetChanged(); // it will make sure alarmPlayed is called if required
+					}
+				});
+			}
+			else
+			{
+				Logger.e(tag, "Expected Message in PubSub but received " + object.getClass());
+			}
 		}
 	}
 

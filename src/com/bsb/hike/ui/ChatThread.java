@@ -637,6 +637,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if (mAdapter != null)
 		{
+			mAdapter.onDestroy();
 			mAdapter.resetPlayerIfRunning();
 		}
 		if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
