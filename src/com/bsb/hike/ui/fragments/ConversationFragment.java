@@ -89,6 +89,7 @@ import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.PairModified;
@@ -626,6 +627,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			break;
 		case R.id.but_remind:
+			Intent in = IntentManager.openNuxCustomMessage(getActivity());
+			Set<String> contactsNux = NUXManager.getInstance().getUnlockedContacts();
+			in.putExtra(NUXConstants.SELECTED_FRIENDS, contactsNux.toString().replace("[", "").replace("]", ""));
+			getActivity().startActivity(in);
 			break;
 		case R.id.but_inviteMore:
 			NUXManager.getInstance().startNuxSelector(getActivity());

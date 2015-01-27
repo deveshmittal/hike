@@ -103,6 +103,10 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     
     private void addEmptyView(){
     	View emptyView = getLayoutInflater(null).inflate(R.layout.friends_horizontal_item,null);
+    	ImageView iv = (ImageView ) emptyView.findViewById(R.id.profile_image);
+		iv.setScaleType(ScaleType.CENTER_INSIDE);
+		iv.setBackgroundResource(R.drawable.avatar_empty);
+		iv.setImageResource(R.drawable.ic_question_mark);
     	emptyView.setTag(emptyTag);
     	viewStack.addView(emptyView);
     }
