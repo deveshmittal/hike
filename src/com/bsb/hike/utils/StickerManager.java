@@ -586,6 +586,8 @@ public class StickerManager
 				}
 			}
 			out.flush();
+			fileOut.flush();
+			fileOut.getFD().sync();
 			out.close();
 			fileOut.close();
 			long t2 = System.currentTimeMillis();
