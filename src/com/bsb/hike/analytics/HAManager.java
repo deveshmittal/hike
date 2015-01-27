@@ -192,13 +192,13 @@ public class HAManager
 			
 			eventsList.clear();
 			
-			AnalyticsStore.getInstance(this.context).dumpEvents(jsons, false);
+			AnalyticsStore.getInstance(this.context).dumpEvents(jsons, false, false);
 
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "writer thread started!");
 		}
 	}
 
-	private synchronized void dumpMostRecentEvents()
+	private synchronized void dumpMostRecentEventsAndSendToServer(boolean isOnDemandFromServer)
 	{
 		if(eventsList.size() > 0)
 		{
@@ -206,7 +206,8 @@ public class HAManager
 			
 			eventsList.clear();
 			
-			AnalyticsStore.getInstance(this.context).dumpEvents(jsons, true);
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Dumping in-memory events :" + jsons.size());
+			AnalyticsStore.getInstance(this.context).dumpEvents(jsons, true, isOnDemandFromServer);
 		}
 	}
 	
