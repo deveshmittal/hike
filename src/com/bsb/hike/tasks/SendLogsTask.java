@@ -24,7 +24,7 @@ public class SendLogsTask extends AsyncTask<Void, Void, Void>
 	@Override
 	protected Void doInBackground(Void... params)
 	{
-		getLogCatDetails();
+		//getLogCatDetails();
 		return null;
 	}
 
@@ -33,12 +33,16 @@ public class SendLogsTask extends AsyncTask<Void, Void, Void>
 	{
 		try
 		{
-
+			File file = getCustomLogFile();
+			if(file == null)
+			{
+				return;
+			}
 			Intent intent = new Intent(Intent.ACTION_SEND);
 			intent.setType("text/plain");
 			intent.putExtra(Intent.EXTRA_EMAIL, "");
 			intent.putExtra(Intent.EXTRA_SUBJECT, "hike logs");
-			intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(getLogFile()));
+			intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
 
 			context.startActivity(intent);
 		}
@@ -95,6 +99,17 @@ public class SendLogsTask extends AsyncTask<Void, Void, Void>
 				}
 			}
 		}
+	}
+	
+	private File getCustomLogFile()
+	{
+		File dir = context.getExternalFilesDir(null);
+		if (dir == null)
+		{
+			return null;
+		}
+		File file = new File(dir, "custom_logs" + ".txt");
+		return file;
 	}
 
 	private File getLogFile()
