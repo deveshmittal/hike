@@ -155,9 +155,9 @@ public class AnalyticsStore
 	 * Used to write event json to the file
 	 * @param eventJsons ArrayList of json events to be written to the file
 	 * @param sendToServer true if data should be sent to the server, false otherwise
-	 * @param isOnDemandFromServer true if server has sent action packet to get data from client, false otherwise
+	 * @param sendAllLogs true if server has sent action packet to get data from client, false otherwise
 	 */
-	protected void dumpEvents(final ArrayList<JSONObject> eventJsons, final boolean sendToServer, final boolean isOnDemandFromServer)
+	protected void dumpEvents(final ArrayList<JSONObject> eventJsons, final boolean sendToServer, final boolean sendAllLogs)
 	{		
 		new Thread(new Runnable() 
 		{			
@@ -254,21 +254,15 @@ public class AnalyticsStore
 					}
 				}
 				// SEND ANALYTICS FROM HERE
-				if(sendToServer)
+				if(sendToServer && Utils.isUserOnline(context))
 				{
-					if(Utils.isUserOnline(context))
-					{			
-						if(!isOnDemandFromServer)
-						{
-							// if total logged data is less than threshold value or wifi is available, try sending all the data else delete normal priority data
-							if(!((Utils.getNetworkType(context) == ConnectivityManager.TYPE_WIFI) || 
-									(AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance().getMaxAnalyticsSizeOnClient())))
-							{
-								AnalyticsStore.getInstance(context).deleteNormalPriorityData();
-							}
-						}
-						AnalyticsSender.getInstance(context).sendData();
+					// if total logged data is less than threshold value or wifi is available, try sending all the data else delete normal priority data
+					if(!sendAllLogs && !((Utils.getNetworkType(context) == ConnectivityManager.TYPE_WIFI) || 
+							(AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance().getMaxAnalyticsSizeOnClient())))
+					{
+						AnalyticsStore.getInstance(context).deleteNormalPriorityData();
 					}
+					AnalyticsSender.getInstance(context).sendData();
 				}
 			}
 		}, AnalyticsConstants.ANALYTICS_THREAD_WRITER).start();						
@@ -409,17 +403,12 @@ public class AnalyticsStore
 	{
 		File tempFile = new File(filePath);
 
-		if(tempFile.length() == 0)
+		if(tempFile.length() != 0)
 		{
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File was empty! Deleted :" + filePath);
-			tempFile.delete();			
-			return;
-		}
-		else
-		{
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File compressed :" + filePath);
 			gzipFile(filePath);
-			tempFile.delete();
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File compressed :" + filePath);
 		}
+		tempFile.delete();
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File was deleted :" + filePath);
 	}
 }

@@ -91,6 +91,7 @@ public class AnalyticsSender
 	
 	/**
 	 * This method sends the event log files to the server. Returns if no file is present or there is no connectivity
+	 * Use this method carefully as its not thread-safe
 	 */
 	public void sendData()
 	{
