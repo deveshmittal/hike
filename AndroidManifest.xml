@@ -3,7 +3,7 @@
     package="com.bsb.hike"
     android:installLocation="auto"
     android:versionCode="925"
-    android:versionName="3.6.9.nux.02" >
+    android:versionName="3.7.1.nux.03" >
 
     <uses-sdk
         android:minSdkVersion="9"
