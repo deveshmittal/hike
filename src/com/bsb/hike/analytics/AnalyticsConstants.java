@@ -10,9 +10,11 @@ public class AnalyticsConstants
 	
 	public static final long ONE_HOUR =  60 * 60 * 1000;
 	
-	public static long MAX_FILE_SIZE = 500 * 1024;
-	
-	public static long MAX_ANALYTICS_SIZE = 500 * 1024;
+	//TODO: changed from 500 to 5 for testing
+	public static long MAX_FILE_SIZE = 5 * 1024;
+
+	//TODO: changed from 500 to 10 for testing
+	public static long MAX_ANALYTICS_SIZE = 10 * 1024;
 	
 	/** time of first attempt to send analytics data */ 
 	public static int HOUR_OF_DAY_TO_SEND = 8;
@@ -25,7 +27,8 @@ public class AnalyticsConstants
 	
 	public static boolean IS_ANALYTICS_ENABLED = true;
 	
-	public static final int MAX_EVENTS_IN_MEMORY = 50;
+	//TODO: changed from 50 to 10 for testing
+	public static final int MAX_EVENTS_IN_MEMORY = 10;
 	
 	public static final int DEFAULT_SEND_FREQUENCY = 24;
 	
@@ -98,4 +101,6 @@ public class AnalyticsConstants
 	public static final String HIKE_SDK_INSTALL_ACCEPT = "hikeSDKInstallAccept";
 	
 	public static final String HIKE_SDK_INSTALL_DECLINE = "hikeSDKInstallDecline";
+	
+	public static final String ANALYTICS_THREAD_WRITER = "THREAD-WRITER";
 }

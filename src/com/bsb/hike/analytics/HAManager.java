@@ -192,13 +192,13 @@ public class HAManager
 			
 			eventsList.clear();
 			
-			AnalyticsStore.getInstance(this.context).dumpEvents(jsons, false);
+			AnalyticsStore.getInstance(this.context).dumpEvents(jsons, false, false);
 
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "writer thread started!");
 		}
 	}
 
-	private synchronized void dumpMostRecentEvents()
+	private synchronized void dumpMostRecentEventsAndSendToServer(boolean isOnDemandFromServer)
 	{
 		if(eventsList.size() > 0)
 		{
@@ -206,7 +206,8 @@ public class HAManager
 			
 			eventsList.clear();
 			
-			AnalyticsStore.getInstance(this.context).dumpEvents(jsons, true);
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Dumping in-memory events :" + jsons.size());
+			AnalyticsStore.getInstance(this.context).dumpEvents(jsons, true, isOnDemandFromServer);
 		}
 	}
 	
@@ -364,26 +365,16 @@ public class HAManager
 	/**
 	 * Used to send the analytics data to the server
 	 */
-	public boolean sendAnalyticsData(boolean isOnDemand)
+	public boolean sendAnalyticsData(boolean isOnDemandFromServer)
 	{
 		boolean isUserConnected = false;
 		
-		dumpMostRecentEvents();
+		dumpMostRecentEventsAndSendToServer(isOnDemandFromServer);
 		
 		if(Utils.isUserOnline(context))
-		{			
-			if(!isOnDemand)
-			{
-				// if total logged data is less than threshold value or wifi is available, try sending all the data else delete normal priority data
-				if(!((Utils.getNetworkType(context) == ConnectivityManager.TYPE_WIFI) || 
-						(AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance().getMaxAnalyticsSizeOnClient())))
-				{
-					AnalyticsStore.getInstance(context).deleteNormalPriorityData();
-				}
-			}
-			new Thread(AnalyticsSender.getInstance(context)).start();
-			isUserConnected = true;			
-		}
+		{
+			isUserConnected = true;
+		}		
 		return isUserConnected;
 	}	
 	

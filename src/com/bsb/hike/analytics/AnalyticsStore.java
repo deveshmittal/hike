@@ -12,9 +12,12 @@ import java.util.zip.GZIPOutputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.content.Context;
+import android.net.ConnectivityManager;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 /**
  * @author rajesh
@@ -147,11 +150,14 @@ public class AnalyticsStore
 
 		return eventFile;
 	}
-	
+
 	/**
-	 * writes the event json to the file
+	 * Used to write event json to the file
+	 * @param eventJsons ArrayList of json events to be written to the file
+	 * @param sendToServer true if data should be sent to the server, false otherwise
+	 * @param sendAllLogs true if server has sent action packet to get data from client, false otherwise
 	 */
-	protected void dumpEvents(final ArrayList<JSONObject> eventJsons, final boolean isOnDemand)
+	protected void dumpEvents(final ArrayList<JSONObject> eventJsons, final boolean sendToServer, final boolean sendAllLogs)
 	{		
 		new Thread(new Runnable() 
 		{			
@@ -199,13 +205,13 @@ public class AnalyticsStore
 						}
 						fileWriter = new FileWriter(normalPriorityEventFile, true);
 						fileWriter.write(normal.toString());
-
-						if(isOnDemand)
-						{
-							compressAndDeleteOriginalFile(normalPriorityEventFile.getAbsolutePath());
-						}
-						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to normal file!");
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to normal file! Size now :" + normalPriorityEventFile.length() + "bytes");
 					}
+					if(sendToServer)
+					{
+						compressAndDeleteOriginalFile(normalPriorityEventFile.getAbsolutePath());
+					}
+
 					if(high.length() > 0)
 					{
 						if(!eventFileExists(EventPriority.HIGH))
@@ -219,15 +225,14 @@ public class AnalyticsStore
 							compressAndDeleteOriginalFile(highPriorityEventFile.getAbsolutePath());
 							highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
 						}
-						fileWriter = new FileWriter(normalPriorityEventFile, true);
+						fileWriter = new FileWriter(highPriorityEventFile, true);
 						fileWriter.write(normal.toString());
-						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to imp file!");
-
-						if(isOnDemand)
-						{
-							compressAndDeleteOriginalFile(highPriorityEventFile.getAbsolutePath());
-						}
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to imp file! Size now :" + highPriorityEventFile.length() + "bytes");
 					}	
+					if(sendToServer)
+					{
+						compressAndDeleteOriginalFile(highPriorityEventFile.getAbsolutePath());
+					}
 				}
 				catch (IOException e)
 				{
@@ -248,8 +253,19 @@ public class AnalyticsStore
 						closeCurrentFile(fileWriter);
 					}
 				}
+				// SEND ANALYTICS FROM HERE
+				if(sendToServer && Utils.isUserOnline(context))
+				{
+					// if total logged data is less than threshold value or wifi is available, try sending all the data else delete normal priority data
+					if(!sendAllLogs && !((Utils.getNetworkType(context) == ConnectivityManager.TYPE_WIFI) || 
+							(AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance().getMaxAnalyticsSizeOnClient())))
+					{
+						AnalyticsStore.getInstance(context).deleteNormalPriorityData();
+					}
+					AnalyticsSender.getInstance(context).sendData();
+				}
 			}
-		}).start();						
+		}, AnalyticsConstants.ANALYTICS_THREAD_WRITER).start();						
 	}
 	
 	/**
@@ -385,8 +401,14 @@ public class AnalyticsStore
 	 */
 	private void compressAndDeleteOriginalFile(String filePath) throws IOException
 	{
-		gzipFile(filePath);
-		
-		new File(filePath).delete();
+		File tempFile = new File(filePath);
+
+		if(tempFile.length() != 0)
+		{
+			gzipFile(filePath);
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File compressed :" + filePath);
+		}
+		tempFile.delete();
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File was deleted :" + filePath);
 	}
 }

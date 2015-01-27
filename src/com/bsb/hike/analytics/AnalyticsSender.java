@@ -28,7 +28,7 @@ import com.bsb.hike.utils.Utils;
  * @author rajesh
  *
  */
-public class AnalyticsSender implements Runnable  
+public class AnalyticsSender  
 {
 	private Context context;
 	
@@ -85,13 +85,15 @@ public class AnalyticsSender implements Runnable
 		if(fileNames == null || !(Utils.isUserOnline(context)))
 			isPossible = false;	
 		
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Checking if files can be sent :" + isPossible);
 		return isPossible;
 	}
 	
 	/**
 	 * This method sends the event log files to the server. Returns if no file is present or there is no connectivity
+	 * Use this method carefully as its not thread-safe
 	 */
-	private synchronized void sendData()
+	public void sendData()
 	{
 		// get files absolute paths
 		String[] fileNames = getFileNames(this.context);
@@ -159,15 +161,6 @@ public class AnalyticsSender implements Runnable
 		String[] fileNames = dir.list();
 		
 		return fileNames;
-	}
-	
-	/**
-	 * sender thread's run method
-	 */
-	@Override
-	public void run() 
-	{
-		sendData();
 	}
 	
 	/**
