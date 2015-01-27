@@ -2,6 +2,8 @@ package com.bsb.hike.chatthread;
 
 import java.util.Map;
 
+import com.bsb.hike.media.AudioRecordView;
+
 
 /**
  * <!-- begin-user-doc -->
@@ -27,7 +29,7 @@ public class MessageSenderLayout
 	 * @ordered
 	 */
 	
-	public StickerLayout stickerLayout;
+//	public StickerLayout stickerLayout;
 	
 	/**
 	 * <!-- begin-user-doc -->

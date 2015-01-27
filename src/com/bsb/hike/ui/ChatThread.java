@@ -1,8 +1,6 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
-
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -13,9 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Pattern;
 import java.util.Random;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,12 +44,8 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.graphics.Shader.TileMode;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaRecorder;
@@ -74,13 +68,10 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -135,7 +126,6 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -151,15 +141,14 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.AccountAdapter;
-import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
-import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
+import com.bsb.hike.dialog.ContactDialog;
+import com.bsb.hike.dialog.CustomAlertDialog;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -181,23 +170,16 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
-import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.ui.utils.HashSpanWatcher;
-import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
-import com.bsb.hike.utils.ContactDialog;
-import com.bsb.hike.utils.CustomAlertDialog;
-import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -218,7 +200,7 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
-		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener
+		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener
 {
 	private static final String HASH_PIN = "#pin";
 
@@ -616,7 +598,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				mComposeViewWatcher.sendEndTyping();
 			}
-			mComposeViewWatcher.uninit();
+			//mComposeViewWatcher.uninit();
 			mComposeViewWatcher = null;
 		}
 		if (contactDialog != null)
@@ -1540,7 +1522,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void clearConversation()
 	{
-		final CustomAlertDialog clearConfirmDialog = new CustomAlertDialog(ChatThread.this);
+		/*final CustomAlertDialog clearConfirmDialog = new CustomAlertDialog(ChatThread.this);
 		clearConfirmDialog.setHeader(R.string.clear_conversation);
 		clearConfirmDialog.setBody(R.string.confirm_clear_conversation);
 		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
@@ -1570,7 +1552,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		clearConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
 		clearConfirmDialog.setCancelButton(R.string.cancel);
-		clearConfirmDialog.show();
+		clearConfirmDialog.show();*/
 	}
 
 	private void blockUser()
@@ -1892,7 +1874,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (mComposeViewWatcher != null)
 		{
-			mComposeViewWatcher.uninit();
+			//mComposeViewWatcher.uninit();
 			mComposeViewWatcher = null;
 		}
 
@@ -2563,7 +2545,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (mComposeViewWatcher != null)
 		{
-			mComposeViewWatcher.uninit();
+			//mComposeViewWatcher.uninit();
 		}
 
 		updateUIForHikeStatus();
@@ -6269,7 +6251,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void showContactDetails(final List<ContactInfoData> items, final String name, final JSONObject contactInfo, final boolean saveContact)
 	{
-		contactDialog = new ContactDialog(this, R.style.Theme_CustomDialog);
+		contactDialog = new ContactDialog(this, R.style.Theme_CustomDialog, -1);
 		contactDialog.setContentView(R.layout.contact_share_info);
 
 		ViewGroup parent = (ViewGroup) contactDialog.findViewById(R.id.parent);
@@ -6368,7 +6350,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					if (accounts.getSelectedItem() != null)
 					{
 						saveContact(items, accounts, name);
-					}
+					} 
 					else
 					{
 						Utils.addToContacts(items, name, ChatThread.this);
@@ -6567,7 +6549,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		// it is possible that window token is null when activity is rotated, will occur rarely
 		View anchor = findViewById(R.id.chatThreadParentLayout);
-		if (anchor.getWindowToken() != null)
+		/*if (anchor.getWindowToken() != null)
 		{
 			if (showingChatThemePicker)
 			{
@@ -6665,7 +6647,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 					/*
 					 * Checking whether we have a few emoticons in the recents category. If not we show the next tab emoticons.
-					 */
+					 
 					if (whichSubcategory == 0)
 					{
 						int startOffset = offset;
@@ -6717,7 +6699,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						/*
 						 * Hiding the black filler palette.
-						 */
+						 
 						findViewById(R.id.sticker_palette_filler).setVisibility(View.GONE);
 						resizeMainheight(0, false);
 						emoticonType = null;
@@ -6760,7 +6742,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				/*
 				 * Setting the current selection to the last message.
-				 */
+				 
 				mConversationsView.post(new Runnable()
 				{
 
@@ -6778,7 +6760,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Logger.d("chatthread", "window token is null -- trying to show emoticon pallette");
 			attachmentWindow = null;
 			emoticonType = null;
-		}
+		}*/
 
 	}
 
@@ -6844,7 +6826,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (emoticonsAdapter == null)
 			{
-				emoticonsAdapter = new EmoticonAdapter(this, this, isPortrait, categoryResIds);
+				//emoticonsAdapter = new EmoticonAdapter(this, this, isPortrait, categoryResIds);
 			}
 			emoticonViewPager.setAdapter(emoticonsAdapter);
 		}
@@ -6852,7 +6834,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (stickerAdapter == null)
 			{
-				stickerAdapter = new StickerAdapter(this);
+				//stickerAdapter = new StickerAdapter(this);
 			}
 			emoticonViewPager.setAdapter(stickerAdapter);
 		}
@@ -6861,7 +6843,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		emoticonViewPager.setCurrentItem(actualPageNum, false);
 		emoticonViewPager.invalidate();
 
-		iconPageIndicator = (StickerEmoticonIconPageIndicator) emoticonLayout.findViewById(R.id.icon_indicator);
+		//iconPageIndicator = (StickerEmoticonIconPageIndicator) emoticonLayout.findViewById(R.id.icon_indicator);
 		iconPageIndicator.setViewPager(emoticonViewPager);
 		iconPageIndicator.setOnPageChangeListener(onPageChangeListener);
 		iconPageIndicator.notifyDataSetChanged();
@@ -7520,7 +7502,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 		case R.id.delete_msgs:
 			final ArrayList<Long> selectedMsgIdsToDelete = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
-			final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(ChatThread.this);
+			final CustomAlertDialog deleteConfirmDialog = null;
 			if (mAdapter.getSelectedCount() == 1)
 			{
 				deleteConfirmDialog.setHeader(R.string.confirm_delete_msg_header);
@@ -8419,12 +8401,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		hikeToOfflineTipview.findViewById(R.id.send_button_tick).setEnabled(enabled);
 	}
 
-	@Override
+	/*@Override
 	public void onEmoticonClicked(int emoticonIndex)
 	{
 		Utils.emoticonClicked(getApplicationContext(), emoticonIndex, mComposeView);
 
-	}
+	}*/
 
 	private void showPinHistory(boolean viaMenu)
 	{
