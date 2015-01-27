@@ -207,6 +207,8 @@ public class Utils
 	private static TranslateAnimation mInFromRight;
 
 	public static float scaledDensityMultiplier = 1.0f;
+	
+	public static float densityMultiplier = 1.0f;
 
 	public static int densityDpi;
 
@@ -948,6 +950,7 @@ public class Utils
 	{
 		Utils.scaledDensityMultiplier = displayMetrics.scaledDensity;
 		Utils.densityDpi = displayMetrics.densityDpi;
+		Utils.densityMultiplier = displayMetrics.density;
 	}
 
 	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)

@@ -268,14 +268,14 @@ public class PlatformJavaScriptBridge
 	@JavascriptInterface
 	public void onLoadFinished(String height)
 	{
-		Logger.i(tag, "onloadfinished called with height=" +( Integer.parseInt(height)*Utils.scaledDensityMultiplier ) +" current height is "+mWebView.getHeight());
+		Logger.i(tag, "onloadfinished called with height=" +( Integer.parseInt(height)*Utils.densityMultiplier ) +" current height is "+mWebView.getHeight());
 		resizeWebview(height);
 	}
 
 	@JavascriptInterface
 	public void onResize(String height)
 	{
-		Logger.i(tag, "onresize called with height=" + height);
+		Logger.i(tag, "onresize called with height=" +(Integer.parseInt(height)*Utils.densityMultiplier));
 		resizeWebview(height);
 	}
 
@@ -291,7 +291,7 @@ public class PlatformJavaScriptBridge
 	@JavascriptInterface
 	public void printHeight(String height)
 	{
-		Logger.i(tag, "my webview height is px= " + mWebView.getHeight() + " and content height " + mWebView.getContentHeight()*Utils.scaledDensityMultiplier + " , height what javascript thinks is " + height);
+		Logger.i(tag, "my webview height is px= " + mWebView.getHeight() + " and content height " + mWebView.getContentHeight()*Utils.densityMultiplier + " , height what javascript thinks is " + height);
 	}
 
 	HeoghtRunnable heightRunnable = new HeoghtRunnable();
@@ -306,7 +306,7 @@ public class PlatformJavaScriptBridge
 			
 			if (height != 0)
 			{
-				height  =(int) (Utils.scaledDensityMultiplier*height);  // javascript returns us in dp
+				height  =(int) (Utils.densityMultiplier*height);  // javascript returns us in dp
 				Logger.i(tag, "HeightRunnable called with height=" + height+" and current height is "+mWebView.getHeight());
 				LayoutParams lp = mWebView.getLayoutParams();
 				if (lp.height != height)
