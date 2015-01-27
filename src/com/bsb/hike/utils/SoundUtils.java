@@ -74,8 +74,7 @@ public class SoundUtils
 	
 	public static boolean isTickSoundEnabled(Context context)
 	{
-		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true) && tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !isAnyMusicPlaying(context));
+		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true) && !Utils.isUserInAnyTypeOfCall(context) && !isAnyMusicPlaying(context));
 	}
 
 	/**
