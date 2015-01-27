@@ -7429,6 +7429,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
+	// We depend on listflinging state to download hd thumbnail of image
+	// call this function when listview stops flinging, so we iterate through
+	// the visible items and call getview just to make sure imageloader loads thumbnail properly
+	public void notifyFileThumbnailDataSetChanged()
+	{
+		int start = mConversationsView.getFirstVisiblePosition();
+		int last = mConversationsView.getLastVisiblePosition();
+		for(int i=start, j=last; i<=j; i++)
+		{
+			ConvMessage convMessage= (ConvMessage)mConversationsView.getItemAtPosition(i);
+			if(convMessage.isFileTransferMessage()){
+				View view = mConversationsView.getChildAt(i-start);
+				// this method call will take care of thumbnail loading when lv stops flinging.
+				mAdapter.getView(i, view, mConversationsView);
+				break;
+			}
+		}
+	}
+
 	private List<AccountData> getAccountList()
 	{
 		Account[] a = AccountManager.get(this).getAccounts();
