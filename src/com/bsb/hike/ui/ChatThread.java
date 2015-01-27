@@ -5727,9 +5727,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
 		attachmentWindow.setOutsideTouchable(true);
 		attachmentWindow.setFocusable(true);
-		attachmentWindow.setWidth((int) (Utils.densityMultiplier * 270));
+		attachmentWindow.setWidth((int) (Utils.scaledDensityMultiplier * 270));
 		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
-		attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor), -(int) (276 * Utils.densityMultiplier), -(int) (0.5 * Utils.densityMultiplier));
+		attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor), -(int) (276 * Utils.scaledDensityMultiplier), -(int) (0.5 * Utils.scaledDensityMultiplier));
 	}
 
 	private class AudioActivityInfo
@@ -5776,7 +5776,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				TextView tv = (TextView) v.findViewById(android.R.id.text1);
 				tv.setText(audioActivityInfo.label);
 				tv.setCompoundDrawablesWithIntrinsicBounds(audioActivityInfo.icon, null, null, null);
-				tv.setCompoundDrawablePadding((int) (15 * Utils.densityMultiplier));
+				tv.setCompoundDrawablePadding((int) (15 * Utils.scaledDensityMultiplier));
 				return v;
 			}
 		};
@@ -6510,8 +6510,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		int dialogHeight = (int) (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? ((3 * screenHeight) / 4)
 				: FrameLayout.LayoutParams.MATCH_PARENT);
 		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(dialogWidth, dialogHeight);
-		lp.topMargin = (int) (5 * Utils.densityMultiplier);
-		lp.bottomMargin = (int) (5 * Utils.densityMultiplier);
+		lp.topMargin = (int) (5 * Utils.scaledDensityMultiplier);
+		lp.bottomMargin = (int) (5 * Utils.scaledDensityMultiplier);
 
 		parent.setLayoutParams(lp);
 
@@ -8058,7 +8058,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		try
 		{
 			int rightMargin = getResources().getDimensionPixelSize(R.dimen.overflow_menu_width) + getResources().getDimensionPixelSize(R.dimen.overflow_menu_right_margin);
-			attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor), -rightMargin, -(int) (0.5 * Utils.densityMultiplier));
+			attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor), -rightMargin, -(int) (0.5 * Utils.scaledDensityMultiplier));
 
 		}
 		catch (BadTokenException e)

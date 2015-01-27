@@ -215,7 +215,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			Logger.i(tag, "minimum height given in card is =" + height);
 			if (height != 0)
 			{
-				int minHeight = (int) (height * Utils.densityMultiplier);
+				int minHeight = (int) (height * Utils.scaledDensityMultiplier);
 				LayoutParams lp = viewHolder.myBrowser.getLayoutParams();
 				lp.height = minHeight;
 				viewHolder.myBrowser.setLayoutParams(lp);
