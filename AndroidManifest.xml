@@ -7,7 +7,7 @@
 
     <uses-sdk
         android:minSdkVersion="9"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="21" />
 
     <permission
         android:name="com.bsb.hike.ui.permission.MAPS_RECEIVE"

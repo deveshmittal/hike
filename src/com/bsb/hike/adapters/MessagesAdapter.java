@@ -4321,7 +4321,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		if (notify && !isListFlinging)
 		{
-			notifyDataSetChanged();
+			chatThread.notifyFileThumbnailDataSetChanged();
 		}
 	}
 
