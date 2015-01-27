@@ -37,7 +37,7 @@
                 layout="@layout/message_sender_details" />
 
 
-        <WebView
+        <com.bsb.hike.platform.CustomWebView
                 android:id="@+id/webcontent"
                 android:layout_margin="10dp"
                 android:background="@color/transparent"
