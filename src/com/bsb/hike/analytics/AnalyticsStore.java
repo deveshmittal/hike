@@ -407,8 +407,19 @@ public class AnalyticsStore
 	 */
 	private void compressAndDeleteOriginalFile(String filePath) throws IOException
 	{
-		gzipFile(filePath);
-		
-		new File(filePath).delete();
+		File tempFile = new File(filePath);
+
+		if(tempFile.length() == 0)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File was empty! Deleted :" + filePath);
+			tempFile.delete();			
+			return;
+		}
+		else
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File compressed :" + filePath);
+			gzipFile(filePath);
+			tempFile.delete();
+		}
 	}
 }
