@@ -82,29 +82,29 @@ public class MqttMessagesManager
 
 	private static final String UJFile = "uj_file";
 
-	private HikeConversationsDatabase convDb;
+	private final HikeConversationsDatabase convDb;
 
-	private SharedPreferences settings;
+	private final SharedPreferences settings;
 
-	private SharedPreferences appPrefs;
+	private final SharedPreferences appPrefs;
 
-	private Context context;
+	private final Context context;
 
-	private HikePubSub pubSub;
+	private final HikePubSub pubSub;
 
-	private Map<String, TypingNotification> typingNotificationMap;
+	private final Map<String, TypingNotification> typingNotificationMap;
 
-	private Handler clearTypingNotificationHandler;
+	private final Handler clearTypingNotificationHandler;
 
-	private static MqttMessagesManager instance;
+	private static volatile MqttMessagesManager instance;
 
-	private String userMsisdn;
+	private final String userMsisdn;
 
 	private boolean isBulkMessage = false;
 
-	private SQLiteDatabase convWriteDb;
+	private final SQLiteDatabase convWriteDb;
 
-	private SQLiteDatabase userWriteDb;
+	private final SQLiteDatabase userWriteDb;
 
 	private LinkedList<ConvMessage> messageList;
 
