@@ -91,6 +91,8 @@ public class SendLogsTask extends AsyncTask<Void, Void, Void>
 			{
 				try
 				{
+					fos.flush();
+					fos.getFD().sync();
 					fos.close();
 				}
 				catch (IOException e)
