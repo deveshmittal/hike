@@ -1183,7 +1183,7 @@ public class Utils
 
 	public static void bytesToFile(byte[] bytes, File dst)
 	{
-		OutputStream out = null;
+		FileOutputStream out = null;
 		try
 		{
 			out = new FileOutputStream(dst);
@@ -1199,6 +1199,8 @@ public class Utils
 			{
 				try
 				{
+					out.flush();
+					out.getFD().sync();
 					out.close();
 				}
 				catch (IOException e)
@@ -1465,7 +1467,7 @@ public class Utils
 			{
 				src = new FileInputStream(new File(srcFilePath));
 			}
-			OutputStream dest = new FileOutputStream(new File(destFilePath));
+			FileOutputStream dest = new FileOutputStream(new File(destFilePath));
 
 			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
 			int len;
@@ -1475,6 +1477,8 @@ public class Utils
 				dest.write(buffer, 0, len);
 			}
 
+			dest.flush();
+			dest.getFD().sync();
 			src.close();
 			dest.close();
 
@@ -1528,7 +1532,7 @@ public class Utils
 				src = new FileInputStream(new File(srcFilePath));
 			}
 
-			OutputStream dest = new FileOutputStream(new File(destFilePath));
+			FileOutputStream dest = new FileOutputStream(new File(destFilePath));
 
 			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
 			int len;
@@ -1537,6 +1541,8 @@ public class Utils
 			{
 				dest.write(buffer, 0, len);
 			}
+			dest.flush();
+			dest.getFD().sync();
 			src.close();
 			dest.close();
 			return true;
@@ -1955,6 +1961,8 @@ public class Utils
 			{
 				try
 				{
+					fileOutputStream.flush();
+					fileOutputStream.getFD().sync();
 					fileOutputStream.close();
 				}
 				catch (IOException e)
@@ -2038,6 +2046,8 @@ public class Utils
 			{
 				try
 				{
+					fileOutputStream.flush();
+					fileOutputStream.getFD().sync();
 					fileOutputStream.close();
 				}
 				catch (IOException e)
@@ -2631,6 +2641,7 @@ public class Utils
 		}
 		fos.write(b);
 		fos.flush();
+		fos.getFD().sync();
 		fos.close();
 	}
 

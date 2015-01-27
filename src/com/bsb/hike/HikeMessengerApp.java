@@ -34,6 +34,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -56,11 +57,13 @@ import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
+import com.bsb.hike.utils.CustomLogger;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.google.android.gms.internal.fk;
 
 @ReportsCrashes(formKey = "", customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
 		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE, ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
@@ -852,6 +855,83 @@ public void onTrimMemory(int level)
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
 		
 		registerReceivers();
+		
+		attachStickerFileObserver();
+	}
+	
+	FileObserver stickerFilesObserver[];
+	private void attachStickerFileObserver()
+	{
+		File dir = getApplicationContext().getExternalFilesDir(null);
+		if (dir == null)
+		{
+			return;
+		}
+		String rootPath = dir.getPath() + HikeConstants.STICKERS_ROOT;
+		File stickersRoot = new File(rootPath);
+
+		if (!stickersRoot.exists() || !stickersRoot.canRead())
+		{
+			Logger.d("StickerManager", "sticker root doesn't exit or is not readable");
+			return;
+		}
+
+		File[] files = stickersRoot.listFiles();
+
+		if (files == null)
+		{
+			Logger.d("StickerManager", "sticker root is not a directory");
+			return;
+		}
+
+		// renaming large/small folders for all categories
+		stickerFilesObserver = new FileObserver[files.length];
+		int i = 0;
+		for (File categoryRoot : files)
+		{
+			startObservingForPath(categoryRoot + HikeConstants.LARGE_STICKER_ROOT, i++);
+		}
+	}
+
+	private void startObservingForPath(String pathToWatch, int folderNum)
+	{
+		File file = new File(pathToWatch);
+		Logger.d("StickerFileObserver", "attaching observer 1. file exists? "+file.exists() +" 2.pathTowatch :"+ pathToWatch);
+		if(!file.exists())
+		{
+			return;
+		}
+		
+		//(FileObserver.CREATE & FileObserver.DELETE & FileObserver.DELETE_SELF & FileObserver.MODIFY);
+		FileObserver observer = new FileObserver(pathToWatch, (FileObserver.CREATE | FileObserver.DELETE | FileObserver.DELETE_SELF | FileObserver.MODIFY)) { // set up a file observer to watch this directory on sd card
+
+		     @Override
+		     public void onEvent(int event, String file) 
+		     {
+		         if(file.equals(".probe") || ".nomedia".equalsIgnoreCase(file))
+		         {
+		        	 return;
+		         }
+		         Logger.d("StickerFileObserver", "event recieved for file : "+file);
+		    	 if(event  == FileObserver.CREATE ){ // check if its a "create" and not equal to .probe because thats created every time camera is launched
+		        	 CustomLogger.writeLog(getApplicationContext(), "StickerFileObserverCreate : "+"event : "+event + " Created filename : "+ file);
+		         }
+		         else if(event  == FileObserver.MODIFY )
+		         {
+		        	 CustomLogger.writeLog(getApplicationContext(), "StickerFileObserverModify : "+"event : "+event + " Modified filename : "+ file);
+		         }
+		         else if(event == FileObserver.DELETE )
+		         {
+		        	 CustomLogger.writeLog(getApplicationContext(), "StickerFileObserverDelete : "+"event : "+event + " Deleted filename : "+ file);
+		         }
+		         else
+		         {
+		        	 CustomLogger.writeLog(getApplicationContext(), "StickerFileObserverEvent : "+"event : "+event + " Event filename : "+ file);
+		         }
+		     }
+		 };
+		 observer.startWatching(); //START OBSERVING 	
+		 stickerFilesObserver[folderNum] = observer;
 	}
 	
 	public static HikeMessengerApp getInstance()
