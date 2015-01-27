@@ -676,14 +676,13 @@ public class ConversationsAdapter extends BaseAdapter
 		 */
 		if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE || message.getState() == State.RECEIVED_UNREAD)
 		{
-			int resId = 0;
-			if(isNuxLocked)
-				resId = R.drawable.ic_pending_icon;
-			else
-				resId = message.getImageState();
-			if (resId > 0)
+			
+			if (message.isSent())
 			{
-				imgStatus.setImageResource(resId);
+				if(isNuxLocked)
+					imgStatus.setImageBitmap(NUXManager.getInstance().getNuxChatRewardPojo().getPendingChatIcon());
+				else
+					imgStatus.setImageResource(message.getImageState());
 				imgStatus.setVisibility(View.VISIBLE);
 			}
 			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0 && !message.isSent())
