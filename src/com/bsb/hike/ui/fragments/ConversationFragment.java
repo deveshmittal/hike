@@ -147,7 +147,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
-			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.SWITCH_OFF_NUX_MODE};
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.SWITCH_OFF_NUX_MODE, HikePubSub.MUTE_CONVERSATION_TOGGLED};
 
 	private ConversationsAdapter mAdapter;
 
@@ -534,10 +534,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(getString(R.string.delete_chat));
 		}
-		if (conv instanceof GroupConversation)
-		{	
-			optionsList.add(getString(R.string.clear_whole_conversation));
-		}
+
+		//Showing "Clear Whole Conv" option in Both Group and One-to-One Chat
+		optionsList.add(getString(R.string.clear_whole_conversation));
+		
 		optionsList.add(getString(R.string.email_conversations));
 		
 
@@ -1944,6 +1944,45 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					switchOffNuxMode();
 				};
+			});
+		}
+		else if (HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type))
+		{
+			if (!isAdded())
+			{
+				return;
+			}
+			
+			Pair<String, Boolean> groupMute = (Pair<String, Boolean>) object;
+			String groupId = groupMute.first;
+			final Boolean isMuted = groupMute.second;
+
+			final Conversation conversation = mConversationsByMSISDN.get(groupId);
+			
+			if (conversation == null)
+			{
+				return ;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					View parentView = getParenViewForConversation(conversation);
+					if (parentView == null)
+					{
+						notifyDataSetChanged();
+						return;
+					}
+
+					// Updating data set for Conversation ListView
+					if (conversation instanceof GroupConversation)
+					{
+						((GroupConversation) conversation).setIsMuted(isMuted);
+					}
+
+					notifyDataSetChanged();
+				}
 			});
 		}
 	}

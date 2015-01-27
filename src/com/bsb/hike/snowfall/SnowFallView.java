@@ -48,15 +48,9 @@ public class SnowFallView extends View
 	{
 		if(useConfettiAssets)
 		{
-			snow_flake = context.getResources().getDrawable(R.drawable.rectangle);
-			snow_flake_large = context.getResources().getDrawable(R.drawable.spring);
-			snow_flake_trans = context.getResources().getDrawable(R.drawable.circle);
-		}
-		else
-		{
-			snow_flake = context.getResources().getDrawable(R.drawable.snow_flake);
-			snow_flake_large = context.getResources().getDrawable(R.drawable.snow_flake_large);
-			snow_flake_trans = context.getResources().getDrawable(R.drawable.snow_flake_trans);
+			snow_flake = context.getResources().getDrawable(R.drawable.green_parachute);
+			snow_flake_large = context.getResources().getDrawable(R.drawable.safron_parachute);
+			snow_flake_trans = context.getResources().getDrawable(R.drawable.white_parachute);
 		}
 
 		snow_flake.setBounds(0, 0, snow_flake.getIntrinsicWidth(), snow_flake.getIntrinsicHeight());
@@ -71,10 +65,11 @@ public class SnowFallView extends View
 		Random random = new Random();
 		Interpolator interpolator = new LinearInterpolator();
 
-		snow_flake_count = Math.max(width, height) / 8;
+		// snow_flake_count is number of parachutes
+		snow_flake_count = Math.max(width, height) / 48;
 		coords = new int[snow_flake_count][];
 		drawables.clear();
-		int durationMultiplier = (int) (10 / Utils.densityMultiplier);
+		int durationMultiplier = (int) (20 / Utils.densityMultiplier);
 		for (int i = 0; i < snow_flake_count; i++)
 		{
 			Animation animation = new TranslateAnimation(0, height / 10 - random.nextInt(height / 5), 0, height + 50);
@@ -84,9 +79,9 @@ public class SnowFallView extends View
 			animation.setInterpolator(interpolator);
 
 			int startYDisp = (int) (45 * Utils.densityMultiplier);
-			coords[i] = new int[] { random.nextInt(width), -startYDisp };
+			coords[i] = new int[] { random.nextInt(width), -startYDisp - height/100 };
 			drawables.add(new AnimateDrawable(snow_flake, snow_flake_large, snow_flake_trans, animation));
-			animation.setStartOffset(random.nextInt(8 * height));
+			animation.setStartOffset((random.nextInt(6 * height) * i)/10);
 			animation.setFillBefore(false);
 
 			animation.startNow();
@@ -96,7 +91,7 @@ public class SnowFallView extends View
 	@Override
 	protected void onDraw(Canvas canvas)
 	{
-		for (int i = 0; i < snow_flake_count; i++)
+		for (int i = 0; i <  snow_flake_count; i++)
 		{
 			Drawable drawable = drawables.get(i);
 			canvas.save();

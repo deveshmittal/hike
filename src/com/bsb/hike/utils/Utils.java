@@ -192,6 +192,9 @@ import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.bsb.hike.voip.VoIPService;
+import com.bsb.hike.voip.VoIPUtils;
+import com.bsb.hike.voip.view.VoIPActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.maps.GeoPoint;
@@ -2592,25 +2595,29 @@ public class Utils
 
 	public static int getResolutionId()
 	{
-		switch (densityDpi)
+		if(densityDpi > 480)
 		{
-		case 120:
-			return HikeConstants.LDPI_ID;
-		case 160:
-			return HikeConstants.MDPI_ID;
-		case 240:
-			return HikeConstants.HDPI_ID;
-		case 320:
+			return HikeConstants.XXXHDPI_ID;
+		}
+		else if(densityDpi > 320)
+		{
+			return HikeConstants.XXHDPI_ID;
+		}
+		else if(densityDpi > 240)
+		{
 			return HikeConstants.XHDPI_ID;
-		case 213:
+		}
+		else if(densityDpi > 160)
+		{
 			return HikeConstants.HDPI_ID;
-		case 480:
-			return HikeConstants.XXHDPI_ID;
-		case 640:
-		case 400:
-			return HikeConstants.XXHDPI_ID;
-		default:
-			return HikeConstants.HDPI_ID;
+		}
+		else if(densityDpi > 120)
+		{
+			return HikeConstants.MDPI_ID;
+		}
+		else
+		{
+			return HikeConstants.LDPI_ID;
 		}
 	}
 
@@ -2630,6 +2637,8 @@ public class Utils
 
 	public static void setupFormattedTime(TextView tv, long timeElapsed)
 	{
+		if(timeElapsed < 0)
+			return;
 		int totalSeconds = (int) (timeElapsed);
 		int minutesToShow = (int) (totalSeconds / 60);
 		int secondsToShow = totalSeconds % 60;
@@ -2984,13 +2993,26 @@ public class Utils
 
 	public static void sendLogEvent(JSONObject data)
 	{
+		sendLogEvent(data, null, null);
+	}
+	
+	public static void sendLogEvent(JSONObject data, String subType, String toMsisdn){
+
 		JSONObject object = new JSONObject();
 		try
 		{
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
 			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-
+			if(!TextUtils.isEmpty(subType)){
+				JSONObject md = new JSONObject();
+				md.put(HikeConstants.SUB_TYPE, subType);
+				data.put(HikeConstants.METADATA, md);
+			}
+			if(!TextUtils.isEmpty(toMsisdn))
+			{
+				object.put(HikeConstants.TO, toMsisdn);
+			}
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
 
@@ -3000,6 +3022,7 @@ public class Utils
 		{
 			Logger.w("LogEvent", e);
 		}
+	
 	}
 
 	private static void sendSMSSyncLogEvent(boolean syncing)
@@ -3378,75 +3401,24 @@ public class Utils
 		Toast.makeText(activity, R.string.shortcut_created, Toast.LENGTH_SHORT).show();
 	}
 
-	public static void onCallClicked(Activity activity, final String mContactNumber)
+	public static boolean isVoipActivated(Context context)
 	{
-		final Activity mActivity = activity;
-		final SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		int voipActivated = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.VOIP_ACTIVATED, 0);
+		return (voipActivated == 0)? false : true;
+	}
 
-		if (!settings.getBoolean(HikeConstants.NO_CALL_ALERT_CHECKED, false))
+	public static void onCallClicked(Context context, final String mContactNumber, VoIPUtils.CallSource source)
+	{
+		if(!isUserOnline(context))
 		{
-			final Dialog dialog = new Dialog(activity, R.style.Theme_CustomDialog);
-			dialog.setContentView(R.layout.operator_alert_popup);
-			dialog.setCancelable(true);
-
-			TextView header = (TextView) dialog.findViewById(R.id.header);
-			TextView body = (TextView) dialog.findViewById(R.id.body_text);
-			Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
-			Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
-
-			header.setText(R.string.call_not_free_head);
-			body.setText(R.string.call_not_free_body);
-
-			btnCancel.setText(R.string.cancel);
-			btnOk.setText(R.string.call);
-
-			CheckBox checkBox = (CheckBox) dialog.findViewById(R.id.body_checkbox);
-			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener()
-			{
-
-				@Override
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-				{
-					Editor editor = settings.edit();
-					editor.putBoolean(HikeConstants.NO_CALL_ALERT_CHECKED, isChecked);
-					editor.commit();
-				}
-			});
-			checkBox.setText(activity.getResources().getString(R.string.not_show_call_alert_msg));
-
-			btnOk.setOnClickListener(new OnClickListener()
-			{
-
-				@Override
-				public void onClick(View v)
-				{
-					Utils.logEvent(mActivity, HikeConstants.LogEvent.MENU_CALL);
-					Intent callIntent = new Intent(Intent.ACTION_CALL);
-					callIntent.setData(Uri.parse("tel:" + mContactNumber));
-					mActivity.startActivity(callIntent);
-					dialog.dismiss();
-				}
-			});
-
-			btnCancel.setOnClickListener(new OnClickListener()
-			{
-
-				@Override
-				public void onClick(View v)
-				{
-					dialog.dismiss();
-				}
-			});
-
-			dialog.show();
+			Toast.makeText(context, context.getString(R.string.voip_offline_error), Toast.LENGTH_SHORT).show();
+			return;
 		}
-		else
-		{
-			Utils.logEvent(activity, HikeConstants.LogEvent.MENU_CALL);
-			Intent callIntent = new Intent(Intent.ACTION_CALL);
-			callIntent.setData(Uri.parse("tel:" + mContactNumber));
-			activity.startActivity(callIntent);
-		}
+		Intent i = new Intent(context, VoIPService.class);
+		i.putExtra("action", "outgoingcall");
+		i.putExtra("msisdn", mContactNumber);
+		i.putExtra("call_source", source.ordinal());
+		context.startService(i);
 	}
 
 	public static String getFormattedDateTimeFromTimestamp(long milliSeconds, Locale current)
@@ -3983,122 +3955,7 @@ public class Utils
 		context.startActivity(i);
 	}
 
-	public static boolean isPlayTickSound(Context context)
-	{
-		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-		return tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !am.isMusicActive()
-				&& (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
-	}
-
-	/**
-	 * we are using stream_ring so that use can control volume from mobile and this stream is not in use when user is chatting and vice-versa
-	 * 
-	 * @param context
-	 * @param soundId
-	 */
-	public static void playSoundFromRaw(Context context, int soundId)
-	{
-
-		Logger.i("sound", "playing sound " + soundId);
-		MediaPlayer mp = new MediaPlayer();
-		mp.setAudioStreamType(AudioManager.STREAM_SYSTEM);
-		Resources res = context.getResources();
-		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
-
-		try
-		{
-			mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-			afd.close();
-
-			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-			{
-
-				@Override
-				public void onCompletion(MediaPlayer mp)
-				{
-					mp.release();
-
-				}
-			});
-			mp.prepare();
-			mp.start();
-
-		}
-		catch (IllegalArgumentException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-		catch (IllegalStateException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-	}
-
-	public static void playDefaultNotificationSound(Context context)
-	{
-		try
-		{
-			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-			Ringtone r = RingtoneManager.getRingtone(context, notification);
-			r.play();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
 	
-	/**
-	 * Plays non-ducking sound from given Uri. Plays on {@link android.Media.AudioManager#STREAM_SYSTEM AudioManager.STREAM_SYSTEM} to enable non-ducking playback.
-	 * 
-	 * @param context
-	 * @param soundUri
-	 */
-	public static void playSound(Context context, Uri soundUri)
-	{
-		MediaPlayer mp = new MediaPlayer();
-		mp.setAudioStreamType(AudioManager.STREAM_SYSTEM);
-		try
-		{
-			mp.setDataSource(context, soundUri);
-
-			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-			{
-
-				@Override
-				public void onCompletion(MediaPlayer mp)
-				{
-					mp.release();
-				}
-			});
-			mp.prepare();
-			mp.start();
-
-		}
-		catch (IllegalArgumentException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-		catch (IllegalStateException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-	}
 
 	public static final void cancelScheduledStealthReset(Context context)
 	{

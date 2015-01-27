@@ -221,9 +221,6 @@ public class HikeService extends Service
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
 		mMqttManager = HikeMqttManagerNew.getInstance();
 		mMqttManager.init(getApplicationContext());
-		
-		initStickerDownloadManager();
-		
 
 		/*
 		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
@@ -812,11 +809,6 @@ public class HikeService extends Service
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 			Utils.executeHttpTask(hikeHTTPTask, profilePicRequest);
 		}
-	}
-
-	private void initStickerDownloadManager()
-	{
-		StickerDownloadManager.init(getApplicationContext());
 	}
 
 	public boolean isInitialized()
