@@ -5,9 +5,9 @@ import java.util.HashMap;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Message;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -59,19 +59,13 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	private HashMap<Integer, String> cardAlarms;
 
-	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages)
-	{
-		this.mContext = context;
-		this.convMessages = convMessages;
-		cardAlarms = new HashMap<Integer, String>();
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.PLATFORM_CARD_ALARM, this);
-	}
-
 	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages, BaseAdapter adapter)
 	{
 		this.mContext = context;
 		this.adapter = adapter;
 		this.convMessages = convMessages;
+		cardAlarms = new HashMap<Integer, String>();
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.PLATFORM_CARD_ALARM, this);
 	}
 
 	public static class WebViewHolder extends MessagesAdapter.DetailViewHolder
@@ -90,6 +84,8 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 		public View loadingFailed;
 
+		public CustomWebViewClient webViewClient;
+		
 		private void initializeHolderForForward(View view, boolean isReceived)
 		{
 			time = (TextView) view.findViewById(R.id.time);
@@ -115,10 +111,11 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	private WebViewHolder initializeHolder(WebViewHolder holder, View view, ConvMessage convMessage)
 	{
 		holder.myBrowser = (WebView) view.findViewById(R.id.webcontent);
-		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, this);
+		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, adapter);
 		holder.selectedStateOverlay = view.findViewById(R.id.selected_state_overlay);
 		holder.loadingSpinner = view.findViewById(R.id.loading_data);
 		holder.cardFadeScreen = view.findViewById(R.id.card_fade_screen);
+		holder.webViewClient = new CustomWebViewClient(convMessage, holder);
 		holder.loadingFailed = view.findViewById(R.id.loading_failed);
 		webViewStates(holder);
 
@@ -130,6 +127,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		holder.myBrowser.setVerticalScrollBarEnabled(false);
 		holder.myBrowser.setHorizontalScrollBarEnabled(false);
 		holder.myBrowser.addJavascriptInterface(holder.platformJavaScriptBridge, HikePlatformConstants.PLATFORM_BRIDGE_NAME);
+		holder.myBrowser.setWebViewClient(holder.webViewClient);
 		holder.platformJavaScriptBridge.allowUniversalAccess();
 		holder.platformJavaScriptBridge.allowDebugging();
 		holder.myBrowser.getSettings().setJavaScriptEnabled(true);
@@ -211,6 +209,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			}
 
 			view.setTag(viewHolder);
+			viewHolder.myBrowser.setTag(viewHolder);
 			Logger.d(tag, "inflated");
 			int height = convMessage.platformWebMessageMetadata.getCardHeight();
 			Logger.i(tag, "minimum height given in card is =" + height);
@@ -271,24 +270,29 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				public void onComplete(PlatformContentModel content)
 				{
 					viewHolder.id = getItemId(position);
-					fillContent(web, content, convMessage);
+					fillContent(web, content, convMessage,viewHolder);
 				}
 			});
 		}
 		else
 		{
 			Logger.i(tag, "either tag is not null ");
-			viewHolder.myBrowser.loadUrl("javascript:alarmPlayed(" + "'" + cardAlarms.get(convMessage.getMsgID()) + "')");
-			cardAlarms.remove(convMessage.getMsgID());
+			int mId = (int)convMessage.getMsgID();
+			if (cardAlarms.containsKey(mId))
+			{
+				viewHolder.myBrowser.loadUrl("javascript:alarmPlayed(" + "'" + cardAlarms.get(mId) + "')");
+				cardAlarms.remove(mId);
+			}
 		}
 
 		return view;
 
 	}
 
-	private void fillContent(WebView web, PlatformContentModel content, ConvMessage convMessage)
+	private void fillContent(WebView web, PlatformContentModel content, ConvMessage convMessage,WebViewHolder holder)
 	{
-		web.setWebViewClient(new CustomWebViewClient(convMessage));
+		holder.webViewClient.convMessage = convMessage;
+		holder.platformJavaScriptBridge.updateConvMessage(convMessage);
 		web.loadDataWithBaseURL("", content.getFormedData(), "text/html", "UTF-8", "");
 	}
 
@@ -296,10 +300,11 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	{
 
 		ConvMessage convMessage;
-
-		public CustomWebViewClient(ConvMessage convMessage)
+		WebViewHolder holder;
+		public CustomWebViewClient(ConvMessage convMessage,WebViewHolder holder)
 		{
 			this.convMessage = convMessage;
+			this.holder = holder;
 		}
 
 		@Override
@@ -341,8 +346,6 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			{
 				npe.printStackTrace();
 			}
-			View main = (View) view.getTag();
-			// main.findViewById(R.id.loader).setVisibility(View.GONE);
 		}
 	}
 
@@ -360,6 +363,15 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			{
 				Message m = (Message) object;
 				cardAlarms.put(m.arg1, (String) m.obj);
+				uiHandler.post(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						adapter.notifyDataSetChanged(); // it will make sure alarmPlayed is called if required
+					}
+				});
 			}
 			else
 			{

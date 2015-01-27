@@ -12,8 +12,10 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.Toast;
+
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.platform.WebViewCardRenderer.WebViewHolder;
 import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
@@ -172,7 +174,7 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void updateMetadata(String messageId, String json)
+	public void updateMetadata(String messageId, String json,String notifyScreen)
 	{
 
 		try
@@ -181,18 +183,31 @@ public class PlatformJavaScriptBridge
 			String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata(Integer.valueOf(messageId), json);
 			if (updatedJSON != null)
 			{
-				message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON);
-
-				mWebView.post(new Runnable()
+				message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON); // the new metadata to inflate in webview
+				if(notifyScreen!=null && Boolean.valueOf(notifyScreen))
 				{
-
-					@Override
-					public void run()
+					mWebView.post(new Runnable()
 					{
-						adapter.notifyDataSetChanged();
 
-					}
-				});
+						@Override
+						public void run()
+						{
+							Object obj = mWebView.getTag();
+							if (obj instanceof WebViewHolder)
+							{
+								Logger.i(tag, "updated metadata and calling notifydataset of " + adapter.getClass().getName() + " and thread= " + Thread.currentThread().getName());
+								WebViewHolder holder = (WebViewHolder) obj;
+								holder.id = -1; // will make sure new metadata is inflated in webview
+								adapter.notifyDataSetChanged();
+							}
+							else
+							{
+								Logger.e(tag, "Expected Tag of Webview was WebViewHolder and received " + obj.getClass().getCanonicalName());
+							}
+
+						}
+					});
+				}
 			}
 		}
 		catch (JSONException e)
@@ -304,4 +319,8 @@ public class PlatformJavaScriptBridge
 		}
 	};
 
+	public void updateConvMessage(ConvMessage message)
+	{
+		this.message = message;
+	}
 }
