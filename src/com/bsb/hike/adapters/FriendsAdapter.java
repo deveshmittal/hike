@@ -299,30 +299,17 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				for (ContactInfo info : allList)
 				{
 					String name = info.getName();
-					boolean endReached = false;
 					boolean found = false;
 					int startIndex = 0;
-					while(!endReached && name!=null)
+					name = name.toLowerCase();
+					if (name.startsWith(textToBeFiltered))
 					{
-						name = name.toLowerCase();
-						if(name.startsWith(textToBeFiltered))
-						{
-							found = true;
-							break;
-						}
-						else
-						{
-							String tokens[] = name.split(" ", 2);
-							if(tokens.length > 1)
-							{
-								startIndex += tokens[0].length() + 1;
-								name = tokens[1];
-							}
-							else
-							{
-								endReached = true;
-							}
-						}
+						found = true;
+					}
+					else if (name.contains(" " + textToBeFiltered))
+					{
+						found = true;
+						startIndex = name.indexOf(" " + textToBeFiltered) + 1;
 					}
 					if(found)
 					{
