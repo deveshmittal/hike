@@ -7436,14 +7436,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		int start = mConversationsView.getFirstVisiblePosition();
 		int last = mConversationsView.getLastVisiblePosition();
-		for(int i=start, j=last; i<=j; i++)
+		for (int i = start, j = last; i <= j; i++)
 		{
-			ConvMessage convMessage= (ConvMessage)mConversationsView.getItemAtPosition(i);
-			if(convMessage.isFileTransferMessage()){
-				View view = mConversationsView.getChildAt(i-start);
-				// this method call will take care of thumbnail loading when lv stops flinging.
-				mAdapter.getView(i, view, mConversationsView);
-				break;
+			Object object = mConversationsView.getItemAtPosition(i);
+			if (object instanceof ConvMessage)
+			{
+				ConvMessage convMessage = (ConvMessage) object;
+				if (convMessage.isFileTransferMessage())
+				{
+					View view = mConversationsView.getChildAt(i - start);
+					// this method call will take care of thumbnail loading when lv stops flinging.
+					mAdapter.getView(i, view, mConversationsView);
+					break;
+				}
 			}
 		}
 	}
