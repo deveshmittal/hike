@@ -5,7 +5,7 @@
     android:animateLayoutChanges="true"
     android:background="@color/transparent" >
 
-    <WebView
+    <com.bsb.hike.platform.CustomWebView
         android:id="@+id/webcontent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
