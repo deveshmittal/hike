@@ -27,6 +27,10 @@ public class HttpManager
 
 	static HttpManager getInstance()
 	{
+		if (_instance == null)
+		{
+			throw new IllegalStateException("Http Manager not initialized");
+		}
 		return _instance;
 	}
 
