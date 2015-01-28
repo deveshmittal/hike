@@ -508,7 +508,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (requestCode)
 		{
 		case AttachmentPicker.CAMERA:
-			CaptureImageParser.parseCameraResult(activity, resultCode, data, this);
+			CaptureImageParser.parseCameraResult(activity.getApplicationContext(), resultCode, data, this);
 			break;
 		case AttachmentPicker.AUDIO:
 		case AttachmentPicker.VIDEO:

@@ -1,16 +1,15 @@
 package com.bsb.hike.media;
 
 import java.io.File;
-import java.net.URI;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.Utils;
 
 public class CaptureImageParser
 {
@@ -34,7 +33,7 @@ public class CaptureImageParser
 	 * @param listener
 	 *            - listener to which give callback
 	 */
-	public static void parseCameraResult(Activity context, int resultCode, Intent data, CaptureImageListener listener)
+	public static void parseCameraResult(Context context, int resultCode, Intent data, CaptureImageListener listener)
 	{
 		Logger.d(TAG, "onactivity result");
 
