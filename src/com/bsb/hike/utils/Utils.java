@@ -3218,23 +3218,9 @@ public class Utils
 		return !convMessage.isSent() && convMessage.getState() == State.RECEIVED_UNREAD && convMessage.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE;
 	}
 
-	public static Intent createIntentForConversation(Context context, Conversation conversation)
-	{
-		Intent intent = new Intent(context, ChatThreadActivity.class);
-		if (conversation.getContactName() != null)
-		{
-			intent.putExtra(HikeConstants.Extras.NAME, conversation.getContactName());
-		}
-		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
-		String whichChatThread = (conversation instanceof GroupConversation) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD;
-		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, whichChatThread);
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		return intent;
-	}
-
 	public static void createShortcut(Activity activity, Conversation conv)
 	{
-		Intent shortcutIntent = Utils.createIntentForConversation(activity, conv);
+		Intent shortcutIntent = IntentFactory.createChatThreadIntentFromConversation(activity, conv);
 		Intent intent = new Intent();
 		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
 		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());

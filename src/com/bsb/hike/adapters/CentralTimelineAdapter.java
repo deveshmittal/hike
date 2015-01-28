@@ -645,9 +645,9 @@ public class CentralTimelineAdapter extends BaseAdapter
 				return;
 			}
 
-			Intent intent = IntentFactory.createIntentFromContactInfo(new ContactInfo(null, statusMessage.getMsisdn(), statusMessage.getNotNullName(), statusMessage.getMsisdn()), true);
+			Intent intent = IntentFactory.createChatThreadIntentFromContactInfo(context, new ContactInfo(null, statusMessage.getMsisdn(), statusMessage.getNotNullName(), statusMessage.getMsisdn()), true);
+			//Add anything else to the intent
 			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
-			intent.setClass(context, ChatThreadActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			context.startActivity(intent);
 			context.finish();

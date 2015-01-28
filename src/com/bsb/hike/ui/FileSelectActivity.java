@@ -48,6 +48,7 @@ import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.models.FileListItem;
@@ -714,11 +715,9 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 				@Override
 				public void run()
 				{
-					Intent intent = new Intent(FileSelectActivity.this, ChatThreadActivity.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
-					intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
-					intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, Utils.isGroupConversation(msisdn) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD);
+					Intent intent = IntentFactory.createChatThreadIntentFromMsisdn(FileSelectActivity.this, msisdn , false);
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(intent);
 
 					if (progressDialog != null)

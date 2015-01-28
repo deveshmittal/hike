@@ -158,9 +158,9 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 				return;
 			}
 		}
-		Intent intent = IntentFactory.createIntentFromContactInfo(new ContactInfo(null, statusMessage.getMsisdn(), statusMessage.getNotNullName(), statusMessage.getMsisdn()), true);
+		Intent intent = IntentFactory.createChatThreadIntentFromContactInfo(getActivity(), new ContactInfo(null, statusMessage.getMsisdn(), statusMessage.getNotNullName(), statusMessage.getMsisdn()), true);
+		//Add anything else which is needed to your intent
 		intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
-		intent.setClass(getActivity(), ChatThreadActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 		getActivity().finish();

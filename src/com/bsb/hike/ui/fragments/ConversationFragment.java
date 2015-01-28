@@ -69,6 +69,7 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
@@ -376,7 +377,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return;
 		}
 
-		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), conv);
+		Intent intent = IntentFactory.createChatThreadIntentFromConversation(getSherlockActivity(), conv);
 		startActivity(intent);
 
 		SharedPreferences prefs = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);

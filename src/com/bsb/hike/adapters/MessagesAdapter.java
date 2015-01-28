@@ -104,6 +104,7 @@ import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
@@ -2655,13 +2656,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 					else if ((context.getString(R.string.send_message)).equals(option))
 					{
-						Intent intent = new Intent();
-						// If the contact info was made using a group conversation, then the
-						// Group ID is in the contact ID
-						intent.putExtra(HikeConstants.Extras.MSISDN, message.getGroupParticipantMsisdn());
-						intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
-						intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, HikeConstants.Extras.GROUP_CHAT_THREAD);
-						intent.setClass(context, ChatThreadActivity.class);
+						Intent intent = IntentFactory.createChatThreadIntentFromMsisdn(context, message.getGroupParticipantMsisdn(), true);
 						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						context.startActivity(intent);
 					}

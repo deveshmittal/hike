@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,7 +19,10 @@ import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.CreditsActivity;
@@ -323,23 +327,39 @@ public class IntentFactory
 	}
 	
 	
-	public static Intent createIntentFromMsisdn(String msisdnOrGroupId, boolean openKeyBoard)
+	public static Intent createChatThreadIntentFromMsisdn(Context context, String msisdnOrGroupId, boolean openKeyBoard)
 	{
 		Intent intent = new Intent();
 
+		intent.setClass(context, ChatThreadActivity.class);
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdnOrGroupId);
 		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, Utils.isGroupConversation(msisdnOrGroupId) ? HikeConstants.Extras.GROUP_CHAT_THREAD
 				: HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD);
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
+		
 		return intent;
 	}
 
-	public static Intent createIntentFromContactInfo(ContactInfo contactInfo, boolean openKeyBoard)
+	public static Intent createChatThreadIntentFromContactInfo(Context context, ContactInfo contactInfo, boolean openKeyBoard)
 	{
 		// If the contact info was made using a group conversation, then the
 		// Group ID is in the contact ID
 		boolean isGroupConv = Utils.isGroupConversation(contactInfo.getMsisdn());
-		return createIntentFromMsisdn(isGroupConv ? contactInfo.getId() : contactInfo.getMsisdn(), openKeyBoard);
+		return createChatThreadIntentFromMsisdn(context, isGroupConv ? contactInfo.getId() : contactInfo.getMsisdn(), openKeyBoard);
 	}
-
+	
+	public static Intent createChatThreadIntentFromConversation(Context context, Conversation conversation)
+	{
+		Intent intent = new Intent(context, ChatThreadActivity.class);
+		if (conversation.getContactName() != null)
+		{
+			intent.putExtra(HikeConstants.Extras.NAME, conversation.getContactName());
+		}
+		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
+		String whichChatThread = (conversation instanceof GroupConversation) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD;
+		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, whichChatThread);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		return intent;
+	}
+	
 }

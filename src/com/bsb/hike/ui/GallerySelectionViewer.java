@@ -44,6 +44,7 @@ import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Utils;
 
 public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnScrollListener, OnPageChangeListener, HikePubSub.Listener
@@ -548,12 +549,8 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 					if (!isFromChatThread)
 					{
 						String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
-						String whichChatThread = Utils.isGroupConversation(msisdn) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD;
-
-						Intent intent = new Intent(GallerySelectionViewer.this, ChatThreadActivity.class);
+						Intent intent = IntentFactory.createChatThreadIntentFromMsisdn(GallerySelectionViewer.this, msisdn, false);
 						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-						intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
-						intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, whichChatThread);
 						startActivity(intent);
 					}
 					

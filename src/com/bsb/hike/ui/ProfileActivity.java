@@ -1975,8 +1975,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private void openChatThread(ContactInfo contactInfo)
 	{
-		Intent intent = IntentFactory.createIntentFromContactInfo(contactInfo, true);
-		intent.setClass(this, ChatThreadActivity.class);
+		Intent intent = IntentFactory.createChatThreadIntentFromContactInfo(this, contactInfo, true);
+		//Add anything else which is need to the intent
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		if (getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false))
 		{
@@ -1988,10 +1988,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	public void onProfileSmallLeftBtnClick(View v)
 	{
 		Utils.logEvent(ProfileActivity.this, HikeConstants.LogEvent.ADD_PARTICIPANT);
-
-		Intent intent = new Intent(ProfileActivity.this, ChatThreadActivity.class);
-		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, HikeConstants.Extras.GROUP_CHAT_THREAD);
-		intent.putExtra(HikeConstants.Extras.MSISDN, mLocalMSISDN);
+		Intent intent = IntentFactory.createChatThreadIntentFromMsisdn(ProfileActivity.this, mLocalMSISDN, false);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 
