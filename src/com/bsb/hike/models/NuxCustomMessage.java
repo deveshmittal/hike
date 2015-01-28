@@ -11,9 +11,9 @@ package com.bsb.hike.models;
 
 public class NuxCustomMessage
 {
-	private String screenTitle;
+	private String customMessage;
 
-	private String hint;
+	private String indicatorText;
 
 	private String buttext;
 
@@ -22,8 +22,8 @@ public class NuxCustomMessage
 	public NuxCustomMessage(String screentitle, String smsmessage, String buttext, boolean togglecustommsg)
 	{
 		super();
-		this.screenTitle = screentitle;
-		this.hint = smsmessage;
+		this.customMessage = screentitle;
+		this.indicatorText = smsmessage;
 		this.buttext = buttext;
 		this.togglescreen = togglecustommsg;
 	}
@@ -31,17 +31,17 @@ public class NuxCustomMessage
 	/**
 	 * @return the screentitle
 	 */
-	public String getScreenTitle()
+	public String getCustomMessage()
 	{
-		return screenTitle;
+		return customMessage;
 	}
 
 	/**
 	 * @return the smsmessage
 	 */
-	public String getSmsMessage()
+	public String getIndicatorText()
 	{
-		return hint;
+		return indicatorText;
 	}
 
 	/**

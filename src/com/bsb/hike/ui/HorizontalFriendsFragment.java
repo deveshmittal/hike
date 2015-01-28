@@ -84,6 +84,7 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		//this only appears for custom message screen
 		if (!TextUtils.isEmpty(selectedFriendsString)) 
 		{
+			nxtBtn.setText(nm.getNuxCustomMessagePojo().getButText());
 			String[] arrmsisdn = selectedFriendsString.split(NUXConstants.STRING_SPLIT_SEPERATOR);
 			
 			contactsDisplayed.addAll(Arrays.asList(arrmsisdn));
@@ -92,6 +93,7 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 				addContactView(msisdn, viewStack.getChildCount());			
 			}
 		} else {
+			nxtBtn.setText(selectFriends.getButText());
 			for (int i = 0; i < maxShowListCount - preSelectedCount; i++) 
 				addEmptyView();
 			changeDisplayString(0);

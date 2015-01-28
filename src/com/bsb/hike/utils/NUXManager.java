@@ -646,11 +646,11 @@ public class NUXManager
 				}
 				if (!TextUtils.isEmpty(custommessage.toString()))
 				{
-					String screentitle = custommessage.optString(CM_DEF_MESSAGE, context.getString(R.string.custom_message_hint));
-					String hint = custommessage.optString(CM_HINT, context.getString(R.string.custom_message));
+					String customText = custommessage.optString(CM_DEF_MESSAGE, context.getString(R.string.custom_message));
+					String indicatorText = custommessage.optString(CM_HINT, context.getString(R.string.custom_message_hint));
 					String buttext = custommessage.optString(CM_BUTTON_TEXT, context.getString(R.string.custome_message_send_button));
 					boolean togglecustommsg = custommessage.optBoolean(CM_SCREEN_TOGGLE, false);
-					customMessage = new NuxCustomMessage(screentitle, hint, buttext, togglecustommsg);
+					customMessage = new NuxCustomMessage(customText, indicatorText, buttext, togglecustommsg);
 				}
 			}
 			catch (JSONException e)
