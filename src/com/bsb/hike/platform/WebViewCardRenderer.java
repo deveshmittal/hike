@@ -2,10 +2,8 @@ package com.bsb.hike.platform;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -24,7 +22,6 @@ import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -77,7 +74,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	{
 		long id = 0;
 
-		WebView myBrowser;
+		CustomWebView myBrowser;
 
 		PlatformJavaScriptBridge platformJavaScriptBridge;
 
@@ -115,8 +112,8 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	private WebViewHolder initializeHolder(WebViewHolder holder, View view, ConvMessage convMessage)
 	{
-		holder.myBrowser = (WebView) view.findViewById(R.id.webcontent);
 		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, adapter);
+		holder.myBrowser = (CustomWebView) view.findViewById(R.id.webcontent);
 		holder.selectedStateOverlay = view.findViewById(R.id.selected_state_overlay);
 		holder.loadingSpinner = view.findViewById(R.id.loading_data);
 		holder.cardFadeScreen = view.findViewById(R.id.card_fade_screen);
@@ -235,8 +232,9 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 		final WebViewHolder viewHolder = (WebViewHolder) view.getTag();
 
-		final WebView web = viewHolder.myBrowser;
 
+		final CustomWebView web = viewHolder.myBrowser;
+		web.setTag(view);
 		if (viewHolder.id != getItemId(position))
 		{
 			showLoadingState(viewHolder);
@@ -280,7 +278,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	}
 
-	private void fillContent(WebView web, PlatformContentModel content, ConvMessage convMessage, WebViewHolder holder)
+	private void fillContent(CustomWebView web, PlatformContentModel content, ConvMessage convMessage,WebViewHolder holder)
 	{
 		holder.webViewClient.convMessage = convMessage;
 		holder.platformJavaScriptBridge.updateConvMessage(convMessage);

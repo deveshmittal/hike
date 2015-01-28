@@ -36,7 +36,7 @@
             android:layout_toRightOf="@id/avatar_container"
             layout="@layout/message_sender_details" />
 
-        <WebView
+        <com.bsb.hike.platform.CustomWebView
             android:id="@+id/webcontent"
             android:layout_width="271dp"
             android:layout_height="wrap_content"
