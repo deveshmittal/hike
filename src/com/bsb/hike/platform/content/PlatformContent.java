@@ -8,7 +8,7 @@ import java.io.File;
 public class PlatformContent
 {
 
-	private static byte isInitialized = 1;
+	private static byte isInitialized = 0;
 
 	private PlatformContent()
 	{
@@ -35,8 +35,15 @@ public class PlatformContent
 	{
 		if (isInitialized == 0)
 		{
-			PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
-					+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
+			if (PlatformContentUtils.hasStorage(true))
+			{
+				//Do nothing
+			}
+			else
+			{
+				PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
+						+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
+			}
 			isInitialized = 1;
 		}
 
