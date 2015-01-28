@@ -102,8 +102,6 @@ class PlatformContentLoader extends Handler
 	{
 		PlatformRequestManager.setWaitState(argContentRequest);
 		
-		argContentRequest.getListener().onFailure(ErrorCode.DOWNLOADING);
-		
 		// Check if this is already being downloaded
 		ArrayList<Integer> currentDownloadingTemplates = PlatformRequestManager.getCurrentDownloadingTemplates();
 
