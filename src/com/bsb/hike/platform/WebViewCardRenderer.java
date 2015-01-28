@@ -3,8 +3,12 @@ package com.bsb.hike.platform;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -15,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
+import android.view.animation.DecelerateInterpolator;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -85,7 +90,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		public View loadingFailed;
 
 		public CustomWebViewClient webViewClient;
-		
+
 		private void initializeHolderForForward(View view, boolean isReceived)
 		{
 			time = (TextView) view.findViewById(R.id.time);
@@ -115,8 +120,8 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		holder.selectedStateOverlay = view.findViewById(R.id.selected_state_overlay);
 		holder.loadingSpinner = view.findViewById(R.id.loading_data);
 		holder.cardFadeScreen = view.findViewById(R.id.card_fade_screen);
-		holder.webViewClient = new CustomWebViewClient(convMessage, holder);
 		holder.loadingFailed = view.findViewById(R.id.loading_failed);
+		holder.webViewClient = new CustomWebViewClient(convMessage, holder);
 		webViewStates(holder);
 
 		return holder;
@@ -212,12 +217,14 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			viewHolder.myBrowser.setTag(viewHolder);
 			Logger.d(tag, "inflated");
 			int height = convMessage.platformWebMessageMetadata.getCardHeight();
-			Logger.i(tag, "minimum height given in card is =" + height);
+			Logger.i("HeightAnim", "minimum height given in card is =" + height);
+
 			if (height != 0)
 			{
 				int minHeight = (int) (height * Utils.scaledDensityMultiplier);
 				LayoutParams lp = viewHolder.myBrowser.getLayoutParams();
 				lp.height = minHeight;
+				Logger.i("HeightAnim", position + "set height given in card is =" + minHeight);
 				viewHolder.myBrowser.setLayoutParams(lp);
 			}
 		}
@@ -232,12 +239,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 		if (viewHolder.id != getItemId(position))
 		{
-
-			viewHolder.loadingSpinner.setVisibility(View.VISIBLE);
-
-			viewHolder.cardFadeScreen.setVisibility(View.VISIBLE);
-
-			viewHolder.loadingFailed.setVisibility(View.GONE);
+			showLoadingState(viewHolder);
 
 			PlatformContent.getContent(convMessage.platformWebMessageMetadata.JSONtoString(), new PlatformContentListener<PlatformContentModel>()
 			{
@@ -245,39 +247,28 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				@Override
 				public void onFailure(ErrorCode reason)
 				{
-					uiHandler.post(new Runnable()
+					if (reason == ErrorCode.DOWNLOADING)
 					{
-
-						@Override
-						public void run()
-						{
-							viewHolder.cardFadeScreen.setVisibility(View.GONE);
-							viewHolder.loadingSpinner.setVisibility(View.GONE);
-
-						}
-					});
-
-					uiHandler.postDelayed(new Runnable()
+						// Do nothing
+						return;
+					}
+					else
 					{
-						@Override
-						public void run()
-						{
-							viewHolder.loadingFailed.setVisibility(View.VISIBLE);
-						}
-					}, 300);
+						showConnErrState(viewHolder);
+					}
 				}
 
 				public void onComplete(PlatformContentModel content)
 				{
 					viewHolder.id = getItemId(position);
-					fillContent(web, content, convMessage,viewHolder);
+					fillContent(web, content, convMessage, viewHolder);
 				}
 			});
 		}
 		else
 		{
 			Logger.i(tag, "either tag is not null ");
-			int mId = (int)convMessage.getMsgID();
+			int mId = (int) convMessage.getMsgID();
 			if (cardAlarms.containsKey(mId))
 			{
 				viewHolder.myBrowser.loadUrl("javascript:alarmPlayed(" + "'" + cardAlarms.get(mId) + "')");
@@ -289,7 +280,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	}
 
-	private void fillContent(WebView web, PlatformContentModel content, ConvMessage convMessage,WebViewHolder holder)
+	private void fillContent(WebView web, PlatformContentModel content, ConvMessage convMessage, WebViewHolder holder)
 	{
 		holder.webViewClient.convMessage = convMessage;
 		holder.platformJavaScriptBridge.updateConvMessage(convMessage);
@@ -300,8 +291,10 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	{
 
 		ConvMessage convMessage;
+
 		WebViewHolder holder;
-		public CustomWebViewClient(ConvMessage convMessage,WebViewHolder holder)
+
+		public CustomWebViewClient(ConvMessage convMessage, WebViewHolder holder)
 		{
 			this.convMessage = convMessage;
 			this.holder = holder;
@@ -311,12 +304,22 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		public void onPageStarted(WebView view, String url, Bitmap favicon)
 		{
 			super.onPageStarted(view, url, favicon);
+			try
+			{
+				final ViewGroup viewGroup = (ViewGroup) view.getParent();
+				WebViewHolder holder = (WebViewHolder) viewGroup.getTag();
+				showLoadingState(holder);
+			}
+			catch (NullPointerException npe)
+			{
+				npe.printStackTrace();
+			}
 		}
 
 		@Override
 		public void onPageFinished(WebView view, String url)
 		{
-			Log.d(tag, "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
+			Log.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
 			view.loadUrl("javascript:setData(" + "'" + convMessage.getMsgID() + "','" + convMessage.getMsisdn() + "','"
 					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "')");
 			String alarmData = convMessage.platformWebMessageMetadata.getAlarmData();
@@ -329,18 +332,8 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			super.onPageFinished(view, url);
 			try
 			{
-				final ViewGroup viewGroup = (ViewGroup) view.getParent();
-
-				viewGroup.findViewById(R.id.loading_data).setVisibility(View.GONE);
-
-				uiHandler.postDelayed(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						viewGroup.findViewById(R.id.card_fade_screen).setVisibility(View.GONE);
-					}
-				}, 300);
+				WebViewHolder holder = (WebViewHolder) view.getTag();
+				showCard(holder);
 			}
 			catch (NullPointerException npe)
 			{
@@ -365,7 +358,6 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				cardAlarms.put(m.arg1, (String) m.obj);
 				uiHandler.post(new Runnable()
 				{
-					
 					@Override
 					public void run()
 					{
@@ -382,4 +374,138 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	// TODO Replace with HikeUiHandler utility
 	static Handler uiHandler = new Handler(Looper.getMainLooper());
+
+	private void showLoadingState(final WebViewHolder argViewHolder)
+	{
+		if (argViewHolder == null)
+		{
+			return;
+		}
+
+		Logger.d("CardState", "Loading");
+		uiHandler.post(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+				{
+					// TODO Add animations here if required
+					argViewHolder.cardFadeScreen.setVisibility(View.VISIBLE);
+					argViewHolder.loadingFailed.setVisibility(View.GONE);
+					argViewHolder.loadingSpinner.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					argViewHolder.cardFadeScreen.setVisibility(View.VISIBLE);
+					argViewHolder.loadingFailed.setVisibility(View.GONE);
+					argViewHolder.loadingSpinner.setVisibility(View.VISIBLE);
+				}
+			}
+		});
+
+	}
+
+	private void showConnErrState(final WebViewHolder argViewHolder)
+	{
+		if (argViewHolder == null)
+		{
+			return;
+		}
+
+		Logger.d("CardState", "Error");
+		uiHandler.post(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+				{
+					// TODO Add animations here if required
+					argViewHolder.cardFadeScreen.setVisibility(View.VISIBLE);
+					argViewHolder.loadingSpinner.setVisibility(View.GONE);
+					argViewHolder.loadingFailed.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					argViewHolder.cardFadeScreen.setVisibility(View.VISIBLE);
+					argViewHolder.loadingSpinner.setVisibility(View.GONE);
+					argViewHolder.loadingFailed.setVisibility(View.VISIBLE);
+				}
+			}
+		});
+
+	}
+
+	private void showCard(final WebViewHolder argViewHolder)
+	{
+
+		if (argViewHolder == null)
+		{
+			return;
+		}
+
+		Logger.d("CardState", "Card");
+		uiHandler.postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+				{
+					// Values are based on self observation
+					argViewHolder.loadingSpinner.animate().alpha(0.0f).setDuration(500).setListener(new WebViewAnimationListener(argViewHolder.loadingSpinner, true)).start();
+					argViewHolder.loadingFailed.animate().alpha(0.0f).setDuration(500).setListener(new WebViewAnimationListener(argViewHolder.loadingSpinner, true)).start();
+					argViewHolder.cardFadeScreen.animate().setStartDelay(300).setInterpolator(decInterpolator).alpha(0.0f).setDuration(1000)
+							.setListener(new WebViewAnimationListener(argViewHolder.loadingSpinner, true)).start();
+				}
+				else
+				{
+					argViewHolder.loadingSpinner.setVisibility(View.GONE);
+					argViewHolder.loadingFailed.setVisibility(View.GONE);
+					argViewHolder.cardFadeScreen.setVisibility(View.GONE);
+				}
+			}
+		}, 500);
+	}
+
+	private static DecelerateInterpolator decInterpolator = new DecelerateInterpolator();
+
+	private class WebViewAnimationListener implements AnimatorListener
+	{
+		private View mTargetView;
+
+		private boolean mShouldRemove;
+
+		public WebViewAnimationListener(View targetView, boolean shouldRemove)
+		{
+			mTargetView = targetView;
+			mShouldRemove = shouldRemove;
+		}
+
+		@Override
+		public void onAnimationStart(Animator animation)
+		{
+		}
+
+		@Override
+		public void onAnimationEnd(Animator animation)
+		{
+			if (mTargetView != null)
+			{
+				mTargetView.setVisibility(mShouldRemove ? View.GONE : View.VISIBLE);
+				mTargetView = null;
+			}
+		}
+
+		@Override
+		public void onAnimationCancel(Animator animation)
+		{
+		}
+
+		@Override
+		public void onAnimationRepeat(Animator animation)
+		{
+		}
+	}
 }

@@ -3,11 +3,15 @@ package com.bsb.hike.platform;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.text.TextUtils;
+import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
@@ -64,6 +68,7 @@ public class PlatformJavaScriptBridge
 	{
 		mWebView.post(new Runnable()
 		{
+			@SuppressLint("JavascriptInterface")
 			@Override
 			public void run()
 			{
@@ -174,7 +179,7 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void updateMetadata(String messageId, String json,String notifyScreen)
+	public void updateMetadata(String messageId, String json, String notifyScreen)
 	{
 
 		try
@@ -184,7 +189,7 @@ public class PlatformJavaScriptBridge
 			if (updatedJSON != null)
 			{
 				message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON); // the new metadata to inflate in webview
-				if(notifyScreen!=null && Boolean.valueOf(notifyScreen))
+				if (notifyScreen != null && Boolean.valueOf(notifyScreen))
 				{
 					mWebView.post(new Runnable()
 					{
@@ -232,7 +237,8 @@ public class PlatformJavaScriptBridge
 				}
 			}
 
-			final Intent intent = IntentManager.getForwardIntentForConvMessage(mContext, message, PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
+			final Intent intent = IntentManager.getForwardIntentForConvMessage(mContext, message,
+					PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
 			mWebView.post(new Runnable()
 			{
 				@Override
@@ -240,7 +246,7 @@ public class PlatformJavaScriptBridge
 				{
 					mContext.startActivity(intent);
 				}
-			}) ;
+			});
 
 		}
 		catch (JSONException e)
@@ -268,14 +274,14 @@ public class PlatformJavaScriptBridge
 	@JavascriptInterface
 	public void onLoadFinished(String height)
 	{
-		Logger.i(tag, "onloadfinished called with height=" +( Integer.parseInt(height)*Utils.densityMultiplier ) +" current height is "+mWebView.getHeight());
+		Logger.i(tag, "onloadfinished called with height=" + (Integer.parseInt(height) * Utils.densityMultiplier) + " current height is " + mWebView.getHeight());
 		resizeWebview(height);
 	}
 
 	@JavascriptInterface
 	public void onResize(String height)
 	{
-		Logger.i(tag, "onresize called with height=" +(Integer.parseInt(height)*Utils.densityMultiplier));
+		Logger.i(tag, "onresize called with height=" + (Integer.parseInt(height) * Utils.densityMultiplier));
 		resizeWebview(height);
 	}
 
@@ -291,33 +297,97 @@ public class PlatformJavaScriptBridge
 	@JavascriptInterface
 	public void printHeight(String height)
 	{
-		Logger.i(tag, "my webview height is px= " + mWebView.getHeight() + " and content height " + mWebView.getContentHeight()*Utils.densityMultiplier + " , height what javascript thinks is " + height);
+		Logger.i(tag, "my webview height is px= " + mWebView.getHeight() + " and content height " + mWebView.getContentHeight() * Utils.densityMultiplier
+				+ " , height what javascript thinks is " + height);
 	}
 
-	HeoghtRunnable heightRunnable = new HeoghtRunnable();
+	HeightRunnable heightRunnable = new HeightRunnable();
 
-	class HeoghtRunnable implements Runnable
+	class HeightRunnable implements Runnable
 	{
 		int height;
 
 		@Override
 		public void run()
 		{
-			
 			if (height != 0)
 			{
-				height  =(int) (Utils.densityMultiplier*height);  // javascript returns us in dp
-				Logger.i(tag, "HeightRunnable called with height=" + height+" and current height is "+mWebView.getHeight());
-				LayoutParams lp = mWebView.getLayoutParams();
-				if (lp.height != height)
+				height = (int) (Utils.densityMultiplier * height); // javascript returns us in dp
+
+				Logger.i(tag, "HeightRunnable called with height=" + height + " and current height is " + mWebView.getHeight());
+
+				int initHeight = mWebView.getMeasuredHeight();
+
+				Logger.i("HeightAnim", "InitHeight = " + initHeight + " TargetHeight = " + height);
+
+				if (initHeight == height)
 				{
-					lp.height = height;
-					mWebView.setLayoutParams(lp);
-					Logger.i(tag, "Set heigh of webview suceessfully");
+					return;
 				}
+				else if (initHeight > height)
+				{
+					collapse(mWebView, height);
+				}
+				else if (initHeight < height)
+				{
+					expand(mWebView, height);
+				}
+
 			}
 		}
 	};
+
+	public static void expand(final View v, final int targetHeight)
+	{
+		final int initHeight = v.getMeasuredHeight();
+
+		final int animationHeight = targetHeight - initHeight;
+
+		Animation a = new Animation()
+		{
+			@Override
+			protected void applyTransformation(float interpolatedTime, Transformation t)
+			{
+				v.getLayoutParams().height = initHeight + (int) (animationHeight * interpolatedTime);
+				v.requestLayout();
+			}
+
+			@Override
+			public boolean willChangeBounds()
+			{
+				return true;
+			}
+		};
+
+		a.setDuration(300);
+		v.startAnimation(a);
+	}
+
+	public static void collapse(final View v, final int targetHeight)
+	{
+		final int initialHeight = v.getMeasuredHeight();
+
+		final int animationHeight = initialHeight - targetHeight;
+
+		Animation a = new Animation()
+		{
+			@Override
+			protected void applyTransformation(float interpolatedTime, Transformation t)
+			{
+				v.getLayoutParams().height = initialHeight - (int) (animationHeight * interpolatedTime);
+				v.requestLayout();
+			}
+
+			@Override
+			public boolean willChangeBounds()
+			{
+				return true;
+			}
+		};
+
+		a.setDuration(300);
+		v.startAnimation(a);
+	}
 
 	public void updateConvMessage(ConvMessage message)
 	{
