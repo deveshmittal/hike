@@ -184,7 +184,7 @@ public class PlatformJavaScriptBridge
 
 		try
 		{
-			Logger.i(tag, "update metadata called " + json + " , message id=" + messageId);
+			Logger.i(tag, "update metadata called " + json + " , message id=" + messageId +" notifyScren is "+notifyScreen);
 			String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata(Integer.valueOf(messageId), json);
 			if (updatedJSON != null)
 			{
