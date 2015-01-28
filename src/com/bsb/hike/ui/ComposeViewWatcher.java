@@ -117,7 +117,7 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements Runnable,
 			mTextLastChanged = lastChanged;
 
 			// fire an event
-			HikeMqttManagerNew.getInstance().sendMessage(mConversation.serialize(HikeConstants.MqttMessageTypes.START_TYPING), HikeMqttManagerNew.MQTT_PUBLISH_LOW);
+			HikeMqttManagerNew.getInstance().sendMessage(mConversation.serialize(HikeConstants.MqttMessageTypes.START_TYPING), HikeMqttManagerNew.MQTT_PUBLISH_QOS_ZERO);
 
 			// create a timer to clear the event
 			mUIThreadHandler.removeCallbacks(this);

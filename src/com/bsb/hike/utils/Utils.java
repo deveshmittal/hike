@@ -1143,7 +1143,7 @@ public class Utils
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			requestAccountInfo.put(HikeConstants.DATA, data);
-			HikeMqttManagerNew.getInstance().sendMessage(requestAccountInfo, HikeMqttManagerNew.MQTT_PUBLISH);
+			HikeMqttManagerNew.getInstance().sendMessage(requestAccountInfo, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
@@ -1740,7 +1740,7 @@ public class Utils
 		ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(msisdn, context);
 		if (!sentMqttPacket)
 		{
-			HikeMqttManagerNew.getInstance().sendMessage(convMessage.serialize(sendNativeInvite), HikeMqttManagerNew.MQTT_PUBLISH);
+			HikeMqttManagerNew.getInstance().sendMessage(convMessage.serialize(sendNativeInvite), HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
 		}
 
 		if (sendNativeInvite)
@@ -2483,7 +2483,7 @@ public class Utils
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
 			object.put(HikeConstants.DATA, data);
 
-			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
@@ -2740,7 +2740,7 @@ public class Utils
 			{
 				return;
 			}
-			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH_LOW);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ZERO);
 		}
 		catch (JSONException e)
 		{
@@ -3016,7 +3016,7 @@ public class Utils
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
 
-			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
@@ -4935,7 +4935,7 @@ public class Utils
 		JSONObject obj = getDeviceDetails(context);
 		if (obj != null)
 		{
-			HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_PUBLISH);
+			HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
 		}
 		requestAccountInfo(upgrade, sendBot);
 		sendLocaleToServer(context);

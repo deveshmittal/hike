@@ -592,7 +592,7 @@ public class HikeService extends Service
 			JSONObject obj = Utils.getDeviceDetails(context);
 			if (obj != null)
 			{
-				HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_PUBLISH);
+				HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
 			}
 
 			Utils.requestAccountInfo(true, false);
@@ -690,7 +690,7 @@ public class HikeService extends Service
 			JSONObject obj = Utils.getDeviceStats(getApplicationContext());
 			if (obj != null)
 			{
-				HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_PUBLISH);
+				HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
 			}
 			scheduleNextUserStatsSending();
 		}

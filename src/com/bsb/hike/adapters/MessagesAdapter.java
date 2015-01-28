@@ -3742,7 +3742,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				for (ConvMessage convMessage : unsentMessages)
 				{
-					HikeMqttManagerNew.getInstance().sendMessage(convMessage.serialize(), HikeMqttManagerNew.MQTT_PUBLISH);
+					HikeMqttManagerNew.getInstance().sendMessage(convMessage.serialize(), HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
 					convMessage.setTimestamp(System.currentTimeMillis() / 1000);
 				}
 				notifyDataSetChanged();
