@@ -103,6 +103,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private volatile AtomicBoolean haveUnsentMessages = new AtomicBoolean(false);
 
+	private volatile AtomicBoolean initialised = new AtomicBoolean(false);
+	
 	private int reconnectTime = 0;
 
 	private Looper mMqttHandlerLooper;
@@ -366,6 +368,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	 */
 	public void init()
 	{
+		if(initialised.getAndSet(true))
+		{
+			Logger.d(TAG, "Already initialised , return now..");
+			return;
+		}
+		
 		context = HikeMessengerApp.getInstance();
 		cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -1592,8 +1600,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		Bundle bundle = new Bundle();
 		bundle.putParcelable(HikeConstants.MESSAGE, packet);
 
-		if (mMessenger == null)
+		if (!initialised.get())
 		{
+			Logger.d(TAG, "Not initialised, initializing...");
 			init();
 		}
 
