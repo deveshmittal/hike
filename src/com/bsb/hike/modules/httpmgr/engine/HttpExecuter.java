@@ -33,7 +33,7 @@ public class HttpExecuter extends ScheduledThreadPoolExecutor
 	@Override
 	protected void beforeExecute(Thread t, Runnable r)
 	{
-		engine.addRunningTask(r, executerType); // removes this request from running task queue
+		engine.incrementRunningTasksSize(executerType); // removes this request from running task queue
 		super.beforeExecute(t, r);
 	}
 
@@ -56,7 +56,7 @@ public class HttpExecuter extends ScheduledThreadPoolExecutor
 	protected void afterExecute(Runnable r, Throwable t)
 	{
 		super.afterExecute(r, t);
-		engine.removeRunningTask(r, executerType); // removes this request from running task queue
+		engine.decrementRunningTasksSize(executerType); // removes this request from running task queue
 		engine.fetchNextTask(executerType); // fetch the next task to execute
 	}
 

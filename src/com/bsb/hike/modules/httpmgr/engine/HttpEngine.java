@@ -132,23 +132,23 @@ public class HttpEngine
 	}
 
 	/**
-	 * adds new task to long or short running queue Called from beforeExecute in executer
+	 * increments short or long running tasks size Called from beforeExecute in executer
 	 * 
-	 * @param call
+	 * @param executer
 	 */
-	synchronized void addRunningTask(Runnable call, short executer)
+	synchronized void incrementRunningTasksSize(short executer)
 	{
-		queue.addToRunningQueue(call, executer);
+		queue.incrementRunningTasksSize(executer);
 	}
 
 	/**
-	 * removes task from long or short running queue Called from beforeExecute in executer
+	 * decrements short or long running tasks size Called from afterExecute in executer
 	 * 
-	 * @param call
+	 * @param executer
 	 */
-	synchronized void removeRunningTask(Runnable call, short executer)
+	synchronized void decrementRunningTasksSize(short executer)
 	{
-		queue.removeFromRunningQueue(call, executer);
+		queue.decrementRunningTasksSize(executer);
 	}
 
 	/**

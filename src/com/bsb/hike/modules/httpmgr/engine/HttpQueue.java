@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import android.util.Pair;
 
@@ -27,9 +28,9 @@ public class HttpQueue
 
 	private PriorityQueue<RequestCall> longQueue;
 
-	private Deque<Runnable> longRunningQueue;
-
-	private Deque<Runnable> shortRunningQueue;
+	private volatile AtomicInteger numShortRunningCalls = new AtomicInteger(0);
+	
+	private volatile AtomicInteger numLongRunningCalls = new AtomicInteger(0);
 
 	private short MAX_QUEUE_SIZE = CORE_POOL_SIZE;
 
@@ -40,12 +41,6 @@ public class HttpQueue
 
 		// Priority Queue used for storing long requests submitted to engine
 		longQueue = new PriorityQueue<RequestCall>();
-
-		// queue that contains short running requests
-		longRunningQueue = new ArrayDeque<Runnable>(MAX_QUEUE_SIZE);
-
-		// queue that contains long running requests
-		shortRunningQueue = new ArrayDeque<Runnable>();
 	}
 
 	/**
@@ -66,42 +61,38 @@ public class HttpQueue
 	}
 
 	/**
-	 * add the call to long or short running queues
+	 * increments the number of running calls
 	 * 
-	 * @param call
-	 *            request call to add
 	 * @param executer
 	 *            executerType
 	 */
-	void addToRunningQueue(Runnable call, short executer)
+	void incrementRunningTasksSize(short executer)
 	{
 		if (executer == HttpEngine.LONG_EXECUTER)
 		{
-			longRunningQueue.add(call);
+			numLongRunningCalls.incrementAndGet();
 		}
 		else
 		{
-			shortRunningQueue.add(call);
+			numShortRunningCalls.incrementAndGet();
 		}
 	}
 
 	/**
-	 * removes call from long or short running queues
+	 * decrements the number of running calls
 	 * 
-	 * @param call
-	 *            request call to add
 	 * @param executer
 	 *            executerType
 	 */
-	void removeFromRunningQueue(Runnable call, short executer)
+	void decrementRunningTasksSize(short executer)
 	{
 		if (executer == HttpEngine.LONG_EXECUTER)
 		{
-			longRunningQueue.remove(call);
+			numLongRunningCalls.decrementAndGet();
 		}
 		else
 		{
-			shortRunningQueue.remove(call);
+			numShortRunningCalls.decrementAndGet();
 		}
 	}
 
@@ -192,19 +183,19 @@ public class HttpQueue
 	 */
 	boolean spaceAvailable(int requestType)
 	{
-		int longSize = longRunningQueue.size();
-		int shortSize = shortRunningQueue.size();
+		int longSize = numLongRunningCalls.get();
+		int shortSize = numShortRunningCalls.get();
 		
 		if (requestType == Request.REQUEST_TYPE_LONG)
 		{
-			if (longRunningQueue.size() < MAX_QUEUE_SIZE)
+			if (numLongRunningCalls.get() < MAX_QUEUE_SIZE)
 			{
 				return true;
 			}
 		}
 		else
 		{
-			if (shortRunningQueue.size() < MAX_QUEUE_SIZE)
+			if (numShortRunningCalls.get() < MAX_QUEUE_SIZE)
 			{
 				return true;
 			}
@@ -219,13 +210,10 @@ public class HttpQueue
 	{
 		longQueue.clear();
 		shortQueue.clear();
-		longRunningQueue.clear();
-		shortRunningQueue.clear();
-
 		longQueue = null;
 		shortQueue = null;
-		longRunningQueue = null;
-		shortRunningQueue = null;
+		numLongRunningCalls = null;
+		numShortRunningCalls = null;
 	}
 
 	public void solveStarvation(RequestCall call)
