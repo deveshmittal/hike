@@ -113,9 +113,10 @@ public class AnalyticsSender
 	
 	/**
 	 * Used to retry upload of the file to the server
+	 * true if upload should be retried, false otherwise
 	 */
-	private void retryUpload()
-	{
+	private boolean retryUpload()
+	{	
 		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "RETRY NUMBER ::" + retryCount);
 
 		if(retryCount < MAX_RETRY_COUNT)
@@ -136,7 +137,10 @@ public class AnalyticsSender
 		if(retryCount >= MAX_RETRY_COUNT)
 		{
 			resetRetryParams();
+			
+			return false;
 		}
+		return true;
 	}
 	
 	/**
@@ -237,11 +241,13 @@ public class AnalyticsSender
 			}
 			catch(SocketTimeoutException e)
 			{			
-				retryUpload();
+				if(!retryUpload())
+					return;
 			}
 			catch(ConnectTimeoutException e)
 			{
-				retryUpload();
+				if(!retryUpload())
+					return;
 			}
 			catch (FileNotFoundException e) 
 			{
@@ -270,10 +276,10 @@ public class AnalyticsSender
 				return;
 	
 				case HttpResponseCode.GATEWAY_TIMEOUT:
-				case HttpResponseCode.SERVICE_UNAVAILABLE:
-				case HttpResponseCode.NOT_FOUND:
+				case HttpResponseCode.SERVICE_UNAVAILABLE:					
+				if(!retryUpload())
 				{
-					retryUpload();
+					return;
 				}
 				break;
 				
