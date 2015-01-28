@@ -31,6 +31,7 @@ public class OkClient implements IClient
 	 */
 	static OkHttpClient generateClient(ClientOptions clientOptions)
 	{
+		clientOptions = clientOptions != null ? clientOptions : getDefaultClientOptions();
 		OkHttpClient client = new OkHttpClient();
 		return setClientParameters(client, clientOptions);
 	}
@@ -140,10 +141,6 @@ public class OkClient implements IClient
 
 	public OkClient(ClientOptions clientOptions)
 	{
-		if (clientOptions == null)
-		{
-			clientOptions = getDefaultClientOptions();
-		}
 		client = generateClient(clientOptions);
 	}
 	
@@ -178,7 +175,7 @@ public class OkClient implements IClient
 			httpRequestBuilder.addHeader(header.getName(), header.getValue());
 		}
 		IRequestBody body = request.getBody();
-		httpRequestBuilder.method(request.getMethod(), body.getRequestBody());
+		httpRequestBuilder.method(request.getMethod(), null == body ? null : body.getRequestBody());
 		com.squareup.okhttp.Request httpRequest = httpRequestBuilder.build();
 		return httpRequest;
 	}
