@@ -421,9 +421,10 @@ public class UploadFileTask extends FileTransferBase
 				else if(hikeFileType == HikeFileType.VIDEO)
 				{
 					File compFile = null;
+					VideoEditedInfo info = null;
 					if(android.os.Build.VERSION.SDK_INT >= 18)
 					{
-						VideoEditedInfo info = VideoUtilities.processOpenVideo(mFile.getPath());
+						info = VideoUtilities.processOpenVideo(mFile.getPath());
 						if(info != null)
 						{
 							if(info.isCompRequired)
@@ -434,8 +435,15 @@ public class UploadFileTask extends FileTransferBase
 						}
 					}
 					if(compFile != null && compFile.exists()){
+						FTAnalyticEvents.sendVideoCompressionEvent(info.originalWidth + "x" + info.originalHeight, info.resultWidth + "x" + info.resultHeight,
+								(int) mFile.length(), (int) compFile.length(), 1);
 						selectedFile = compFile;
 					}else{
+						if(info != null)
+						{
+							FTAnalyticEvents.sendVideoCompressionEvent(info.originalWidth + "x" + info.originalHeight, info.resultWidth + "x" + info.resultHeight,
+									(int) mFile.length(), 0, 0);
+						}
 						selectedFile = mFile;
 					}
 					hikeFile.setFile(selectedFile);
@@ -746,7 +754,12 @@ public class UploadFileTask extends FileTransferBase
 				Logger.d(getClass().getSimpleName(), "Verifying MD5");
 				JSONObject responseMd5 = verifyMD5(selectedFile);
 				if(responseMd5 != null)
+				{
+					FTAnalyticEvents.sendQuickUploadEvent(1);
 					return responseMd5;
+				}
+				else
+					FTAnalyticEvents.sendQuickUploadEvent(0);
 			}
 			catch (Exception e)
 			{
