@@ -18,6 +18,8 @@ public class RequestListenerNotifier
 {
 	private HttpEngine engine;
 
+	private MainThreadExecutor uiExecuter;
+
 	public RequestListenerNotifier(HttpEngine engine)
 	{
 		this.engine = engine;
@@ -31,12 +33,27 @@ public class RequestListenerNotifier
 	 */
 	public void notifyListenersOfRequestSuccess(final Request request, final Response response)
 	{
-		if (request.isResponseOnUIThread())
+		if (!request.isAsynchronous())
 		{
+			// send response on same thread
 			sendResponse(request, response);
+		}
+		else if (request.isResponseOnUIThread())
+		{
+			// send response on ui thread
+			ResponseCall call = new ResponseCall()
+			{
+				@Override
+				public void execute()
+				{
+					sendResponse(request, response);
+				}
+			};
+			uiExecuter.execute(call);
 		}
 		else
 		{
+			// send response on other thread
 			ResponseCall call = new ResponseCall()
 			{
 				@Override
