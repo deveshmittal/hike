@@ -14,7 +14,7 @@ import com.bsb.hike.modules.httpmgr.request.Request;
  */
 public class HttpManager
 {
-	private static HttpManager _instance;
+	private static volatile HttpManager _instance;
 
 	private RequestProcessor requestProcessor;
 
