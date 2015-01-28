@@ -220,7 +220,7 @@ public class HikeService extends Service
 		// reset status variable to initial state
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
 		mMqttManager = HikeMqttManagerNew.getInstance();
-		mMqttManager.init(getApplicationContext());
+		mMqttManager.init();
 
 		/*
 		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
