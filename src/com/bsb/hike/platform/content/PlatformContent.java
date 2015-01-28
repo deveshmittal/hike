@@ -8,7 +8,7 @@ import java.io.File;
 public class PlatformContent
 {
 
-	private static byte isInitialized = 1;
+	private static byte isInitialized = 0;
 
 	private PlatformContent()
 	{
