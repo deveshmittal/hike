@@ -12,6 +12,7 @@ import java.io.OutputStream;
 
 import android.content.res.AssetManager;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -32,7 +33,7 @@ public class PlatformContentUtils
 		File tempFile = null;
 		try
 		{
-			//Hack to increase size of file name. Min 3 is required.
+			// Hack to increase size of file name. Min 3 is required.
 			if (prefix.length() <= 2)
 			{
 				prefix = prefix.concat("00");
@@ -221,5 +222,44 @@ public class PlatformContentUtils
 			}
 		}
 		return (path.delete());
+	}
+
+	static public boolean hasStorage(boolean requireWriteAccess)
+	{
+		String state = Environment.getExternalStorageState();
+		if (Environment.MEDIA_MOUNTED.equals(state))
+		{
+			if (requireWriteAccess)
+			{
+				boolean writable = checkFsWritable();
+				return writable;
+			}
+			else
+			{
+				return true;
+			}
+		}
+		else if (!requireWriteAccess && Environment.MEDIA_MOUNTED_READ_ONLY.equals(state))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	private static boolean checkFsWritable()
+	{
+		// Create a temporary file to see whether a volume is really writeable.
+		// It's important not to put it in the root directory which may have a
+		// limit on the number of files.
+		String directoryName = Environment.getExternalStorageDirectory().toString() + "/DCIM";
+		File directory = new File(directoryName);
+		if (!directory.isDirectory())
+		{
+			if (!directory.mkdirs())
+			{
+				return false;
+			}
+		}
+		return directory.canWrite();
 	}
 }

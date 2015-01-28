@@ -18,7 +18,7 @@ public class PlatformWebClient extends WebViewClient
 	@Override
 	public WebResourceResponse shouldInterceptRequest(WebView view, String url)
 	{
-		Log.d("PlatformWebClient", "" + "URL: " + url);
+		Log.d("Call from webview", "" + url);
 		if (url.startsWith("http") || (!url.startsWith(PlatformContentConstants.CONTENT_FONTPATH_BASE)))
 		{
 			return super.shouldInterceptRequest(view, url);
@@ -30,10 +30,15 @@ public class PlatformWebClient extends WebViewClient
 		String[] name = fileNameRequested.split("\\.");
 		String prefix = name[0];
 		String suffix = name[1];
-
-		InputStream wrtInputStreamm = new FileInputStream(PlatformContentUtils.openFile(myuri, "").getFileDescriptor());
 		
+		if (prefix.contains("Roboto") || prefix.contains("roboto"))
+		{
+			return super.shouldInterceptRequest(view, url.replace(PlatformContentConstants.CONTENT_FONTPATH_BASE, "file:///android_asset/"));
+		}
+
+		InputStream wrtInputStreamm = null;
 		WebResourceResponse response = null;
+		wrtInputStreamm = new FileInputStream(PlatformContentUtils.openFile(myuri, "").getFileDescriptor());
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
 		{
