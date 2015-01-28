@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -214,7 +215,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 
 		if(nuxIncentiveMode){
-			Utils.blockOrientationChange(this);
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			getSupportActionBar().hide();
 		}
 		else{
@@ -369,13 +370,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 			setMode(FTUE_FWD);
 		}
-		else if (isForwardingMessage && !isSharingFile)
-		{
-			setMode(nuxIncentiveMode ? NUX_INCENTIVE_MODE : (nuxInviteMode ? NUX_INVITE_MODE : MULTIPLE_FWD));
-		}
 		else if(nuxIncentiveMode)
 		{
 			setMode(NUX_INCENTIVE_MODE);
+		}
+		else if (isForwardingMessage && !isSharingFile)
+		{
+			setMode(nuxInviteMode ? NUX_INVITE_MODE : MULTIPLE_FWD);
 		}
 		else
 		{
@@ -540,7 +541,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						tagEditText.toggleTag(name, contactInfo.getMsisdn(),contactInfo);
 					else {
 						//newFragment.toggleViews(contactInfo);
-						
+						adapter.removeFilter();
+						tagEditText.clear(false);
 						if (adapter.isContactAdded(contactInfo)) {
 							if(newFragment.removeView(contactInfo)) adapter.removeContact(contactInfo);;
 
@@ -672,7 +674,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.removeFilter();
 			adapter.clearAllSelection(true);
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
-			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint(R.string.nux_fwd_search_hint);
+			tagEditText.setHint(R.string.nux_fwd_search_hint);
 			break;
 		case NUX_INCENTIVE_MODE:
 			adapter.showCheckBoxAgainstItems(true);
@@ -682,9 +684,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.setNuxStateActive(true);
 			NUXManager nm  = NUXManager.getInstance();
 			adapter.preSelectContacts(nm.getLockedContacts(), nm.getUnlockedContacts());
-			System.out.print("INSIDE NUX");
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
-			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint(R.string.nux_fwd_search_hint);
+			tagEditText.setHint(R.string.search_hint);
 			break;
 		}
 		if(!nuxIncentiveMode) 

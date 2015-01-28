@@ -122,13 +122,13 @@ public class NUXConstants
 
 	public static final String SCREENS = "s";
 
-	public static final String KILLNUX = "kill";
+	public static final String KILLNUX = "nuxKill";
 
-	public static final String REFRESH = "refresh";
+	public static final String REFRESH = "nuxRfsh";
 
 	public static final String UNLOCK = "nuxUL";
 
-	public static final String REMINDER = "reminder";
+	public static final String REMINDER = "nuxRmndr";
 
 	public static final String CONTACTS_SECTION_TYPE_HIKE = "hike";
 
@@ -169,6 +169,8 @@ public class NUXConstants
 	public static final String PUSH_TEXT="pushTxt";
 	
 	public static final String PUSH_REWARD_CARD_TYPE="rwdCrdTyp";
+	
+	public static final String REMINDER_NORMAL = "rem_normal";
 	
 	public static enum PushTypeEnum
 	{
@@ -238,9 +240,5 @@ public class NUXConstants
             return unknown;
         }
     }
-
-	public static final int REWARD_TYPE_EXPANDED=0;
-	
-	public static final int REWARD_TYPE_COMPRESSED=1;
 
 }

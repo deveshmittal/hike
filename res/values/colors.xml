@@ -250,6 +250,7 @@
     <color name="orange_avatar">#ffaf5a</color>
     <color name="pink_avatar">#ff92a5</color>
     <color name="violet_avatar">#c1a0e1</color>
+    <color name="gray_avatar">#aa4b4e55</color>
     <color name="rec_progress">#ef554e</color>
     <color name="bubble_blue">#d4feff</color>
     <color name="bubble_celebration_space">#e4cdfe</color>
@@ -386,5 +387,7 @@
     <color name="nux_reward_subtext">#87888a</color>
     <color name="nux_invite_button">#0f8fe1</color>
     <color name="nux_chat_reward_status">#ffab0a</color>
+    <color name="nux_disabled_text">#aeafb0</color>
+    <color name="nuxunlocked">#6bbe00</color>
 </resources>
 	

@@ -30,9 +30,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/status_text"
-            android:textColor="@color/nux_chat_reward_status"
             android:textSize="12sp"
-            android:textStyle="italic" />
+            android:textStyle="bold" />
     </LinearLayout>
 
     <RelativeLayout
@@ -49,7 +48,7 @@
             android:layout_centerInParent="true"
             android:visibility="visible"
             app:marker_visible="false"
-            app:progress_background_color="#dddddd"
+            app:progress_background_color="#fce4e3"
             app:progress_color="@color/nux_chat_reward_status"
             app:stroke_width="2dp"
             app:thumb_visible="false" />

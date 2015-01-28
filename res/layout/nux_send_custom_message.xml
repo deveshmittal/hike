@@ -16,29 +16,32 @@
        android:layout_height="wrap_content"
        android:layout_width="match_parent">
   	</FrameLayout>
-    
-    
-    <com.bsb.hike.view.CustomFontEditText
+  	
+  	<com.bsb.hike.view.CustomFontEditText
         android:id="@+id/multiforward_text_message"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:hint="@string/custom_message"
-        android:textColorHint="@color/gray"
-        android:textSize="30sp"
-        android:gravity="center"
         android:layout_gravity="center"
-        android:textColor="@color/grey"
-        android:layout_margin="10dp"/>
+        android:layout_marginTop="25dp"
+        android:background="@drawable/bg_country_picker_selector"
+        android:gravity="center"
+        android:imeOptions="actionDone"
+        android:maxLength="140"
+        android:text="@string/custom_message"
+        android:textColor="@color/selected_country"
+        android:textSize="18sp"
+        android:visibility="visible" />
     
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/tap_to_write"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:padding="20dp"
         android:layout_gravity="center"
         android:gravity="center"
+        android:padding="25dp"
+        android:textColor="@color/nux_disabled_text"
         android:text="@string/custom_message_hint"
-        android:textSize="20sp"
-        android:textColor="@color/light_gray_hike"/>
+        android:textSize="13sp"
+        android:textStyle="italic" />
 
 </LinearLayout>

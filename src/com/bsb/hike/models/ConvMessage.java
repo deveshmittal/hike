@@ -2,6 +2,7 @@ package com.bsb.hike.models;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
