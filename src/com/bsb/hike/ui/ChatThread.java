@@ -18,6 +18,7 @@ import java.util.Set;
 import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.CardConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,6 +74,7 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -204,6 +206,7 @@ import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
@@ -212,9 +215,13 @@ import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
+import com.bsb.hike.voip.VoIPConstants;
+import com.bsb.hike.voip.VoIPUtils;
+import com.bsb.hike.voip.view.CallRatePopup;
+import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
-		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener
+		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener, IVoipCallListener
 {
 	private static final String HASH_PIN = "#pin";
 
@@ -595,6 +602,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		super.onDestroy();
 		possibleKeyboardHeight = 0;
 		unregisterReceivers();
+		VoIPUtils.removeCallListener();
 
 		if (prefs != null && !prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
 		{
@@ -604,7 +612,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		if (stickerAdapter != null)
-		{
+		{	
 			stickerAdapter.unregisterListeners();
 		}
 
@@ -785,6 +793,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		/* ensure that when we hit Alt+Enter, we insert a newline */
 		mComposeView.setOnKeyListener(this);
+
+		VoIPUtils.setCallListener(this);
 
 		mConversationDb = HikeConversationsDatabase.getInstance();
 
@@ -1271,7 +1281,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void onCreateThemeMenu(Menu menu)
 	{
-		menu.getItem(0).setVisible(true);
+		if(!Utils.isVoipActivated(this) || (mConversation!=null && !mConversation.isOnhike()) || HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
+		{
+			menu.getItem(0).setVisible(false);
+		}
 		menu.getItem(1).setVisible(false);
 		if(tipView!=null && tipView.getVisibility()== View.VISIBLE && tipView.getTag() instanceof TipType && (TipType)tipView.getTag()==TipType.PIN)
 		{
@@ -1350,8 +1363,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		
 		switch (item.getItemId())
 		{
-		case R.id.chat_bg:
-			setupThemePicker(null);
+		case R.id.voip_call:
+			Utils.onCallClicked(this, mContactNumber, VoIPUtils.CallSource.CHAT_THREAD);
 			break;
 		case R.id.attachment:
 			// hide pop up if any
@@ -1430,7 +1443,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (!(mConversation instanceof GroupConversation))
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.call), 1));
+			optionsList.add(new OverFlowMenuItem(getString(R.string.chat_theme), 1));
 			if(mUserIsBlocked)
 			{
 				optionsList.add(new OverFlowMenuItem(getString(R.string.unblock_title), 6));
@@ -1522,7 +1535,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					openProfileScreen();
 					break;
 				case 1:
-					Utils.onCallClicked(ChatThread.this, mContactNumber);
+					setupThemePicker(null);
 					break;
 				case 2:
 					GroupConversation groupConversation = (GroupConversation) mConversation;
@@ -2403,7 +2416,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mLabel = mConversation.getLabel();
 		if (!(mConversation instanceof GroupConversation))
 		{
-			mLabel = Utils.getFirstName(mLabel);
+			// To Show Full Name in Actionbar in One-to-One Conv
+			mLabel = Utils.getFirstNameAndSurname(mLabel);
 		}
 
 		if (showKeyboard && !wasOrientationChanged)
@@ -2457,6 +2471,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 								HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_JOIN_TIME_OBTAINED, new Pair<String, Long>(mContactNumber, hikeJoinTime));
 								ContactManager.getInstance().updateHikeStatus(ChatThread.this, mContactNumber, true);
 								mConversationDb.updateOnHikeStatus(mContactNumber, true);
+								showCallIcon();
 								HikeMessengerApp.getPubSub().publish(HikePubSub.USER_JOINED, mContactNumber);
 							}
 						}
@@ -2855,6 +2870,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					mAdapter.notifyDataSetChanged();
 				}
 			}
+		}
+	}
+
+	private void showCallIcon()
+	{
+		if(mMenu!=null && !HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber) && Utils.isVoipActivated(this))
+		{
+			mMenu.findItem(R.id.voip_call).setVisible(true);
 		}
 	}
 
@@ -3458,9 +3481,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
-				if (activityVisible && Utils.isPlayTickSound(getApplicationContext()))
+				if (activityVisible && SoundUtils.isTickSoundEnabled(getApplicationContext()))
 				{
-					Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
+					SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
 				}
 				runOnUiThread(new Runnable()
 				{
@@ -4190,9 +4213,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 
 					label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
-					if (activityVisible && Utils.isPlayTickSound(getApplicationContext()))
+					if (activityVisible && SoundUtils.isTickSoundEnabled(getApplicationContext()))
 					{
-						Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
+						SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
 					}
 				}
 				final String convLabel = label;
@@ -4352,8 +4375,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
                 if (msisdn.equals(mContactNumber)) {
 
-                    if (activityVisible && Utils.isPlayTickSound(getApplicationContext())) {
-                        Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
+                    if (activityVisible && SoundUtils.isTickSoundEnabled(getApplicationContext())) 
+                    {
+                    	SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
                     }
 
                     runOnUiThread(new Runnable() {
@@ -4392,9 +4416,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		
 		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 		{
-			if (activityVisible && (!msg.isTickSoundPlayed()) && Utils.isPlayTickSound(getApplicationContext()))
+			if (activityVisible && (!msg.isTickSoundPlayed()) && SoundUtils.isTickSoundEnabled(getApplicationContext()))
 			{
-				Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
+				SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
 			}
 			msg.setTickSoundPlayed(true);
 			msg.setState(ConvMessage.State.SENT_CONFIRMED);
@@ -6164,21 +6188,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					: requestCode == HikeConstants.VIDEO_TRANSFER_CODE ? HikeFileType.VIDEO : HikeFileType.AUDIO;
 
 			String filePath = null;
-			if (data == null || data.getData() == null)
+			if (selectedFile != null)
 			{
-				if (selectedFile != null)
-				{
-					filePath = selectedFile.getAbsolutePath();
-				}
-				else
-				{
-					/*
-					 * This else condition was added because of a bug in android 4.3 with recording videos. https://code.google.com/p/android/issues/detail?id=57996
-					 */
-					Toast.makeText(this, R.string.error_capture_video, Toast.LENGTH_SHORT).show();
-					clearTempData();
-					return;
-				}
+				filePath = selectedFile.getAbsolutePath();
+			}
+			else if (data == null || data.getData() == null)
+			{
+				/*
+				 * This else condition was added because of a bug in android 4.3 with recording videos. https://code.google.com/p/android/issues/detail?id=57996
+				 */
+				Toast.makeText(this, R.string.error_capture_video, Toast.LENGTH_SHORT).show();
+				clearTempData();
+				return;
 			}
 			else
 			{
@@ -8773,5 +8794,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			Utils.hideSoftKeyboard(ChatThread.this, mComposeView);
 		}
+	}
+
+	@Override
+	public void onVoipCallEnd(final Bundle bundle) 
+	{
+		runOnUiThread(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				if(!isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG))
+				{
+					CallRatePopup callRatePopup = new CallRatePopup();
+					callRatePopup.setArguments(bundle);
+
+					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+					fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
+					fragmentTransaction.commitAllowingStateLoss();
+				}
+			}
+		});
 	}
 }
