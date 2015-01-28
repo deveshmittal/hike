@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -11,7 +12,9 @@ import android.widget.TextView;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.models.NUXTaskDetails;
 import com.bsb.hike.models.NuxInviteFriends;
+import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -39,7 +42,7 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		{
 			return;
 		}
-
+		Logger.d("footer","onCreate");
 		getSupportActionBar().hide();
 
 		HikeMessengerApp app = (HikeMessengerApp) getApplication();
@@ -53,9 +56,18 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		bindListeners();
 
 		processViewElemets();
+		
+		Logger.d("footer","onCreateFinished");
 
 	}
 
+	@Override
+	protected void onNewIntent(Intent intent)
+	{
+	Logger.d("footer","onNewIntent");
+		super.onNewIntent(intent);
+	}
+	
 	private void bindViews()
 	{
 		butInviteFriends = (Button) findViewById(R.id.but_inviteFrnds);
@@ -81,6 +93,7 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 	{
 		NUXManager mmNuxManager = NUXManager.getInstance();
 		NuxInviteFriends mmInviteFriends = mmNuxManager.getNuxInviteFriendsPojo();
+	NUXTaskDetails mmTaskDetails=mmNuxManager.getNuxTaskDetailsPojo();
 		if (mmInviteFriends != null)
 		{
 			if (!TextUtils.isEmpty(mmInviteFriends.getButText()))
@@ -90,12 +103,15 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 
 			if (!TextUtils.isEmpty(mmInviteFriends.getRewardTitle()))
 			{
-				tvRewardMain.setText(mmInviteFriends.getRewardTitle());
+				String rewardTitle = String.format(mmInviteFriends.getRewardTitle(), mmTaskDetails.getMin(), mmTaskDetails.getIncentiveAmount());
+				tvRewardMain.setText(rewardTitle);
 			}
 
 			if (!TextUtils.isEmpty(mmInviteFriends.getRewardSubText()))
 			{
-				tvRewardSubText.setText(mmInviteFriends.getRewardSubText());
+				String rewardSubText = String.format(mmInviteFriends.getRewardSubText(), mmTaskDetails.getMin(), mmTaskDetails.getIncentiveAmount());
+				tvRewardSubText.setText(rewardSubText);
+
 			}
 			if (mmInviteFriends.getImageBitmap() != null)
 			{
@@ -129,12 +145,7 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 
 	}
 
-	@Override
-	protected void onStop()
-	{
-		super.onStop();
-		finish();
-	}
+	
 	
 	@Override
 	protected void onDestroy()

@@ -1257,12 +1257,12 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="send_sticker_joy">Wish your friends with this sticker</string>
     <string name="happy_new_year">Happy New Year</string>
     <string name="nux_invitefrnds_skip">SKIP</string>
-    <string name="nux_invitefrnds_reward">Earn a free talktime worth Rs 100!</string>
-    <string name="nux_invitefrnds_objective">Start a chat with your friends.Unlock your talktime reward when any 3 of them message you back</string>
+    <string name="nux_invitefrnds_reward">Get awesome stickers on hike!</string>
+    <string name="nux_invitefrnds_objective">Select %1$s of your best friends and start chatting. You\'ll love it.</string>
     <string name="nux_invitefrnds_buttext">SELECT FRIENDS TO CHAT</string>
     <string name="tap_to_claim">TAP TO CLAIM</string>
-    <string name="reward_card_success">Congrats! You\'ve unlocked %d free SMS!</string>
-    <string name="reward_card_objective">Chat with %1$d friends and get %2$d free SMS.</string>
+    <string name="reward_card_success">Congrats! You can now use our awesome stickers! Check out the Sticker Shop.</string>
+    <string name="reward_card_objective">Chat with %1$d friends and get all our awesome stickers!.</string>
     <string name="details_text">VIEW DETAILS</string>
     <string name="status_text">%1$d/%2$d</string>
     <string name="incentive_amount">50</string>

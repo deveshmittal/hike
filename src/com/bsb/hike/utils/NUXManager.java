@@ -109,8 +109,12 @@ public class NUXManager
 	{
 		if (getNuxSelectFriendsPojo().isModuleToggle())
 		{
-			activity.finish();
+
 			setCurrentState(NUX_IS_ACTIVE);
+
+			activity.startActivity(Utils.getHomeActivityIntent(activity));
+			activity.finish();
+
 		}
 		else
 		{
@@ -167,6 +171,7 @@ public class NUXManager
 		taskDetails = null;
 		inviteFriends = null;
 		customMessage = null;
+		chatReward=null;
 
 	}
 
@@ -1013,7 +1018,7 @@ public class NUXManager
 		{
 			return getNuxTaskDetailsPojo().getMin()+2;
 		}
-		return 3;
+		return 2;
 	}
 	
 	/**
