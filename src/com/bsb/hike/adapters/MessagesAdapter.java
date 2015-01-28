@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -69,6 +70,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -788,7 +790,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			setSenderDetails(convMessage, position, stickerHolder, true);
 			String categoryId = sticker.getCategoryId();
 			String stickerId = sticker.getStickerId();
-
 			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId) + HikeConstants.LARGE_STICKER_ROOT;
 			File stickerImage = null;
 			if (categoryDirPath != null)
@@ -832,7 +833,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					@Override
 					public void onSuccess(Object result)
 					{
-						// TODO Auto-generated method stub
+						// Here we update sticker category, if we received a different category in download response.
+						// This is being done to fix a legacy bug, where catId came as "unknown"
+						
+						String newCategoryId = (String) result;
+						String oldCategoryId = convMessage.getMetadata().getSticker().getStickerId();
+						if (!oldCategoryId.equals(newCategoryId))
+						{
+							try
+							{
+								MessageMetadata newMetadata = convMessage.getMetadata();
+								newMetadata.updateSticker(newCategoryId);
+								HikeConversationsDatabase.getInstance().updateMessageMetadata(convMessage.getMsgID(), newMetadata);
+							}
+							catch (JSONException e)
+							{
+								Logger.wtf("MessagesAdapter", "Got new categoryId as " + result.toString() + " But failed to update the metadata for : " + convMessage.getMsgID());
+							}
+
+						}
 						HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_DOWNLOADED, null);
 
 					}
