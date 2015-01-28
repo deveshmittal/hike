@@ -149,7 +149,7 @@ public class HikeDialogFactory
 			return showDeleteMessagesDialog(dialogId, context, listener, data);
 			
 		case GPS_DIALOG:
-			return showGPSDialog(dialogId, context, listener);
+			return showGPSDialog(dialogId, context, listener, data);
 		}
 		return null;
 	}
