@@ -1224,14 +1224,27 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	 */
 	private void onParticipantJoinedOrLeftGroup(Object object, boolean joined)
 	{
+		/**
+		 * Received message for current open chatThread
+		 */
+
 		if (groupConversation.getMsisdn().equals(((JSONObject) object).optString(HikeConstants.TO)))
 		{
-			JSONObject jObj = (JSONObject) object;
-			
-			JSONArray participants = jObj.optJSONArray(HikeConstants.DATA);
-			
-			int addPeopleCount = joined ? participants.length() : (-1 * participants.length());
-			
+			int addPeopleCount = 0;
+			if (joined)		// Participants added
+			{
+				JSONObject jObj = (JSONObject) object;
+
+				JSONArray participants = jObj.optJSONArray(HikeConstants.DATA);
+
+				addPeopleCount = participants.length();
+			}
+
+			else	//A participant has been kicked out
+			{
+				addPeopleCount = -1;
+			}
+
 			sendUIMessage(PARTICIPANT_JOINED_OR_LEFT_GROUP, addPeopleCount);
 		}
 	}
