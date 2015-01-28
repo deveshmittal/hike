@@ -1293,7 +1293,6 @@ public class HikeConstants
 
 		public static final String CURRENT_POSITION = "currentPosition";
 		
-		public static final String FROM_CHAT_THREAD = "fromCt";
 	}
 
 	public static final class LogEvent

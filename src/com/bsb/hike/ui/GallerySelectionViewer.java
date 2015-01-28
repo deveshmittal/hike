@@ -140,9 +140,9 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET));
 		intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
-		if(getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CHAT_THREAD, false))
+		if(getIntent().getBooleanExtra(GalleryActivity.START_FOR_RESULT, false))
 		{
-			intent.putExtra(HikeConstants.Extras.FROM_CHAT_THREAD, true);
+			intent.putExtra(GalleryActivity.START_FOR_RESULT, true);
 		}
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -544,9 +544,9 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 					/**
 					 * This flag indicates whether this was opened from chatThread or not
 					 */
-					boolean isFromChatThread = getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CHAT_THREAD, false);
+					boolean sendResult = getIntent().getBooleanExtra(GalleryActivity.START_FOR_RESULT, false);
 					
-					if (!isFromChatThread)
+					if (!sendResult)
 					{
 						String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
 						Intent intent = IntentFactory.createChatThreadIntentFromMsisdn(GallerySelectionViewer.this, msisdn, false);

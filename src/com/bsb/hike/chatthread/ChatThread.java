@@ -117,6 +117,7 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
+import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
@@ -819,13 +820,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private void startHikeGallery(boolean onHike)
 	{
 		Intent imageIntent = IntentFactory.getHikeGallaryShare(activity.getApplicationContext(), msisdn, onHike);
-		imageIntent.putExtra(HikeConstants.Extras.FROM_CHAT_THREAD, true);
+		imageIntent.putExtra(GalleryActivity.START_FOR_RESULT, true);
 		activity.startActivityForResult(imageIntent, AttachmentPicker.GALLERY);
 	}
 
 	protected void shareCapturedImage(int resultCode, Intent data)
 	{
-
+		
 	}
 
 	protected void uploadFile(Uri uri, HikeFileType fileType)

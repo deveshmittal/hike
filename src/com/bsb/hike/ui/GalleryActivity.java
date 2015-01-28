@@ -63,10 +63,12 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private int velocity;
 	
+	public static final String START_FOR_RESULT = "startForResult";
+	
 	/**
-	 * This flag indicates whether this was opened from chatThread or not
+	 * This flag indicates whether this was opened for result or not, i.e. was it startActivityForResult
 	 */
-	private boolean isFromChatThread;
+	private boolean sendResult;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -96,7 +98,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 		GalleryItem selectedBucket = data.getParcelable(HikeConstants.Extras.SELECTED_BUCKET);
 		msisdn = data.getString(HikeConstants.Extras.MSISDN);
-		isFromChatThread = data.getBoolean(HikeConstants.Extras.FROM_CHAT_THREAD);
+		sendResult = data.getBoolean(START_FOR_RESULT);
 		String sortBy;
 		if (selectedBucket != null)
 		{
@@ -319,13 +321,13 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
 		intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET));
 		
-		if (!isFromChatThread)
+		if (!sendResult)
 		{
 			startActivity(intent);
 		}
 		else
 		{
-			intent.putExtra(HikeConstants.Extras.FROM_CHAT_THREAD, isFromChatThread);
+			intent.putExtra(START_FOR_RESULT, sendResult);
 			startActivityForResult(intent, AttachmentPicker.GALLERY);
 		}
 	}
@@ -377,9 +379,9 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, galleryItem);
 			intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 			intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
-			if (isFromChatThread)
+			if (sendResult)
 			{
-				intent.putExtra(HikeConstants.Extras.FROM_CHAT_THREAD, isFromChatThread);
+				intent.putExtra(START_FOR_RESULT, sendResult);
 			}
 			startActivityForResult(intent, AttachmentPicker.GALLERY);
 		}
