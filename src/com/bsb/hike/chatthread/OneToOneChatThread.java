@@ -1152,7 +1152,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	}
 	
 	/**
-	 * Returns the label for the cuurent conversation
+	 * Returns the label for the current conversation
 	 * 
 	 * @return
 	 */

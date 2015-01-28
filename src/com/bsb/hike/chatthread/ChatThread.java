@@ -106,11 +106,13 @@ import com.bsb.hike.media.StickerPickerListener;
 import com.bsb.hike.media.ThemePicker;
 import com.bsb.hike.media.ThemePicker.ThemePickerListener;
 import com.bsb.hike.models.AccountData;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.PhonebookContact;
@@ -119,6 +121,7 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
+import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
@@ -2653,8 +2656,32 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, getMsisdnMainUser());
 		}
+		
+		else  // No SMS credits case
+		{
+			Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.INVITE_OVERLAY_BUTTON);
+			inviteUser();
+			hideOverlay();
+		}
 
-		// TODO : Add SMS credits 0 case
+	}
+	
+	/**
+	 * Invite user
+	 */
+	private void inviteUser()
+	{
+		if (!mConversation.isOnhike())
+		{
+			Utils.sendInviteUtil(new ContactInfo(msisdn, msisdn, mConversation.getContactName(), msisdn), activity.getApplicationContext(),
+					HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED, getString(R.string.native_header), getString(R.string.native_info));
+		}
+		// Will this case ever happen ?
+		else
+		{
+			Toast toast = Toast.makeText(activity, R.string.already_hike_user, Toast.LENGTH_LONG);
+			toast.show();
+		}
 	}
 
 	/**
