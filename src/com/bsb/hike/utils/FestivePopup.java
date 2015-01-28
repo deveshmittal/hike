@@ -30,11 +30,16 @@ public class FestivePopup
 
 	public static SnowFallView snowFallView; 
 	
-	public static final int REPUBLIC_DAY_POPUP = 0;
+	public static final int REPUBLIC_DAY_POPUP = 2;
 
 	public static SnowFallView startAndSetSnowFallView(final HomeActivity activity, final int popupType)
 	{
 		if (activity == null)
+		{
+			return null;
+		}
+
+		if(popupType !=  REPUBLIC_DAY_POPUP)
 		{
 			return null;
 		}
@@ -49,11 +54,7 @@ public class FestivePopup
 			activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
 			RelativeLayout layout = (RelativeLayout) activity.findViewById(R.id.parent_layout);
 			
-			if(popupType ==  REPUBLIC_DAY_POPUP)
-			{
-				snowFallView = new SnowFallView(activity, true);
-			}
-
+			snowFallView = new SnowFallView(activity, true);
 			snowFallView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			snowFallView.setVisibility(View.GONE);
 			layout.addView(snowFallView, 4);
