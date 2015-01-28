@@ -1,15 +1,14 @@
 package com.bsb.hike.platform.content;
 
-import java.io.File;
-
+import android.util.Log;
 import com.bsb.hike.HikeMessengerApp;
 
-import android.util.Log;
+import java.io.File;
 
 public class PlatformContent
 {
 
-	private static byte isInitialized = 0;
+	private static byte isInitialized = 1;
 
 	private PlatformContent()
 	{
