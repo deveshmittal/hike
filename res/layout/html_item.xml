@@ -24,6 +24,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/webcontent"
+        android:layout_alignLeft="@+id/webcontent"
+        android:layout_alignRight="@+id/webcontent"
         android:layout_alignTop="@+id/webcontent"
         android:background="@android:color/white"
         android:visibility="visible" />
@@ -40,9 +42,9 @@
     <include
         android:id="@+id/loading_failed"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_alignBottom="@+id/webcontent"
         android:layout_alignTop="@+id/webcontent"
-        android:layout_height="match_parent"
         layout="@layout/platform_card_loading_failed"
         android:visibility="gone" />
 

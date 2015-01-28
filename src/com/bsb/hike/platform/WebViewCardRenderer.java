@@ -112,8 +112,8 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	private WebViewHolder initializeHolder(WebViewHolder holder, View view, ConvMessage convMessage)
 	{
-		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, adapter);
 		holder.myBrowser = (CustomWebView) view.findViewById(R.id.webcontent);
+		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, adapter);
 		holder.selectedStateOverlay = view.findViewById(R.id.selected_state_overlay);
 		holder.loadingSpinner = view.findViewById(R.id.loading_data);
 		holder.cardFadeScreen = view.findViewById(R.id.card_fade_screen);
@@ -232,9 +232,10 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 		final WebViewHolder viewHolder = (WebViewHolder) view.getTag();
 
-
 		final CustomWebView web = viewHolder.myBrowser;
-		web.setTag(view);
+		
+		web.setTag(viewHolder);
+		
 		if (viewHolder.id != getItemId(position))
 		{
 			showLoadingState(viewHolder);
