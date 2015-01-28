@@ -3,7 +3,7 @@
     package="com.bsb.hike"
     android:installLocation="auto"
     android:versionCode="925"
-    android:versionName="3.7.1.nux.03" >
+    android:versionName="3.7.1.nux.04" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -305,8 +305,7 @@
         </activity> 
         <activity
             android:name="com.bsb.hike.ui.NuxSendCustomMessageActivity"
-              android:screenOrientation="portrait"
-            android:configChanges="orientation|keyboardHidden|screenSize">
+              android:screenOrientation="portrait">
         </activity>     
         <activity
     		android:name="com.haibison.android.lockpattern.LockPatternActivity"
