@@ -54,7 +54,6 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.Spinner;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -62,6 +61,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,7 +69,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.dialog.ContactDialog;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
@@ -86,11 +85,11 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
+import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
@@ -259,6 +258,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private Context context;
 
 	private ChatThread chatThread;
+	
+	private com.bsb.hike.chatthread.ChatThread mChatThread;
 
 	private TextView smsToggleSubtext;
 
@@ -316,7 +317,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	 */
 	private boolean isHikeOfflineTipShowing;
 
-	public MessagesAdapter(Context context, List<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
+	public MessagesAdapter(Context context, List<ConvMessage> objects, Conversation conversation, com.bsb.hike.chatthread.ChatThread chatThread)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		// this.largeStickerLoader = new StickerLoader(context);
@@ -325,7 +326,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;
-		this.chatThread = chatThread;
+		this.mChatThread = chatThread;
 		this.voiceMessagePlayer = new VoiceMessagePlayer();
 		this.preferences = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.isGroupChat = Utils.isGroupConversation(conversation.getMsisdn());
@@ -2629,9 +2630,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			final String[] options = new String[optionsList.size()];
 			optionsList.toArray(options);
 
-			AlertDialog.Builder builder = new AlertDialog.Builder(chatThread);
+			AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
-			ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(chatThread, R.layout.alert_item, R.id.item, options);
+			ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(context, R.layout.alert_item, R.id.item, options);
 
 			if (number != null)
 			{
@@ -3394,7 +3395,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void showSMSDialog(final boolean nativeOnly)
 	{
-		final Dialog dialog = new Dialog(chatThread, R.style.Theme_CustomDialog);
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.sms_undelivered_popup);
 		dialog.setCancelable(true);
 
@@ -3694,7 +3695,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		public void playMessage(HikeFile hikeFile)
 		{
-			Utils.blockOrientationChange(chatThread);
+			Utils.blockOrientationChange(mChatThread.getChatThreadActivity());
 
 			playerState = VoiceMessagePlayerState.PLAYING;
 			fileKey = hikeFile.getFileKey();
@@ -3734,7 +3735,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		public void pausePlayer()
 		{
-			Utils.unblockOrientationChange(chatThread);
+			Utils.unblockOrientationChange(mChatThread.getChatThreadActivity());
 			if (mediaPlayer == null)
 			{
 				return;
@@ -3751,7 +3752,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				return;
 			}
-			Utils.blockOrientationChange(chatThread);
+			Utils.blockOrientationChange(mChatThread.getChatThreadActivity());
 			playerState = VoiceMessagePlayerState.PLAYING;
 			mediaPlayer.start();
 			handler.post(updateTimer);
@@ -3760,7 +3761,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		public void resetPlayer()
 		{
-			Utils.unblockOrientationChange(chatThread);
+			Utils.unblockOrientationChange(mChatThread.getChatThreadActivity());
 			playerState = VoiceMessagePlayerState.STOPPED;
 
 			setTimer();

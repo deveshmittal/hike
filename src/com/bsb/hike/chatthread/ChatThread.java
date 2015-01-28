@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorDescription;
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentProviderOperation;
@@ -1103,7 +1104,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mMessageMap = new HashMap<Long, ConvMessage>();
 		addtoMessageMap(0, messages.size());
 
-		mAdapter = new MessagesAdapter(activity, messages, mConversation, null);
+		mAdapter = new MessagesAdapter(activity, messages, mConversation, this);
 
 		initListView(); // set adapter and add clicks etc
 		setupActionBar(); // Setup the action bar
@@ -3499,5 +3500,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			initiateFileTransferFromIntentData(fileType, filePath, fileKey, isRecording, recordingDuration);
 		}
+	}
+	
+	public Activity getChatThreadActivity()
+	{
+		return activity;
 	}
 }
