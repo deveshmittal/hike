@@ -279,6 +279,8 @@ public class HikeConstants
 
 	public static final String LAST_SEEN_SETTING = "lastseen";
 
+	public static final String UJ_NOTIF_SETTING = "ujn";
+
 	public static final String BULK_LAST_SEEN_KEY = "lastseens";
 
 	public static final String PROTIP_HEADER = "h";
@@ -396,6 +398,8 @@ public class HikeConstants
 	public static final String FREE_SMS_PREF = "freeSmsPref";
 
 	public static final String LED_PREF = "ledPref";
+	
+	public static final String COLOR_LED_PREF = "colorLedPref";
 
 	public static final String NATIVE_JINGLE_PREF = "jinglePref";
 
@@ -434,7 +438,7 @@ public class HikeConstants
 	public static final String MESSAGES = "msgs";
 	
 	public static final String FILE_IMAGE_QUALITY = "img_quality";
-
+	
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
 	public static final String AUTO_DOWNLOAD_MEDIA_PREF = "AutoDownloadMediaPref";
@@ -518,12 +522,6 @@ public class HikeConstants
 	public static final String OPERATOR_SMS_ALERT_CHECKED = "opSmsAlertChecked";
 
 	public static final String SINGLE_INVITE_SMS_ALERT_CHECKED = "singleSmsAlertChecked";
-	
-	public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
-	
-	public static final String SHOW_NUX_SCREEN = "show_nux_screen";
-		
-	public static final String NUX_STICKER_DETAILS = "nuxStickerDetails";
 	
 	public static final String FTUE_ADD_SMS_ALERT_CHECKED = "ftueSmsAlertChecked";
 
@@ -883,6 +881,8 @@ public class HikeConstants
 	public static final int XHDPI_ID = 1;
 
 	public static final int XXHDPI_ID = 0;
+	
+	public static final int XXXHDPI_ID = 12;
 
 	public static final int LDPI_CACHE = 15;
 
@@ -957,9 +957,7 @@ public class HikeConstants
 	
 	public static final String SHOW_FESTIVE_POPUP = "showFestivePopup";
 
-	public static final String XMAS_POPUP = "xmas";
-
-	public static final String NEW_YEAR_POPUP = "newyear";
+	public static final String REPUBLIC_DAY_POPUP = "indiarepublic";
 
 	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
 
@@ -980,15 +978,7 @@ public class HikeConstants
 	public static final String SUCCESSFUL_SELECTIONS = "s";
 	
 	public static final String DRAWABLE = "drawable";
-	
-	public static final String NUX_STICKERS = "stickers";
-	
-	public static final String SHOW_NUX_INVITE_MODE = "showNuxInviteMode";
-
-	public static final String NUX_HOME_INVITE_FOOTER = "nuxHomeInviteFooter";
-
-	public static final String NUX_INVITE_FORWARD = "nuxInviteForward";
-	
+		
 	public static final String SELF_HIKE_ID = "-1";
 
 	public static final class ResultCodes
@@ -1337,12 +1327,6 @@ public class HikeConstants
 
 		public static final String CURRENT_POSITION = "currentPosition";
 		
-		public static final String FTUE_FORWARD = "ftueForward";
-		
-		public static final String FTUE_STICKER_ID_LIST = "ftueStickerIdsList";
-		
-		public static final String FTUE_STICKER_CATEGORY_LIST = "ftueStickerCategoryList";
-		
 		public static final String SDK_THIRD_PARTY_PKG = "third_party_app_pkg";
 		
 		public static final String SDK_CONNECTION_TYPE = "connection_type";
@@ -1656,11 +1640,7 @@ public class HikeConstants
 		/*
 		 * Settings screen <screen> = settingsS <event> = notifNUJEnabled, notifH2OEnabled, notifNUJDisabled, notifH2ODisabled
 		 */
-		public static final String SETTINGS_NOTIFICATION_NUJ_ON = "settingsSNotifNUJEnabled";
-		
 		public static final String SETTINGS_NOTIFICATION_H2O_ON = "settingsSNotifH2OEnabled";
-		
-		public static final String SETTINGS_NOTIFICATION_NUJ_OFF = "settingsSNotifNUJDisabled";
 		
 		public static final String SETTINGS_NOTIFICATION_H2O_OFF = "settingsSNotifH2ODisabled";
 		
@@ -1711,19 +1691,6 @@ public class HikeConstants
 		public static final String ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED = "atomicAppHikeExtraClick";
 
 		public static final String ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED = "atomicAppHikeRewardsClick";
-
-		/*
-		 * NUX Events 
-		 */
-		public static final String NUX_STICKER_CLICKED = "nuxStckrClk";
-
-		public static final String NUX_STICKER_FORWARD = "nuxStckrFwd";
-
-		public static final String NUX_INVITE_BUTTON_CLICKED = "nuxInvteBtnClk";
-
-		public static final String NUX_INVITE_SENT = "nuxInvteSent";
-
-		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
 		
 		/*
 		 * Account Backup Events
@@ -2105,4 +2072,14 @@ public class HikeConstants
 	public static final String GCM_ID = "gcm_id";
 	
 	public static final String ADD_CATEGORY = "addCat";
+
+	public static final int LED_DEFAULT_WHITE_COLOR = 0xffffffff;
+	
+	public static final int LED_NONE_COLOR = -2; /**
+													Any Change In this Value Should be double checked 
+													as this may coincide with any other color value
+												   */
+
+	public static long STOP_NOTIF_SOUND_TIME = 3000; // In milliseconds
+
 }

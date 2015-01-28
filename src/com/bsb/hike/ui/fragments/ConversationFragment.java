@@ -89,6 +89,7 @@ import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.PairModified;
@@ -183,19 +184,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			if (mAdapter.getCount() == 0)
 			{
 				setEmptyState();
-				switchOffNuxMode();
 			}
 		}
 	}
 
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED,
 			HikePubSub.NEW_CONVERSATION, HikePubSub.MESSAGE_SENT, HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.CONTACT_ADDED,
-			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.GROUP_LEFT, HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED,
-			HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP,
-			HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV, HikePubSub.RESET_STEALTH_INITIATED,
-			HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP, HikePubSub.REMOVE_STEALTH_UNREAD_TIP,
-			HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END, HikePubSub.CONTACT_DELETED,
-			HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.SWITCH_OFF_NUX_MODE };
+			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.GROUP_LEFT,
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, 
+			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
+			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
+			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.MUTE_CONVERSATION_TOGGLED};
 
 	private ConversationsAdapter mAdapter;
 
@@ -627,6 +627,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			break;
 		case R.id.but_remind:
+			Intent in = IntentManager.openNuxCustomMessage(getActivity());
+			Set<String> contactsNux = NUXManager.getInstance().getUnlockedContacts();
+			in.putExtra(NUXConstants.SELECTED_FRIENDS, contactsNux.toString().replace("[", "").replace("]", ""));
+			getActivity().startActivity(in);
 			break;
 		case R.id.but_inviteMore:
 			NUXManager.getInstance().startNuxSelector(getActivity());
@@ -732,8 +736,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		mConversationsComparator = new Conversation.ConversationComparator();
 		fetchConversations();
 
-		showInviteFooterIfRequired();
-
 		for (TypingNotification typingNotification : HikeMessengerApp.getTypingNotificationSet().values())
 		{
 			toggleTypingNotification(true, typingNotification);
@@ -823,11 +825,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			Editor editor = prefs.edit();
 			editor.putInt(HikeConstants.HIKEBOT_CONV_STATE, hikeBotConvStat.VIEWED.ordinal());
 			editor.commit();
-		}
-
-		if(HikeConstants.NUX_BOT.equals(conv.getMsisdn()) && HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false) && (displayedConversations.size() == 1))
-		{
-			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeConstants.NUX_HOME_INVITE_FOOTER, true);
 		}
 	}
 
@@ -993,10 +990,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(getString(R.string.delete_chat));
 		}
-		if (conv instanceof GroupConversation)
-		{	
-			optionsList.add(getString(R.string.clear_whole_conversation));
-		}
+
+		//Showing "Clear Whole Conv" option in Both Group and One-to-One Chat
+		optionsList.add(getString(R.string.clear_whole_conversation));
+		
 		optionsList.add(getString(R.string.email_conversations));
 
 		final String[] options = new String[optionsList.size()];
@@ -1234,20 +1231,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		
 		mAdapter = new ConversationsAdapter(getActivity(), displayedConversations, getListView());
 
-		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false))
-		{
-			inviteFooter = LayoutInflater.from(getActivity()).inflate(R.layout.nux_invite_footer, null);
-			inviteFooter.findViewById(R.id.nux_invite_now).setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v)
-				{
-					inviteButtonClicked();
-				}
-			});
-			getListView().addFooterView(inviteFooter);
-		}
-
 		setListAdapter(mAdapter);
 
 		getListView().setOnItemLongClickListener(this);
@@ -1372,7 +1355,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			if (mAdapter.getCount() == 0)
 			{
 				setEmptyState();
-				switchOffNuxMode();
 			}
 		}
 		else
@@ -1648,11 +1630,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 					displayedConversations.add(conversation);
 					Collections.sort(displayedConversations, mConversationsComparator);
-					if(!conversation.getMsisdn().equals(HikeConstants.NUX_BOT))
-					{
-						switchOffNuxMode();
-					}
-
 					notifyDataSetChanged();
 				}
 			});
@@ -2392,14 +2369,43 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				};
 			});
 		}
-		else if(HikePubSub.SWITCH_OFF_NUX_MODE.equals(type))
+		else if (HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type))
 		{
+			if (!isAdded())
+			{
+				return;
+			}
+			
+			Pair<String, Boolean> groupMute = (Pair<String, Boolean>) object;
+			String groupId = groupMute.first;
+			final Boolean isMuted = groupMute.second;
+
+			final Conversation conversation = mConversationsByMSISDN.get(groupId);
+			
+			if (conversation == null)
+			{
+				return ;
+			}
 			getActivity().runOnUiThread(new Runnable()
 			{
+				@Override
 				public void run()
 				{
-					switchOffNuxMode();
-				};
+					View parentView = getParenViewForConversation(conversation);
+					if (parentView == null)
+					{
+						notifyDataSetChanged();
+						return;
+					}
+
+					// Updating data set for Conversation ListView
+					if (conversation instanceof GroupConversation)
+					{
+						((GroupConversation) conversation).setIsMuted(isMuted);
+					}
+
+					notifyDataSetChanged();
+				}
 			});
 		}
 	}
@@ -2928,7 +2934,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			ShowTipIfNeeded(displayedConversations.isEmpty());
 			notifyDataSetChanged();
 		}
-		showInviteFooterIfRequired();
 		final NUXManager nm=NUXManager.getInstance();
 
 		if (nm.getCurrentState() == NUXConstants.NUX_IS_ACTIVE
@@ -2987,60 +2992,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				llChatReward.setVisibility(View.GONE);
 			}
 		}
-		
-		
-		
 	}
 
-	private void showInviteFooterIfRequired()
-	{
-		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.NUX_HOME_INVITE_FOOTER, false))
-		{
-			if(displayedConversations.size()!=1)
-			{
-				/*
-				 * If app was in background, and conversations were created then we need to switch off nux mode.
-				 */
-				switchOffNuxMode();
-			}
-			else if(inviteFooter!=null)
-			{
-				inviteFooter.findViewById(R.id.nux_invite_parent).setVisibility(View.VISIBLE);
-			}
-		}
-	}
-
-	private void removeInviteFooterView()
-	{
-		if(inviteFooter!=null)
-		{
-			inviteFooter.findViewById(R.id.nux_invite_parent).setVisibility(View.GONE);
-			getListView().removeFooterView(inviteFooter);
-			/*
-			 * Need to set adapter again after removing footer view because getListView.getChildCount doesn't update. (Hack)
-			 */
-			setListAdapter(mAdapter);
-			Logger.d("nux", "Removed NUX invite footer");
-		}
-	}
-
-	private void inviteButtonClicked()
-	{
-		Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_INVITE_BUTTON_CLICKED);
-		Intent intent = new Intent(getActivity(), HikeListActivity.class);
-		intent.putExtra(HikeConstants.NUX_INVITE_FORWARD, true);
-		startActivity(intent);
-	}
-
-	private void switchOffNuxMode()
-	{
-		boolean isNuxModeOn = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false);
-		Logger.d(getClass().getSimpleName(), "Switching off nux mode = " + isNuxModeOn);
-		if(isNuxModeOn)
-		{
-			HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeConstants.NUX_HOME_INVITE_FOOTER);
-			HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeConstants.SHOW_NUX_INVITE_MODE);
-			removeInviteFooterView();
-		}
-	}
 }

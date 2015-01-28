@@ -167,6 +167,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 	private volatile int ipConnectCount = 0;
 
 	private boolean connectUsingIp = false;
+	
+	private boolean connectToFallbackPort = false;
 
 	private volatile short fastReconnect = 0;
 
@@ -792,6 +794,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 		{
 			return getIp() + ":" + (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : FALLBACK_BROKER_PORT_NUMBER);
 		}
+		
+		if (connectToFallbackPort)
+		{
+			return serverURIs.get(0) + ":" + (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : FALLBACK_BROKER_PORT_NUMBER);
+		}
 		else
 		{
 			return serverURIs.get(0) + ":" + brokerPortNumber;
@@ -846,6 +853,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 	{
 		forceDisconnect = false;
 		connectUsingIp = false;
+		connectToFallbackPort = false;
 		ipConnectCount = 0;
 		try
 		{
@@ -900,6 +908,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 						HikeMessengerApp.getPubSub().publish(HikePubSub.CONNECTED_TO_MQTT, null);
 						mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 						connectUsingIp = false;
+						connectToFallbackPort = false;
 						ipConnectCount = 0;
 						scheduleNextActivityCheck(); // after successfull connect, reschedule for next conn check
 					}
@@ -925,6 +934,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 				{
 					try
 					{
+						
+						connectToFallbackPort = !connectToFallbackPort;
 						MqttException exception = (MqttException) value;
 						handleMqttException(exception, true);
 					}
@@ -983,6 +994,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 				{
 					Logger.w(TAG, "Connection Lost : " + arg0.getMessage());
 					connectUsingIp = false;
+					connectToFallbackPort = false;
 					ipConnectCount = 0;
 					scheduleNetworkErrorTimer();
 					connectOnMqttThread();
@@ -1323,6 +1335,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 				{
 					ipConnectCount = 0;
 					connectUsingIp = false;
+					connectToFallbackPort = false;
 					connectOnMqttThread();
 				}
 			}

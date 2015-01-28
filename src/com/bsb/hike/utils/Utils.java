@@ -1,6 +1,7 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -181,7 +182,6 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.FtueActivity;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeDialog;
@@ -676,18 +676,6 @@ public class Utils
 		}
 		if (!currentAppVersion.equals("") && !currentAppVersion.equals(actualAppVersion))
 		{
-			return true;
-		}
-		return false;
-	}
-
-	public static boolean showNuxScreen(Activity activity)
-	{
-		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if (settings.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false))
-		{
-			activity.startActivity(new Intent(activity, FtueActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-			activity.finish();
 			return true;
 		}
 		return false;
@@ -2614,25 +2602,29 @@ public class Utils
 
 	public static int getResolutionId()
 	{
-		switch (densityDpi)
+		if(densityDpi > 480)
 		{
-		case 120:
-			return HikeConstants.LDPI_ID;
-		case 160:
-			return HikeConstants.MDPI_ID;
-		case 240:
-			return HikeConstants.HDPI_ID;
-		case 320:
+			return HikeConstants.XXXHDPI_ID;
+		}
+		else if(densityDpi > 320)
+		{
+			return HikeConstants.XXHDPI_ID;
+		}
+		else if(densityDpi > 240)
+		{
 			return HikeConstants.XHDPI_ID;
-		case 213:
+		}
+		else if(densityDpi > 160)
+		{
 			return HikeConstants.HDPI_ID;
-		case 480:
-			return HikeConstants.XXHDPI_ID;
-		case 640:
-		case 400:
-			return HikeConstants.XXHDPI_ID;
-		default:
-			return HikeConstants.HDPI_ID;
+		}
+		else if(densityDpi > 120)
+		{
+			return HikeConstants.MDPI_ID;
+		}
+		else
+		{
+			return HikeConstants.LDPI_ID;
 		}
 	}
 
@@ -2652,6 +2644,8 @@ public class Utils
 
 	public static void setupFormattedTime(TextView tv, long timeElapsed)
 	{
+		if(timeElapsed < 0)
+			return;
 		int totalSeconds = (int) (timeElapsed);
 		int minutesToShow = (int) (totalSeconds / 60);
 		int secondsToShow = totalSeconds % 60;
@@ -4005,122 +3999,7 @@ public class Utils
 		context.startActivity(i);
 	}
 
-	public static boolean isPlayTickSound(Context context)
-	{
-		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-		return tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !am.isMusicActive()
-				&& (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
-	}
-
-	/**
-	 * we are using stream_ring so that use can control volume from mobile and this stream is not in use when user is chatting and vice-versa
-	 * 
-	 * @param context
-	 * @param soundId
-	 */
-	public static void playSoundFromRaw(Context context, int soundId)
-	{
-
-		Logger.i("sound", "playing sound " + soundId);
-		MediaPlayer mp = new MediaPlayer();
-		mp.setAudioStreamType(AudioManager.STREAM_SYSTEM);
-		Resources res = context.getResources();
-		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
-
-		try
-		{
-			mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-			afd.close();
-
-			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-			{
-
-				@Override
-				public void onCompletion(MediaPlayer mp)
-				{
-					mp.release();
-
-				}
-			});
-			mp.prepare();
-			mp.start();
-
-		}
-		catch (IllegalArgumentException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-		catch (IllegalStateException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-	}
-
-	public static void playDefaultNotificationSound(Context context)
-	{
-		try
-		{
-			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-			Ringtone r = RingtoneManager.getRingtone(context, notification);
-			r.play();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
 	
-	/**
-	 * Plays non-ducking sound from given Uri. Plays on {@link android.Media.AudioManager#STREAM_SYSTEM AudioManager.STREAM_SYSTEM} to enable non-ducking playback.
-	 * 
-	 * @param context
-	 * @param soundUri
-	 */
-	public static void playSound(Context context, Uri soundUri)
-	{
-		MediaPlayer mp = new MediaPlayer();
-		mp.setAudioStreamType(AudioManager.STREAM_SYSTEM);
-		try
-		{
-			mp.setDataSource(context, soundUri);
-
-			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-			{
-
-				@Override
-				public void onCompletion(MediaPlayer mp)
-				{
-					mp.release();
-				}
-			});
-			mp.prepare();
-			mp.start();
-
-		}
-		catch (IllegalArgumentException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-		catch (IllegalStateException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-	}
 
 	public static final void cancelScheduledStealthReset(Context context)
 	{

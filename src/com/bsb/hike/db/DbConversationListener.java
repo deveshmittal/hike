@@ -400,11 +400,13 @@ public class DbConversationListener implements Listener
     }
 
     private void handleHikeSdkMessage(Object object){
-	//	if(object instanceof JSONObject){
+        /*
+        * Handles the message sent by SDK. Will have a string of comma-separated msisdn, which is sent as a multi convMessage.
+        */
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject((String) object);
-            JSONObject parseJSON = new JSONObject(jsonObject.optString("message"));
+            JSONObject parseJSON = new JSONObject(jsonObject.optString(HikePlatformConstants.MESSAGE));
             ArrayList<ConvMessage> listOfMessages= new ArrayList<ConvMessage>(1);
             ConvMessage convMessage= HikeSDKMessageFilter.filterMessage((JSONObject) parseJSON, context);
             listOfMessages.add(convMessage);
@@ -419,7 +421,8 @@ public class DbConversationListener implements Listener
             convMessage.platformMessageMetadata.thumbnailMap.clear();
             convMessage.platformMessageMetadata.addThumbnailsToMetadata();
             long timeStamp = System.currentTimeMillis()/1000;
-            MultipleConvMessage multipleConvMessage = new MultipleConvMessage(listOfMessages, listOfContacts, timeStamp, true, null);
+			String source = jsonObject.optString(HikePlatformConstants.SOURCE);
+            MultipleConvMessage multipleConvMessage = new MultipleConvMessage(listOfMessages, listOfContacts, timeStamp, true, source);
             sendMultiConvMessage(multipleConvMessage);
 
         } catch (JSONException e) {
