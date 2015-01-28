@@ -36,61 +36,72 @@
             android:layout_toRightOf="@id/avatar_container"
             layout="@layout/message_sender_details" />
 
-        <com.bsb.hike.platform.CustomWebView
-            android:id="@+id/webcontent"
-            android:layout_width="271dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/sender_details"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:layout_marginBottom="3dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="3dp"
-            android:layout_toRightOf="@id/avatar_container"
-            android:background="@color/transparent"
-            android:minHeight="90dp" />
+        <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/card_container"
+                android:layout_below="@id/sender_details"
+                android:layout_toRightOf="@id/avatar_container"
+                android:background="@drawable/card_container"
+                android:layout_marginBottom="3dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="3dp"
+                >
+
+            <com.bsb.hike.platform.CustomWebView
+                android:id="@+id/webcontent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@color/transparent"
+                android:minHeight="90dp" />
+
+
+            <View
+                android:id="@+id/card_fade_screen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/webcontent"
+                android:layout_alignLeft="@+id/webcontent"
+                android:layout_alignRight="@+id/webcontent"
+                android:layout_alignTop="@+id/webcontent"
+                android:background="@android:color/white"
+                android:visibility="visible" />
+
+            <include
+                android:id="@+id/loading_data"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignBottom="@+id/webcontent"
+                android:layout_alignLeft="@+id/webcontent"
+                android:layout_alignRight="@+id/webcontent"
+                android:layout_alignTop="@+id/webcontent"
+                layout="@layout/platform_card_loading"
+                android:visibility="visible" />
+
+            <include
+                android:id="@+id/loading_failed"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignBottom="@+id/webcontent"
+                android:layout_alignLeft="@+id/webcontent"
+                android:layout_alignRight="@+id/webcontent"
+                android:layout_alignTop="@+id/webcontent"
+                layout="@layout/platform_card_loading_failed"
+                android:visibility="gone" />
+
+        </RelativeLayout>
 
         <include
-            android:id="@+id/time_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/webcontent"
-            android:layout_marginLeft="@dimen/chat_bubble_time_edge_spacing"
-            android:layout_toRightOf="@id/avatar_container"
-            layout="@layout/message_time_status_ext" />
+                android:id="@+id/time_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/card_container"
+                android:layout_marginLeft="@dimen/chat_bubble_time_edge_spacing"
+                android:layout_toRightOf="@id/avatar_container"
+                layout="@layout/message_time_status_ext" />
 
-        <View
-            android:id="@+id/card_fade_screen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/webcontent"
-            android:layout_alignLeft="@+id/webcontent"
-            android:layout_alignRight="@+id/webcontent"
-            android:layout_alignTop="@+id/webcontent"
-            android:background="@android:color/white"
-            android:visibility="visible" />
-
-        <include
-            android:id="@+id/loading_data"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignBottom="@+id/webcontent"
-            android:layout_alignLeft="@+id/webcontent"
-            android:layout_alignRight="@+id/webcontent"
-            android:layout_alignTop="@+id/webcontent"
-            layout="@layout/platform_card_loading"
-            android:visibility="visible" />
-
-        <include
-            android:id="@+id/loading_failed"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignBottom="@+id/webcontent"
-            android:layout_alignLeft="@+id/webcontent"
-            android:layout_alignRight="@+id/webcontent"
-            android:layout_alignTop="@+id/webcontent"
-            layout="@layout/platform_card_loading_failed"
-            android:visibility="gone" />
     </RelativeLayout>
 
     <include

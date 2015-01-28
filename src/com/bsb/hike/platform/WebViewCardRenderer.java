@@ -113,13 +113,14 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	private WebViewHolder initializeHolder(WebViewHolder holder, View view, ConvMessage convMessage)
 	{
-		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, adapter);
 		holder.myBrowser = (CustomWebView) view.findViewById(R.id.webcontent);
 		holder.selectedStateOverlay = view.findViewById(R.id.selected_state_overlay);
 		holder.loadingSpinner = view.findViewById(R.id.loading_data);
 		holder.cardFadeScreen = view.findViewById(R.id.card_fade_screen);
 		holder.loadingFailed = view.findViewById(R.id.loading_failed);
 		holder.webViewClient = new CustomWebViewClient(convMessage, holder);
+
+		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, adapter);
 		webViewStates(holder);
 
 		return holder;
@@ -235,7 +236,6 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 
 		final CustomWebView web = viewHolder.myBrowser;
-		web.setTag(view);
 		if (viewHolder.id != getItemId(position))
 		{
 			showLoadingState(viewHolder);
@@ -305,8 +305,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			super.onPageStarted(view, url, favicon);
 			try
 			{
-				final ViewGroup viewGroup = (ViewGroup) view.getParent();
-				WebViewHolder holder = (WebViewHolder) viewGroup.getTag();
+				WebViewHolder holder = (WebViewHolder) view.getTag();
 				showLoadingState(holder);
 			}
 			catch (NullPointerException npe)
