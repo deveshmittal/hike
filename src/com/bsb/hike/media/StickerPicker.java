@@ -300,9 +300,6 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	{
 		if (stickerAdapter != null)
 		{
-			/**
-			 * Calling this on UI Thread. Still not 100% sure about this though.
-			 */
 			stickerAdapter.instantiateStickerList();
 			stickerAdapter.notifyDataSetChanged();
 		}
