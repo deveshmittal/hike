@@ -462,7 +462,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		Logger.d(TAG, "Broker port: " + brokerPortNumber);
 	}
 
-	public void finish()
+	private void finish()
 	{
 		context.unregisterReceiver(this);
 		this.mqttMessageManager.close();
@@ -758,7 +758,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
-	public void setServerUris()
+	private void setServerUris()
 	{
 
 		String ipString = settings.getString(HikeMessengerApp.MQTT_IPS, "");
@@ -835,7 +835,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	}
 
 	// This function should be called always from external classes inorder to run connect on MQTT thread
-	public void disconnectOnMqttThread(final boolean reconnect)
+	private void disconnectOnMqttThread(final boolean reconnect)
 	{
 		try
 		{
@@ -1041,7 +1041,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	}
 
 	// this should always run on MQTT Thread
-	public void send(HikePacket packet, int qos)
+	private void send(HikePacket packet, int qos)
 	{
 		// if force disconnect is in progress dont allow mqtt operations to take place
 		if (forceDisconnect)
@@ -1398,7 +1398,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		return false;
 	}
 
-	public void saveAndSet(String ipString)
+	private void saveAndSet(String ipString)
 	{
 		Editor editor = settings.edit();
 		editor.putString(HikeMessengerApp.MQTT_IPS, ipString);
@@ -1424,7 +1424,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	}
 
 	// This class is just for testing .....
-	public class TestOutmsgs implements Runnable
+	private class TestOutmsgs implements Runnable
 	{
 		@Override
 		public void run()
@@ -1594,7 +1594,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 		if (mMessenger == null)
 		{
-			Logger.d(TAG,"sendMessage returning, mMessenger not initialized");
 			init();
 		}
 
