@@ -7,9 +7,12 @@ public abstract class RequestCall implements Runnable, Comparable<RequestCall>
 
 	private Request request;
 
+	private long submissionTime;
+	
 	public RequestCall(Request request)
 	{
 		this.request = request;
+		this.submissionTime = System.currentTimeMillis();
 	}
 
 	@Override
@@ -20,7 +23,7 @@ public abstract class RequestCall implements Runnable, Comparable<RequestCall>
 
 	public abstract void execute();
 
-	private int getPriority()
+	public int getPriority()
 	{
 		return request.getPriority();
 	}
@@ -30,6 +33,11 @@ public abstract class RequestCall implements Runnable, Comparable<RequestCall>
 		return request.getRequestType();
 	}
 
+	public long getSubmissionTime()
+	{
+		return submissionTime;
+	}
+	
 	public boolean isCancelled()
 	{
 		return request.isCancelled();
@@ -39,7 +47,12 @@ public abstract class RequestCall implements Runnable, Comparable<RequestCall>
 	{
 		request.setFuture(future);
 	}
-
+	
+	public void setPriority(int priority)
+	{
+		request.setPriority(priority);
+	}
+	
 	@Override
 	public int hashCode()
 	{

@@ -14,7 +14,7 @@ import com.bsb.hike.modules.httpmgr.request.Request;
  */
 public class HttpManager
 {
-	private static HttpManager _instance;
+	private static volatile HttpManager _instance;
 
 	private RequestProcessor requestProcessor;
 
@@ -27,6 +27,10 @@ public class HttpManager
 
 	static HttpManager getInstance()
 	{
+		if (_instance == null)
+		{
+			throw new IllegalStateException("Http Manager not initialized");
+		}
 		return _instance;
 	}
 

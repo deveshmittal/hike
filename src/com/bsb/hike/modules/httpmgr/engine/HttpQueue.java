@@ -1,7 +1,11 @@
 package com.bsb.hike.modules.httpmgr.engine;
 
+import static com.bsb.hike.modules.httpmgr.engine.HttpEngineConstants.CORE_POOL_SIZE;
+
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.PriorityQueue;
 
 import android.util.Pair;
@@ -9,7 +13,6 @@ import android.util.Pair;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.RequestCall;
 import com.bsb.hike.utils.Logger;
-import static com.bsb.hike.modules.httpmgr.engine.HttpEngineConstants.CORE_POOL_SIZE;
 
 public class HttpQueue
 {
@@ -221,6 +224,40 @@ public class HttpQueue
 		shortQueue = null;
 		longRunningQueue = null;
 		shortRunningQueue = null;
+	}
+
+	public void solveStarvation(short executerType, RequestCall call)
+	{
+		if (executerType == HttpEngine.SHORT_EXECUTER)
+		{
+			changePriority(shortQueue, call);
+		}
+		else
+		{
+			changePriority(longQueue, call);
+		}
+	}
+
+	private void changePriority(PriorityQueue<RequestCall> queue, RequestCall call)
+	{
+		List<RequestCall> requestCallsList = new ArrayList<RequestCall>();
+		while (true)
+		{
+			RequestCall requestCall = queue.peek();
+			
+			if (requestCall == null)
+			{
+				break;
+			}
+			
+			if (requestCall.getSubmissionTime() < call.getSubmissionTime() && requestCall.getPriority() > call.getPriority())
+			{
+				queue.remove();
+				requestCall.setPriority(requestCall.getPriority() - 1);
+				requestCallsList.add(requestCall);
+			}
+		}
+		queue.addAll(requestCallsList);
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.bsb.hike.modules.httpmgr.engine;
 
+import static com.bsb.hike.modules.httpmgr.engine.HttpEngineConstants.CORE_POOL_SIZE;
+
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -13,7 +15,6 @@ import com.bsb.hike.modules.httpmgr.request.RequestCall;
 import com.bsb.hike.modules.httpmgr.response.ResponseCall;
 import com.bsb.hike.utils.Logger;
 import com.squareup.okhttp.internal.Util;
-import static com.bsb.hike.modules.httpmgr.engine.HttpEngineConstants.CORE_POOL_SIZE;
 
 /**
  * 
@@ -42,15 +43,13 @@ public class HttpEngine
 	public HttpEngine()
 	{
 		// executer used for serving short requests
-		shortRequestExecuter = new HttpExecuter(this, SHORT_EXECUTER, CORE_POOL_SIZE, Utils.threadFactory("short-thread", false),
-				Utils.rejectedExecutionHandler());
+		shortRequestExecuter = new HttpExecuter(this, SHORT_EXECUTER, CORE_POOL_SIZE, Utils.threadFactory("short-thread", false), Utils.rejectedExecutionHandler());
 
 		// executer used for serving long requests
 		longRequestExecuter = new HttpExecuter(this, LONG_EXECUTER, CORE_POOL_SIZE, Utils.threadFactory("long-thread", false), Utils.rejectedExecutionHandler());
 
 		// executer used for serving response
-		responseExecuter = new ThreadPoolExecutor(0, 2 * CORE_POOL_SIZE + 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), Util.threadFactory(
-				"http-response", false));
+		responseExecuter = new ThreadPoolExecutor(0, 2 * CORE_POOL_SIZE + 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), Util.threadFactory("http-response", false));
 
 		// underlying queue used for storing submitted and running request
 		queue = new HttpQueue();
@@ -129,9 +128,8 @@ public class HttpEngine
 	 */
 	synchronized void fetchNextTask(short executerType)
 	{
-
+		//solveStarvation(executerType, call);
 		submitNext(executerType);
-		solveStarvation(executerType);
 	}
 
 	/**
@@ -168,7 +166,6 @@ public class HttpEngine
 			Future<?> future;
 			RequestCall call = result.first;
 			short executer = result.second;
-
 			if (executer == LONG_EXECUTER)
 			{
 				future = longRequestExecuter.submit(call);
@@ -185,9 +182,9 @@ public class HttpEngine
 		}
 	}
 
-	private void solveStarvation(short executerType)
+	private void solveStarvation(short executerType, RequestCall call)
 	{
-		// TODO
+		queue.solveStarvation(executerType, call);
 	}
 
 	/**

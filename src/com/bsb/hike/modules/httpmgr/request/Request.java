@@ -1,6 +1,7 @@
 package com.bsb.hike.modules.httpmgr.request;
 
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
@@ -15,6 +16,8 @@ import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListene
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
+import static com.bsb.hike.modules.httpmgr.request.RequestConstants.*;
+import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.*;
 
 /**
  * Encapsulates all of the information necessary to make an HTTP request.
@@ -54,7 +57,7 @@ public class Request implements IRequestFacade
 	private boolean asynchronous;
 
 	private Future<?> future;
-	
+
 	private Request(Builder builder)
 	{
 		this.id = builder.id;
@@ -276,9 +279,9 @@ public class Request implements IRequestFacade
 	 */
 	public void setPriority(int priority)
 	{
-		if (priority > PriorityConstants.PRIORITY_LOW || priority < PriorityConstants.PRIORITY_HIGH)
+		if (priority > PRIORITY_LOW || priority < PRIORITY_HIGH)
 		{
-			throw new IllegalArgumentException("Priority can be between " + PriorityConstants.PRIORITY_LOW + " to " + PriorityConstants.PRIORITY_HIGH);
+			throw new IllegalArgumentException("Priority can be between " + PRIORITY_LOW + " to " + PRIORITY_HIGH);
 		}
 		this.priority = priority;
 	}
@@ -334,7 +337,7 @@ public class Request implements IRequestFacade
 	{
 		this.future = future;
 	}
-	
+
 	/**
 	 * Sets isCancelled field to true and cancels the future of this request that has been submitted to the executor
 	 */
@@ -547,14 +550,14 @@ public class Request implements IRequestFacade
 				throw new IllegalStateException("Url must not be null and its length must be greater than 0");
 			}
 
-			if (priority > PriorityConstants.PRIORITY_LOW || priority < PriorityConstants.PRIORITY_HIGH)
+			if (priority > PRIORITY_LOW || priority < PRIORITY_HIGH)
 			{
-				throw new IllegalArgumentException("Priority can be between " + PriorityConstants.PRIORITY_LOW + " to " + PriorityConstants.PRIORITY_HIGH);
+				throw new IllegalArgumentException("Priority can be between " + PRIORITY_LOW + " to " + PRIORITY_HIGH);
 			}
 
 			if (TextUtils.isEmpty(method))
 			{
-				method = RequestConstants.GET;
+				method = GET;
 			}
 
 			if (null == headers)
