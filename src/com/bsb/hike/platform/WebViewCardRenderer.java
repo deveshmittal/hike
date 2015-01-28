@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -218,7 +219,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 			if (height != 0)
 			{
-				int minHeight = (int) (height * Utils.scaledDensityMultiplier);
+				int minHeight = (int) (height * Utils.densityMultiplier);
 				LayoutParams lp = viewHolder.myBrowser.getLayoutParams();
 				lp.height = minHeight;
 				Logger.i("HeightAnim", position + "set height given in card is =" + minHeight);
@@ -319,15 +320,14 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			Log.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
 			view.loadUrl("javascript:setData(" + "'" + convMessage.getMsgID() + "','" + convMessage.getMsisdn() + "','"
-					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "')");
+					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "','" + convMessage.isSent() +  "')");
 			String alarmData = convMessage.platformWebMessageMetadata.getAlarmData();
 			Logger.d(tag, "alarm data to html is " + alarmData);
 			if (!TextUtils.isEmpty(alarmData))
 			{
 				view.loadUrl("javascript:alarmPlayed(" + "'" + alarmData + "')");
-				cardAlarms.remove(convMessage.getMsgID());
+				cardAlarms.remove(convMessage.getMsgID()); // to avoid calling from getview
 			}
-			super.onPageFinished(view, url);
 			try
 			{
 				WebViewHolder holder = (WebViewHolder) view.getTag();
@@ -446,10 +446,11 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		Logger.d("CardState", "Card");
 		uiHandler.postDelayed(new Runnable()
 		{
+			@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 			@Override
 			public void run()
 			{
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 				{
 					// Values are based on self observation
 					argViewHolder.loadingSpinner.animate().alpha(0.0f).setDuration(500).setListener(new WebViewAnimationListener(argViewHolder.loadingSpinner, true)).start();
@@ -469,6 +470,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	private static DecelerateInterpolator decInterpolator = new DecelerateInterpolator();
 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private class WebViewAnimationListener implements AnimatorListener
 	{
 		private View mTargetView;
