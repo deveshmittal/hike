@@ -41,6 +41,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcelable;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
@@ -102,6 +103,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private volatile AtomicBoolean haveUnsentMessages = new AtomicBoolean(false);
 
+	private volatile AtomicBoolean initialised = new AtomicBoolean(false);
+	
 	private int reconnectTime = 0;
 
 	private Looper mMqttHandlerLooper;
@@ -323,9 +326,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				{
 				case HikeService.MSG_APP_PUBLISH:
 					Bundle bundle = msg.getData();
-					String message = bundle.getString(HikeConstants.MESSAGE);
-					long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
-					send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis(), msg.arg2), msg.arg1);
+					HikePacket packet = bundle.getParcelable(HikeConstants.MESSAGE);
+					send(packet, msg.arg1);
 					break;
 				case 12341: // just for testing
 					Bundle b = msg.getData();
@@ -364,9 +366,15 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	 * This method should be used after creating this object. Note : Functions involving 'this' reference and Threads should not be used or started in constructor as it might
 	 * happen that incomplete 'this' object creation took place till that time.
 	 */
-	public void init(Context ctx)
+	public void init()
 	{
-		context = ctx;
+		if(initialised.getAndSet(true))
+		{
+			Logger.d(TAG, "Already initialised , return now..");
+			return;
+		}
+		
+		context = HikeMessengerApp.getInstance();
 		cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
@@ -462,7 +470,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		Logger.d(TAG, "Broker port: " + brokerPortNumber);
 	}
 
-	public void finish()
+	private void finish()
 	{
 		context.unregisterReceiver(this);
 		this.mqttMessageManager.close();
@@ -758,7 +766,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
-	public void setServerUris()
+	private void setServerUris()
 	{
 
 		String ipString = settings.getString(HikeMessengerApp.MQTT_IPS, "");
@@ -835,7 +843,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	}
 
 	// This function should be called always from external classes inorder to run connect on MQTT thread
-	public void disconnectOnMqttThread(final boolean reconnect)
+	private void disconnectOnMqttThread(final boolean reconnect)
 	{
 		try
 		{
@@ -1041,25 +1049,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	}
 
 	// this should always run on MQTT Thread
-	public void send(HikePacket packet, int qos)
+	private void send(HikePacket packet, int qos)
 	{
-		/* only care about failures for messages we care about. */
-		if (qos > 0 && packet.getPacketId() == -1)
-		{
-			try
-			{
-				persistence.addSentMessage(packet);
-			}
-			catch (MqttPersistenceException e)
-			{
-				Logger.e(TAG, "Unable to persist message", e);
-			}
-			catch (Exception e)
-			{
-				Logger.e(TAG, "Unable to persist message", e);
-			}
-		}
-
 		// if force disconnect is in progress dont allow mqtt operations to take place
 		if (forceDisconnect)
 			return;
@@ -1415,7 +1406,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		return false;
 	}
 
-	public void saveAndSet(String ipString)
+	private void saveAndSet(String ipString)
 	{
 		Editor editor = settings.edit();
 		editor.putString(HikeMessengerApp.MQTT_IPS, ipString);
@@ -1441,7 +1432,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	}
 
 	// This class is just for testing .....
-	public class TestOutmsgs implements Runnable
+	private class TestOutmsgs implements Runnable
 	{
 		@Override
 		public void run()
@@ -1576,39 +1567,43 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	 */
 	public void sendMessage(Object object, int qos)
 	{
-		if (mMessenger == null)
-		{
-			Logger.d(TAG,"sendMessage returning, mMessenger not initialized");
-			return;
-		}
-
 		JSONObject o = (JSONObject) object;
 		String data = o.toString();
-		Message msg = Message.obtain();
-		msg.what = HikeService.MSG_APP_PUBLISH;
-		Bundle bundle = new Bundle();
-		bundle.putString(HikeConstants.MESSAGE, data);
 
-		/* set the QoS */
-		msg.arg1 = qos;
-
+		long msgId = -1;
 		/*
 		 * if this is a message, then grab the messageId out of the json object so we can get confirmation of success/failure
 		 */
 		if (HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) || (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE))))
 		{
 			JSONObject json = o.optJSONObject(HikeConstants.DATA);
-			long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
-			bundle.putLong(HikeConstants.MESSAGE_ID, msgId);
+			msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
 		}
 
+		int type;
 		if (HikeConstants.MqttMessageTypes.MULTIPLE_FORWARD.equals(o.optString(HikeConstants.SUB_TYPE)))
 		{
-			msg.arg2 = HikeConstants.MULTI_FORWARD_MESSAGE_TYPE;
+			type = HikeConstants.MULTI_FORWARD_MESSAGE_TYPE;
 		}
 		else
 		{
-			msg.arg2 = HikeConstants.NORMAL_MESSAGE_TYPE;
+			type = HikeConstants.NORMAL_MESSAGE_TYPE;
+		}
+
+		HikePacket packet = new HikePacket(data.getBytes(), msgId, System.currentTimeMillis(), type);
+		addToPersistence(packet, qos);
+
+		Message msg = Message.obtain();
+		msg.what = HikeService.MSG_APP_PUBLISH;
+		msg.arg1 = qos;
+
+		Bundle bundle = new Bundle();
+		bundle.putParcelable(HikeConstants.MESSAGE, packet);
+
+		if (!initialised.get())
+		{
+			Logger.d(TAG, "Not initialised, initializing...");
+			init();
 		}
 
 		msg.setData(bundle);
@@ -1622,6 +1617,32 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			/* Service is dead. What to do? */
 			Logger.e("HikeServiceConnection", "Remote Service dead", e);
+		}
+	}
+
+	/*
+	 * Adds the created hike packet to mqtt persistence if qos > 0.
+	 *
+	 * @param packet - HikePacket
+	 * @param qos level (MQTT_PUBLISH or MQTT_PUBLISH_LOW)
+	 */
+	private void addToPersistence(HikePacket packet, int qos)
+	{
+		/* only care about failures for messages we care about. */
+		if (qos > 0 && packet.getPacketId() == -1)
+		{
+			try
+			{
+				persistence.addSentMessage(packet);
+			}
+			catch (MqttPersistenceException e)
+			{
+				Logger.e(TAG, "Unable to persist message", e);
+			}
+			catch (Exception e)
+			{
+				Logger.e(TAG, "Unable to persist message", e);
+			}
 		}
 	}
 }
