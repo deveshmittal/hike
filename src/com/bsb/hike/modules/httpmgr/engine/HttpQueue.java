@@ -22,9 +22,9 @@ public class HttpQueue
 
 	private PriorityQueue<RequestCall> longQueue;
 
-	private Deque<RequestCall> longRunningQueue;
+	private Deque<Runnable> longRunningQueue;
 
-	private Deque<RequestCall> shortRunningQueue;
+	private Deque<Runnable> shortRunningQueue;
 
 	private short MAX_QUEUE_SIZE = CORE_POOL_SIZE;
 
@@ -37,10 +37,10 @@ public class HttpQueue
 		longQueue = new PriorityQueue<RequestCall>();
 
 		// queue that contains short running requests
-		longRunningQueue = new ArrayDeque<RequestCall>(MAX_QUEUE_SIZE);
+		longRunningQueue = new ArrayDeque<Runnable>(MAX_QUEUE_SIZE);
 
 		// queue that contains long running requests
-		shortRunningQueue = new ArrayDeque<RequestCall>(MAX_QUEUE_SIZE);
+		shortRunningQueue = new ArrayDeque<Runnable>();
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class HttpQueue
 	 * @param executer
 	 *            executerType
 	 */
-	void addToRunningQueue(RequestCall call, short executer)
+	void addToRunningQueue(Runnable call, short executer)
 	{
 		if (executer == HttpEngine.LONG_EXECUTER)
 		{
@@ -88,15 +88,15 @@ public class HttpQueue
 	 * @param executer
 	 *            executerType
 	 */
-	void removeFromRunningQueue(RequestCall call, short executer)
+	void removeFromRunningQueue(Runnable call, short executer)
 	{
 		if (executer == HttpEngine.LONG_EXECUTER)
 		{
-			longRunningQueue.add(call);
+			longRunningQueue.remove(call);
 		}
 		else
 		{
-			shortRunningQueue.add(call);
+			shortRunningQueue.remove(call);
 		}
 	}
 
@@ -187,6 +187,9 @@ public class HttpQueue
 	 */
 	boolean spaceAvailable(int requestType)
 	{
+		int longSize = longRunningQueue.size();
+		int shortSize = shortRunningQueue.size();
+		
 		if (requestType == Request.REQUEST_TYPE_LONG)
 		{
 			if (longRunningQueue.size() < MAX_QUEUE_SIZE)

@@ -139,7 +139,7 @@ public class HttpEngine
 	 * 
 	 * @param call
 	 */
-	synchronized void addRunningTask(RequestCall call, short executer)
+	synchronized void addRunningTask(Runnable call, short executer)
 	{
 		queue.addToRunningQueue(call, executer);
 	}
@@ -149,7 +149,7 @@ public class HttpEngine
 	 * 
 	 * @param call
 	 */
-	synchronized void removeRunningTask(RequestCall call, short executer)
+	synchronized void removeRunningTask(Runnable call, short executer)
 	{
 		queue.removeFromRunningQueue(call, executer);
 	}
