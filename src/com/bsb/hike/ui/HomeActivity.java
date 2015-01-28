@@ -107,7 +107,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP, FESTIVE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP, FESTIVE_POPUP, VOIP_FTUE_POPUP
 	}
 
 	private DialogShowing dialogShowing;
@@ -198,6 +198,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (!showingProgress)
 		{
+			if (Utils.isVoipActivated(HomeActivity.this) && !HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWN_VOIP_INTRO_TIP, false))
+			{
+				dialogShowing = DialogShowing.VOIP_FTUE_POPUP;
+			}
 			initialiseHomeScreen(savedInstanceState);
 		}
 		
@@ -278,7 +282,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private void setupFestivePopup()
 	{
 		final int festivePopupType = accountPrefs.getInt(HikeConstants.SHOW_FESTIVE_POPUP, -1);
-		if (festivePopupType != -1)
+		if (festivePopupType == FestivePopup.REPUBLIC_DAY_POPUP)
 		{
 			if(FestivePopup.isPastFestiveDate(festivePopupType))
 			{
@@ -287,10 +291,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			else if(dialogShowing == null)
 			{
 				ViewStub festiveView = (ViewStub) findViewById(R.id.festive_view_stub);
-				if(festivePopupType == FestivePopup.NEW_YEAR_POPUP)
-				{
-					festiveView.setLayoutResource(R.layout.new_year_popup);
-				}
 				festiveView.setOnInflateListener(new ViewStub.OnInflateListener()
 				{
 					@Override
@@ -1647,6 +1647,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
 			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
 			break;
+		case VOIP_FTUE_POPUP:
+			dialogShowing = DialogShowing.VOIP_FTUE_POPUP;
+			dialog = HikeDialog.showDialog(this, HikeDialog.VOIP_INTRO_DIALOG, getHomeActivityDialogListener());
 		}
 	}
 

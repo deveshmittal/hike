@@ -279,6 +279,8 @@ public class HikeConstants
 
 	public static final String LAST_SEEN_SETTING = "lastseen";
 
+	public static final String UJ_NOTIF_SETTING = "ujn";
+
 	public static final String BULK_LAST_SEEN_KEY = "lastseens";
 
 	public static final String PROTIP_HEADER = "h";
@@ -396,6 +398,8 @@ public class HikeConstants
 	public static final String FREE_SMS_PREF = "freeSmsPref";
 
 	public static final String LED_PREF = "ledPref";
+	
+	public static final String COLOR_LED_PREF = "colorLedPref";
 
 	public static final String NATIVE_JINGLE_PREF = "jinglePref";
 
@@ -434,7 +438,7 @@ public class HikeConstants
 	public static final String MESSAGES = "msgs";
 	
 	public static final String FILE_IMAGE_QUALITY = "img_quality";
-
+	
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
 	public static final String AUTO_DOWNLOAD_MEDIA_PREF = "AutoDownloadMediaPref";
@@ -804,6 +808,8 @@ public class HikeConstants
 	
 	public static final String PIN_HISTORY_FRAGMENT_TAG = "pin-history-fragment";
 
+	public static final String VOIP_CALL_RATE_FRAGMENT_TAG = "voipCallRateFragmentTag";
+
 	/*
 	 * Contact Type
 	 */
@@ -883,6 +889,8 @@ public class HikeConstants
 	public static final int XHDPI_ID = 1;
 
 	public static final int XXHDPI_ID = 0;
+	
+	public static final int XXXHDPI_ID = 12;
 
 	public static final int LDPI_CACHE = 15;
 
@@ -957,9 +965,7 @@ public class HikeConstants
 	
 	public static final String SHOW_FESTIVE_POPUP = "showFestivePopup";
 
-	public static final String XMAS_POPUP = "xmas";
-
-	public static final String NEW_YEAR_POPUP = "newyear";
+	public static final String REPUBLIC_DAY_POPUP = "indiarepublic";
 
 	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
 
@@ -990,6 +996,24 @@ public class HikeConstants
 	public static final String NUX_INVITE_FORWARD = "nuxInviteForward";
 	
 	public static final String SELF_HIKE_ID = "-1";
+
+	public static final String VOIP_CALL_DURATION = "vcd";
+
+	public static final String VOIP_CALL_INITIATOR = "vci";
+	
+	public static final String VOIP_BITRATE_2G = "vb2g";
+	
+	public static final String VOIP_BITRATE_3G = "vb3g";
+	
+	public static final String VOIP_BITRATE_WIFI = "vbw";
+
+	public static final String VOIP_ACTIVATED = "voip";
+
+	public static final String VOIP_CALL_RATE_POPUP_SHOW = "vrmcs";
+
+	public static final String VOIP_CALL_RATE_POPUP_FREQ = "vrmcf";
+
+	public static final String VOIP_RELAY_SERVER_PORT = "rsport";
 
 	public static final class ResultCodes
 	{
@@ -1654,11 +1678,7 @@ public class HikeConstants
 		/*
 		 * Settings screen <screen> = settingsS <event> = notifNUJEnabled, notifH2OEnabled, notifNUJDisabled, notifH2ODisabled
 		 */
-		public static final String SETTINGS_NOTIFICATION_NUJ_ON = "settingsSNotifNUJEnabled";
-		
 		public static final String SETTINGS_NOTIFICATION_H2O_ON = "settingsSNotifH2OEnabled";
-		
-		public static final String SETTINGS_NOTIFICATION_NUJ_OFF = "settingsSNotifNUJDisabled";
 		
 		public static final String SETTINGS_NOTIFICATION_H2O_OFF = "settingsSNotifH2ODisabled";
 		
@@ -1769,6 +1789,33 @@ public class HikeConstants
 		public static final String FESTIVE_POPUP_WISH = "fstvepopwish";
 
 		public static final String FESTIVE_POPUP_DISMISS = "fstvepopdsmss";
+
+		/*
+		 * VOIP events
+		 */
+		public static final String VOIP = "voip";
+
+		public static final String VOIP_CALL_RATE_POPUP_SUBMIT = "vrmcSbmt";
+
+		public static final String VOIP_CALL_CLICK = "cs";
+
+		public static final String VOIP_CALL_ACCEPT = "ca";
+
+		public static final String VOIP_CALL_REJECT = "cr";
+
+		public static final String VOIP_CALL_SPEAKER = "spk";
+
+		public static final String VOIP_CALL_MUTE = "mut";
+
+		public static final String VOIP_CALL_HOLD = "hld";
+
+		public static final String VOIP_CALL_END = "ce";
+
+		public static final String VOIP_CALL_DROP = "cd";
+
+		public static final String VOIP_NATIVE_CALL_INTERRUPT = "tci";
+
+		public static final String VOIP_CALL_RELAY = "cpur";
 	}
 
 	public static final class MqttMessageTypes
@@ -1887,8 +1934,55 @@ public class HikeConstants
 		
 		public static final String TIP = "tip";
 
-	}
+		public static final String VOIP_SOCKET_INFO = "ve";
+		
+		/**
+		 * VoIP data packet with QoS 0. This packet will either be delivered immediately
+		 * or never. 
+		 */
+		public static final String MESSAGE_VOIP_0 = "v0";
 
+		/**
+		 * VoIP data packet with QoS 1. 
+		 */
+		public static final String MESSAGE_VOIP_1 = "v1";
+
+		/**
+		 * The person we are calling is on a compatible platform, but is
+		 * using an old version of the client which does not support VoIP. 
+		 */
+		public static final String VOIP_ERROR_CALLEE_INCOMPATIBLE_UPGRADABLE = "e0";
+
+		public static final String CREATE_BOT = "cb";
+		
+		public static final String DELETE_BOT = "db";
+		
+		public static final String GCM_ECHO = "gcmecho";
+
+		/**
+		 * The person we are calling is on a client that cannot be upgraded
+		 * to support VoIP. For example, might be on iOS and we have no iOS client.
+		 */
+		public static final String VOIP_ERROR_CALLEE_INCOMPATIBLE_NOT_UPGRADABLE = "e1";
+
+		/**
+		 * The person you are calling has blocked you. 
+		 */
+		public static final String VOIP_ERROR_CALLEE_HAS_BLOCKED_YOU = "e2";
+		
+		/**
+		 * If you receive a packet of this subtype, it implies that the person
+		 * you are calling is already on a call.
+		 */
+		public static final String VOIP_ERROR_ALREADY_IN_CALL = "mc";
+
+		public static final String VOIP_MSG_TYPE_CALL_SUMMARY = "vcs";
+
+		public static final String VOIP_MSG_TYPE_MISSED_CALL_INCOMING = "vmci";
+
+		public static final String VOIP_MSG_TYPE_MISSED_CALL_OUTGOING = "vmco";
+	}
+	
 	public static final class SMSNative
 	{
 		/*
@@ -2101,4 +2195,14 @@ public class HikeConstants
 	public static final String GCM_ID = "gcm_id";
 	
 	public static final String ADD_CATEGORY = "addCat";
+
+	public static final int LED_DEFAULT_WHITE_COLOR = 0xffffffff;
+	
+	public static final int LED_NONE_COLOR = -2; /**
+													Any Change In this Value Should be double checked 
+													as this may coincide with any other color value
+												   */
+
+	public static long STOP_NOTIF_SOUND_TIME = 3000; // In milliseconds
+
 }
