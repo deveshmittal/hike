@@ -1,10 +1,9 @@
 package com.bsb.hike.platform.content;
 
-import java.io.File;
-
+import android.util.Log;
 import com.bsb.hike.HikeMessengerApp;
 
-import android.util.Log;
+import java.io.File;
 
 public class PlatformContent
 {
@@ -36,8 +35,15 @@ public class PlatformContent
 	{
 		if (isInitialized == 0)
 		{
-			PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
-					+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
+			if (PlatformContentUtils.hasStorage(true))
+			{
+				//Do nothing
+			}
+			else
+			{
+				PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
+						+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
+			}
 			isInitialized = 1;
 		}
 

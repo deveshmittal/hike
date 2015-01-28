@@ -37,6 +37,7 @@ public class CustomWebView extends WebView
 	private boolean is_gone = false;
 
 	// if webView is not visible, call onPause of WebView, else call onResume.
+	@Override
 	public void onWindowVisibilityChanged(int visibility)
 	{
 		super.onWindowVisibilityChanged(visibility);
@@ -73,6 +74,7 @@ public class CustomWebView extends WebView
 	}
 
 	//this will be trigger when back key pressed, not when home key pressed
+	@Override
 	public void onDetachedFromWindow()
 	{
 		if (this.is_gone)

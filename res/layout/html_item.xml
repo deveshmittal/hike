@@ -4,46 +4,55 @@
     android:layout_height="wrap_content"
     android:background="@color/transparent" >
 
-    <com.bsb.hike.platform.CustomWebView
-        android:id="@+id/webcontent"
+    <RelativeLayout
+        android:id="@+id/card_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:layout_margin="10dp"
-        android:background="@color/transparent" />
+        android:background="@drawable/card_container" >
+
+        <com.bsb.hike.platform.CustomWebView
+            android:id="@+id/webcontent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@color/transparent" />
+
+        <View
+            android:id="@+id/card_fade_screen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/webcontent"
+            android:layout_alignTop="@+id/webcontent"
+            android:layout_alignRight="@+id/webcontent"
+            android:layout_alignLeft="@+id/webcontent"
+            android:background="@android:color/white"
+            android:visibility="visible" />
+
+        <include
+            android:id="@+id/loading_data"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/webcontent"
+            android:layout_alignTop="@+id/webcontent"
+            layout="@layout/platform_card_loading"
+            android:visibility="visible" />
+
+        <include
+            android:id="@+id/loading_failed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/webcontent"
+            android:layout_alignTop="@+id/webcontent"
+            layout="@layout/platform_card_loading_failed"
+            android:visibility="gone" />
+    </RelativeLayout>
 
     <include
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignBottom="@id/webcontent"
-        android:layout_alignTop="@id/webcontent"
+        android:layout_alignBottom="@id/card_container"
+        android:layout_alignTop="@id/card_container"
         layout="@layout/message_overlay" />
-
-    <View
-        android:id="@+id/card_fade_screen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/webcontent"
-        android:layout_alignTop="@+id/webcontent"
-        android:background="@android:color/white"
-        android:visibility="visible" />
-
-    <include
-        android:id="@+id/loading_data"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignBottom="@+id/webcontent"
-        android:layout_alignTop="@+id/webcontent"
-        layout="@layout/platform_card_loading"
-        android:visibility="visible" />
-
-    <include
-        android:id="@+id/loading_failed"
-        android:layout_width="match_parent"
-        android:layout_alignBottom="@+id/webcontent"
-        android:layout_alignTop="@+id/webcontent"
-        android:layout_height="match_parent"
-        layout="@layout/platform_card_loading_failed"
-        android:visibility="gone" />
 
 </RelativeLayout>
