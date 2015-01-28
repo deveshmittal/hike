@@ -3878,7 +3878,7 @@ public class Utils
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 	}
 
-	public static void addToContacts(Activity context, String msisdn)
+	public static void addToContacts(Context context, String msisdn)
 	{
 		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
 		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);

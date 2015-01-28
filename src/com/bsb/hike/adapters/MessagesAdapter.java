@@ -2181,6 +2181,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			if (convertView == null)
 			{
 				convertView = inflater.inflate(R.layout.block_add_unknown_contact, parent, false);
+				convertView.findViewById(R.id.block_unknown_contact).setOnClickListener(this);
+				convertView.findViewById(R.id.add_unknown_contact).setOnClickListener(this);
 			}
 			return convertView;
 		}
@@ -3047,7 +3049,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	@Override
 	public void onClick(View v)
-	{
+	{	/* Was Block or addContactHeaderClicked */
+		
+		if (v.getId() == R.id.block_unknown_contact)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, conversation.getMsisdn());
+			return;
+		}
+		
+		if (v.getId() == R.id.add_unknown_contact)
+		{
+			Utils.addToContacts(context, conversation.getMsisdn());  // Is this same as ContactInfo.getMsisdn() ? ?
+			return;
+		}
+		
+		/**
+		 * Other click cases
+		 */
 		ConvMessage convMessage = (ConvMessage) v.getTag();
 		if (convMessage == null)
 		{
