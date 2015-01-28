@@ -2204,5 +2204,5 @@ public class HikeConstants
 												   */
 
 	public static long STOP_NOTIF_SOUND_TIME = 3000; // In milliseconds
-
+	
 }
