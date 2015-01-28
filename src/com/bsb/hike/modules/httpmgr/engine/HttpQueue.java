@@ -13,6 +13,8 @@ import android.util.Pair;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.RequestCall;
 import com.bsb.hike.utils.Logger;
+import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
+import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_LONG;
 
 public class HttpQueue
 {
@@ -53,7 +55,7 @@ public class HttpQueue
 	 */
 	void add(RequestCall request)
 	{
-		if (request.getRequestType() == Request.REQUEST_TYPE_LONG)
+		if (request.getRequestType() == REQUEST_TYPE_LONG)
 		{
 			longQueue.add(request);
 		}
@@ -226,9 +228,9 @@ public class HttpQueue
 		shortRunningQueue = null;
 	}
 
-	public void solveStarvation(short executerType, RequestCall call)
+	public void solveStarvation(RequestCall call)
 	{
-		if (executerType == HttpEngine.SHORT_EXECUTER)
+		if (call.getRequestType() == REQUEST_TYPE_SHORT)
 		{
 			changePriority(shortQueue, call);
 		}

@@ -128,7 +128,6 @@ public class HttpEngine
 	 */
 	synchronized void fetchNextTask(short executerType)
 	{
-		//solveStarvation(executerType, call);
 		submitNext(executerType);
 	}
 
@@ -182,9 +181,9 @@ public class HttpEngine
 		}
 	}
 
-	private void solveStarvation(short executerType, RequestCall call)
+	public void solveStarvation(RequestCall call)
 	{
-		queue.solveStarvation(executerType, call);
+		queue.solveStarvation(call);
 	}
 
 	/**

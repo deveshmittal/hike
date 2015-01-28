@@ -13,6 +13,7 @@ import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.util.Queue;
 
 import org.apache.http.conn.ConnectTimeoutException;
 
@@ -59,11 +60,12 @@ public class RequestExecuter
 	 */
 	private void preProcess()
 	{
-		if(request.getPreProcessListener() != null)
+		if (request.getPreProcessListener() != null)
 		{
 			request.getPreProcessListener().doInBackground(new RequestFacade(request));
 		}
 	}
+
 	/**
 	 * Processes request synchronously or asynchronously based on request parameters
 	 * 
@@ -140,6 +142,7 @@ public class RequestExecuter
 				}
 				finally
 				{
+					finish(this);
 					request.setRequestCancellationListener(null);
 				}
 			}
@@ -148,6 +151,11 @@ public class RequestExecuter
 		engine.submit(call, delay);
 	}
 
+	private void finish(RequestCall requestCall)
+	{
+		engine.solveStarvation(requestCall);
+	}
+	
 	/**
 	 * Checks if network is available or not and request is cancelled or not. If network is available and request is not cancelled yet then executes the request using
 	 * {@link IClient}
