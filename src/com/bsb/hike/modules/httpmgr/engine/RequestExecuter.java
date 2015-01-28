@@ -59,9 +59,11 @@ public class RequestExecuter
 	 */
 	private void preProcess()
 	{
-		request.getPreProcessListener().doInBackground(new RequestFacade(request));
+		if(request.getPreProcessListener() != null)
+		{
+			request.getPreProcessListener().doInBackground(new RequestFacade(request));
+		}
 	}
-
 	/**
 	 * Processes request synchronously or asynchronously based on request parameters
 	 * 
