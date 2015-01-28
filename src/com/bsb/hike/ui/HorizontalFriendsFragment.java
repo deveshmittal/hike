@@ -82,16 +82,14 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		}
 		
 		//this only appears for custom message screen
-		if (!TextUtils.isEmpty(selectedFriendsString)) {
+		if (!TextUtils.isEmpty(selectedFriendsString)) 
+		{
 			String[] arrmsisdn = selectedFriendsString.split(NUXConstants.STRING_SPLIT_SEPERATOR);
 			
 			contactsDisplayed.addAll(Arrays.asList(arrmsisdn));
-			for (String msisdn : contactsDisplayed) {
-				if(nm.getLockedContacts().contains(msisdn) || nm.getUnlockedContacts().contains(msisdn)) {
-					viewStack.removeView(viewMap.get(msisdn));
-				} else {
-					addContactView(msisdn, viewStack.getChildCount());
-				}
+			for (String msisdn : contactsDisplayed) 
+			{
+				addContactView(msisdn, viewStack.getChildCount());			
 			}
 		} else {
 			for (int i = 0; i < maxShowListCount - preSelectedCount; i++) 
