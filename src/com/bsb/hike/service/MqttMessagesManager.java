@@ -1031,6 +1031,13 @@ public class MqttMessagesManager
 				settingEditor.putBoolean(HikeConstants.LAST_SEEN_PREF, account.optBoolean(HikeConstants.LAST_SEEN_SETTING, true));
 				settingEditor.commit();
 			}
+			if (account.has(HikeConstants.UJ_NOTIF_SETTING))
+			{
+				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+				Editor settingEditor = settings.edit();
+				settingEditor.putBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, account.optInt(HikeConstants.UJ_NOTIF_SETTING, 1) == 1? true:false);
+				settingEditor.commit();
+			}
 			if (account.has(HikeConstants.CHAT_BACKGROUNDS))
 			{
 				JSONArray chatBackgroundArray = account.getJSONArray(HikeConstants.CHAT_BACKGROUNDS);
@@ -1836,13 +1843,9 @@ public class MqttMessagesManager
 				}
 			}
 		}
-		else if(subType.equals(HikeConstants.XMAS_POPUP))
+		else if(subType.equals(HikeConstants.REPUBLIC_DAY_POPUP))
 		{
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.XMAS_POPUP);
-		}
-		else if(subType.equals(HikeConstants.NEW_YEAR_POPUP))
-		{
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.NEW_YEAR_POPUP);
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.REPUBLIC_DAY_POPUP);
 		}
 		else
 		{

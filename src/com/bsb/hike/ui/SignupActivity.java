@@ -492,32 +492,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				 */
 				Utils.setupUri(this.getApplicationContext());
 
-				boolean showNuxScreen = accountPrefs.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
-				/*
-				 * If backup is available we don't want to show nux screen to user and also we don't need bot msgs to prompt user for forwarding sticker
-				 */
-				if (DBBackupRestore.getInstance(this).isBackupAvailable())
-				{
-					showNuxScreen = false;
-				}
-				
-				if (showNuxScreen && (accountPrefs.getInt(HikeConstants.HIKE_CONTACTS_COUNT, 0) > 0))
-				{
-					mHandler.removeCallbacks(startNuxScreen);
-					mHandler.postDelayed(startNuxScreen, 2500);
-				}
-				else
-				{
-					Editor e = accountPrefs.edit();
-					if (showNuxScreen)
-					{
-						e.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, true);
-					}
-					e.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
-					e.commit();
-					mHandler.removeCallbacks(startWelcomeScreen);
-					mHandler.postDelayed(startWelcomeScreen, 2500);
-				}
+				mHandler.removeCallbacks(startWelcomeScreen);
+				mHandler.postDelayed(startWelcomeScreen, 2500);
+
 				SharedPreferences settings = getApplication().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 				Editor ed = settings.edit();
 				ed.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
@@ -533,17 +510,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			mActivityState = new ActivityState();
 		}
 	}
-
-	Runnable startNuxScreen = new Runnable()
-	{	
-		@Override
-		public void run()
-		{
-			Intent i = new Intent(SignupActivity.this, FtueActivity.class);
-			startActivity(i);
-			finish();
-		}
-	};
 	
 	Runnable startWelcomeScreen = new Runnable()
 	{
