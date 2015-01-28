@@ -3611,7 +3611,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		};
 
-		HikeDialogFactory.showDialog(chatThread, HikeDialogFactory.SMS_CLIENT_DIALOG, smsClientDialogListener, triggeredFromToggle, checkBox, showingNativeInfoDialog);
+		HikeDialogFactory.showDialog(context, HikeDialogFactory.SMS_CLIENT_DIALOG, smsClientDialogListener, triggeredFromToggle, checkBox, showingNativeInfoDialog);
 	}
 
 	public LinkedHashMap<Long, ConvMessage> getAllUnsentMessages(boolean resetTimestamp)

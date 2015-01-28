@@ -2879,6 +2879,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		return;
 	}
 
+	protected ChatTheme getCurrentlTheme()
+	{
+		return mAdapter.getChatTheme();
+	}
 	/**
 	 * Used to show clear conversation confirmation dialog
 	 */

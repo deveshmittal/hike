@@ -55,7 +55,7 @@ import com.bsb.hike.utils.Utils;
  * @generated
  */
 
-public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCallback
+public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCallback, ViewStub.OnInflateListener
 {
 	private static final String TAG = "oneonechatthread";
 	
@@ -1098,14 +1098,29 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		 */
 		if(viewStub != null)
 		{
+			viewStub.setOnInflateListener(this);
 			viewStub.inflate();
 		}
 		
+		/**
+		 * ViewStub has been inflated
+		 */
+		else
+		{
+			setUpSMSViews();
+		}
+
+	}
+	
+	private void setUpSMSViews()
+	{
 		showView(R.id.sms_toggle_button);
 		TextView smsToggleSubtext = (TextView) activity.findViewById(R.id.sms_toggle_subtext);
 		CheckBox smsToggle = (CheckBox) activity.findViewById(R.id.checkbox);
 		TextView hikeSmsText = (TextView) activity.findViewById(R.id.hike_text);
 		TextView regularSmsText = (TextView) activity.findViewById(R.id.sms_text);
+		
+		ChatTheme theme = getCurrentlTheme();
 
 		if (theme == ChatTheme.DEFAULT)
 		{
@@ -1133,7 +1148,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		smsToggle.setVisibility(View.VISIBLE);
 		hikeSmsText.setVisibility(View.VISIBLE);
 		regularSmsText.setVisibility(View.VISIBLE);
-
 		smsToggle.setOnCheckedChangeListener(mAdapter);
 	}
 	
@@ -1439,5 +1453,18 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		super.takeActionBasedOnIntent();
 	}
-	
+
+	@Override
+	public void onInflate(ViewStub stub, View inflated)
+	{
+		switch (stub.getId())
+		{
+		case R.id.sms_toggle_view_stub:
+			setUpSMSViews();
+			break;
+		default:
+			break;
+		}
+	}
+
 }
