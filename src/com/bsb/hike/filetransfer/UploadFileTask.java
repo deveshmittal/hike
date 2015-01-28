@@ -426,8 +426,11 @@ public class UploadFileTask extends FileTransferBase
 						VideoEditedInfo info = VideoUtilities.processOpenVideo(mFile.getPath());
 						if(info != null)
 						{
-							hikeFile.setVideoEditedInfo(info);
-							compFile = HikeVideoCompressor.getInstance().compressVideo(hikeFile);
+							if(info.isCompRequired)
+							{
+								hikeFile.setVideoEditedInfo(info);
+								compFile = HikeVideoCompressor.getInstance().compressVideo(hikeFile);
+							}
 						}
 					}
 					if(compFile != null && compFile.exists()){

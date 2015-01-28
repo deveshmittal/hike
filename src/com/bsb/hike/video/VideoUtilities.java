@@ -34,7 +34,6 @@ public class VideoUtilities {
 			IsoFile isoFile = new IsoFile(videoPath);
 			List<Box> boxes = Path.getPaths(isoFile, "/moov/trak/");
 			TrackHeaderBox trackHeaderBox = null;
-			boolean isAvc = true;
             boolean isMp4A = true;
 
             Box boxTest = Path.getPath(isoFile, "/moov/trak/mdia/minf/stbl/stsd/mp4a/");
@@ -46,12 +45,6 @@ public class VideoUtilities {
                 return null;
             }
 
-            boxTest = Path.getPath(isoFile, "/moov/trak/mdia/minf/stbl/stsd/avc1/");
-            if (boxTest == null) {
-                isAvc = false;
-            }
-            boxTest = Path.getPath(isoFile, "/moov/trak/mdia/minf/stbl/stsd/drmi/");
-            Logger.d("Suyashh", "boxTest = "+ boxTest);
 			for (Box box : boxes) {
 				Logger.d("Suyashhh", "box value = " + box.toString());
 				trackBox = (TrackBox) box;
@@ -109,9 +102,14 @@ public class VideoUtilities {
 					videoEditedInfo.bitrate *= Math.max(0.5f, scale);
 				}
 			}
-			if (!isAvc && (videoEditedInfo.resultWidth == videoEditedInfo.originalWidth || videoEditedInfo.resultHeight == videoEditedInfo.originalHeight)) {
-                return null;
+			if ((videoEditedInfo.resultWidth == videoEditedInfo.originalWidth || videoEditedInfo.resultHeight == videoEditedInfo.originalHeight)) 
+			{
+				videoEditedInfo.isCompRequired = false;
             }
+			else
+			{
+				videoEditedInfo.isCompRequired = true;
+			}
 		} catch (Exception e) {
 			Logger.d(TAG, "Exception" + e);
 			return null;
@@ -135,6 +133,7 @@ public class VideoUtilities {
 		public int bitrate;
 		public String originalPath;
 		public File destCachFilePath;
+		public boolean isCompRequired;
 
 		public String getString() {
 			return String.format(Locale.US, "-1_%d_%d_%d_%d_%d_%d_%d_%d_%s",
