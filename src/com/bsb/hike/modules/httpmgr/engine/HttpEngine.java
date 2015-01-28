@@ -74,7 +74,7 @@ public class HttpEngine
 	 * 
 	 * @param request
 	 */
-	public synchronized void submit(RequestCall request)
+	private synchronized void submit(RequestCall request)
 	{
 		queue.add(request);
 		if (queue.spaceAvailable(request.getRequestType()))
@@ -91,7 +91,7 @@ public class HttpEngine
 	 *            Delay after which request should execute
 	 * @return
 	 */
-	public void submitWithDelay(RequestCall request, long delay)
+	private void submitWithDelay(RequestCall request, long delay)
 	{
 		if (request.isCancelled())
 		{
