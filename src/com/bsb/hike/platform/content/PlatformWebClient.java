@@ -38,7 +38,7 @@ public class PlatformWebClient extends WebViewClient
 
 		InputStream wrtInputStreamm = null;
 		WebResourceResponse response = null;
-		wrtInputStreamm = new FileInputStream(PlatformContentUtils.openFile(myuri, "").getFileDescriptor());
+		wrtInputStreamm = new FileInputStream(PlatformContentUtils.openFileParcel(myuri, "").getFileDescriptor());
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
 		{

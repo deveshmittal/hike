@@ -2,7 +2,6 @@ package com.bsb.hike.platform.content;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -90,42 +89,23 @@ public class PlatformContentUtils
 		return tempFile;
 	}
 
-	public static ParcelFileDescriptor openFile(Uri uri, String mode)
+	public static ParcelFileDescriptor openFileParcel(Uri uri, String mode)
 	{
-
 		Log.d("FileContentProvider", "fetching: " + uri);
 
 		ParcelFileDescriptor parcel = null;
 
-		String fileNameRequested = uri.getLastPathSegment();
-		String[] name = fileNameRequested.split("\\.");
-		String prefix = name[0];
-		String suffix = name[1];
-
-		InputStream is = null;
-		try
-		{
-			String filePath = uri.toString().replace(PlatformContentConstants.CONTENT_AUTHORITY_BASE, PlatformContentConstants.PLATFORM_CONTENT_DIR);
-
-			Log.d("FileContentProvider", "FILE PATH: " + filePath);
-
-			is = new FileInputStream(filePath);
-		}
-		catch (IOException e1)
-		{
-			e1.printStackTrace();
-		}
-
-		File file = PlatformContentUtils.streamToTempFile(is, prefix, suffix);
+		String filePath = uri.toString().replace(PlatformContentConstants.CONTENT_AUTHORITY_BASE, PlatformContentConstants.PLATFORM_CONTENT_DIR);
 
 		try
 		{
-			parcel = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+			parcel = ParcelFileDescriptor.open(new File(filePath), ParcelFileDescriptor.MODE_READ_ONLY);
 		}
 		catch (FileNotFoundException e)
 		{
 			Log.e("FileContentProvider", "uri " + uri.toString(), e);
 		}
+		
 		return parcel;
 	}
 
