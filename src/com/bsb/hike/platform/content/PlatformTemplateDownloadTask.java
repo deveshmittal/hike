@@ -60,6 +60,11 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 		// Start downloading ZIP to temporary folder
 		InputStream input = getZipStream();
 
+		if (input == null)
+		{
+			return null;
+		}
+
 		OutputStream output = null;
 
 		boolean isDownloaded = false;
@@ -97,6 +102,7 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 			{
 				if (output != null)
 				{
+					output.flush();
 					output.close();
 				}
 
