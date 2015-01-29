@@ -34,6 +34,7 @@ import android.telephony.TelephonyManager;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
@@ -235,6 +236,7 @@ public class HikeService extends Service
 		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
 		assignUtilityThread();
+		scheduleNextAnalyticsSendAlarm();
 		DBBackupRestore.getInstance(getApplicationContext()).scheduleNextAutoBackup();
 
 		/*
@@ -589,11 +591,7 @@ public class HikeService extends Service
 
 			// Send the device details again which includes the new app
 			// version
-			JSONObject obj = Utils.getDeviceDetails(context);
-			if (obj != null)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-			}
+			Utils.getDeviceDetails(context);
 
 			Utils.requestAccountInfo(true, false);
 
@@ -687,11 +685,7 @@ public class HikeService extends Service
 		@Override
 		public void run()
 		{
-			JSONObject obj = Utils.getDeviceStats(getApplicationContext());
-			if (obj != null)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-			}
+			Utils.getDeviceStats(getApplicationContext());
 			scheduleNextUserStatsSending();
 		}
 	};
@@ -821,4 +815,12 @@ public class HikeService extends Service
 		this.isInitialized = isInitialized;
 	}
 
+	/**
+	 * Used to schedule the alarm for sending analytics data to the server after the HikeService has been booted
+	 */
+	private void scheduleNextAnalyticsSendAlarm()
+	{
+		long whenToSend = Utils.getTimeInMillis(Calendar.getInstance(), HAManager.getInstance().getWhenToSend(), 0, 0, 0);
+		HikeAlarmManager.setAlarm(getApplicationContext(), whenToSend, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
+	}
 }
