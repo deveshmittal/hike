@@ -531,11 +531,11 @@ public class HikeNotification
 			avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
 		}
 
+		// Possibility to show big picture message
+		ConvMessage convMessage = hikeNotifMsgStack.getLastInsertedConvMessage();
+					
 		if (hikeNotifMsgStack.getSize() == 1)
 		{
-			// Possibility to show big picture message
-			ConvMessage convMessage = hikeNotifMsgStack.getLastInsertedConvMessage();
-
 			if (convMessage.isInvite())
 			{
 				return;
@@ -545,6 +545,9 @@ public class HikeNotification
 				Bitmap bigPictureImage = ToastListener.returnBigPicture(convMessage, context);
 				if (bigPictureImage != null)
 				{
+					HAManager.getInstance().setMetadatFieldsForSessionEvent(AnalyticsConstants.AppOpenSource.FROM_NOTIFICATION, convMessage.getMsisdn(), convMessage,
+							AnalyticsConstants.ConversationType.NORMAL);
+					
 					showNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 							hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 							hikeNotifMsgStack.getNotificationBigText(), convMessage.getMsisdn(), bigPictureImage, !convMessage.isStickerMessage(), false, false,
@@ -556,6 +559,9 @@ public class HikeNotification
 
 		if (hikeNotifMsgStack.getSize() == 1)
 		{
+			HAManager.getInstance().setMetadatFieldsForSessionEvent(AnalyticsConstants.AppOpenSource.FROM_NOTIFICATION, convMessage.getMsisdn(), convMessage,
+					AnalyticsConstants.ConversationType.NORMAL);
+			
 			showBigTextStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 					hikeNotifMsgStack.getNotificationBigText(), isSingleMsisdn ? hikeNotifMsgStack.lastAddedMsisdn : "bulk", hikeNotifMsgStack.getNotificationSubText(),
@@ -564,6 +570,9 @@ public class HikeNotification
 		}
 		else if (!hikeNotifMsgStack.isEmpty())
 		{
+			HAManager.getInstance().setMetadatFieldsForSessionEvent(AnalyticsConstants.AppOpenSource.FROM_NOTIFICATION, convMessage.getMsisdn(), convMessage,
+					AnalyticsConstants.ConversationType.NORMAL);
+			
 			showInboxStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 					hikeNotifMsgStack.getNotificationBigText(), isSingleMsisdn ? hikeNotifMsgStack.lastAddedMsisdn : "bulk", hikeNotifMsgStack.getNotificationSubText(),
@@ -1172,6 +1181,9 @@ public class HikeNotification
 
 	public void setNotificationIntentForBuilder(NotificationCompat.Builder mBuilder, Intent notificationIntent)
 	{
+		//Adding Extra to check While receiving that user has come via clicking Notification
+		notificationIntent.putExtra(AnalyticsConstants.APP_OPEN_SOURCE_EXTRA, AppOpenSource.FROM_NOTIFICATION);
+		
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		mBuilder.setContentIntent(contentIntent);
 	}
