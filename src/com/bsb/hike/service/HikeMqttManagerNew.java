@@ -189,10 +189,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private static final String UNRESOLVED_EXCEPTION = "unresolved";
 
 	/* publishes a message via mqtt to the server */
-	public static int MQTT_PUBLISH = 1;
+	public static int MQTT_PUBLISH_QOS_ONE = 1;
 
 	/* publishes a message via mqtt to the server with QoS 0 */
-	public static int MQTT_PUBLISH_LOW = 0;
+	public static int MQTT_PUBLISH_QOS_ZERO = 0;
 
 	// constants used to define MQTT connection status, this is used by external classes and hardly of any use internally
 	public enum MQTTConnectionStatus
