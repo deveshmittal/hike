@@ -207,10 +207,6 @@ public class AnalyticsStore
 						fileWriter.write(normal.toString());
 						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to normal file! Size now :" + normalPriorityEventFile.length() + "bytes");
 					}
-					if(sendToServer)
-					{
-						compressAndDeleteOriginalFile(normalPriorityEventFile.getAbsolutePath());
-					}
 
 					if(high.length() > 0)
 					{
@@ -229,10 +225,6 @@ public class AnalyticsStore
 						fileWriter.write(normal.toString());
 						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to imp file! Size now :" + highPriorityEventFile.length() + "bytes");
 					}	
-					if(sendToServer)
-					{
-						compressAndDeleteOriginalFile(highPriorityEventFile.getAbsolutePath());
-					}
 				}
 				catch (IOException e)
 				{
@@ -256,6 +248,31 @@ public class AnalyticsStore
 				// SEND ANALYTICS FROM HERE
 				if(sendToServer && Utils.isUserOnline(context))
 				{
+					// we should find all residual txt files compress them all 
+					String[] fileNames = HAManager.getFileNames(context);
+					
+					if(fileNames != null)
+					{
+						int fileCount = fileNames.length;
+						
+						for(int i=0; i<fileCount; i++)
+						{
+							if(fileNames[i].endsWith(AnalyticsConstants.SRC_FILE_EXTENSION))
+							{
+								String absolutePath = HAManager.getInstance().getAnalyticsDirectory() + File.separator + fileNames[i];
+								
+								try
+								{
+									compressAndDeleteOriginalFile(absolutePath);
+								}
+								catch(IOException ex)
+								{
+									Logger.d(AnalyticsConstants.ANALYTICS_TAG, "IOException while compressing files on the fly!");
+								}
+							}
+						}
+					}
+
 					// if total logged data is less than threshold value or wifi is available, try sending all the data else delete normal priority data
 					if(!sendAllLogs && !((Utils.getNetworkType(context) == ConnectivityManager.TYPE_WIFI) || 
 							(AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance().getMaxAnalyticsSizeOnClient())))
