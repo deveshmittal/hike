@@ -2613,7 +2613,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			setChatTheme(selectedTheme);
 		}
 
-		if (mConversation.getUnreadCount() > 0)
+		if (mConversation.getUnreadCount() > 0 && !messages.isEmpty())
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
 			if (message.getTypingNotification() != null)
