@@ -2,6 +2,7 @@ package com.bsb.hike.platform.content;
 
 import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
@@ -97,10 +98,11 @@ class PlatformContentLoader extends Handler
 		}
 	}
 
+	@SuppressLint("NewApi")
 	private void getTemplateFromRemote(PlatformContentRequest argContentRequest)
 	{
 		PlatformRequestManager.setWaitState(argContentRequest);
-		
+
 		// Check if this is already being downloaded
 		ArrayList<Integer> currentDownloadingTemplates = PlatformRequestManager.getCurrentDownloadingTemplates();
 

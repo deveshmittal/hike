@@ -1,6 +1,5 @@
 package com.bsb.hike.platform.content;
 
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
 import com.bsb.hike.AppConfig;

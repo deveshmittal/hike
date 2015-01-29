@@ -286,6 +286,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	{
 		holder.webViewClient.convMessage = convMessage;
 		holder.platformJavaScriptBridge.updateConvMessage(convMessage);
+		Logger.d("Filling content: ", content == null ? "CONTENT IS NULL!!":""+content.getFormedData());
 		web.loadDataWithBaseURL("", content.getFormedData(), "text/html", "UTF-8", "");
 	}
 
