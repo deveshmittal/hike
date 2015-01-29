@@ -2456,8 +2456,9 @@ public class MqttMessagesManager
 		convDb.deleteBot(msisdn);
 	}
 
-	private void createBot(JSONObject jsonObj)
+	public void createBot(JSONObject jsonObj)
 	{
+		long startTime = System.currentTimeMillis();
 		String msisdn = jsonObj.optString(HikeConstants.MSISDN);
 		msisdn = Utils.validateBotMsisdn(msisdn);
 		String name = jsonObj.optString(HikeConstants.NAME);
@@ -2481,7 +2482,7 @@ public class MqttMessagesManager
 			HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_ADDED, contact);
 		}
 		HikeMessengerApp.hikeBotNamesMap.put(msisdn, name);
-
+		Logger.d("create bot", "It takes " + String.valueOf(System.currentTimeMillis() - startTime) + "msecs");
 	}
 
 	private void uploadGroupProfileImage(final String groupId, final boolean retryOnce)

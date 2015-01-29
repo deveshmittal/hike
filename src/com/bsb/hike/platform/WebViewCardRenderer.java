@@ -6,6 +6,7 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
@@ -13,11 +14,13 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
+import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
@@ -238,6 +241,8 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		final CustomWebView web = viewHolder.myBrowser;
 		
 		web.setTag(viewHolder);
+
+		orientationChangeHandling(web);
 		
 		if (viewHolder.id != getItemId(position))
 		{
@@ -280,6 +285,18 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 		return view;
 
+	}
+
+	private void orientationChangeHandling(CustomWebView web)
+	{
+		int orientation = Utils.getDeviceOrientation(mContext);
+		if (orientation == Configuration.ORIENTATION_LANDSCAPE)
+		{
+			WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+			Display display = wm.getDefaultDisplay();
+			LayoutParams lp =  web.getLayoutParams();
+			lp.width = display.getHeight();
+		}
 	}
 
 	private void fillContent(CustomWebView web, PlatformContentModel content, ConvMessage convMessage,WebViewHolder holder)
