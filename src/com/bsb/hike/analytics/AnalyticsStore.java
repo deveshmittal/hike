@@ -357,7 +357,11 @@ public class AnalyticsStore
 	 */
 	private void gzipFile(String srcFileUrl) throws IOException
 	{	
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "FILE COMPRESSION IN PROCESS");
+
 		String destFileUrl = srcFileUrl.replace(AnalyticsConstants.SRC_FILE_EXTENSION, AnalyticsConstants.DEST_FILE_EXTENSION);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Source file url: "+srcFileUrl);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Destination file url: "+destFileUrl);
 
 		byte[] buffer = new byte[4096];
 		
@@ -390,6 +394,7 @@ public class AnalyticsStore
 			{
 				gzos.finish();
 				gzos.close();
+				new File(srcFileUrl).delete();
 			}
 		}
 	}
@@ -401,14 +406,19 @@ public class AnalyticsStore
 	 */
 	private void compressAndDeleteOriginalFile(String filePath) throws IOException
 	{
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "CHECKING FILE VALIDITY FOR COMPRESSION");
+
 		File tempFile = new File(filePath);
 
-		if(tempFile.length() != 0)
+		if(tempFile.length() > 0)
 		{
 			gzipFile(filePath);
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File compressed :" + filePath);
 		}
-		tempFile.delete();
+		else if(tempFile.length() == 0)
+		{
+			tempFile.delete();
+		}
 		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File was deleted :" + filePath);
 	}
 }
