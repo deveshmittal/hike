@@ -207,8 +207,8 @@ public class HikeService extends Service
 
 		// reset status variable to initial state
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
-		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
-		mMqttManager.init();		
+		mMqttManager = HikeMqttManagerNew.getInstance();
+		mMqttManager.init();
 
 		/*
 		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
@@ -580,7 +580,7 @@ public class HikeService extends Service
 			JSONObject obj = Utils.getDeviceDetails(context);
 			if (obj != null)
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+				HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_QOS_ONE);
 			}
 
 			Utils.requestAccountInfo(true, false);
@@ -678,7 +678,7 @@ public class HikeService extends Service
 			JSONObject obj = Utils.getDeviceStats(getApplicationContext());
 			if (obj != null)
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+				HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_QOS_ONE);
 			}
 			scheduleNextUserStatsSending();
 		}
