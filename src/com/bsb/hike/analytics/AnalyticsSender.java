@@ -117,8 +117,6 @@ public class AnalyticsSender
 	 */
 	private boolean retryUpload()
 	{	
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "RETRY NUMBER ::" + retryCount);
-
 		if(retryCount < MAX_RETRY_COUNT)
 		{
 			retryCount++;
@@ -134,6 +132,8 @@ public class AnalyticsSender
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Interrupted exception while thread sleeping before retry upload");
 			}
 		}
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "RETRY NUMBER ::" + retryCount);
+
 		if(retryCount >= MAX_RETRY_COUNT)
 		{
 			resetRetryParams();
@@ -209,10 +209,6 @@ public class AnalyticsSender
 	 */
 	private void upload(String fileName)
 	{
-		if(fileName.endsWith(AnalyticsConstants.SRC_FILE_EXTENSION))
-		{
-			return;
-		}
 		while(true)
 		{
 			String absolutePath = HAManager.getInstance().getAnalyticsDirectory() + File.separator + fileName;
@@ -242,12 +238,18 @@ public class AnalyticsSender
 			catch(SocketTimeoutException e)
 			{			
 				if(!retryUpload())
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Exiting upload process....");
 					return;
+				}
 			}
 			catch(ConnectTimeoutException e)
 			{
 				if(!retryUpload())
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Exiting upload process....");
 					return;
+				}
 			}
 			catch (FileNotFoundException e) 
 			{
@@ -261,7 +263,7 @@ public class AnalyticsSender
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception during upload.");			
 			}
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "http response :" + response + response.getStatusLine());
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "http response :" + response.getStatusLine());
 	
 			switch (response.getStatusLine().getStatusCode()) 
 			{
@@ -276,12 +278,15 @@ public class AnalyticsSender
 				return;
 	
 				case HttpResponseCode.GATEWAY_TIMEOUT:
-				case HttpResponseCode.SERVICE_UNAVAILABLE:					
+				case HttpResponseCode.SERVICE_UNAVAILABLE:
+				case HttpResponseCode.INTERNAL_SERVER_ERROR:
+				case HttpResponseCode.NOT_FOUND:
+					
 				if(!retryUpload())
 				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Exiting upload process....");
 					return;
 				}
-				break;
 				
 			default:
 				break;
