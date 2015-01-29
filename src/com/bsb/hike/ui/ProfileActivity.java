@@ -1948,7 +1948,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				public void onClick(DialogInterface dialog, int which)
 				{
 					HikePubSub hikePubSub = HikeMessengerApp.getPubSub();
-					HikeMqttManagerNew.getInstance().sendMessage(groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+					HikeMqttManagerNew.getInstance().sendMessage(groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_QOS_ONE);
 					hikePubSub.publish(HikePubSub.GROUP_LEFT, groupConversation.getMsisdn());
 					Intent intent = new Intent(ProfileActivity.this, HomeActivity.class);
 					intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mLocalMSISDN);
@@ -2783,7 +2783,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 				}
-				HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+				HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 				confirmDialog.dismiss();
 			}
 		};

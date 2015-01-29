@@ -551,7 +551,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 				mqttPacket.put(HikeConstants.DATA, data);
 
-				HikeMqttManagerNew.getInstance().sendMessage(mqttPacket, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+				HikeMqttManagerNew.getInstance().sendMessage(mqttPacket, HikeMqttManagerNew.MQTT_QOS_ONE);
 
 				CheckBox selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
 				if (selectAllCB.isChecked())

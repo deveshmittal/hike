@@ -90,7 +90,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					//TODO in case of leaving group from group info screen ==> 2 gcl event will trigger
 					//we can avoid these by moving delete conversation task to db
-					HikeMqttManagerNew.getInstance().sendMessage(conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+					HikeMqttManagerNew.getInstance().sendMessage(conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_QOS_ONE);
 				}
 
 				msisdns.add(conv.getMsisdn());
@@ -2295,7 +2295,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						convs[i] = mAdapter.getItem(i);
 						if ((convs[i] instanceof GroupConversation))
 						{
-							HikeMqttManagerNew.getInstance().sendMessage(convs[i].serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+							HikeMqttManagerNew.getInstance().sendMessage(convs[i].serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_QOS_ONE);
 						}
 					}
 					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
