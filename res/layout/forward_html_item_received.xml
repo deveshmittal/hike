@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:descendantFocusability="blocksDescendants"
-    android:gravity="center_vertical|left"
     android:minHeight="30dp"
     android:paddingBottom="4dp" >
 
@@ -38,8 +37,9 @@
 
         <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:id="@+id/card_container"
+                android:layout_centerInParent="true"
                 android:layout_below="@id/sender_details"
                 android:layout_toRightOf="@id/avatar_container"
                 android:background="@drawable/card_container"
@@ -53,7 +53,6 @@
                 android:id="@+id/webcontent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
                 android:background="@color/transparent"
                 android:minHeight="90dp" />
 
