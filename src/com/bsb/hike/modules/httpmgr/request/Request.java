@@ -368,7 +368,7 @@ public class Request implements IRequestFacade
 
 		private IRequestBody body;
 
-		private int priority;
+		private int priority = PRIORITY_NORMAL;
 
 		private short requestType = REQUEST_TYPE_LONG;
 
@@ -380,7 +380,7 @@ public class Request implements IRequestFacade
 
 		private boolean responseOnUIThread;
 
-		private boolean asynchronous;
+		private boolean asynchronous = true;
 
 		/**
 		 * Sets the unique id of the request
