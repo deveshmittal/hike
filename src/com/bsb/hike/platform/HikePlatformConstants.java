@@ -35,6 +35,7 @@ public interface HikePlatformConstants
 	String HELPER_DATA = "hd";
 	String HEIGHT = "h";
 	String CARD_OBJECT = "cardObj";
+	String NOTIF_TEXT_WC = "notifText";
 
 	public static final String PLATFORM_BRIDGE_NAME = "PlatformBridge";
 

@@ -362,6 +362,7 @@ public class ConvMessage
 			{
 				this.messageType  = MESSAGE_TYPE.WEB_CONTENT;
 				platformWebMessageMetadata  = new PlatformWebMessageMetadata(data.optJSONObject(HikeConstants.METADATA));
+				this.mMessage = platformWebMessageMetadata.getNotifText();
 			}
 			else if (ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE)))
 			{

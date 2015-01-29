@@ -64,17 +64,23 @@ public class PlatformWebMessageMetadata
 		if (metadata.has(HikePlatformConstants.CARD_OBJECT))
 		{
 			JSONObject cardobj = metadata.optJSONObject(HikePlatformConstants.CARD_OBJECT);
+
 			if (cardobj.has(HikePlatformConstants.HELPER_DATA))
 			{
 				setHelperData(cardobj.optJSONObject(HikePlatformConstants.HELPER_DATA));
 			}
-			if (cardobj.has(HikePlatformConstants.HEIGHT)){
+
+			if (cardobj.has(HikePlatformConstants.HEIGHT))
+			{
 				setCardHeight(Integer.parseInt(cardobj.optString(HikePlatformConstants.HEIGHT)));
 			}
+
+			// Extract notif text
+			if (cardobj.has(HikePlatformConstants.NOTIF_TEXT_WC))
+			{
+				setNotifText(cardobj.optString(HikePlatformConstants.NOTIF_TEXT_WC));
+			}
 		}
-
-
-
 	}
 
 	public JSONObject getJSON()
@@ -82,17 +88,23 @@ public class PlatformWebMessageMetadata
 		return json;
 	}
 
-	public String JSONtoString() {
+	public String JSONtoString()
+	{
 		return json.toString();
 	}
-	
+
 	public String getAlarmData()
 	{
 		return getString(HikePlatformConstants.ALARM_DATA);
 	}
-	
+
 	private String getString(String key)
 	{
 		return json.optString(key);
+	}
+
+	public void setNotifText(String notifText)
+	{
+		this.notifText = notifText;
 	}
 }
