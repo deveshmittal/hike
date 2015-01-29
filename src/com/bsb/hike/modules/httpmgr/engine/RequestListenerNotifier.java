@@ -31,42 +31,41 @@ public class RequestListenerNotifier
 	 * @param request
 	 * @param response
 	 */
-	public void notifyListenersOfRequestSuccess(final Request request, final Response response)
+	public void notifyListenersOfRequestSuccess(Request request, Response response)
 	{
 		if (!request.isAsynchronous())
 		{
 			// send response on same thread
-			sendResponse(request, response);
+			sendSuccess(request, response);
 		}
 		else if (request.isResponseOnUIThread())
 		{
 			// send response on ui thread
-			ResponseCall call = new ResponseCall()
-			{
-				@Override
-				public void execute()
-				{
-					sendResponse(request, response);
-				}
-			};
+			ResponseCall call = getResponseCall(request, response);
 			uiExecuter.execute(call);
 		}
 		else
 		{
 			// send response on other thread
-			ResponseCall call = new ResponseCall()
-			{
-				@Override
-				public void execute()
-				{
-					sendResponse(request, response);
-				}
-			};
+			ResponseCall call = getResponseCall(request, response);
 			engine.submit(call);
 		}
 	}
 
-	private void sendResponse(Request request, Response response)
+	private ResponseCall getResponseCall(final Request request, final Response response)
+	{
+		ResponseCall call = new ResponseCall()
+		{
+			@Override
+			public void execute()
+			{
+				sendSuccess(request, response);
+			}
+		};
+		return call;
+	}
+
+	private void sendSuccess(Request request, Response response)
 	{
 		if (request.isCancelled())
 		{
@@ -97,27 +96,41 @@ public class RequestListenerNotifier
 	 * @param request
 	 * @param ex
 	 */
-	public void notifyListenersOfRequestFailure(final Request request, final HttpException ex)
+	public void notifyListenersOfRequestFailure(Request request, HttpException ex)
 	{
-		if (request.isResponseOnUIThread())
+		if (!request.isAsynchronous())
 		{
-			sendException(request, ex);
+			// send response on same thread
+			sendFailure(request, ex);
+		}
+		else if (request.isResponseOnUIThread())
+		{
+			// send response on ui thread
+			ResponseCall call = getResponseCall(request, ex);
+			uiExecuter.execute(call);
 		}
 		else
 		{
-			ResponseCall call = new ResponseCall()
-			{
-				@Override
-				public void execute()
-				{
-					sendException(request, ex);
-				}
-			};
+			// send response on other thread
+			ResponseCall call = getResponseCall(request, ex);
 			engine.submit(call);
 		}
 	}
 
-	private void sendException(Request request, HttpException ex)
+	private ResponseCall getResponseCall(final Request request, final HttpException ex)
+	{
+		ResponseCall call = new ResponseCall()
+		{
+			@Override
+			public void execute()
+			{
+				sendFailure(request, ex);
+			}
+		};
+		return call;
+	}
+
+	private void sendFailure(Request request, HttpException ex)
 	{
 		if (request.isCancelled())
 		{
