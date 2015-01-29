@@ -587,11 +587,11 @@ public class NUXManager
 			else
 				chatReward = new JSONObject();
 
-			if (newChatReward.has(CR_BUTTON1_TEXT))
-				chatReward.put(CR_BUTTON1_TEXT, newChatReward.getString(CR_BUTTON1_TEXT));
+			if (newChatReward.has(CR_INVITE_MORE_TEXT))
+				chatReward.put(CR_INVITE_MORE_TEXT, newChatReward.getString(CR_INVITE_MORE_TEXT));
 
-			if (newChatReward.has(CR_BUTTON2_TEXT))
-				chatReward.put(CR_BUTTON2_TEXT, newChatReward.getString(CR_BUTTON2_TEXT));
+			if (newChatReward.has(CR_REMIND_TEXT))
+				chatReward.put(CR_REMIND_TEXT, newChatReward.getString(CR_REMIND_TEXT));
 
 			if (newChatReward.has(CR_CHAT_WAITING_TEXT))
 				chatReward.put(CR_CHAT_WAITING_TEXT, newChatReward.getString(CR_CHAT_WAITING_TEXT));
@@ -841,13 +841,13 @@ public class NUXManager
 					String pendingChatIcon = chatrewardobj.optString(CR_PENDINGCHAT_ICON);
 					String detailsText = chatrewardobj.optString(CR_DETAILS_TEXT, context.getString(R.string.details_text));
 					String detailsLink = chatrewardobj.optString(CR_DETAILS_LINK);
-					String button1Text = chatrewardobj.optString(CR_BUTTON1_TEXT, context.getString(R.string.nux_invite_more));
-					String button2Text = chatrewardobj.optString(CR_BUTTON2_TEXT, context.getString(R.string.nux_remind));
+					String inviteMore = chatrewardobj.optString(CR_INVITE_MORE_TEXT, context.getString(R.string.nux_invite_more));
+					String remind = chatrewardobj.optString(CR_REMIND_TEXT, context.getString(R.string.nux_remind));
 					String tapToClaimLink = chatrewardobj.optString(CR_TAPTOCLAIM);
 					String tapToClaimText = chatrewardobj.optString(CR_TAPTOCLAIMTEXT, context.getString(R.string.tap_to_claim));
 					String selectFriends = chatrewardobj.optString(CR_SELECTFRIENDS, context.getString(R.string.select_friends));
 					chatReward = new NUXChatReward(rewardCardText, rewardCardSuccessText, statusText, chatWaitingText, pendingChatIcon, detailsText, detailsLink,
-							button1Text, button2Text, tapToClaimLink, tapToClaimText, selectFriends);
+							inviteMore, remind, tapToClaimLink, tapToClaimText, selectFriends);
 
 				}
 			}
