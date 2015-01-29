@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:descendantFocusability="blocksDescendants"
-    android:gravity="center_vertical|right"
     android:minHeight="30dp"
     android:paddingBottom="4dp" >
 
@@ -30,6 +29,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="10dp"
+                android:layout_centerInParent="true"
                 android:background="@drawable/card_container"
                 android:layout_toRightOf="@id/avatar_container"
                 >
@@ -39,8 +39,6 @@
                 android:id="@+id/webcontent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_gravity="center"
                 android:background="@color/transparent"
                 android:minHeight="90dp" />
 
