@@ -139,7 +139,7 @@ public class VoIPUtils {
 		message.put(HikeConstants.SUB_TYPE, subtype);
 		message.put(HikeConstants.DATA, data);
 		
-		HikeMqttManagerNew.getInstance().sendMessage(message, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+		HikeMqttManagerNew.getInstance().sendMessage(message, HikeMqttManagerNew.MQTT_QOS_ONE);
     }
 
     /**
@@ -216,7 +216,7 @@ public class VoIPUtils {
 			message.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING);
 			message.put(HikeConstants.DATA, data);
 			
-			HikeMqttManagerNew.getInstance().sendMessage(message, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+			HikeMqttManagerNew.getInstance().sendMessage(message, HikeMqttManagerNew.MQTT_QOS_ONE);
 			Logger.d(VoIPConstants.TAG, "Sent missed call notifier to partner.");
 			
 		} catch (JSONException e) {

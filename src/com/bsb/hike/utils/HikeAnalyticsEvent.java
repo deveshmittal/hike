@@ -34,7 +34,7 @@ public class HikeAnalyticsEvent
 				dataJson.put(HikeConstants.DISABLED_STEALTH, new JSONArray(disabledMsisdn));
 			}
 			object.put(HikeConstants.DATA, dataJson);
-	        HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+	        HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
@@ -56,7 +56,7 @@ public class HikeAnalyticsEvent
 			JSONObject dataJson = new JSONObject();
 			dataJson.put(HikeConstants.RESET, true);
 			object.put(HikeConstants.DATA, dataJson);
-	        HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+	        HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
@@ -77,7 +77,7 @@ public class HikeAnalyticsEvent
 			JSONObject dataJson = new JSONObject();
 			dataJson.put(HikeConstants.ENABLED, enabled);
 			object.put(HikeConstants.DATA, dataJson);
-			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ZERO);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ZERO);
 		}
 		catch (JSONException e)
 		{
@@ -106,7 +106,7 @@ public class HikeAnalyticsEvent
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
 			
-			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 		catch (JSONException e)
 		{

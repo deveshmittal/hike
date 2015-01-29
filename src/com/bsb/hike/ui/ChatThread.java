@@ -3356,7 +3356,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					e.printStackTrace();
 				}
 
-		        HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+		        HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 			}
 		}
 	}
@@ -3467,7 +3467,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal(), mConversation.getMsisdn());
 					if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 					{
-						HikeMqttManagerNew.getInstance().sendMessage(message.serializeDeliveryReportRead(), HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+						HikeMqttManagerNew.getInstance().sendMessage(message.serializeDeliveryReportRead(), HikeMqttManagerNew.MQTT_QOS_ONE);
 					}
 					// return to
 					// sender
@@ -4256,7 +4256,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						e.printStackTrace();
 					}
 					// TODO make the calls here.
-					HikeMqttManagerNew.getInstance().sendMessage(jsonObject, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+					HikeMqttManagerNew.getInstance().sendMessage(jsonObject, HikeMqttManagerNew.MQTT_QOS_ONE);
 					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 				}
 			}

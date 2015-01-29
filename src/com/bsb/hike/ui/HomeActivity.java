@@ -722,7 +722,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		JSONObject obj = Utils.getDeviceDetails(HomeActivity.this);
 		if (obj != null)
 		{
-			HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_PUBLISH_QOS_ONE);
+			HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 		Utils.requestAccountInfo(false, HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false));
 		Utils.sendLocaleToServer(HomeActivity.this);
