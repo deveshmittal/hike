@@ -636,12 +636,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			break;
 		case R.id.but_remind:
-			Set<String> contactsNux = NUXManager.getInstance().getLockedContacts();
-			if(!contactsNux.isEmpty())
+			if(NUXManager.getInstance().getCountLockedContacts()  > 0)
 			{
-				Logger.d("UmangX", contactsNux.toString());
 				Intent in = IntentManager.openNuxCustomMessage(getActivity());
-				in.putExtra(NUXConstants.SELECTED_FRIENDS, contactsNux.toString().replace("[", "").replace("]", ""));
 				getActivity().startActivity(in);
 			}
 			break;
