@@ -117,7 +117,7 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 			{
 				imgvInviteFrd.setImageBitmap(mmInviteFriends.getImageBitmap());
 			}
-			if (!mmInviteFriends.isToggleSkipButton())
+			if (!mmInviteFriends.showSkipButton())
 			{
 				butSkip.setVisibility(View.INVISIBLE);
 			}

@@ -798,11 +798,11 @@ public class NUXManager
 
 					String text = incentive_reward.optString(INVITEFRDS_TEXT, context.getString(R.string.nux_invitefrnds_objective));
 					String image = incentive_reward.optString(INVITEFRDS_IMAGE);
-					boolean skip_toggle_button = incentive_reward.optBoolean(INVITEFRDS_SKIP_TOGGLE_BUTTON, true);
+					boolean showSkipButton = incentive_reward.optBoolean(INVITEFRDS_SKIP_TOGGLE_BUTTON, true);
 					String title = incentive_reward.optString(INVITEFRDS_MAIN_TITLE, context.getString(R.string.nux_invitefrnds_reward));
 					String buttext = incentive_reward.optString(INVITEFRDS_BUT_TEXT, context.getString(R.string.nux_invitefrnds_buttext));
 					boolean isNuxSkippable = incentive_reward.optBoolean(INVITE_NUX_IS_SKIPPABLE, true);
-					inviteFriends = new NuxInviteFriends(title, text, buttext, image, skip_toggle_button,isNuxSkippable);
+					inviteFriends = new NuxInviteFriends(title, text, buttext, image, showSkipButton,isNuxSkippable);
 				}
 			}
 			catch (JSONException e)

@@ -23,7 +23,7 @@ public class NuxInviteFriends
 
 	private String buttext;
 
-	private boolean toggleskipbutton;
+	private boolean showSkipButton;
 
 	private Bitmap bitmap;
 
@@ -36,7 +36,7 @@ public class NuxInviteFriends
 		this.mainReward = mainReward;
 		this.subTextReward = subTextReward;
 		this.buttext = buttext;
-		this.toggleskipbutton = skip_toggle_button;
+		this.showSkipButton = skip_toggle_button;
 
 		this.isNuxSkippable = isNuxSkippable;
 		if (!TextUtils.isEmpty(image))
@@ -95,9 +95,9 @@ public class NuxInviteFriends
 	/**
 	 * @return the skip_toggle_button
 	 */
-	public boolean isToggleSkipButton()
+	public boolean showSkipButton()
 	{
-		return toggleskipbutton;
+		return showSkipButton;
 	}
 
 	/**
