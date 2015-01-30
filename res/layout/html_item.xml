@@ -31,6 +31,7 @@
                 android:id="@+id/card_fade_screen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
                 android:layout_alignBottom="@+id/webcontent"
                 android:layout_alignLeft="@+id/webcontent"
                 android:layout_alignRight="@+id/webcontent"
@@ -40,9 +41,10 @@
 
             <include
                 android:id="@+id/loading_data"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 layout="@layout/platform_card_loading"
+                android:layout_centerHorizontal="true"
                 android:layout_alignBottom="@+id/webcontent"
                 android:layout_alignLeft="@+id/webcontent"
                 android:layout_alignRight="@+id/webcontent"
@@ -51,8 +53,9 @@
 
             <include
                 android:id="@+id/loading_failed"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_centerHorizontal="true"
                 layout="@layout/platform_card_loading_failed"
                 android:layout_alignBottom="@+id/webcontent"
                 android:layout_alignLeft="@+id/webcontent"
