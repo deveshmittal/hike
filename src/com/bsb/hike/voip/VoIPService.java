@@ -36,9 +36,6 @@ import android.media.AudioTrack.OnPlaybackPositionUpdateListener;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.media.SoundPool;
-import android.media.audiofx.AcousticEchoCanceler;
-import android.media.audiofx.AutomaticGainControl;
-import android.media.audiofx.NoiseSuppressor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -97,7 +94,7 @@ public class VoIPService extends Service {
 	private boolean mute, hold, speaker, vibratorEnabled = true, remoteHold = false;
 	private boolean audioStarted = false;
 	private int droppedDecodedPackets = 0;
-	private int minBufSizePlayback;
+	private int minBufSizePlayback, minBufSizeRecording;
 	private int gain = 0;
 	private OpusWrapper opusWrapper;
 	private Resampler resampler;
@@ -151,6 +148,10 @@ public class VoIPService extends Service {
 	private static final byte PP_ENCRYPTED_VOICE_PACKET = 0x02;
 	private static final byte PP_PROTOCOL_BUFFER = 0x03;
 	
+	// Echo cancellation
+	SolicallWrapper solicallAec = null;
+	boolean aecEnabled = true;
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return myBinder;
@@ -196,6 +197,22 @@ public class VoIPService extends Service {
 		
 		VoIPUtils.resetNotificationStatus();
 		startNotificationThread();
+
+		minBufSizePlayback = AudioTrack.getMinBufferSize(playbackSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
+		minBufSizeRecording = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+		
+		if (aecEnabled) {
+			Logger.w(VoIPConstants.TAG, "minBufSizeRecording: " + minBufSizeRecording);
+			if (minBufSizeRecording < OpusWrapper.OPUS_FRAME_SIZE * 2) {
+				Logger.w(VoIPConstants.TAG, "Rounding up.");
+				minBufSizeRecording = OpusWrapper.OPUS_FRAME_SIZE * 2;
+			} else {
+				Logger.w(VoIPConstants.TAG, "Setting to a multiple.");
+				minBufSizeRecording = ((minBufSizeRecording + (OpusWrapper.OPUS_FRAME_SIZE * 2) - 1) / (OpusWrapper.OPUS_FRAME_SIZE * 2)) * OpusWrapper.OPUS_FRAME_SIZE * 2;
+//				aecEnabled = false;
+			}
+			Logger.w(VoIPConstants.TAG, "new minBufSizeRecording: " + minBufSizeRecording);
+		}
 	}
 
 	@Override
@@ -707,6 +724,9 @@ public class VoIPService extends Service {
 		if (opusWrapper != null)
 			opusWrapper.destroy();
 
+		if (solicallAec != null)
+			solicallAec.destroy();
+		
 		setCallid(0);
 		
 		if(chronometer != null)
@@ -981,6 +1001,12 @@ public class VoIPService extends Service {
 		
 		// Set encoder complexity which directly affects CPU usage
 		opusWrapper.setEncoderComplexity(0);
+		
+		// Initialize AEC
+		if (aecEnabled) {
+			solicallAec = new SolicallWrapper();
+			solicallAec.init();
+		}
 	}
 	
 	private void startCodecDecompression() {
@@ -1177,7 +1203,6 @@ public class VoIPService extends Service {
 				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 
 				AudioRecord recorder;
-				int minBufSizeRecording = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 				Logger.d(VoIPConstants.TAG, "minBufSizeRecording: " + minBufSizeRecording);
 
 				int audioSource = VoIPUtils.getAudioSource();
@@ -1189,8 +1214,8 @@ public class VoIPService extends Service {
 					if (NoiseSuppressor.isAvailable()) {
 						NoiseSuppressor ns = NoiseSuppressor.create(recorder.getAudioSessionId());
 						if (ns != null) {
-							Logger.d(VoIPConstants.TAG, "Initial NS status: " + ns.getEnabled());
 							ns.setEnabled(true);
+							Logger.d(VoIPConstants.TAG, "Initial NS status: " + ns.getEnabled());
 						}
 					} else {
 						Logger.d(VoIPConstants.TAG, "Noise suppression not available.");
@@ -1238,6 +1263,12 @@ public class VoIPService extends Service {
 					if (mute == true)
 						continue;
 
+					// AEC
+					if (solicallAec != null) {
+						int ret = solicallAec.processMic(recordedData);
+//						Logger.d(VoIPConstants.TAG, "AEC mic process ret: " + ret);
+					}
+					
 					// Break input audio into smaller chunks
                 	while (index < retVal) {
                 		if (retVal - index < OpusWrapper.OPUS_FRAME_SIZE * 2)
@@ -1293,7 +1324,6 @@ public class VoIPService extends Service {
 
 				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				int index = 0, size = 0;
-				minBufSizePlayback = AudioTrack.getMinBufferSize(playbackSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 				Logger.d(VoIPConstants.TAG, "minBufSizePlayback: " + minBufSizePlayback);
 			
 				setAudioModeInCall();
@@ -1339,7 +1369,9 @@ public class VoIPService extends Service {
 					if (dp != null) {
 						decodedBuffersQueue.poll();
 
-						// audioTrack.write(dp.getData(), 0, dp.getLength());
+						// AEC
+						if (solicallAec != null)
+							solicallAec.processSpeaker(dp.getData());
 
 						// For streaming mode, we must write data in chunks <= buffer size
 						index = 0;
