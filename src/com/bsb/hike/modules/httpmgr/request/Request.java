@@ -12,6 +12,7 @@ import com.bsb.hike.modules.httpmgr.Header;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.request.facade.IRequestFacade;
 import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
+import com.bsb.hike.modules.httpmgr.request.listener.IProgressListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
@@ -51,6 +52,8 @@ public class Request implements IRequestFacade
 	private IRequestCancellationListener requestCancellationListener;
 
 	private IPreProcessListener preProcessListener;
+
+	private IProgressListener progressListener;
 
 	private boolean responseOnUIThread;
 
@@ -187,6 +190,16 @@ public class Request implements IRequestFacade
 	public IRequestCancellationListener getRequestCancellationListener()
 	{
 		return requestCancellationListener;
+	}
+
+	/**
+	 * Returns the {@link IProgressListener} object , used to update the request progress
+	 * 
+	 * @return
+	 */
+	public IProgressListener getProgressListener()
+	{
+		return progressListener;
 	}
 
 	/**
@@ -329,6 +342,16 @@ public class Request implements IRequestFacade
 	}
 
 	/**
+	 * Sets the progress listener of the request {@link IProgressListener}
+	 * 
+	 * @param progressListener
+	 */
+	public void setProgressListener(IProgressListener progressListener)
+	{
+		this.progressListener = progressListener;
+	}
+
+	/**
 	 * Sets the future of the runnable submitted to the executor
 	 * 
 	 * @param future
@@ -353,6 +376,19 @@ public class Request implements IRequestFacade
 		if (this.requestCancellationListener != null)
 		{
 			this.requestCancellationListener.onCancel();
+		}
+	}
+
+	/**
+	 * Used to update the progress of the request
+	 * 
+	 * @param f
+	 */
+	public void publishProgress(float f)
+	{
+		if (this.progressListener != null)
+		{
+			this.progressListener.onProgressUpdate(f);
 		}
 	}
 

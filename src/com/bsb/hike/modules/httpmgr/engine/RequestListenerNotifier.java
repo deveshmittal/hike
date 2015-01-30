@@ -146,11 +146,56 @@ public class RequestListenerNotifier
 	}
 
 	/**
+	 * This method notifies the listeners about the request progress in percentage. Calls {@link IRequestListener#onRequestProgressUpdate(float)} for each listener of the request
 	 * 
 	 * @param request
+	 * @param progress
 	 */
-	public void notifyListenersOfRequestProgress(Request request)
+	public void notifyListenersOfRequestProgress(Request request, float progress)
 	{
-		// TODO
+		if (!request.isAsynchronous())
+		{
+			// send response on same thread
+			sendProgress(request, progress);
+		}
+		else if (request.isResponseOnUIThread())
+		{
+			// send response on ui thread
+			ResponseCall call = getResponseCall(request, progress);
+			uiExecuter.execute(call);
+		}
+		else
+		{
+			// send response on other thread
+			ResponseCall call = getResponseCall(request, progress);
+			engine.submit(call);
+		}
+	}
+
+	private void sendProgress(Request request, float progress)
+	{
+		if (request.isCancelled())
+		{
+			return;
+		}
+
+		CopyOnWriteArrayList<IRequestListener> listeners = request.getRequestListeners();
+		for (IRequestListener listener : listeners)
+		{
+			listener.onRequestProgressUpdate(progress);
+		}
+	}
+
+	private ResponseCall getResponseCall(final Request request, final float progress)
+	{
+		ResponseCall call = new ResponseCall()
+		{
+			@Override
+			public void execute()
+			{
+				sendProgress(request, progress);
+			}
+		};
+		return call;
 	}
 }

@@ -3,6 +3,7 @@ package com.bsb.hike.modules.httpmgr.request.requestbody;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.bsb.hike.modules.httpmgr.request.Request;
 import com.squareup.okhttp.RequestBody;
 
 /**
@@ -37,7 +38,7 @@ public interface IRequestBody
 	 * @param out
 	 * @throws IOException
 	 */
-	void writeTo(OutputStream out) throws IOException;
+	void writeTo(Request request, OutputStream out) throws IOException;
 
 	/**
 	 * Returns the request body of okhttp that are processed in internal classes

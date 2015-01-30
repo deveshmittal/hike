@@ -24,6 +24,10 @@ public interface IRequestListener
 	 */
 	void onRequestSuccess(Response result);
 
-	
-	void onProgressUpdate();
+	/**
+	 * Sends the request progress in percentage
+	 * 
+	 * @param progress
+	 */
+	void onRequestProgressUpdate(float progress);
 }

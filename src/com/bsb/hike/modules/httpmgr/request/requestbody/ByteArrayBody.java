@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
+import com.bsb.hike.modules.httpmgr.request.Request;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.RequestBody;
 
@@ -77,7 +78,7 @@ public class ByteArrayBody implements IRequestBody
 	}
 
 	@Override
-	public void writeTo(OutputStream out) throws IOException
+	public void writeTo(Request request, OutputStream out) throws IOException
 	{
 		out.write(bytes);
 	}

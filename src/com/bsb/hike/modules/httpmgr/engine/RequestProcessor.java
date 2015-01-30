@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.bsb.hike.modules.httpmgr.client.ClientOptions;
 import com.bsb.hike.modules.httpmgr.request.Request;
+import com.bsb.hike.modules.httpmgr.request.listener.IProgressListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListener;
 
 /**
@@ -57,6 +58,17 @@ public class RequestProcessor
 				}
 			};
 			request.setRequestCancellationListener(listener);
+
+			IProgressListener progressListener = new IProgressListener()
+			{
+				@Override
+				public void onProgressUpdate(float progress)
+				{
+					requestListenerNotifier.notifyListenersOfRequestProgress(request, progress);
+				}
+			};
+			request.setProgressListener(progressListener);
+
 			requestRunner.submit(request, options);
 		}
 	}

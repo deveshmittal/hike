@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.bsb.hike.modules.httpmgr.request.Request;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.RequestBody;
 
@@ -80,18 +81,21 @@ public class FileBody implements IRequestBody
 	{
 		return file.getName();
 	}
-	
+
 	@Override
-	public void writeTo(OutputStream out) throws IOException
+	public void writeTo(Request request, OutputStream out) throws IOException
 	{
 		byte[] buffer = new byte[BUFFER_SIZE];
 		FileInputStream in = new FileInputStream(file);
+		float progress = 0;
 		try
 		{
 			int read;
 			while ((read = in.read(buffer)) != -1)
 			{
 				out.write(buffer, 0, read);
+				progress += read;
+				request.publishProgress(progress / length());
 			}
 		}
 		finally

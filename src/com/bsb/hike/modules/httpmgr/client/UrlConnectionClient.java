@@ -69,7 +69,7 @@ public class UrlConnectionClient extends OkClient
 				connection.setChunkedStreamingMode(CHUNK_SIZE);
 			}
 
-			body.writeTo(connection.getOutputStream());
+			body.writeTo(request,connection.getOutputStream());
 		}
 	}
 
