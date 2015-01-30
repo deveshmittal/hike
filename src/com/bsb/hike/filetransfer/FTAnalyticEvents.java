@@ -34,6 +34,22 @@ public class FTAnalyticEvents
 	public static final String FT_ATTACHEMENT_TYPE = "at";
 
 	public static final String FT_STATUS = "s";
+
+	private static final String VIDEO_INPUT_RESOLUTION = "inputRes";
+
+	private static final String VIDEO_OUTPUT_RESOLUTION = "outRes";
+
+	private static final String VIDEO_INPUT_SIZE = "inputSize";
+
+	private static final String VIDEO_OUTPUT_SIZE = "outSize";
+
+	private static final String VIDEO_COMPRESS_STATE = "vidCompSt";
+
+	private static final String VIDEO_COMPRESSION = "videoCompression";
+
+	private static final String QUICK_UPLOAD = "quickUpload";
+
+	private static final String QUICK_UPLOAD_STATUS = "quSt";
 	
 	public static final int FT_SUCCESS = 0;
 
@@ -181,6 +197,68 @@ public class FTAnalyticEvents
 			object.put(HikeConstants.DATA, data);
 
 			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
+		}
+		catch (JSONException e)
+		{
+			Logger.e("FTAnalyticsEvent", "Exception is sending analytics event for file transfer", e);
+		}
+	}
+	
+	/*
+	 * Send an event for video compression
+	 */
+	public static void sendVideoCompressionEvent(String inputRes, String outRes, int inputSize, int outSize, int compressedState)
+	{
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(VIDEO_INPUT_RESOLUTION, inputRes);
+			metadata.put(VIDEO_OUTPUT_RESOLUTION, outRes);
+			metadata.put(VIDEO_INPUT_SIZE, inputSize);
+			metadata.put(VIDEO_OUTPUT_SIZE, outSize);
+			metadata.put(VIDEO_COMPRESS_STATE, compressedState);
+
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
+			data.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.LogEvent.TAG, VIDEO_COMPRESSION);
+
+			JSONObject object = new JSONObject();
+			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
+			object.put(HikeConstants.DATA, data);
+
+			Logger.d("FTAnalyticsEvent", "Video comp event = " + object.toString());
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+		}
+		catch (JSONException e)
+		{
+			Logger.e("FTAnalyticsEvent", "Exception is sending analytics event for file transfer", e);
+		}
+	}
+
+	/*
+	 * Send an event for video compression
+	 */
+	public static void sendQuickUploadEvent(int quickUploadStatus)
+	{
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(QUICK_UPLOAD_STATUS, quickUploadStatus);
+
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
+			data.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.LogEvent.TAG, QUICK_UPLOAD);
+
+			JSONObject object = new JSONObject();
+			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
+			object.put(HikeConstants.DATA, data);
+
+			Logger.d("FTAnalyticsEvent", "Quick upload event = " + object.toString());
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
 		}
 		catch (JSONException e)
 		{
