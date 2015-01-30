@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.NUXTaskDetails;
@@ -58,6 +59,11 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		processViewElemets();
 		
 		Logger.d("footer","onCreateFinished");
+		
+		/**
+		 * Cancelling all notifications ...
+		 */
+		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
 
 	}
 

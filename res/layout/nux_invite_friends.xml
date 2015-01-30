@@ -42,7 +42,7 @@
         android:layout_gravity="center"
         android:layout_weight=".3"
         android:background="#00000000"
-        android:src="@drawable/ic_nuxinvite"
+        android:src="@drawable/art_default_stickers_nux"
         android:textStyle="italic" />
 
     <com.bsb.hike.view.CustomFontTextView
