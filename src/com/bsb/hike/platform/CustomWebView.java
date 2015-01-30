@@ -1,5 +1,8 @@
 package com.bsb.hike.platform;
 
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
@@ -41,35 +44,52 @@ public class CustomWebView extends WebView
 	public void onWindowVisibilityChanged(int visibility)
 	{
 		super.onWindowVisibilityChanged(visibility);
-
 		if (visibility == View.GONE)
 		{
-
-			try
-			{
-				WebView.class.getMethod("onPause").invoke(this);//stop flash
-				this.pauseTimers();
-				this.is_gone = true;
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-
+			onWebViewGone();
 		}
 		else if (visibility == View.VISIBLE)
 		{
-			try
+			onWebViewVisible();
+		}
+	}
+	
+	@SuppressLint("NewApi")
+	public void onWebViewGone()
+	{
+		Logger.i("customWebView", "on webview gone "+this.hashCode());
+		try
+		{
+			if(Utils.isHoneycombOrHigher())
 			{
-				WebView.class.getMethod("onResume").invoke(this);//resume flash
-				this.resumeTimers();
-				this.is_gone = false;
+				this.onPause();
 			}
-			catch (Exception e)
+			// we giving callback to javascript to stop heavy processing
+			this.loadUrl("javascript:onPause()");
+			this.is_gone = true;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	@SuppressLint("NewApi")
+	public void onWebViewVisible()
+	{
+		Logger.i("customWebView", "on webview visible "+this.hashCode());
+		try
+		{
+			if(Utils.isHoneycombOrHigher())
 			{
-				e.printStackTrace();
+				this.onResume();
 			}
-
+			this.loadUrl("javascript:onResume()");
+			this.is_gone = false;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 
@@ -77,6 +97,7 @@ public class CustomWebView extends WebView
 	@Override
 	public void onDetachedFromWindow()
 	{
+		Logger.i("customwebview", "on detach called");
 		if (this.is_gone)
 		{
 			try
