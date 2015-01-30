@@ -5,13 +5,15 @@ import android.util.Log;
 import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 import java.io.File;
 
 public class PlatformContent
 {
 
-	private static byte isInitialized = 0;
+	private static boolean isInitialized;
 
 	private PlatformContent()
 	{
@@ -36,18 +38,19 @@ public class PlatformContent
 	 */
 	public static PlatformContentRequest getContent(String contentData, PlatformContentListener<PlatformContentModel> listener)
 	{
-		if (isInitialized == 0)
+		if (!isInitialized)
 		{
-			if (PlatformContentUtils.hasStorage(true) && AppConfig.ALLOW_STAGING_TOGGLE)
+			if (Utils.getExternalStorageState() == ExternalStorageState.WRITEABLE)
 			{
-				//Do nothing
+				PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getExternalFilesDir(null) + File.separator
+						+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
 			}
 			else
 			{
 				PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
 						+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
 			}
-			isInitialized = 1;
+			isInitialized = true;
 		}
 
 		Logger.d("PlatformContent", "Content Dir : " + PlatformContentConstants.PLATFORM_CONTENT_DIR);
