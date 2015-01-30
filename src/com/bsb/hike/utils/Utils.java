@@ -2298,9 +2298,16 @@ public class Utils
 
 		if (ringerMode != AudioManager.RINGER_MODE_SILENT)
 		{
-			Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-			if (vibrator != null)
-				vibrator.vibrate(100);
+			vibrate(context, 100);
+		}
+	}
+
+	public static void vibrate(Context context, int msecs)
+	{
+		Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+		if (vibrator != null)
+		{
+			vibrator.vibrate(msecs);
 		}
 	}
 

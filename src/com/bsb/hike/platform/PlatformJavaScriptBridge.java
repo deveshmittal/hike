@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.webkit.JavascriptInterface;
@@ -60,7 +59,11 @@ public class PlatformJavaScriptBridge
 	public void showToast(String toast)
 	{
 		Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+	}
 
+	public void vibrate(String msecs)
+	{
+		Utils.vibrate(mContext, Integer.parseInt(msecs));
 	}
 
 	@JavascriptInterface
