@@ -34,6 +34,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -874,19 +876,6 @@ public void onTrimMemory(int level)
 	// AC packet cbot and delete using the ac packet dbot.
 	private void cricketBotEntry()
 	{
-		Logger.d("create bot", "cricket bot entry started" );
-		final JSONObject jsonObject = new JSONObject();
-		try
-		{
-			jsonObject.put(HikeConstants.MSISDN, HikePlatformConstants.CRICKET_BOT_MSISDN);
-			jsonObject.put(HikeConstants.NAME, HikePlatformConstants.CRICKET_BOT_NAME);
-			jsonObject.put(HikeConstants.BOT_CHAT_THEME, HikePlatformConstants.CRICKET_CHAT_THEME_ID);
-
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
 		HikeHandlerUtil mThread = HikeHandlerUtil.getInstance();
 		mThread.startHandlerThread();
 		mThread.postRunnableWithDelay(new Runnable()
@@ -894,12 +883,32 @@ public void onTrimMemory(int level)
 			@Override
 			public void run()
 			{
+				Logger.d("create bot", "cricket bot entry started");
+				final JSONObject jsonObject = new JSONObject();
+				try
+				{
+					jsonObject.put(HikeConstants.MSISDN, HikePlatformConstants.CRICKET_BOT_MSISDN);
+					jsonObject.put(HikeConstants.NAME, HikePlatformConstants.CRICKET_BOT_NAME);
+					jsonObject.put(HikeConstants.BOT_CHAT_THEME, HikePlatformConstants.CRICKET_CHAT_THEME_ID);
+
+					BitmapDrawable drawable = (BitmapDrawable) getApplicationContext().getResources().getDrawable(R.drawable.crick_icon);
+					String base64Icon = Utils.drawableToString(drawable);
+					if (base64Icon != null)
+					{
+						jsonObject.put(HikeConstants.BOT_THUMBNAIL, base64Icon);
+					}
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+
 				MqttMessagesManager.getInstance(getApplicationContext()).createBot(jsonObject);
 			}
 		}, 0);
 
 	}
-	
+
 	public static HikeMessengerApp getInstance()
 	{
 		return _instance;

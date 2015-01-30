@@ -14,6 +14,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,14 +64,14 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	BaseAdapter adapter;
 
-	private HashMap<Integer, String> cardAlarms;
+	private SparseArray<String> cardAlarms;
 
 	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages, BaseAdapter adapter)
 	{
 		this.mContext = context;
 		this.adapter = adapter;
 		this.convMessages = convMessages;
-		cardAlarms = new HashMap<Integer, String>();
+		cardAlarms = new SparseArray<String>(3);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.PLATFORM_CARD_ALARM, this);
 	}
 
@@ -254,6 +255,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				@Override
 				public void onFailure(ErrorCode reason)
 				{
+					Logger.e(tag, "on failure called "+reason);
 					if (reason == ErrorCode.DOWNLOADING)
 					{
 						// Do nothing
@@ -276,9 +278,10 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			Logger.i(tag, "either tag is not null ");
 			int mId = (int) convMessage.getMsgID();
-			if (cardAlarms.containsKey(mId))
+			String alarm;
+			if ((alarm = cardAlarms.get(mId))!=null)
 			{
-				viewHolder.myBrowser.loadUrl("javascript:alarmPlayed(" + "'" + cardAlarms.get(mId) + "')");
+				viewHolder.myBrowser.loadUrl("javascript:alarmPlayed(" + "'" + alarm + "')");
 				cardAlarms.remove(mId);
 			}
 		}
@@ -303,7 +306,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	{
 		holder.webViewClient.convMessage = convMessage;
 		holder.platformJavaScriptBridge.updateConvMessage(convMessage);
-		Logger.d("Filling content: ", content == null ? "CONTENT IS NULL!!":""+content.getFormedData());
+		Logger.d("content"+holder.id, content == null ? "CONTENT IS NULL!!":""+content.getFormedData());
 		web.loadDataWithBaseURL("", content.getFormedData(), "text/html", "UTF-8", "");
 	}
 
@@ -338,6 +341,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		@Override
 		public void onPageFinished(WebView view, String url)
 		{
+			super.onPageFinished(view, url);
 			Log.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
 			view.loadUrl("javascript:setData(" + "'" + convMessage.getMsgID() + "','" + convMessage.getMsisdn() + "','"
 					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "','" + convMessage.isSent() +  "')");
@@ -346,7 +350,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			if (!TextUtils.isEmpty(alarmData))
 			{
 				view.loadUrl("javascript:alarmPlayed(" + "'" + alarmData + "')");
-				cardAlarms.remove(convMessage.getMsgID()); // to avoid calling from getview
+				cardAlarms.remove((int)convMessage.getMsgID()); // to avoid calling from getview
 			}
 			try
 			{
@@ -485,7 +489,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 					argViewHolder.cardFadeScreen.setVisibility(View.GONE);
 				}
 			}
-		}, 500);
+		}, 300);
 	}
 
 	private static DecelerateInterpolator decInterpolator = new DecelerateInterpolator();
