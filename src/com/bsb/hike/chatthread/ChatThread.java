@@ -44,9 +44,11 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.style.StyleSpan;
 import android.util.Pair;
 import android.view.GestureDetector;
@@ -138,7 +140,7 @@ import com.bsb.hike.utils.Utils;
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener,
 		CaptureImageListener, PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener,
-		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener
+		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher
 {
 	private static final String TAG = "chatthread";
 
@@ -1148,7 +1150,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		/* get the number of credits and also listen for changes */
 		int mCredits = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
-
+		
 		mComposeViewWatcher = new ComposeViewWatcher(mConversation, mComposeView, (ImageButton) activity.findViewById(R.id.send_message), mCredits,
 				activity.getApplicationContext());
 
@@ -3533,4 +3535,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		return activity;
 	}
+	
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count)
+	{
+	}
+	
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count, int after)
+	{
+	}
+	
 }

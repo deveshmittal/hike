@@ -12,6 +12,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -1464,6 +1465,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		default:
 			break;
+		}
+	}
+	
+	@Override
+	public void afterTextChanged(Editable s)
+	{
+		if (!mConversation.isOnhike())
+		{
+			updateChatMetadata();
 		}
 	}
 

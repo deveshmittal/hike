@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Message;
+import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
@@ -48,6 +49,7 @@ import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.PinHistoryActivity;
+import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.HikeTip;
@@ -82,6 +84,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	private static final int PARTICIPANT_JOINED_OR_LEFT_GROUP = 207;
 	
 	private static final String TAG = "groupchatthread";
+	
+	private HashSpanWatcher mHashSpanWatcher;
 
 	protected GroupConversation groupConversation;
 
@@ -1255,4 +1259,21 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		super.takeActionBasedOnIntent();
 	}
 	
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count, int after)
+	{
+		if (mHashSpanWatcher != null)
+		{
+			mHashSpanWatcher.onTextChanged(s, start, count, after);
+		}
+	}
+	
+	@Override
+	public void afterTextChanged(Editable s)
+	{
+		if (mHashSpanWatcher != null)
+		{
+			mHashSpanWatcher.afterTextChanged(s);
+		}
+	}
 }
