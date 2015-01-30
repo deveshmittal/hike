@@ -2312,9 +2312,16 @@ public class Utils
 
 		if (ringerMode != AudioManager.RINGER_MODE_SILENT)
 		{
-			Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-			if (vibrator != null)
-				vibrator.vibrate(100);
+			vibrate(100);
+		}
+	}
+
+	public static void vibrate(int msecs)
+	{
+		Vibrator vibrator = (Vibrator) HikeMessengerApp.getInstance().getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
+		if (vibrator != null)
+		{
+			vibrator.vibrate(msecs);
 		}
 	}
 

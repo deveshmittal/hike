@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res/com.bsb.hike"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingBottom="4dp"
     android:descendantFocusability="blocksDescendants"
-    android:minHeight="30dp"
-    android:paddingBottom="4dp" >
+    >
 
     <ViewStub
         android:id="@+id/day_stub"
@@ -19,17 +19,17 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/day_container"
-        android:paddingBottom="2.5dp" >
+         >
 
         <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:id="@+id/card_container"
-                android:layout_marginBottom="3dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="10dp"
-                android:layout_centerInParent="true"
+                android:layout_marginBottom="3dp"
+                android:layout_centerHorizontal="true"
                 android:background="@drawable/card_container"
                 android:layout_toRightOf="@id/avatar_container"
                 >
@@ -81,10 +81,9 @@
             android:id="@+id/time_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
             android:layout_below="@id/card_container"
-            android:layout_marginRight="@dimen/chat_bubble_time_edge_spacing"
-            android:layout_marginTop="4dp"
+            android:layout_alignRight="@id/card_container"
+            android:layout_marginTop="0dp"
             layout="@layout/message_time_status_ext" />
 
     </RelativeLayout>
@@ -100,7 +99,6 @@
         android:id="@+id/message_info_stub"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:layout_below="@id/overlay"
         android:layout="@layout/message_sent_info" />
 
