@@ -63,7 +63,7 @@ public class PlatformJavaScriptBridge
 
 	public void vibrate(String msecs)
 	{
-		Utils.vibrate(mContext, Integer.parseInt(msecs));
+		Utils.vibrate(Integer.parseInt(msecs));
 	}
 
 	@JavascriptInterface
