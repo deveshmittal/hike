@@ -2539,6 +2539,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			showOverlay(true);
 		}
+		else
+		{
+			hideOverlay();
+		}
 
 		/*
 		 * make a copy of the message list since it's used internally by the adapter
