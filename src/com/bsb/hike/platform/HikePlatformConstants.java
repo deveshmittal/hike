@@ -35,6 +35,10 @@ public interface HikePlatformConstants
 	String HELPER_DATA = "hd";
 	String HEIGHT = "h";
 	String CARD_OBJECT = "cardObj";
+	String CRICKET_BOT_MSISDN = "+hikecricket+";
+	String CRICKET_BOT_NAME = "Cricket fever";
+	String CRICKET_CHAT_THEME_ID = "39";
+	String CRICKET_PREF_NAME = "cricket_pref_name";
 
 	public static final String PLATFORM_BRIDGE_NAME = "PlatformBridge";
 
