@@ -47,11 +47,6 @@
 			android:padding="13dp"/>
         </LinearLayout>>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2px"
-        android:background="#e6e6e6" />
-        
 	<HorizontalScrollView 
 		    android:layout_width="match_parent"
 		    android:layout_height="wrap_content"

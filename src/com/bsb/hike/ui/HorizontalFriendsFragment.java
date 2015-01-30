@@ -5,20 +5,8 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.bsb.hike.NUXConstants;
-import com.bsb.hike.R;
-import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.NuxSelectFriends;
-import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.NUXManager;
-
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
@@ -32,10 +20,18 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.ImageView.ScaleType;
-import android.view.View.OnLayoutChangeListener;
+
+import com.bsb.hike.NUXConstants;
+import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.NuxSelectFriends;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
 
 
 public class HorizontalFriendsFragment extends Fragment implements OnClickListener{
@@ -52,7 +48,23 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 	private TextView nxtBtn;
 	private ImageView backBtn;
 	private HashSet<String> contactsDisplayed;
-
+	
+	private void changeLayoutParams(){
+		WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+    	Display display = wm.getDefaultDisplay();
+    	Logger.d("UmangX", "message : " + display.getWidth()+ " "+ viewStack.getWidth());
+    	if(viewStack.getWidth() < display.getWidth()){
+    		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.MATCH_PARENT);
+    		params.gravity = Gravity.CENTER;
+    		viewStack.setLayoutParams(params);
+    	}
+    	else {
+    		Logger.d("UmangX", "" + viewStack.getChildAt(0).getWidth() + "  " + NUXManager.getInstance().getCountLockedContacts());
+    		scrollHorizontalView(contactsDisplayed.size(), viewStack.getChildAt(0).getWidth());
+    	}
+	}
+	
     @Override
     public View onCreateView(LayoutInflater inf, ViewGroup parent, Bundle savedInstanceState) {
 
@@ -73,29 +85,11 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		selectFriends = nm.getNuxSelectFriendsPojo();
 		preSelectedCount = nm.getCountLockedContacts() + nm.getCountUnlockedContacts();
 		
-		viewStack.addOnLayoutChangeListener(new OnLayoutChangeListener() {
-		    @Override
-		    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
-		                    int oldTop, int oldRight, int oldBottom) {
-		    	WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-		    	Display display = wm.getDefaultDisplay();
-		    	Point p = new Point();
-		    	display.getSize(p);
-		    	Logger.d("UmangX", "message : " + p.x + " "+ viewStack.getWidth());
-		    	if(viewStack.getWidth() < p.x){
-		    		 
-		    		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-		                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.MATCH_PARENT);
-		    		//params.weight = 1.0f;
-		    		params.gravity = Gravity.CENTER;
-		    		viewStack.setLayoutParams(params);
-		    	}
-		    	else {
-		    		Logger.d("UmangX", "" + viewStack.getChildAt(0).getWidth() + "  " + NUXManager.getInstance().getCountLockedContacts());
-		    		scrollHorizontalView(3, viewStack.getChildAt(0).getWidth());
-		    	}
-		    	//viewStack.removeOnLayoutChangeListener(this);
-		    }
+		viewStack.post(new Runnable() {	
+			@Override
+			public void run() {
+				changeLayoutParams();			
+			}
 		});
 		//First Time Nux
 		if(nm.getCurrentState() == NUXConstants.NUX_NEW || nm.getCurrentState()==NUXConstants.NUX_SKIPPED)
@@ -133,7 +127,8 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 			}
 		} else if (getActivity() instanceof ComposeChatActivity) {
 			nxtBtn.setText(selectFriends.getButText());
-			for (String msisdn : nm.getLockedContacts()) {
+			contactsDisplayed.addAll(nm.getLockedContacts());
+			for (String msisdn : contactsDisplayed) {
 				addContactView(msisdn, viewStack.getChildCount());
 			}
 			for (int i = 0; i < maxShowListCount - preSelectedCount; i++) 
