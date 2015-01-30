@@ -39,7 +39,7 @@ public class PlatformContentModel
 	@Expose
 	public PlatformCardObjectModel fwdCardObj;
 
-	private int mAppHash;
+	private int mAppHash = -1;
 
 	/*
 	 * (non-Javadoc)
