@@ -489,7 +489,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 					argViewHolder.cardFadeScreen.setVisibility(View.GONE);
 				}
 			}
-		}, 500);
+		}, 300);
 	}
 
 	private static DecelerateInterpolator decInterpolator = new DecelerateInterpolator();

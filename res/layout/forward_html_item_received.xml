@@ -2,9 +2,9 @@
     xmlns:app="http://schemas.android.com/apk/res/com.bsb.hike"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingBottom="4dp"
     android:descendantFocusability="blocksDescendants"
-    android:minHeight="30dp"
-    android:paddingBottom="4dp" >
+     >
 
     <ViewStub
         android:id="@+id/day_stub"
@@ -16,8 +16,10 @@
         android:id="@+id/overlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_below="@+id/day_container"
-        android:paddingBottom="2.5dp" >
+        android:paddingBottom="4dp"
+        >
 
         <include
             android:id="@+id/avatar_container"
@@ -39,14 +41,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/card_container"
-                android:layout_centerInParent="true"
+                android:layout_centerHorizontal="true"
                 android:layout_below="@id/sender_details"
                 android:layout_toRightOf="@id/avatar_container"
                 android:background="@drawable/card_container"
-                android:layout_marginBottom="3dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_marginTop="3dp"
+                android:layout_marginBottom="3dp"
                 >
 
             <com.bsb.hike.platform.CustomWebView
@@ -92,14 +94,18 @@
 
         </RelativeLayout>
 
+
         <include
-                android:id="@+id/time_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/card_container"
-                android:layout_marginLeft="@dimen/chat_bubble_time_edge_spacing"
-                android:layout_toRightOf="@id/avatar_container"
-                layout="@layout/message_time_status_ext" />
+            android:id="@+id/time_status"
+            android:layout_alignLeft="@id/card_container"
+            android:layout_toRightOf="@id/avatar_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_container"
+            layout="@layout/message_time_status_ext"
+                />
+
+
 
     </RelativeLayout>
 

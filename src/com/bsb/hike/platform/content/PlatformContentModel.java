@@ -39,7 +39,7 @@ public class PlatformContentModel
 	@Expose
 	public PlatformCardObjectModel fwdCardObj;
 
-	private int mAppHash;
+	private int mAppHash = -1;
 
 	/*
 	 * (non-Javadoc)
@@ -372,6 +372,16 @@ public class PlatformContentModel
 			this.hd = hd;
 		}
 
+		public String getH()
+		{
+			return h;
+		}
+
+		public void setH(String h)
+		{
+			this.h = h;
+		}
+
 		@Expose
 		public String appName;
 
@@ -398,6 +408,9 @@ public class PlatformContentModel
 
 		@Expose
 		public JsonObject hd;
+
+		@Expose
+		public String h;
 
 	}
 

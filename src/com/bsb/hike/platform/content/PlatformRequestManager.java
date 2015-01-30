@@ -159,6 +159,8 @@ class PlatformRequestManager
 		argRequest.setState(PlatformContentRequest.STATE_CANCELLED);
 
 		Log.d(TAG, "remove request - " + argRequest.getContentData().getContentJSON());
+		
+		getCurrentDownloadingTemplates().clear();
 
 		boolean status = requestQueue.remove(argRequest);
 
