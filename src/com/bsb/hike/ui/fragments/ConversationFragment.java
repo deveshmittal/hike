@@ -80,6 +80,7 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.HikeUser;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
+import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeFragmentable;
 import com.bsb.hike.ui.HikeListActivity;
@@ -238,7 +239,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		NOTVIEWED, VIEWED, DELETED
 	};
 
-	public static enum footerState
+	public  enum footerState
 	{
 		OPEN(0), HALFOPEN(1), CLOSED(2);
 		
@@ -257,7 +258,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			Logger.d("footer", "Footer state set = " + value + "");
 			val = value;
-
+			
 		}
 	};
 	View parent;
@@ -440,11 +441,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			
 			}
 		}
+		
+		
 		if (!(mmNuxManager.getCurrentState()==NUXConstants.COMPLETED))
 		{
 			progressNux.setProgress(NUXManager.getInstance().getCountUnlockedContacts() / ((float) mmDetails.getMin()));
+		
+			if(footerState.getEnum()==footerState.HALFOPEN)
+			{
+				
+			
 			chatProgress.setText(String.format(mmReward.getStatusText(), mmNuxManager.getCountUnlockedContacts(), mmDetails.getMin()));
-
+			}
+			else
+			{
+				chatProgress.setText(mmReward.getDetailsText());
+			}
 		}
 		else
 		{
@@ -503,7 +515,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				llInviteOptions.setVisibility(View.GONE);
 			}
-
+			
+			
+			chatProgress.setText(NUXManager.getInstance().getNuxChatRewardPojo().getDetailsText());
+			
 			footerState.setEnumState(footerState.HALFOPEN);
 			changeFooterControllerBackground(footerState.HALFOPEN);
 		}
@@ -561,15 +576,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 				//Will remove after testing
 				
-				/*if (mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+				if (mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
 				{
-					chatProgress.setText(mmReward.getTapToClaimText());
+					
 				}
 				else
 				{
 					chatProgress.setText(String.format(mmReward.getStatusText(), mmNuxManager.getCountUnlockedContacts(), mmDetails.getMin()));
 					progressNux.setProgress(NUXManager.getInstance().getCountUnlockedContacts() / mmDetails.getMin());
-				}*/
+				}
 				if (Utils.isHoneycombOrHigher())
 					ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).start();
 				else
@@ -2958,6 +2973,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			
 			if (NUXManager.getInstance().isReminderReceived())
 			{
+				
 				switch(footerState.getEnum())
 				{
 				case OPEN:
@@ -2981,8 +2997,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 					break;
 				}
+				
 				fillNuxFooterElements();
-
 				NUXManager.getInstance().reminderShown();
 			}
 			else
