@@ -93,6 +93,7 @@ public class NuxSendCustomMessageActivity extends HikeAppStateBaseFragmentActivi
 		if (!TextUtils.isEmpty(mmCustomMessage.getCustomMessage()))
 		{
 			textMessageView.setText(mmCustomMessage.getCustomMessage());
+			textMessageView.setSelection(mmCustomMessage.getCustomMessage().length());
 		}
 		
 		tapToChangeView.setText(mmCustomMessage.getIndicatorText());
@@ -100,7 +101,7 @@ public class NuxSendCustomMessageActivity extends HikeAppStateBaseFragmentActivi
 	
 	public String getCustomMessage(){
 		if(TextUtils.isEmpty(textMessageView.getText())){
-			return NUXManager.getInstance().getNuxCustomMessagePojo().getIndicatorText();
+			return NUXManager.getInstance().getNuxCustomMessagePojo().getCustomMessage();
 		} else {
 			return textMessageView.getText().toString();
 		}

@@ -29,6 +29,13 @@
             android:textSize="16sp"
             android:id="@+id/nux_header_selection_text"
             />
+        
+        <View
+           android:layout_width="1dp"
+           android:layout_height="match_parent"
+           android:layout_marginBottom="12dp"
+           android:layout_marginTop="12dp"
+           android:background="#e6e6e6" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:layout_weight=".2"
@@ -39,6 +46,11 @@
 			android:layout_gravity="right"
 			android:padding="13dp"/>
         </LinearLayout>>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2px"
+        android:background="#e6e6e6" />
         
 	<HorizontalScrollView 
 		    android:layout_width="match_parent"
@@ -50,8 +62,14 @@
 		      	android:layout_height="wrap_content"
 		      	android:paddingLeft="12dp"
 		    	android:paddingRight="12dp"
-		        android:orientation="horizontal" />  
+		        android:orientation="horizontal" />
 		            
-	</HorizontalScrollView>  
+	</HorizontalScrollView>
 	
+	<LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:background="@drawable/repeat_shadow"/>
+	
+    
 </LinearLayout>

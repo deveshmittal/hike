@@ -74,35 +74,34 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		else if(nm.getCurrentState() == NUXConstants.NUX_IS_ACTIVE)
 		{
 			maxShowListCount = nm.getNuxTaskDetailsPojo().getMax();
-			for (String msisdn : nm.getLockedContacts()) {
-				addContactView(msisdn, viewStack.getChildCount());
-			}
-			showNextButton(true);
-			scrollHorizontalView(0, viewStack.getChildAt(0).getWidth());
+			//scrollHorizontalView(0, viewStack.getChildAt(0).getWidth());
 		}
 		
 		//this only appears for custom message screen
 		if (getActivity() instanceof NuxSendCustomMessageActivity) 
 		{
+
+			showNextButton(true);
 			nxtBtn.setText(nm.getNuxCustomMessagePojo().getButText());
+			//only when jumping from Compose Chat Activity
 			if(!TextUtils.isEmpty(selectedFriendsString))
 			{
 				String[] arrmsisdn = selectedFriendsString.split(NUXConstants.STRING_SPLIT_SEPERATOR);
 				contactsDisplayed.addAll(Arrays.asList(arrmsisdn));
 			}
+			//remind me button 
+			else {
+				contactsDisplayed.addAll(nm.getLockedContacts());
+			}
 			for (String msisdn : contactsDisplayed) 
 			{
-				// do not remove locked contacts when selectedFriends is not empty, because it indicated
-				// that previous screen was used for choosing friends
-				if(nm.getUnlockedContacts().contains(msisdn) || (nm.getLockedContacts().contains(msisdn) && TextUtils.isEmpty(selectedFriendsString)) )
-				{
-					viewStack.removeView(viewMap.get(msisdn));
-				}
-				else
-					addContactView(msisdn, viewStack.getChildCount());			
+				addContactView(msisdn, viewStack.getChildCount());		
 			}
 		} else if (getActivity() instanceof ComposeChatActivity) {
 			nxtBtn.setText(selectFriends.getButText());
+			for (String msisdn : nm.getLockedContacts()) {
+				addContactView(msisdn, viewStack.getChildCount());
+			}
 			for (int i = 0; i < maxShowListCount - preSelectedCount; i++) 
 				addEmptyView();
 			changeDisplayString(0);
@@ -252,17 +251,18 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 					HashSet<String> contactsNux = new HashSet<String>(viewMap.keySet());
 					nm.startNuxCustomMessage(contactsNux.toString().replace("[", "").replace("]", ""), getActivity());
 					
-			}
-			else if (getActivity() instanceof NuxSendCustomMessageActivity)
-			{
-				nm.sendMessage(contactsDisplayed, ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage());
-				nm.saveNUXContact(contactsDisplayed);
-				nm.sendMsisdnListToServer(contactsDisplayed);
-				nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
-				Intent intent = new Intent(getActivity(), HomeActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-				startActivity(intent);
+				}
+				else if (getActivity() instanceof NuxSendCustomMessageActivity)
+				{
+					nm.sendMessage(contactsDisplayed, ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage());
+					nm.saveNUXContact(contactsDisplayed);
+					Logger.d("UmangX",contactsDisplayed.toString());
+					nm.sendMsisdnListToServer(contactsDisplayed);
+					nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
+					Intent intent = new Intent(getActivity(), HomeActivity.class);
+					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+					startActivity(intent);
 
 				}
 				break;
