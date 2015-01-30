@@ -88,6 +88,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	private HashSpanWatcher mHashSpanWatcher;
 
 	protected GroupConversation groupConversation;
+	
+	private static final String HASH_PIN = "#pin";
 
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -286,6 +288,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	@Override
 	protected void fetchConversationFinished(Conversation conversation)
 	{
+		mHashSpanWatcher = new HashSpanWatcher(mComposeView, HASH_PIN, getResources().getColor(R.color.sticky_yellow));
 		super.fetchConversationFinished(conversation);
 		
 		/**
