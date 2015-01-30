@@ -180,12 +180,12 @@ public class AnalyticsStore
 
 							if(priority == EventPriority.NORMAL)
 							{
-								normal.append(json);
+								normal.append(object);
 								normal.append(AnalyticsConstants.NEW_LINE);
 							}
 							else if(priority == EventPriority.HIGH)
 							{
-								high.append(json);
+								high.append(object);
 								high.append(AnalyticsConstants.NEW_LINE);								
 							}
 						}
