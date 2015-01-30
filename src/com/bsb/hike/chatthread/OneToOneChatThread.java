@@ -1477,4 +1477,17 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 
+	@Override
+	protected void sendButtonClicked()
+	{
+		if (!mConversation.isOnhike() && mCredits <= 0)
+		{
+			if (!Utils.getSendSmsPref(activity.getApplicationContext()))
+			{
+				return;
+			}
+		}
+
+		super.sendButtonClicked();
+	}
 }
