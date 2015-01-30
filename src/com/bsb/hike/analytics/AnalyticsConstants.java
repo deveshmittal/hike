@@ -63,44 +63,106 @@ public class AnalyticsConstants
 	public static String NON_UI_EVENT = "nonUiEvent";
 
 	public static String CLICK_EVENT = "click";
-				
+
 	public static String SUB_TYPE = "st";
-	
-	public static String EVENT_TYPE = "et";		
-	
+
+	public static String EVENT_TYPE = "et";
+
 	public static String EVENT_KEY = "ek";
-	
-	public static String TO = "to";	
-	
+
+	public static String TO = "to";
+
 	public static final String ANALYTICS = "analytics";
-	
+
 	public static final String ANALYTICS_FILESIZE = "analyticsfs";
-	
+
 	public static final String ANALYTICS_TOTAL_SIZE = "totalfs";
-	
+
 	public static final String ANALYTICS_SEND_FREQUENCY = "analyticsfreq";
-	
+
 	public static final String EVENT_SUB_TYPE = "st";
-	
+
 	public static final String EVENT_TAG = "tag";
-	
-	public static final String CURRENT_TIME_STAMP = "cts"; 
-	
+
+	public static final String CURRENT_TIME_STAMP = "cts";
+
 	public static final String EVENT_TAG_MOB = "mob";
-	
-	public static final String EVENT_TAG_CBS = "cbs";	
-	
+
+	public static final String EVENT_TAG_CBS = "cbs";
+
 	public static final String DEVICE_DETAILS = "devicedetails";
-	
+
 	public static final String DEVICE_STATS = "devicestats";
-	
-	public static final String FILE_TRANSFER = "filetransfer";	
-	
+
+	public static final String FILE_TRANSFER = "filetransfer";
+
 	public static final String EXIT_FROM_GALLERY = "exitFromGallery";
-	
+
 	public static final String HIKE_SDK_INSTALL_ACCEPT = "hikeSDKInstallAccept";
-	
+
 	public static final String HIKE_SDK_INSTALL_DECLINE = "hikeSDKInstallDecline";
-	
+
 	public static final String ANALYTICS_THREAD_WRITER = "THREAD-WRITER";
+
+	// Added For Session
+	public static final String SESSION_ID = "sid";
+
+	public static final String CONNECTION_TYPE = "con";
+
+	public static final String SOURCE_APP_OPEN = "src";
+
+	public static final String EVENT_TAG_SESSION = "session";
+
+	public static final String SOURCE_CONTEXT = "srcctx";
+
+	public static final String CONVERSATION_TYPE = "slth";
+
+	public static final String MESSAGE_TYPE = "msg_type";
+
+	public static final String SESSION_EVENT = "session";
+
+	public static final String SESSION_TIME = "tt";
+
+	public static final String APP_OPEN_SOURCE_EXTRA = "appOpenSource";
+
+	public static final String DATA_CONSUMED = "dcon";
+	
+	public static final String FOREGROUND = "fg";
+	
+	public static final String BACKGROUND = "bg";
+
+	public static final class MessageType
+	{
+		public static final String NUDGE = "nudge";
+
+		public static final String STICKER = "stk";
+
+		public static final String TEXT = "text";
+
+		public static final String IMAGE = "image";
+
+		public static final String VEDIO = "video";
+
+		public static final String AUDIO = "audio";
+
+		public static final String LOCATION = "location";
+
+		public static final String CONTACT = "contact";
+	}
+
+	public static final class ConversationType
+	{
+		public static final int NORMAL = 0;
+
+		public static final int STLEATH = 1;
+
+	}
+
+	public static final class AppOpenSource
+	{
+
+		public static final String REGULAR_APP_OPEN = "regular_open";
+
+		public static final String FROM_NOTIFICATION = "notif";
+	}
 }

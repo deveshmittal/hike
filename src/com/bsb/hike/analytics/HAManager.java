@@ -2,18 +2,24 @@ package com.bsb.hike.analytics;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
 import android.os.Environment;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.analytics.AnalyticsConstants.AppOpenSource;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.google.android.gms.internal.fs;
 
 /**
  * @author rajesh
@@ -52,6 +58,8 @@ public class HAManager
 
 //	private NetworkListener listner;
 	
+	private Session fgSessionInstance;
+	
 	/**
 	 * Constructor
 	 */
@@ -76,6 +84,8 @@ public class HAManager
 
 		analyticsSendFreq = getPrefs().getInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY, AnalyticsConstants.DEFAULT_SEND_FREQUENCY);
 
+		fgSessionInstance = new Session();
+		
 		// set wifi listener
 //		listner = new NetworkListener(this.context);
 	}
@@ -346,10 +356,15 @@ public class HAManager
 			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, System.currentTimeMillis());
 			data.put(AnalyticsConstants.EVENT_TAG, tagValue);
 
-			if(metadata != null)
+			if(metadata == null)
 			{
-				data.put(AnalyticsConstants.METADATA, metadata);
+				metadata = new JSONObject();
 			}
+			
+			metadata.put(AnalyticsConstants.SESSION_ID, fgSessionInstance.getSessionId());
+
+			data.put(AnalyticsConstants.METADATA, metadata);
+			
 			json.put(AnalyticsConstants.TYPE, AnalyticsConstants.ANALYTICS_EVENT);
 			json.put(AnalyticsConstants.DATA, data);
 		}
@@ -411,5 +426,135 @@ public class HAManager
 		String[] fileNames = dir.list();
 		
 		return fileNames;
+	}
+	
+	public void recordSessionStart()
+	{
+		fgSessionInstance.startSession();
+		recordSession(fgSessionInstance, true);
+	}
+	
+	public void recordSessionEnd()
+	{
+		recordSession(fgSessionInstance, false);
+		fgSessionInstance.reset();
+	}
+	
+	private void recordSession( Session session, boolean sessionStart)
+	{
+		JSONObject metadata = null;
+		try
+		{
+			metadata = new JSONObject();
+			
+			//2)con:- 2g/3g/4g/wifi/off
+			metadata.put(AnalyticsConstants.CONNECTION_TYPE, Utils.getNetworkTypeAsString(context));
+			
+			if (sessionStart)
+			{
+				if (fgSessionInstance.getAppOpenSource() == AppOpenSource.FROM_NOTIFICATION)
+				{
+					// 4)srcctx :- uid/gid
+					metadata.put(AnalyticsConstants.SOURCE_CONTEXT, session.getSrcContext());
+
+					// 5)con-type :- normal/stleath 0/1
+					metadata.put(AnalyticsConstants.CONVERSATION_TYPE, session.getConvType());
+
+					// 6)msg_type :- MessageType (Text/Audio/Vedio/Sticker/Image/Contact/Location)
+					metadata.put(AnalyticsConstants.MESSAGE_TYPE, session.getMsgType());
+				}
+
+				// Not sending it for now. We will fix this code in later release when required
+				//metadata.put(AnalyticsConstants.SOURCE_APP_OPEN, session.getAppOpenSource());
+				
+				HAManager.getInstance().record(AnalyticsConstants.SESSION_EVENT, AnalyticsConstants.FOREGROUND, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_SESSION);
+			}
+			else
+			{
+				metadata.put(AnalyticsConstants.SESSION_TIME, fgSessionInstance.getSessionTime());
+
+				metadata.put(AnalyticsConstants.DATA_CONSUMED, fgSessionInstance.getDataConsumedInSession());
+				
+				HAManager.getInstance().record(AnalyticsConstants.SESSION_EVENT, AnalyticsConstants.BACKGROUND, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_SESSION);
+			}
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+		
+	}
+	
+	public void setMetadatFieldsForSessionEvent(String appOpenSource, String srcContext, ConvMessage convMessage, int convType)
+	{
+		fgSessionInstance.setAppOpenSource(appOpenSource);
+		fgSessionInstance.setMsgType(getMsgType(convMessage));
+		fgSessionInstance.setSrcContext(srcContext);
+		fgSessionInstance.setConvType(convType);
+	}
+	
+	public void setAppOpenSource(String appOpenSource)
+	{
+		fgSessionInstance.setAppOpenSource(appOpenSource);
+	}
+
+	/**
+	 * @param convMessage
+	 */
+	private String getMsgType(ConvMessage convMessage)
+	{
+		if (convMessage == null)
+		{
+			return "";
+		}
+
+		if (convMessage.isStickerMessage())
+		{
+			return AnalyticsConstants.MessageType.STICKER;
+		}
+		/**
+		 * If NO Metadata ===> It was a "Text" Msg in 1-1 Conv
+		 */
+		else if (convMessage.getMetadata() != null)
+		{
+			if (convMessage.getMetadata().isPokeMessage())
+			{
+				return AnalyticsConstants.MessageType.NUDGE;
+			}
+
+			List<HikeFile> list = convMessage.getMetadata().getHikeFiles();
+			/**
+			 * If No HikeFile List ====> It was a "Text" Msg in gc
+			 */
+			if (list != null)
+			{
+				HikeFileType fileType = convMessage.getMetadata().getHikeFiles().get(0).getHikeFileType();
+				switch (fileType)
+				{
+				case CONTACT:
+					return AnalyticsConstants.MessageType.CONTACT;
+
+				case LOCATION:
+					return AnalyticsConstants.MessageType.LOCATION;
+
+				case AUDIO:
+					return AnalyticsConstants.MessageType.AUDIO;
+
+				case VIDEO:
+					return AnalyticsConstants.MessageType.VEDIO;
+
+				case IMAGE:
+					return AnalyticsConstants.MessageType.IMAGE;
+
+				}
+			}
+			else
+			{
+				return AnalyticsConstants.MessageType.TEXT;
+			}
+		}
+
+		return AnalyticsConstants.MessageType.TEXT;
+
 	}
 }
