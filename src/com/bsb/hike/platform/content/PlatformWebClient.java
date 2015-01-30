@@ -5,6 +5,10 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.bsb.hike.platform.CustomWebView;
+
+import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
@@ -15,6 +19,7 @@ import android.webkit.WebViewClient;
 public class PlatformWebClient extends WebViewClient
 {
 
+	@SuppressLint("NewApi")
 	@Override
 	public WebResourceResponse shouldInterceptRequest(WebView view, String url)
 	{
@@ -54,5 +59,19 @@ public class PlatformWebClient extends WebViewClient
 		}
 
 		return response;
+	}
+	
+	@Override
+	public void onPageStarted(WebView view, String url, Bitmap favicon)
+	{
+		((CustomWebView)view).isLoaded = false;
+		super.onPageStarted(view, url, favicon);
+	}
+	
+	@Override
+	public void onPageFinished(WebView view, String url)
+	{
+		super.onPageFinished(view, url);
+		((CustomWebView)view).isLoaded = true;
 	}
 }
