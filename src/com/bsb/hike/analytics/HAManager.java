@@ -1,5 +1,6 @@
 package com.bsb.hike.analytics;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -395,5 +396,20 @@ public class HAManager
 	public String getAnalyticsDirectory()
 	{
 		return analyticsDirectory;
+	}
+	
+	/**
+	 * Used to get an array of file names present in the Analytics directory of the application package
+	 * @return array of strings with file names 
+	 */
+	protected static String[] getFileNames(Context context)
+	{
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Looking files in directory :" + context.getFilesDir() + "/Analytics/");
+		
+		File dir = new File(HAManager.getInstance().getAnalyticsDirectory() + File.separator);
+
+		String[] fileNames = dir.list();
+		
+		return fileNames;
 	}
 }

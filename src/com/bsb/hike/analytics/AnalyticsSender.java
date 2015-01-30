@@ -80,7 +80,7 @@ public class AnalyticsSender
 		boolean isPossible = true;
 		
 		// get files absolute paths
-		String[] fileNames = getFileNames(context);
+		String[] fileNames = HAManager.getFileNames(context);
 		
 		if(fileNames == null || !(Utils.isUserOnline(context)))
 			isPossible = false;	
@@ -96,7 +96,7 @@ public class AnalyticsSender
 	public void sendData()
 	{
 		// get files absolute paths
-		String[] fileNames = getFileNames(this.context);
+		String[] fileNames = HAManager.getFileNames(this.context);
 		
 		if(fileNames == null || !(Utils.isUserOnline(this.context)))
 			return;
@@ -152,20 +152,20 @@ public class AnalyticsSender
 		retryDelay = DELAY_BEFORE_RETRY;
 	}
 	
-	/**
-	 * Used to get an array of file names present in the Analytics directory of the application package
-	 * @return array of strings with file names 
-	 */
-	protected static String[] getFileNames(Context context)
-	{
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Looking files in directory :" + context.getFilesDir() + "/Analytics/");
-		
-		File dir = new File(HAManager.getInstance().getAnalyticsDirectory() + File.separator);
-
-		String[] fileNames = dir.list();
-		
-		return fileNames;
-	}
+//	/**
+//	 * Used to get an array of file names present in the Analytics directory of the application package
+//	 * @return array of strings with file names 
+//	 */
+//	protected static String[] getFileNames(Context context)
+//	{
+//		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Looking files in directory :" + context.getFilesDir() + "/Analytics/");
+//		
+//		File dir = new File(HAManager.getInstance().getAnalyticsDirectory() + File.separator);
+//
+//		String[] fileNames = dir.list();
+//		
+//		return fileNames;
+//	}
 	
 	/**
 	 * starts the analytics data upload to server as per the set alarm and schedules the next alarm
