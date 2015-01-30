@@ -90,15 +90,17 @@ public class NuxSendCustomMessageActivity extends HikeAppStateBaseFragmentActivi
 		NUXManager mmNuxManager = NUXManager.getInstance();
 		NuxCustomMessage mmCustomMessage = mmNuxManager.getNuxCustomMessagePojo();
 
-		if (!TextUtils.isEmpty(mmCustomMessage.getSmsMessage()))
+		if (!TextUtils.isEmpty(mmCustomMessage.getCustomMessage()))
 		{
-			textMessageView.setHint(mmCustomMessage.getSmsMessage());
+			textMessageView.setText(mmCustomMessage.getCustomMessage());
 		}
+		
+		tapToChangeView.setText(mmCustomMessage.getIndicatorText());
 	}
 	
 	public String getCustomMessage(){
 		if(TextUtils.isEmpty(textMessageView.getText())){
-			return NUXManager.getInstance().getNuxCustomMessagePojo().getSmsMessage();
+			return NUXManager.getInstance().getNuxCustomMessagePojo().getIndicatorText();
 		} else {
 			return textMessageView.getText().toString();
 		}

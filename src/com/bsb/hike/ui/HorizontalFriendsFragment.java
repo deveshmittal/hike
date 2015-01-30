@@ -82,18 +82,27 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		}
 		
 		//this only appears for custom message screen
-		if (!TextUtils.isEmpty(selectedFriendsString)) {
-			String[] arrmsisdn = selectedFriendsString.split(NUXConstants.STRING_SPLIT_SEPERATOR);
-			
-			contactsDisplayed.addAll(Arrays.asList(arrmsisdn));
-			for (String msisdn : contactsDisplayed) {
-				if(nm.getLockedContacts().contains(msisdn) || nm.getUnlockedContacts().contains(msisdn)) {
-					viewStack.removeView(viewMap.get(msisdn));
-				} else {
-					addContactView(msisdn, viewStack.getChildCount());
-				}
+		if (getActivity() instanceof NuxSendCustomMessageActivity) 
+		{
+			nxtBtn.setText(nm.getNuxCustomMessagePojo().getButText());
+			if(!TextUtils.isEmpty(selectedFriendsString))
+			{
+				String[] arrmsisdn = selectedFriendsString.split(NUXConstants.STRING_SPLIT_SEPERATOR);
+				contactsDisplayed.addAll(Arrays.asList(arrmsisdn));
 			}
-		} else {
+			for (String msisdn : contactsDisplayed) 
+			{
+				// do not remove locked contacts when selectedFriends is not empty, because it indicated
+				// that previous screen was used for choosing friends
+				if(nm.getUnlockedContacts().contains(msisdn) || (nm.getLockedContacts().contains(msisdn) && TextUtils.isEmpty(selectedFriendsString)) )
+				{
+					viewStack.removeView(viewMap.get(msisdn));
+				}
+				else
+					addContactView(msisdn, viewStack.getChildCount());			
+			}
+		} else if (getActivity() instanceof ComposeChatActivity) {
+			nxtBtn.setText(selectFriends.getButText());
 			for (int i = 0; i < maxShowListCount - preSelectedCount; i++) 
 				addEmptyView();
 			changeDisplayString(0);

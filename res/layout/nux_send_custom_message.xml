@@ -16,21 +16,34 @@
        android:layout_height="wrap_content"
        android:layout_width="match_parent">
   	</FrameLayout>
-  	
-  	<com.bsb.hike.view.CustomFontEditText
-        android:id="@+id/multiforward_text_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="25dp"
-        android:background="@drawable/bg_country_picker_selector"
-        android:gravity="center"
-        android:imeOptions="actionDone"
-        android:maxLength="140"
-        android:text="@string/custom_message"
-        android:textColor="@color/selected_country"
-        android:textSize="18sp"
-        android:visibility="visible" />
+  	<RelativeLayout
+  	    android:layout_width="wrap_content"
+  	    android:layout_height="wrap_content"
+  	    android:layout_gravity="center"
+  	    android:padding="20dp">
+	  	<com.bsb.hike.view.CustomFontEditText
+	        android:id="@+id/multiforward_text_message"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:background="@drawable/bg_country_picker_selector"
+	        android:gravity="center"
+	        android:layout_centerInParent="true"
+	        android:imeOptions="actionDone"
+	        android:maxLength="140"
+	        android:layout_marginBottom="15dp"
+	        android:ems="50"
+	        android:text="@string/custom_message"
+	        android:textColor="@color/selected_country"
+	        android:textSize="18sp"
+	        android:visibility="visible" />
+	  	<com.bsb.hike.view.CustomFontTextView
+	  	    android:layout_width="wrap_content"
+	  	    android:layout_height="wrap_content"
+	  	    android:layout_alignRight="@id/multiforward_text_message"
+	  	    android:layout_below="@id/multiforward_text_message"
+	  	    android:textSize="10sp"
+	  	    android:text="140"/>
+  	</RelativeLayout>
     
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/tap_to_write"

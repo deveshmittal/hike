@@ -1,6 +1,8 @@
 package com.bsb.hike.ui;
 
 import android.app.ProgressDialog;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -23,6 +25,7 @@ import android.view.View.OnClickListener;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.*;
 import android.widget.AbsListView.OnScrollListener;
@@ -173,27 +176,30 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 
 		setContentView(R.layout.compose_chat);
-		
-		if (savedInstanceState == null && nuxIncentiveMode) {
-           
-			
+
+		if (savedInstanceState == null && nuxIncentiveMode)
+		{
+
 			FragmentManager fm = getSupportFragmentManager();
 			newFragment = (HorizontalFriendsFragment) fm.findFragmentByTag("chatFragment");
-			if(newFragment == null){
+			if (newFragment == null)
+			{
 				newFragment = new HorizontalFriendsFragment();
 			}
-			
-            FragmentTransaction ft = fm.beginTransaction();
-            ft.add(R.id.horizontal_friends_placeholder, newFragment, "chatFragment").commit();
-        }
+			FragmentTransaction ft = fm.beginTransaction();
+			ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+			ft.add(R.id.horizontal_friends_placeholder, newFragment, "chatFragment").commit();
+			setListnerToRootView();
 
+		}
 		Object object = getLastCustomNonConfigurationInstance();
 
 		if (object instanceof InitiateMultiFileTransferTask)
 		{
 			fileTransferTask = (InitiateMultiFileTransferTask) object;
 			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
-		}else if( object instanceof PreFileTransferAsycntask){
+		}
+		else if ( object instanceof PreFileTransferAsycntask){
 			prefileTransferTask = (PreFileTransferAsycntask) object;
 			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
 		}
@@ -217,6 +223,39 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		mPubSub.addListeners(this, hikePubSubListeners);
 	}
 
+	boolean isOpened = false;
+
+	 public void setListnerToRootView(){
+	    final View activityRootView = getWindow().getDecorView().findViewById(R.id.ll_compose); 
+	    activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+	        @Override
+	        public void onGlobalLayout() {
+
+	            int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
+	            if (heightDiff > 100 ) { // 99% of the time the height diff will be due to a keyboard.
+
+	                if(isOpened == false){
+						Logger.d("UmangX", "Keyboard up");
+						FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+						ft.hide(newFragment);
+						ft.commit();
+	                }
+	                isOpened = true;
+	            }else if(isOpened == true){
+	            	 Logger.d("UmangX","Keyboard Down");
+	                isOpened = false;
+					FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+					if (tagEditText.getText().toString().length() == 0)
+					{
+						ft.show(newFragment);
+						ft.commit();
+					}
+				}
+			}
+	    });
+	}
+	 
+	
 	@Override
 	protected void onSaveInstanceState(Bundle outState)
 	{
@@ -502,15 +541,25 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						// change is to prevent the Tags from appearing in the search bar.
 						tagEditText.toggleTag(name, contactInfo.getMsisdn(),contactInfo);
 					else {
-						//newFragment.toggleViews(contactInfo);
+						// newFragment.toggleViews(contactInfo);
+						FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+						ft.show(newFragment);
+						ft.commit();
+						final InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(tagEditText.getWindowToken(), 0);
 						adapter.removeFilter();
 						tagEditText.clear(false);
-						if (adapter.isContactAdded(contactInfo)) {
-							if(newFragment.removeView(contactInfo)) adapter.removeContact(contactInfo);;
+						if (adapter.isContactAdded(contactInfo))
+						{
+							if (newFragment.removeView(contactInfo))
+								adapter.removeContact(contactInfo);
 
-						} else {
-							if(newFragment.addView(contactInfo)) adapter.addContact(contactInfo);
-							
+						}
+						else
+						{
+							if (newFragment.addView(contactInfo))
+								adapter.addContact(contactInfo);
+
 						}
 					}
 				}
@@ -1551,7 +1600,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			progress_bar.setVisibility(value);
 		}
 	}
-
 	@Override
 	public void onBackPressed()
 	{

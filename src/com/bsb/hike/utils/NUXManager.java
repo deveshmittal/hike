@@ -109,8 +109,12 @@ public class NUXManager
 	{
 		if (getNuxSelectFriendsPojo().isModuleToggle())
 		{
-			activity.finish();
+
 			setCurrentState(NUX_IS_ACTIVE);
+
+			activity.startActivity(Utils.getHomeActivityIntent(activity));
+			activity.finish();
+
 		}
 		else
 		{
@@ -167,6 +171,7 @@ public class NUXManager
 		taskDetails = null;
 		inviteFriends = null;
 		customMessage = null;
+		chatReward=null;
 
 	}
 
@@ -582,11 +587,11 @@ public class NUXManager
 			else
 				chatReward = new JSONObject();
 
-			if (newChatReward.has(CR_BUTTON1_TEXT))
-				chatReward.put(CR_BUTTON1_TEXT, newChatReward.getString(CR_BUTTON1_TEXT));
+			if (newChatReward.has(CR_INVITE_MORE_TEXT))
+				chatReward.put(CR_INVITE_MORE_TEXT, newChatReward.getString(CR_INVITE_MORE_TEXT));
 
-			if (newChatReward.has(CR_BUTTON2_TEXT))
-				chatReward.put(CR_BUTTON2_TEXT, newChatReward.getString(CR_BUTTON2_TEXT));
+			if (newChatReward.has(CR_REMIND_TEXT))
+				chatReward.put(CR_REMIND_TEXT, newChatReward.getString(CR_REMIND_TEXT));
 
 			if (newChatReward.has(CR_CHAT_WAITING_TEXT))
 				chatReward.put(CR_CHAT_WAITING_TEXT, newChatReward.getString(CR_CHAT_WAITING_TEXT));
@@ -646,11 +651,11 @@ public class NUXManager
 				}
 				if (!TextUtils.isEmpty(custommessage.toString()))
 				{
-					String screentitle = custommessage.optString(CM_DEF_MESSAGE, context.getString(R.string.custom_message_hint));
-					String hint = custommessage.optString(CM_HINT, context.getString(R.string.custom_message));
+					String customText = custommessage.optString(CM_DEF_MESSAGE, context.getString(R.string.custom_message));
+					String indicatorText = custommessage.optString(CM_HINT, context.getString(R.string.custom_message_hint));
 					String buttext = custommessage.optString(CM_BUTTON_TEXT, context.getString(R.string.custome_message_send_button));
 					boolean togglecustommsg = custommessage.optBoolean(CM_SCREEN_TOGGLE, false);
-					customMessage = new NuxCustomMessage(screentitle, hint, buttext, togglecustommsg);
+					customMessage = new NuxCustomMessage(customText, indicatorText, buttext, togglecustommsg);
 				}
 			}
 			catch (JSONException e)
@@ -793,11 +798,11 @@ public class NUXManager
 
 					String text = incentive_reward.optString(INVITEFRDS_TEXT, context.getString(R.string.nux_invitefrnds_objective));
 					String image = incentive_reward.optString(INVITEFRDS_IMAGE);
-					boolean skip_toggle_button = incentive_reward.optBoolean(INVITEFRDS_SKIP_TOGGLE_BUTTON, true);
+					boolean showSkipButton = incentive_reward.optBoolean(INVITEFRDS_SKIP_TOGGLE_BUTTON, true);
 					String title = incentive_reward.optString(INVITEFRDS_MAIN_TITLE, context.getString(R.string.nux_invitefrnds_reward));
 					String buttext = incentive_reward.optString(INVITEFRDS_BUT_TEXT, context.getString(R.string.nux_invitefrnds_buttext));
 					boolean isNuxSkippable = incentive_reward.optBoolean(INVITE_NUX_IS_SKIPPABLE, true);
-					inviteFriends = new NuxInviteFriends(title, text, buttext, image, skip_toggle_button,isNuxSkippable);
+					inviteFriends = new NuxInviteFriends(title, text, buttext, image, showSkipButton,isNuxSkippable);
 				}
 			}
 			catch (JSONException e)
@@ -836,13 +841,13 @@ public class NUXManager
 					String pendingChatIcon = chatrewardobj.optString(CR_PENDINGCHAT_ICON);
 					String detailsText = chatrewardobj.optString(CR_DETAILS_TEXT, context.getString(R.string.details_text));
 					String detailsLink = chatrewardobj.optString(CR_DETAILS_LINK);
-					String button1Text = chatrewardobj.optString(CR_BUTTON1_TEXT, context.getString(R.string.nux_invite_more));
-					String button2Text = chatrewardobj.optString(CR_BUTTON2_TEXT, context.getString(R.string.nux_remind));
+					String inviteMore = chatrewardobj.optString(CR_INVITE_MORE_TEXT, context.getString(R.string.nux_invite_more));
+					String remind = chatrewardobj.optString(CR_REMIND_TEXT, context.getString(R.string.nux_remind));
 					String tapToClaimLink = chatrewardobj.optString(CR_TAPTOCLAIM);
 					String tapToClaimText = chatrewardobj.optString(CR_TAPTOCLAIMTEXT, context.getString(R.string.tap_to_claim));
 					String selectFriends = chatrewardobj.optString(CR_SELECTFRIENDS, context.getString(R.string.select_friends));
 					chatReward = new NUXChatReward(rewardCardText, rewardCardSuccessText, statusText, chatWaitingText, pendingChatIcon, detailsText, detailsLink,
-							button1Text, button2Text, tapToClaimLink, tapToClaimText, selectFriends);
+							inviteMore, remind, tapToClaimLink, tapToClaimText, selectFriends);
 
 				}
 			}
@@ -1013,7 +1018,7 @@ public class NUXManager
 		{
 			return getNuxTaskDetailsPojo().getMin()+2;
 		}
-		return 3;
+		return 2;
 	}
 	
 	/**

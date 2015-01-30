@@ -419,7 +419,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		butRemind.setText(mmReward.getRemindButtonText());
 
-		rewardCard.setText(String.format(mmReward.getRewardCardText(), mmDetails.getMin(), mmDetails.getIncentiveAmount()));
+		rewardCard.setText(String.format(mmReward.getRewardCardText(), mmDetails.getMin()));
 
 		//NUX Skipped state ...
 		
@@ -487,7 +487,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					llInviteOptions.addOnLayoutChangeListener(new OnLayoutChangeListener()
 					{
-
+ 
 						@Override
 						public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom)
 						{
@@ -614,7 +614,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 				if ((!TextUtils.isEmpty(mmReward.getTapToClaimLink())))
 				{
-					Utils.startWebViewActivity(getActivity(),  mmReward.getTapToClaimLink(),  getString(R.string.hike));
+					HikeSharedPreferenceUtil mprefs=HikeSharedPreferenceUtil.getInstance(getActivity());
+					String tapToClaim=mprefs.getData(HikeMessengerApp.UID_SETTING, "")+":"+mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
+					String title= getString(R.string.hike);
+				
+					String link=String.format(mmReward.getTapToClaimLink(),tapToClaim);
+					Utils.startWebViewActivity(getActivity(),  link, title);
 				}
 			}
 
@@ -622,15 +627,20 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				if ((!TextUtils.isEmpty(mmReward.getDetailsLink())))
 				{
-					Utils.startWebViewActivity(getActivity(), mmReward.getDetailsLink(),  getString(R.string.hike));
+					HikeSharedPreferenceUtil mprefs = HikeSharedPreferenceUtil.getInstance(getActivity());
+					String tapToClaim = mprefs.getData(HikeMessengerApp.UID_SETTING, "") + ":" + mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
+					String title = getString(R.string.hike);
+					String link = String.format(mmReward.getDetailsLink(), tapToClaim);
+					Utils.startWebViewActivity(getActivity(), link, title);
 				}
 			}
 			break;
 		case R.id.but_remind:
-			Intent in = IntentManager.openNuxCustomMessage(getActivity());
-			Set<String> contactsNux = NUXManager.getInstance().getUnlockedContacts();
-			in.putExtra(NUXConstants.SELECTED_FRIENDS, contactsNux.toString().replace("[", "").replace("]", ""));
-			getActivity().startActivity(in);
+			if(NUXManager.getInstance().getCountLockedContacts()  > 0)
+			{
+				Intent in = IntentManager.openNuxCustomMessage(getActivity());
+				getActivity().startActivity(in);
+			}
 			break;
 		case R.id.but_inviteMore:
 			NUXManager.getInstance().startNuxSelector(getActivity());

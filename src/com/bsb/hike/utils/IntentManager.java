@@ -235,7 +235,7 @@ public class IntentManager
 	{
 		// TODO Auto-generated method stub
 		Intent in = new Intent(context, NUXInviteActivity.class);
-		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return in;
 	}
 	
@@ -255,15 +255,4 @@ public class IntentManager
 		return in;
 	}
 
-	public static void openSelectFriends(Context context)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	public static void openCustomMessage(Context context)
-	{
-		// TODO Auto-generated method stub
-
-	}
 }

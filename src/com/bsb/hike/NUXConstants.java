@@ -94,9 +94,9 @@ public class NUXConstants
 
 	public static final String CR_DETAILS_TEXT = "dtlsTxt";
 
-	public static final String CR_BUTTON1_TEXT = "bttn1Txt";
+	public static final String CR_INVITE_MORE_TEXT = "bttn2Txt";
 
-	public static final String CR_BUTTON2_TEXT = "bttn2Txt";
+	public static final String CR_REMIND_TEXT = "bttn1Txt";
 
 	public static final String CR_TAPTOCLAIM = "tpToClmLnk";
 	

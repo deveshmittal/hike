@@ -18,29 +18,28 @@
         <Button
             android:id="@+id/but_remind"
             android:layout_width="0dp"
-            android:layout_height="44dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
             android:layout_weight=".35"
             android:background="#00000000"
             android:gravity="center"
-            android:layout_gravity="center"
             android:text="@string/nux_remind"
             android:textAllCaps="true"
             android:textColor="#0f8fe1"
             android:textSize="13sp" />
-        
-        
+
         <View
             android:layout_width="1dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp"
             android:layout_height="match_parent"
+            android:layout_marginBottom="12dp"
+            android:layout_marginTop="12dp"
             android:background="#e6e6e6" />
 
         <Button
             android:id="@+id/but_inviteMore"
             android:layout_width="0dp"
-            android:layout_height="44dp"
-                android:layout_gravity="center"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
             android:layout_weight=".35"
             android:background="#00000000"
             android:gravity="center"

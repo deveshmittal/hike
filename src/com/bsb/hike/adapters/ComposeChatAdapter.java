@@ -142,13 +142,10 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				default:
 						
 			}
-			fetchRecentlyJoined = false;
-			fetchRecents = false;
-			fetchGroups = false;
 			
 			fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList,recentlyJoinedHikeContactsList, friendsStealthList, hikeStealthContactsList,
 					smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList, filteredRecentsList,filteredRecentlyJoinedHikeContactsList,
-					existingParticipants, sendingMsisdn, fetchGroups, existingGroupId, isCreatingOrEditingGroup, fetchSMSContacts, false, fetchRecents , fetchRecentlyJoined, showDefaultEmptyList, fetchHikeContacts, false);
+					existingParticipants, sendingMsisdn, false, existingGroupId, isCreatingOrEditingGroup, fetchSMSContacts, false, false , false, showDefaultEmptyList, fetchHikeContacts, false);
 			
 		} else {
 			fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList,recentlyJoinedHikeContactsList, friendsStealthList, hikeStealthContactsList,

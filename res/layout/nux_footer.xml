@@ -3,10 +3,8 @@
     android:id="@+id/ll_footer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
     android:orientation="vertical" >
 
-    
     <LinearLayout
         android:id="@+id/ll_shadow"
         android:layout_width="match_parent"
@@ -19,6 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
+        android:background="@android:color/white"
         android:paddingBottom="12dp"
         android:paddingTop="13dp"
         android:src="@drawable/btn_uparrow" >
@@ -29,6 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
+        android:background="@android:color/white"
         android:orientation="vertical" >
 
         <include layout="@layout/nux_footer_reward_status" />
