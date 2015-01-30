@@ -222,7 +222,7 @@ public class AnalyticsStore
 							highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
 						}
 						fileWriter = new FileWriter(highPriorityEventFile, true);
-						fileWriter.write(normal.toString());
+						fileWriter.write(high.toString());
 						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to imp file! Size now :" + highPriorityEventFile.length() + "bytes");
 					}	
 				}

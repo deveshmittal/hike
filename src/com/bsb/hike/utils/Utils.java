@@ -95,6 +95,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -155,6 +156,7 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.TrafficsStatsFile;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -2724,11 +2726,13 @@ public class Utils
 				object.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
+				HAManager.getInstance().recordSessionStart();
 			}
 			else if (!dueToConnect)
 			{
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_BACKGROUNDED, null);
+				HAManager.getInstance().recordSessionEnd();
 			}
 			else
 			{
@@ -5012,5 +5016,74 @@ public class Utils
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Fetches the network connection using connectivity manager
+	 * @param context
+	 * @return
+	 * <li>-1 in case of no network</li>
+	 * <li> 0 in case of unknown network</li>
+	 * <li> 1 in case of wifi</li>
+	 * <li> 2 in case of 2g</li>
+	 * <li> 3 in case of 3g</li>
+	 * <li> 4 in case of 4g</li>
+	 *     
+	 */
+	public static String getNetworkTypeAsString(Context context)
+	{
+		String networkType = "";
+		switch (getNetworkType(context))
+		{
+		case -1:
+			networkType = "off";
+			break;
+
+		case 0:
+			networkType = "unknown";
+			break;
+
+		case 1:
+			networkType = "wifi";
+			break;
+
+		case 2:
+			networkType = "2g";
+			break;
+
+		case 3:
+			networkType = "3g";
+			break;
+
+		case 4:
+			networkType = "4g";
+			break;
+
+		default:
+			break;
+		}
+		return networkType;
+	}
+
+	/**
+	 * Returns Data Consumed in KB
+	 * @param appId
+	 * @return
+	 */
+	public static long getTotalDataConsumed(int appId)
+	{
+		long received = TrafficStats.getUidRxBytes(appId);  //In KB
+        
+		long sent = TrafficStats.getUidTxBytes(appId);   //In KB
+        
+		if(received != TrafficStats.UNSUPPORTED
+				&& sent != TrafficStats.UNSUPPORTED)
+		{
+	        return received/(1024) + sent/(1024);
+		}
+		else
+		{
+			return TrafficsStatsFile.getTotalBytesManual(appId);  //In KB
+		}
 	}
 }
