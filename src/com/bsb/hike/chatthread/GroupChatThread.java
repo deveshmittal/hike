@@ -384,7 +384,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			@Override
 			public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event)
 			{
-				// TODO pin history
 				boolean result = super.onTouchEvent(widget, buffer, event);
 				if (!result)
 				{
@@ -930,8 +929,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		case R.id.emo_btn:
 			emoticonClicked();
 			break;
-		case R.id.cross: // PIN CREATE cross
-			mActionMode.finish();
+		case R.id.cross: //Pin message bar cross
+			hidePin();
 			break;
 		default:
 			super.onClick(v);
