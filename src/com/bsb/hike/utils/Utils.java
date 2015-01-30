@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Shader.TileMode;
@@ -1254,6 +1255,19 @@ public class Utils
 		}
 		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
 		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
+	}
+
+	public static String drawableToString(Drawable ic)
+	{
+		if (ic != null)
+		{
+			Bitmap bitmap = ((BitmapDrawable) ic).getBitmap();
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			bitmap.compress(CompressFormat.PNG, 100, outputStream);
+			byte[] bitmapByte = outputStream.toByteArray();
+			return Base64.encodeToString(bitmapByte,Base64.DEFAULT);
+		}
+		return null;
 	}
 
 	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
