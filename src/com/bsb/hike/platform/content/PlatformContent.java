@@ -1,7 +1,10 @@
 package com.bsb.hike.platform.content;
 
 import android.util.Log;
+
+import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.utils.Logger;
 
 import java.io.File;
 
@@ -35,7 +38,7 @@ public class PlatformContent
 	{
 		if (isInitialized == 0)
 		{
-			if (PlatformContentUtils.hasStorage(true))
+			if (PlatformContentUtils.hasStorage(true) && AppConfig.ALLOW_STAGING_TOGGLE)
 			{
 				//Do nothing
 			}
@@ -47,7 +50,10 @@ public class PlatformContent
 			isInitialized = 1;
 		}
 
+		Logger.d("PlatformContent", "Content Dir : " + PlatformContentConstants.PLATFORM_CONTENT_DIR);
+
 		PlatformContentRequest request = PlatformContentRequest.make(PlatformContentModel.make(contentData), listener);
+		
 		if (request != null)
 		{
 			PlatformContentLoader.getLoader().handleRequest(request);

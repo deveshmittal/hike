@@ -277,34 +277,15 @@ public class HikeProvider extends ContentProvider
 	@Override
 	public ParcelFileDescriptor openFile(Uri uri, String mode)
 	{
-
 		Log.d("FileContentProvider", "fetching: " + uri);
 
 		ParcelFileDescriptor parcel = null;
 
-		String fileNameRequested = uri.getLastPathSegment();
-		String[] name = fileNameRequested.split("\\.");
-		String prefix = name[0];
-		String suffix = name[1];
+		String filePath = uri.toString().replace(PlatformContentConstants.CONTENT_AUTHORITY_BASE, PlatformContentConstants.PLATFORM_CONTENT_DIR);
 
-		InputStream is = null;
 		try
 		{
-			String filePath = uri.toString().replace(PlatformContentConstants.CONTENT_AUTHORITY_BASE, PlatformContentConstants.PLATFORM_CONTENT_DIR);
-
-			Log.d("FileContentProvider", "FILE PATH: " + filePath);
-
-			is = new FileInputStream(filePath);
-		}
-		catch (IOException e1)
-		{
-			e1.printStackTrace();
-		}
-
-		File file = PlatformContentUtils.streamToTempFile(is, prefix, suffix);
-		try
-		{
-			parcel = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+			parcel = ParcelFileDescriptor.open(new File(filePath), ParcelFileDescriptor.MODE_READ_ONLY);
 		}
 		catch (FileNotFoundException e)
 		{
@@ -313,5 +294,4 @@ public class HikeProvider extends ContentProvider
 		return parcel;
 	}
 
-	
 }

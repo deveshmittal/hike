@@ -1443,11 +1443,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (!(mConversation instanceof GroupConversation))
 		{
-			if (!mConversation.isBotConv())
-			{
-				optionsList.add(new OverFlowMenuItem(getString(R.string.call), 1));
-			}
-
+			optionsList.add(new OverFlowMenuItem(getString(R.string.chat_theme), 1));
+			
 			if (!mConversation.getMsisdn().equals(HikeConstants.FTUE_HIKE_DAILY) && !mConversation.getMsisdn().equals(HikeConstants.FTUE_TEAMHIKE_MSISDN))
 			{
 				if (mUserIsBlocked)
@@ -2616,7 +2613,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			setChatTheme(selectedTheme);
 		}
 
-		if (mConversation.getUnreadCount() > 0)
+		if (mConversation.getUnreadCount() > 0 && !messages.isEmpty())
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
 			if (message.getTypingNotification() != null)

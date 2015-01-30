@@ -35,6 +35,7 @@ public interface HikePlatformConstants
 	String HELPER_DATA = "hd";
 	String HEIGHT = "h";
 	String CARD_OBJECT = "cardObj";
+	String NOTIF_TEXT_WC = "notifText";
 	String CRICKET_BOT_MSISDN = "+hikecricket+";
 	String CRICKET_BOT_NAME = "Cricket fever";
 	String CRICKET_CHAT_THEME_ID = "39";
