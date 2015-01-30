@@ -702,6 +702,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		/* tell the service to start listening for new messages */
 		isAlreadyFetchingNumber = false;
 
+		settings.edit().putBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, true).commit();
+		
 		return Boolean.TRUE;
 	}
 	

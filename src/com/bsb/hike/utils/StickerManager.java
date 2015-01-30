@@ -199,6 +199,8 @@ public class StickerManager
 	private final Map<String, StickerCategory> stickerCategoriesMap;
 	
 	public static final int DEFAULT_POSITION = 3;
+
+	public static final String STICKER_FOLDER_NAMES_UPGRADE_DONE = "upgradeForStickerFolderNames";
 	
 	public FilenameFilter stickerFileFilter = new FilenameFilter()
 	{
@@ -279,6 +281,12 @@ public class StickerManager
 		{
 			removeLegacyGreenDots();
 			settings.edit().putBoolean(StickerManager.REMOVE_LEGACY_GREEN_DOTS, true).commit();
+		}
+		
+		if(!settings.getBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, false))
+		{
+			updateStickerFolderNames();
+			settings.edit().putBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, true).commit();
 		}
 	}
 
@@ -1582,6 +1590,55 @@ public class StickerManager
 			{
 				HikeConversationsDatabase.getInstance().saveUpdateFlagOfStickerCategory(updatedList);
 			}
+		}
+	}
+	
+	/**
+	 * This method is to update our sticker folder names from large/small to stickers_l and stickers_s.
+	 * This is being done because some cleanmaster was cleaning large named folder content 
+	 */
+	public void updateStickerFolderNames()
+	{
+		File dir = context.getExternalFilesDir(null);
+		if (dir == null)
+		{
+			return;
+		}
+		String rootPath = dir.getPath() + HikeConstants.STICKERS_ROOT;
+		File stickersRoot = new File(rootPath);
+
+		if (!stickersRoot.exists() || !stickersRoot.canRead())
+		{
+			Logger.d("StickerManager", "sticker root doesn't exit or is not readable");
+			return;
+		}
+
+		File[] files = stickersRoot.listFiles();
+
+		if (files == null)
+		{
+			Logger.d("StickerManager", "sticker root is not a directory");
+			return;
+		}
+
+		// renaming large/small folders for all categories
+		for (File categoryRoot : files)
+		{
+			File[] categoryAssetFiles = categoryRoot.listFiles();
+			for (File categoryAssetFile : categoryAssetFiles)
+			{
+				if (categoryAssetFile.getName().equals(HikeConstants.OLD_LARGE_STICKER_FOLDER_NAME))
+				{
+					Logger.d("StickerManager", "changing large file name for : " + categoryRoot.getName() + "category");
+					categoryAssetFile.renameTo(new File(categoryRoot + HikeConstants.LARGE_STICKER_ROOT));
+				}
+				else if (categoryAssetFile.getName().equals(HikeConstants.OLD_SMALL_STICKER_FOLDER_NAME))
+				{
+					Logger.d("StickerManager", "changing small file name for : " + categoryRoot.getName() + "category");
+					categoryAssetFile.renameTo(new File(categoryRoot + HikeConstants.SMALL_STICKER_ROOT));
+				}
+			}
+
 		}
 	}
 	
