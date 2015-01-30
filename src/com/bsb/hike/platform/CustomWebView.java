@@ -15,6 +15,8 @@ import android.webkit.WebView;
  */
 public class CustomWebView extends WebView
 {
+	public boolean isLoaded = true;
+	
 	//Custom WebView to stop background calls when moves out of view.
 	public CustomWebView(Context context)
 	{
@@ -37,7 +39,6 @@ public class CustomWebView extends WebView
 		super(context, attrs, defStyleAttr, defStyleRes);
 	}
 
-	private boolean is_gone = false;
 
 	// if webView is not visible, call onPause of WebView, else call onResume.
 	@Override
@@ -60,13 +61,11 @@ public class CustomWebView extends WebView
 		Logger.i("customWebView", "on webview gone "+this.hashCode());
 		try
 		{
-			if(Utils.isHoneycombOrHigher())
-			{
-				this.onPause();
-			}
 			// we giving callback to javascript to stop heavy processing
-			this.loadUrl("javascript:onPause()");
-			this.is_gone = true;
+			if(isLoaded)
+			{
+				this.loadUrl("javascript:onPause()");
+			}
 		}
 		catch (Exception e)
 		{
@@ -80,33 +79,14 @@ public class CustomWebView extends WebView
 		Logger.i("customWebView", "on webview visible "+this.hashCode());
 		try
 		{
-			if(Utils.isHoneycombOrHigher())
+			if(isLoaded)
 			{
-				this.onResume();
+				this.loadUrl("javascript:onResume()");
 			}
-			this.loadUrl("javascript:onResume()");
-			this.is_gone = false;
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
-		}
-	}
-
-	//this will be trigger when back key pressed, not when home key pressed
-	@Override
-	public void onDetachedFromWindow()
-	{
-		Logger.i("customwebview", "on detach called");
-		if (this.is_gone)
-		{
-			try
-			{
-				this.destroy();
-			}
-			catch (Exception e)
-			{
-			}
 		}
 	}
 }
