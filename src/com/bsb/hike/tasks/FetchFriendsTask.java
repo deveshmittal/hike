@@ -245,6 +245,9 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 				if(!TextUtils.isEmpty(msisdn) && !(cm.getContact(msisdn) == null))
 					nuxHideTaskList.add(cm.getContact(msisdn));
 			}
+			
+			allContacts.removeAll(nuxHideTaskList);
+			allContacts.removeAll(nuxRecommendedTaskList);
 		}
 		
 		long iterationTime = System.currentTimeMillis();

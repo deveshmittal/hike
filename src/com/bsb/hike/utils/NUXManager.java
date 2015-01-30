@@ -1012,15 +1012,6 @@ public class NUXManager
 		return false;
 	}
 	
-	public int getStealthModeTipConversationNumber()
-	{
-		if(getCurrentState()!=NUX_KILLED)
-		{
-			return getNuxTaskDetailsPojo().getMin()+2;
-		}
-		return 2;
-	}
-	
 	/**
 	 * All these are testing functions will be removed afterwards.
 	 */
