@@ -3010,10 +3010,9 @@ public class Utils
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
 			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-			if(!TextUtils.isEmpty(subType)){
-				JSONObject md = new JSONObject();
-				md.put(HikeConstants.SUB_TYPE, subType);
-				data.put(HikeConstants.METADATA, md);
+			if(!TextUtils.isEmpty(subType))
+			{
+				data.put(HikeConstants.SUB_TYPE, subType);
 			}
 			if(!TextUtils.isEmpty(toMsisdn))
 			{
