@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -18,18 +19,21 @@ import android.os.Message;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.util.Linkify;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.TextureView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -1277,6 +1281,59 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		if (mHashSpanWatcher != null)
 		{
 			mHashSpanWatcher.afterTextChanged(s);
+		}
+	}
+	
+	@Override
+	protected ConvMessage createConvMessageFromCompose()
+	{
+		ConvMessage convMessage = super.createConvMessageFromCompose();
+		if (checkMessageTypeFromHash(convMessage, HASH_PIN))
+		{
+			Logger.d(TAG, "Found a pin message type");
+			modifyMessageToPin(convMessage);
+		}
+		return convMessage;
+	}
+	
+	private boolean checkMessageTypeFromHash(ConvMessage convMessage, String hashType)
+	{
+		Pattern p = Pattern.compile("(?i)" + hashType + ".*",Pattern.DOTALL);
+		String message = convMessage.getMessage();
+		if (p.matcher(message).matches())
+		{
+			
+			convMessage.setMessage(message.substring(hashType.length()).trim());
+			
+			if (TextUtils.isEmpty(convMessage.getMessage()))
+			{
+				Toast.makeText(activity.getApplicationContext(), R.string.text_empty_error, Toast.LENGTH_SHORT).show();
+				return false;
+			}
+			
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * This method is used to add pin related parameters in the convMessage
+	 * @param convMessage
+	 */
+	private void modifyMessageToPin(ConvMessage convMessage)
+	{
+		convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+		JSONObject jsonObject = new JSONObject();
+		try
+		{
+			jsonObject.put(HikeConstants.PIN_MESSAGE, 1);
+			convMessage.setMetadata(jsonObject);
+			convMessage.setHashMessage(HikeConstants.HASH_MESSAGE_TYPE.HASH_PIN_MESSAGE);
+		}
+		catch (JSONException je)
+		{
+			Toast.makeText(activity.getApplicationContext(), R.string.unknown_error, Toast.LENGTH_SHORT).show();
+			je.printStackTrace();
 		}
 	}
 }

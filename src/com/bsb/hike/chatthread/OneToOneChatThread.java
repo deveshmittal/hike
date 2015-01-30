@@ -300,15 +300,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	protected void sendMessage()
 	{
-		// TODO : SMS related code -gaurav
-		// if (!mConversation.isOnhike() && mCredits <= 0)
-		// {
-		// boolean nativeSmsPref = Utils.getSendSmsPref(this);
-		// if (!nativeSmsPref)
-		// {
-		// return;
-		// }
-		// }
 		super.sendMessage();
 	}
 
