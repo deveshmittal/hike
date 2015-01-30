@@ -23,6 +23,7 @@ public class RequestListenerNotifier
 	public RequestListenerNotifier(HttpEngine engine)
 	{
 		this.engine = engine;
+		this.uiExecuter = new MainThreadExecutor();
 	}
 
 	/**
