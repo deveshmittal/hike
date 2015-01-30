@@ -19,6 +19,7 @@ import com.bsb.hike.service.PreloadNotificationSchedular;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.voip.VoIPConstants;
 import com.google.android.gcm.GCMBaseIntentService;
 
 //import com.bsb.hike.service.HikeMqttManager;
@@ -49,6 +50,7 @@ public class GCMIntentService extends GCMBaseIntentService
 	@Override
 	protected void onMessage(Context context, Intent intent)
 	{
+		Logger.d(VoIPConstants.TAG, "GCM message received.");
 		Logger.d(getClass().getSimpleName(), "Message received: " + intent.getExtras());
 
 		prefs = HikeSharedPreferenceUtil.getInstance(context);
@@ -179,7 +181,7 @@ public class GCMIntentService extends GCMBaseIntentService
 				JSONObject data = json.optJSONObject(HikeConstants.DATA);
 				if (data != null)
 				{
-					Utils.sendLogEvent(data,HikeConstants.MqttMessageTypes.GCM_ECHO);
+					Utils.sendLogEvent(data, HikeConstants.MqttMessageTypes.GCM_ECHO, null);
 				}
 				return false;
 			}
