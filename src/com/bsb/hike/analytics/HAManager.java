@@ -210,15 +210,12 @@ public class HAManager
 
 	private synchronized void dumpMostRecentEventsAndSendToServer(boolean isOnDemandFromServer)
 	{
-		if(eventsList.size() > 0)
-		{
-			ArrayList<JSONObject> jsons = (ArrayList<JSONObject>) eventsList.clone();
-			
-			eventsList.clear();
-			
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Dumping in-memory events :" + jsons.size());
-			AnalyticsStore.getInstance(this.context).dumpEvents(jsons, true, isOnDemandFromServer);
-		}
+		ArrayList<JSONObject> jsons = (ArrayList<JSONObject>) eventsList.clone();
+		
+		eventsList.clear();
+		
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Dumping in-memory events :" + jsons.size());
+		AnalyticsStore.getInstance(this.context).dumpEvents(jsons, true, isOnDemandFromServer);
 	}
 	
 	/**
