@@ -25,7 +25,8 @@
             android:gravity="center"
             android:layout_height="wrap_content" 
             android:layout_width="0dp"
-            android:layout_weight=".7"
+            android:layout_weight=".9"
+            android:textStyle="italic"
             android:textSize="16sp"
             android:id="@+id/nux_header_selection_text"
             />
@@ -33,14 +34,13 @@
         <View
            android:layout_width="1dp"
            android:layout_height="match_parent"
-           android:layout_marginBottom="12dp"
-           android:layout_marginTop="12dp"
+           android:layout_marginBottom="6dp"
+           android:layout_marginTop="6dp"
            android:background="#e6e6e6" />
 
         <com.bsb.hike.view.CustomFontTextView
-            android:layout_weight=".2"
             android:id="@+id/nux_next_selection_button"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 			android:text="@string/next_uppercase"
 			android:layout_gravity="right"

@@ -16,19 +16,26 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ImageView.ScaleType;
+import android.view.View.OnLayoutChangeListener;
 
 
 public class HorizontalFriendsFragment extends Fragment implements OnClickListener{
@@ -65,8 +72,33 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		NUXManager nm = NUXManager.getInstance();
 		selectFriends = nm.getNuxSelectFriendsPojo();
 		preSelectedCount = nm.getCountLockedContacts() + nm.getCountUnlockedContacts();
+		
+		viewStack.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+		    @Override
+		    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
+		                    int oldTop, int oldRight, int oldBottom) {
+		    	WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+		    	Display display = wm.getDefaultDisplay();
+		    	Point p = new Point();
+		    	display.getSize(p);
+		    	Logger.d("UmangX", "message : " + p.x + " "+ viewStack.getWidth());
+		    	if(viewStack.getWidth() < p.x){
+		    		 
+		    		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+		                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.MATCH_PARENT);
+		    		//params.weight = 1.0f;
+		    		params.gravity = Gravity.CENTER;
+		    		viewStack.setLayoutParams(params);
+		    	}
+		    	else {
+		    		Logger.d("UmangX", "" + viewStack.getChildAt(0).getWidth() + "  " + NUXManager.getInstance().getCountLockedContacts());
+		    		scrollHorizontalView(3, viewStack.getChildAt(0).getWidth());
+		    	}
+		    	//viewStack.removeOnLayoutChangeListener(this);
+		    }
+		});
 		//First Time Nux
-		if(nm.getCurrentState() == NUXConstants.NUX_NEW||NUXManager.getInstance().getCurrentState()==NUXConstants.NUX_SKIPPED)
+		if(nm.getCurrentState() == NUXConstants.NUX_NEW || nm.getCurrentState()==NUXConstants.NUX_SKIPPED)
 		{
 			maxShowListCount = nm.getNuxTaskDetailsPojo().getMin();
 		}
@@ -88,9 +120,11 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 			{
 				String[] arrmsisdn = selectedFriendsString.split(NUXConstants.STRING_SPLIT_SEPERATOR);
 				contactsDisplayed.addAll(Arrays.asList(arrmsisdn));
+				contactsDisplayed.removeAll(nm.getLockedContacts());
 			}
 			//remind me button 
-			else {
+			else 
+			{
 				contactsDisplayed.addAll(nm.getLockedContacts());
 			}
 			for (String msisdn : contactsDisplayed) 
