@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="950"
-    android:versionName="3.7.0.analytics.50" >
+    android:versionCode="951"
+    android:versionName="3.7.0.analytics.51" >
 
     <uses-sdk
         android:minSdkVersion="9"
