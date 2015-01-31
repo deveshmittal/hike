@@ -75,6 +75,10 @@ public class AnalyticsSender
 		return _instance;
 	}
 	
+	/**
+	 * Used to check if there is analytics data logged on client
+	 * @return true if there is analytics data logged, false otherwise
+	 */
 	public boolean isAnalyticsUploadReady()
 	{
 		boolean isPossible = true;
@@ -82,10 +86,10 @@ public class AnalyticsSender
 		// get files absolute paths
 		String[] fileNames = HAManager.getFileNames(context);
 		
-		if(fileNames == null || !(Utils.isUserOnline(context)))
+		if(fileNames == null)
 			isPossible = false;	
 		
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Checking if files can be sent :" + isPossible);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Checking if analytics data exists or user is offline :" + isPossible);
 		return isPossible;
 	}
 	
@@ -152,21 +156,6 @@ public class AnalyticsSender
 		retryDelay = DELAY_BEFORE_RETRY;
 	}
 	
-//	/**
-//	 * Used to get an array of file names present in the Analytics directory of the application package
-//	 * @return array of strings with file names 
-//	 */
-//	protected static String[] getFileNames(Context context)
-//	{
-//		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Looking files in directory :" + context.getFilesDir() + "/Analytics/");
-//		
-//		File dir = new File(HAManager.getInstance().getAnalyticsDirectory() + File.separator);
-//
-//		String[] fileNames = dir.list();
-//		
-//		return fileNames;
-//	}
-	
 	/**
 	 * starts the analytics data upload to server as per the set alarm and schedules the next alarm
 	 */
@@ -179,25 +168,60 @@ public class AnalyticsSender
 
 		long nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend(), 0, 0, 0);
 
-		if(!instance.sendAnalyticsData(false))
+		if(!Utils.isUserOnline(context))
 		{
-			int freq = instance.getAnalyticsUploadRetryCount();
+			instance.sendAnalyticsData(false);
 			
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "User is offline.....");
+
+			int freq = instance.getAnalyticsUploadRetryCount();
+
 			// set alarm for post 4 hours if there is no network
 			if(freq < AnalyticsConstants.ANALYTICS_UPLOAD_FREQUENCY)
 			{
-				nextSchedule = System.currentTimeMillis() + freq * AnalyticsConstants.UPLOAD_TIME_MULTIPLE * AnalyticsConstants.ONE_HOUR;			
 				instance.incrementAnalyticsUploadRetryCount();
+//				freq = instance.getAnalyticsUploadRetryCount();
+				nextSchedule = System.currentTimeMillis() + freq * AnalyticsConstants.UPLOAD_TIME_MULTIPLE * AnalyticsConstants.ONE_HOUR;
+//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "UPLOAD RETRY COUNT :" + freq);
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Alarm set for next 4 hours from current time.");
+				
+				// don't remove! added for testing purpose. 
+//				Calendar cal = Calendar.getInstance();
+//				cal.setTimeInMillis(nextSchedule);
+//								
+//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Day :" + cal.get(Calendar.DATE));
+//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Hour :" + cal.get(Calendar.HOUR_OF_DAY));				
 			}
 			else
 			{
-				instance.resetAnalyticsUploadRetryCount();				
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Retries finished. Set alarm as per frequency now.");
+				instance.resetAnalyticsUploadRetryCount();
+				
+				// don't remove! added for testing purpose. 
+//				Calendar cal = Calendar.getInstance();
+//				cal.setTimeInMillis(nextSchedule);
+//								
+//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Day :" + cal.get(Calendar.DATE));
+//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Hour :" + cal.get(Calendar.HOUR_OF_DAY));
+				
+				nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;
+				
+				// don't remove! added for testing purpose. 
+//				cal = Calendar.getInstance();
+//				cal.setTimeInMillis(nextSchedule);
+//								
+//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Day :" + cal.get(Calendar.DATE));
+//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Hour :" + cal.get(Calendar.HOUR_OF_DAY));
 			}
 		}
 		// regular path will set alarm for same time next day
 		else
 		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "User is online.....");
+
 			nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;
+
+			instance.sendAnalyticsData(false);			
 		}
 		
 		HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);		

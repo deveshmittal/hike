@@ -408,17 +408,9 @@ public class HAManager
 	/**
 	 * Used to send the analytics data to the server
 	 */
-	public boolean sendAnalyticsData(boolean isOnDemandFromServer)
+	public void sendAnalyticsData(boolean isOnDemandFromServer)
 	{
-		boolean isUserConnected = false;
-		
-		dumpMostRecentEventsAndSendToServer(isOnDemandFromServer);
-		
-		if(Utils.isUserOnline(context))
-		{
-			isUserConnected = true;
-		}		
-		return isUserConnected;
+		dumpMostRecentEventsAndSendToServer(isOnDemandFromServer);		
 	}	
 	
 	/**
