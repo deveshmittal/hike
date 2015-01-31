@@ -319,14 +319,27 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				/**
 				 * Adding an Global Listener to close the footer on opening ...
 				 */
-				llInviteOptions.addOnLayoutChangeListener(new OnLayoutChangeListener()
-				{
+//				llInviteOptions.addOnLayoutChangeListener(new OnLayoutChangeListener()
+//				{
+//
+//					@Override
+//					public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom)
+//					{
+//						ObjectAnimator.ofFloat(llNuxFooter, "translationY", llChatReward.getHeight() + llInviteOptions.getHeight()).setDuration(0).start();
+//						llInviteOptions.removeOnLayoutChangeListener(this);
+//					}
+//				});
+				
+				
 
+				llInviteOptions.post(new Runnable()
+				{
+					
 					@Override
-					public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom)
+					public void run()
 					{
 						ObjectAnimator.ofFloat(llNuxFooter, "translationY", llChatReward.getHeight() + llInviteOptions.getHeight()).setDuration(0).start();
-						llInviteOptions.removeOnLayoutChangeListener(this);
+						
 					}
 				});
 			}
@@ -493,22 +506,34 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				
 				// This is done to handle the footer on home button pressed when the view is already inflated.
-				if (llInviteOptions.getHeight()>0)
-					ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).setDuration(0).start();
-				else
+//				if (llInviteOptions.getHeight()>0)
+//					ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).setDuration(0).start();
+//				else
+//				{
+//					llInviteOptions.addOnLayoutChangeListener(new OnLayoutChangeListener()
+//					{
+// 
+//						@Override
+//						public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom)
+//						{
+//							ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).setDuration(0).start();
+//
+//							llInviteOptions.removeOnLayoutChangeListener(this);
+//						}
+//					});
+//				}
+				
+				
+				llInviteOptions.post(new Runnable()
 				{
-					llInviteOptions.addOnLayoutChangeListener(new OnLayoutChangeListener()
+					
+					@Override
+					public void run()
 					{
- 
-						@Override
-						public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom)
-						{
-							ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).setDuration(0).start();
-
-							llInviteOptions.removeOnLayoutChangeListener(this);
-						}
-					});
-				}
+						ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).setDuration(0).start();
+						
+					}
+				});
 			}
 
 			else
