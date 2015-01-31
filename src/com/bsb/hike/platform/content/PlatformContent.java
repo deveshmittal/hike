@@ -51,12 +51,31 @@ public class PlatformContent
 						+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
 			}
 			isInitialized = true;
+
+			if (AppConfig.ALLOW_STAGING_TOGGLE)
+			{
+				// For testing purposes. We delete Content folder from saved location when hike messenger is re-started
+				File contentDir = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR);
+				
+				if (contentDir != null)
+				{
+					try
+					{
+						Logger.d("PlatformContent", "Deleting old content");
+						Utils.deleteFile(contentDir); 
+					}
+					catch (NullPointerException npe)
+					{
+						npe.printStackTrace();
+					}
+				}
+			}
 		}
 
 		Logger.d("PlatformContent", "Content Dir : " + PlatformContentConstants.PLATFORM_CONTENT_DIR);
 
 		PlatformContentRequest request = PlatformContentRequest.make(PlatformContentModel.make(contentData), listener);
-		
+
 		if (request != null)
 		{
 			PlatformContentLoader.getLoader().handleRequest(request);
