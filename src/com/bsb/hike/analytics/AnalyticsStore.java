@@ -164,7 +164,8 @@ public class AnalyticsStore
 			@Override
 			public void run() 
 			{			
-				FileWriter fileWriter = null;
+				FileWriter normalFileWriter = null;
+				FileWriter highFileWriter = null;
 				StringBuilder normal = new StringBuilder();
 				StringBuilder high = new StringBuilder();
 
@@ -203,8 +204,8 @@ public class AnalyticsStore
 							compressAndDeleteOriginalFile(normalPriorityEventFile.getAbsolutePath());
 							normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
 						}
-						fileWriter = new FileWriter(normalPriorityEventFile, true);
-						fileWriter.write(normal.toString());
+						normalFileWriter = new FileWriter(normalPriorityEventFile, true);
+						normalFileWriter.write(normal.toString());
 						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to normal file! Size now :" + normalPriorityEventFile.length() + "bytes");
 					}
 
@@ -221,8 +222,8 @@ public class AnalyticsStore
 							compressAndDeleteOriginalFile(highPriorityEventFile.getAbsolutePath());
 							highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
 						}
-						fileWriter = new FileWriter(highPriorityEventFile, true);
-						fileWriter.write(high.toString());
+						highFileWriter = new FileWriter(highPriorityEventFile, true);
+						highFileWriter.write(high.toString());
 						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to imp file! Size now :" + highPriorityEventFile.length() + "bytes");
 					}	
 				}
@@ -240,9 +241,13 @@ public class AnalyticsStore
 				}
 				finally
 				{	
-					if(fileWriter != null)	
+					if(normalFileWriter != null)	
 					{
-						closeCurrentFile(fileWriter);
+						closeCurrentFile(normalFileWriter);
+					}
+					if(highFileWriter!= null)
+					{
+						closeCurrentFile(highFileWriter);
 					}
 				}
 				// SEND ANALYTICS FROM HERE
