@@ -1,7 +1,5 @@
 package com.bsb.hike.platform;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.annotation.TargetApi;
@@ -41,6 +39,8 @@ import com.bsb.hike.platform.content.PlatformContentModel;
 import com.bsb.hike.platform.content.PlatformWebClient;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+
+import java.util.ArrayList;
 
 /**
  * Created by shobhitmandloi on 14/01/15.
@@ -340,7 +340,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			super.onPageFinished(view, url);
 			Log.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
-			view.loadUrl("javascript:setData(" +  "','" + convMessage.getMsisdn() + "','"
+			view.loadUrl("javascript:setData('"  + convMessage.getMsisdn() + "','"
 					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "','" + convMessage.isSent() +  "')");
 			String alarmData = convMessage.platformWebMessageMetadata.getAlarmData();
 			Logger.d(tag, "alarm data to html is " + alarmData);
