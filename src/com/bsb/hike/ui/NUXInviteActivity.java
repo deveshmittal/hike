@@ -11,20 +11,18 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.NUXTaskDetails;
 import com.bsb.hike.models.NuxInviteFriends;
-import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.ui.utils.RecyclingImageView;
-import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
-import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
 
-public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener
+public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener,Listener
 {
 
 	private Button butInviteFriends, butSkip;
@@ -33,6 +31,8 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 
 	private ImageView imgvInviteFrd;
 
+	private String HikePubListener=HikePubSub.NUX_DESTROY_ACTIVITY;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -59,6 +59,8 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		processViewElemets();
 		
 		Logger.d("footer","onCreateFinished");
+		
+		HikeMessengerApp.getPubSub().addListener(HikePubListener, this);
 		
 		/**
 		 * Cancelling all notifications ...
@@ -144,18 +146,28 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 
 		case R.id.but_inviteFrnds:
 
-			NUXManager.getInstance().startNuxSelector(this);
-
+			if (!(NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED))
+			{
+				NUXManager.getInstance().startNuxSelector(this);
+			}
+			else
+			{
+				startActivity(Utils.getHomeActivityIntent(this));
+				finish();
+			}
 			break;
 		}
 
 	}
 
-	
-	
 	@Override
-	protected void onDestroy()
+	public void onEventReceived(String type, Object object)
 	{
-		super.onDestroy();
+		super.onEventReceived(type, object);
+		if (type == HikePubListener)
+		{
+			this.finish();
+		}
+
 	}
 }

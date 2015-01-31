@@ -391,6 +391,8 @@ public class HikePubSub implements Runnable
 	public static final String STICKER_FTUE_TIP = "stickerFtueTip";
 	
 	public static final String USER_JOINED_NOTIFICATION = "userJoinedNotification";
+	
+	public static final String NUX_DESTROY_ACTIVITY="nuxDestroyAct";
 
 	private final Thread mThread;
 

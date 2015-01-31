@@ -24,6 +24,8 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
@@ -32,6 +34,7 @@ import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
+import com.bsb.hike.utils.Utils;
 
 
 public class HorizontalFriendsFragment extends Fragment implements OnClickListener{
@@ -137,6 +140,8 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		}
 		return v;
 	}
+    
+    
     
     private void addEmptyView(){
     	View emptyView = getLayoutInflater(null).inflate(R.layout.friends_horizontal_item,null);
@@ -258,10 +263,15 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		return true;
     }
     
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-    	super.onActivityCreated(savedInstanceState);    
-    }
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState)
+	{
+		super.onActivityCreated(savedInstanceState);
+		if ((NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED))
+		{
+			KillActivity();
+		}
+	}
     
 	@Override
 	public void onClick(View v) 
@@ -275,32 +285,60 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 			case R.id.nux_next_selection_button:
 	
 				NUXManager nm = NUXManager.getInstance();
-				if(getActivity() instanceof ComposeChatActivity)
-				{
-					HashSet<String> contactsNux = new HashSet<String>(viewMap.keySet());
-					nm.startNuxCustomMessage(contactsNux.toString().replace("[", "").replace("]", ""), getActivity());
-					
-				}
-				else if (getActivity() instanceof NuxSendCustomMessageActivity)
-				{
-					nm.sendMessage(contactsDisplayed, ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage());
-					
-					Logger.d("UmangX",contactsDisplayed.toString());
-					contactsDisplayed.removeAll(nm.getLockedContacts());
-					if(!contactsDisplayed.isEmpty()){
-						nm.sendMsisdnListToServer(contactsDisplayed);
-						nm.saveNUXContact(contactsDisplayed);
-					}
-					nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
-					Intent intent = new Intent(getActivity(), HomeActivity.class);
-					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-					startActivity(intent);
+				
+			if ((nm.getCurrentState() == NUXConstants.NUX_KILLED))
+			{
+				KillActivity();
+				return;
+			}
 
+			if (getActivity() instanceof ComposeChatActivity)
+			{
+				HashSet<String> contactsNux = new HashSet<String>(viewMap.keySet());
+				nm.startNuxCustomMessage(contactsNux.toString().replace("[", "").replace("]", ""), getActivity());
+
+			}
+			else if (getActivity() instanceof NuxSendCustomMessageActivity)
+			{
+				nm.sendMessage(contactsDisplayed, ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage());
+				
+				Logger.d("UmangX",contactsDisplayed.toString());
+				contactsDisplayed.removeAll(nm.getLockedContacts());
+				if(!contactsDisplayed.isEmpty()){
+					nm.sendMsisdnListToServer(contactsDisplayed);
+					nm.saveNUXContact(contactsDisplayed);
 				}
+				nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
+				KillActivity();
+			}
 				break;
 		}
 		
+	}
+
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED)
+			KillActivity();
+	}
+
+	private void KillActivity()
+	{
+		Intent in = (Utils.getHomeActivityIntent(getActivity()));
+		if (!Utils.isHoneycombOrHigher())
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.NUX_DESTROY_ACTIVITY, null);
+		}
+		else
+		{
+			in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		}
+
+		getActivity().startActivity(in);
+		getActivity().finish();
 	}
 
 }
