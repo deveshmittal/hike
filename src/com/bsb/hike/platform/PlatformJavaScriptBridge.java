@@ -282,10 +282,10 @@ public class PlatformJavaScriptBridge
 				// lets save in DB, so that from next time onwards we will have less flickering
 				message.platformWebMessageMetadata.setCardHeight(requiredHeightinDP);
 				HikeConversationsDatabase.getInstance().updateMetadataOfMessage(message.getMsgID(), message.platformWebMessageMetadata.JSONtoString());
+				resizeWebview(height);
 			}else
 			{
 				Logger.i(tag, "onloadfinished called with height=" + requiredHeightInPX + " current height is " + mWebView.getHeight());
-				resizeWebview(height);
 			}
 				
 		}catch(NumberFormatException ne)
