@@ -159,6 +159,7 @@ import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
@@ -6767,7 +6768,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				JSONObject metadata = new JSONObject();
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_BTN_CLICKED);
-				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
 			}
 			catch(JSONException e)
 			{
@@ -6831,7 +6832,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							{
 								JSONObject metadata = new JSONObject();
 								metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
-								HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+								HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
 							}
 							catch(JSONException e)
 							{
