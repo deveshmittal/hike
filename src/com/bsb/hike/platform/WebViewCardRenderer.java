@@ -122,7 +122,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		holder.loadingSpinner = view.findViewById(R.id.loading_data);
 		holder.cardFadeScreen = view.findViewById(R.id.card_fade_screen);
 		holder.loadingFailed = view.findViewById(R.id.loading_failed);
-		holder.webViewClient = new CustomWebViewClient(convMessage, holder);
+		holder.webViewClient = new CustomWebViewClient(convMessage);
 		holder.dayStub = (ViewStub) view.findViewById(R.id.day_stub);
 		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, adapter);
 		webViewStates(holder);
@@ -314,12 +314,10 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 		ConvMessage convMessage;
 
-		WebViewHolder holder;
 
-		public CustomWebViewClient(ConvMessage convMessage, WebViewHolder holder)
+		public CustomWebViewClient(ConvMessage convMessage)
 		{
 			this.convMessage = convMessage;
-			this.holder = holder;
 		}
 
 		@Override
@@ -342,7 +340,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			super.onPageFinished(view, url);
 			Log.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
-			view.loadUrl("javascript:setData(" + "'" + convMessage.getMsgID() + "','" + convMessage.getMsisdn() + "','"
+			view.loadUrl("javascript:setData(" +  "','" + convMessage.getMsisdn() + "','"
 					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "','" + convMessage.isSent() +  "')");
 			String alarmData = convMessage.platformWebMessageMetadata.getAlarmData();
 			Logger.d(tag, "alarm data to html is " + alarmData);

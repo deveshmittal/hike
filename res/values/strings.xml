@@ -1226,7 +1226,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="shop_download_failed">Download failed. Tap to retry.</string>
     <string name="shop_download_failed_out_of_space">Insufficient memory</string>
     <string name="shop_loading_state">LOADING STICKERS</string>
-    <string name="shop_loading_state_subtext">Patience is recommended</string>
+    <string name="shop_loading_state_subtext">Please wait ...</string>
     <string name="shop_loading_failed_no_internet">NO INTERNET CONNECTION</string>
     <string name="shop_loading_failed_switch_on">Switch on Mobile data or Wi-Fi</string>
     <string name="singular_packs">%1$d Pack</string>
