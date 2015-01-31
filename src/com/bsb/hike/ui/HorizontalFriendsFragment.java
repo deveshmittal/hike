@@ -284,9 +284,13 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 				else if (getActivity() instanceof NuxSendCustomMessageActivity)
 				{
 					nm.sendMessage(contactsDisplayed, ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage());
-					nm.saveNUXContact(contactsDisplayed);
+					
 					Logger.d("UmangX",contactsDisplayed.toString());
-					nm.sendMsisdnListToServer(contactsDisplayed);
+					contactsDisplayed.removeAll(nm.getLockedContacts());
+					if(!contactsDisplayed.isEmpty()){
+						nm.sendMsisdnListToServer(contactsDisplayed);
+						nm.saveNUXContact(contactsDisplayed);
+					}
 					nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
 					Intent intent = new Intent(getActivity(), HomeActivity.class);
 					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
