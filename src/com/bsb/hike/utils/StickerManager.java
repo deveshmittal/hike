@@ -43,6 +43,7 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.CustomStickerCategory;
 import com.bsb.hike.models.Sticker;
@@ -1442,7 +1443,7 @@ public class StickerManager
 				{
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_CHECK_BOX_CLICKED);
-					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
 				}
 				catch(JSONException e)
 				{
@@ -1460,7 +1461,7 @@ public class StickerManager
 				{
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_UNCHECK_BOX_CLICKED);
-					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
 				}
 				catch(JSONException e)
 				{
