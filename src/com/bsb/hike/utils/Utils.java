@@ -2655,10 +2655,11 @@ public class Utils
 
 	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded)
 	{
-		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true, false);
+		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true, false, true);
 	}
 
-	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen, boolean dueToConnect)
+	public static void appStateChanged(Context context, boolean resetStealth,
+			boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen, boolean dueToConnect, boolean toLog)
 	{
 		if (!isUserAuthenticated(context))
 		{
@@ -2686,7 +2687,7 @@ public class Utils
 			}
 		}
 
-		sendAppState(context, requestBulkLastSeen, dueToConnect);
+		sendAppState(context, requestBulkLastSeen, dueToConnect, toLog);
 
 		if (resetStealth)
 		{
@@ -2706,7 +2707,7 @@ public class Utils
 		return ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
 	}
 
-	private static void sendAppState(Context context, boolean requestBulkLastSeen, boolean dueToConnect)
+	private static void sendAppState(Context context, boolean requestBulkLastSeen, boolean dueToConnect, boolean toLog)
 	{
 		JSONObject object = new JSONObject();
 
@@ -2726,13 +2727,19 @@ public class Utils
 				object.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
-				HAManager.getInstance().recordSessionStart();
+				if(toLog)
+				{
+					HAManager.getInstance().recordSessionStart();
+				}
 			}
 			else if (!dueToConnect)
 			{
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_BACKGROUNDED, null);
-				HAManager.getInstance().recordSessionEnd();
+				if(toLog)
+				{
+					HAManager.getInstance().recordSessionEnd();
+				}
 			}
 			else
 			{
