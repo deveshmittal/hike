@@ -1357,25 +1357,21 @@ public class MqttMessagesManager
 		if(data.has(AnalyticsConstants.ANALYTICS_FILESIZE))
 		{
 			long fileSize = data.getLong(AnalyticsConstants.ANALYTICS_FILESIZE);
-			editor.putLong(AnalyticsConstants.ANALYTICS_FILESIZE, fileSize);
 			HAManager.getInstance().setFileMaxSize(fileSize);
 		}
 		if(data.has(AnalyticsConstants.ANALYTICS))
 		{
 			boolean isAnalyticsEnabled = data.getBoolean(AnalyticsConstants.ANALYTICS);
-			editor.putBoolean(AnalyticsConstants.ANALYTICS, isAnalyticsEnabled);
 			HAManager.getInstance().setAnalyticsEnabled(isAnalyticsEnabled);
 		}
 		if(data.has(AnalyticsConstants.ANALYTICS_TOTAL_SIZE))
 		{
 			long size = data.getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE);
-			editor.putLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, size);
 			HAManager.getInstance().setAnalyticsMaxSizeOnClient(size);
 		}
 		if(data.has(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY))
 		{
 			int freq = data.getInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY);
-			editor.putInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY, freq);
 			HAManager.getInstance().setAnalyticsSendFrequency(freq);
 		}
 		
