@@ -123,7 +123,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		holder.loadingSpinner = view.findViewById(R.id.loading_data);
 		holder.cardFadeScreen = view.findViewById(R.id.card_fade_screen);
 		holder.loadingFailed = view.findViewById(R.id.loading_failed);
-		holder.webViewClient = new CustomWebViewClient(convMessage, holder);
+		holder.webViewClient = new CustomWebViewClient(convMessage);
 
 		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, adapter);
 		webViewStates(holder);
@@ -315,12 +315,10 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 		ConvMessage convMessage;
 
-		WebViewHolder holder;
 
-		public CustomWebViewClient(ConvMessage convMessage, WebViewHolder holder)
+		public CustomWebViewClient(ConvMessage convMessage)
 		{
 			this.convMessage = convMessage;
-			this.holder = holder;
 		}
 
 		@Override
