@@ -676,14 +676,27 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			break;
 		case R.id.but_remind:
-			if(NUXManager.getInstance().getCountLockedContacts()  > 0)
+			if(mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+			{
+				butRemind.setEnabled(false);
+				butInviteMore.setEnabled(false);
+			} 
+			else 
 			{
 				Intent in = IntentManager.openNuxCustomMessage(getActivity());
 				getActivity().startActivity(in);
 			}
 			break;
 		case R.id.but_inviteMore:
-			NUXManager.getInstance().startNuxSelector(getActivity());
+			if(mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+			{
+				butRemind.setEnabled(false);
+				butInviteMore.setEnabled(false);
+			} 
+			else 
+			{
+				NUXManager.getInstance().startNuxSelector(getActivity());
+			}
 			break;
 
 		}
