@@ -183,6 +183,7 @@ public class PlatformJavaScriptBridge
 		{
 			Logger.i(tag, "update metadata called " + json + " , message id=" + message.getMsgID() +" notifyScren is "+notifyScreen);
 			String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata((int)(message.getMsgID()), json);
+
 			if (updatedJSON != null)
 			{
 				message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON); // the new metadata to inflate in webview
@@ -271,8 +272,27 @@ public class PlatformJavaScriptBridge
 	@JavascriptInterface
 	public void onLoadFinished(String height)
 	{
-		Logger.i(tag, "onloadfinished called with height=" + (Integer.parseInt(height) * Utils.densityMultiplier) + " current height is " + mWebView.getHeight());
-		resizeWebview(height);
+		try
+		{
+			int requiredHeightinDP = Integer.parseInt(height);
+			int requiredHeightInPX = (int) (requiredHeightinDP * Utils.densityMultiplier);
+			if(requiredHeightInPX != mWebView.getHeight())
+			{
+				Logger.i(tag, "onloadfinished called with height=" + requiredHeightInPX + " current height is " + mWebView.getHeight() +" : updated in DB as well");
+				// lets save in DB, so that from next time onwards we will have less flickering
+				message.platformWebMessageMetadata.setCardHeight(requiredHeightinDP);
+				HikeConversationsDatabase.getInstance().updateMetadataOfMessage(message.getMsgID(), message.platformWebMessageMetadata.JSONtoString());
+			}else
+			{
+				Logger.i(tag, "onloadfinished called with height=" + requiredHeightInPX + " current height is " + mWebView.getHeight());
+				resizeWebview(height);
+			}
+				
+		}catch(NumberFormatException ne)
+		{
+			ne.printStackTrace();
+		}
+		
 	}
 
 	@JavascriptInterface
