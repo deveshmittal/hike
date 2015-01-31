@@ -689,6 +689,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			//Calling the getView of another adapter to show html cards.
 			v = mWebViewCardRenderer.getView(position, convertView, parent);
 			WebViewCardRenderer.WebViewHolder holder = (WebViewCardRenderer.WebViewHolder) v.getTag();
+			dayHolder = holder;
 			setSelection(convMessage, holder.selectedStateOverlay);
 		}
 		else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT) {
@@ -2937,7 +2938,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			viewtype = ViewType.values()[type];
 		}
 
-		if (null != viewtype && (viewtype == ViewType.STATUS_MESSAGE || viewtype == ViewType.PIN_TEXT_RECEIVE || viewtype == ViewType.PIN_TEXT_SENT) || getItem(position).getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
+		if (null != viewtype && (viewtype == ViewType.STATUS_MESSAGE || viewtype == ViewType.PIN_TEXT_RECEIVE || viewtype == ViewType.PIN_TEXT_SENT) )
 		{
 			return false;
 		}

@@ -99,7 +99,6 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			status = (ImageView) view.findViewById(R.id.status);
 			timeStatus = (View) view.findViewById(R.id.time_status);
 			messageContainer = (ViewGroup) view.findViewById(R.id.message_container);
-			dayStub = (ViewStub) view.findViewById(R.id.day_stub);
 			messageInfoStub = (ViewStub) view.findViewById(R.id.message_info_stub);
 
 			if (isReceived)
@@ -124,7 +123,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		holder.cardFadeScreen = view.findViewById(R.id.card_fade_screen);
 		holder.loadingFailed = view.findViewById(R.id.loading_failed);
 		holder.webViewClient = new CustomWebViewClient(convMessage, holder);
-
+		holder.dayStub = (ViewStub) view.findViewById(R.id.day_stub);
 		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, adapter);
 		webViewStates(holder);
 
