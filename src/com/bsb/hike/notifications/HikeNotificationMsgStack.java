@@ -137,7 +137,15 @@ public class HikeNotificationMsgStack implements Listener
 		{
 			for (ConvMessage conv : argConvMessageList)
 			{
-				addConvMessage(conv);
+				if (conv.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || conv.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT)
+				{
+					addMessage(conv.getMsisdn(), conv.platformWebMessageMetadata.getNotifText());
+					mLastInsertedConvMessage = conv;
+				}
+				else
+				{
+					addConvMessage(conv);					
+				}
 			}
 		}
 	}
