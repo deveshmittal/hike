@@ -77,13 +77,28 @@ public class HAManager
 						
 		isAnalyticsEnabled = getPrefs().getBoolean(AnalyticsConstants.ANALYTICS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
 		
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Analytics service status :"+ isAnalyticsEnabled);
+
 		fileMaxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_FILESIZE, AnalyticsConstants.MAX_FILE_SIZE);
+		
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File max size :" + fileMaxSize);
 		
 		analyticsMaxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, AnalyticsConstants.MAX_ANALYTICS_SIZE);
 		
-		hourToSend = getPrefs().getInt(AnalyticsConstants.ANALYTICS_ALARM_TIME, getRandomTime());
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Total analytics size :" + analyticsMaxSize);
 		
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Initial alarm-time :" + hourToSend);
+		hourToSend = getPrefs().getInt(AnalyticsConstants.ANALYTICS_ALARM_TIME, -1);
+		
+		if(hourToSend == -1)
+		{
+			hourToSend = getRandomTime();
+			
+			Editor editor = getPrefs().edit();		
+			editor.putInt(AnalyticsConstants.ANALYTICS_ALARM_TIME, hourToSend);		
+			editor.commit();
+		}		
+		
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Current alarm time :" + hourToSend);
 
 		analyticsSendFreq = getPrefs().getInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY, AnalyticsConstants.DEFAULT_SEND_FREQUENCY);
 
@@ -413,12 +428,7 @@ public class HAManager
 	private int getRandomTime()
 	{
 		Random rand = new Random();		
-		int time = rand.nextInt(24);
-		
-		Editor editor = getPrefs().edit();		
-		editor.putInt(AnalyticsConstants.ANALYTICS_ALARM_TIME, time);		
-		editor.commit();
-		
+		int time = rand.nextInt(24);				
 		return time;
 	}
 	
@@ -486,6 +496,8 @@ public class HAManager
 				//metadata.put(AnalyticsConstants.SOURCE_APP_OPEN, session.getAppOpenSource());
 				
 				HAManager.getInstance().record(AnalyticsConstants.SESSION_EVENT, AnalyticsConstants.FOREGROUND, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_SESSION);
+				
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "--session-id :" + session.getSessionId() + "--network-type :" + Utils.getNetworkTypeAsString(context) + "--source-context :" + session.getSrcContext() + "--conv-type :" + session.getConvType() + "--msg-type :" + session.getMsgType());
 			}
 			else
 			{
@@ -494,6 +506,8 @@ public class HAManager
 				metadata.put(AnalyticsConstants.DATA_CONSUMED, fgSessionInstance.getDataConsumedInSession());
 				
 				HAManager.getInstance().record(AnalyticsConstants.SESSION_EVENT, AnalyticsConstants.BACKGROUND, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_SESSION);
+				
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "--session-id :" + session.getSessionId() + "--session-time :" + session.getSessionTime() + "--network-type :" + Utils.getNetworkTypeAsString(context) + "--data-consumed :" + session.getDataConsumedInSession() + "bytes");
 			}
 		}
 		catch(JSONException e)
