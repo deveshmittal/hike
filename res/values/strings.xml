@@ -1279,6 +1279,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="nux_select_friends_3">Good to go!</string>
     <string name="nux_select_friends_reconame">RECOMMENDED</string>
     <string name="nux_select_friends_nextbut">NEXT</string>
+    <string name="nux_view_details_url">http://api.im.hike.in/nuxrewards/details/%1$s</string>
+    <string name="nux_tap_claim_url">http://api.im.hike.in/nuxrewards/claim/%1$s</string>
     <string name="led_color_none_key">None</string>
     <string name="led_color_blue_key">Blue</string>
     <string name="led_color_cyan_key">Cyan</string>

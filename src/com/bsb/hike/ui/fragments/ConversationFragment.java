@@ -655,7 +655,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				if ((!TextUtils.isEmpty(mmReward.getTapToClaimLink())))
 				{
 					HikeSharedPreferenceUtil mprefs=HikeSharedPreferenceUtil.getInstance(getActivity());
-					String tapToClaim=mprefs.getData(HikeMessengerApp.UID_SETTING, "")+":"+mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
+					String tapToClaim=HikeConstants.ANDROID+"/"+ mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
 					String title= getString(R.string.hike);
 				
 					String link=String.format(mmReward.getTapToClaimLink(),tapToClaim);
@@ -668,7 +668,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				if ((!TextUtils.isEmpty(mmReward.getDetailsLink())))
 				{
 					HikeSharedPreferenceUtil mprefs = HikeSharedPreferenceUtil.getInstance(getActivity());
-					String tapToClaim = mprefs.getData(HikeMessengerApp.UID_SETTING, "") + ":" + mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
+					String tapToClaim = HikeConstants.ANDROID+"/"+ mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
 					String title = getString(R.string.hike);
 					String link = String.format(mmReward.getDetailsLink(), tapToClaim);
 					Utils.startWebViewActivity(getActivity(), link, title);
