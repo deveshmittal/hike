@@ -229,7 +229,7 @@ public class FTAnalyticEvents
 			object.put(HikeConstants.DATA, data);
 
 			Logger.d("FTAnalyticsEvent", "Video comp event = " + object.toString());
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
@@ -258,7 +258,7 @@ public class FTAnalyticEvents
 			object.put(HikeConstants.DATA, data);
 
 			Logger.d("FTAnalyticsEvent", "Quick upload event = " + object.toString());
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
