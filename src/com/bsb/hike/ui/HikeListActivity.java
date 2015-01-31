@@ -44,6 +44,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeMqttManagerNew;
@@ -556,11 +558,29 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				CheckBox selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
 				if (selectAllCB.isChecked())
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SELECT_ALL_INVITE);
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SELECT_ALL_INVITE);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 				}
 				if(nuxInviteMode)
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_INVITE_SENT);
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_INVITE_SENT);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 				}
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCH_OFF_NUX_MODE, null);
 
@@ -695,7 +715,16 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				Utils.sendInvite(msisdn, this);
 				if(nuxInviteMode)
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_INVITE_SENT);
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_INVITE_SENT);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 				}
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCH_OFF_NUX_MODE, null);
 				Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT).show();
