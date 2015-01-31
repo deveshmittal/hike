@@ -112,17 +112,6 @@ public class CallRatePopup extends SherlockDialogFragment
 		 
 	}
 
-	@Override
-	public void onStart() 
-	{
-		super.onStart();
-		if(getDialog() == null)
-		{
-			return;
-		}
-		getDialog().getWindow().setLayout((int)(280*Utils.densityMultiplier), LinearLayout.LayoutParams.WRAP_CONTENT);
-	}
-
 	private void submitRating()
 	{
 		try
