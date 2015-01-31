@@ -79,6 +79,8 @@ public class AnalyticsConstants
 	public static final String ANALYTICS_TOTAL_SIZE = "totalfs";
 
 	public static final String ANALYTICS_SEND_FREQUENCY = "analyticsfreq";
+	
+	public static final String ANALYTICS_ALARM_TIME = "analyticsalarmtime";
 
 	public static final String EVENT_SUB_TYPE = "st";
 

@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -80,7 +81,9 @@ public class HAManager
 		
 		analyticsMaxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, AnalyticsConstants.MAX_ANALYTICS_SIZE);
 		
-		hourToSend = getRandomTime();
+		hourToSend = getPrefs().getInt(AnalyticsConstants.ANALYTICS_ALARM_TIME, getRandomTime());
+		
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Initial alarm-time :" + hourToSend);
 
 		analyticsSendFreq = getPrefs().getInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY, AnalyticsConstants.DEFAULT_SEND_FREQUENCY);
 
@@ -234,7 +237,7 @@ public class HAManager
 	 */
 	public int getWhenToSend()
 	{
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Alarm-time :" + hourToSend);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Current alarm-time :" + hourToSend);
 		
 		return hourToSend;
 	}
@@ -254,6 +257,9 @@ public class HAManager
 	 */
 	public void setAnalyticsEnabled(boolean isAnalyticsEnabled)
 	{
+		Editor edit = getPrefs().edit(); 
+		edit.putBoolean(AnalyticsConstants.ANALYTICS, isAnalyticsEnabled);
+		edit.commit();
 		this.isAnalyticsEnabled = isAnalyticsEnabled;
 	}
 	
@@ -263,7 +269,10 @@ public class HAManager
 	 */
 	public void setFileMaxSize(long size)
 	{
-		fileMaxSize = size;
+		Editor edit = getPrefs().edit(); 
+		edit.putLong(AnalyticsConstants.ANALYTICS_FILESIZE, size);
+		edit.commit();
+		fileMaxSize = size;		
 	}
 	
 	/**
@@ -272,15 +281,21 @@ public class HAManager
 	 */
 	public void setAnalyticsMaxSizeOnClient(long size)
 	{
+		Editor edit = getPrefs().edit(); 
+		edit.putLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, size);
+		edit.commit();
 		analyticsMaxSize = size;
 	}
 
 	/**
 	 * Used to set the analytics send frequency
-	 * @param 
+	 * @param frequency on which upload should be retried(0-23)
 	 */
 	public void setAnalyticsSendFrequency(int freq)
 	{
+		Editor edit = getPrefs().edit(); 
+		edit.putInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY, freq);
+		edit.commit();
 		analyticsSendFreq = freq;
 	}
 
@@ -397,9 +412,12 @@ public class HAManager
 	 */
 	private int getRandomTime()
 	{
-		Random rand = new Random();
-		
+		Random rand = new Random();		
 		int time = rand.nextInt(24);
+		
+		Editor editor = getPrefs().edit();		
+		editor.putInt(AnalyticsConstants.ANALYTICS_ALARM_TIME, time);		
+		editor.commit();
 		
 		return time;
 	}
