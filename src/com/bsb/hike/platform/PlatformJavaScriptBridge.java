@@ -124,12 +124,12 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void setAlarm(String json, String messageId, String timeInMills)
+	public void setAlarm(String json, String timeInMills)
 	{
 		try
 		{
-			Logger.i(tag, "set alarm called " + json + " , mId " + messageId + " , time " + timeInMills);
-			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), Integer.parseInt(messageId), Long.valueOf(timeInMills));
+			Logger.i(tag, "set alarm called " + json + " , mId " + message.getMsgID() + " , time " + timeInMills);
+			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), (int)message.getMsgID(), Long.valueOf(timeInMills));
 		}
 		catch (JSONException e)
 		{
@@ -138,12 +138,12 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void updateHelperData(String messageId, String json)
+	public void updateHelperData(String json)
 	{
 		try
 		{
-			Logger.i(tag, "update metadata called " + json + " , message id=" + messageId);
-			String updatedJSON = HikeConversationsDatabase.getInstance().updateHelperData(Integer.parseInt(messageId), json);
+			Logger.i(tag, "update metadata called " + json + " , message id=" + message.getMsgID());
+			String updatedJSON = HikeConversationsDatabase.getInstance().updateHelperData((message.getMsgID()), json);
 			if (updatedJSON != null)
 			{
 				message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON);
@@ -170,9 +170,9 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void deleteAlarm(String id)
+	public void deleteAlarm()
 	{
-		HikeConversationsDatabase.getInstance().deleteAppAlarm(Integer.parseInt(id));
+		HikeConversationsDatabase.getInstance().deleteAppAlarm((int)(message.getMsgID()));
 	}
 
 	@JavascriptInterface
@@ -182,13 +182,13 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void updateMetadata(String messageId, String json, String notifyScreen)
+	public void updateMetadata( String json, String notifyScreen)
 	{
 
 		try
 		{
-			Logger.i(tag, "update metadata called " + json + " , message id=" + messageId +" notifyScren is "+notifyScreen);
-			String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata(Integer.valueOf(messageId), json);
+			Logger.i(tag, "update metadata called " + json + " , message id=" + message.getMsgID() +" notifyScren is "+notifyScreen);
+			String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata((int)(message.getMsgID()), json);
 			if (updatedJSON != null)
 			{
 				message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON); // the new metadata to inflate in webview
@@ -225,15 +225,15 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void forwardToChat(String messageId, String json)
+	public void forwardToChat( String json)
 	{
 		try
 		{
-			Logger.i(tag, "forward to chat called " + json + " , message id=" + messageId);
+			Logger.i(tag, "forward to chat called " + json + " , message id=" + message.getMsgID());
 
 			if (!TextUtils.isEmpty(json))
 			{
-				String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata(Integer.valueOf(messageId), json);
+				String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata((int)(message.getMsgID()), json);
 				if (!TextUtils.isEmpty(updatedJSON))
 				{
 					message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON);
