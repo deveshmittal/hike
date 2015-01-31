@@ -34,6 +34,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.ActivityCallableTask;
@@ -390,7 +392,17 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (preference.getKey().equals(HikeConstants.BACKUP_PREF))
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.BACKUP);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.BACKUP);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+
 			BackupAccountTask task = new BackupAccountTask(getApplicationContext(), HikePreferences.this);
 			blockingTaskType = BlockingTaskType.BACKUP_ACCOUNT;
 			setBlockingTask(task);
@@ -606,7 +618,16 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.RESET_STEALTH_CANCELLED, null);
 
-				Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 			}
 			else
 			{
@@ -634,7 +655,17 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 						startActivity(intent);
 
 						dialog.dismiss();
-						Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_INIT);
+						
+						try
+						{
+							JSONObject metadata = new JSONObject();
+							metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RESET_STEALTH_INIT);
+							HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+						}
+						catch(JSONException e)
+						{
+							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+						}
 					}
 
 					@Override
@@ -702,7 +733,16 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 
 		if (HikeConstants.RECEIVE_SMS_PREF.equals(preference.getKey()))
 		{
-			Utils.sendDefaultSMSClientLogEvent(isChecked);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.UNIFIED_INBOX, String.valueOf(isChecked));
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 
 			if (!isChecked)
 			{
@@ -764,7 +804,16 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			Logger.d(getClass().getSimpleName(), "Free SMS toggled");
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FREE_SMS_TOGGLED, isChecked);
 
-			Utils.sendFreeSmsLogEvent(isChecked);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.FREE_SMS_ON, String.valueOf(isChecked));
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 		}
 		else if (HikeConstants.SSL_PREF.equals(preference.getKey()))
 		{
@@ -776,8 +825,26 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			//Handled in OnPreferenceClick
 		}
 		else if (HikeConstants.NUJ_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))
-		{
+		{			
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				
+				if(isChecked)
+				{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_ON);
+				}
+				else{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_OFF);
+				}
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}			
 			JSONObject object = new JSONObject();
+			
 			try
 			{
 				object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
@@ -796,12 +863,22 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.H2O_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))
 		{
-			if(isChecked)
+			try
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_ON);
+				JSONObject metadata = new JSONObject();
+				
+				if(isChecked)
+				{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_ON);
+				}
+				else{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_OFF);
+				}
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 			}
-			else{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_OFF);
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 			}
 		}
 		return false;

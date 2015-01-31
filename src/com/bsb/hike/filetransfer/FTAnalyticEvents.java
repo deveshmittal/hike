@@ -5,14 +5,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.service.HikeMqttManagerNew;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.utils.Logger;
 
 public class FTAnalyticEvents
@@ -257,8 +255,9 @@ public class FTAnalyticEvents
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
 
+			// TODO move to new analytics framework
 			Logger.d("FTAnalyticsEvent", "Quick upload event = " + object.toString());
-			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.FILE_TRANSFER, metadata, HikeConstants.LogEvent.FILE_TRANSFER_STATUS);			
 		}
 		catch (JSONException e)
 		{
