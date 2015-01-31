@@ -19,6 +19,9 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/day_container"
         android:paddingBottom="4dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="3dp"
         >
 
         <include
@@ -45,10 +48,7 @@
                 android:layout_below="@id/sender_details"
                 android:layout_toRightOf="@id/avatar_container"
                 android:background="@drawable/card_container"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="3dp"
-                android:layout_marginBottom="3dp"
+
                 >
 
             <com.bsb.hike.platform.CustomWebView
@@ -101,6 +101,8 @@
             android:layout_toRightOf="@id/avatar_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="3dp"
             android:layout_below="@id/card_container"
             layout="@layout/message_time_status_ext"
                 />
