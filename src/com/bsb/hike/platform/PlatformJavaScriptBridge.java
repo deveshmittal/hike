@@ -7,7 +7,9 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -15,7 +17,10 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.Toast;
-
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import java.util.ArrayList;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.platform.WebViewCardRenderer.WebViewHolder;
@@ -49,11 +54,6 @@ public class PlatformJavaScriptBridge
 		this.adapter = adapter;
 	}
 
-	@JavascriptInterface
-	public void animationComplete(String html, String id)
-	{
-		Logger.i(tag, "on animation complete " + mWebView.getTag());
-	}
 
 	@JavascriptInterface
 	public void showToast(String toast)
@@ -67,23 +67,17 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void receiveInnerHTML(final String html, String id)
+	public void deleteMessage()
 	{
-		mWebView.post(new Runnable()
-		{
-			@SuppressLint("JavascriptInterface")
-			@Override
-			public void run()
-			{
-				mWebView.loadDataWithBaseURL("", "twtw", "text/html; charset=UTF-8", null, "");
-				mWebView.setVerticalScrollBarEnabled(false);
-				mWebView.setHorizontalScrollBarEnabled(false);
-				mWebView.addJavascriptInterface(this, HikePlatformConstants.PLATFORM_BRIDGE_NAME);
-				mWebView.getSettings().setJavaScriptEnabled(true);
-			}
-		});
-
+		ArrayList<Long> msgIds = new ArrayList<Long>(1);
+		msgIds.add(message.getMsgID());
+		Bundle bundle = new Bundle();
+		bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, false);
+		bundle.putString(HikeConstants.Extras.MSISDN, message.getMsisdn());
+		bundle.putBoolean(HikeConstants.Extras.DELETE_MEDIA_FROM_PHONE, false);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
 	}
+
 
 	@JavascriptInterface
 	public void setDebuggableEnabled(boolean setEnabled)
@@ -124,12 +118,12 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void setAlarm(String json, String messageId, String timeInMills)
+	public void setAlarm(String json, String timeInMills)
 	{
 		try
 		{
-			Logger.i(tag, "set alarm called " + json + " , mId " + messageId + " , time " + timeInMills);
-			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), Integer.parseInt(messageId), Long.valueOf(timeInMills));
+			Logger.i(tag, "set alarm called " + json + " , mId " + message.getMsgID() + " , time " + timeInMills);
+			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), (int)message.getMsgID(), Long.valueOf(timeInMills));
 		}
 		catch (JSONException e)
 		{
@@ -138,12 +132,12 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void updateHelperData(String messageId, String json)
+	public void updateHelperData(String json)
 	{
 		try
 		{
-			Logger.i(tag, "update metadata called " + json + " , message id=" + messageId);
-			String updatedJSON = HikeConversationsDatabase.getInstance().updateHelperData(Integer.parseInt(messageId), json);
+			Logger.i(tag, "update metadata called " + json + " , message id=" + message.getMsgID());
+			String updatedJSON = HikeConversationsDatabase.getInstance().updateHelperData((message.getMsgID()), json);
 			if (updatedJSON != null)
 			{
 				message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON);
@@ -170,9 +164,9 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void deleteAlarm(String id)
+	public void deleteAlarm()
 	{
-		HikeConversationsDatabase.getInstance().deleteAppAlarm(Integer.parseInt(id));
+		HikeConversationsDatabase.getInstance().deleteAppAlarm((int)(message.getMsgID()));
 	}
 
 	@JavascriptInterface
@@ -182,14 +176,14 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void updateMetadata(String messageId, String json, String notifyScreen)
+	public void updateMetadata( String json, String notifyScreen)
 	{
 
 		try
 		{
-			Logger.i(tag, "update metadata called  , message id=" + messageId +" notifyScren is "+notifyScreen);
-			Logger.d(tag, "JSON is ="+json);
-			String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata(Integer.valueOf(messageId), json);
+			Logger.i(tag, "update metadata called " + json + " , message id=" + message.getMsgID() +" notifyScren is "+notifyScreen);
+			String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata((int)(message.getMsgID()), json);
+
 			if (updatedJSON != null)
 			{
 				message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON); // the new metadata to inflate in webview
@@ -226,15 +220,15 @@ public class PlatformJavaScriptBridge
 	}
 
 	@JavascriptInterface
-	public void forwardToChat(String messageId, String json)
+	public void forwardToChat( String json)
 	{
 		try
 		{
-			Logger.i(tag, "forward to chat called " + json + " , message id=" + messageId);
+			Logger.i(tag, "forward to chat called " + json + " , message id=" + message.getMsgID());
 
 			if (!TextUtils.isEmpty(json))
 			{
-				String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata(Integer.valueOf(messageId), json);
+				String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata((int)(message.getMsgID()), json);
 				if (!TextUtils.isEmpty(updatedJSON))
 				{
 					message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON);
