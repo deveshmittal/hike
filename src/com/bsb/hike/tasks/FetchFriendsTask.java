@@ -132,7 +132,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, boolean fetchSmsContacts, boolean checkFavTypeInComparision, boolean fetchRecents, boolean fetchRecentlyJoined, boolean showDefaultEmptyList)
 	{
 		this(friendsAdapter, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, recentlyJoinedHikeContactsList,friendsStealthList, hikeStealthContactsList, smsStealthContactsList, recentsStealthList, filteredFriendsList,
-				filteredHikeContactsList, filteredSmsContactsList, null,null, null, null, null, null, null, null, null, false, null, false, fetchSmsContacts, checkFavTypeInComparision, fetchRecents , fetchRecentlyJoined, showDefaultEmptyList, false, true, false, false);
+				filteredHikeContactsList, filteredSmsContactsList, null,null, null, null, null, null, null, null, null, false, null, false, fetchSmsContacts, checkFavTypeInComparision, fetchRecents , fetchRecentlyJoined, showDefaultEmptyList, true, true, false, false);
 	}
 
 	public FetchFriendsTask(FriendsAdapter friendsAdapter, Context context, List<ContactInfo> friendsList, List<ContactInfo> hikeContactsList, List<ContactInfo> smsContactsList, List<ContactInfo> recentContactsList, List<ContactInfo> recentlyJoinedHikeContactsList,
@@ -245,7 +245,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		nuxRecommendedTaskList = new ArrayList<ContactInfo>();
 		nuxHideTaskList = new ArrayList<ContactInfo>();
 		
-		boolean separateOrHideNuxContacts = (nm.getCurrentState() == NUXConstants.NUX_NEW || nm.getCurrentState() == NUXConstants.NUX_IS_ACTIVE || nm.getCurrentState() == NUXConstants.NUX_SKIPPED) && (filterHideList || fetchRecommendedContacts);
+		boolean separateOrHideNuxContacts = nm.getCurrentState() != NUXConstants.COMPLETED && nm.getCurrentState() != NUXConstants.NUX_KILLED && (filterHideList || fetchRecommendedContacts);
 
 		if (separateOrHideNuxContacts)
 		{
