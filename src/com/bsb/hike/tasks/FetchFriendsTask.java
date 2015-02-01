@@ -207,6 +207,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		long queryTime = System.currentTimeMillis();
 		List<ContactInfo> allContacts = HikeMessengerApp.getContactManager().getAllContacts();
 		Set<String> blockSet = ContactManager.getInstance().getBlockedMsisdnSet();
+		Logger.d("Umng", "blocked contacts :" +  blockSet.toString());
 		
 		NUXManager nm = NUXManager.getInstance();
 
@@ -257,12 +258,16 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			if (mmSet != null && fetchRecommendedContacts)
 			{
 				Logger.d("UmngR","recommended set not null : " + mmSet.toString());
+				mmSet.removeAll(blockSet);
+				Logger.d("UmngR","reco list with blocked contacts : " + mmSet.toString());
 				for (String msisdn : mmSet)
 				{
                     if(!TextUtils.isEmpty(msisdn) && !(cm.getContact(msisdn) == null))
                         nuxRecommendedTaskList.add(cm.getContact(msisdn));
 				}
 				allContacts.removeAll(nuxRecommendedTaskList);
+				Logger.d("UmngR","all with recoList Removed : " + allContacts.toString());
+				
 			}	
 			
 			ArrayList<String> mmList  = nm.getNuxSelectFriendsPojo().getHideList();
