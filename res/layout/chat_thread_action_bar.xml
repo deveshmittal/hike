@@ -32,7 +32,6 @@
 
             <com.bsb.hike.view.RoundedImageView
                 android:id="@+id/avatar"
-                app:riv_oval="true"
                 style="@style/AvatarStyle.Padding" />
 
             <ImageView

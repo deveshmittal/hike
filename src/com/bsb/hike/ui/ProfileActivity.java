@@ -894,7 +894,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			return;
 		}
 		
-		String mappedId = msisdn + PROFILE_ROUND_SUFFIX;
 		if(!isUpdate)
 		{
 			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn + PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(msisdn));
@@ -903,7 +902,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		if(headerViewInitialized || profileImageUpdated )
 		{
 			int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.avatar_profile_size);
-			(new IconLoader(this, mBigImageSize)).loadImage(mappedId, profileImage, false, false, true);
+			(new IconLoader(this, mBigImageSize)).loadImage(msisdn, profileImage, false, false, true);
 		}
 
 		if(headerViewInitialized)
