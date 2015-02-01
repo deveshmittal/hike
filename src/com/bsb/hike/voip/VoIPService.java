@@ -49,6 +49,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.widget.Chronometer;
@@ -57,6 +58,9 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -2436,15 +2440,19 @@ public class VoIPService extends Service {
 	{
 		try
 		{
-			JSONObject data = new JSONObject();
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
-
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.VOIP);
 			metadata.put(HikeConstants.EVENT_KEY, ek);
 			metadata.put(VoIPConstants.Analytics.IS_CALLER, clientPartner.isInitiator() ? 0 : 1);
 			metadata.put(VoIPConstants.Analytics.CALL_ID, getCallId());
 			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, VoIPUtils.getConnectionClass(getApplicationContext()).ordinal());
+			
+			String toMsisdn = clientPartner.getPhoneNumber();
+			
+			if(!TextUtils.isEmpty(toMsisdn))
+			{
+				metadata.put(AnalyticsConstants.TO, toMsisdn);
+			}
 
 			if(ek.equals(HikeConstants.LogEvent.VOIP_CALL_CLICK))
 			{
@@ -2459,14 +2467,11 @@ public class VoIPService extends Service {
 			{
 				metadata.put(VoIPConstants.Analytics.STATE, value);
 			}
-
-			data.put(HikeConstants.METADATA, metadata);
-
-			Utils.sendLogEvent(data, null, clientPartner.getPhoneNumber());
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("VoipService", "Invalid json");
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "Invalid json");
 		}
 	}
 }

@@ -405,13 +405,11 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 	{
 		try
 		{
-			JSONObject analyticsJSON = new JSONObject();
-			JSONObject metaDataJSON = new JSONObject();
-			metaDataJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
-			metaDataJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, disconnectedAppTitle);
-			metaDataJSON.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
-			analyticsJSON.put(HikeConstants.METADATA, metaDataJSON);
-			Utils.sendLogEvent(analyticsJSON);
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
+			metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, disconnectedAppTitle);
+			metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.SDK_DISCONNECT_APP, metadata);			
 		}
 		catch (JSONException e)
 		{
