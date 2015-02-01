@@ -391,7 +391,7 @@ public class NUXManager
 	private boolean isNUXValid()
 	{
 		NUXTaskDetails mmDetails = getNuxTaskDetailsPojo();
-		if (mmDetails.getMin() == 0 || mmDetails.getMax() == 0 || mmDetails.getMin() > mmDetails.getMax()||ContactManager.getInstance().getAllContacts().size()<mmDetails.getMin())
+		if (mmDetails.getMin() == 0 || mmDetails.getMax() == 0 || mmDetails.getMin() > mmDetails.getMax()||ContactManager.getInstance().getAllContacts().size()<mmDetails.getMin()||!Utils.isHoneycombOrHigher())
 		{
 			return false;
 		}

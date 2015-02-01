@@ -1,6 +1,5 @@
 package com.bsb.hike.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.NUXTaskDetails;
@@ -22,7 +20,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
 
-public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener,Listener
+public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener
 {
 
 	private Button butInviteFriends, butSkip;
@@ -31,7 +29,6 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 
 	private ImageView imgvInviteFrd;
 
-	private String HikePubListener=HikePubSub.NUX_DESTROY_ACTIVITY;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -60,8 +57,6 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		
 		Logger.d("footer","onCreateFinished");
 		
-		HikeMessengerApp.getPubSub().addListener(HikePubListener, this);
-		
 		/**
 		 * Cancelling all notifications ...
 		 */
@@ -69,12 +64,6 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 
 	}
 
-	@Override
-	protected void onNewIntent(Intent intent)
-	{
-	Logger.d("footer","onNewIntent");
-		super.onNewIntent(intent);
-	}
 	
 	private void bindViews()
 	{
@@ -160,14 +149,4 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 
 	}
 
-	@Override
-	public void onEventReceived(String type, Object object)
-	{
-		super.onEventReceived(type, object);
-		if (type == HikePubListener)
-		{
-			this.finish();
-		}
-
-	}
 }

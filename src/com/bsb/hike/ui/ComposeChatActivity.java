@@ -138,7 +138,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private LastSeenScheduler lastSeenScheduler;
 
 	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED, HikePubSub.LAST_SEEN_TIME_UPDATED,
-			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, HikePubSub.CONTACT_SYNC_STARTED, HikePubSub.CONTACT_SYNCED,HikePubSub.NUX_DESTROY_ACTIVITY };
+			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, HikePubSub.CONTACT_SYNC_STARTED, HikePubSub.CONTACT_SYNCED };
 
 	private int previousFirstVisibleItem;
 
@@ -1608,11 +1608,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 
 			});
-		}
-		else if(HikePubSub.NUX_DESTROY_ACTIVITY.equals(type))
-		{
-			finish();
-			return;
 		}
 	}
 

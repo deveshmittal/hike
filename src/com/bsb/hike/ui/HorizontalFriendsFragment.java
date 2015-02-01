@@ -327,15 +327,8 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 	private void KillActivity()
 	{
 		Intent in = (Utils.getHomeActivityIntent(getActivity()));
-		if (!Utils.isHoneycombOrHigher())
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.NUX_DESTROY_ACTIVITY, null);
-		}
-		else
-		{
-			in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		}
+		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
 		getActivity().startActivity(in);
 		getActivity().finish();
