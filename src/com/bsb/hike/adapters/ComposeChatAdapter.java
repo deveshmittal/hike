@@ -122,9 +122,15 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		if(nuxStateActive){
 			boolean fetchHikeContacts = true;
 			boolean fetchSMSContacts = true;
+			boolean fetchRecommendedContacts;
+			boolean fetchHideListContacts;
 			
 			
 			NuxSelectFriends nuxPojo = NUXManager.getInstance().getNuxSelectFriendsPojo();
+			fetchHideListContacts = (nuxPojo.getHideList() != null && !nuxPojo.getHideList().isEmpty());
+			fetchRecommendedContacts = (nuxPojo.getRecoList() != null && !nuxPojo.getRecoList().isEmpty());
+			
+			Logger.d("UmangX", "fetch hide : " + fetchHideListContacts + " fetch reco : "+ fetchRecommendedContacts);
 			int contactsShown = nuxPojo.getContactSectionType();
 			switch(NUXConstants.ContactSectionTypeEnum.getEnum(contactsShown)){
 				case none : 
@@ -145,7 +151,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			
 			fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList,recentlyJoinedHikeContactsList, friendsStealthList, hikeStealthContactsList,
 					smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, nuxRecommendedList, nuxFilteredRecoList, filteredGroupsList, filteredRecentsList,filteredRecentlyJoinedHikeContactsList,
-					existingParticipants, sendingMsisdn, false, existingGroupId, isCreatingOrEditingGroup, fetchSMSContacts, false, false , false, showDefaultEmptyList, fetchHikeContacts, false, true, true);
+					existingParticipants, sendingMsisdn, false, existingGroupId, isCreatingOrEditingGroup, fetchSMSContacts, false, false , false, showDefaultEmptyList, fetchHikeContacts, false, fetchRecommendedContacts, fetchHideListContacts);
 			
 		} else {
 			fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList,recentlyJoinedHikeContactsList, friendsStealthList, hikeStealthContactsList,

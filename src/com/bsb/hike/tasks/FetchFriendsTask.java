@@ -245,39 +245,46 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		nuxRecommendedTaskList = new ArrayList<ContactInfo>();
 		nuxHideTaskList = new ArrayList<ContactInfo>();
 		
-		boolean separateOrHideNuxContacts = (nm.getCurrentState() == NUXConstants.NUX_IS_ACTIVE || nm.getCurrentState() == NUXConstants.NUX_SKIPPED) && (filterHideList || fetchRecommendedContacts);
+		boolean separateOrHideNuxContacts = (nm.getCurrentState() == NUXConstants.NUX_NEW || nm.getCurrentState() == NUXConstants.NUX_IS_ACTIVE || nm.getCurrentState() == NUXConstants.NUX_SKIPPED) && (filterHideList || fetchRecommendedContacts);
 
 		if (separateOrHideNuxContacts)
 		{
 			Logger.d("UmangX","hide or recm : SMS : " + fetchSmsContacts + " Hike : " + fetchHikeContacts);
 			ContactManager cm = ContactManager.getInstance();
+			
 			Set<String> mmSet = nm.getNuxSelectFriendsPojo().getRecoList();
-		
-			if (mmSet != null)
+			
+			if (mmSet != null && fetchRecommendedContacts)
 			{
-				Logger.d("UmangX","recommended set not null : " + mmSet.toString());
+				Logger.d("UmngR","recommended set not null : " + mmSet.toString());
 				for (String msisdn : mmSet)
 				{
                     if(!TextUtils.isEmpty(msisdn) && !(cm.getContact(msisdn) == null))
                         nuxRecommendedTaskList.add(cm.getContact(msisdn));
 				}
-			}
-
+				allContacts.removeAll(nuxRecommendedTaskList);
+			}	
 			
 			ArrayList<String> mmList  = nm.getNuxSelectFriendsPojo().getHideList();
-			for (String msisdn : mmList)
+			if(mmList != null && filterHideList)
 			{
-				if(!TextUtils.isEmpty(msisdn) && !(cm.getContact(msisdn) == null))
-					nuxHideTaskList.add(cm.getContact(msisdn));
-			}
-			
-			allContacts.removeAll(nuxHideTaskList);
-			allContacts.removeAll(nuxRecommendedTaskList);
+				Logger.d("UmngR","hide list not null : " + mmList.toString());
+				for (String msisdn : mmList)
+				{
+					if(!TextUtils.isEmpty(msisdn) && !(cm.getContact(msisdn) == null))
+						nuxHideTaskList.add(cm.getContact(msisdn));
+				}
+				nuxRecommendedTaskList.removeAll(nuxHideTaskList);
+				Logger.d("UmngR","reco list with hide contacts : " + nuxRecommendedTaskList.toString());
+				allContacts.removeAll(nuxHideTaskList);
+				Logger.d("UmngR","all with hide Contacts Removed : " + allContacts.toString());
+			}			
+
 		}
 
-		Logger.d("Umng", "hide contacts :" +  nuxHideTaskList.toString());
+		Logger.d("Umng", " new hide contacts :" +  nuxHideTaskList.toString());
 
-		Logger.d("Umng", "recommended contacts :" +  nuxRecommendedTaskList.toString());
+		Logger.d("Umng", "new recommended contacts :" +  nuxRecommendedTaskList.toString());
 
 		Logger.d("Umng", "new all contacts :" +  allContacts.toString());
 		long iterationTime = System.currentTimeMillis();

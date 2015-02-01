@@ -31,6 +31,7 @@ import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.ui.HomeActivity;
+
 import static com.bsb.hike.NUXConstants.*;
 
 
@@ -876,6 +877,8 @@ public class NUXManager
 
 	public void sendMsisdnListToServer(HashSet<String> msisdn)
 	{
+		
+		Logger.d("UmangX", "sending message : " + msisdn.toString());
 		JSONObject root = new JSONObject();
 		try
 		{

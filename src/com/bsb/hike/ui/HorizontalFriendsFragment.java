@@ -64,7 +64,7 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     	}
     	else {
     		Logger.d("UmangX", "" + viewStack.getChildAt(0).getWidth() + "  " + NUXManager.getInstance().getCountLockedContacts());
-    		scrollHorizontalView(contactsDisplayed.size(), viewStack.getChildAt(0).getWidth());
+    		scrollHorizontalView(contactsDisplayed.size() - 1, viewStack.getChildAt(0).getWidth());
     	}
 	}
 	
@@ -302,7 +302,7 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 			{
 				nm.sendMessage(contactsDisplayed, ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage());
 				
-				Logger.d("UmangX",contactsDisplayed.toString());
+				Logger.d("UmangX","displayed : "+contactsDisplayed.toString());
 				contactsDisplayed.removeAll(nm.getLockedContacts());
 				if(!contactsDisplayed.isEmpty()){
 					nm.sendMsisdnListToServer(contactsDisplayed);
