@@ -6880,6 +6880,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 								animatedBackground.setVisibility(View.GONE);
 								animatedBackground.clearAnimation();
 								shopIcon.clearAnimation();
+								
+								try
+								{
+									JSONObject metadata = new JSONObject();
+									metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STKR_SHOP_BTN_CLICKED);
+									HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+								}
+								catch(JSONException e)
+								{
+									Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+								}
 							}
 							if(HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))  //The shop icon would be blue unless the user clicks on it once
 							{
