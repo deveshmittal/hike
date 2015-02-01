@@ -206,26 +206,6 @@ public class HikeBitmapFactory
 			return src;
 	}
 
-	public static Drawable getDefaultIconForUser(Context context, String msisdn)
-	{
-		return getDefaultIconForUser(context, msisdn, false);
-	}
-
-	public static Drawable getDefaultIconForUser(Context context, String msisdn, boolean rounded)
-	{
-		return context.getResources().getDrawable(BitmapUtils.getDefaultAvatarResourceId(msisdn, rounded));
-	}
-
-	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context, String msisdn)
-	{
-		return getDefaultIconForUserFromDecodingRes(context, msisdn, false);
-	}
-
-	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context, String msisdn, boolean rounded)
-	{
-		return getBitmapDrawable(context.getResources(), decodeResource(context.getResources(), BitmapUtils.getDefaultAvatarResourceId(msisdn, rounded)));
-	}
-
 	public static BitmapDrawable getBitmapDrawable(Resources mResources, final Bitmap bitmap)
 	{
 		if (bitmap == null)

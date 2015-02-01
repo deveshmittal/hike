@@ -362,10 +362,8 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 	private void addProfileImgInHeader()
 	{
-		String mappedId = contactInfo.getMsisdn() + ProfileActivity.PROFILE_ROUND_SUFFIX;
-
 		// set profile picture
-		profileImageLoader.loadImage(mappedId, profileImgView, false, false, true);
+		profileImageLoader.loadImage(contactInfo.getMsisdn(), profileImgView, false, false, true);
 
 		ImageViewerInfo imageViewerInfo = new ImageViewerInfo(contactInfo.getMsisdn() + ProfileActivity.PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(
 				contactInfo.getMsisdn()));

@@ -71,7 +71,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 
 		if (contactInfo.hasCustomPhoto())
 		{
-			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView, true);
+			iconLoader.loadImage(contactInfo.getMsisdn(), imageView, true);
 
 		}
 		else

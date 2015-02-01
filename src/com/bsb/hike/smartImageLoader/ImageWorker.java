@@ -87,17 +87,6 @@ public abstract class ImageWorker
 		mResources = ctx.getResources();
 	}
 
-	public void loadImage(String data, boolean rounded, ImageView imageView, boolean runOnUiThread)
-	{
-		String key = data + (rounded ? ProfileActivity.PROFILE_ROUND_SUFFIX : "");
-		loadImage(key, imageView, false, runOnUiThread);
-	}
-
-	public void loadImage(String data, boolean rounded, ImageView imageView, boolean runOnUiThread, boolean isFlinging, boolean setDefaultAvatarInitially)
-	{
-		loadImage(data, imageView, isFlinging, runOnUiThread, setDefaultAvatarInitially);
-	}
-
 	/**
 	 * Load an image specified by the data parameter into an ImageView (override {@link ImageWorker#processBitmap(Object)} to define the processing logic). A memory and disk cache
 	 * will be used if an {@link ImageCache} has been added using {@link ImageWorker#addImageCache(FragmentManager, ImageCache.ImageCacheParams)}. If the image is found in the

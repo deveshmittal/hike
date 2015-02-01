@@ -1513,39 +1513,24 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.USERS_TABLE, customPhotoFlag, whereClause, new String[] { msisdn });
 	}
 
-	Drawable getIcon(String msisdn, boolean rounded)
+	Drawable getIcon(String msisdn)
 	{
-		Cursor c = null;
-		try
+		byte[] icondata = getIconByteArray(msisdn);
+		
+		if(icondata != null)
 		{
-			String table = rounded ? DBConstants.ROUNDED_THUMBNAIL_TABLE : DBConstants.THUMBNAILS_TABLE;
-			c = mDb.query(table, new String[] { DBConstants.IMAGE }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
-
-			if (!c.moveToFirst())
-			{
-				/* lookup based on this msisdn */
-				return null;
-			}
-			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
-
 			return HikeBitmapFactory.getBitmapDrawable(mContext.getResources(), HikeBitmapFactory.decodeByteArray(icondata, 0, icondata.length));
 		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
+		
+		return null;
 	}
 
-	byte[] getIconByteArray(String msisdn, boolean rounded)
+	byte[] getIconByteArray(String msisdn)
 	{
 		Cursor c = null;
 		try
 		{
-			String table = rounded ? DBConstants.ROUNDED_THUMBNAIL_TABLE : DBConstants.THUMBNAILS_TABLE;
-			c = mDb.query(table, new String[] { DBConstants.IMAGE }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
+			c = mDb.query(DBConstants.THUMBNAILS_TABLE, new String[] { DBConstants.IMAGE }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
 
 			if (!c.moveToFirst())
 			{

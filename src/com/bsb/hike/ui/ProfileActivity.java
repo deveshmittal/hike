@@ -183,8 +183,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public static final String PROFILE_PIC_SUFFIX = "profilePic";
 
-	public static final String PROFILE_ROUND_SUFFIX = "round";
-	
 	private static enum ProfileType
 	{
 		USER_PROFILE, // The user profile screen

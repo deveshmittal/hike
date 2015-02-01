@@ -287,22 +287,16 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	 */
 	public BitmapDrawable getIconFromCache(String key)
 	{
-		return getIconFromCache(key, false);
-	}
-
-	public BitmapDrawable getIconFromCache(String key, boolean rounded)
-	{
-		String cacheKey = rounded ? key + ProfileActivity.PROFILE_ROUND_SUFFIX : key;
-		BitmapDrawable b = get(cacheKey);
+		BitmapDrawable b = get(key);
 		if (b == null)
 		{
 			int idx = key.lastIndexOf(ProfileActivity.PROFILE_PIC_SUFFIX);
 			if (idx > 0)
 				key = new String(key.substring(0, idx));
-			BitmapDrawable bd = (BitmapDrawable) ContactManager.getInstance().getIcon(key, rounded);
+			BitmapDrawable bd = (BitmapDrawable) ContactManager.getInstance().getIcon(key);
 			if (bd != null)
 			{
-				putInCache(cacheKey, bd);
+				putInCache(key, bd);
 			}
 			return bd;
 		}
@@ -377,8 +371,6 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	{
 		remove(msisdn);
 		remove(msisdn + ProfileActivity.PROFILE_PIC_SUFFIX);
-		remove(msisdn + ProfileActivity.PROFILE_ROUND_SUFFIX);
-
 	}
 
 	public void clearIconCache()

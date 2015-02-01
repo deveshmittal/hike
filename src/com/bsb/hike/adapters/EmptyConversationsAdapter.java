@@ -209,7 +209,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 					}
 				}
 
-				iconLoader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
+				iconLoader.loadImage(contactInfo.getMsisdn(), avatar, true);
 
 				name.setText(contactInfo.getName());
 				status.setText(contactInfo.getMsisdn());

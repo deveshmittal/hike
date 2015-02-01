@@ -2396,7 +2396,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void setAvatar(String msisdn, ImageView imageView)
 	{
-		iconLoader.loadImage(msisdn, true, imageView, true);
+		iconLoader.loadImage(msisdn, imageView, true);
 	}
 
 	private int getDownloadFailedResIcon()
