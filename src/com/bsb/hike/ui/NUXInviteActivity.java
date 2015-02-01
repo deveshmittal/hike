@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -122,13 +123,25 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 	}
 
 	@Override
+	protected void onResume()
+	{
+		Logger.d("HomeActivity","NuxInviteOnResume");
+		super.onResume();
+		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED)
+			KillActivity();
+	}
+	
+	@Override
 	public void onClick(View v)
 	{
 		switch (v.getId())
 		{
 		case R.id.but_skip:
 		//	IntentManager.openHomeActivity(this);
-			NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
+			if (NUXManager.getInstance().getCurrentState() != NUXConstants.NUX_KILLED)
+			{
+				NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
+			}
 			startActivity(Utils.getHomeActivityIntent(this));
 			finish();
 			break;
@@ -148,5 +161,17 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		}
 
 	}
+	
+	private void KillActivity()
+	{
+		Logger.d("HomeActivity","NuxInviteOnResume");
+		Intent in = (Utils.getHomeActivityIntent(this));
+		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+		this.startActivity(in);
+		finish();
+	}
+
 
 }

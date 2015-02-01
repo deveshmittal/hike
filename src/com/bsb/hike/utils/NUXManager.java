@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.view.ViewDebug.FlagToString;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -990,7 +991,7 @@ public class NUXManager
 	private void notifyUser(String text, String title, boolean shouldNotPlaySound)
 	{
 		Drawable drawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
-		Intent intent = new Intent(context, HomeActivity.class);
+		Intent intent=Utils.getHomeActivityIntent(context);
 		HikeNotification.getInstance(context).showBigTextStyleNotification(intent, 0, System.currentTimeMillis(), HikeNotification.HIKE_SUMMARY_NOTIFICATION_ID, title, text,
 				title, "", null, drawable, shouldNotPlaySound, 0);
 	}
