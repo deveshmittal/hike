@@ -11,6 +11,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.utils.Logger;
 
 public class FTAnalyticEvents
@@ -183,7 +184,7 @@ public class FTAnalyticEvents
 			metadata.put(FT_PAUSE_COUNT, this.mPauseCount);
 			metadata.put(HikeConstants.FILE_SIZE, fileSize);
 			metadata.put(FT_STATUS, status);
-			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.FILE_TRANSFER, metadata, HikeConstants.LogEvent.FILE_TRANSFER_STATUS);			
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.FILE_TRANSFER, EventPriority.HIGH, metadata, HikeConstants.LogEvent.FILE_TRANSFER_STATUS);			
 		}
 		catch (JSONException e)
 		{
@@ -204,7 +205,7 @@ public class FTAnalyticEvents
 			metadata.put(VIDEO_INPUT_SIZE, inputSize);
 			metadata.put(VIDEO_OUTPUT_SIZE, outSize);
 			metadata.put(VIDEO_COMPRESS_STATE, compressedState);
-			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, VIDEO_COMPRESSION, metadata, VIDEO_COMPRESSION);			
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, VIDEO_COMPRESSION, EventPriority.HIGH, metadata, VIDEO_COMPRESSION);			
 		}
 		catch (JSONException e)
 		{
@@ -221,7 +222,7 @@ public class FTAnalyticEvents
 		{
 			JSONObject metadata = new JSONObject();
 			metadata.put(QUICK_UPLOAD_STATUS, quickUploadStatus);			
-			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.FILE_TRANSFER, metadata, QUICK_UPLOAD);			
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.FILE_TRANSFER, EventPriority.HIGH, metadata, QUICK_UPLOAD);			
 		}
 		catch (JSONException e)
 		{

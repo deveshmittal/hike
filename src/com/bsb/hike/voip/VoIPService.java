@@ -60,6 +60,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -2466,7 +2467,7 @@ public class VoIPService extends Service {
 			{
 				metadata.put(VoIPConstants.Analytics.STATE, value);
 			}
-			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
 		}
 		catch (JSONException e)
 		{
