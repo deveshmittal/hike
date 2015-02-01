@@ -49,6 +49,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.widget.Chronometer;
@@ -2444,6 +2445,13 @@ public class VoIPService extends Service {
 			metadata.put(VoIPConstants.Analytics.IS_CALLER, clientPartner.isInitiator() ? 0 : 1);
 			metadata.put(VoIPConstants.Analytics.CALL_ID, getCallId());
 			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, VoIPUtils.getConnectionClass(getApplicationContext()).ordinal());
+			
+			String toMsisdn = clientPartner.getPhoneNumber();
+			
+			if(!TextUtils.isEmpty(toMsisdn))
+			{
+				metadata.put(AnalyticsConstants.TO, toMsisdn);
+			}
 
 			if(ek.equals(HikeConstants.LogEvent.VOIP_CALL_CLICK))
 			{
