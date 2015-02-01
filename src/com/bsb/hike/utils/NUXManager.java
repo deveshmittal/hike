@@ -841,10 +841,10 @@ public class NUXManager
 					String chatWaitingText = chatrewardobj.optString(CR_CHAT_WAITING_TEXT, context.getString(R.string.chat_waiting_text));
 					String pendingChatIcon = chatrewardobj.optString(CR_PENDINGCHAT_ICON);
 					String detailsText = chatrewardobj.optString(CR_DETAILS_TEXT, context.getString(R.string.details_text));
-					String detailsLink = chatrewardobj.optString(CR_DETAILS_LINK,context.getString(R.string.nux_view_details_url));
+					String detailsLink = chatrewardobj.optString(CR_DETAILS_LINK,VIEW_DETAILS_URL);
 					String inviteMore = chatrewardobj.optString(CR_INVITE_MORE_TEXT, context.getString(R.string.nux_invite_more));
 					String remind = chatrewardobj.optString(CR_REMIND_TEXT, context.getString(R.string.nux_remind));
-					String tapToClaimLink = chatrewardobj.optString(CR_TAPTOCLAIM,context.getString(R.string.nux_tap_claim_url));
+					String tapToClaimLink = chatrewardobj.optString(CR_TAPTOCLAIM,TAP_CLAIM_URL);
 					String tapToClaimText = chatrewardobj.optString(CR_TAPTOCLAIMTEXT, context.getString(R.string.tap_to_claim));
 					String selectFriends = chatrewardobj.optString(CR_SELECTFRIENDS, context.getString(R.string.select_friends));
 					chatReward = new NUXChatReward(rewardCardText, rewardCardSuccessText, statusText, chatWaitingText, pendingChatIcon, detailsText, detailsLink,
