@@ -210,6 +210,7 @@ public abstract class ImageWorker
 	protected void setDefaultAvatar(ImageView imageView, String data)
 	{
 		imageView.setBackgroundDrawable(HikeMessengerApp.getLruCache().getDefaultAvatar(data, setHiResDefaultAvatar));
+		imageView.setImageDrawable(null);
 	}
 
 	/**
