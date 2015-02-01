@@ -57,6 +57,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -2436,9 +2438,6 @@ public class VoIPService extends Service {
 	{
 		try
 		{
-			JSONObject data = new JSONObject();
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
-
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.VOIP);
 			metadata.put(HikeConstants.EVENT_KEY, ek);
@@ -2459,14 +2458,11 @@ public class VoIPService extends Service {
 			{
 				metadata.put(VoIPConstants.Analytics.STATE, value);
 			}
-
-			data.put(HikeConstants.METADATA, metadata);
-
-			Utils.sendLogEvent(data, null, clientPartner.getPhoneNumber());
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("VoipService", "Invalid json");
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "Invalid json");
 		}
 	}
 }
