@@ -393,5 +393,6 @@
     <color name="call_rate_submit">#0f8fe1</color>
     <color name="call_rate_header">#111111</color>
     <color name="call_rate_subheader">#26292d</color>
+    <color name="call_issues">#494949</color>
 </resources>
 	
