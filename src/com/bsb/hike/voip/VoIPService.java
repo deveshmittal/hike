@@ -652,6 +652,7 @@ public class VoIPService extends Service {
 		Bundle bundle = new Bundle();
 		bundle.putInt(VoIPConstants.CALL_ID, getCallId());
 		bundle.putInt(VoIPConstants.IS_CALL_INITIATOR, clientPartner.isInitiator() ? 0 : 1);
+		bundle.putInt(VoIPConstants.CALL_NETWORK_TYPE, VoIPUtils.getConnectionClass(getApplicationContext()).ordinal());
 		sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY, bundle);
 
 		Logger.d(VoIPConstants.TAG, "Bytes sent / received: " + totalBytesSent + " / " + totalBytesReceived +
@@ -661,10 +662,7 @@ public class VoIPService extends Service {
 				"\nReconnect attempts: " + reconnectAttempts +
 				"\nCall duration: " + getCallDuration());
 
-		if(getCallDuration() > 0)
-		{
-			sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_END);
-		}
+		sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_END);
 		if(reconnecting)
 		{
 			sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_DROP);
@@ -2453,10 +2451,18 @@ public class VoIPService extends Service {
 			{
 				metadata.put(VoIPConstants.Analytics.DATA_SENT, totalBytesSent);
 				metadata.put(VoIPConstants.Analytics.DATA_RECEIVED, totalBytesReceived);
+				if(getCallDuration() > 0)
+				{
+					metadata.put(VoIPConstants.Analytics.DURATION, getCallDuration());
+				}
 			}
 			else if(ek.equals(HikeConstants.LogEvent.VOIP_CALL_SPEAKER) || ek.equals(HikeConstants.LogEvent.VOIP_CALL_HOLD) || ek.equals(HikeConstants.LogEvent.VOIP_CALL_MUTE))
 			{
 				metadata.put(VoIPConstants.Analytics.STATE, value);
+			}
+			else if(ek.equals(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED))
+			{
+				metadata.put(VoIPConstants.Analytics.CALL_CONNECT_FAIL_REASON, value);
 			}
 
 			data.put(HikeConstants.METADATA, metadata);

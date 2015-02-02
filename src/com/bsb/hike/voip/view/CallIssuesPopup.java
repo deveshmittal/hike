@@ -80,12 +80,13 @@ public class CallIssuesPopup extends SherlockDialogFragment
 	private void submitIssues()
 	{
 		Bundle bundle = getArguments();
-		int isCallInitiator = -1, callId = -1, rating = -1;
+		int isCallInitiator = -1, callId = -1, rating = -1, network = -1;
 		if(bundle!=null)
 		{
 			isCallInitiator = bundle.getInt(VoIPConstants.IS_CALL_INITIATOR);
 			callId = bundle.getInt(VoIPConstants.CALL_ID);
 			rating = bundle.getInt(VoIPConstants.CALL_RATING);
+			network = bundle.getInt(VoIPConstants.CALL_NETWORK_TYPE);
 		}
 
 		try
@@ -99,6 +100,7 @@ public class CallIssuesPopup extends SherlockDialogFragment
 			metadata.put(VoIPConstants.Analytics.CALL_RATING, rating);
 			metadata.put(VoIPConstants.Analytics.CALL_ID, callId);
 			metadata.put(VoIPConstants.Analytics.IS_CALLER, isCallInitiator);
+			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, network);
 
 			TableLayout issuesContainer = (TableLayout) getView().findViewById(R.id.issues_container);
 			int i, rowCount = issuesContainer.getChildCount();

@@ -1818,6 +1818,8 @@ public class HikeConstants
 		public static final String VOIP_NATIVE_CALL_INTERRUPT = "tci";
 
 		public static final String VOIP_CALL_RELAY = "cpur";
+
+		public static final String VOIP_CONNECTION_FAILED = "connf";
 	}
 
 	public static final class MqttMessageTypes

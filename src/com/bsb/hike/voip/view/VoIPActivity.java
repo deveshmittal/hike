@@ -313,7 +313,10 @@ public class VoIPActivity extends Activity implements CallActions
 				message = "Your friend is on an older version. Ask them to update hike.";
 			showMessage(message);
 			if (voipService != null)
+			{
+				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, 0);
 				voipService.stop();
+			}
 		}
 		
 		if (action.equals(VoIPConstants.PARTNER_INCOMPATIBLE)) {
@@ -322,7 +325,10 @@ public class VoIPActivity extends Activity implements CallActions
 				message = "Your friend's hike doesn't support free hike calls just yet. You'll have to message them for now :)";
 			showMessage(message);
 			if (voipService != null)
+			{
+				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, 1);
 				voipService.stop();
+			}
 		}
 		
 		if (action.equals(VoIPConstants.PARTNER_HAS_BLOCKED_YOU)) {
@@ -331,14 +337,20 @@ public class VoIPActivity extends Activity implements CallActions
 				message = "You have been blocked by the person you are trying to call.";
 			showMessage(message);
 			if (voipService != null)
+			{
+				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, 2);
 				voipService.stop();
+			}
 		}
 		
 		if (action.equals(VoIPConstants.PARTNER_IN_CALL)) {
 			showMessage("Busy");
 			showCallStatus(CallStatus.PARTNER_BUSY);
 			if (voipService != null)
+			{
+				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, 3);
 				voipService.stop();
+			}
 		}
 		
 		if (action.equals(VoIPConstants.INCOMING_NATIVE_CALL_HOLD)) {

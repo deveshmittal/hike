@@ -26,8 +26,6 @@ public class CallRatePopup extends SherlockDialogFragment
 	
 	private final String TAG = "CallRatePopup";
 
-	private int isCallInitiator, callId;
-
 	public CallRatePopup(){
 	}
 	
@@ -36,12 +34,6 @@ public class CallRatePopup extends SherlockDialogFragment
 	{
 		super.onCreate(savedInstanceState);
 		setStyle(DialogFragment.STYLE_NO_TITLE, R.style.Theme_CustomDialog);
-		Bundle bundle = getArguments();
-		if(bundle!=null)
-		{
-			isCallInitiator = bundle.getInt(VoIPConstants.IS_CALL_INITIATOR);
-			callId = bundle.getInt(VoIPConstants.CALL_ID);
-		}
 	}
 
 	@Override
@@ -124,12 +116,22 @@ public class CallRatePopup extends SherlockDialogFragment
 			JSONObject data = new JSONObject();
 			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
 
+			Bundle bundle = getArguments();
+			int isCallInitiator = -1, callId = -1, network = -1;
+			if(bundle!=null)
+			{
+				isCallInitiator = bundle.getInt(VoIPConstants.IS_CALL_INITIATOR);
+				callId = bundle.getInt(VoIPConstants.CALL_ID);
+				network = bundle.getInt(VoIPConstants.CALL_NETWORK_TYPE);
+			}
+
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.VOIP);
 			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.VOIP_CALL_RATE_POPUP_SUBMIT);
 			metadata.put(VoIPConstants.Analytics.CALL_RATING, rating+1);
 			metadata.put(VoIPConstants.Analytics.CALL_ID, callId);
 			metadata.put(VoIPConstants.Analytics.IS_CALLER, isCallInitiator);
+			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, network);
 
 			data.put(HikeConstants.METADATA, metadata);
 
