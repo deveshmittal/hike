@@ -1,6 +1,7 @@
 package com.bsb.hike.modules.httpmgr.client;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import com.bsb.hike.modules.httpmgr.Header;
@@ -11,17 +12,35 @@ import com.bsb.hike.modules.httpmgr.response.ResponseBody;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.OkHttpClient;
 
-
 /**
  * 
  * Represents the OkHttpClient wrapper
  * 
  * @author anubhavgupta & sidharth
- *
+ * 
  */
 public class OkClient implements IClient
 {
 	private OkHttpClient client;
+
+	/**
+	 * These constants are used internally by okHttp for connection pooling
+	 */
+	private static final boolean keepAlive = true;
+
+	private static final long keepAliveDuration = 5 * 60 * 1000; // 5 min
+
+	private static final int numOfMaxConnections = 5;
+
+	static
+	{
+		/**
+		 * Don't change these keys as they are used internally by okHttp for connection pooling
+		 */
+		System.setProperty("http.keepAlive", Boolean.toString(keepAlive));
+		System.setProperty("http.keepAliveDuration", Long.toString(keepAliveDuration));
+		System.setProperty("http.maxConnections", Integer.toString(numOfMaxConnections));
+	}
 
 	/**
 	 * Generates a new OkHttpClient with given clientOption parameters
@@ -35,14 +54,15 @@ public class OkClient implements IClient
 		OkHttpClient client = new OkHttpClient();
 		return setClientParameters(client, clientOptions);
 	}
-	
+
 	/**
 	 * Sets Client option parameters to given OkHttpClient
+	 * 
 	 * @param client
 	 * @param clientOptions
 	 * @return
 	 */
-	static OkHttpClient setClientParameters(OkHttpClient client , ClientOptions clientOptions)
+	static OkHttpClient setClientParameters(OkHttpClient client, ClientOptions clientOptions)
 	{
 		client.setConnectTimeout(clientOptions.getConnectTimeout(), TimeUnit.MILLISECONDS);
 		client.setReadTimeout(clientOptions.getReadTimeout(), TimeUnit.MILLISECONDS);
@@ -118,12 +138,13 @@ public class OkClient implements IClient
 
 		client.setFollowSslRedirects(clientOptions.getFollowSslRedirects());
 		client.setFollowRedirects(clientOptions.getFollowRedirects());
-		
+
 		return client;
 	}
-		
+
 	/**
 	 * Returns clientoption with default values set
+	 * 
 	 * @return
 	 */
 	static ClientOptions getDefaultClientOptions()
@@ -143,7 +164,7 @@ public class OkClient implements IClient
 	{
 		client = generateClient(clientOptions);
 	}
-	
+
 	public OkClient(OkHttpClient client)
 	{
 		this.client = client;
@@ -158,7 +179,7 @@ public class OkClient implements IClient
 		return parseOkResponse(response);
 
 	}
-	
+
 	/**
 	 * Parse hike http request to OkHttpRequest
 	 * 
@@ -182,6 +203,7 @@ public class OkClient implements IClient
 
 	/**
 	 * Parse OkhttpResponse to hike http response
+	 * 
 	 * @param response
 	 * @return
 	 * @throws IOException
