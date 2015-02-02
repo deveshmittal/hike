@@ -2251,8 +2251,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			 */
 			overlay.setVisibility(View.VISIBLE);
 			overlay.setTag(convMessage);
-			overlay.setOnClickListener(selectedStateOverlayClickListener);
-
+			//overlay.setOnClickListener(selectedStateOverlayClickListener);
+			
 			if (isSelected(convMessage))
 			{
 				/*
@@ -3026,27 +3026,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return getCount() == 0;
 	}
 
-	/*
-	 * if action mode is on clicking on an item will invoke this listener
-	 */
-	View.OnClickListener selectedStateOverlayClickListener = new OnClickListener()
-	{
-
-		@Override
-		public void onClick(View v)
-		{
-			if (isActionModeOn)
-			{
-				chatThread.showMessageContextMenu((ConvMessage) v.getTag());
-			}
-			else if (isHikeToOfflineMode)
-			{
-				chatThread.clickedHikeToOfflineMessage((ConvMessage) v.getTag());
-			}
-			return;
-		}
-	};
-
+	
 	@Override
 	public void onClick(View v)
 	{	/* Was Block or addContactHeaderClicked */

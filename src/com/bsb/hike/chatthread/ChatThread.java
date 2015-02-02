@@ -44,7 +44,6 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -63,6 +62,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
@@ -89,8 +89,8 @@ import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.filetransfer.FileSavedState;
-import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.media.AttachmentPicker;
 import com.bsb.hike.media.AudioRecordView;
 import com.bsb.hike.media.AudioRecordView.AudioRecordListener;
@@ -116,7 +116,6 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.PhonebookContact;
@@ -125,7 +124,6 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
-import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
@@ -142,7 +140,7 @@ import com.bsb.hike.utils.Utils;
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener,
 		CaptureImageListener, PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener,
-		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher
+		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnItemClickListener
 {
 	private static final String TAG = "chatthread";
 
@@ -1240,6 +1238,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
+		mConversationsView.setOnItemClickListener(this);
 
 		/**
 		 * Hacky fix to ensure onScroll is not called for the first time
@@ -1624,10 +1623,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mActionMode.showActionMode(MULTI_SELECT_ACTION_MODE, activity.getString(R.string.selected_count, mAdapter.getSelectedCount()), true, R.menu.multi_select_chat_menu);
 		}
 		
+		/**
+		 * If there are no selected items, then finish the actionMode
+		 */
 		else if (!hasCheckedItems && mActionMode.isActionModeOn())
 		{
-			//destroyActionMode();
-			//	TODO
+			destroyActionMode();
 			return true;
 		}
 		
@@ -1712,6 +1713,30 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mActionMode.showHideMenuItem(R.id.forward_msgs, !(selectedNonForwadableMsgs > 0));
 		
 		mActionMode.showHideMenuItem(R.id.action_mode_overflow_menu, selectedCancelableMsgs == 1 && mAdapter.getSelectedCount() == 1);
+	}
+	
+	private void destroyActionMode()
+	{
+		shareableMessagesCount = 0;
+		selectedNonForwadableMsgs = 0;
+		selectedNonForwadableMsgs = 0;
+		mAdapter.removeSelection();
+		mAdapter.setActionMode(false);
+		mAdapter.notifyDataSetChanged();
+		
+		// TODO : UNHIDE TIPS IF WE HAVE HIDDEN THEM
+		/**
+		 if we have hidden tips while initializing action mode we should unhide them
+		 
+		if (tipView != null && tipView.getVisibility() == View.INVISIBLE)
+		{
+			tipView.setVisibility(View.VISIBLE);
+		}
+		if (isHikeOfflineTipShowing())
+		{
+			setEnableHikeOfflineNextButton(true);
+		}
+		*/
 	}
 	
 	public int incrementDecrementMsgsCount(int var, boolean isMsgSelected)
@@ -3448,19 +3473,39 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void actionModeDestroyed(int id)
 	{
+		switch (id)
+		{
+		case MULTI_SELECT_ACTION_MODE:
+			destroyActionMode();
+			break;
 
+		default:
+			break;
+		}
 	}
 
 	@Override
 	public void doneClicked(int id)
 	{
-
 	}
 
 	@Override
 	public void initActionbarActionModeView(int id, View view)
 	{
-
+	}
+	
+	@Override
+	public boolean onActionItemClicked(int actionModeId, MenuItem menuItem)
+	{
+		switch (actionModeId)
+		{
+		case MULTI_SELECT_ACTION_MODE:
+			//Do Something;
+			break;
+		default:
+			break;
+		}
+		return false;
 	}
 
 	// ------------------------ ACTIONMODE CALLBACKs ENDS -------------------------------
@@ -3673,4 +3718,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 	}
 	
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+	{
+		if (mActionMode.isActionModeOn(MULTI_SELECT_ACTION_MODE))
+		{
+			Logger.d(TAG, mAdapter.getItem(position).toString());
+			showMessageContextMenu(mAdapter.getItem(position));
+		}
+		
+		/**
+		 * else if (isHikeToOfflineMode) { //chatThread.clickedHikeToOfflineMessage((ConvMessage) v.getTag()); }
+		 **/
+	}
 }

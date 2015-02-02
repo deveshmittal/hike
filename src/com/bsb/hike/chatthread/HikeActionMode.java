@@ -22,6 +22,8 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		public void doneClicked(int actionModeId);
 
 		public void initActionbarActionModeView(int actionModeId, View view);
+		
+		public boolean onActionItemClicked(int actionModeId, MenuItem menuItem);
 	}
 
 	private static final int DEFAULT_LAYOUT_RESID = R.layout.hike_action_mode;
@@ -91,6 +93,11 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	@Override
 	public boolean onActionItemClicked(ActionMode mode, MenuItem item)
 	{
+		if (mListener != null)
+		{
+			return mListener.onActionItemClicked(actionModeId, item);
+		}
+		
 		return false;
 	}
 
@@ -166,19 +173,6 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		}
 	}
 
-	private void setText(int viewId, int textId, int animId)
-	{
-		if (textId != -1)
-		{
-			TextView tv = (TextView) mActionMode.getCustomView().findViewById(viewId);
-			tv.setText(textId);
-			if (animId != -1)
-			{
-				tv.startAnimation(AnimationUtils.loadAnimation(mActivity, animId));
-			}
-		}
-	}
-	
 	private void setText(int viewId, String text, int animId)
 	{
 		if (viewId != -1)

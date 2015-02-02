@@ -914,9 +914,14 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	@Override
 	public void actionModeDestroyed(int id)
 	{
-		if (id == PIN_CREATE_ACTION_MODE)
+		switch (id)
 		{
+		case PIN_CREATE_ACTION_MODE:
 			destroyPinCreateView();
+			break;
+
+		default:
+			super.actionModeDestroyed(id);
 		}
 	}
 
