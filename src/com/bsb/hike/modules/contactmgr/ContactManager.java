@@ -1079,11 +1079,6 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		return transientCache.doesContactExist(msisdn);
 	}
 
-	public void makeOlderAvatarsRounded()
-	{
-		hDb.makeOlderAvatarsRounded();
-	}
-
 	/**
 	 * This method returns a drawable of an icon from the database
 	 * 

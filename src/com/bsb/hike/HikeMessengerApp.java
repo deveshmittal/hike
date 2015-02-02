@@ -644,9 +644,6 @@ public void onTrimMemory(int level)
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		String uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		// this is the setting to check whether the avtar DB migration has
-		// started or not
-		int avtarInt = settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1);
 		// this is the setting to check whether the conv DB migration has
 		// started or not
 		// -1 in both cases means an uninitialized setting, mostly on first
@@ -665,12 +662,11 @@ public void onTrimMemory(int level)
 		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
 
 		// first time or failed DB upgrade.
-		if (avtarInt == -1 && convInt == -1)
+		if (convInt == -1)
 		{
 			Editor mEditor = settings.edit();
 			// set the pref to 0 to indicate we've reached the state to init the
 			// hike conversation database.
-			mEditor.putInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, 0);
 			mEditor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 0);
 			mEditor.commit();
 		}
@@ -732,7 +728,7 @@ public void onTrimMemory(int level)
 		
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
-		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || 
+		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 ) || 
 				settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1 || settings.getInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, -1) == 1 || 
 				settings.getInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1) == 1 || settings.getInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 1) == 1 || TEST)
 		{
