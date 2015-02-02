@@ -430,7 +430,8 @@ public class UploadFileTask extends FileTransferBase
 							if(info.isCompRequired)
 							{
 								hikeFile.setVideoEditedInfo(info);
-								compFile = HikeVideoCompressor.getInstance().compressVideo(hikeFile);
+								HikeVideoCompressor instance = new HikeVideoCompressor();
+								compFile = instance.compressVideo(hikeFile);
 							}
 						}
 					}
