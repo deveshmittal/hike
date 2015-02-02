@@ -267,11 +267,8 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState)
 	{
+		Logger.d("UmangX","on Act Create called frag");
 		super.onActivityCreated(savedInstanceState);
-		if ((NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED))
-		{
-			KillActivity();
-		}
 	}
     
 	@Override
@@ -316,17 +313,30 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		}
 		
 	}
+	
+	@Override
+	public void onStop() {
+		super.onStop();
+		Logger.d("UmangX","on stop of frag");
+		if(NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED){
+			getActivity().finish();
+		}
+	}
 
 	@Override
+	
 	public void onResume()
 	{
 		super.onResume();
+		Logger.d("UmangX","on resume of frag");
 		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED)
-			KillActivity();
+			getActivity().finish();
 	}
 
+	
 	private void KillActivity()
 	{
+		Logger.d("UmangX","kill Acitivty called from frag");
 		Intent in = (Utils.getHomeActivityIntent(getActivity()));
 		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
