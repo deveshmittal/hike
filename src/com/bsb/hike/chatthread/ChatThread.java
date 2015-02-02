@@ -2310,6 +2310,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 
 	}
+	
+	/**
+	 * We save drafts here
+	 */
+	protected void onStop()
+	{
+		saveDraft();
+	}
 
 	protected void hideView(int viewId)
 	{
