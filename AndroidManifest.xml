@@ -5,6 +5,7 @@
     android:versionCode="1005"
     android:versionName="3.8.4" >
 
+
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="21" />
@@ -71,7 +72,6 @@
     <uses-permission android:name="android.permission.SUBSCRIBED_FEEDS_READ"/>
     <uses-permission android:name="android.permission.SUBSCRIBED_FEEDS_WRITE"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    
 
     <!-- C2DM -->
     <permission

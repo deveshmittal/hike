@@ -802,9 +802,17 @@ public class HikeConstants
 
 	public static final String STICKERS_ROOT = "/stickers";
 
-	public static final String LARGE_STICKER_ROOT = "/large";
+	public static final String LARGE_STICKER_FOLDER_NAME = "stickers_l";
 
-	public static final String SMALL_STICKER_ROOT = "/small";
+	public static final String SMALL_STICKER_FOLDER_NAME = "stickers_s";
+	
+	public static final String OLD_LARGE_STICKER_FOLDER_NAME = "large";
+
+	public static final String OLD_SMALL_STICKER_FOLDER_NAME = "small";
+	
+	public static final String LARGE_STICKER_ROOT = "/"+LARGE_STICKER_FOLDER_NAME;
+
+	public static final String SMALL_STICKER_ROOT = "/"+SMALL_STICKER_FOLDER_NAME;
 
 	public static final String HIKE_FILE_LIST_NAME = "hikeFiles";
 
@@ -2227,5 +2235,6 @@ public class HikeConstants
 	public static final String LOUD = "loud";
 	
 	public static final String OFF = "off";
+
 
 }
