@@ -172,6 +172,10 @@ public class NUXConstants
 	
 	public static final String REMINDER_NORMAL = "rem_normal";
 	
+	public static final String VIEW_DETAILS_URL="http://api.im.hike.in/nuxrewards/details/%1$s";
+	
+	public static final String TAP_CLAIM_URL="http://api.im.hike.in/nuxrewards/claim/%1$s";
+	
 	public static enum PushTypeEnum
 	{
 		NONE(0), SILENT(1), PUSH(2), UNKNOWN(-1);

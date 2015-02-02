@@ -706,7 +706,7 @@ public class ConversationsAdapter extends BaseAdapter
 		if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE || message.getState() == State.RECEIVED_UNREAD)
 		{
 			
-			if (message.isSent())
+			if (message.isSent() || isNuxLocked)
 			{
 				if(isNuxLocked)
 					imgStatus.setImageBitmap(NUXManager.getInstance().getNuxChatRewardPojo().getPendingChatIcon());

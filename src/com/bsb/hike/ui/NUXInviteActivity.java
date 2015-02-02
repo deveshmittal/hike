@@ -10,15 +10,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.NUXTaskDetails;
 import com.bsb.hike.models.NuxInviteFriends;
-import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.ui.utils.RecyclingImageView;
-import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
-import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
@@ -32,6 +30,7 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 
 	private ImageView imgvInviteFrd;
 
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -58,15 +57,14 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		processViewElemets();
 		
 		Logger.d("footer","onCreateFinished");
+		
+		/**
+		 * Cancelling all notifications ...
+		 */
+		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
 
 	}
 
-	@Override
-	protected void onNewIntent(Intent intent)
-	{
-	Logger.d("footer","onNewIntent");
-		super.onNewIntent(intent);
-	}
 	
 	private void bindViews()
 	{
@@ -125,31 +123,55 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 	}
 
 	@Override
+	protected void onResume()
+	{
+		Logger.d("HomeActivity","NuxInviteOnResume");
+		super.onResume();
+		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED)
+			KillActivity();
+	}
+	
+	@Override
 	public void onClick(View v)
 	{
 		switch (v.getId())
 		{
 		case R.id.but_skip:
 		//	IntentManager.openHomeActivity(this);
-			NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
+			if (NUXManager.getInstance().getCurrentState() != NUXConstants.NUX_KILLED)
+			{
+				NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
+			}
 			startActivity(Utils.getHomeActivityIntent(this));
 			finish();
 			break;
 
 		case R.id.but_inviteFrnds:
 
-			NUXManager.getInstance().startNuxSelector(this);
-
+			if (!(NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED))
+			{
+				NUXManager.getInstance().startNuxSelector(this);
+			}
+			else
+			{
+				startActivity(Utils.getHomeActivityIntent(this));
+				finish();
+			}
 			break;
 		}
 
 	}
-
 	
-	
-	@Override
-	protected void onDestroy()
+	private void KillActivity()
 	{
-		super.onDestroy();
+		Logger.d("HomeActivity","NuxInviteOnResume");
+		Intent in = (Utils.getHomeActivityIntent(this));
+		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+		this.startActivity(in);
+		finish();
 	}
+
+
 }

@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.view.ViewDebug.FlagToString;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -31,6 +32,7 @@ import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.ui.HomeActivity;
+
 import static com.bsb.hike.NUXConstants.*;
 
 
@@ -390,7 +392,7 @@ public class NUXManager
 	private boolean isNUXValid()
 	{
 		NUXTaskDetails mmDetails = getNuxTaskDetailsPojo();
-		if (mmDetails.getMin() == 0 || mmDetails.getMax() == 0 || mmDetails.getMin() > mmDetails.getMax()||ContactManager.getInstance().getAllContacts().size()<mmDetails.getMin())
+		if (mmDetails.getMin() == 0 || mmDetails.getMax() == 0 || mmDetails.getMin() > mmDetails.getMax()||ContactManager.getInstance().getAllContacts().size()<mmDetails.getMin()||!Utils.isHoneycombOrHigher())
 		{
 			return false;
 		}
@@ -840,10 +842,10 @@ public class NUXManager
 					String chatWaitingText = chatrewardobj.optString(CR_CHAT_WAITING_TEXT, context.getString(R.string.chat_waiting_text));
 					String pendingChatIcon = chatrewardobj.optString(CR_PENDINGCHAT_ICON);
 					String detailsText = chatrewardobj.optString(CR_DETAILS_TEXT, context.getString(R.string.details_text));
-					String detailsLink = chatrewardobj.optString(CR_DETAILS_LINK);
+					String detailsLink = chatrewardobj.optString(CR_DETAILS_LINK,VIEW_DETAILS_URL);
 					String inviteMore = chatrewardobj.optString(CR_INVITE_MORE_TEXT, context.getString(R.string.nux_invite_more));
 					String remind = chatrewardobj.optString(CR_REMIND_TEXT, context.getString(R.string.nux_remind));
-					String tapToClaimLink = chatrewardobj.optString(CR_TAPTOCLAIM);
+					String tapToClaimLink = chatrewardobj.optString(CR_TAPTOCLAIM,TAP_CLAIM_URL);
 					String tapToClaimText = chatrewardobj.optString(CR_TAPTOCLAIMTEXT, context.getString(R.string.tap_to_claim));
 					String selectFriends = chatrewardobj.optString(CR_SELECTFRIENDS, context.getString(R.string.select_friends));
 					chatReward = new NUXChatReward(rewardCardText, rewardCardSuccessText, statusText, chatWaitingText, pendingChatIcon, detailsText, detailsLink,
@@ -876,6 +878,8 @@ public class NUXManager
 
 	public void sendMsisdnListToServer(HashSet<String> msisdn)
 	{
+		
+		Logger.d("UmangX", "sending message : " + msisdn.toString());
 		JSONObject root = new JSONObject();
 		try
 		{
@@ -987,7 +991,7 @@ public class NUXManager
 	private void notifyUser(String text, String title, boolean shouldNotPlaySound)
 	{
 		Drawable drawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
-		Intent intent = new Intent(context, HomeActivity.class);
+		Intent intent=Utils.getHomeActivityIntent(context);
 		HikeNotification.getInstance(context).showBigTextStyleNotification(intent, 0, System.currentTimeMillis(), HikeNotification.HIKE_SUMMARY_NOTIFICATION_ID, title, text,
 				title, "", null, drawable, shouldNotPlaySound, 0);
 	}
@@ -1010,15 +1014,6 @@ public class NUXManager
 			
 		}
 		return false;
-	}
-	
-	public int getStealthModeTipConversationNumber()
-	{
-		if(getCurrentState()!=NUX_KILLED)
-		{
-			return getNuxTaskDetailsPojo().getMin()+2;
-		}
-		return 2;
 	}
 	
 	/**

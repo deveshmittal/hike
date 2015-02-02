@@ -80,6 +80,7 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.HikeUser;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
+import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeFragmentable;
 import com.bsb.hike.ui.HikeListActivity;
@@ -238,7 +239,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		NOTVIEWED, VIEWED, DELETED
 	};
 
-	public static enum footerState
+	public  enum footerState
 	{
 		OPEN(0), HALFOPEN(1), CLOSED(2);
 		
@@ -257,7 +258,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			Logger.d("footer", "Footer state set = " + value + "");
 			val = value;
-
+			
 		}
 	};
 	View parent;
@@ -318,14 +319,27 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				/**
 				 * Adding an Global Listener to close the footer on opening ...
 				 */
-				llInviteOptions.addOnLayoutChangeListener(new OnLayoutChangeListener()
-				{
+//				llInviteOptions.addOnLayoutChangeListener(new OnLayoutChangeListener()
+//				{
+//
+//					@Override
+//					public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom)
+//					{
+//						ObjectAnimator.ofFloat(llNuxFooter, "translationY", llChatReward.getHeight() + llInviteOptions.getHeight()).setDuration(0).start();
+//						llInviteOptions.removeOnLayoutChangeListener(this);
+//					}
+//				});
+				
+				
 
+				llInviteOptions.post(new Runnable()
+				{
+					
 					@Override
-					public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom)
+					public void run()
 					{
 						ObjectAnimator.ofFloat(llNuxFooter, "translationY", llChatReward.getHeight() + llInviteOptions.getHeight()).setDuration(0).start();
-						llInviteOptions.removeOnLayoutChangeListener(this);
+						
 					}
 				});
 			}
@@ -440,11 +454,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			
 			}
 		}
+		
+		
 		if (!(mmNuxManager.getCurrentState()==NUXConstants.COMPLETED))
 		{
 			progressNux.setProgress(NUXManager.getInstance().getCountUnlockedContacts() / ((float) mmDetails.getMin()));
+		
+			if(footerState.getEnum()==footerState.HALFOPEN)
+			{
+				
+			
 			chatProgress.setText(String.format(mmReward.getStatusText(), mmNuxManager.getCountUnlockedContacts(), mmDetails.getMin()));
-
+			}
+			else
+			{
+				chatProgress.setText(mmReward.getDetailsText());
+			}
 		}
 		else
 		{
@@ -481,29 +506,44 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				
 				// This is done to handle the footer on home button pressed when the view is already inflated.
-				if (llInviteOptions.getHeight()>0)
-					ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).setDuration(0).start();
-				else
+//				if (llInviteOptions.getHeight()>0)
+//					ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).setDuration(0).start();
+//				else
+//				{
+//					llInviteOptions.addOnLayoutChangeListener(new OnLayoutChangeListener()
+//					{
+// 
+//						@Override
+//						public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom)
+//						{
+//							ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).setDuration(0).start();
+//
+//							llInviteOptions.removeOnLayoutChangeListener(this);
+//						}
+//					});
+//				}
+				
+				
+				llInviteOptions.post(new Runnable()
 				{
-					llInviteOptions.addOnLayoutChangeListener(new OnLayoutChangeListener()
+					
+					@Override
+					public void run()
 					{
- 
-						@Override
-						public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom)
-						{
-							ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).setDuration(0).start();
-
-							llInviteOptions.removeOnLayoutChangeListener(this);
-						}
-					});
-				}
+						ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).setDuration(0).start();
+						
+					}
+				});
 			}
 
 			else
 			{
 				llInviteOptions.setVisibility(View.GONE);
 			}
-
+			
+			
+			chatProgress.setText(NUXManager.getInstance().getNuxChatRewardPojo().getDetailsText());
+			
 			footerState.setEnumState(footerState.HALFOPEN);
 			changeFooterControllerBackground(footerState.HALFOPEN);
 		}
@@ -561,15 +601,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 				//Will remove after testing
 				
-				/*if (mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+				if (mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
 				{
-					chatProgress.setText(mmReward.getTapToClaimText());
+					
 				}
 				else
 				{
 					chatProgress.setText(String.format(mmReward.getStatusText(), mmNuxManager.getCountUnlockedContacts(), mmDetails.getMin()));
 					progressNux.setProgress(NUXManager.getInstance().getCountUnlockedContacts() / mmDetails.getMin());
-				}*/
+				}
 				if (Utils.isHoneycombOrHigher())
 					ObjectAnimator.ofFloat(llNuxFooter, "translationY", llInviteOptions.getHeight()).start();
 				else
@@ -615,7 +655,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				if ((!TextUtils.isEmpty(mmReward.getTapToClaimLink())))
 				{
 					HikeSharedPreferenceUtil mprefs=HikeSharedPreferenceUtil.getInstance(getActivity());
-					String tapToClaim=mprefs.getData(HikeMessengerApp.UID_SETTING, "")+":"+mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
+					String tapToClaim=HikeConstants.ANDROID+"/"+ mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
 					String title= getString(R.string.hike);
 				
 					String link=String.format(mmReward.getTapToClaimLink(),tapToClaim);
@@ -628,7 +668,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				if ((!TextUtils.isEmpty(mmReward.getDetailsLink())))
 				{
 					HikeSharedPreferenceUtil mprefs = HikeSharedPreferenceUtil.getInstance(getActivity());
-					String tapToClaim = mprefs.getData(HikeMessengerApp.UID_SETTING, "") + ":" + mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
+					String tapToClaim = HikeConstants.ANDROID+"/"+ mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
 					String title = getString(R.string.hike);
 					String link = String.format(mmReward.getDetailsLink(), tapToClaim);
 					Utils.startWebViewActivity(getActivity(), link, title);
@@ -636,14 +676,27 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			break;
 		case R.id.but_remind:
-			if(NUXManager.getInstance().getCountLockedContacts()  > 0)
+			if(mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+			{
+				butRemind.setEnabled(false);
+				butInviteMore.setEnabled(false);
+			} 
+			else 
 			{
 				Intent in = IntentManager.openNuxCustomMessage(getActivity());
 				getActivity().startActivity(in);
 			}
 			break;
 		case R.id.but_inviteMore:
-			NUXManager.getInstance().startNuxSelector(getActivity());
+			if(mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+			{
+				butRemind.setEnabled(false);
+				butInviteMore.setEnabled(false);
+			} 
+			else 
+			{
+				NUXManager.getInstance().startNuxSelector(getActivity());
+			}
 			break;
 
 		}
@@ -1271,7 +1324,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			showingWelcomeHikeConvTip = true;
 			displayedConversations.add(0, new ConversationTip(ConversationTip.WELCOME_HIKE_TIP));
 		}
-		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false) &&  displayedConversations.size() >= NUXManager.getInstance().getStealthModeTipConversationNumber())
+		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false) &&  displayedConversations.size() > 2)
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_INFO_TIP));
 		}
@@ -1631,7 +1684,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						 */
 						movedFromEmptyToNonEmpty();
 					}
-					else if(displayedConversations.size() == NUXManager.getInstance().getStealthModeTipConversationNumber())
+					else if(displayedConversations.size() == 2)
 					{
 						if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false))
 						{
@@ -2639,7 +2692,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				movedFromEmptyToNonEmpty();
 			}
-			else if (displayedConversations.size() == NUXManager.getInstance().getStealthModeTipConversationNumber())
+			else if (displayedConversations.size() == 3)
 			{
 				if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false))
 				{
@@ -2958,6 +3011,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			
 			if (NUXManager.getInstance().isReminderReceived())
 			{
+				
 				switch(footerState.getEnum())
 				{
 				case OPEN:
@@ -2981,8 +3035,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 					break;
 				}
+				
 				fillNuxFooterElements();
-
 				NUXManager.getInstance().reminderShown();
 			}
 			else

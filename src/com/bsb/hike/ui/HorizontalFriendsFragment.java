@@ -5,30 +5,36 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.bsb.hike.NUXConstants;
-import com.bsb.hike.R;
-import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.NuxSelectFriends;
-import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.NUXManager;
-
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.ImageView.ScaleType;
+
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.NUXConstants;
+import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.NuxSelectFriends;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
+import com.bsb.hike.utils.Utils;
 
 
 public class HorizontalFriendsFragment extends Fragment implements OnClickListener{
@@ -45,7 +51,23 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 	private TextView nxtBtn;
 	private ImageView backBtn;
 	private HashSet<String> contactsDisplayed;
-
+	
+	private void changeLayoutParams(){
+		WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+    	Display display = wm.getDefaultDisplay();
+    	Logger.d("UmangX", "message : " + display.getWidth()+ " "+ viewStack.getWidth());
+    	if(viewStack.getWidth() < display.getWidth()){
+    		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.MATCH_PARENT);
+    		params.gravity = Gravity.CENTER;
+    		viewStack.setLayoutParams(params);
+    	}
+    	else {
+    		Logger.d("UmangX", "" + viewStack.getChildAt(0).getWidth() + "  " + NUXManager.getInstance().getCountLockedContacts());
+    		scrollHorizontalView(contactsDisplayed.size() - 1, viewStack.getChildAt(0).getWidth());
+    	}
+	}
+	
     @Override
     public View onCreateView(LayoutInflater inf, ViewGroup parent, Bundle savedInstanceState) {
 
@@ -65,8 +87,15 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		NUXManager nm = NUXManager.getInstance();
 		selectFriends = nm.getNuxSelectFriendsPojo();
 		preSelectedCount = nm.getCountLockedContacts() + nm.getCountUnlockedContacts();
+		
+		viewStack.post(new Runnable() {	
+			@Override
+			public void run() {
+				changeLayoutParams();			
+			}
+		});
 		//First Time Nux
-		if(nm.getCurrentState() == NUXConstants.NUX_NEW||NUXManager.getInstance().getCurrentState()==NUXConstants.NUX_SKIPPED)
+		if(nm.getCurrentState() == NUXConstants.NUX_NEW || nm.getCurrentState()==NUXConstants.NUX_SKIPPED)
 		{
 			maxShowListCount = nm.getNuxTaskDetailsPojo().getMin();
 		}
@@ -74,41 +103,45 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		else if(nm.getCurrentState() == NUXConstants.NUX_IS_ACTIVE)
 		{
 			maxShowListCount = nm.getNuxTaskDetailsPojo().getMax();
-			for (String msisdn : nm.getLockedContacts()) {
-				addContactView(msisdn, viewStack.getChildCount());
-			}
-			showNextButton(true);
-			scrollHorizontalView(0, viewStack.getChildAt(0).getWidth());
+			//scrollHorizontalView(0, viewStack.getChildAt(0).getWidth());
 		}
 		
 		//this only appears for custom message screen
 		if (getActivity() instanceof NuxSendCustomMessageActivity) 
 		{
+
+			showNextButton(true);
 			nxtBtn.setText(nm.getNuxCustomMessagePojo().getButText());
+			//only when jumping from Compose Chat Activity
 			if(!TextUtils.isEmpty(selectedFriendsString))
 			{
 				String[] arrmsisdn = selectedFriendsString.split(NUXConstants.STRING_SPLIT_SEPERATOR);
 				contactsDisplayed.addAll(Arrays.asList(arrmsisdn));
+				contactsDisplayed.removeAll(nm.getLockedContacts());
+			}
+			//remind me button 
+			else 
+			{
+				contactsDisplayed.addAll(nm.getLockedContacts());
 			}
 			for (String msisdn : contactsDisplayed) 
 			{
-				// do not remove locked contacts when selectedFriends is not empty, because it indicated
-				// that previous screen was used for choosing friends
-				if(nm.getUnlockedContacts().contains(msisdn) || (nm.getLockedContacts().contains(msisdn) && TextUtils.isEmpty(selectedFriendsString)) )
-				{
-					viewStack.removeView(viewMap.get(msisdn));
-				}
-				else
-					addContactView(msisdn, viewStack.getChildCount());			
+				addContactView(msisdn, viewStack.getChildCount());		
 			}
 		} else if (getActivity() instanceof ComposeChatActivity) {
 			nxtBtn.setText(selectFriends.getButText());
+			contactsDisplayed.addAll(nm.getLockedContacts());
+			for (String msisdn : contactsDisplayed) {
+				addContactView(msisdn, viewStack.getChildCount());
+			}
 			for (int i = 0; i < maxShowListCount - preSelectedCount; i++) 
 				addEmptyView();
 			changeDisplayString(0);
 		}
 		return v;
 	}
+    
+    
     
     private void addEmptyView(){
     	View emptyView = getLayoutInflater(null).inflate(R.layout.friends_horizontal_item,null);
@@ -230,10 +263,15 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		return true;
     }
     
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-    	super.onActivityCreated(savedInstanceState);    
-    }
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState)
+	{
+		super.onActivityCreated(savedInstanceState);
+		if ((NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED))
+		{
+			KillActivity();
+		}
+	}
     
 	@Override
 	public void onClick(View v) 
@@ -247,27 +285,53 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 			case R.id.nux_next_selection_button:
 	
 				NUXManager nm = NUXManager.getInstance();
-				if(getActivity() instanceof ComposeChatActivity)
-				{
-					HashSet<String> contactsNux = new HashSet<String>(viewMap.keySet());
-					nm.startNuxCustomMessage(contactsNux.toString().replace("[", "").replace("]", ""), getActivity());
-					
+				
+			if ((nm.getCurrentState() == NUXConstants.NUX_KILLED))
+			{
+				KillActivity();
+				return;
+			}
+
+			if (getActivity() instanceof ComposeChatActivity)
+			{
+				HashSet<String> contactsNux = new HashSet<String>(viewMap.keySet());
+				nm.startNuxCustomMessage(contactsNux.toString().replace("[", "").replace("]", ""), getActivity());
+
 			}
 			else if (getActivity() instanceof NuxSendCustomMessageActivity)
 			{
 				nm.sendMessage(contactsDisplayed, ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage());
-				nm.saveNUXContact(contactsDisplayed);
-				nm.sendMsisdnListToServer(contactsDisplayed);
-				nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
-				Intent intent = new Intent(getActivity(), HomeActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-				startActivity(intent);
-
+				
+				Logger.d("UmangX","displayed : "+contactsDisplayed.toString());
+				contactsDisplayed.removeAll(nm.getLockedContacts());
+				if(!contactsDisplayed.isEmpty()){
+					nm.sendMsisdnListToServer(contactsDisplayed);
+					nm.saveNUXContact(contactsDisplayed);
 				}
+				nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
+				KillActivity();
+			}
 				break;
 		}
 		
+	}
+
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED)
+			KillActivity();
+	}
+
+	private void KillActivity()
+	{
+		Intent in = (Utils.getHomeActivityIntent(getActivity()));
+		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+		getActivity().startActivity(in);
+		getActivity().finish();
 	}
 
 }

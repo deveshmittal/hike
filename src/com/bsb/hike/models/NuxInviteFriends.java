@@ -47,7 +47,7 @@ public class NuxInviteFriends
 		}
 		else
 		{
-			bitmap = BitmapFactory.decodeResource(HikeMessengerApp.getInstance().getResources(), R.drawable.ic_nuxinvite);
+			bitmap = BitmapFactory.decodeResource(HikeMessengerApp.getInstance().getResources(), R.drawable.art_default_stickers_nux);
 		}
 	}
 
