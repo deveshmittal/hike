@@ -262,7 +262,8 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 				Logger.d("UmngR","reco list with blocked contacts : " + mmSet.toString());
 				for (String msisdn : mmSet)
 				{
-                    if(!TextUtils.isEmpty(msisdn) && !(cm.getContact(msisdn) == null))
+					ContactInfo nuxCI = cm.getContact(msisdn);
+                    if(!TextUtils.isEmpty(msisdn) && !(nuxCI == null) && nuxCI.getName()!=null)
                         nuxRecommendedTaskList.add(cm.getContact(msisdn));
 				}
 				allContacts.removeAll(nuxRecommendedTaskList);

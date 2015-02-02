@@ -463,12 +463,12 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		{
 			String recoSectionHeader = NUXManager.getInstance().getNuxSelectFriendsPojo().getRecoSectionTitle();
 			ContactInfo recommendedSection = new ContactInfo(SECTION_ID, Integer.toString(nuxFilteredRecoList.size()), recoSectionHeader, RECOMMENDED);
-			Logger.d("UmngR", "nux list :" +  nuxRecommendedList.toString());
+			Logger.d("UmngR", "nux CCA list :" +  nuxRecommendedList.toString());
 			if(nuxFilteredRecoList.size() > 0){
 				completeList.add(recommendedSection);
 				completeList.addAll(nuxFilteredRecoList);
 			}
-			Logger.d("UmngR", "nux  filter list :" +  nuxFilteredRecoList.toString());
+			Logger.d("UmngR", "nux CCA filter list :" +  nuxFilteredRecoList.toString());
 		}
 
 		if(fetchRecentlyJoined && !recentlyJoinedHikeContactsList.isEmpty())
