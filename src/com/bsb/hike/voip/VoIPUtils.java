@@ -30,6 +30,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -138,7 +139,7 @@ public class VoIPUtils {
 		message.put(HikeConstants.SUB_TYPE, subtype);
 		message.put(HikeConstants.DATA, data);
 		
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
+		HikeMqttManagerNew.getInstance().sendMessage(message, HikeMqttManagerNew.MQTT_QOS_ONE);
     }
 
     /**
@@ -215,7 +216,7 @@ public class VoIPUtils {
 			message.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING);
 			message.put(HikeConstants.DATA, data);
 			
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
+			HikeMqttManagerNew.getInstance().sendMessage(message, HikeMqttManagerNew.MQTT_QOS_ONE);
 			Logger.d(VoIPConstants.TAG, "Sent missed call notifier to partner.");
 			
 		} catch (JSONException e) {

@@ -1319,4 +1319,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="voip_partner_incompat">Your friend\'s hike doesn\'t support free hike calls just yet. You\'ll have to message them for now :)</string>
 	<string name="voip_partner_is_busy">Busy</string>
 	<string name="voip_call_on_hold">Call on hold.</string>
+	<string name="voip_call_issues_submit_toast">Your feedback has been submitted</string>
 </resources>

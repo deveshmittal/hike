@@ -1,8 +1,12 @@
 package com.bsb.hike.voip.view;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -11,10 +15,14 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockDialogFragment;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPConstants;
@@ -25,6 +33,8 @@ public class CallIssuesPopup extends SherlockDialogFragment
 	}
 
 	private final String TAG = "CallIssuesPopup";
+
+	private Set<String> selectedIssues = new HashSet<String>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) 
@@ -63,12 +73,43 @@ public class CallIssuesPopup extends SherlockDialogFragment
 			
 			@Override
 			public void onClick(View v) {
-				submitIssues();
-				dismiss();
+				populateSelectedIssues();
+				if(selectedIssues.size() > 0)
+				{
+					dismiss();
+					Toast.makeText(getSherlockActivity(), R.string.voip_call_issues_submit_toast, Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
-		
+
 		return view;
+	}
+
+	private void populateSelectedIssues()
+	{
+		TableLayout issuesContainer = (TableLayout) getView().findViewById(R.id.issues_container);
+		int i, rowCount = issuesContainer.getChildCount();
+		for(i=0; i<rowCount; i++)
+		{
+			TableRow row = (TableRow) issuesContainer.getChildAt(i);
+			int j, colCount = row.getChildCount();
+			for(j=0; j<colCount; j++)
+			{
+				View v = row.getChildAt(j);
+				String tag = (String) v.getTag();
+				if(v.isSelected() && tag!=null)
+				{
+					selectedIssues.add(tag);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void onDismiss(DialogInterface dialog)
+	{
+		sendAnalytics();
+		super.onDismiss(dialog);
 	}
 
 	@Override
@@ -77,7 +118,7 @@ public class CallIssuesPopup extends SherlockDialogFragment
 		super.onSaveInstanceState(outState);
 	}
 
-	private void submitIssues()
+	private void sendAnalytics()
 	{
 		Bundle bundle = getArguments();
 		int isCallInitiator = -1, callId = -1, rating = -1, network = -1;
@@ -91,9 +132,6 @@ public class CallIssuesPopup extends SherlockDialogFragment
 
 		try
 		{
-			JSONObject data = new JSONObject();
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
-
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.VOIP);
 			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.VOIP_CALL_RATE_POPUP_SUBMIT);
@@ -102,26 +140,12 @@ public class CallIssuesPopup extends SherlockDialogFragment
 			metadata.put(VoIPConstants.Analytics.IS_CALLER, isCallInitiator);
 			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, network);
 
-			TableLayout issuesContainer = (TableLayout) getView().findViewById(R.id.issues_container);
-			int i, rowCount = issuesContainer.getChildCount();
-			for(i=0; i<rowCount; i++)
+			for(String issue : selectedIssues)
 			{
-				TableRow row = (TableRow) issuesContainer.getChildAt(i);
-				int j, colCount = row.getChildCount();
-				for(j=0; j<colCount; j++)
-				{
-					View v = row.getChildAt(j);
-					String tag = (String) v.getTag();
-					if(v.isSelected() && tag!=null)
-					{
-						metadata.put(tag, 1);
-					}
-				}
+				metadata.put(issue, 1);
 			}
 
-			data.put(HikeConstants.METADATA, metadata);
-
-			Utils.sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
 		}
 		catch (JSONException e)
 		{

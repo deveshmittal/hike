@@ -48,20 +48,22 @@
 	
 		    <TableRow
 		        android:id="@+id/issues_row1">
-				<Button
+				<com.bsb.hike.view.CustomFontButton
 			        android:id="@+id/issue_echo"
 			        android:layout_width="0dp"
 			        android:layout_height="wrap_content"
 			        android:layout_weight="1"
 			        android:drawablePadding="8dp"
 			        android:text="@string/voip_issue_echo"
+			        android:textColor="@color/call_issues"
 			        android:drawableTop="@drawable/call_issues_echo_btn"
 			        android:textSize="12dp"
+			        android:textStyle="italic"
 			        android:tag="echoI"
 			        android:background="@null"
 			        android:scaleType="center" />
 		
-				<Button
+				<com.bsb.hike.view.CustomFontButton
 			        android:id="@+id/issue_noise"
 			        android:layout_width="0dp"
 			        android:layout_height="wrap_content"
@@ -71,12 +73,14 @@
 			        android:drawablePadding="8dp"
 			        android:background="@null"
 			        android:textSize="12dp"
+			        android:textStyle="italic"
+			        android:textColor="@color/call_issues"
 			        android:tag="noiseI"
 			        android:layout_marginRight="24dp"
 			        android:layout_marginLeft="24dp"
 			        android:scaleType="center" />
 		
-				<Button
+				<com.bsb.hike.view.CustomFontButton
 			        android:id="@+id/issue_cant_hear"
 			        android:layout_width="0dp"
 			        android:layout_height="wrap_content"
@@ -85,6 +89,8 @@
 			        android:text="@string/voip_issue_hearing"
 			        android:drawableTop="@drawable/call_issues_hear_btn"
 			        android:textSize="12dp"
+			        android:textStyle="italic"
+			        android:textColor="@color/call_issues"
 			        android:tag="hearI"
 			        android:background="@null"
 			        android:scaleType="center" />	
@@ -93,7 +99,7 @@
 			<TableRow
 			    android:id="@+id/issues_row2"
 		    	android:layout_marginTop="24dp">
-				<Button
+				<com.bsb.hike.view.CustomFontButton
 			        android:id="@+id/issue_call_drop"
 			        android:layout_width="0dp"
 			        android:layout_height="wrap_content"
@@ -102,12 +108,14 @@
 			        android:text="@string/voip_issue_drop"
 			        android:drawableTop="@drawable/call_issues_drop_btn"
 			        android:textSize="12dp"
+			        android:textStyle="italic"
+			        android:textColor="@color/call_issues"
 			        android:tag="dropI"
 			        android:background="@null"
 			        android:layout_marginRight="24dp"
 			        android:scaleType="center" />
 		
-				<Button
+				<com.bsb.hike.view.CustomFontButton
 			        android:id="@+id/issue_network"
 			        android:layout_width="0dp"
 			        android:layout_height="wrap_content"
@@ -117,11 +125,13 @@
 			        android:drawableTop="@drawable/call_issues_network_btn"
 			        android:background="@null"
 			        android:textSize="12dp"
+			        android:textStyle="italic"
+			        android:textColor="@color/call_issues"
 			        android:tag="netI"
 			        android:layout_marginRight="24dp"
 			        android:scaleType="center" />
 		
-				<Button
+				<com.bsb.hike.view.CustomFontButton
 			        android:id="@+id/issue_voice_delay"
 			        android:layout_width="0dp"
 			        android:layout_height="wrap_content"
@@ -130,6 +140,8 @@
 			        android:text="@string/voip_issue_delay"
 			        android:drawableTop="@drawable/call_issues_delay_btn"
 			        android:textSize="12dp"
+			        android:textStyle="italic"
+			        android:textColor="@color/call_issues"
 			        android:tag="delayI"
 			        android:background="@null"
 			        android:scaleType="center" />
