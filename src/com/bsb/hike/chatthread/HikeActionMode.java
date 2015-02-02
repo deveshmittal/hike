@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.R;
 
@@ -29,21 +30,31 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 
 	protected SherlockFragmentActivity mActivity;
 
-	private int actionModeTitle, doneButtonText, defaultLayoutId = DEFAULT_LAYOUT_RESID, actionModeId;
+	private int defaultLayoutId = DEFAULT_LAYOUT_RESID, actionModeId;
+	
+	private String actionModeTitle = "";
+	
+	private String doneButtonText = "";
 
 	private ActionModeListener mListener;
+	
+	private boolean shouldInflateMenu;
+	
+	private int menuResId = -1;
+	
+	private Menu mMenu;
 
 	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, ActionModeListener listener)
 	{
-		this(sherlockFragmentActivity, -1, -1, DEFAULT_LAYOUT_RESID, listener);
+		this(sherlockFragmentActivity, "", "", DEFAULT_LAYOUT_RESID, listener);
 	}
 
 	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int layoutId, ActionModeListener listener)
 	{
-		this(sherlockFragmentActivity, -1, -1, layoutId, listener);
+		this(sherlockFragmentActivity, "", "", layoutId, listener);
 	}
 
-	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int title, int save, int layoutId, ActionModeListener listener)
+	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, String title, String save, int layoutId, ActionModeListener listener)
 	{
 		this.mActivity = sherlockFragmentActivity;
 		this.defaultLayoutId = layoutId;
@@ -62,6 +73,10 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	{
 		this.mActionMode = mode;
 		mode.setCustomView(LayoutInflater.from(mActivity).inflate(defaultLayoutId, null));
+		if(shouldInflateMenu)
+		{
+			inflateMenu(menu);
+		}
 
 		return true;
 	}
@@ -101,11 +116,28 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		showActionMode(id, actionModeTitle, doneButtonText);
 	}
 
-	public void showActionMode(int id, int title, int doneButtonText)
+	public void showActionMode(int id, String title, String doneButtonText)
 	{
 		this.actionModeId = id;
 		this.actionModeTitle = title;
 		this.doneButtonText = doneButtonText;
+		mActivity.startActionMode(this);
+	}
+	
+	/**
+	 * Used to show an actionMode with a custom menu. The menu layout resId is passed in the params
+	 * 
+	 * @param id
+	 * @param title
+	 * @param showMenu
+	 * @param menuResId
+	 */
+	public void showActionMode(int id, String title, boolean showMenu, int menuResId)
+	{
+		this.actionModeId = id;
+		this.actionModeTitle = title;
+		this.shouldInflateMenu = showMenu;
+		this.menuResId = showMenu ? menuResId : -1;
 		mActivity.startActionMode(this);
 	}
 
@@ -134,7 +166,7 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		}
 	}
 
-	private View setText(int viewId, int textId, int animId)
+	private void setText(int viewId, int textId, int animId)
 	{
 		if (textId != -1)
 		{
@@ -144,9 +176,20 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 			{
 				tv.startAnimation(AnimationUtils.loadAnimation(mActivity, animId));
 			}
-			return tv;
 		}
-		return null;
+	}
+	
+	private void setText(int viewId, String text, int animId)
+	{
+		if (viewId != -1)
+		{
+			TextView tv = (TextView) mActionMode.getCustomView().findViewById(viewId);
+			tv.setText(text);
+			if (animId != -1)
+			{
+				tv.startAnimation(AnimationUtils.loadAnimation(mActivity, animId));
+			}
+		}
 	}
 
 	@Override
@@ -186,5 +229,53 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		{
 			mActionMode.finish();
 		}
+	}
+	
+	private void inflateMenu(Menu menu)
+	{
+		if (menuResId == -1)
+		{
+			throw new RuntimeException("Trying to inflate menu with menuId as -1");
+		}
+		MenuInflater mMenuInflater = mActionMode.getMenuInflater();
+		mMenuInflater.inflate(menuResId, menu);
+		this.mMenu = menu;
+	}
+	
+	public boolean isActionModeOn(int whichActionMode)
+	{
+		if (mActionMode != null && this.actionModeId == whichActionMode)
+		{
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isActionModeOn()
+	{
+		return mActionMode != null;
+	}
+	
+	public void updateTitle(String title)
+	{
+		setText(R.id.title, title, -1);
+	}
+	
+	public void showHideMenuItem(int menuItemResId, boolean show)
+	{
+		if (mMenu != null)
+		{
+			MenuItem item = mMenu.findItem(menuItemResId);
+			if (item != null)
+			{
+				item.setVisible(show);
+			}
+		}
+	}
+	
+	public void hideView(int resId)
+	{
+		mActionMode.getCustomView().findViewById(resId).setVisibility(View.GONE);
 	}
 }

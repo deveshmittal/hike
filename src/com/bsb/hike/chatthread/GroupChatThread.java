@@ -783,7 +783,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 
 	private void showPinCreateView()
 	{
-		mActionMode.showActionMode(PIN_CREATE_ACTION_MODE, R.string.create_pin, R.string.pin);
+		mActionMode.showActionMode(PIN_CREATE_ACTION_MODE, getString(R.string.create_pin), getString(R.string.pin));
 		// TODO : dismissPopupWindow was here : gaurav
 		final View content = activity.findViewById(R.id.impMessageCreateView);
 		content.setVisibility(View.VISIBLE);

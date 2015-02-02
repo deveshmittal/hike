@@ -88,7 +88,9 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
+import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferManager;
+import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.media.AttachmentPicker;
 import com.bsb.hike.media.AudioRecordView;
 import com.bsb.hike.media.AudioRecordView.AudioRecordListener;
@@ -186,6 +188,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static final int DISABLE_TRANSCRIPT_MODE = 20;
 
 	protected static final int STICKER_CATEGORY_MAP_UPDATED = 21;
+	
+	protected static final int MULTI_SELECT_ACTION_MODE = 22; 
 
 	protected ChatThreadActivity activity;
 
@@ -242,6 +246,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected View mActionBarView;
 
 	protected HikeActionMode mActionMode;
+	
+	protected int selectedNonTextMsgs;
+
+	protected int selectedNonForwadableMsgs;
+	
+	protected int shareableMessagesCount;
+	
+	protected int selectedCancelableMsgs;
+
 
 	private class ChatThreadBroadcasts extends BroadcastReceiver
 	{
@@ -1589,9 +1602,121 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	}
 
 	@Override
-	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3)
+	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
-		return false;
+		return showMessageContextMenu(mAdapter.getItem(position - mConversationsView.getHeaderViewsCount()));
+	}
+
+	protected boolean showMessageContextMenu(ConvMessage message)
+	{
+		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null || message.isBlockAddHeader())
+		{
+			return false;
+		}
+		
+		mAdapter.toggleSelection(message);
+		boolean isMsgSelected = mAdapter.isSelected(message);
+		
+		boolean hasCheckedItems = mAdapter.getSelectedCount() > 0;
+		
+		if (hasCheckedItems && !mActionMode.isActionModeOn())
+		{
+			mActionMode.showActionMode(MULTI_SELECT_ACTION_MODE, activity.getString(R.string.selected_count, mAdapter.getSelectedCount()), true, R.menu.multi_select_chat_menu);
+		}
+		
+		else if (!hasCheckedItems && mActionMode.isActionModeOn())
+		{
+			//destroyActionMode();
+			//	TODO
+			return true;
+		}
+		
+		if(!mActionMode.isActionModeOn(MULTI_SELECT_ACTION_MODE))
+		{
+			mActionMode.showActionMode(MULTI_SELECT_ACTION_MODE, activity.getString(R.string.selected_count, mAdapter.getSelectedCount()), true, R.menu.multi_select_chat_menu);
+		}
+		
+		else
+		{
+			mActionMode.updateTitle(activity.getString(R.string.selected_count, mAdapter.getSelectedCount()));
+		}
+		
+		mAdapter.setActionMode(true);
+		mAdapter.notifyDataSetChanged();
+		
+		if (message.isFileTransferMessage())
+		{
+			selectedNonTextMsgs = incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
+			
+			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+			File file = hikeFile.getFile();
+			FileSavedState fss;
+			if (message.isSent())
+			{
+				fss = FileTransferManager.getInstance(activity.getApplicationContext()).getUploadFileState(message.getMsgID(), file);
+			}
+			else
+			{
+				fss = FileTransferManager.getInstance(activity.getApplicationContext()).getDownloadFileState(message.getMsgID(), file);
+			}
+			if ((message.isSent() && TextUtils.isEmpty(hikeFile.getFileKey())) || (!message.isSent() && !hikeFile.wasFileDownloaded()))
+			{
+				/*
+				 * This message has not been downloaded or uploaded yet. this can't be forwarded
+				 */
+				if (message.isSent())
+				{
+					selectedNonForwadableMsgs = incrementDecrementMsgsCount(selectedNonForwadableMsgs, isMsgSelected);
+				}
+				if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED ))
+				{
+					/*
+					 * File Transfer is in progress. this can be canceLled.
+					 */
+					selectedCancelableMsgs = incrementDecrementMsgsCount(selectedCancelableMsgs, isMsgSelected);
+				}
+			}
+			else
+			{
+				HikeFileType ftype = hikeFile.getHikeFileType();
+				// we do not support location and contact sharing
+				if (ftype != HikeFileType.LOCATION && ftype != HikeFileType.CONTACT)
+				{
+					shareableMessagesCount = incrementDecrementMsgsCount(shareableMessagesCount, isMsgSelected);
+				}
+			}
+		}
+		else if (message.getMetadata() != null && message.getMetadata().isPokeMessage())
+		{
+			// Poke message can only be deleted
+			selectedNonTextMsgs = incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
+		}
+		else if (message.isStickerMessage())
+		{
+			// Sticker message is a non text message.
+			selectedNonTextMsgs = incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
+		}
+		
+		mActionMode.hideView(R.id.done_container);
+		mActionMode.hideView(R.id.done_container_divider);
+		hideShowActionModeMenus(MULTI_SELECT_ACTION_MODE);
+		return true;
+	}
+	
+	private void hideShowActionModeMenus(int actionModeId)
+	{
+		mActionMode.showHideMenuItem(R.id.copy_msgs, selectedNonTextMsgs == 0);
+		
+		mActionMode.showHideMenuItem(R.id.share_msgs, shareableMessagesCount == 1 && mAdapter.getSelectedCount() == 1);
+		
+		mActionMode.showHideMenuItem(R.id.forward_msgs, !(selectedNonForwadableMsgs > 0));
+		
+		mActionMode.showHideMenuItem(R.id.action_mode_overflow_menu, selectedCancelableMsgs == 1 && mAdapter.getSelectedCount() == 1);
+	}
+	
+	public int incrementDecrementMsgsCount(int var, boolean isMsgSelected)
+	{
+		return isMsgSelected ? var + 1 : var - 1;
 	}
 
 	@Override
