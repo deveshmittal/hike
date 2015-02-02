@@ -3273,7 +3273,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			@Override
 			public void negativeClicked(HikeDialog hikeDialog)
 			{
-				
+				hikeDialog.dismiss();
 			}
 		}, contact, context.getString(R.string.save), true);
 	}
