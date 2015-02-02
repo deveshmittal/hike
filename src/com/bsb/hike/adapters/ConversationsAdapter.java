@@ -563,8 +563,17 @@ public class ConversationsAdapter extends BaseAdapter
 				{
 					continue;
 				}
-				ConvMessage message = new ConvMessage("Start a new chat", contact.getMsisdn(), 0, State.RECEIVED_READ);
+				String msg= null;
+				if (contact.isOnhike())
+				{
+					msg = context.getString(R.string.start_new_chat);
+				}
+				else
+				{
+					msg = context.getString(R.string.invite_to_hike);
+				}
 				List<ConvMessage> messagesList = new ArrayList<ConvMessage>();
+				ConvMessage message = new ConvMessage(msg, contact.getMsisdn(), 0, State.RECEIVED_READ);
 				messagesList.add(message);
 				conv.setMessages(messagesList);
 				otherConversations.add(conv);
@@ -582,7 +591,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	public void onQueryChanged(String s)
 	{
-		searchQueryLength = s.length();
+		searchQueryLength = s.trim().length();
 		contactFilter.filter(s);
 	}
 
