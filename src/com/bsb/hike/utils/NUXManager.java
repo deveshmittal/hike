@@ -1,6 +1,7 @@
 package com.bsb.hike.utils;
 
 import static com.bsb.hike.NUXConstants.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -34,6 +35,7 @@ import com.bsb.hike.models.NuxInviteFriends;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.service.HikeMqttManagerNew;
 
 
 /**
@@ -893,7 +895,7 @@ public class NUXManager
 			object.put(INVITE_ARRAY, mmArray);
 			root.put(HikeConstants.DATA, object);
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, root);
+			HikeMqttManagerNew.getInstance().sendMessage(root, HikeMqttManagerNew.MQTT_QOS_ONE);
 
 		}
 		catch (JSONException e)

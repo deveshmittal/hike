@@ -186,7 +186,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	protected void onStop()
 	{
 		int successfulSelections = galleryItems.size();
-		HikeAnalyticsEvent.sendGallerySelectionEvent(totalSelections, successfulSelections);
+		HikeAnalyticsEvent.sendGallerySelectionEvent(totalSelections, successfulSelections, getApplicationContext());
 		super.onStop();
 	}
 

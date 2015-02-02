@@ -74,6 +74,16 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
 
+	public static final String VOIP_SETTINGS = "voipsettings";
+
+	public static final String VOIP_AUDIO_GAIN = "voipaudiogain";
+	
+	public static final String VOIP_BITRATE_2G = "vb2g";
+	
+	public static final String VOIP_BITRATE_3G = "vb3g";
+	
+	public static final String VOIP_BITRATE_WIFI = "vbw";
+	
 	public static final String MSISDN_SETTING = "msisdn";
 
 	public static final String CARRIER_SETTING = "carrier";
@@ -419,7 +429,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN = "showCategoryReordering";
 	
 	public static final String STICKED_BTN_CLICKED_FIRST_TIME = "stickerBtnClickedFirstTime";
-	
+
 	public static final String STICKER_SETTING_CHECK_BOX_CLICKED = "stickerSettingCheckBoxClicked";
 	
 	public static final String STICKER_SETTING_UNCHECK_BOX_CLICKED = "stickerSettingUnCheckBoxClicked";
@@ -431,6 +441,14 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String NOTIFICATION_TONE_URI = "notificationToneUri";
 
 	public static final String NOTIFICATION_TONE_NAME = "notificaationToneName";
+
+	public static final String SHOWN_VOIP_INTRO_TIP = "shownVoipIntroTip";
+
+	public static final String SHOW_VOIP_CALL_RATE_POPUP = "showVoipCallRatePopup";
+
+	public static final String VOIP_CALL_RATE_POPUP_FREQUENCY = "voipCallRatePopupFrequency";
+
+	public static final String VOIP_ACTIVE_CALLS_COUNT = "voipCallsCount";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -1059,7 +1077,7 @@ public void onTrimMemory(int level)
 			/*
 			 * Send a fg/bg packet on reconnecting.
 			 */
-			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true);
+			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true, false);
 		}
 	};
 
