@@ -316,8 +316,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	 * This variable is used to determine whether HiketoOffline tip is showing or not
 	 */
 	private boolean isHikeOfflineTipShowing;
+	
+	private OnClickListener mOnClickListener;
 
-	public MessagesAdapter(Context context, List<ConvMessage> objects, Conversation conversation, com.bsb.hike.chatthread.ChatThread chatThread)
+	public MessagesAdapter(Context context, List<ConvMessage> objects, Conversation conversation, com.bsb.hike.chatthread.ChatThread chatThread, OnClickListener listener)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		// this.largeStickerLoader = new StickerLoader(context);
@@ -327,6 +329,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		this.convMessages = objects;
 		this.conversation = conversation;
 		this.mChatThread = chatThread;
+		this.mOnClickListener = listener;
 		this.voiceMessagePlayer = new VoiceMessagePlayer();
 		this.preferences = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.isGroupChat = Utils.isGroupConversation(conversation.getMsisdn());
@@ -2251,7 +2254,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			 */
 			overlay.setVisibility(View.VISIBLE);
 			overlay.setTag(convMessage);
-			//overlay.setOnClickListener(selectedStateOverlayClickListener);
+			overlay.setOnClickListener(mOnClickListener);
 			
 			if (isSelected(convMessage))
 			{

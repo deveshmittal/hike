@@ -63,7 +63,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
@@ -91,7 +90,6 @@ import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.filetransfer.FileSavedState;
-import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.media.AttachmentPicker;
 import com.bsb.hike.media.AudioRecordView;
@@ -143,7 +141,7 @@ import com.bsb.hike.utils.Utils;
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener,
 		CaptureImageListener, PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener,
-		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnItemClickListener
+		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher
 {
 	private static final String TAG = "chatthread";
 
@@ -636,6 +634,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mConversationsView.setSelection(0);
 			hideView(R.id.scroll_top_indicator);
 			break;
+		case R.id.selected_state_overlay:
+			onOverLayClick((ConvMessage) v.getTag());
+			break;
 		default:
 			Logger.e(TAG, "onClick Registered but not added in onClick : " + v.toString());
 			break;
@@ -1123,7 +1124,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mMessageMap = new HashMap<Long, ConvMessage>();
 		addtoMessageMap(0, messages.size());
 
-		mAdapter = new MessagesAdapter(activity, messages, mConversation, this);
+		mAdapter = new MessagesAdapter(activity, messages, mConversation, this, this);
 
 		initListView(); // set adapter and add clicks etc
 		setupActionBar(); // Setup the action bar
@@ -1241,7 +1242,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
-		mConversationsView.setOnItemClickListener(this);
 
 		/**
 		 * Hacky fix to ensure onScroll is not called for the first time
@@ -3883,13 +3883,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 	}
 	
-	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+	/**
+	 * Used to handle clicks on the Overlay mode when ActionMode is enabled
+	 * @param convMessage
+	 */
+	public void onOverLayClick(ConvMessage convMessage)
 	{
 		if (mActionMode.whichActionModeIsOn() == MULTI_SELECT_ACTION_MODE)
 		{
-			Logger.d(TAG, mAdapter.getItem(position).toString());
-			showMessageContextMenu(mAdapter.getItem(position));
+			showMessageContextMenu(convMessage);
 		}
 		
 		/**
