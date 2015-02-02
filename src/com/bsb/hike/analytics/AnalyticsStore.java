@@ -198,7 +198,7 @@ public class AnalyticsStore
 							normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
 						}
 
-						if(getFileSize(EventPriority.NORMAL) >= AnalyticsConstants.MAX_FILE_SIZE)
+						if(getFileSize(EventPriority.NORMAL) >= HAManager.getInstance().getMaxFileSize())
 						{
 							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "normal priority file size reached its limit! " + normalPriorityEventFile.getName());
 							compressAndDeleteOriginalFile(normalPriorityEventFile.getAbsolutePath());
@@ -216,7 +216,7 @@ public class AnalyticsStore
 							highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
 						}
 
-						if(getFileSize(EventPriority.HIGH) >= AnalyticsConstants.MAX_FILE_SIZE)
+						if(getFileSize(EventPriority.HIGH) >= HAManager.getInstance().getMaxFileSize())
 						{
 							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "high priority file size reached its limit! " + highPriorityEventFile.getName());
 							compressAndDeleteOriginalFile(highPriorityEventFile.getAbsolutePath());
