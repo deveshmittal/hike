@@ -226,6 +226,13 @@ class HikeUserDatabase extends SQLiteOpenHelper
 			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.INVITE_TIMESTAMP + " INTEGER DEFAULT 0";
 			db.execSQL(alter);
 		}
+		
+		// Now we have removing rounded thumbnails table. Using RoundedImageView to create rounded thumbnails instead
+		if (oldVersion < 16)
+		{
+			String drop = "DROP TABLE " + DBConstants.ROUNDED_THUMBNAIL_TABLE;
+			db.execSQL(drop);
+		}
 	}
 
 	void addContacts(List<ContactInfo> contacts, boolean isFirstSync) throws DbException
