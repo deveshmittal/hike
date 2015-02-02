@@ -86,6 +86,8 @@ public class HikeDialogFactory
 	public static final int DELETE_GROUP_DIALOG = 25;
 	
 	public static final int DELETE_ALL_CONVERSATIONS = 26;
+	
+	public static final int DELETE_MESSAGES_DIALOG = 27;
 
 	public static HikeDialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -146,6 +148,7 @@ public class HikeDialogFactory
 		case DELETE_CHAT_DIALOG:
 		case DELETE_GROUP_DIALOG:
 		case DELETE_ALL_CONVERSATIONS:
+		case DELETE_MESSAGES_DIALOG:
 			return showDeleteMessagesDialog(dialogId, context, listener, data);
 			
 		case GPS_DIALOG:
@@ -891,6 +894,17 @@ public class HikeDialogFactory
 		case DELETE_ALL_CONVERSATIONS:
 			deleteConfirmDialog.setHeader(R.string.deleteconversations);
 			deleteConfirmDialog.setBody(R.string.delete_all_question);
+			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			break;
+			
+		case DELETE_MESSAGES_DIALOG:
+			deleteConfirmDialog.setHeader((int) data[0] == 1 ? R.string.confirm_delete_msg_header : R.string.confirm_delete_msgs_header);
+			deleteConfirmDialog.setBody((int) data[0] == 1 ? context.getString(R.string.confirm_delete_msg) : context.getString(R.string.confirm_delete_msgs, (int) data[0]));
+			if ((boolean) data[1] == true)
+			{
+				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
+			}
 			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
 			deleteConfirmDialog.setCancelButton(R.string.cancel);
 			break;

@@ -104,7 +104,6 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	@Override
 	public void onDestroyActionMode(ActionMode mode)
 	{
-		this.mActionMode = null;
 		if (mListener != null)
 		{
 			mListener.actionModeDestroyed(actionModeId);
@@ -185,7 +184,7 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 			}
 		}
 	}
-
+	
 	@Override
 	public void onClick(View v)
 	{
@@ -197,6 +196,7 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 
 	protected void actionBarDestroyed()
 	{
+		this.mActionMode = null;
 	}
 
 	protected void doneClicked()

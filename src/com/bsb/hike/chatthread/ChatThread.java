@@ -1615,43 +1615,43 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			return false;
 		}
-		
+
 		mAdapter.toggleSelection(message);
 		boolean isMsgSelected = mAdapter.isSelected(message);
-		
+
 		boolean hasCheckedItems = mAdapter.getSelectedCount() > 0;
-		
+
 		if (hasCheckedItems && !mActionMode.isActionModeOn())
 		{
 			mActionMode.showActionMode(MULTI_SELECT_ACTION_MODE, activity.getString(R.string.selected_count, mAdapter.getSelectedCount()), true, R.menu.multi_select_chat_menu);
 		}
-		
+
 		/**
 		 * If there are no selected items, then finish the actionMode
 		 */
 		else if (!hasCheckedItems && mActionMode.isActionModeOn())
 		{
-			destroyActionMode();
+			mActionMode.finish();
 			return true;
 		}
-		
-		if(!mActionMode.isActionModeOn(MULTI_SELECT_ACTION_MODE))
+
+		if (!mActionMode.isActionModeOn(MULTI_SELECT_ACTION_MODE))
 		{
 			mActionMode.showActionMode(MULTI_SELECT_ACTION_MODE, activity.getString(R.string.selected_count, mAdapter.getSelectedCount()), true, R.menu.multi_select_chat_menu);
 		}
-		
+
 		else
 		{
 			mActionMode.updateTitle(activity.getString(R.string.selected_count, mAdapter.getSelectedCount()));
 		}
-		
+
 		mAdapter.setActionMode(true);
 		mAdapter.notifyDataSetChanged();
-		
+
 		if (message.isFileTransferMessage())
 		{
 			selectedNonTextMsgs = incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
-			
+
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
 			File file = hikeFile.getFile();
 			FileSavedState fss;
@@ -1672,13 +1672,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				{
 					selectedNonForwadableMsgs = incrementDecrementMsgsCount(selectedNonForwadableMsgs, isMsgSelected);
 				}
-				if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED ))
-				{
-					/*
-					 * File Transfer is in progress. this can be canceLled.
-					 */
-					selectedCancelableMsgs = incrementDecrementMsgsCount(selectedCancelableMsgs, isMsgSelected);
-				}
+				/**
+				 * if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED )) { /* File Transfer is in progress. this can be canceLled.
+				 * 
+				 * selectedCancelableMsgs = incrementDecrementMsgsCount(selectedCancelableMsgs, isMsgSelected); }
+				 */
 			}
 			else
 			{
@@ -1700,24 +1698,24 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			// Sticker message is a non text message.
 			selectedNonTextMsgs = incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
 		}
-		
+
 		mActionMode.hideView(R.id.done_container);
 		mActionMode.hideView(R.id.done_container_divider);
 		hideShowActionModeMenus(MULTI_SELECT_ACTION_MODE);
 		return true;
 	}
-	
+
 	private void hideShowActionModeMenus(int actionModeId)
 	{
 		mActionMode.showHideMenuItem(R.id.copy_msgs, selectedNonTextMsgs == 0);
-		
+
 		mActionMode.showHideMenuItem(R.id.share_msgs, shareableMessagesCount == 1 && mAdapter.getSelectedCount() == 1);
-		
+
 		mActionMode.showHideMenuItem(R.id.forward_msgs, !(selectedNonForwadableMsgs > 0));
-		
-		mActionMode.showHideMenuItem(R.id.action_mode_overflow_menu, selectedCancelableMsgs == 1 && mAdapter.getSelectedCount() == 1);
+
+		// mActionMode.showHideMenuItem(R.id.action_mode_overflow_menu, selectedCancelableMsgs == 1 && mAdapter.getSelectedCount() == 1);
 	}
-	
+
 	private void destroyActionMode()
 	{
 		shareableMessagesCount = 0;
@@ -1726,20 +1724,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mAdapter.removeSelection();
 		mAdapter.setActionMode(false);
 		mAdapter.notifyDataSetChanged();
-		
+
 		// TODO : UNHIDE TIPS IF WE HAVE HIDDEN THEM
 		/**
-		 if we have hidden tips while initializing action mode we should unhide them
-		 
-		if (tipView != null && tipView.getVisibility() == View.INVISIBLE)
-		{
-			tipView.setVisibility(View.VISIBLE);
-		}
-		if (isHikeOfflineTipShowing())
-		{
-			setEnableHikeOfflineNextButton(true);
-		}
-		*/
+		 * if we have hidden tips while initializing action mode we should unhide them
+		 * 
+		 * if (tipView != null && tipView.getVisibility() == View.INVISIBLE) { tipView.setVisibility(View.VISIBLE); } if (isHikeOfflineTipShowing()) {
+		 * setEnableHikeOfflineNextButton(true); }
+		 */
 	}
 	
 	public int incrementDecrementMsgsCount(int var, boolean isMsgSelected)
@@ -3512,6 +3504,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	// ------------------------ ACTIONMODE CALLBACKs ENDS -------------------------------
 
+	protected void deleteMessagesFromDb(ArrayList<Long> msgIds, boolean deleteMediaFromPhone)
+	{
+		// TODO if last message is typing notification we will get wrong result here
+		boolean isLastMessage = (msgIds.contains(messages.get(messages.size() - 1).getMsgID()));
+		Bundle bundle = new Bundle();
+		bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, isLastMessage);
+		bundle.putString(HikeConstants.Extras.MSISDN, msisdn);
+		bundle.putBoolean(HikeConstants.Extras.DELETE_MEDIA_FROM_PHONE, deleteMediaFromPhone);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
+	}
+
 	private boolean onActionModeMenuItemClicked(MenuItem menuItem)
 	{
 		final HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
@@ -3519,20 +3522,30 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (menuItem.getItemId())
 		{
 		case R.id.delete_msgs:
-			/*
-			 * final ArrayList<Long> selectedMsgIdsToDelete = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
-			 * 
-			 * if (mAdapter.getSelectedCount() == 1) { deleteConfirmDialog.setHeader(R.string.confirm_delete_msg_header); deleteConfirmDialog.setBody(R.string.confirm_delete_msg);
-			 * } else { deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header); deleteConfirmDialog.setBody(getString(R.string.confirm_delete_msgs,
-			 * mAdapter.getSelectedCount())); } View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
-			 * 
-			 * @Override public void onClick(View v) { deleteMessagesFromDb(selectedMsgIdsToDelete, deleteConfirmDialog.isChecked()); destroyActionMode();
-			 * deleteConfirmDialog.dismiss(); } };
-			 * 
-			 * if(mAdapter.containsMediaMessage(selectedMsgIdsToDelete)) { deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard); }
-			 * deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener); deleteConfirmDialog.setCancelButton(R.string.cancel); deleteConfirmDialog.show(); return
-			 * true;
-			 */
+			final ArrayList<Long> selectedMsgIdsToDelete = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			HikeDialogFactory.showDialog(activity, HikeDialogFactory.DELETE_MESSAGES_DIALOG, new HikeDialogListener()
+			{
+
+				@Override
+				public void positiveClicked(HikeDialog hikeDialog)
+				{
+					deleteMessagesFromDb(selectedMsgIdsToDelete, ((CustomAlertDialog) hikeDialog).isChecked());
+					hikeDialog.dismiss();
+					mActionMode.finish();
+				}
+
+				@Override
+				public void neutralClicked(HikeDialog hikeDialog)
+				{
+				}
+
+				@Override
+				public void negativeClicked(HikeDialog hikeDialog)
+				{
+				}
+			}, mAdapter.getSelectedCount(), mAdapter.containsMediaMessage(selectedMsgIdsToDelete));
+
+			return true;
 
 		case R.id.forward_msgs:
 			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
@@ -3597,11 +3610,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 			Utils.setClipboardText(msgStr.toString(), activity.getApplicationContext());
 			Toast.makeText(activity.getApplicationContext(), R.string.copied, Toast.LENGTH_SHORT).show();
-			destroyActionMode();
+			mActionMode.finish();
 			return true;
 
 		case R.id.action_mode_overflow_menu:
-			/*
+			
+			/**
 			 * for (ConvMessage convMessage : selectedMessagesMap.values()) { //showActionModeOverflow(convMessage); }
 			 */
 			// TO DO
@@ -3614,7 +3628,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				ConvMessage message = selectedMessagesMap.get(selectedMsgIds.get(0));
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
 				hikeFile.shareFile(activity);
-				destroyActionMode();
+				mActionMode.finish();
 			}
 			else
 			{
@@ -3623,7 +3637,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			return true;
 
 		default:
-			destroyActionMode();
+			mActionMode.finish();
 			return false;
 		}
 	}
