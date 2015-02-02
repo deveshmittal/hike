@@ -236,19 +236,18 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		this.mMenu = menu;
 	}
 	
-	public boolean isActionModeOn(int whichActionMode)
+	/**
+	 * -1 indicates no action mode is on currently
+	 * @return
+	 */
+	public int whichActionModeIsOn()
 	{
-		if (mActionMode != null && this.actionModeId == whichActionMode)
+		if (mActionMode != null)
 		{
-			return true;
+			return actionModeId;
 		}
-		
-		return false;
-	}
-	
-	public boolean isActionModeOn()
-	{
-		return mActionMode != null;
+
+		return -1;
 	}
 	
 	public void updateTitle(String title)

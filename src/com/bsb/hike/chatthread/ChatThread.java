@@ -1611,43 +1611,80 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected boolean showMessageContextMenu(ConvMessage message)
 	{
+		if (shouldProcessMessagesOnTap(message))
+		{
+			/**
+			 * Inflate ActionMode
+			 */
+			if (mActionMode.whichActionModeIsOn() == -1)
+			{
+				mActionMode.showActionMode(MULTI_SELECT_ACTION_MODE, activity.getString(R.string.selected_count, mAdapter.getSelectedCount()), true, R.menu.multi_select_chat_menu);
+			}
+
+			/**
+			 * Update ActionMode
+			 */
+			else
+			{
+				mActionMode.updateTitle(activity.getString(R.string.selected_count, mAdapter.getSelectedCount()));
+			}
+
+			processMessageOnTap(message, mAdapter.isSelected(message));
+
+			mAdapter.setActionMode(true);
+			mAdapter.notifyDataSetChanged();
+
+			mActionMode.hideView(R.id.done_container);
+			mActionMode.hideView(R.id.done_container_divider);
+			hideShowActionModeMenus(MULTI_SELECT_ACTION_MODE);
+			return true;
+		}
+
+		else
+		{
+			return false;
+		}
+	}
+
+	private boolean shouldProcessMessagesOnTap(ConvMessage message)
+	{
+		/**
+		 * Exit Condition 1.
+		 */
 		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null || message.isBlockAddHeader())
 		{
 			return false;
 		}
 
 		mAdapter.toggleSelection(message);
-		boolean isMsgSelected = mAdapter.isSelected(message);
-
-		boolean hasCheckedItems = mAdapter.getSelectedCount() > 0;
-
-		if (hasCheckedItems && !mActionMode.isActionModeOn())
+		/**
+		 * If there are no selected items, then finish the actionMode Exit Condition 2
+		 */
+		if (!(mAdapter.getSelectedCount() > 0))
 		{
-			mActionMode.showActionMode(MULTI_SELECT_ACTION_MODE, activity.getString(R.string.selected_count, mAdapter.getSelectedCount()), true, R.menu.multi_select_chat_menu);
+			mActionMode.finish();
+			return false;
 		}
 
 		/**
-		 * If there are no selected items, then finish the actionMode
+		 * Do not inflate ActionMode if any actionMode is on other than MULTI_SELECT_MODE
 		 */
-		else if (!hasCheckedItems && mActionMode.isActionModeOn())
+		int whichActionMode = mActionMode.whichActionModeIsOn();
+
+		/**
+		 * Exit Condition 3
+		 */
+		if (whichActionMode != -1 && whichActionMode != MULTI_SELECT_ACTION_MODE)
 		{
-			mActionMode.finish();
-			return true;
+			return false;
 		}
 
-		if (!mActionMode.isActionModeOn(MULTI_SELECT_ACTION_MODE))
-		{
-			mActionMode.showActionMode(MULTI_SELECT_ACTION_MODE, activity.getString(R.string.selected_count, mAdapter.getSelectedCount()), true, R.menu.multi_select_chat_menu);
-		}
-
-		else
-		{
-			mActionMode.updateTitle(activity.getString(R.string.selected_count, mAdapter.getSelectedCount()));
-		}
-
-		mAdapter.setActionMode(true);
-		mAdapter.notifyDataSetChanged();
-
+		return true;
+	}
+	
+	
+	private void processMessageOnTap(ConvMessage message, boolean isMsgSelected)
+	{
 		if (message.isFileTransferMessage())
 		{
 			selectedNonTextMsgs = incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
@@ -1688,6 +1725,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				}
 			}
 		}
+
 		else if (message.getMetadata() != null && message.getMetadata().isPokeMessage())
 		{
 			// Poke message can only be deleted
@@ -1698,11 +1736,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			// Sticker message is a non text message.
 			selectedNonTextMsgs = incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
 		}
-
-		mActionMode.hideView(R.id.done_container);
-		mActionMode.hideView(R.id.done_container_divider);
-		hideShowActionModeMenus(MULTI_SELECT_ACTION_MODE);
-		return true;
 	}
 
 	private void hideShowActionModeMenus(int actionModeId)
@@ -3853,7 +3886,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 	{
-		if (mActionMode.isActionModeOn(MULTI_SELECT_ACTION_MODE))
+		if (mActionMode.whichActionModeIsOn() == MULTI_SELECT_ACTION_MODE)
 		{
 			Logger.d(TAG, mAdapter.getItem(position).toString());
 			showMessageContextMenu(mAdapter.getItem(position));
