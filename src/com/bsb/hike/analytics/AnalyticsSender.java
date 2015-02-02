@@ -287,33 +287,39 @@ public class AnalyticsSender
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception during upload.");			
 			}
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "http response :" + response.getStatusLine());
-	
-			switch (response.getStatusLine().getStatusCode()) 
+			if (response != null)
 			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "http response :" + response.getStatusLine());
+				switch (response.getStatusLine().getStatusCode())
+				{
 				case HttpResponseCode.OK:
 				{
 					resetRetryParams();
-					
+
 					new File(absolutePath).delete();
-					
+
 					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "deleted file :" + fileName);
 				}
-				return;
-	
+					return;
+
 				case HttpResponseCode.GATEWAY_TIMEOUT:
 				case HttpResponseCode.SERVICE_UNAVAILABLE:
 				case HttpResponseCode.INTERNAL_SERVER_ERROR:
 				case HttpResponseCode.NOT_FOUND:
-					
-				if(!retryUpload())
-				{
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Exiting upload process....");
-					return;
+
+					if (!retryUpload())
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Exiting upload process....");
+						return;
+					}
+
+				default:
+					break;
 				}
-				
-			default:
-				break;
+			}
+			else
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "null response while uploading file to server.");
 			}
 		}
 	}		
