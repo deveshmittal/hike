@@ -265,9 +265,7 @@ public class HAManager
 	 * @return hour of the day(0-23)
 	 */
 	public int getWhenToSend()
-	{
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Current alarm-time :" + hourToSend);
-		
+	{		
 		return hourToSend;
 	}
 
