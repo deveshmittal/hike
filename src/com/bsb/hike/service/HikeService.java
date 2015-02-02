@@ -809,6 +809,10 @@ public class HikeService extends Service
 	private void scheduleNextAnalyticsSendAlarm()
 	{
 		long whenToSend = Utils.getTimeInMillis(Calendar.getInstance(), HAManager.getInstance().getWhenToSend(), 0, 0, 0);
-		HikeAlarmManager.setAlarm(getApplicationContext(), whenToSend, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
+		
+		if(System.currentTimeMillis() < whenToSend)
+		{
+			HikeAlarmManager.setAlarm(getApplicationContext(), whenToSend, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
+		}
 	}
 }
