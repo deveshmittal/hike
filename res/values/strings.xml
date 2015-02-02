@@ -1274,9 +1274,10 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="custom_message">I just love these stickers on hike. Check them out!</string>
     <string name="custome_message_send_button">SEND</string>
     <string name="custom_message_hint"> </string>
-    <string name="nux_select_friends_1">Choose your best friends!</string>
-    <string name="nux_select_friends_2">Pick %d more!</string>
-    <string name="nux_select_friends_3">Good to go!</string>
+    <string name="nux_select_friends_1">Choose your best friends</string>
+    <string name="nux_select_friends_2">Pick %d more</string>
+    <string name="nux_select_friends_3">You\'re good to go!</string>
+    <string name="nux_send_message">Send a message</string>
     <string name="nux_select_friends_reconame">RECOMMENDED</string>
     <string name="nux_select_friends_nextbut">NEXT</string>
     <string name="led_color_none_key">None</string>

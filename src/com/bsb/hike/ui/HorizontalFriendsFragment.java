@@ -111,6 +111,7 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		{
 
 			showNextButton(true);
+        	sectionDisplayMessage.setText(R.string.nux_send_message);
 			nxtBtn.setText(nm.getNuxCustomMessagePojo().getButText());
 			//only when jumping from Compose Chat Activity
 			if(!TextUtils.isEmpty(selectedFriendsString))
