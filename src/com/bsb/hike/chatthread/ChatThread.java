@@ -600,7 +600,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			bottomScrollIndicatorClicked();
 			break;
 		case R.id.back:
-			// onActionBarBackPressed();
+			onBackPressed();
 			break;
 		case R.id.contact_info:
 			openProfileScreen();
@@ -806,7 +806,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			return themePicker.onBackPressed();
 		}
-
+		
+		if (mActionMode.whichActionModeIsOn() != -1)
+		{
+			mActionMode.finish();
+			return true;
+		}
+		
+		activity.backPressed();
+		
 		return false;
 	}
 

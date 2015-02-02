@@ -11,6 +11,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentFactory;
 
 public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 {
@@ -99,6 +100,12 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 		{
 			return;
 		}
+		
+		backPressed();
+	}
+	
+	public void backPressed()
+	{
 		super.onBackPressed();
 	}
 

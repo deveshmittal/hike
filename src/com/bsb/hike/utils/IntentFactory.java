@@ -30,6 +30,7 @@ import com.bsb.hike.ui.FileSelectActivity;
 import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.ShareLocation;
@@ -362,4 +363,10 @@ public class IntentFactory
 		return intent;
 	}
 	
+	public static Intent getHomeActivityIntent(Context context)
+	{
+		Intent intent = new Intent(context, HomeActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		return intent;
+	}
 }
