@@ -3,6 +3,7 @@ package com.bsb.hike.chatthread;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +86,7 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.chatthread.HikeActionMode.ActionModeListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.dialog.CustomAlertDialog;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
@@ -122,6 +124,7 @@ import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
+import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.utils.ChatTheme;
@@ -3500,8 +3503,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (actionModeId)
 		{
 		case MULTI_SELECT_ACTION_MODE:
-			//Do Something;
-			break;
+			return onActionModeMenuItemClicked(menuItem);
 		default:
 			break;
 		}
@@ -3510,6 +3512,122 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	// ------------------------ ACTIONMODE CALLBACKs ENDS -------------------------------
 
+	private boolean onActionModeMenuItemClicked(MenuItem menuItem)
+	{
+		final HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
+		ArrayList<Long> selectedMsgIds;
+		switch (menuItem.getItemId())
+		{
+		case R.id.delete_msgs:
+			/*
+			 * final ArrayList<Long> selectedMsgIdsToDelete = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			 * 
+			 * if (mAdapter.getSelectedCount() == 1) { deleteConfirmDialog.setHeader(R.string.confirm_delete_msg_header); deleteConfirmDialog.setBody(R.string.confirm_delete_msg);
+			 * } else { deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header); deleteConfirmDialog.setBody(getString(R.string.confirm_delete_msgs,
+			 * mAdapter.getSelectedCount())); } View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+			 * 
+			 * @Override public void onClick(View v) { deleteMessagesFromDb(selectedMsgIdsToDelete, deleteConfirmDialog.isChecked()); destroyActionMode();
+			 * deleteConfirmDialog.dismiss(); } };
+			 * 
+			 * if(mAdapter.containsMediaMessage(selectedMsgIdsToDelete)) { deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard); }
+			 * deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener); deleteConfirmDialog.setCancelButton(R.string.cancel); deleteConfirmDialog.show(); return
+			 * true;
+			 */
+
+		case R.id.forward_msgs:
+			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			Collections.sort(selectedMsgIds);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FORWARD_MSG);
+			Intent intent = new Intent(activity, ComposeChatActivity.class);
+			String msg;
+			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+			JSONArray multipleMsgArray = new JSONArray();
+			try
+			{
+				for (int i = 0; i < selectedMsgIds.size(); i++)
+				{
+					ConvMessage message = selectedMessagesMap.get(selectedMsgIds.get(i));
+					JSONObject multiMsgFwdObject = new JSONObject();
+					if (message.isFileTransferMessage())
+					{
+						HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+						Utils.handleFileForwardObject(multiMsgFwdObject, hikeFile);
+					}
+					else if (message.isStickerMessage())
+					{
+						Sticker sticker = message.getMetadata().getSticker();
+						/*
+						 * If the category is an unknown one, we have the id saved in the json.
+						 */
+						String categoryId = sticker.getCategoryId();
+						multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
+						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, sticker.getStickerId());
+					}
+					else if (message.getMetadata() != null && message.getMetadata().isPokeMessage())
+					{
+						multiMsgFwdObject.put(HikeConstants.Extras.POKE, true);
+					}
+					else
+					{
+						msg = message.getMessage();
+						multiMsgFwdObject.putOpt(HikeConstants.Extras.MSG, msg);
+					}
+					multipleMsgArray.put(multiMsgFwdObject);
+				}
+			}
+			catch (JSONException e)
+			{
+				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
+			}
+			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
+			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, msisdn);
+			activity.startActivity(intent);
+			return true;
+
+		case R.id.copy_msgs:
+			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			Collections.sort(selectedMsgIds);
+			StringBuilder msgStr = new StringBuilder();
+			int size = selectedMsgIds.size();
+
+			for (int i = 0; i < size; i++)
+			{
+				msgStr.append(selectedMessagesMap.get(selectedMsgIds.get(i)).getMessage());
+				msgStr.append("\n");
+			}
+			Utils.setClipboardText(msgStr.toString(), activity.getApplicationContext());
+			Toast.makeText(activity.getApplicationContext(), R.string.copied, Toast.LENGTH_SHORT).show();
+			destroyActionMode();
+			return true;
+
+		case R.id.action_mode_overflow_menu:
+			/*
+			 * for (ConvMessage convMessage : selectedMessagesMap.values()) { //showActionModeOverflow(convMessage); }
+			 */
+			// TO DO
+			return true;
+
+		case R.id.share_msgs:
+			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			if (selectedMsgIds.size() == 1)
+			{
+				ConvMessage message = selectedMessagesMap.get(selectedMsgIds.get(0));
+				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+				hikeFile.shareFile(activity);
+				destroyActionMode();
+			}
+			else
+			{
+				Toast.makeText(activity, R.string.some_error, Toast.LENGTH_SHORT).show();
+			}
+			return true;
+
+		default:
+			destroyActionMode();
+			return false;
+		}
+	}
+	
 	private void clearTempData()
 	{
 		Editor editor = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, activity.MODE_PRIVATE).edit();
