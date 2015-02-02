@@ -779,8 +779,7 @@ public void onTrimMemory(int level)
 			editor.remove(HikeConstants.RECEIVE_SMS_PREF);
 			editor.commit();
 		}
-
-		Utils.setupServerURL(settings.getInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, AccountUtils._PRODUCTION_HOST), Utils.switchSSLOn(getApplicationContext()));
+		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), Utils.switchSSLOn(getApplicationContext()));
 
 		typingNotificationMap = new HashMap<String, TypingNotification>();
 

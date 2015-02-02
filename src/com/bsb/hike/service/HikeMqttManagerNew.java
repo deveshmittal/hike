@@ -420,12 +420,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 			return;
 		}
 
-		int whichServer = settings.getInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, AccountUtils._PRODUCTION_HOST);
-		
-		brokerHostName = whichServer == AccountUtils._PRODUCTION_HOST ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
+		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION,true);
 
-		brokerPortNumber = whichServer == AccountUtils._PRODUCTION_HOST ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
-				: STAGING_BROKER_PORT_NUMBER);
+		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
+
+		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
+						: STAGING_BROKER_PORT_NUMBER);
+
 
 		Logger.d(TAG, "Broker host name: " + brokerHostName);
 		Logger.d(TAG, "Broker port: " + brokerPortNumber);
@@ -776,17 +777,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 
 	private String getServerUri(boolean ssl)
 	{
-		int whichServer = settings.getInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, AccountUtils._PRODUCTION_HOST);
+		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION, true);
 
-		brokerHostName = (whichServer == AccountUtils._PRODUCTION_HOST ? PRODUCTION_BROKER_HOST_NAME : (whichServer == AccountUtils._DEV_STAGING_HOST)? AccountUtils.DEV_STAGING_HOST:STAGING_BROKER_HOST_NAME);
+		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
 
-		brokerPortNumber = whichServer == AccountUtils._PRODUCTION_HOST ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
-				: STAGING_BROKER_PORT_NUMBER);
-		if(whichServer == AccountUtils._DEV_STAGING_HOST){
-			brokerPortNumber = ssl ? DEV_STAGING_BROKER_PORT_NUMBER_SSL: DEV_STAGING_BROKER_PORT_NUMBER;
-		}
+		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
+		                                : STAGING_BROKER_PORT_NUMBER);
 
-		if (!(whichServer == AccountUtils._PRODUCTION_HOST))
+		if (!production)
 		{
 			return brokerHostName + ":" + brokerPortNumber;
 		}
