@@ -2383,11 +2383,11 @@ public class VoIPService extends Service {
 		SharedPreferences prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		int simulateBitrate = prefs.getInt(HikeMessengerApp.VOIP_BITRATE_2G, VoIPConstants.BITRATE_2G);
 
-		final int TOTAL_TEST_TIME = 2;
+		final int TOTAL_TEST_TIME = VoIPUtils.getQualityTestSimulatedCallDuration(getApplicationContext());
 		final int TOTAL_TEST_BYTES = (simulateBitrate * TOTAL_TEST_TIME) / 8;
-		final int TEST_PACKETS = 35;
+		final int TEST_PACKETS = TOTAL_TEST_TIME * 15;	// Assuming ~15 packets per second
 		final int TIME_TO_WAIT_FOR_PACKETS = 1;
-		final int ACCEPTABLE_LOSS_PCT = 10;
+		final int ACCEPTABLE_LOSS_PCT = VoIPUtils.getQualityTestSimulatedCallDuration(getApplicationContext());
 
 		byte[] packetData = new byte[TOTAL_TEST_BYTES / TEST_PACKETS];
 		VoIPDataPacket dp = new VoIPDataPacket(PacketType.NETWORK_QUALITY);

@@ -1015,6 +1015,10 @@ public class HikeConstants
 
 	public static final String VOIP_RELAY_SERVER_PORT = "rsport";
 
+	public static final String VOIP_QUALITY_TEST_ACCEPTABLE_PACKET_LOSS = "apl";
+
+	public static final String VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION = "scd";
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;

@@ -362,4 +362,19 @@ public class VoIPUtils {
 		int port = prefs.getInt(HikeConstants.VOIP_RELAY_SERVER_PORT, VoIPConstants.ICEServerPort);
 		return port;
 	}
+	
+	public static int getQualityTestAcceptablePacketLoss(Context context) {
+		
+		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		int apl = prefs.getInt(HikeConstants.VOIP_QUALITY_TEST_ACCEPTABLE_PACKET_LOSS, 20);
+		return apl;
+	}
+	
+	public static int getQualityTestSimulatedCallDuration(Context context) {
+		
+		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		int scd = prefs.getInt(HikeConstants.VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION, 2);
+		return scd;
+	}
+	
 }
