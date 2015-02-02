@@ -26,6 +26,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -114,7 +116,18 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity implements On
 		Sticker st = pair.first;
 		int stickerResId = pair.second;
 		String stId = st.getStickerId();
-		Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_STICKER_CLICKED + "_" + stId);
+		
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_STICKER_CLICKED + "_" + stId);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+
 		Intent intent = IntentManager.getForwardStickerIntent(FtueActivity.this, stId, st.getCategoryId(), true);
 		intent.putExtra(StickerManager.STICKER_RES_ID, stickerResId);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
