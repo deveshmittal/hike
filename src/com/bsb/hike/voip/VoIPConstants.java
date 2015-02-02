@@ -32,6 +32,8 @@ public class VoIPConstants {
 
 	public static final String CALL_ID = "callId";
 	public static final String IS_CALL_INITIATOR = "isCallInitiator";
+	public static final String CALL_RATING = "rating";
+	public static final String CALL_NETWORK_TYPE = "network";
 
 	public static final class Analytics
 	{
@@ -52,6 +54,10 @@ public class VoIPConstants {
 		public static final String DATA_RECEIVED = "drec";
 
 		public static final String STATE = "state";
+
+		public static final String DURATION = "dur";
+
+		public static final String CALL_CONNECT_FAIL_REASON = "reason";
 	}
 
 	
