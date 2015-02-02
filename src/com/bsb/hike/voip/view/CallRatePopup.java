@@ -16,6 +16,9 @@ import android.widget.LinearLayout;
 import com.actionbarsherlock.app.SherlockDialogFragment;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPConstants;
@@ -111,20 +114,17 @@ public class CallRatePopup extends SherlockDialogFragment
 
 	private void submitRating()
 	{
+		Bundle bundle = getArguments();
+		int isCallInitiator = -1, callId = -1, network = -1;
+		if(bundle!=null)
+		{
+			isCallInitiator = bundle.getInt(VoIPConstants.IS_CALL_INITIATOR);
+			callId = bundle.getInt(VoIPConstants.CALL_ID);
+			network = bundle.getInt(VoIPConstants.CALL_NETWORK_TYPE);
+		}
+
 		try
 		{
-			JSONObject data = new JSONObject();
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
-
-			Bundle bundle = getArguments();
-			int isCallInitiator = -1, callId = -1, network = -1;
-			if(bundle!=null)
-			{
-				isCallInitiator = bundle.getInt(VoIPConstants.IS_CALL_INITIATOR);
-				callId = bundle.getInt(VoIPConstants.CALL_ID);
-				network = bundle.getInt(VoIPConstants.CALL_NETWORK_TYPE);
-			}
-
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.VOIP);
 			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.VOIP_CALL_RATE_POPUP_SUBMIT);
@@ -133,9 +133,7 @@ public class CallRatePopup extends SherlockDialogFragment
 			metadata.put(VoIPConstants.Analytics.IS_CALLER, isCallInitiator);
 			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, network);
 
-			data.put(HikeConstants.METADATA, metadata);
-
-			Utils.sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
 		}
 		catch (JSONException e)
 		{

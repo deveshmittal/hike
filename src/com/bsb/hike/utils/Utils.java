@@ -95,6 +95,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -153,6 +154,9 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.TrafficsStatsFile;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -173,6 +177,7 @@ import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.ConnectionChangeReceiver;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
@@ -814,18 +819,14 @@ public class Utils
 		return highlight;
 	}
 
-	public static JSONObject getDeviceDetails(Context context)
+	public static void recordDeviceDetails(Context context)
 	{
 		try
 		{
-			// {"t": "le", "d"{"tag":"cbs", "device_id":
-			// "54330bc905bcf18a","_os": "DDD","_os_version": "EEE","_device":
-			// "FFF","_resolution": "GGG","_carrier": "HHH", "_app_version" :
-			// "x.x.x"}}
+			JSONObject metadata = new JSONObject();
+			
 			int height;
 			int width;
-			JSONObject object = new JSONObject();
-			JSONObject data = new JSONObject();
 
 			/*
 			 * Doing this to avoid the ClassCastException when the context is sent from the BroadcastReceiver. As it is, we don't need to send the resolution from the
@@ -836,7 +837,7 @@ public class Utils
 				height = ((Activity) context).getWindowManager().getDefaultDisplay().getHeight();
 				width = ((Activity) context).getWindowManager().getDefaultDisplay().getWidth();
 				String resolution = height + "x" + width;
-				data.put(HikeConstants.LogEvent.RESOLUTION, resolution);
+				metadata.put(HikeConstants.LogEvent.RESOLUTION, resolution);
 			}
 			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
@@ -848,12 +849,10 @@ public class Utils
 			}
 			catch (NoSuchAlgorithmException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			catch (UnsupportedEncodingException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			String os = "Android";
@@ -861,77 +860,58 @@ public class Utils
 			String device = Build.MANUFACTURER + " " + Build.MODEL;
 			String appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
 
-			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			Map<String, String> referralValues = retrieveReferralParams(context);
 			if (!referralValues.isEmpty())
 			{
 				for (Entry<String, String> entry : referralValues.entrySet())
 				{
-					data.put(entry.getKey(), entry.getValue());
+					metadata.put(entry.getKey(), entry.getValue());
 				}
 			}
-			data.put(HikeConstants.LogEvent.TAG, "cbs");
-			data.put(HikeConstants.LogEvent.DEVICE_ID, deviceId);
-			data.put(HikeConstants.LogEvent.OS, os);
-			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
-			data.put(HikeConstants.LogEvent.DEVICE, device);
-			data.put(HikeConstants.LogEvent.CARRIER, carrier);
-			data.put(HikeConstants.LogEvent.APP_VERSION, appVersion);
-			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-			object.put(HikeConstants.DATA, data);
-
-			return object;
+			metadata.put(HikeConstants.LogEvent.DEVICE_ID, deviceId);
+			metadata.put(HikeConstants.LogEvent.OS, os);
+			metadata.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
+			metadata.put(HikeConstants.LogEvent.DEVICE, device);
+			metadata.put(HikeConstants.LogEvent.CARRIER, carrier);
+			metadata.put(HikeConstants.LogEvent.APP_VERSION, appVersion);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.DEVICE_DETAILS, metadata, AnalyticsConstants.EVENT_TAG_CBS);
 		}
-		catch (JSONException e)
+		catch(JSONException e)
 		{
-			Logger.e("Utils", "Invalid JSON", e);
-			return null;
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 		catch (NameNotFoundException e)
 		{
 			Logger.e("Utils", "Package not found", e);
-			return null;
 		}
-
 	}
 
-	public static JSONObject getDeviceStats(Context context)
+	public static void getDeviceStats(Context context)
 	{
 		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ANALYTICS, 0);
 		Editor editor = prefs.edit();
 		Map<String, ?> keys = prefs.getAll();
 
-		JSONObject data = new JSONObject();
-		JSONObject obj = new JSONObject();
+		JSONObject metadata = new JSONObject();
 
 		try
 		{
-			if (keys.isEmpty())
-			{
-				obj = null;
-			}
-			else
+			if (!keys.isEmpty())
 			{
 				for (String key : keys.keySet())
 				{
 					Logger.d("Utils", "Getting keys: " + key);
-					data.put(key, prefs.getLong(key, 0));
+					metadata.put(key, prefs.getLong(key, 0));
 					editor.remove(key);
 				}
 				editor.commit();
-				data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
-				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-
-				obj.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
-				obj.put(HikeConstants.DATA, data);
+				HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.DEVICE_STATS, metadata);
 			}
 		}
 		catch (JSONException e)
 		{
 			Logger.e("Utils", "Invalid JSON", e);
 		}
-
-		return obj;
 	}
 
 	public static CharSequence addContactName(String firstName, CharSequence message)
@@ -1142,7 +1122,7 @@ public class Utils
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			requestAccountInfo.put(HikeConstants.DATA, data);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, requestAccountInfo);
+			HikeMqttManagerNew.getInstance().sendMessage(requestAccountInfo, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
@@ -1183,7 +1163,7 @@ public class Utils
 
 	public static void bytesToFile(byte[] bytes, File dst)
 	{
-		OutputStream out = null;
+		FileOutputStream out = null;
 		try
 		{
 			out = new FileOutputStream(dst);
@@ -1199,6 +1179,8 @@ public class Utils
 			{
 				try
 				{
+					out.flush();
+					out.getFD().sync();
 					out.close();
 				}
 				catch (IOException e)
@@ -1465,7 +1447,7 @@ public class Utils
 			{
 				src = new FileInputStream(new File(srcFilePath));
 			}
-			OutputStream dest = new FileOutputStream(new File(destFilePath));
+			FileOutputStream dest = new FileOutputStream(new File(destFilePath));
 
 			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
 			int len;
@@ -1475,6 +1457,8 @@ public class Utils
 				dest.write(buffer, 0, len);
 			}
 
+			dest.flush();
+			dest.getFD().sync();
 			src.close();
 			dest.close();
 
@@ -1528,7 +1512,7 @@ public class Utils
 				src = new FileInputStream(new File(srcFilePath));
 			}
 
-			OutputStream dest = new FileOutputStream(new File(destFilePath));
+			FileOutputStream dest = new FileOutputStream(new File(destFilePath));
 
 			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
 			int len;
@@ -1537,6 +1521,8 @@ public class Utils
 			{
 				dest.write(buffer, 0, len);
 			}
+			dest.flush();
+			dest.getFD().sync();
 			src.close();
 			dest.close();
 			return true;
@@ -1664,6 +1650,8 @@ public class Utils
 		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
 
+		AccountUtils.analyticsUploadUrl = AccountUtils.base + AccountUtils.ANALYTICS_UPLOAD_BASE;
+		
 		AccountUtils.rewardsUrl = isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.REWARDS_STAGING_BASE;
 		AccountUtils.gamesUrl = isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.GAMES_STAGING_BASE;
 		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE : AccountUtils.STICKERS_STAGING_BASE);
@@ -1739,7 +1727,7 @@ public class Utils
 		ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(msisdn, context);
 		if (!sentMqttPacket)
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize(sendNativeInvite));
+			HikeMqttManagerNew.getInstance().sendMessage(convMessage.serialize(sendNativeInvite), HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 
 		if (sendNativeInvite)
@@ -1869,17 +1857,33 @@ public class Utils
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.INVITE_SENT, null);
 
-		switch (whichScreen)
+		try
 		{
-		case FRIENDS_TAB:
-			Utils.sendUILogEvent(!isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK : HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK, contactInfo.getMsisdn());
-			break;
-		case UPDATES_TAB:
-			Utils.sendUILogEvent(!isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK : HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK, contactInfo.getMsisdn());
-			break;
-		case SMS_SECTION:
-			Utils.sendUILogEvent(!isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK : HikeConstants.LogEvent.REMIND_SMS_CLICK, contactInfo.getMsisdn());
-			break;
+			JSONObject md = new JSONObject();
+			String msisdn = contactInfo.getMsisdn();
+			
+			switch (whichScreen)
+			{
+			case FRIENDS_TAB:
+				md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK : HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK);				
+				break;
+			case UPDATES_TAB:
+				md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK : HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK);
+				break;
+			case SMS_SECTION:
+				md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK : HikeConstants.LogEvent.REMIND_SMS_CLICK);				
+				break;
+			}
+			
+			if(!TextUtils.isEmpty(msisdn))
+			{
+				md.put(HikeConstants.TO, msisdn);
+			}
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 	}
 
@@ -1955,6 +1959,8 @@ public class Utils
 			{
 				try
 				{
+					fileOutputStream.flush();
+					fileOutputStream.getFD().sync();
 					fileOutputStream.close();
 				}
 				catch (IOException e)
@@ -2038,6 +2044,8 @@ public class Utils
 			{
 				try
 				{
+					fileOutputStream.flush();
+					fileOutputStream.getFD().sync();
 					fileOutputStream.close();
 				}
 				catch (IOException e)
@@ -2289,7 +2297,7 @@ public class Utils
 		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		int ringerMode = audioManager.getRingerMode();
 
-		if (ringerMode != AudioManager.RINGER_MODE_SILENT)
+		if (ringerMode != AudioManager.RINGER_MODE_SILENT && !Utils.isUserInAnyTypeOfCall(context))
 		{
 			Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 			if (vibrator != null)
@@ -2482,7 +2490,7 @@ public class Utils
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
 			object.put(HikeConstants.DATA, data);
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
@@ -2631,6 +2639,7 @@ public class Utils
 		}
 		fos.write(b);
 		fos.flush();
+		fos.getFD().sync();
 		fos.close();
 	}
 
@@ -2658,10 +2667,11 @@ public class Utils
 
 	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded)
 	{
-		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true, false);
+		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true, false, true);
 	}
 
-	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen, boolean dueToConnect)
+	public static void appStateChanged(Context context, boolean resetStealth,
+			boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen, boolean dueToConnect, boolean toLog)
 	{
 		if (!isUserAuthenticated(context))
 		{
@@ -2689,7 +2699,7 @@ public class Utils
 			}
 		}
 
-		sendAppState(context, requestBulkLastSeen, dueToConnect);
+		sendAppState(context, requestBulkLastSeen, dueToConnect, toLog);
 
 		if (resetStealth)
 		{
@@ -2709,7 +2719,7 @@ public class Utils
 		return ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
 	}
 
-	private static void sendAppState(Context context, boolean requestBulkLastSeen, boolean dueToConnect)
+	private static void sendAppState(Context context, boolean requestBulkLastSeen, boolean dueToConnect, boolean toLog)
 	{
 		JSONObject object = new JSONObject();
 
@@ -2729,17 +2739,25 @@ public class Utils
 				object.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
+				if(toLog)
+				{
+					HAManager.getInstance().recordSessionStart();
+				}
 			}
 			else if (!dueToConnect)
 			{
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_BACKGROUNDED, null);
+				if(toLog)
+				{
+					HAManager.getInstance().recordSessionEnd();
+				}
 			}
 			else
 			{
 				return;
 			}
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH_LOW, object);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ZERO);
 		}
 		catch (JSONException e)
 		{
@@ -3014,7 +3032,8 @@ public class Utils
 			}
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
@@ -3025,84 +3044,64 @@ public class Utils
 
 	private static void sendSMSSyncLogEvent(boolean syncing)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.PULL_OLD_SMS, syncing);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LogEvent", e);
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 
 	}
 
 	public static void sendDefaultSMSClientLogEvent(boolean defaultClient)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.UNIFIED_INBOX, defaultClient);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LogEvent", e);
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 
 	}
 
 	public static void sendFreeSmsLogEvent(boolean freeSmsOn)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.FREE_SMS_ON, freeSmsOn);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LogEvent", e);
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 
 	}
 
 	public static void sendNativeSmsLogEvent(boolean nativeSmsOn)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.NATIVE_SMS, nativeSmsOn);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LogEvent", e);
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 
 	}
@@ -3475,23 +3474,17 @@ public class Utils
 	{
 		try
 		{
-			JSONObject data = new JSONObject();
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.CRC_EVENT);
-
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.FILE_NAME, fileName);
 			metadata.put(HikeConstants.FILE_KEY, fileKey);
 			metadata.put(HikeConstants.MD5_HASH, md5);
 			metadata.put(HikeConstants.FILE_SIZE, recBytes);
 			metadata.put(HikeConstants.DOWNLOAD, downloading);
-
-			data.put(HikeConstants.METADATA, metadata);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.CRC_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LE", "Invalid json");
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "Invalid json");
 		}
 	}
 
@@ -4910,31 +4903,47 @@ public class Utils
 		SharedPreferences accountPrefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP, false))
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FB_CLICK);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 		}
 		if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) > -1)
 		{
-			if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+			try
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+				JSONObject metadata = new JSONObject();
+				
+				if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+				{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+				}
+				else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+				{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+				}
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+	
+				Editor editor = accountPrefs.edit();
+				editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
+				editor.commit();
 			}
-			else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+			catch(JSONException e)
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 			}
-			Editor editor = accountPrefs.edit();
-			editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
-			editor.commit();
 		}
 	}
 
 	private static void sendDeviceDetails(Context context, boolean upgrade, boolean sendBot)
 	{
-		JSONObject obj = getDeviceDetails(context);
-		if (obj != null)
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-		}
+		recordDeviceDetails(context);
 		requestAccountInfo(upgrade, sendBot);
 		sendLocaleToServer(context);
 	}
@@ -5028,5 +5037,86 @@ public class Utils
 		}
 		return true;
 	}
+	
+	/**
+	 * Tells if User is on Telephonic/Audio/Vedio/Voip Call
+	 * @param context
+	 * @return
+	 */
+	public static boolean isUserInAnyTypeOfCall(Context context) {
+		
+		AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        
+		boolean callMode = manager.getMode() == AudioManager.MODE_IN_COMMUNICATION 
+				|| manager.getMode() == AudioManager.MODE_IN_CALL;
+        
+		return callMode;
+    } 
+	 /** Fetches the network connection using connectivity manager
+	 * @param context
+	 * @return
+	 * <li>-1 in case of no network</li>
+	 * <li> 0 in case of unknown network</li>
+	 * <li> 1 in case of wifi</li>
+	 * <li> 2 in case of 2g</li>
+	 * <li> 3 in case of 3g</li>
+	 * <li> 4 in case of 4g</li>
+	 *     
+	 */
+	public static String getNetworkTypeAsString(Context context)
+	{
+		String networkType = "";
+		switch (getNetworkType(context))
+		{
+		case -1:
+			networkType = "off";
+			break;
 
+		case 0:
+			networkType = "unknown";
+			break;
+
+		case 1:
+			networkType = "wifi";
+			break;
+
+		case 2:
+			networkType = "2g";
+			break;
+
+		case 3:
+			networkType = "3g";
+			break;
+
+		case 4:
+			networkType = "4g";
+			break;
+
+		default:
+			break;
+		}
+		return networkType;
+	}
+
+	/**
+	 * Returns Data Consumed in KB
+	 * @param appId
+	 * @return
+	 */
+	public static long getTotalDataConsumed(int appId)
+	{
+		long received = TrafficStats.getUidRxBytes(appId);  //In KB
+        
+		long sent = TrafficStats.getUidTxBytes(appId);   //In KB
+        
+		if(received != TrafficStats.UNSUPPORTED
+				&& sent != TrafficStats.UNSUPPORTED)
+		{
+	        return received/(1024) + sent/(1024);
+		}
+		else
+		{
+			return TrafficsStatsFile.getTotalBytesManual(appId);  //In KB
+		}
+	}
 }

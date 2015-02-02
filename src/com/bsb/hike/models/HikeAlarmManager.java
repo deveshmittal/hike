@@ -1,6 +1,13 @@
 package com.bsb.hike.models;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.AnalyticsSender;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.utils.Logger;
@@ -12,7 +19,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.bsb.hike.service.PreloadNotificationSchedular;
-import com.bsb.hike.utils.Utils;
 
 /**
  * A AlarmManager Utility class to set alarms at specific times to perform functions.
@@ -40,6 +46,8 @@ public class HikeAlarmManager
 	public static final int REQUESTCODE_NOTIFICATION_PRELOAD = 4567;
 	
 	public static final int REQUESTCODE_RETRY_LOCAL_NOTIFICATION = 4568;
+	
+	public static final int REQUESTCODE_HIKE_ANALYTICS = 3456;
 
 	public static final int REQUESTCODE_PERIODIC_BACKUP= 4569;
 
@@ -182,9 +190,26 @@ public class HikeAlarmManager
 			int retryCount  = intent.getExtras().getInt(HikeConstants.RETRY_COUNT, 0);
 			Logger.i(LOG_TAG, "processTasks called with request Code "+requestCode+ "time = "+System.currentTimeMillis() +" retryCount = "+retryCount);
 			
-			Utils.sendUILogEvent(HikeConstants.LogEvent.RETRY_NOTIFICATION_SENT);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RETRY_NOTIFICATION_SENT);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+
 			HikeNotification.getInstance(context).showNotificationForCurrentMsgStack(true, retryCount);
 			break;
+			
+		case HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS:
+		{				
+			AnalyticsSender.getInstance(context).startUploadAndScheduleNextAlarm();
+		}
+		break;
+		
 		case HikeAlarmManager.REQUESTCODE_PERIODIC_BACKUP:
 			DBBackupRestore.getInstance(context).backupDB();
 			DBBackupRestore.getInstance(context).scheduleNextAutoBackup();
