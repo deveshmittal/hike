@@ -1,8 +1,10 @@
 package com.bsb.hike.utils;
 
+import static com.bsb.hike.NUXConstants.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -14,12 +16,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.view.ViewDebug.FlagToString;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NUXConstants;
+import com.bsb.hike.NUXConstants.PushTypeEnum;
+import com.bsb.hike.NUXConstants.RewardTypeEnum;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -31,9 +34,6 @@ import com.bsb.hike.models.NuxInviteFriends;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
-import com.bsb.hike.ui.HomeActivity;
-
-import static com.bsb.hike.NUXConstants.*;
 
 
 /**
@@ -392,7 +392,10 @@ public class NUXManager
 	private boolean isNUXValid()
 	{
 		NUXTaskDetails mmDetails = getNuxTaskDetailsPojo();
-		if (mmDetails.getMin() == 0 || mmDetails.getMax() == 0 || mmDetails.getMin() > mmDetails.getMax()||ContactManager.getInstance().getAllContacts().size()<mmDetails.getMin()||!Utils.isHoneycombOrHigher())
+	
+	Logger.d("ContactManager.getInstance()",ContactManager.getInstance().getAllContacts(true).size()+"");
+		
+		if (mmDetails.getMin() == 0 || mmDetails.getMax() == 0 || mmDetails.getMin() > mmDetails.getMax()||ContactManager.getInstance().getAllContacts(true).size()<mmDetails.getMin()||!Utils.isHoneycombOrHigher())
 		{
 			return false;
 		}

@@ -440,6 +440,11 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		return transientCache.getAllContacts();
 	}
 
+	
+	public List<ContactInfo> getAllContacts(boolean ignoreUnknownContacts)
+	{
+		return transientCache.getAllContacts(ignoreUnknownContacts);
+	}
 	/**
 	 * This method should be called when last message in a group is changed, we remove the previous contact from the {@link PersistenceCache} and inserts the new contacts in memory
 	 * 
