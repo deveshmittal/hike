@@ -300,10 +300,10 @@
     <color name="stealth_tip_divider">#f2706a</color>
     <color name="ftue_card_header">#9f9f9f</color>
     <color name="black_alpha_3">#08000000</color>
-    <color name="standerd_black">#333333</color>
-    <color name="standerd_grey">#666666</color>
-    <color name="standerd_light_grey">#999999</color>
-    <color name="standerd_light_grey2">#777777</color>
+    <color name="standard_black">#333333</color>
+    <color name="standard_grey">#666666</color>
+    <color name="standard_light_grey">#999999</color>
+    <color name="standard_light_grey2">#777777</color>
     <color name="standerd_background">#ececec</color>
     <color name="white_50">#7fffffff</color>
     <color name="stealth_tip_bg">#ef554e</color>

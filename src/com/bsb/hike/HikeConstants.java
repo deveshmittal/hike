@@ -810,6 +810,8 @@ public class HikeConstants
 
 	public static final String VOIP_CALL_RATE_FRAGMENT_TAG = "voipCallRateFragmentTag";
 
+	public static final String VOIP_CALL_ISSUES_FRAGMENT_TAG = "voipCallIssuesFragmentTag";
+
 	/*
 	 * Contact Type
 	 */
@@ -1820,6 +1822,8 @@ public class HikeConstants
 		public static final String VOIP_NATIVE_CALL_INTERRUPT = "tci";
 
 		public static final String VOIP_CALL_RELAY = "cpur";
+
+		public static final String VOIP_CONNECTION_FAILED = "connf";
 	}
 
 	public static final class MqttMessageTypes
