@@ -664,6 +664,7 @@ public class VoIPService extends Service {
 		if(getCallDuration() > 0)
 		{
 			sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_END);
+			VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration(), -1);
 		}
 		if(reconnecting)
 		{
@@ -732,7 +733,6 @@ public class VoIPService extends Service {
 				stop();
 			}
 		},"HANG_UP_THREAD").start();
-		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration(), -1);
 	}
 	
 	public void rejectIncomingCall() {
@@ -1623,7 +1623,6 @@ public class VoIPService extends Service {
 					case END_CALL:
 						Logger.d(VoIPConstants.TAG, "Other party hung up.");
 						stop();
-						VoIPUtils.addMessageToChatThread(getApplicationContext(), clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration(), -1);
 						break;
 						
 					case START_VOICE:
