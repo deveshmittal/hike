@@ -890,6 +890,26 @@ class PersistenceCache extends ContactsCache
 
 	}
 
+	public void insertGroup(String grpId, GroupDetails grpDetails)
+	{
+		writeLock.lock();
+		try
+		{
+			String groupName = grpDetails.getGroupName();
+			if (TextUtils.isEmpty(groupName) || groupName.equals(grpId))
+			{
+				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(grpId, false, false);
+				groupName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+				grpDetails.setGroupName(groupName);
+			}
+			groupPersistence.put(grpId, grpDetails);
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
 	/**
 	 * Inserts the group with group id and groupName in the {@link #groupPersistence}
 	 * 

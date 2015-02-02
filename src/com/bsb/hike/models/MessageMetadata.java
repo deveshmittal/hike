@@ -276,4 +276,19 @@ public class MessageMetadata
 	{
 		this.nudgeAnimationType = type;
 	}
+	
+	/**
+	 * Used to update the sticker object as well as the JSON Object in the message metadata
+	 * 
+	 * @param newCategoryId
+	 * @throws JSONException
+	 */
+	public void updateSticker(String newCategoryId) throws JSONException
+	{
+		if (this.json.has(StickerManager.CATEGORY_ID))
+		{
+			this.json.put(StickerManager.CATEGORY_ID, newCategoryId);
+		}
+		this.sticker.setCategoryId(newCategoryId);
+	}
 }
