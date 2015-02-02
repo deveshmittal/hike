@@ -3210,7 +3210,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void setLastSeenTextBasedOnHikeValue(boolean onHike)
 	{
-		if (onHike)
+		if (onHike || Utils.isBot(mContactNumber))
 		{
 			hideLastSeenText();
 		}

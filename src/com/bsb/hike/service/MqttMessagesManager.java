@@ -113,7 +113,9 @@ public class MqttMessagesManager
 	private Map<String, LinkedList<ConvMessage>> messageListMap;
 
 	private Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap;
-
+	
+	private static int lastNotifPacket;
+	
 	private MqttMessagesManager(Context context)
 	{
 		this.convDb = HikeConversationsDatabase.getInstance();
@@ -1914,15 +1916,30 @@ public class MqttMessagesManager
 	private void playNotification(JSONObject jsonObj)
 	{
 		JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
-		String body = data.optString(HikeConstants.BODY);
-		String destination = data.optString("u");
-
-		if (data.optBoolean(HikeConstants.PUSH, true) && !TextUtils.isEmpty(destination) && !TextUtils.isEmpty(body))
+		if (data != null)
 		{
-				// chat thread -- by default silent is true, so no sound
-				boolean silent = data.optBoolean(HikeConstants.SILENT, true);
-				// open respective chat thread
-				HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
+			int hash = data.hashCode();
+			// it is safety check, it is possible that server sends same packet twice (we have seen cases in GCM)
+			// we are dependent upon in memory hash of last packet.
+			if (lastNotifPacket != hash)
+			{
+				lastNotifPacket = hash;
+				String body = data.optString(HikeConstants.BODY);
+				String destination = data.optString("u");
+
+				if (data.optBoolean(HikeConstants.PUSH, true) && !TextUtils.isEmpty(destination) && !TextUtils.isEmpty(body))
+				{
+					Logger.i("mqttMessageManager", "Play Notification packet from Server " + data.toString());
+					// chat thread -- by default silent is true, so no sound
+					boolean silent = data.optBoolean(HikeConstants.SILENT, true);
+					// open respective chat thread
+					HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
+				}
+			}
+			else
+			{
+				Logger.e("mqttMessageManager", "duplicate Notification packet from server "+data.toString());
+			}
 		}
 	}
 
