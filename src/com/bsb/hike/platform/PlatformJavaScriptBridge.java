@@ -54,18 +54,29 @@ public class PlatformJavaScriptBridge
 		this.adapter = adapter;
 	}
 
-
+	/**
+	 * call this function to Show toast for the string that is sent by the javascript.
+	 * @param toast :
+	 */
 	@JavascriptInterface
 	public void showToast(String toast)
 	{
 		Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
 	}
 
+	/**
+	 * Call this function to vibrate the device.
+	 * @param msecs : the number of milliseconds the device will vibrate.
+	 */
+	@JavascriptInterface
 	public void vibrate(String msecs)
 	{
 		Utils.vibrate(Integer.parseInt(msecs));
 	}
 
+	/**
+	 * call this function to delete the message. The message will get deleted instantaneously
+	 */
 	@JavascriptInterface
 	public void deleteMessage()
 	{
@@ -78,7 +89,11 @@ public class PlatformJavaScriptBridge
 		HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
 	}
 
-
+	/**
+	 * call this function with parameter as true to enable the debugging for javascript.
+	 * The debuggable for javascript will get enabled only after KITKAT version.
+	 * @param setEnabled
+	 */
 	@JavascriptInterface
 	public void setDebuggableEnabled(boolean setEnabled)
 	{
@@ -117,6 +132,19 @@ public class PlatformJavaScriptBridge
 		}
 	}
 
+	/**
+	 * Call this function to set the alarm at certain time that is defined by the second parameter.
+	 * The first param is a json that contains
+	 * 1.alarm_data: the data that the javascript receives when the alarm is played.
+	 * 2.delete_card: if present and true, used to delete the message on alarm getting played
+	 * 3.conv_msisdn: this field is must Send the msisdn.
+	 * 4.inc_unread: if inc_unread is present and true, we will increase red unread counter in Conversation screen.
+	 * 5.notification: contains message  if you want to show notification at some particular time
+	 * 6.notification_sound: true if we you want to play sound
+	 * sample json  :  {alarm_data:{}, conv_msisdn:'', ;delete_card' : 'true' , 'inc_unread' :'true ' , 'notification': 'message', 'notification_sound':'true'}
+	 * @param json
+	 * @param timeInMills
+	 */
 	@JavascriptInterface
 	public void setAlarm(String json, String timeInMills)
 	{
@@ -131,6 +159,11 @@ public class PlatformJavaScriptBridge
 		}
 	}
 
+	/**
+	 * this function will update the helper data. It will replace the key if it is present in the helper data and will add it if it is
+	 * not present in the helper data.
+	 * @param json
+	 */
 	@JavascriptInterface
 	public void updateHelperData(String json)
 	{
@@ -150,6 +183,10 @@ public class PlatformJavaScriptBridge
 		}
 	}
 
+	/**
+	 * This function will replace the entire metadata of the message.
+	 * @param metadata
+	 */
 	@JavascriptInterface
 	public void replaceMetadata(String metadata)
 	{
@@ -163,18 +200,34 @@ public class PlatformJavaScriptBridge
 		}
 	}
 
+	/**
+	 * calling this function will delete the alarm associated with this javascript.
+	 */
 	@JavascriptInterface
 	public void deleteAlarm()
 	{
 		HikeConversationsDatabase.getInstance().deleteAppAlarm((int)(message.getMsgID()));
 	}
 
+	/**
+	 * calling this function will generate logs for testing at the android IDE. The first param will be tag used for logging and the second param
+	 * is data that is used for logging. this will create verbose logs for testing purposes.
+	 * @param tag
+	 * @param data
+	 */
 	@JavascriptInterface
 	public void logFromJS(String tag, String data)
 	{
 		Logger.v(tag, data);
 	}
 
+	/**
+	 * Calling this function will update the metadata. If the key is already present, it will be replaced else it will be added to the existent metadata.
+	 * If the json has JSONObject as key, there would be another round of iteration, and will replace the key-value pair if the key is already present
+	 * and will add the key-value pair if the key is not present in the existent metadata.
+	 * @param json
+	 * @param notifyScreen : if true, the adapter will be notified of the change, else there will be only db update.
+	 */
 	@JavascriptInterface
 	public void updateMetadata( String json, String notifyScreen)
 	{
@@ -219,6 +272,13 @@ public class PlatformJavaScriptBridge
 		}
 	}
 
+	/**
+	 * Calling this function will initiate forward of the message to a friend or group.
+	 * @param json : if the data has changed , then send the updated fields and it will update the metadata.
+	 *             If the key is already present, it will be replaced else it will be added to the existent metadata.
+	 * 			If the json has JSONObject as key, there would be another round of iteration, and will replace the key-value pair if the key is already present
+	 * 		and will add the key-value pair if the key is not present in the existent metadata.
+	 */
 	@JavascriptInterface
 	public void forwardToChat( String json)
 	{
@@ -253,6 +313,11 @@ public class PlatformJavaScriptBridge
 		}
 	}
 
+	/**
+	 * Call this function to open a full page webView within hike.
+	 * @param title : the title on the action bar.
+	 * @param url : the url that will be loaded.
+	 */
 	@JavascriptInterface
 	public void openFullPage(String title, String url)
 	{
@@ -269,6 +334,11 @@ public class PlatformJavaScriptBridge
 
 	}
 
+	/**
+	 * This function is called whenever the onLoadFinished of the html is called. This function calling is MUST.
+	 * This function is also used for analytics purpose.
+	 * @param height : The height of the loaded content
+	 */
 	@JavascriptInterface
 	public void onLoadFinished(String height)
 	{
@@ -282,10 +352,10 @@ public class PlatformJavaScriptBridge
 				// lets save in DB, so that from next time onwards we will have less flickering
 				message.platformWebMessageMetadata.setCardHeight(requiredHeightinDP);
 				HikeConversationsDatabase.getInstance().updateMetadataOfMessage(message.getMsgID(), message.platformWebMessageMetadata.JSONtoString());
+				resizeWebview(height);
 			}else
 			{
 				Logger.i(tag, "onloadfinished called with height=" + requiredHeightInPX + " current height is " + mWebView.getHeight());
-				resizeWebview(height);
 			}
 				
 		}catch(NumberFormatException ne)
@@ -295,6 +365,11 @@ public class PlatformJavaScriptBridge
 		
 	}
 
+	/**
+	 * Whenever the content's height is changed, the html will call this function to resize the height of the Android Webview.
+	 * Calling this function is MUST, whenever the height of the content changes.
+	 * @param height : the new height when the content is reloaded.
+	 */
 	@JavascriptInterface
 	public void onResize(String height)
 	{
@@ -311,12 +386,6 @@ public class PlatformJavaScriptBridge
 		}
 	}
 
-	@JavascriptInterface
-	public void printHeight(String height)
-	{
-		Logger.i(tag, "my webview height is px= " + mWebView.getHeight() + " and content height " + mWebView.getContentHeight() * Utils.densityMultiplier
-				+ " , height what javascript thinks is " + height);
-	}
 
 	HeightRunnable heightRunnable = new HeightRunnable();
 
