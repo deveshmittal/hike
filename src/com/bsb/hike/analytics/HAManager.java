@@ -492,10 +492,10 @@ public class HAManager
 					metadata.put(AnalyticsConstants.SOURCE_CONTEXT, session.getSrcContext());
 
 					// 5)con-type :- normal/stleath 0/1
-					metadata.put(AnalyticsConstants.CONVERSATION_TYPE, session.getConvType());
+					//metadata.put(AnalyticsConstants.CONVERSATION_TYPE, session.getConvType());
 
 					// 6)msg_type :- MessageType (Text/Audio/Vedio/Sticker/Image/Contact/Location)
-					metadata.put(AnalyticsConstants.MESSAGE_TYPE, session.getMsgType());
+					//metadata.put(AnalyticsConstants.MESSAGE_TYPE, session.getMsgType());
 				}
 
 				// Not sending it for now. We will fix this code in later release when required
