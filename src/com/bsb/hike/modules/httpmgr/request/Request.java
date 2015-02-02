@@ -1,7 +1,11 @@
 package com.bsb.hike.modules.httpmgr.request;
 
-import java.util.ArrayList;
+import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_HIGH;
+import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_LOW;
+import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_NORMAL;
+import static com.bsb.hike.modules.httpmgr.request.RequestConstants.GET;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
@@ -17,8 +21,6 @@ import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListene
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
-import static com.bsb.hike.modules.httpmgr.request.RequestConstants.*;
-import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.*;
 
 /**
  * Encapsulates all of the information necessary to make an HTTP request.
@@ -430,13 +432,59 @@ public class Request implements IRequestFacade
 		}
 
 		/**
-		 * Sets the method of the request
+		 * Sets the method type to {@see RequestConstants#GET} and body null
 		 * 
-		 * @param method
+		 * @return
 		 */
-		public Builder setMethod(String method)
+		public Builder get()
 		{
-			this.method = method;
+			this.method = RequestConstants.GET;
+			this.body = null;
+			return this;
+		}
+
+		/**
+		 * Sets the method type to {@see RequestConstants#HEAD} and body null
+		 * 
+		 * @return
+		 */
+		public Builder head()
+		{
+			this.method = RequestConstants.HEAD;
+			this.body = null;
+			return this;
+		}
+
+		/**
+		 * Sets the method type to {@see RequestConstants#POST} and body passed as a parameter
+		 * 
+		 * @return
+		 */
+		public Builder post(IRequestBody body)
+		{
+			this.method = RequestConstants.POST;
+			this.body = body;
+			return this;
+		}
+
+		public Builder put(IRequestBody body)
+		{
+			this.method = RequestConstants.PUT;
+			this.body = body;
+			return this;
+		}
+
+		public Builder delete()
+		{
+			this.method = RequestConstants.DELETE;
+			this.body = null;
+			return this;
+		}
+
+		public Builder patch(IRequestBody body)
+		{
+			this.method = RequestConstants.PATCH;
+			this.body = body;
 			return this;
 		}
 
@@ -459,17 +507,6 @@ public class Request implements IRequestFacade
 		public Builder setHeaders(List<Header> headers)
 		{
 			this.headers = headers;
-			return this;
-		}
-
-		/**
-		 * Sets the body of the request
-		 * 
-		 * @param body
-		 */
-		public Builder setBody(IRequestBody body)
-		{
-			this.body = body;
 			return this;
 		}
 
