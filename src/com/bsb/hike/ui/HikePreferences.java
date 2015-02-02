@@ -290,6 +290,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			notificationRingtonePreference.setOnPreferenceClickListener(this);
 		}
+		Preference videoCompressPreference = getPreferenceScreen().findPreference(HikeConstants.COMPRESS_VIDEO_CATEGORY);
+		if(videoCompressPreference != null && android.os.Build.VERSION.SDK_INT < 18)
+		{
+			getPreferenceScreen().removePreference(videoCompressPreference);
+		}
 		setupActionBar(titleRes);
 
 	}

@@ -454,6 +454,10 @@ public class HikeConstants
 	public static final String WF_AUTO_DOWNLOAD_AUDIO_PREF = "wfAutoDownloadAudioPref";
 
 	public static final String WF_AUTO_DOWNLOAD_VIDEO_PREF = "wfAutoDownloadVideoPref";
+
+	public static final String COMPRESS_VIDEO = "videoCompress";
+
+	public static final String COMPRESS_VIDEO_CATEGORY = "videoCompressCategory";
 	
 	public static final String IMAGE_QUALITY = "imageQuality";
 	
