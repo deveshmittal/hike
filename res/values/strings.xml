@@ -1306,4 +1306,13 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="call_rate_submit">SUBMIT</string>
     <string name="happy_republic_day">Happy Republic Day</string>
     <string name="beta">BETA</string>
+    <string name="voip_call_issues_header">Tell us about the issues</string>
+    <string name="voip_call_issues_subheader">Select relevant options</string>
+    <string name="report_issue">REPORT ISSUE</string>
+    <string name="voip_issue_echo">Echo</string>
+    <string name="voip_issue_noise">Noise</string>
+    <string name="voip_issue_hearing">Can\'t Hear</string>
+    <string name="voip_issue_drop">Call Drop</string>
+    <string name="voip_issue_network">Network Issue</string>
+    <string name="voip_issue_delay">Voice Delay</string>
 </resources>

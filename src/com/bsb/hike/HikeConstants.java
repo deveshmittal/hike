@@ -810,6 +810,8 @@ public class HikeConstants
 
 	public static final String VOIP_CALL_RATE_FRAGMENT_TAG = "voipCallRateFragmentTag";
 
+	public static final String VOIP_CALL_ISSUES_FRAGMENT_TAG = "voipCallIssuesFragmentTag";
+
 	/*
 	 * Contact Type
 	 */

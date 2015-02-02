@@ -315,7 +315,7 @@ public class VoIPUtils {
 		incrementActiveCallCount(context);
 		if(shouldShowCallRatePopupNow(context) && callListener!=null)
 		{
-			callListener.onVoipCallEnd(bundle);
+			callListener.onVoipCallEnd(bundle, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
 		}
 		setupCallRatePopupNextTime(context);
 	}

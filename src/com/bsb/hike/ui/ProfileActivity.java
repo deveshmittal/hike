@@ -113,7 +113,7 @@ import com.bsb.hike.voip.view.CallRatePopup;
 import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
-		View.OnClickListener, IVoipCallListener
+		View.OnClickListener
 {
 	private TextView mName;
 	
@@ -3076,27 +3076,5 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		intent.putExtra(HikeConstants.Extras.CONTACT_INFO_TIMELINE, mLocalMSISDN);
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, contactInfo.isOnhike());
 		startActivity(intent);
-	}
-
-	@Override
-	public void onVoipCallEnd(final Bundle bundle) 
-	{
-		runOnUiThread(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				if(!isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG))
-				{
-					CallRatePopup callRatePopup = new CallRatePopup();
-					callRatePopup.setArguments(bundle);
-
-					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-					fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
-					fragmentTransaction.commitAllowingStateLoss();
-				}
-			}
-		});
 	}
 }

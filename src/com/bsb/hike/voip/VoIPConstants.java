@@ -32,6 +32,7 @@ public class VoIPConstants {
 
 	public static final String CALL_ID = "callId";
 	public static final String IS_CALL_INITIATOR = "isCallInitiator";
+	public static final String CALL_RATING = "rating";
 
 	public static final class Analytics
 	{
