@@ -13,17 +13,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AuthenticatorDescription;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.OperationApplicationException;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -31,16 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.CommonDataKinds.Email;
-import android.provider.ContactsContract.CommonDataKinds.Event;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
-import android.provider.ContactsContract.CommonDataKinds.StructuredName;
-import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
-import android.provider.ContactsContract.Data;
-import android.provider.ContactsContract.RawContacts;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -70,7 +56,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -109,9 +94,7 @@ import com.bsb.hike.media.StickerPicker;
 import com.bsb.hike.media.StickerPickerListener;
 import com.bsb.hike.media.ThemePicker;
 import com.bsb.hike.media.ThemePicker.ThemePickerListener;
-import com.bsb.hike.models.AccountData;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -636,6 +619,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case R.id.selected_state_overlay:
 			onOverLayClick((ConvMessage) v.getTag());
+			break;
+		case R.id.block_unknown_contact:
+			HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, msisdn);
+			break;
+		case R.id.add_unknown_contact:
+			Utils.addToContacts(activity.getApplicationContext(), msisdn);
 			break;
 		default:
 			Logger.e(TAG, "onClick Registered but not added in onClick : " + v.toString());
