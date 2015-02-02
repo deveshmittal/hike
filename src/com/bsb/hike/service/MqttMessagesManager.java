@@ -45,6 +45,7 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.notifications.HikeNotificationUtils;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HomeActivity;
@@ -1964,6 +1965,9 @@ public class MqttMessagesManager
 					Logger.i("mqttMessageManager", "Play Notification packet from Server " + data.toString());
 					// chat thread -- by default silent is true, so no sound
 					boolean silent = data.optBoolean(HikeConstants.SILENT, true);
+					
+					destination = HikeNotificationUtils.getNameForMsisdn(destination);
+					
 					// open respective chat thread
 					HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
 				}
