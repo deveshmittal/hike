@@ -356,7 +356,7 @@ public class VoIPService extends Service {
 			clientSelf.setInitiator(true);
 			clientPartner.setInitiator(false);
 			callSource = intent.getIntExtra("call_source", -1);
-			setCallid(new Random().nextInt(99999999));
+			setCallid(new Random().nextInt(2000000000));
 			Logger.d(VoIPConstants.TAG, "Making outgoing call to: " + clientPartner.getPhoneNumber() + ", id: " + getCallId());
 			
 			// Show activity
@@ -658,6 +658,8 @@ public class VoIPService extends Service {
 		bundle.putInt(VoIPConstants.CALL_ID, getCallId());
 		bundle.putInt(VoIPConstants.IS_CALL_INITIATOR, clientPartner.isInitiator() ? 0 : 1);
 		bundle.putInt(VoIPConstants.CALL_NETWORK_TYPE, VoIPUtils.getConnectionClass(getApplicationContext()).ordinal());
+		bundle.putString(VoIPConstants.PARTNER_MSISDN, clientPartner.getPhoneNumber());
+
 		sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY, bundle);
 
 		Logger.d(VoIPConstants.TAG, "Bytes sent / received: " + totalBytesSent + " / " + totalBytesReceived +
@@ -1630,6 +1632,7 @@ public class VoIPService extends Service {
 						
 					case END_CALL:
 						Logger.d(VoIPConstants.TAG, "Other party hung up.");
+						clientPartner.setEnder(true);
 						stop();
 						break;
 						
@@ -1638,6 +1641,7 @@ public class VoIPService extends Service {
 						break;
 						
 					case CALL_DECLINED:
+						clientPartner.setEnder(true);
 						sendHandlerMessage(VoIPActivity.MSG_OUTGOING_CALL_DECLINED);
 						stop();
 						break;
@@ -2464,6 +2468,7 @@ public class VoIPService extends Service {
 			{
 				metadata.put(VoIPConstants.Analytics.DATA_SENT, totalBytesSent);
 				metadata.put(VoIPConstants.Analytics.DATA_RECEIVED, totalBytesReceived);
+				metadata.put(VoIPConstants.Analytics.IS_ENDER, clientPartner.isEnder() ? 0 : 1);
 				if(getCallDuration() > 0)
 				{
 					metadata.put(VoIPConstants.Analytics.DURATION, getCallDuration());

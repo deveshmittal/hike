@@ -34,6 +34,7 @@ public class VoIPConstants {
 	public static final String IS_CALL_INITIATOR = "isCallInitiator";
 	public static final String CALL_RATING = "rating";
 	public static final String CALL_NETWORK_TYPE = "network";
+	public static final String PARTNER_MSISDN = "pmsisdn";
 
 	public static final class Analytics
 	{
@@ -42,6 +43,8 @@ public class VoIPConstants {
 		public static final String CALL_ID = "callid";
 
 		public static final String IS_CALLER = "caller";
+
+		public static final String IS_ENDER = "ender";
 
 		public static final String NETWORK_TYPE = "net";
 
