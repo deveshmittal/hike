@@ -167,4 +167,11 @@ public class AnalyticsConstants
 
 		public static final String FROM_NOTIFICATION = "notif";
 	}
+	
+	//Added For Chat Session
+	public static final String CHAT_ANALYTICS = "ctal";
+	
+	public static final String TO_USER = "to_user";
+	
+	public static final String EVENT_TAG_CHAT_SESSION = "ctal";
 }
