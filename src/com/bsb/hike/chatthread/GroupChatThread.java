@@ -94,6 +94,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	protected GroupConversation groupConversation;
 	
 	private static final String HASH_PIN = "#pin";
+	
+	private static final String PIN_MESSAGE_SEPARATOR = ": ";
 
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -361,11 +363,11 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		String name = "";
 		if (impMessage.isSent())
 		{
-			name = "You: ";
+			name = getString(R.string.pin_self) + PIN_MESSAGE_SEPARATOR;
 		}
 		else
 		{
-			name = groupConversation.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()) + ": ";
+			name = groupConversation.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()) + PIN_MESSAGE_SEPARATOR;
 		}
 
 		ForegroundColorSpan fSpan = new ForegroundColorSpan(getResources().getColor(R.color.pin_name_color));
