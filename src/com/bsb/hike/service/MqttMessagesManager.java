@@ -1950,7 +1950,7 @@ public class MqttMessagesManager
 		JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
 		if (data != null)
 		{
-			int hash = data.hashCode();
+			int hash = data.toString().hashCode();
 			// it is safety check, it is possible that server sends same packet twice (we have seen cases in GCM)
 			// we are dependent upon in memory hash of last packet.
 			if (lastNotifPacket != hash)
