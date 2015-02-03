@@ -705,19 +705,12 @@ public class ConversationsAdapter extends BaseAdapter
 
 		TextView messageView = viewHolder.subText;
 		messageView.setVisibility(View.VISIBLE);
+		CharSequence markedUp = getConversationText(conversation, message);
+		messageView.setText(markedUp);
+		
 		updateViewsRelatedToMessageState(parentView, message, conversation);
 		
-		if(!( (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_IS_ACTIVE) &&(NUXManager.getInstance().isContactLocked(message.getMsisdn()))))
-		{
-			CharSequence markedUp = getConversationText(conversation, message);
-			messageView.setText(markedUp);
-			
-		} else {
-			messageView.setText(NUXManager.getInstance().getNuxChatRewardPojo().getChatWaitingText());	
-		}
-		
 		TextView tsView = viewHolder.timeStamp;
-
 		tsView.setText(message.getTimestampFormatted(true, context));
 	}
 
@@ -750,9 +743,9 @@ public class ConversationsAdapter extends BaseAdapter
 		unreadIndicator.setVisibility(View.GONE);
 		imgStatus.setVisibility(View.GONE);
 		
-		if (message.getParticipantInfoState() == ParticipantInfoState.VOIP_CALL_SUMMARY ||
+		if (!isNuxLocked && (message.getParticipantInfoState() == ParticipantInfoState.VOIP_CALL_SUMMARY ||
 				message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING ||
-						message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING)
+						message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING))
 		{
 			String messageText = null;
 			int imageId = R.drawable.ic_voip_conv_miss;
@@ -795,12 +788,9 @@ public class ConversationsAdapter extends BaseAdapter
 		else if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE || message.getState() == State.RECEIVED_UNREAD)
 		{
 			
-			if (message.isSent() || isNuxLocked)
+			if (message.isSent())
 			{
-				if(isNuxLocked)
-					imgStatus.setImageBitmap(NUXManager.getInstance().getNuxChatRewardPojo().getPendingChatIcon());
-				else
-					imgStatus.setImageResource(message.getImageState());
+				imgStatus.setImageResource(message.getImageState());
 				imgStatus.setVisibility(View.VISIBLE);
 			}
 			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0 && !message.isSent())
@@ -811,8 +801,11 @@ public class ConversationsAdapter extends BaseAdapter
 
 				unreadIndicator.setText(Integer.toString(conversation.getUnreadCount()));
 			}
-			else
-			{
+			if(isNuxLocked)
+			{ 
+				imgStatus.setVisibility(View.VISIBLE);
+				imgStatus.setImageBitmap(NUXManager.getInstance().getNuxChatRewardPojo().getPendingChatIcon());
+				messageView.setText(NUXManager.getInstance().getNuxChatRewardPojo().getChatWaitingText());		
 			}
 			
 			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) messageView.getLayoutParams();
