@@ -233,7 +233,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		actionBar.setIcon(R.drawable.ic_search_back);
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
 		actionBarView.findViewById(R.id.seprator).setVisibility(View.GONE);
-		// TODO: Back button missing
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
 		title.setVisibility(View.GONE);
 

@@ -521,6 +521,10 @@ public class ConversationsAdapter extends BaseAdapter
 		return v;
 	}
 
+	/**
+	 * Activates search mode in the adapter.
+	 * Setups contact msisdn lists. Launches task to fetch the contact list.
+	 */
 	public void setupSearch()
 	{
 		isSearchMode = true;
@@ -535,6 +539,10 @@ public class ConversationsAdapter extends BaseAdapter
 		Utils.executeAsyncTask(fetchContactsTask);
 	}
 
+	/**
+	 * Deactivates search mode in the adapter.
+	 * Clears up the contact msisdn lists. Launches task to fetch the contact list.
+	 */
 	public void removeSearch()
 	{
 		isSearchMode = false;
