@@ -219,6 +219,8 @@ public class AnalyticsSender
 
 			nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;
 
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM ALARM ROUTE---");
+			
 			instance.sendAnalyticsData(false);			
 		}
 		

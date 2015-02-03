@@ -1733,13 +1733,13 @@ public class HikeConstants
 		/*
 		 * Account Backup Events
 		 */
-		public static final String BACKUP = "backupClk";
+		public static final String BACKUP = "bckMnul";
 
-		public static final String BACKUP_RESTORE = "backupRestoreClk";
+		public static final String BACKUP_RESTORE = "bckRstr";
 
-		public static final String BACKUP_RESTORE_RETRY = "backupRestoreRetryClk";
+		public static final String BACKUP_RESTORE_RETRY = "rstrRtry";
 
-		public static final String BACKUP_RESTORE_SKIP = "backupRestoreSkipClk";
+		public static final String BACKUP_RESTORE_SKIP = "rstrSkp";
 
 		/*
 		 * Platform Events

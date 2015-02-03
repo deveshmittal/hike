@@ -8,9 +8,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPOutputStream;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 
@@ -32,6 +35,8 @@ public class AnalyticsStore
 	private File normalPriorityEventFile;
 	
 	private File highPriorityEventFile;
+	
+	private AtomicBoolean uploadUnderProgress = new AtomicBoolean(false);
 		
 	/**
 	 * Constructor
@@ -50,7 +55,7 @@ public class AnalyticsStore
 		catch (IOException e) 
 		{
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "IO exception while creating new event file");
-		}
+		}		
 	}
 	
 	/**
@@ -164,129 +169,142 @@ public class AnalyticsStore
 			@Override
 			public void run() 
 			{			
-				FileWriter normalFileWriter = null;
-				FileWriter highFileWriter = null;
-				StringBuilder normal = new StringBuilder();
-				StringBuilder high = new StringBuilder();
-
+				if(uploadUnderProgress.getAndSet(true))
+					return;
+				
 				try
 				{
-					for(JSONObject object : eventJsons)
+					FileWriter normalFileWriter = null;
+					FileWriter highFileWriter = null;
+					StringBuilder normal = new StringBuilder();
+					StringBuilder high = new StringBuilder();
+	
+					try
 					{
-						JSONObject json = object.getJSONObject(HikeConstants.DATA);
-
-						if(json.has(AnalyticsConstants.EVENT_PRIORITY))
+						for(JSONObject object : eventJsons)
 						{
-							EventPriority priority = (EventPriority) json.get(AnalyticsConstants.EVENT_PRIORITY);
-
-							if(priority == EventPriority.NORMAL)
+							JSONObject json = object.getJSONObject(HikeConstants.DATA);
+	
+							if(json.has(AnalyticsConstants.EVENT_PRIORITY))
 							{
-								normal.append(object);
-								normal.append(AnalyticsConstants.NEW_LINE);
+								EventPriority priority = (EventPriority) json.get(AnalyticsConstants.EVENT_PRIORITY);
+	
+								if(priority == EventPriority.NORMAL)
+								{
+									normal.append(object);
+									normal.append(AnalyticsConstants.NEW_LINE);
+								}
+								else if(priority == EventPriority.HIGH)
+								{
+									high.append(object);
+									high.append(AnalyticsConstants.NEW_LINE);								
+								}
 							}
-							else if(priority == EventPriority.HIGH)
+						}					
+						if(normal.length() > 0)
+						{
+							if(!eventFileExists(EventPriority.NORMAL))
 							{
-								high.append(object);
-								high.append(AnalyticsConstants.NEW_LINE);								
+								normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
 							}
+	
+							if(getFileSize(EventPriority.NORMAL) >= HAManager.getInstance().getMaxFileSize())
+							{
+								Logger.d(AnalyticsConstants.ANALYTICS_TAG, "normal priority file size reached its limit! " + normalPriorityEventFile.getName());
+								compressAndDeleteOriginalFile(normalPriorityEventFile.getAbsolutePath());
+								normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
+							}
+							normalFileWriter = new FileWriter(normalPriorityEventFile, true);
+							normalFileWriter.write(normal.toString());
+							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to normal file! Size now :" + normalPriorityEventFile.length() + "bytes");
 						}
-					}					
-					if(normal.length() > 0)
-					{
-						if(!eventFileExists(EventPriority.NORMAL))
+	
+						if(high.length() > 0)
 						{
-							normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
-						}
-
-						if(getFileSize(EventPriority.NORMAL) >= HAManager.getInstance().getMaxFileSize())
-						{
-							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "normal priority file size reached its limit! " + normalPriorityEventFile.getName());
-							compressAndDeleteOriginalFile(normalPriorityEventFile.getAbsolutePath());
-							normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
-						}
-						normalFileWriter = new FileWriter(normalPriorityEventFile, true);
-						normalFileWriter.write(normal.toString());
-						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to normal file! Size now :" + normalPriorityEventFile.length() + "bytes");
+							if(!eventFileExists(EventPriority.HIGH))
+							{
+								highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
+							}
+	
+							if(getFileSize(EventPriority.HIGH) >= HAManager.getInstance().getMaxFileSize())
+							{
+								Logger.d(AnalyticsConstants.ANALYTICS_TAG, "high priority file size reached its limit! " + highPriorityEventFile.getName());
+								compressAndDeleteOriginalFile(highPriorityEventFile.getAbsolutePath());
+								highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
+							}
+							highFileWriter = new FileWriter(highPriorityEventFile, true);
+							highFileWriter.write(high.toString());
+							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to imp file! Size now :" + highPriorityEventFile.length() + "bytes");
+						}	
 					}
-
-					if(high.length() > 0)
+					catch (IOException e)
 					{
-						if(!eventFileExists(EventPriority.HIGH))
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception while writing events to file");
+					}
+					catch(ConcurrentModificationException ex)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "ConcurrentModificationException exception while writing events to file");			
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "json error");
+					}
+					finally
+					{	
+						if(normalFileWriter != null)	
 						{
-							highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
+							closeCurrentFile(normalFileWriter);
 						}
-
-						if(getFileSize(EventPriority.HIGH) >= HAManager.getInstance().getMaxFileSize())
+						if(highFileWriter!= null)
 						{
-							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "high priority file size reached its limit! " + highPriorityEventFile.getName());
-							compressAndDeleteOriginalFile(highPriorityEventFile.getAbsolutePath());
-							highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
+							closeCurrentFile(highFileWriter);
 						}
-						highFileWriter = new FileWriter(highPriorityEventFile, true);
-						highFileWriter.write(high.toString());
-						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to imp file! Size now :" + highPriorityEventFile.length() + "bytes");
-					}	
-				}
-				catch (IOException e)
-				{
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception while writing events to file");
-				}
-				catch(ConcurrentModificationException ex)
-				{
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "ConcurrentModificationException exception while writing events to file");			
-				}
-				catch(JSONException e)
-				{
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "json error");
+													
+					}
+					// SEND ANALYTICS FROM HERE
+					if(sendToServer && Utils.isUserOnline(context))
+					{
+						// we should find all residual txt files compress them all 
+						String[] fileNames = HAManager.getFileNames(context);
+						
+						if(fileNames != null)
+						{
+							int fileCount = fileNames.length;
+							
+							for(int i=0; i<fileCount; i++)
+							{
+								if(fileNames[i].endsWith(AnalyticsConstants.SRC_FILE_EXTENSION))
+								{
+									String absolutePath = HAManager.getInstance().getAnalyticsDirectory() + File.separator + fileNames[i];
+									
+									try
+									{
+										compressAndDeleteOriginalFile(absolutePath);
+									}
+									catch(IOException ex)
+									{
+										Logger.d(AnalyticsConstants.ANALYTICS_TAG, "IOException while compressing files on the fly!");
+									}
+								}
+							}
+						}
+	
+						// if total logged data is less than threshold value or wifi is available, try sending all the data else delete normal priority data
+						if(!sendAllLogs && !((Utils.getNetworkType(context) == ConnectivityManager.TYPE_WIFI) || 
+								(AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance().getMaxAnalyticsSizeOnClient())))
+						{
+							AnalyticsStore.getInstance(context).deleteNormalPriorityData();
+						}
+						AnalyticsSender.getInstance(context).sendData();
+					}
 				}
 				finally
-				{	
-					if(normalFileWriter != null)	
-					{
-						closeCurrentFile(normalFileWriter);
-					}
-					if(highFileWriter!= null)
-					{
-						closeCurrentFile(highFileWriter);
-					}
-				}
-				// SEND ANALYTICS FROM HERE
-				if(sendToServer && Utils.isUserOnline(context))
 				{
-					// we should find all residual txt files compress them all 
-					String[] fileNames = HAManager.getFileNames(context);
-					
-					if(fileNames != null)
-					{
-						int fileCount = fileNames.length;
-						
-						for(int i=0; i<fileCount; i++)
-						{
-							if(fileNames[i].endsWith(AnalyticsConstants.SRC_FILE_EXTENSION))
-							{
-								String absolutePath = HAManager.getInstance().getAnalyticsDirectory() + File.separator + fileNames[i];
-								
-								try
-								{
-									compressAndDeleteOriginalFile(absolutePath);
-								}
-								catch(IOException ex)
-								{
-									Logger.d(AnalyticsConstants.ANALYTICS_TAG, "IOException while compressing files on the fly!");
-								}
-							}
-						}
-					}
-
-					// if total logged data is less than threshold value or wifi is available, try sending all the data else delete normal priority data
-					if(!sendAllLogs && !((Utils.getNetworkType(context) == ConnectivityManager.TYPE_WIFI) || 
-							(AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance().getMaxAnalyticsSizeOnClient())))
-					{
-						AnalyticsStore.getInstance(context).deleteNormalPriorityData();
-					}
-					AnalyticsSender.getInstance(context).sendData();
+					uploadUnderProgress.set(false);
 				}
+
 			}
+			
 		}, AnalyticsConstants.ANALYTICS_THREAD_WRITER).start();						
 	}
 	

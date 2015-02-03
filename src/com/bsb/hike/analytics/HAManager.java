@@ -468,6 +468,8 @@ public class HAManager
 	
 	public void recordSessionEnd()
 	{
+		fgSessionInstance.endChatSessions();
+		recordChatSessions();
 		recordSession(fgSessionInstance, false);
 		fgSessionInstance.reset();
 	}
@@ -593,4 +595,56 @@ public class HAManager
 		return AnalyticsConstants.MessageType.TEXT;
 
 	}
+	
+	/**
+	 * It records Events For All Bots For this App session
+	 */
+	public void recordChatSessions()
+	{
+		JSONObject metadata = null;
+		
+		try
+		{
+			ArrayList<ChatSession> chatSessionList = fgSessionInstance.getChatSesions();
+			
+			if(chatSessionList != null && !chatSessionList.isEmpty())
+			{
+				for(ChatSession chatSession : chatSessionList)
+				{
+					metadata = new JSONObject();
+					//1)to_user:- "+hikecricket+" for cricket bot
+					metadata.put(AnalyticsConstants.TO_USER, chatSession.getMsisdn());
+					
+					//2)duration:-Total time of Chat Session in whole session
+					metadata.put(AnalyticsConstants.SESSION_TIME, chatSession.getChatSessionTotalTime());
+					
+					HAManager.getInstance().record(AnalyticsConstants.CHAT_ANALYTICS, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_CHAT_SESSION);
+						
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "--session-id :" + fgSessionInstance.getSessionId() + "--to_user :" + chatSession.getMsisdn() + "--session-time :" + chatSession.getChatSessionTotalTime());
+				}
+			}
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+		
+	}
+	
+	/**
+	 * Sets StartingTime for Bot Chat Session to CurrentTime
+	 */
+	public void startChatSession(String msisdn)
+	{
+		fgSessionInstance.startChatSession(msisdn);
+	}
+	
+	/**
+	 * Sets StartingTime for Bot Chat Session to CurrentTime
+	 */
+	public void endChatSession(String msisdn)
+	{
+		fgSessionInstance.endChatSesion(msisdn);
+	}
+	
 }

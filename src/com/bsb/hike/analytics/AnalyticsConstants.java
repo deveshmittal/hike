@@ -82,6 +82,8 @@ public class AnalyticsConstants
 	
 	public static final String ANALYTICS_ALARM_TIME = "analyticsalarmtime";
 
+	public static final String ANALYTICS_BACKUP = "backup";
+
 	public static final String EVENT_SUB_TYPE = "st";
 
 	public static final String EVENT_TAG = "tag";
@@ -167,4 +169,11 @@ public class AnalyticsConstants
 
 		public static final String FROM_NOTIFICATION = "notif";
 	}
+	
+	//Added For Chat Session
+	public static final String CHAT_ANALYTICS = "ctal";
+	
+	public static final String TO_USER = "to_user";
+	
+	public static final String EVENT_TAG_CHAT_SESSION = "ctal";
 }

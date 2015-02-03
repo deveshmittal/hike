@@ -685,6 +685,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	{
 		try
 		{
+			
+			if(!Utils.isUserAuthenticated(context))
+			{
+				Logger.d(TAG, "User not Authenticated");
+				return;
+			}
+			
 			if (!isNetworkAvailable())
 			{
 				Logger.d(TAG, "No Network Connection so should not connect");
