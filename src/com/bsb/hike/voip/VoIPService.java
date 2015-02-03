@@ -356,7 +356,7 @@ public class VoIPService extends Service {
 			clientSelf.setInitiator(true);
 			clientPartner.setInitiator(false);
 			callSource = intent.getIntExtra("call_source", -1);
-			setCallid(new Random().nextInt(99999999));
+			setCallid(new Random().nextInt(2000000000));
 			Logger.d(VoIPConstants.TAG, "Making outgoing call to: " + clientPartner.getPhoneNumber() + ", id: " + getCallId());
 			
 			// Show activity
