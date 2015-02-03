@@ -1092,4 +1092,9 @@ public void onTrimMemory(int level)
 			edit.commit();
 		}
 	}
+	
+	public boolean isHikeBotNumber(String msisdn)
+	{
+		return hikeBotNamesMap.containsKey(msisdn);
+	}
 }

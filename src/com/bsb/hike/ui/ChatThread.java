@@ -457,7 +457,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	protected void onPause()
 	{
-		super.onPause();
 		if (mAdapter != null)
 		{
 			// mAdapter.getStickerLoader().setPauseWork(false);
@@ -473,6 +472,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
 		activityVisible = false;
+		
+		//Logging ChatThread Screen closing for bot case
+		if(HikeMessengerApp.getInstance().isHikeBotNumber(mContactNumber))
+		{
+			HAManager.getInstance().endChatSession(mContactNumber);
+		}
+		super.onPause();
 	}
 
 	@Override
@@ -526,6 +532,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			   decrementUnreadPInCount();
 		}
 		updateOverflowMenuUnreadCount();
+		
+		//Logging ChatThread Screen opening for bot case
+		if(HikeMessengerApp.getInstance().isHikeBotNumber(mContactNumber))
+		{
+			HAManager.getInstance().startChatSession(mContactNumber);
+		}
 	}
 
 	private void showPopUpIfRequired()
