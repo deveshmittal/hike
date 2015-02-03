@@ -230,7 +230,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		showingSearchModeActionBar = true;
 		final ActionBar actionBar = getSupportActionBar();
-		actionBar.setIcon(R.drawable.ic_top_bar_search);
+		actionBar.setIcon(R.drawable.ic_search_back);
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
 		actionBarView.findViewById(R.id.seprator).setVisibility(View.GONE);
 		// TODO: Back button missing
