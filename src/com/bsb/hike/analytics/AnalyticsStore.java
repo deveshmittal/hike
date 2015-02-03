@@ -36,7 +36,7 @@ public class AnalyticsStore
 	
 	private File highPriorityEventFile;
 	
-	private AtomicBoolean uploadUnderProgress;
+	private AtomicBoolean uploadUnderProgress = new AtomicBoolean(false);
 		
 	/**
 	 * Constructor
@@ -55,9 +55,7 @@ public class AnalyticsStore
 		catch (IOException e) 
 		{
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "IO exception while creating new event file");
-		}
-		
-		uploadUnderProgress.set(false);
+		}		
 	}
 	
 	/**
