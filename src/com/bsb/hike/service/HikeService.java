@@ -27,6 +27,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -808,11 +809,14 @@ public class HikeService extends Service
 	 */
 	private void scheduleNextAnalyticsSendAlarm()
 	{
-		long whenToSend = Utils.getTimeInMillis(Calendar.getInstance(), HAManager.getInstance().getWhenToSend(), 0, 0, 0);
-		
-		if(System.currentTimeMillis() < whenToSend)
-		{
-			HikeAlarmManager.setAlarm(getApplicationContext(), whenToSend, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
-		}
-	}
+		HAManager obj = HAManager.getInstance();
+		long nextAlarm = Utils.getTimeInMillis(Calendar.getInstance(), obj.getWhenToSend(), 0, 0, 0);
+ 		
+		// if next alarm time is less than the current time, add frequency to the current time itself
+		if(System.currentTimeMillis() > nextAlarm)
+ 		{
+			nextAlarm = System.currentTimeMillis() + obj.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;;			
+ 		}
+		HikeAlarmManager.setAlarm(getApplicationContext(), nextAlarm, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
+ 	}
 }
