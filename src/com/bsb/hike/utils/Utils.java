@@ -26,6 +26,7 @@ import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Shader.TileMode;
 import android.graphics.Typeface;
@@ -1161,12 +1162,23 @@ public class Utils
 		context.startActivity(s);
 	}
 
-	public static void startShareImageIntent(Context context, String mimeType, String imagePath)
+	public static void startShareImageIntent(Context context, String mimeType, String imagePath,String text)
 	{
 		Intent s = new Intent(android.content.Intent.ACTION_SEND);
 		s.setType(mimeType);
 		s.putExtra(Intent.EXTRA_STREAM, Uri.parse(imagePath));
+		if(!TextUtils.isEmpty(text))
+		{
+			s.putExtra(Intent.EXTRA_TEXT, text);
+		}
+		s.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+		Logger.i("imageShare", "shared image with "+s.getExtras());
 		context.startActivity(s);
+		
+	}
+	public static void startShareImageIntent(Context context, String mimeType, String imagePath)
+	{
+		startShareImageIntent(context, mimeType, imagePath, null);
 	}
 
 	public static void bytesToFile(byte[] bytes, File dst)
@@ -5162,6 +5174,20 @@ public class Utils
 		else
 		{
 			return TrafficsStatsFile.getTotalBytesManual(appId);  //In KB
+		}
+	}
+	
+	public static Bitmap viewToBitmap(View view) {
+		try
+		{
+	    Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+	    Canvas canvas = new Canvas(bitmap);
+	    view.draw(canvas);
+	    return bitmap;
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
 		}
 	}
 }

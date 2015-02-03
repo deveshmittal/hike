@@ -1,18 +1,32 @@
 package com.bsb.hike.platform;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -25,10 +39,6 @@ import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 /**
  * API bridge that connects the javascript to the Native environment. Make the instance of this class and add it as the JavaScript interface of the Card WebView.
@@ -353,6 +363,47 @@ public class PlatformJavaScriptBridge
 			}
 		});
 
+	}
+	
+	@JavascriptInterface
+	public void share()
+	{
+		try
+		{
+//			File f = new File(Environment.getExternalStorageDirectory()+"/"+"share"+System.currentTimeMillis()+".jpeg");
+			File f = new File(mContext.getExternalCacheDir(),System.currentTimeMillis()+".jpeg");
+			FileOutputStream output = new FileOutputStream(f);
+			View share = LayoutInflater.from(mContext).inflate(com.bsb.hike.R.layout.web_card_share, null);
+			// set card image
+			ImageView image = (ImageView) share.findViewById(com.bsb.hike.R.id.image);
+			Bitmap b = Utils.viewToBitmap(((WebViewHolder)mWebView.getTag()).main);
+			image.setImageBitmap(b);
+			
+			// set description text
+			TextView tv = (TextView) share.findViewById(com.bsb.hike.R.id.description);
+			tv.setText(Html.fromHtml(mContext.getString(com.bsb.hike.R.string.cardShareDescription)));
+			
+			int measuredWidth = View.MeasureSpec.makeMeasureSpec(share.getWidth(), View.MeasureSpec.UNSPECIFIED);
+		    int measuredHeight = View.MeasureSpec.makeMeasureSpec(share.getHeight(), View.MeasureSpec.UNSPECIFIED);
+
+		    //Cause the view to re-layout
+		    share.measure(measuredWidth, measuredHeight);
+		    share.layout(0, 0, share.getMeasuredWidth(), share.getMeasuredHeight());
+
+		    Bitmap shB = Utils.viewToBitmap(share);
+			Logger.i(tag, " width height of layout to share "+share.getWidth() +" , "+share.getHeight());
+			shB.compress(CompressFormat.JPEG, 100, output);
+			output.close();
+			Logger.i(tag, "share webview card "+f.getAbsolutePath());
+			Utils.startShareImageIntent(mContext, "image/jpeg", "file://"+f.getAbsolutePath(),"sample text from hike");
+			
+		}
+		catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			showToast(mContext.getString(com.bsb.hike.R.string.error_card_sharing));
+		}
 	}
 
 	/**

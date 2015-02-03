@@ -2098,7 +2098,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		messages.clear();
-
+		conversation.setUnreadCount(0);
 		/*
 		 * Adding a blank message
 		 */

@@ -92,6 +92,8 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		public View loadingFailed;
 
 		public CustomWebViewClient webViewClient;
+		
+		public View main;
 
 		private void initializeHolderForForward(View view, boolean isReceived)
 		{
@@ -116,6 +118,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	private WebViewHolder initializeHolder(WebViewHolder holder, View view, ConvMessage convMessage)
 	{
+		holder.main = view;
 		holder.myBrowser = (CustomWebView) view.findViewById(R.id.webcontent);
 		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext, holder.myBrowser, convMessage, adapter);
 		holder.selectedStateOverlay = view.findViewById(R.id.selected_state_overlay);

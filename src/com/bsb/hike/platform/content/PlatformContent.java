@@ -57,18 +57,18 @@ public class PlatformContent
 				// For testing purposes. We delete Content folder from saved location when hike messenger is re-started
 				File contentDir = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR);
 				
-				if (contentDir != null)
-				{
-					try
-					{
-						Logger.d("PlatformContent", "Deleting old content");
-						Utils.deleteFile(contentDir); 
-					}
-					catch (NullPointerException npe)
-					{
-						npe.printStackTrace();
-					}
-				}
+//				if (contentDir != null)
+//				{
+//					try
+//					{
+//						Logger.d("PlatformContent", "Deleting old content");
+//						Utils.deleteFile(contentDir); 
+//					}
+//					catch (NullPointerException npe)
+//					{
+//						npe.printStackTrace();
+//					}
+//				}
 			}
 		}
 
