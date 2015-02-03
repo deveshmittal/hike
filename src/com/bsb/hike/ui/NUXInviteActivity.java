@@ -1,5 +1,8 @@
 package com.bsb.hike.ui;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -9,10 +12,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
+import com.bsb.hike.db.DBConstants.HIKE_CONTENT;
 import com.bsb.hike.models.NUXTaskDetails;
 import com.bsb.hike.models.NuxInviteFriends;
 import com.bsb.hike.ui.utils.RecyclingImageView;
@@ -148,7 +156,18 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 		switch (v.getId())
 		{
 		case R.id.but_skip:
-		//	IntentManager.openHomeActivity(this);
+
+			try
+			{
+				JSONObject metaData = new JSONObject();
+				metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_INTRO_SKIP);
+				NUXManager.getInstance().sendAnalytics(metaData);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+
 			if (NUXManager.getInstance().getCurrentState() != NUXConstants.NUX_KILLED)
 			{
 				NUXManager.getInstance().setCurrentState(NUXConstants.NUX_SKIPPED);
@@ -159,6 +178,17 @@ public class NUXInviteActivity extends HikeAppStateBaseFragmentActivity implemen
 
 		case R.id.but_inviteFrnds:
 
+			try
+			{
+				JSONObject metaData = new JSONObject();
+				metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_INTRO_BTN);
+				NUXManager.getInstance().sendAnalytics(metaData);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			
 			if (!(NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED))
 			{
 				NUXManager.getInstance().startNuxSelector(this);

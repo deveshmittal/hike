@@ -78,6 +78,8 @@ public class NUXConstants
 
 	public static final String TD_MAX_CONTACTS = "max";
 	
+	public static final String TD_PKT_CODE = "pktId";
+	
 	public static final String CHAT_REWARDS_BAR = "s4";
 
 	public static final String CR_REWARD_CARD_TEXT = "rwdCrdTxt";
@@ -175,6 +177,8 @@ public class NUXConstants
 	public static final String VIEW_DETAILS_URL="http://api.im.hike.in/nuxrewards/details/%1$s";
 	
 	public static final String TAP_CLAIM_URL="http://api.im.hike.in/nuxrewards/claim/%1$s";
+
+	public static final String OTHER_STRING = "od1";
 	
 	public static enum PushTypeEnum
 	{

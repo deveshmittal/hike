@@ -5,7 +5,6 @@ import static com.bsb.hike.NUXConstants.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -25,6 +24,8 @@ import com.bsb.hike.NUXConstants;
 import com.bsb.hike.NUXConstants.PushTypeEnum;
 import com.bsb.hike.NUXConstants.RewardTypeEnum;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.MultipleConvMessage;
@@ -50,7 +51,6 @@ public class NUXManager
 {
 	private static final NUXManager mmManager = new NUXManager();
 
-	
 
 	private HashSet<String> listNuxContacts;
 
@@ -432,6 +432,10 @@ public class NUXManager
 			if (newTaskDetails.has(TD_MAX_CONTACTS))
 			{
 				task_details.put(TD_MAX_CONTACTS, newTaskDetails.getInt(TD_MAX_CONTACTS));
+			}
+			if(newTaskDetails.has(TD_PKT_CODE))
+			{
+				mprefs.saveData(TD_PKT_CODE, newTaskDetails.getLong(TD_PKT_CODE));
 			}
 		
 			mprefs.saveData(TASK_DETAILS, task_details.toString());
@@ -1020,6 +1024,27 @@ public class NUXManager
 		}
 		return false;
 	}
+	
+	public void sendAnalytics(JSONObject metaData)
+	{
+		if (metaData != null)
+		{
+			try
+			{
+				metaData.put(TD_PKT_CODE, mprefs.getData(TD_PKT_CODE, 0l));
+				Logger.d("Analytics", metaData.toString());
+				HAManager.getInstance().record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, EventPriority.HIGH, metaData);
+			}
+			catch (JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+
+	}
+	
 	
 	/**
 	 * All these are testing functions will be removed afterwards.

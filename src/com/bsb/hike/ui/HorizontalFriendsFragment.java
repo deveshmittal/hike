@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +27,7 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NUXConstants;
@@ -296,6 +300,17 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 
 			if (getActivity() instanceof ComposeChatActivity)
 			{
+				
+				try
+				{
+					JSONObject metaData=new JSONObject();
+					metaData.put(HikeConstants.EVENT_KEY,HikeConstants.LogEvent.NUX_FRNSEL_NEXT);
+					nm.sendAnalytics(metaData);
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
 				HashSet<String> contactsNux = new HashSet<String>(viewMap.keySet());
 				nm.startNuxCustomMessage(contactsNux.toString().replace("[", "").replace("]", ""), getActivity());
 
@@ -303,7 +318,18 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 			else if (getActivity() instanceof NuxSendCustomMessageActivity)
 			{
 				nm.sendMessage(contactsDisplayed, ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage());
-				
+				try
+				{
+					JSONObject metaData=new JSONObject();
+					metaData.put(HikeConstants.EVENT_KEY,HikeConstants.LogEvent.NUX_CUSMES_SEND);
+					boolean val = ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage().equals(nm.getNuxCustomMessagePojo().getCustomMessage());
+					metaData.put(NUXConstants.OTHER_STRING, val);
+					nm.sendAnalytics(metaData);
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
 				Logger.d("UmangX","displayed : "+contactsDisplayed.toString());
 				contactsDisplayed.removeAll(nm.getLockedContacts());
 				if(!contactsDisplayed.isEmpty()){

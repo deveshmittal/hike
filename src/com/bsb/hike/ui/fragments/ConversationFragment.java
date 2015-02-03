@@ -577,6 +577,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 				footerState.setEnumState(footerState.CLOSED);
 				changeFooterControllerBackground(footerState.CLOSED);
+				
+				try
+				{
+					JSONObject metaData = new JSONObject();
+					metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_EXPANDED_COM);
+					NUXManager.getInstance().sendAnalytics(metaData);
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				break;
 			case HALFOPEN:
 				
@@ -589,6 +602,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				footerState.setEnumState(footerState.CLOSED);
 				changeFooterControllerBackground(footerState.CLOSED);
+				
+				try
+				{
+					JSONObject metaData = new JSONObject();
+					metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_FOOTER_NOR_COM);
+					NUXManager.getInstance().sendAnalytics(metaData);
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				break;
 			case CLOSED:
 				
@@ -616,6 +641,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				
 				footerState.setEnumState(footerState.HALFOPEN);
 				changeFooterControllerBackground(footerState.HALFOPEN);
+				
+				
+				
+				try
+				{
+					JSONObject metaData = new JSONObject();
+					metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_FOOTER_COM_NOR);
+					NUXManager.getInstance().sendAnalytics(metaData);
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
 			}
 
 			break;
@@ -639,6 +677,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			footerState.setEnumState(footerState.OPEN);
 			changeFooterControllerBackground(footerState.OPEN);
+
+			try
+			{
+				JSONObject metaData = new JSONObject();
+				metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_FOOTER_NOR_EXP);
+				NUXManager.getInstance().sendAnalytics(metaData);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
 			break;
 
 		case R.id.tv_chatStatus:
@@ -650,12 +699,28 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 				if ((!TextUtils.isEmpty(mmReward.getTapToClaimLink())))
 				{
+					
+					try
+					{
+						JSONObject metaData = new JSONObject();
+						metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_TAP_CLAIM);
+						NUXManager.getInstance().sendAnalytics(metaData);
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+					}
+					
+					
 					HikeSharedPreferenceUtil mprefs=HikeSharedPreferenceUtil.getInstance(getActivity());
 					String tapToClaim=HikeConstants.ANDROID+"/"+ mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
 					String title= getString(R.string.hike);
 				
 					String link=String.format(mmReward.getTapToClaimLink(),tapToClaim);
 					Utils.startWebViewActivity(getActivity(),  link, title);
+					
+					
+					
 				}
 			}
 
@@ -663,6 +728,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				if ((!TextUtils.isEmpty(mmReward.getDetailsLink())))
 				{
+					
+					try
+					{
+						JSONObject metaData = new JSONObject();
+						metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_VIEW_MORE);
+						NUXManager.getInstance().sendAnalytics(metaData);
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+					}
+					
+					
 					HikeSharedPreferenceUtil mprefs = HikeSharedPreferenceUtil.getInstance(getActivity());
 					String tapToClaim = HikeConstants.ANDROID+"/"+ mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
 					String title = getString(R.string.hike);
@@ -672,6 +750,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			break;
 		case R.id.but_remind:
+			try
+			{
+				JSONObject metaData = new JSONObject();
+				metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_REMIND);
+				NUXManager.getInstance().sendAnalytics(metaData);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+
 			if(mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
 			{
 				butRemind.setEnabled(false);
@@ -684,7 +773,21 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			break;
 		case R.id.but_inviteMore:
-			if(mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+
+			
+			try
+			{
+				JSONObject metaData = new JSONObject();
+				metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_INVITE_MORE);
+				metaData.put(NUXConstants.OTHER_STRING, butInviteMore.getText().toString());
+				NUXManager.getInstance().sendAnalytics(metaData);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+
+			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
 			{
 				butRemind.setEnabled(false);
 				butInviteMore.setEnabled(false);

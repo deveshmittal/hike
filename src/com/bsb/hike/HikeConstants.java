@@ -1803,6 +1803,34 @@ public class HikeConstants
 		public static final String VOIP_NATIVE_CALL_INTERRUPT = "tci";
 
 		public static final String VOIP_CALL_RELAY = "cpur";
+		
+		// nux Analytics Event
+		
+		public static final String NUX_INTRO_BTN="nuxIB";
+		
+		public static final String NUX_INTRO_SKIP="nuxIS";
+		
+		public static final String NUX_FRNSEL_NEXT="nuxFSN";
+		
+		public static final String NUX_CUSMES_SEND="nuxMS";
+		
+		public static final String NUX_INVITE_MORE="nuxSF";
+		
+		public static final String NUX_REMIND="nuxRF";
+		
+		public static final String NUX_VIEW_MORE="nuxMr";
+		
+		public static final String NUX_TAP_CLAIM="nuxClm";
+		
+		public static final String NUX_FOOTER_COM_NOR="nuxC2N";
+		
+		public static final String NUX_FOOTER_NOR_EXP="nuxN2E";
+		
+		public static final String NUX_FOOTER_NOR_COM="nuxN2C";
+		
+		public static final String NUX_EXPANDED_COM="nuxE2C";
+		
+		
 	}
 
 	public static final class MqttMessageTypes
