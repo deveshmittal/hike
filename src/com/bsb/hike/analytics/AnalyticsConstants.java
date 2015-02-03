@@ -82,6 +82,8 @@ public class AnalyticsConstants
 	
 	public static final String ANALYTICS_ALARM_TIME = "analyticsalarmtime";
 
+	public static final String ANALYTICS_BACKUP = "backup";
+
 	public static final String EVENT_SUB_TYPE = "st";
 
 	public static final String EVENT_TAG = "tag";
