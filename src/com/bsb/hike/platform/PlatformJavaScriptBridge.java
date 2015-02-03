@@ -1,9 +1,5 @@
 package com.bsb.hike.platform;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -20,14 +16,19 @@ import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import java.util.ArrayList;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.platform.WebViewCardRenderer.WebViewHolder;
 import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 /**
  * API bridge that connects the javascript to the Native environment. Make the instance of this class and add it as the JavaScript interface of the Card WebView.
@@ -132,6 +133,26 @@ public class PlatformJavaScriptBridge
 		}
 	}
 
+    /**
+     * Call this function to log analytics events.
+     * @param isUI : whether the event is a UI event or not. This is a string. Send "true" or "false".
+     * @param subType : the subtype of the event to be logged, eg. send "click", to determine whether it is a click event.
+     * @param json : any extra info for logging events, including the event key that is pretty crucial for analytics.
+     */
+    @JavascriptInterface
+    public void logAnalytics(String isUI, String subType, String json)
+    {
+        try {
+            if (Boolean.valueOf(isUI)) {
+                HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_UI_EVENT, subType, new JSONObject(json));
+            } else
+            {
+                HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_NON_UI_EVENT, subType, new JSONObject(json));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 	/**
 	 * Call this function to set the alarm at certain time that is defined by the second parameter.
 	 * The first param is a json that contains

@@ -16,6 +16,7 @@ import java.util.Random;
 import java.util.Set;
 
 import com.bsb.hike.platform.CardComponent;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
@@ -1550,6 +1551,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 				case 0:
 					openProfileScreen();
+                    if (mConversation.isBotConv())
+                    {
+                        analyticsForBots(HikePlatformConstants.BOT_VIEW_PROFILE, HikePlatformConstants.OVERFLOW_MENU, AnalyticsConstants.CLICK_EVENT, null);
+                    }
 					break;
 				case 1:
 					setupThemePicker(null);
@@ -1557,10 +1562,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 2:
 					if (mConversation.isBotConv())
 					{
-						mConversation.setBotConvMute(!mConversation.isMutedBotConv(false));
+                        if(mConversation.isMutedBotConv(false))
+                        {
+                            mConversation.setBotConvMute(false);
+                            analyticsForBots(HikePlatformConstants.BOT_UNMUTE_CHAT, HikePlatformConstants.OVERFLOW_MENU, AnalyticsConstants.CLICK_EVENT, null);
+                        }
+                        else
+                        {
+                            mConversation.setBotConvMute(true);
+                            analyticsForBots(HikePlatformConstants.BOT_MUTE_CHAT, HikePlatformConstants.OVERFLOW_MENU, AnalyticsConstants.CLICK_EVENT, null);
+                        }
+
 						
 						HikeMessengerApp.getPubSub().publish(HikePubSub.MUTE_CONVERSATION_TOGGLED,
 								new Pair<String, Boolean>(mConversation.getMsisdn(), mConversation.isMutedBotConv(false)));
+
 					}
 					else
 					{
@@ -1574,20 +1590,30 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					break;
 				case 3:
 					EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(ChatThread.this, null);
+                    if (mConversation.isBotConv())
+                    {
+                        analyticsForBots(HikePlatformConstants.BOT_EMAIL_CONVERSATION, HikePlatformConstants.OVERFLOW_MENU, AnalyticsConstants.CLICK_EVENT, null);
+                    }
 					Utils.executeConvAsyncTask(emailTask, mConversation);
 					break;
 				case 5:
 					clearConversation();
+                    if (mConversation.isBotConv())
+                    {
+                        analyticsForBots(HikePlatformConstants.BOT_CLEAR_CONVERSATION, HikePlatformConstants.OVERFLOW_MENU, AnalyticsConstants.CLICK_EVENT, null);
+                    }
 					break;
 				case 6:
 					if(mUserIsBlocked)
 					{
 						HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, mContactNumber);
+                        analyticsForBots(HikePlatformConstants.BOT_UNBLOCK_CHAT, HikePlatformConstants.OVERFLOW_MENU, AnalyticsConstants.CLICK_EVENT, null);
 						unblockUser();
 					}
 					else
 					{
 						HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, mContactNumber);
+                        analyticsForBots(HikePlatformConstants.BOT_BLOCK_CHAT, HikePlatformConstants.OVERFLOW_MENU, AnalyticsConstants.CLICK_EVENT, null);
 					}
 					break;
 				case 7:
@@ -1606,6 +1632,26 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		setupPopupWindow(optionsList, onItemClickListener);
 	}
+
+    public void analyticsForBots(String key, String origin, String subType, JSONObject json)
+    {
+        if (json == null || json.length() == 0)
+        {
+            json = new JSONObject();
+        }
+        try
+        {
+            json.put(AnalyticsConstants.EVENT_KEY, key);
+            json.put(AnalyticsConstants.ORIGIN, origin);
+            json.put(HikeConstants.MSISDN, mContactNumber);
+            HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.UI_EVENT, subType, json);
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
 
 	private void clearConversation()
 	{
@@ -1671,7 +1717,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/* user clicked the unblock button in the chat-screen */
 		if (v.getId() != R.id.overlay_layout && blockOverlay)
 		{
+
 			mPubSub.publish(HikePubSub.UNBLOCK_USER, getMsisdnMainUser());
+            analyticsForBots(HikePlatformConstants.BOT_UNBLOCK_CHAT, HikePlatformConstants.OVERFLOW_MENU, AnalyticsConstants.CLICK_EVENT, null);
 			unblockUser();
 		}
 		else if (v.getId() != R.id.overlay_layout)
@@ -3121,6 +3169,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onClick(View v)
 			{
 				openProfileScreen();
+                if (mConversation.isBotConv())
+                {
+                    analyticsForBots(HikePlatformConstants.BOT_VIEW_PROFILE, HikePlatformConstants.ACTION_BAR, AnalyticsConstants.CLICK_EVENT, null);
+                }
 			}
 		});
 
@@ -5033,6 +5085,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
             }
         }
 
+        if (convMessage.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT)
+        {
+            analyticsForBots(HikePlatformConstants.BOT_CHAT_THEME_PICKER, HikeConstants.ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE, AnalyticsConstants.CLICK_EVENT, null);
+        }
+
+        if (convMessage.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+        {
+            analyticsForBots(HikePlatformConstants.BOT_CHAT_THEME_PICKER, HikeConstants.ConvMessagePacketKeys.WEB_CONTENT_TYPE, AnalyticsConstants.CLICK_EVENT, null);
+        }
+
 	}
 
 	@Override
@@ -5408,6 +5470,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					selectedTheme = temporaryTheme;
 					sendChatThemeMessage();
+
+                    if (mConversation.isBotConv())
+                    {
+                        JSONObject json = new JSONObject();
+                        try {
+                            json.put(HikeConstants.BG_ID, selectedTheme.bgId());
+                            analyticsForBots(HikePlatformConstants.BOT_CHAT_THEME_PICKER, HikePlatformConstants.OVERFLOW_MENU, AnalyticsConstants.CLICK_EVENT, json);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
 				}
 				dismissPopupWindow();
 
