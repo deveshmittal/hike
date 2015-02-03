@@ -236,8 +236,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected int shareableMessagesCount;
 	
 	protected int selectedCancelableMsgs;
-
-
+	
 	private class ChatThreadBroadcasts extends BroadcastReceiver
 	{
 		@Override

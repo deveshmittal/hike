@@ -96,6 +96,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private static final int ADD_TO_UNDELIVERED_MESSAGE = 111;
 	
+	protected ChatThreadTips mTips;
+	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -243,6 +245,13 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			// TODO : mAdapter.addAllUndeliverdMessages(messages);
 		}
 		
+		showTips();
+	}
+	
+	private void showTips()
+	{
+		mTips = new ChatThreadTips(activity.getBaseContext(), activity.findViewById(R.id.chatThreadParentLayout), new int[] { ChatThreadTips.ATOMIC_ATTACHMENT_TIP, ChatThreadTips.ATOMIC_STICKER_TIP, ChatThreadTips.ATOMIC_CHAT_THEME_TIP, ChatThreadTips.STICKER_TIP}, sharedPreference);
+		mTips.showTip();
 	}
 	
 	private void resetLastSeenScheduler()

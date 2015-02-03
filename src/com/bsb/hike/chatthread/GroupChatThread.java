@@ -26,7 +26,6 @@ import android.text.util.Linkify;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.TextureView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
@@ -96,6 +95,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	private static final String HASH_PIN = "#pin";
 	
 	private static final String PIN_MESSAGE_SEPARATOR = ": ";
+	
+	protected ChatThreadTips mTips;
 
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -319,6 +320,16 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		}
 		
 		updateUnreadPinCount();
+		
+		showTips();
+	}
+	
+	private void showTips()
+	{
+		mTips = new ChatThreadTips(activity.getBaseContext(), activity.findViewById(R.id.chatThreadParentLayout), new int[] { ChatThreadTips.ATOMIC_ATTACHMENT_TIP,
+				ChatThreadTips.ATOMIC_STICKER_TIP, ChatThreadTips.PIN_TIP, ChatThreadTips.STICKER_TIP }, sharedPreference);
+		
+		mTips.showTip();
 	}
 
 	/**
