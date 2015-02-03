@@ -57,14 +57,15 @@ public class CallRatePopup extends SherlockDialogFragment
 			
 			@Override
 			public void onClick(View v) {
-				dismiss();
 				if(rating >= 3)
 				{
 					submitRating();
+					dismiss();
 				}
 				else if(rating >= 0)
 				{
 					showCallIssuesFragment(getArguments());
+					dismiss();
 				}
 			}
 		});
