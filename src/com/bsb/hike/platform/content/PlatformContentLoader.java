@@ -124,7 +124,7 @@ class PlatformContentLoader extends Handler
 		{
 			new PlatformTemplateDownloadTask(argContentRequest).execute();
 		}
-
+		
 		PlatformRequestManager.getCurrentDownloadingTemplates().add(argContentRequest.getContentData().appHashCode());
 	}
 }

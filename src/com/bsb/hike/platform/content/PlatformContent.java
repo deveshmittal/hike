@@ -95,9 +95,9 @@ public class PlatformContent
 		return PlatformContentModel.getForwardData(contentData);
 	}
 
-	public static boolean cancelRequest(PlatformContentRequest argRequest)
+	public static void cancelRequest(PlatformContentRequest argRequest)
 	{
-		return PlatformRequestManager.remove(argRequest);
+		PlatformRequestManager.remove(argRequest);
 	}
 
 	public static void cancelAllRequests()
