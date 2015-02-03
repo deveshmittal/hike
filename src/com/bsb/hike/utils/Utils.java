@@ -26,6 +26,7 @@ import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Shader.TileMode;
 import android.graphics.Typeface;
@@ -5173,6 +5174,20 @@ public class Utils
 		else
 		{
 			return TrafficsStatsFile.getTotalBytesManual(appId);  //In KB
+		}
+	}
+	
+	public static Bitmap viewToBitmap(View view) {
+		try
+		{
+	    Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+	    Canvas canvas = new Canvas(bitmap);
+	    view.draw(canvas);
+	    return bitmap;
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
 		}
 	}
 }
