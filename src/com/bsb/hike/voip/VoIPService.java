@@ -658,6 +658,8 @@ public class VoIPService extends Service {
 		bundle.putInt(VoIPConstants.CALL_ID, getCallId());
 		bundle.putInt(VoIPConstants.IS_CALL_INITIATOR, clientPartner.isInitiator() ? 0 : 1);
 		bundle.putInt(VoIPConstants.CALL_NETWORK_TYPE, VoIPUtils.getConnectionClass(getApplicationContext()).ordinal());
+		bundle.putString(VoIPConstants.PARTNER_MSISDN, clientPartner.getPhoneNumber());
+
 		sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY, bundle);
 
 		Logger.d(VoIPConstants.TAG, "Bytes sent / received: " + totalBytesSent + " / " + totalBytesReceived +

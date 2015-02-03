@@ -117,11 +117,13 @@ public class CallRatePopup extends SherlockDialogFragment
 	{
 		Bundle bundle = getArguments();
 		int isCallInitiator = -1, callId = -1, network = -1;
+		String toMsisdn = "";
 		if(bundle!=null)
 		{
 			isCallInitiator = bundle.getInt(VoIPConstants.IS_CALL_INITIATOR);
 			callId = bundle.getInt(VoIPConstants.CALL_ID);
 			network = bundle.getInt(VoIPConstants.CALL_NETWORK_TYPE);
+			toMsisdn = bundle.getString(VoIPConstants.PARTNER_MSISDN);
 		}
 
 		try
@@ -133,6 +135,7 @@ public class CallRatePopup extends SherlockDialogFragment
 			metadata.put(VoIPConstants.Analytics.CALL_ID, callId);
 			metadata.put(VoIPConstants.Analytics.IS_CALLER, isCallInitiator);
 			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, network);
+			metadata.put(AnalyticsConstants.TO, toMsisdn);
 
 			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
 		}
