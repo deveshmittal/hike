@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
@@ -22,6 +23,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.AnalyticsSender;
 import com.bsb.hike.analytics.AnalyticsStore;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
@@ -45,6 +47,7 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.notifications.HikeNotificationUtils;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HomeActivity;
@@ -118,7 +121,9 @@ public class MqttMessagesManager
 	private Map<String, LinkedList<ConvMessage>> messageListMap;
 
 	private Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap;
-
+	
+	private static int lastNotifPacket;
+	
 	private MqttMessagesManager(Context context)
 	{
 		this.convDb = HikeConversationsDatabase.getInstance();
@@ -1946,15 +1951,33 @@ public class MqttMessagesManager
 	private void playNotification(JSONObject jsonObj)
 	{
 		JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
-		String body = data.optString(HikeConstants.BODY);
-		String destination = data.optString("u");
-
-		if (data.optBoolean(HikeConstants.PUSH, true) && !TextUtils.isEmpty(destination) && !TextUtils.isEmpty(body))
+		if (data != null)
 		{
-				// chat thread -- by default silent is true, so no sound
-				boolean silent = data.optBoolean(HikeConstants.SILENT, true);
-				// open respective chat thread
-				HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
+			int hash = data.toString().hashCode();
+			// it is safety check, it is possible that server sends same packet twice (we have seen cases in GCM)
+			// we are dependent upon in memory hash of last packet.
+			if (lastNotifPacket != hash)
+			{
+				lastNotifPacket = hash;
+				String body = data.optString(HikeConstants.BODY);
+				String destination = data.optString("u");
+
+				if (data.optBoolean(HikeConstants.PUSH, true) && !TextUtils.isEmpty(destination) && !TextUtils.isEmpty(body))
+				{
+					Logger.i("mqttMessageManager", "Play Notification packet from Server " + data.toString());
+					// chat thread -- by default silent is true, so no sound
+					boolean silent = data.optBoolean(HikeConstants.SILENT, true);
+					
+					destination = HikeNotificationUtils.getNameForMsisdn(destination);
+					
+					// open respective chat thread
+					HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
+				}
+			}
+			else
+			{
+				Logger.e("mqttMessageManager", "duplicate Notification packet from server "+data.toString());
+			}
 		}
 	}
 
@@ -2963,12 +2986,59 @@ public class MqttMessagesManager
 		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
 		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance(context).getData(key, "").equals(id);
 	}
-	
+
 	public void saveGCMMessage(JSONObject json)
 	{
 		try
 		{
 			Logger.i("gcmMqttMessage", "message received " + json.toString());
+			
+			// Check if the message is expired
+			String expiryTime = json.optString(HikeConstants.EXPIRE_AT);
+			
+			JSONObject pushAckJson = json.optJSONObject(HikeConstants.PUSHACK);
+			
+			if (!TextUtils.isEmpty(expiryTime))
+			{
+				try
+				{
+					long expiry = Long.valueOf(expiryTime);
+					long currentEpoch = System.currentTimeMillis();
+					currentEpoch = currentEpoch / 1000;
+					if (currentEpoch > expiry)
+					{
+						Logger.i("gcmMqttMessage", "message expired " + json.toString());
+						JSONObject metadata = new JSONObject();
+						metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.GCM_EXPIRED);
+						metadata.put(HikeConstants.EXPIRE_AT, expiryTime);
+
+						if (pushAckJson != null)
+						{
+							metadata.put(HikeConstants.PUSHACK, pushAckJson);
+						}
+
+						HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.GCM_ANALYTICS_CONTEXT, EventPriority.HIGH, metadata);
+
+						// Discard message since it has expired
+						return;
+					}
+				}
+				catch (NumberFormatException nfe)
+				{
+					nfe.printStackTrace();
+					// Assuming message is not expired
+				}
+			}
+
+			if (pushAckJson != null)
+			{
+				// Record push ack
+				JSONObject metadata = new JSONObject();
+				metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.GCM_PUSH_ACK);
+				metadata.put(HikeConstants.PUSHACK, pushAckJson);
+				HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.GCM_ANALYTICS_CONTEXT, EventPriority.HIGH, metadata);
+			}
+			
 			String type = json.optString(HikeConstants.TYPE);
 			if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type))
 			{

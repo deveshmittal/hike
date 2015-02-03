@@ -2015,6 +2015,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					mDb.delete(DBConstants.GROUP_INFO_TABLE, DBConstants.GROUP_ID + " =?", new String[] { msisdn });
 					removeChatThemeForMsisdn(msisdn);
 				}
+				setExtraConvUnreadCount(msisdn, 0);
 			}
 			mDb.setTransactionSuccessful();
 		}
@@ -3125,7 +3126,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.MSISDN + "= ?", args);
 
 		mDb.execSQL("DELETE FROM " + DBConstants.SHARED_MEDIA_TABLE + " WHERE " + DBConstants.MSISDN + "= ?", args);
-
+		
+		setExtraConvUnreadCount(msisdn, 0);
 		/*
 		 * Next we have to clear the conversation table.
 		 */

@@ -219,12 +219,12 @@ public class HikeNotificationMsgStack implements Listener
 
 		if (mTickerText != null)
 		{
-			mTickerText.append("\n" + HikeNotificationUtils.getNameForMsisdn(mContext, argMsisdn) + " - " + argMessage);
+			mTickerText.append("\n" + HikeNotificationUtils.getNameForMsisdn(argMsisdn) + " - " + argMessage);
 		}
 		else
 		{
 			mTickerText = new StringBuilder();
-			mTickerText.append(HikeNotificationUtils.getNameForMsisdn(mContext, argMsisdn) + " - " + argMessage);
+			mTickerText.append(HikeNotificationUtils.getNameForMsisdn(argMsisdn) + " - " + argMessage);
 		}
 	}
 
@@ -373,7 +373,7 @@ public class HikeNotificationMsgStack implements Listener
 
 				String notificationMsgTitle = mContext.getString(R.string.app_name);
 
-				notificationMsgTitle = HikeNotificationUtils.getNameForMsisdn(mContext, msisdn);
+				notificationMsgTitle = HikeNotificationUtils.getNameForMsisdn(msisdn);
 
 				if (!isFromSingleMsisdn())
 				{
@@ -574,7 +574,7 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		if (isFromSingleMsisdn())
 		{
-			return HikeNotificationUtils.getNameForMsisdn(mContext, lastAddedMsisdn);
+			return HikeNotificationUtils.getNameForMsisdn(lastAddedMsisdn);
 		}
 
 		if (getNewMessages() <= 1)

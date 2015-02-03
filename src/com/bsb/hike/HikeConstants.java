@@ -90,6 +90,10 @@ public class HikeConstants
 	public static final String GENDER = "gender";
 
 	public static final String VERSION = "v";
+	
+	public static final String EXPIRE_AT = "expires_at";
+	
+	public static final String PUSHACK = "pushack";
 
 	public static final String CRITICAL = "c";
 
@@ -1828,6 +1832,13 @@ public class HikeConstants
 		public static final String VOIP_NATIVE_CALL_INTERRUPT = "tci";
 
 		public static final String VOIP_CALL_RELAY = "cpur";
+		
+		//GCM Events
+		public static final String GCM_EXPIRED = "gcmexp";
+		
+		public static final String GCM_PUSH_ACK = "gcmpack";
+		
+		public static final String GCM_ANALYTICS_CONTEXT = "gcmst";
 	}
 
 	public static final class MqttMessageTypes

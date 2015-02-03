@@ -3,6 +3,7 @@ package com.bsb.hike.platform.content;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -110,18 +111,31 @@ public class HikeUnzipTask extends Observable
 				createDir(outputFile.getParentFile());
 			}
 
-			Log.v(TAG, "Extracting: " + entry);
-			BufferedInputStream inputStream = new BufferedInputStream(zipfile.getInputStream(entry));
-			BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
+			BufferedInputStream inputStream = null;
+			BufferedOutputStream outputStream = null;
 
 			try
 			{
+				Log.v(TAG, "Extracting: " + entry);
+				inputStream = new BufferedInputStream(zipfile.getInputStream(entry));
+				outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
+
 				PlatformContentUtils.copyFile(inputStream, outputStream);
+			}
+			catch (FileNotFoundException fnfe)
+			{
+				fnfe.printStackTrace();
 			}
 			finally
 			{
-				outputStream.close();
-				inputStream.close();
+				if (outputStream != null)
+				{
+					outputStream.close();
+				}
+				if (inputStream != null)
+				{
+					inputStream.close();
+				}
 			}
 		}
 
