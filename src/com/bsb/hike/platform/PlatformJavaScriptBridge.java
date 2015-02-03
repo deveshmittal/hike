@@ -376,7 +376,8 @@ public class PlatformJavaScriptBridge
 			View share = LayoutInflater.from(mContext).inflate(com.bsb.hike.R.layout.web_card_share, null);
 			// set card image
 			ImageView image = (ImageView) share.findViewById(com.bsb.hike.R.id.image);
-			Bitmap b = Utils.viewToBitmap(((WebViewHolder)mWebView.getTag()).main);
+//			Bitmap b = Utils.viewToBitmap(((WebViewHolder)mWebView.getTag()).main);
+			Bitmap b = Utils.viewToBitmap(mWebView);
 			image.setImageBitmap(b);
 			
 			// set description text
@@ -395,7 +396,7 @@ public class PlatformJavaScriptBridge
 			shB.compress(CompressFormat.JPEG, 100, output);
 			output.close();
 			Logger.i(tag, "share webview card "+f.getAbsolutePath());
-			Utils.startShareImageIntent(mContext, "image/jpeg", "file://"+f.getAbsolutePath(),"sample text from hike");
+			Utils.startShareImageIntent(mContext, "image/jpeg", "file://"+f.getAbsolutePath(),"Download  http://get.hike.in");
 			
 		}
 		catch (Exception e)
