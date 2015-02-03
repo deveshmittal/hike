@@ -815,8 +815,13 @@ public class HikeService extends Service
 		// if next alarm time is less than the current time, add frequency to the current time itself
 		if(System.currentTimeMillis() > nextAlarm)
  		{
-			nextAlarm = System.currentTimeMillis() + obj.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;;			
+			nextAlarm = System.currentTimeMillis() + obj.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;						
  		}
+		// please do not remove the following logs, for QA testing
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(nextAlarm);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm day number of the month on service boot up :" + cal.get(Calendar.DAY_OF_MONTH) + " " + cal.get(Calendar.MONTH));
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm hour number on service boot up :" + cal.get(Calendar.HOUR_OF_DAY));
 		HikeAlarmManager.setAlarm(getApplicationContext(), nextAlarm, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
  	}
 }
