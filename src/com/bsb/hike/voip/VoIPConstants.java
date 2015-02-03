@@ -44,6 +44,8 @@ public class VoIPConstants {
 
 		public static final String IS_CALLER = "caller";
 
+		public static final String IS_ENDER = "ender";
+
 		public static final String NETWORK_TYPE = "net";
 
 		public static final String OLD_NETWORK_TYPE = "oldnet";

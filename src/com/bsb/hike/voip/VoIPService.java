@@ -1627,6 +1627,7 @@ public class VoIPService extends Service {
 						
 					case END_CALL:
 						Logger.d(VoIPConstants.TAG, "Other party hung up.");
+						clientPartner.setEnder(true);
 						stop();
 						VoIPUtils.addMessageToChatThread(getApplicationContext(), clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration(), -1);
 						break;
@@ -1636,6 +1637,7 @@ public class VoIPService extends Service {
 						break;
 						
 					case CALL_DECLINED:
+						clientPartner.setEnder(true);
 						sendHandlerMessage(VoIPActivity.MSG_OUTGOING_CALL_DECLINED);
 						stop();
 						break;
@@ -2462,6 +2464,7 @@ public class VoIPService extends Service {
 			{
 				metadata.put(VoIPConstants.Analytics.DATA_SENT, totalBytesSent);
 				metadata.put(VoIPConstants.Analytics.DATA_RECEIVED, totalBytesReceived);
+				metadata.put(VoIPConstants.Analytics.IS_ENDER, clientPartner.isEnder() ? 0 : 1);
 				if(getCallDuration() > 0)
 				{
 					metadata.put(VoIPConstants.Analytics.DURATION, getCallDuration());
