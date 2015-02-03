@@ -3011,26 +3011,34 @@ public class MqttMessagesManager
 						JSONObject metadata = new JSONObject();
 						metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.GCM_EXPIRED);
 						metadata.put(HikeConstants.EXPIRE_AT, expiryTime);
-						metadata.put(HikeConstants.PUSHACK, pushAckJson);
+
+						if (pushAckJson != null)
+						{
+							metadata.put(HikeConstants.PUSHACK, pushAckJson);
+						}
+
 						HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.GCM_ANALYTICS_CONTEXT, EventPriority.HIGH, metadata);
-						
-						//Discard message since it has expired
+
+						// Discard message since it has expired
 						return;
 					}
 				}
 				catch (NumberFormatException nfe)
 				{
 					nfe.printStackTrace();
-					//Assuming message is not expired
+					// Assuming message is not expired
 				}
 			}
 
-			// Record push ack
-			JSONObject metadata = new JSONObject();
-			metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.GCM_PUSH_ACK);
-			metadata.put(HikeConstants.PUSHACK, pushAckJson);
-			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.GCM_ANALYTICS_CONTEXT, EventPriority.HIGH, metadata);
-
+			if (pushAckJson != null)
+			{
+				// Record push ack
+				JSONObject metadata = new JSONObject();
+				metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.GCM_PUSH_ACK);
+				metadata.put(HikeConstants.PUSHACK, pushAckJson);
+				HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.GCM_ANALYTICS_CONTEXT, EventPriority.HIGH, metadata);
+			}
+			
 			String type = json.optString(HikeConstants.TYPE);
 			if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type))
 			{
