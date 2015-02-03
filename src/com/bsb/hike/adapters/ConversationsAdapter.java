@@ -632,11 +632,15 @@ public class ConversationsAdapter extends BaseAdapter
 		private void filterList(List<Conversation> allList, List<Conversation> listToUpdate, String textToBeFiltered)
 		{
 
-			try
+			for (Conversation info : allList)
 			{
-				for (Conversation info : allList)
+				try
 				{
 					String name = info.getContactName();
+					if (name == null)
+					{
+						name = "";
+					}
 					boolean found = false;
 					int startIndex = 0;
 					name = name.toLowerCase();
@@ -651,6 +655,10 @@ public class ConversationsAdapter extends BaseAdapter
 						startIndex = name.indexOf(" " + textToBeFiltered) + 1;
 						convSpanStartIndexes.put(info.getMsisdn(), startIndex);
 					}
+					else if (info.getMsisdn().contains(textToBeFiltered))
+					{
+						found = true;
+					}
 					else if (textToBeFiltered.equals("group") && Utils.isGroupConversation(info.getMsisdn()))
 					{
 						found = true;
@@ -660,11 +668,12 @@ public class ConversationsAdapter extends BaseAdapter
 						listToUpdate.add(info);
 					}
 				}
+				catch (Exception ex)
+				{
+					Logger.d(getClass().getSimpleName(), "Exception while filtering conversation contacts." + ex);
+				}
 			}
-			catch (Exception ex)
-			{
-				Logger.d(getClass().getSimpleName(), "Exception while filtering conversation contacts." + ex);
-			}
+			
 		}
 
 		@Override
