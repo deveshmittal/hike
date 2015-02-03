@@ -4,6 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Contains the mime type , content and content length of the response body
  * 
@@ -48,6 +51,20 @@ public class ResponseBody
 	public byte[] getContent()
 	{
 		return content;
+	}
+	
+	public JSONObject getContentJSON()
+	{
+		JSONObject jsonContent = null;
+		try
+		{
+			jsonContent = new JSONObject(new String(getContent()));
+		}
+		catch (JSONException e)
+		{
+			
+		}
+		return jsonContent;
 	}
 
 	public void setContent(byte[] content)
