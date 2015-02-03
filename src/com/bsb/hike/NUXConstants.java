@@ -180,6 +180,8 @@ public class NUXConstants
 
 	public static final String OTHER_STRING = "od1";
 	
+	public static final String NUXREMINDTOSERVER="nuxInvRmndr";
+	
 	public static enum PushTypeEnum
 	{
 		NONE(0), SILENT(1), PUSH(2), UNKNOWN(-1);

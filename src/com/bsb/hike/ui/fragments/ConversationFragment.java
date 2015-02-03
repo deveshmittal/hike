@@ -480,7 +480,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			
 			 Animation pulse = AnimationUtils.loadAnimation(getActivity(), R.anim.pulse);
 
-			lockImage.startAnimation(pulse);
+			//lockImage.startAnimation(pulse);
 			
 			// Changing the footer state to halfOpen when the reward is unlocked.
 			setFooterHalfOpen();

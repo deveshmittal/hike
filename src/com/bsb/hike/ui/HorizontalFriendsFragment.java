@@ -36,6 +36,7 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
@@ -325,6 +326,16 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 					boolean val = ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage().equals(nm.getNuxCustomMessagePojo().getCustomMessage());
 					metaData.put(NUXConstants.OTHER_STRING, val);
 					nm.sendAnalytics(metaData);
+					
+					JSONObject remind = new JSONObject();
+					remind.put(HikeConstants.TYPE, HikeConstants.NUX);
+					remind.put(HikeConstants.SUB_TYPE, NUXConstants.NUXREMINDTOSERVER);
+					JSONObject data = new JSONObject();
+					data.put(HikeConstants.Extras.MSG, ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage());
+					remind.put(HikeConstants.DATA, data);
+					HikeMqttManagerNew.getInstance().sendMessage(remind, HikeMqttManagerNew.MQTT_QOS_ONE);
+					Logger.d("RemindPkt",remind.toString());
+					
 				}
 				catch (JSONException e)
 				{
