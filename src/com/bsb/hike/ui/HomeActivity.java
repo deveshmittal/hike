@@ -58,6 +58,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeConstants;
@@ -66,15 +67,20 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.FtueContactsData;
+import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.service.HikeMqttManagerNew;
+import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.tasks.SendLogsTask;
@@ -82,6 +88,7 @@ import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
+import com.bsb.hike.utils.FestivePopup;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.StickerManager;
@@ -103,7 +110,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP, FESTIVE_POPUP, VOIP_FTUE_POPUP
 	}
 
 	private DialogShowing dialogShowing;
@@ -149,15 +156,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private HikeTip.TipType tipTypeShowing;
 
 	private FetchContactsTask fetchContactsTask;
-	
+
 	private ConversationFragment mainFragment;
-	
+
 	private Handler mHandler = new Handler();
+
+	private SnowFallView snowFallView;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
-			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FAVORITE_COUNT_CHANGED, HikePubSub.STEALTH_UNREAD_TIP_CLICKED };
+			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FAVORITE_COUNT_CHANGED,
+			HikePubSub.STEALTH_UNREAD_TIP_CLICKED,HikePubSub. FTUE_LIST_FETCHED_OR_UPDATED };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE };
 
@@ -191,6 +201,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (!showingProgress)
 		{
+			if (Utils.isVoipActivated(HomeActivity.this) && !HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWN_VOIP_INTRO_TIP, false))
+			{
+				dialogShowing = DialogShowing.VOIP_FTUE_POPUP;
+			}
 			initialiseHomeScreen(savedInstanceState);
 		}
 		
@@ -234,6 +248,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		setupMainFragment(savedInstanceState);
 		initialiseTabs();
 
+		setupFestivePopup();
+
 		if (savedInstanceState == null && dialogShowing == null)
 		{
 			
@@ -265,7 +281,54 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
 	}
+
+	private void setupFestivePopup()
+	{
+		final int festivePopupType = accountPrefs.getInt(HikeConstants.SHOW_FESTIVE_POPUP, -1);
+		if (festivePopupType == FestivePopup.REPUBLIC_DAY_POPUP)
+		{
+			if(FestivePopup.isPastFestiveDate(festivePopupType))
+			{
+				HikeSharedPreferenceUtil.getInstance(this).removeData(HikeConstants.SHOW_FESTIVE_POPUP);
+			}
+			else if(dialogShowing == null)
+			{
+				ViewStub festiveView = (ViewStub) findViewById(R.id.festive_view_stub);
+				festiveView.setOnInflateListener(new ViewStub.OnInflateListener()
+				{
+					@Override
+					public void onInflate(ViewStub stub, View inflated)
+					{
+						startFestiveView(festivePopupType);
+					}
+				});
+				festiveView.inflate();
+			}
+		}
+
+	}
 	
+	private void startFestiveView(final int type)
+	{
+		Utils.blockOrientationChange(HomeActivity.this);
+		dialogShowing = DialogShowing.FESTIVE_POPUP;
+		findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
+		getSupportActionBar().hide();
+
+		if(snowFallView == null)
+		{
+			mHandler.postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					snowFallView = FestivePopup.startAndSetSnowFallView(HomeActivity.this, type);
+				}
+			}, 300);
+		}
+	}
+
 	private void setupMainFragment(Bundle savedInstanceState)
 	{
 		if (savedInstanceState != null) {
@@ -276,6 +339,20 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.home_screen, mainFragment).commit();
 		
+	}
+
+	public void onFestiveModeBgClick(View v)
+	{
+		return;
+	}
+
+	public void showActionBarAfterFestivePopup()
+	{
+		dialogShowing = null;
+		// Bringing back action bar & unblocking orientation
+		findViewById(R.id.action_bar_img).setVisibility(View.GONE);
+		getSupportActionBar().show();
+		Utils.unblockOrientationChange(this);
 	}
 
 	private void showStealthFtueTip(final boolean isSetPasswordTip)
@@ -382,7 +459,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void onClick(View v)
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
+
 				Intent intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
 				intent.putExtra(HikeConstants.Extras.EDIT, true);
 				newConversationIndicator.setVisibility(View.GONE);
@@ -544,7 +631,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				Intent intent = new Intent(HomeActivity.this, HikeListActivity.class);
 				startActivity(intent);
 
-				Utils.sendUILogEvent(showingRewardsPopup ? HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_REWARDS : HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_FREE_SMS);
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, showingRewardsPopup ? HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_REWARDS : HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_FREE_SMS);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 			}
 		});
 
@@ -644,11 +740,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void sendDeviceDetails()
 	{
-		JSONObject obj = Utils.getDeviceDetails(HomeActivity.this);
-		if (obj != null)
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-		}
+		Utils.recordDeviceDetails(HomeActivity.this);
 		Utils.requestAccountInfo(false, HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false));
 		Utils.sendLocaleToServer(HomeActivity.this);
 		deviceDetailsSent = true;
@@ -952,23 +1044,42 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					sendDeviceDetails();
 					if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP, false))
 					{
-						Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
+						try
+						{
+							JSONObject metadata = new JSONObject();
+							metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FB_CLICK);
+							HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+						}
+						catch(JSONException e)
+						{
+							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+						}
 					}
 					if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) > -1)
 					{
-						if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+						try
 						{
-							Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+							JSONObject metadata = new JSONObject();
+							
+							if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+							{
+								metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+							}
+							else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+							{
+								metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+							}
+							HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+	
+							editor = accountPrefs.edit();
+							editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
+							editor.commit();
 						}
-						else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+						catch(JSONException e)
 						{
-							Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 						}
-						editor = accountPrefs.edit();
-						editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
-						editor.commit();
-					}
-
+					}						
 				}
 			}
 		}
@@ -1161,7 +1272,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_MENU)
 			{
-				if (ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE)
+				if ((ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE) || dialogShowing!=null)
 				{
 					return true;
 				}
@@ -1411,13 +1522,33 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
 					break;
 				case 7:
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SHOW_TIMELINE_TOP_BAR);
+					try
+					{
+						JSONObject md = new JSONObject();
+						md.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SHOW_TIMELINE_TOP_BAR);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
+
 					editor.putBoolean(HikeConstants.SHOW_TIMELINE_RED_DOT, false);
 					editor.commit();
 					intent = new Intent(HomeActivity.this, TimelineActivity.class);
 					break;
 				case 8:
-					Utils.sendUILogEvent(HikeConstants.LogEvent.STATUS_UPDATE_FROM_OVERFLOW);
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STATUS_UPDATE_FROM_OVERFLOW);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
+
 					intent = new Intent(HomeActivity.this, StatusUpdate.class);
 					break;
 				case 9:
@@ -1573,6 +1704,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
 			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
 			break;
+		case VOIP_FTUE_POPUP:
+			dialogShowing = DialogShowing.VOIP_FTUE_POPUP;
+			dialog = HikeDialog.showDialog(this, HikeDialog.VOIP_INTRO_DIALOG, getHomeActivityDialogListener());
 		}
 	}
 
@@ -1594,7 +1728,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 				case STEALTH_FTUE_POPUP:
 					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
-					Utils.sendUILogEvent(HikeConstants.LogEvent.QUICK_SETUP_CLICK);
+					
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.QUICK_SETUP_CLICK);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 					break;
 
 				default:
@@ -1708,7 +1852,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.EXIT_STEALTH_MODE);
+				
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.EXIT_STEALTH_MODE);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 			}
 		}
 	}

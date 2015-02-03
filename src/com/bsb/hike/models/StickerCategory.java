@@ -47,6 +47,8 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	
 	public static final int DONE = 4;
 	
+	public static final int DONE_SHOP_SETTINGS = 5;
+	
 	private int downloadedStickersCount = -1;
 	
 	private int state;
@@ -192,12 +194,12 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		return state;
 	}
 	
-	public List<Sticker> getStickerList(Context context)
+	public List<Sticker> getStickerList()
 	{
 		final List<Sticker> stickersList;
 		if (isCustom())
 		{
-			return ((CustomStickerCategory) this).getStickerList(context);
+			return ((CustomStickerCategory) this).getStickerList();
 		}
 		else
 		{

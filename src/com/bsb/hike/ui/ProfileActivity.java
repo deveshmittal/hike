@@ -29,6 +29,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.Gravity;
@@ -62,6 +63,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.SubMenu;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -70,6 +72,8 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ProfileAdapter;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
@@ -90,7 +94,9 @@ import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -105,9 +111,12 @@ import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontEditText;
+import com.bsb.hike.voip.VoIPUtils;
+import com.bsb.hike.voip.view.CallRatePopup;
+import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
-		View.OnClickListener
+		View.OnClickListener, IVoipCallListener
 {
 	private TextView mName;
 	
@@ -171,12 +180,14 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public static final String ORIENTATION_FLAG = "of";
 	
-	public static final String PROFILE_PIC_SUFFIX = "pp";
-
 	private ProfileItem.ProfileSharedMedia sharedMediaItem;
 	
 	private ProfileItem.ProfileSharedContent sharedContentItem;
 
+	public static final String PROFILE_PIC_SUFFIX = "profilePic";
+
+	public static final String PROFILE_ROUND_SUFFIX = "round";
+	
 	private static enum ProfileType
 	{
 		USER_PROFILE, // The user profile screen
@@ -237,8 +248,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public SmileyParser smileyParser;
 	
-	public static final String PROFILE_ROUND_SUFFIX = "round";
-
 	private static final String TAG = "Profile_Activity";
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -298,6 +307,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		else if (profileType == ProfileType.CONTACT_INFO || profileType == ProfileType.CONTACT_INFO_TIMELINE)
 		{
 			HikeMessengerApp.getPubSub().removeListeners(this, contactInfoPubSubListeners);
+			VoIPUtils.removeCallListener();
 		}
 		else if (profileType == ProfileType.USER_PROFILE)
 		{
@@ -351,6 +361,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			this.profileType = ProfileType.CONTACT_INFO;
 			setupContactProfileScreen();
 			HikeMessengerApp.getPubSub().addListeners(this, contactInfoPubSubListeners);
+			VoIPUtils.setCallListener(this);
 		}
 		else if(getIntent().hasExtra(HikeConstants.Extras.CONTACT_INFO_TIMELINE))
 		{
@@ -368,8 +379,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if(Intent.ACTION_ATTACH_DATA.equals(getIntent().getAction()))
 			{
-				setProfileImage(HikeConstants.GALLERY_RESULT, RESULT_OK, getIntent());
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SET_PROFILE_PIC_GALLERY);
+				setProfileImage(HikeConstants.GALLERY_RESULT, RESULT_OK, getIntent());				
 			}
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false))
 			{
@@ -549,11 +559,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			{
 				getSupportMenuInflater().inflate(R.menu.contact_profile_menu, menu);
 				mMenu = menu;
-				MenuItem callItem = menu.findItem(R.id.call);
-				if (callItem != null)
-				{
-					callItem.setVisible(getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY));
-				}
 				return true;
 			}
 		case GROUP_INFO:
@@ -581,6 +586,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			/*Falling onto contact info intentionally*/
 		case CONTACT_INFO:
 			MenuItem friendItem = menu.findItem(R.id.unfriend);
+			MenuItem overflow = menu.findItem(R.id.overflow_menu);
 
 			if (friendItem != null)
 			{
@@ -593,6 +599,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						friendItem.setVisible(false);
 					}
+			}
+
+			if(overflow!=null && !overflow.getSubMenu().hasVisibleItems())
+			{
+				overflow.setVisible(false);
 			}
 			return true;
 		case GROUP_INFO:
@@ -611,9 +622,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		switch (item.getItemId())
 		{
-		case R.id.call:
-			Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
-			break;
 		case R.id.unfriend:
 			FavoriteType fav = Utils.checkAndUnfriendContact(contactInfo);
 			contactInfo.setFavoriteType(fav);
@@ -1805,6 +1813,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					Utils.executeBoolResultAsyncTask(mActivityState.downloadPicasaImageTask);
 					mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.downloading_image));
 				}
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SET_PROFILE_PIC_GALLERY);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 				break;
 
 			case HikeConstants.CROP_RESULT:
@@ -1890,7 +1908,17 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		
 		if (contactInfo.isOnhike())
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_TO_FAVOURITE);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ADD_TO_FAVOURITE);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+
 			Utils.addFavorite(this, contactInfo, false);
 		}
 		else
@@ -1941,7 +1969,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				public void onClick(DialogInterface dialog, int which)
 				{
 					HikePubSub hikePubSub = HikeMessengerApp.getPubSub();
-					hikePubSub.publish(HikePubSub.MQTT_PUBLISH, groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+					HikeMqttManagerNew.getInstance().sendMessage(groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_QOS_ONE);
 					hikePubSub.publish(HikePubSub.GROUP_LEFT, groupConversation.getMsisdn());
 					Intent intent = new Intent(ProfileActivity.this, HomeActivity.class);
 					intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mLocalMSISDN);
@@ -2776,7 +2804,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 				}
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+				HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 				confirmDialog.dismiss();
 			}
 		};
@@ -2909,7 +2937,18 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			arguments.putInt(HikeConstants.MEDIA_POSITION, hsf.size()-1);
 			arguments.putBoolean(HikeConstants.FROM_CHAT_THREAD, true);
 			arguments.putString(HikeConstants.Extras.MSISDN, mLocalMSISDN);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.MEDIA_THUMBNAIL_VIA_PROFILE);
+			
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.MEDIA_THUMBNAIL_VIA_PROFILE);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+
 			if(this.profileType == ProfileType.GROUP_INFO)
 				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, groupConversation);
 			else
@@ -2919,7 +2958,17 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else if(v.getTag() instanceof String)  //Open entire gallery intent
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.OPEN_GALLERY_VIA_PROFILE);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.OPEN_GALLERY_VIA_PROFILE);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+
 			if(this.profileType == ProfileType.GROUP_INFO)
 				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ProfileActivity.this, groupConversation));
 			else
@@ -3034,7 +3083,17 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.SHARED_FILES_VIA_PROFILE);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SHARED_FILES_VIA_PROFILE);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+
 			Intent intent = new Intent(this, SharedOtherFilesActivity.class);
 			intent.putExtra(HikeConstants.Extras.MSISDN, mLocalMSISDN);
 			startActivity(intent);
@@ -3048,7 +3107,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public void callBtnClicked(View v)
 	{
-		Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
+		Utils.onCallClicked(this, mLocalMSISDN, VoIPUtils.CallSource.PROFILE_ACTIVITY);
 	}
 	
 	@Override
@@ -3070,5 +3129,27 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		intent.putExtra(HikeConstants.Extras.CONTACT_INFO_TIMELINE, mLocalMSISDN);
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, contactInfo.isOnhike());
 		startActivity(intent);
+	}
+
+	@Override
+	public void onVoipCallEnd(final Bundle bundle) 
+	{
+		runOnUiThread(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				if(!isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG))
+				{
+					CallRatePopup callRatePopup = new CallRatePopup();
+					callRatePopup.setArguments(bundle);
+
+					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+					fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
+					fragmentTransaction.commitAllowingStateLoss();
+				}
+			}
+		});
 	}
 }

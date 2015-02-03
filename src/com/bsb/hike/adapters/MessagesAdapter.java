@@ -2,7 +2,6 @@ package com.bsb.hike.adapters;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -13,19 +12,17 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -38,17 +35,13 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,7 +59,6 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ProgressBar;
@@ -75,10 +67,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
@@ -90,7 +83,6 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -103,17 +95,17 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
+import com.bsb.hike.platform.CardRenderer;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
-import com.bsb.hike.ui.fragments.PhotoViewerFragment;
-import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
-import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
@@ -125,42 +117,46 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 {
 	private enum ViewType
 	{
-		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION, UNKNOWN_BLOCK_ADD, PIN_TEXT_SENT, PIN_TEXT_RECEIVE
+		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION, UNKNOWN_BLOCK_ADD, PIN_TEXT_SENT, PIN_TEXT_RECEIVE,
+		VOIP_CALL;
+		
 	};
 
-	private static class DayHolder
-	{
-		ViewStub dayStub;
+    private int viewTypeCount = ViewType.values().length;
 
-		View dayStubInflated;
+	public static class DayHolder
+	{
+		public ViewStub dayStub;
+
+		public View dayStubInflated;
 	}
 
-	private static class DetailViewHolder extends DayHolder
+	public static class DetailViewHolder extends DayHolder
 	{
 
-		ImageView status;
+		public ImageView status;
 
-		TextView time;
+		public TextView time;
 
-		View timeStatus;
+		public View timeStatus;
 
-		View senderDetails;
+		public View senderDetails;
 
-		TextView senderName;
+		public TextView senderName;
 
-		TextView senderNameUnsaved;
+		public TextView senderNameUnsaved;
 
-		ImageView avatarImage;
+		public ImageView avatarImage;
 
-		ViewGroup avatarContainer;
+		public ViewGroup avatarContainer;
 
-		View selectedStateOverlay;
+		public View selectedStateOverlay;
 
-		ViewGroup messageContainer;
+		public ViewGroup messageContainer;
 
-		ViewStub messageInfoStub;
+		public ViewStub messageInfoStub;
 
-		View messageInfoInflated;
+		public View messageInfoInflated;
 	}
 
 	private static class FTViewHolder extends DetailViewHolder
@@ -248,6 +244,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		TextView messageInfo;
 
 	}
+	
+	private static class VoipInfoHolder extends DayHolder
+	{
+		
+		ImageView image;
+		
+		TextView text;
+
+		TextView messageInfo;
+	}
 
 	private static class ParticipantInfoHolder extends DayHolder
 	{
@@ -310,6 +316,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	
 	private HighQualityThumbLoader hqThumbLoader;
 
+    private CardRenderer mChatThreadCardRenderer;
+
 	/*
 	 * this is set of all the currently visible messages which are stuck in tick and are not sms
 	 */
@@ -342,6 +350,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		hqThumbLoader = new HighQualityThumbLoader();
 		hqThumbLoader.setImageFadeIn(false);
 		hqThumbLoader.setDefaultDrawableNull(false);
+        this.mChatThreadCardRenderer = new CardRenderer(context);
+
 	}
 
 	public void setChatTheme(ChatTheme theme)
@@ -467,6 +477,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
+		
 		MessageMetadata metadata = convMessage.getMetadata();
 		if (convMessage.isStickerMessage())
 		{
@@ -566,6 +577,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 			}
 		}
+        else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT)
+        {
+            return viewTypeCount + mChatThreadCardRenderer.getItemViewType(convMessage);
+        }
 		else if (convMessage.getUnreadCount() > 0)
 		{
 			type = ViewType.UNREAD_COUNT;
@@ -582,6 +597,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else if (convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
 		{
 			type = ViewType.STATUS_MESSAGE;
+		}
+		else if (convMessage.getParticipantInfoState() == ParticipantInfoState.VOIP_CALL_SUMMARY ||
+				convMessage.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING ||
+				convMessage.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING)
+		{
+			type = ViewType.VOIP_CALL;
 		}
 		else if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
@@ -621,7 +642,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public int getViewTypeCount()
 	{
-		return ViewType.values().length;
+		return viewTypeCount + mChatThreadCardRenderer.getCardCount();
 	}
 
 	@Override
@@ -629,13 +650,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		long startTime = System.currentTimeMillis();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		ViewType viewType = ViewType.values()[getItemViewType(position)];
+        int type = getItemViewType(position);
+		ViewType viewType = null;
 
 		final ConvMessage convMessage = getItem(position);
 
 		DayHolder dayHolder = null;
 		View v = convertView;
 		// Applicable to all kinds of messages
+        if (type >= viewTypeCount){
+            v = mChatThreadCardRenderer.getView(v, convMessage, parent);
+            DetailViewHolder holder = (DetailViewHolder) v.getTag();
+            dayHolder = holder;
+            setSenderDetails(convMessage, position, holder, false);
+            //setBubbleColor(convMessage, holder.messageContainer);
+            setTimeNStatus(position, holder, true, holder.messageContainer);
+            setSelection(convMessage, holder.selectedStateOverlay);
+        }  else
+            viewType = ViewType.values()[type];
+
 		if (viewType == ViewType.TYPING_NOTIFICATION)
 		{
 
@@ -759,7 +792,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			setSenderDetails(convMessage, position, stickerHolder, true);
 			String categoryId = sticker.getCategoryId();
 			String stickerId = sticker.getStickerId();
-
 			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId) + HikeConstants.LARGE_STICKER_ROOT;
 			File stickerImage = null;
 			if (categoryDirPath != null)
@@ -797,13 +829,31 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				stickerHolder.image.setVisibility(View.GONE);
 				stickerHolder.image.setImageDrawable(null);
 
-				StickerDownloadManager.getInstance(context).DownloadSingleSticker(categoryId, stickerId, new IStickerResultListener()
+				StickerDownloadManager.getInstance().DownloadSingleSticker(categoryId, stickerId, new IStickerResultListener()
 				{
 
 					@Override
 					public void onSuccess(Object result)
 					{
-						// TODO Auto-generated method stub
+						// Here we update sticker category, if we received a different category in download response.
+						// This is being done to fix a legacy bug, where catId came as "unknown"
+						
+						String newCategoryId = (String) result;
+						String oldCategoryId = convMessage.getMetadata().getSticker().getStickerId();
+						if (!oldCategoryId.equals(newCategoryId))
+						{
+							try
+							{
+								MessageMetadata newMetadata = convMessage.getMetadata();
+								newMetadata.updateSticker(newCategoryId);
+								HikeConversationsDatabase.getInstance().updateMessageMetadata(convMessage.getMsgID(), newMetadata);
+							}
+							catch (JSONException e)
+							{
+								Logger.wtf("MessagesAdapter", "Got new categoryId as " + result.toString() + " But failed to update the metadata for : " + convMessage.getMsgID());
+							}
+
+						}
 						HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_DOWNLOADED, null);
 
 					}
@@ -1186,12 +1236,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				videoHolder.fileThumb.setScaleType(ScaleType.CENTER);
 				videoHolder.fileThumb.setLayoutParams(fileThumbParams);
 
-				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0) && fss.getFTState() != FTState.INITIALIZED)
 				{
 					videoHolder.fileSize.setText(Utils.getSizeForDisplay((int) hikeFile.getFile().length()));
 					videoHolder.fileSize.setVisibility(View.VISIBLE);
 				}
-				else if (hikeFile.getFileSize() > 0)
+				else if (!convMessage.isSent() && hikeFile.getFileSize() > 0)
 				{
 					videoHolder.fileSize.setText(Utils.getSizeForDisplay(hikeFile.getFileSize()));
 					videoHolder.fileSize.setVisibility(View.VISIBLE);
@@ -1809,7 +1859,70 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 			}
 		}
+		else if (viewType == ViewType.VOIP_CALL)
+		{
+			VoipInfoHolder infoHolder = null;
+			if (v == null)
+			{
+				infoHolder = new VoipInfoHolder();
+				v = inflateView(R.layout.voip_info, null);
+				infoHolder.image = (ImageView) v.findViewById(R.id.voip_image);
+				infoHolder.text = (TextView) v.findViewById(R.id.voip_text);
+				infoHolder.messageInfo = (TextView) v.findViewById(R.id.timestamp);
+				infoHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
+				v.setTag(infoHolder);
+			}
+			else
+			{
+				infoHolder = (VoipInfoHolder) v.getTag();
+			}
+			dayHolder = infoHolder;
+			
+			if (isDefaultTheme)
+			{
+				infoHolder.text.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
+				infoHolder.messageInfo.setTextColor(context.getResources().getColor(R.color.timestampcolor));
+				((View) v.findViewById(R.id.voip_details)).setBackgroundResource(R.drawable.participant_info_bg);
+			}
+			else
+			{
+				infoHolder.text.setTextColor(context.getResources().getColor(R.color.white));
+				infoHolder.messageInfo.setTextColor(context.getResources().getColor(R.color.white));
+				((View) v.findViewById(R.id.voip_details)).setBackgroundResource(R.drawable.participant_info_custom_bg);
+			}
+			
+			int duration = metadata.getDuration();
+			boolean initiator = metadata.isVoipInitiator();
 
+			String message = null;
+			int imageId = isDefaultTheme ? R.drawable.ic_voip_ct_miss : R.drawable.ic_voip_ct_miss_custom;
+			if (convMessage.getParticipantInfoState() == ParticipantInfoState.VOIP_CALL_SUMMARY)
+			{
+				if (initiator)
+				{
+					message = context.getString(R.string.voip_call_summary_outgoing);
+					imageId = isDefaultTheme ? R.drawable.ic_voip_ct_out : R.drawable.ic_voip_ct_out_custom; 
+				}
+				else
+				{
+					message = context.getString(R.string.voip_call_summary_incoming);
+					imageId = isDefaultTheme ? R.drawable.ic_voip_ct_in : R.drawable.ic_voip_ct_in_custom;
+				}
+				message += String.format(" (%02d:%02d)", (duration / 60), (duration % 60));
+			}
+			else if (convMessage.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING)
+			{
+				message = context.getString(R.string.voip_missed_call_outgoing);
+			}
+			else if (convMessage.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING)
+			{
+				message = context.getString(R.string.voip_missed_call_incoming);
+			}
+			
+			infoHolder.text.setText(message);
+			infoHolder.messageInfo.setText(convMessage.getTimestampFormatted(false, context));
+			infoHolder.image.setImageResource(imageId);
+		}
 		else if (viewType == ViewType.STATUS_MESSAGE || viewType == ViewType.PIN_TEXT_SENT || viewType == ViewType.PIN_TEXT_RECEIVE)
 		{
 			StatusViewHolder statusHolder = null;
@@ -1887,7 +2000,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			int bottom = positiveMargin;
 
 			int layoutRes = chatTheme.systemMessageLayoutId();
-
+			
 			if (infoState == ParticipantInfoState.PARTICIPANT_JOINED)
 			{
 				JSONArray participantInfoArray = metadata.getGcjParticipantInfo();
@@ -2545,26 +2658,54 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else if(fss.getFTState() == FTState.IN_PROGRESS && fss.getTransferredSize() == 0)
 		{
-			float fakeProgress = 5 * 0.01f;
-			
-			if (fss.getTotalSize() > 0)
+			float animatedProgress = 5 * 0.01f;
+			if (fss.getTotalSize() > 0 && chunkSize > 0)
 			{
-				fakeProgress = (float) chunkSize;
-				fakeProgress /= fss.getTotalSize();
-				if (fakeProgress > 5 * 0.01f)
+				animatedProgress = (float) chunkSize;
+				animatedProgress = animatedProgress / fss.getTotalSize() ;
+			}
+			if(holder.circularProgress.getRelatedMsgId() == -1 || holder.circularProgress.getCurrentProgress() > animatedProgress
+					|| holder.circularProgress.getCurrentProgress() == 1.0f)
+			{
+				holder.circularProgress.resetProgress();
+			}
+			if (Utils.isHoneycombOrHigher()){
+				holder.circularProgress.stopAnimation();
+				holder.circularProgress.setAnimatedProgress(0, (int) (animatedProgress * 100), 6 * 1000);
+			}else{
+				holder.circularProgress.setProgress(animatedProgress);
+			}
+			holder.circularProgress.setRelatedMsgId(msgId);
+			holder.circularProgress.setVisibility(View.VISIBLE);
+			holder.circularProgressBg.setVisibility(View.VISIBLE);
+		}
+		else if(fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
+		{
+			if(progress < 100)
+				holder.circularProgress.setProgress(progress * 0.01f);
+			if (Utils.isHoneycombOrHigher())
+				holder.circularProgress.stopAnimation();
+			if(fss.getFTState() == FTState.IN_PROGRESS) {
+				float animatedProgress = 5 * 0.01f;
+				if (fss.getTotalSize() > 0)
 				{
-					fakeProgress = 5 * 0.01f;
+					animatedProgress = (float) chunkSize;
+					animatedProgress = animatedProgress / fss.getTotalSize() ;
+				}
+				if (Utils.isHoneycombOrHigher())
+				{
+					if(holder.circularProgress.getCurrentProgress() < (0.95f) && progress == 100){
+						holder.circularProgress.setAnimatedProgress((int) (holder.circularProgress.getCurrentProgress() * 100), progress, 300);
+					}else
+						holder.circularProgress.setAnimatedProgress(progress, progress + (int) (animatedProgress * 100), 6 * 1000);
 				}
 			}
-			holder.circularProgress.setProgress(fakeProgress);
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
 		else
 		{
-			holder.circularProgress.setProgress(progress * 0.01f);
-			holder.circularProgress.setVisibility(View.VISIBLE);
-			holder.circularProgressBg.setVisibility(View.VISIBLE);
+			showTransferInitialization(holder, hikeFile);
 		}
 	}
 
@@ -2768,8 +2909,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		/*
 		 * We show the time stamp in the status message separately so no need to show this time stamp.
 		 */
-		ViewType viewtype = ViewType.values()[getItemViewType(position)];
-		if (viewtype == ViewType.STATUS_MESSAGE || viewtype == ViewType.PIN_TEXT_RECEIVE || viewtype == ViewType.PIN_TEXT_SENT)
+        int type = getItemViewType(position);
+        ViewType viewtype = null;
+        if (type < viewTypeCount) {
+            viewtype = ViewType.values()[type];
+        }
+
+		if (null != viewtype && (viewtype == ViewType.STATUS_MESSAGE || viewtype == ViewType.PIN_TEXT_RECEIVE || viewtype == ViewType.PIN_TEXT_SENT))
 		{
 			return false;
 		}
@@ -3268,8 +3414,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_SMS_PREF_TOGGLED, null);
 
-		Utils.sendNativeSmsLogEvent(isChecked);
-
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.NATIVE_SMS, String.valueOf(isChecked));
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+		
 		if (isChecked)
 		{
 			if (!preferences.getBoolean(HikeMessengerApp.SHOWN_NATIVE_INFO_POPUP, false))
@@ -3467,10 +3622,30 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			public void onClick(View v)
 			{
 				smsDialogSendClick(sendHike.isChecked(), false);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_ALWAYS_CLICKED);
+				
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SMS_POPUP_ALWAYS_CLICKED);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
+
 				if (!sendHike.isChecked())
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
+					try
+					{
+						JSONObject md = new JSONObject();
+						md.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 				}
 				dialog.dismiss();
 			}
@@ -3482,13 +3657,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			@Override
 			public void onClick(View v)
 			{
-				smsDialogSendClick(sendHike.isChecked(), true);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_JUST_ONCE_CLICKED);
-				if (!sendHike.isChecked())
+				try
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
+					smsDialogSendClick(sendHike.isChecked(), true);
+				
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SMS_POPUP_JUST_ONCE_CLICKED);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					
+					if (!sendHike.isChecked())
+					{						
+						JSONObject md = new JSONObject();
+						md.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					dialog.dismiss();
 				}
-				dialog.dismiss();
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 			}
 		});
 
@@ -3616,7 +3804,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				for (ConvMessage convMessage : unsentMessages)
 				{
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
+					HikeMqttManagerNew.getInstance().sendMessage(convMessage.serialize(), HikeMqttManagerNew.MQTT_QOS_ONE);
 					convMessage.setTimestamp(System.currentTimeMillis() / 1000);
 				}
 				notifyDataSetChanged();
@@ -3829,7 +4017,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					Utils.setupFormattedTime(durationTxt, mediaPlayer.getCurrentPosition() / 1000);
 					break;
 				case STOPPED:
-					((HoloCircularProgress) durationProgress).setProgress(0.00f);
+					((HoloCircularProgress) durationProgress).resetProgress();
 					Utils.setupFormattedTime(durationTxt, duration / 1000);
 					break;
 

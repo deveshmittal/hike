@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
@@ -26,40 +27,39 @@ import twitter4j.auth.AccessToken;
 import twitter4j.auth.OAuthAuthorization;
 import twitter4j.conf.ConfigurationContext;
 import android.app.Application;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Pair;
 
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
-import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
-import com.bsb.hike.service.HikeServiceConnection;
+import com.bsb.hike.service.RegisterToGCMTrigger;
+import com.bsb.hike.service.SendGCMIdToServerTrigger;
 import com.bsb.hike.service.UpgradeIntentService;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
-import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 
 @ReportsCrashes(formKey = "", customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
@@ -74,6 +74,16 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
 
+	public static final String VOIP_SETTINGS = "voipsettings";
+
+	public static final String VOIP_AUDIO_GAIN = "voipaudiogain";
+	
+	public static final String VOIP_BITRATE_2G = "vb2g";
+	
+	public static final String VOIP_BITRATE_3G = "vb3g";
+	
+	public static final String VOIP_BITRATE_WIFI = "vbw";
+	
 	public static final String MSISDN_SETTING = "msisdn";
 
 	public static final String CARRIER_SETTING = "carrier";
@@ -87,6 +97,12 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String UID_SETTING = "uid";
 
 	public static final String BACKUP_TOKEN_SETTING = "backup_token";
+
+	public static final String RESTORE_ACCOUNT_SETTING = "restore";
+	
+	public static final String SIGNUP_COMPLETE = "signup_complete";
+
+	public static final String RESTORING_BACKUP = "restoring_backup";
 
 	public static final String UPDATE_SETTING = "update";
 
@@ -103,7 +119,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String NAME = "name";
 
 	public static final String ACCEPT_TERMS = "acceptterms";
-
+	
 	public static final String CONNECTED_ONCE = "connectedonce";
 
 	public static final String MESSAGES_LIST_TOOLTIP_DISMISSED = "messageslist_tooltip";
@@ -152,6 +168,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String TEMP_COUNTRY_CODE = "tempCountryCode";
 
+	public static final String GCM_ID_SENT_PRELOAD = "gcm_id_sent_preload";
+	
 	public static final String GCM_ID_SENT = "gcmIdSent";
 
 	public static final String BLOCK_NOTIFICATIONS = "blockNotification";
@@ -409,10 +427,26 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN = "showCategoryReordering";
 	
 	public static final String STICKED_BTN_CLICKED_FIRST_TIME = "stickerBtnClickedFirstTime";
-	
+
 	public static final String STICKER_SETTING_CHECK_BOX_CLICKED = "stickerSettingCheckBoxClicked";
 	
 	public static final String STICKER_SETTING_UNCHECK_BOX_CLICKED = "stickerSettingUnCheckBoxClicked";
+
+	public static final String RETRY_NOTIFICATION_COOL_OFF_TIME = "retryNotificationCoolOffTime";
+	
+	public static final String LED_NOTIFICATION_COLOR_CODE = "led_notification_color_code";
+
+	public static final String NOTIFICATION_TONE_URI = "notificationToneUri";
+
+	public static final String NOTIFICATION_TONE_NAME = "notificaationToneName";
+
+	public static final String SHOWN_VOIP_INTRO_TIP = "shownVoipIntroTip";
+
+	public static final String SHOW_VOIP_CALL_RATE_POPUP = "showVoipCallRatePopup";
+
+	public static final String VOIP_CALL_RATE_POPUP_FREQUENCY = "voipCallRatePopupFrequency";
+
+	public static final String VOIP_ACTIVE_CALLS_COUNT = "voipCallsCount";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -428,11 +462,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	private static Set<String> stealthMsisdn;
 
-	private Messenger mService;
-
-	private HikeServiceConnection mServiceConnection;
-
-	private boolean mInitialized;
+	private AtomicBoolean mInitialized = new AtomicBoolean(false);
 
 	private String token;
 
@@ -455,6 +485,12 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public Handler appStateHandler;
 	
 	private StickerManager sm;
+	
+	private static HikeMessengerApp _instance;
+	
+	RegisterToGCMTrigger mmRegisterToGCMTrigger = null;
+
+	SendGCMIdToServerTrigger mmGcmIdToServerTrigger = null;
 
 	class IncomingHandler extends Handler
 	{
@@ -478,11 +514,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 				MQTTConnectionStatus status = MQTTConnectionStatus.values()[s];
 				mPubSubInstance.publish(HikePubSub.CONNECTION_STATUS, status);
 				break;
-			case HikeService.MSG_APP_INVALID_TOKEN:
-				Logger.d("HikeMessengerApp", "received invalid token message from service");
-				HikeMessengerApp.this.disconnectFromService();
-				HikeMessengerApp.this.stopService(new Intent(HikeMessengerApp.this, HikeService.class));
-				HikeMessengerApp.this.startActivity(new Intent(HikeMessengerApp.this, WelcomeActivity.class));
 			}
 		}
 	}
@@ -496,46 +527,43 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		}
 	}
 
-	public void sendToService(Message message)
+	public void setServiceAsDisconnected()
 	{
-		try
-		{
-			mService.send(message);
-		}
-		catch (RemoteException e)
-		{
-			Logger.e("HikeMessengerApp", "Unable to connect to service", e);
-		}
+		mInitialized.compareAndSet(true, false);
 	}
-
-	public void disconnectFromService()
+	
+	public void setServiceAsConnected()
 	{
-		if (mInitialized)
-		{
-			synchronized (HikeMessengerApp.class)
-			{
-				if (mInitialized)
-				{
-					mInitialized = false;
-					unbindService(mServiceConnection);
-					mServiceConnection = null;
-				}
-			}
-		}
+		mInitialized.compareAndSet(false, true);
 	}
 
 	public void connectToService()
 	{
+		if(!Utils.isUserSignedUp(getApplicationContext(), false))
+		{
+			return;
+		}
+		
 		Logger.d("HikeMessengerApp", "calling connectToService:" + mInitialized);
-		if (!mInitialized)
+		if (!mInitialized.get())
 		{
 			synchronized (HikeMessengerApp.class)
 			{
-				if (!mInitialized)
+				if (!mInitialized.get())
 				{
-					mInitialized = true;
 					Logger.d("HikeMessengerApp", "Initializing service");
-					mServiceConnection = HikeServiceConnection.createConnection(this, mMessenger);
+					
+					ComponentName service = HikeMessengerApp.this.startService(new Intent(HikeMessengerApp.this, HikeService.class));
+					
+					if(service!=null && service.getClassName().equals(HikeService.class.getName()))
+					{
+						//Service started
+						setServiceAsConnected();
+					}
+					else
+					{
+						setServiceAsDisconnected();
+					}
 				}
 			}
 		}
@@ -603,7 +631,12 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		return dataBfr.toString();
 	}
-
+@Override
+public void onTrimMemory(int level)
+{
+	// TODO Auto-generated method stub
+	super.onTrimMemory(level);
+}
 	public void onCreate()
 	{
 
@@ -626,6 +659,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		ErrorReporter.getInstance().setReportSender(customReportSender);
 
 		super.onCreate();
+		
+		_instance = this;
 
 		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
 
@@ -694,6 +729,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		sm = StickerManager.getInstance();
 		sm.init(getApplicationContext());
+		
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
 		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || 
@@ -719,16 +755,9 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
 
-		// adding a check here for MobileAppTracker SDK update case
 		// we use this preference to check if this is a fresh install case or an
 		// update case
 		// in case of an update the SSL pref would not be null
-		TrackerUtil tUtil = TrackerUtil.getInstance(this.getApplicationContext());
-		if (tUtil != null)
-		{
-			tUtil.setTrackOptions(!preferenceManager.contains(HikeConstants.SSL_PREF));
-			Logger.d(getClass().getSimpleName(), "Init for apptracker sdk finished" + !preferenceManager.contains(HikeConstants.SSL_PREF));
-		}
 
 		boolean isSAUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE);
 
@@ -821,8 +850,29 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		appStateHandler = new Handler();
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
+		
+		registerReceivers();
 	}
 	
+	public static HikeMessengerApp getInstance()
+	{
+		return _instance;
+	}
+
+	private void registerReceivers()
+	{
+		// TODO Auto-generated method stub
+
+		LocalBroadcastManager mmBroadcastManager = LocalBroadcastManager.getInstance(this);
+		mmRegisterToGCMTrigger = new RegisterToGCMTrigger();
+		mmGcmIdToServerTrigger = new SendGCMIdToServerTrigger();
+
+		mmBroadcastManager.registerReceiver(mmRegisterToGCMTrigger, new IntentFilter(HikeService.REGISTER_TO_GCM_ACTION));
+
+		mmBroadcastManager.registerReceiver(mmGcmIdToServerTrigger, new IntentFilter(HikeService.SEND_TO_SERVER_ACTION));
+
+	}
+
 	public void startUpdgradeIntent()
 	{
 		// turn off future push notifications as soon as the app has
@@ -869,7 +919,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		conMgr = ContactManager.getInstance();
 		conMgr.init(getApplicationContext());
 	}
-
+	
 	public static ContactManager getContactManager()
 	{
 		return conMgr;
@@ -904,11 +954,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static HikePubSub getPubSub()
 	{
 		return mPubSubInstance;
-	}
-
-	public void setService(Messenger service)
-	{
-		this.mService = service;
 	}
 
 	public static boolean isIndianUser()
@@ -1005,7 +1050,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		}
 		if (toastListener == null)
 		{
-			toastListener = new ToastListener(getApplicationContext());
+			toastListener = toastListener = ToastListener.getInstance(getApplicationContext());
 		}
 		if (activityTimeLogger == null)
 		{
@@ -1031,7 +1076,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			/*
 			 * Send a fg/bg packet on reconnecting.
 			 */
-			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true);
+			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true, false);
 		}
 	};
 
@@ -1046,5 +1091,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			edit.putBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, true);
 			edit.commit();
 		}
+	}
+	
+	public boolean isHikeBotNumber(String msisdn)
+	{
+		return hikeBotNamesMap.containsKey(msisdn);
 	}
 }

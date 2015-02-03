@@ -52,7 +52,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	private StickerLoader worker;
 	
 	private StickerOtherIconLoader stickerOtherIconLoader;
-
+	
 	private class StickerPageObjects
 	{
 		private GridView stickerGridView;
@@ -332,6 +332,14 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				@Override
 				public void onClick(View v)
 				{
+					/**
+					 * This is done to remove the green dot for update available state. For a new category added on the fly from the server, the update available is set to true to
+					 * show a green indicator. To remove that, we are doing this.
+					 */
+					if(category.isUpdateAvailable())
+					{
+						category.setUpdateAvailable(false);
+					}
 					StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.FIRST_TIME, DownloadType.NEW_CATEGORY, activity);
 					setupStickerPage(parent, category);
 				}
@@ -415,7 +423,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 
 		spo.getStickerGridView().setVisibility(View.VISIBLE);
-		final List<Sticker> stickersList = category.getStickerList(activity);
+		final List<Sticker> stickersList = category.getStickerList();
 		final List<StickerPageAdapterItem> stickerPageList = StickerManager.getInstance().generateStickerPageAdapterItemList(stickersList);
 		
 		/**
@@ -426,7 +434,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			category.setState(StickerCategory.UPDATE);
 		}
 		
-		int state = category.getState(); 
+		int state = category.getState();
+
 		/* We add UI elements based on the current state of the sticker category*/
 		addStickerPageAdapterItem(category, stickerPageList);
 		/**
@@ -488,19 +497,15 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		return stickerOtherIconLoader;
 	}
 
+	/**
+	 * Returns Sticker Category object based on index
+	 * @param position
+	 * @return {@link StickerCategory} Object
+	 */
 	@Override
-	public String getCategoryIdForIndex(int index)
+	public StickerCategory getCategoryForIndex(int index)
 	{
-		return stickerCategoryList.get(index).getCategoryId();
+		return stickerCategoryList.get(index);
 	}
 	
-	/**
-	 * Returns Sticker Category object based on position
-	 * @param position
-	 * @return
-	 */
-	public StickerCategory getStickerCategory(int position)
-	{
-		return stickerCategoryList.get(position);
-	}
 }

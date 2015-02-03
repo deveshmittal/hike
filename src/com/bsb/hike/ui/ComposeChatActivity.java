@@ -1,25 +1,10 @@
 package com.bsb.hike.ui;
 
-import java.io.File;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,65 +12,51 @@ import android.preference.PreferenceManager;
 import android.provider.ContactsContract.Data;
 import android.text.TextUtils;
 import android.util.Pair;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.ViewStub;
-import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.webkit.MimeTypeMap;
-import android.widget.AbsListView;
+import android.widget.*;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ComposeChatAdapter;
 import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.filetransfer.FileTransferManager;
-import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.*;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.MultipleConvMessage;
-import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.platform.ContentLove;
+import com.bsb.hike.platform.PlatformMessageMetadata;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
-import com.bsb.hike.utils.CustomAlertDialog;
-import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
-import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.LastSeenScheduler;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.PairModified;
-import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.CustomTypeFace;
+import com.bsb.hike.utils.*;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.net.URI;
+import java.util.*;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener, OnScrollListener
 {
@@ -255,7 +226,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);
 			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
 			sendBroadcast(contactSyncIntent);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.COMPOSE_REFRESH_CONTACTS);
+			
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.COMPOSE_REFRESH_CONTACTS);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -690,7 +671,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					tagEditText.clear(false);
 					int selected = adapter.getSelectedContactCount();
 					tagEditText.toggleTag( getString(selected <=1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SELECT_ALL_HIKE_CONTACTS);
+					
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SELECT_ALL_HIKE_CONTACTS);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 				}else{
 					// call adapter unselect all
 					selectAllMode = false;
@@ -787,7 +778,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				e.printStackTrace();
 			}
 		}
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, gcjJson);
+		HikeMqttManagerNew.getInstance().sendMessage(gcjJson, HikeMqttManagerNew.MQTT_QOS_ONE);
 
 		ContactInfo conversationContactInfo = new ContactInfo(groupId, groupId, groupId, groupId);
 		Intent intent = Utils.createIntentFromContactInfo(conversationContactInfo, true);
@@ -928,9 +919,20 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
+				JSONObject metadata = new JSONObject();
+				
 				if(isFtueFwd)
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_STICKER_FORWARD);
+					try
+					{
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_STICKER_FORWARD);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
+						
 					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 					Editor editor = settings.edit();
 					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, false);
@@ -941,7 +943,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 				else if(nuxInviteMode)
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_BOT_FORWARD);
+					try
+					{
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_BOT_FORWARD);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
+
 					forwardMultipleMessages(adapter.getAllSelectedContacts());
 				}
 				else if (isForwardingMessage)
@@ -1117,7 +1128,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.CONFIRM_FORWARD);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.CONFIRM_FORWARD);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+
 			// forwarding it is
 			Intent intent = null;
 			if(!nuxInviteMode && !isFtueFwd && arrayList.size()==1)
@@ -1214,7 +1235,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						return;
 					}
 
-					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike, FTAnalyticEvents.OTHER_ATTACHEMENT);
 					Utils.executeAsyncTask(fileTransferTask);
 
 					progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
@@ -1334,6 +1355,19 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						 * Making sure the sticker is not forwarded again on orientation change
 						 */
 						presentIntent.removeExtra(StickerManager.FWD_CATEGORY_ID);
+					}else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.CONTENT){
+						// CONTENT Message
+						String metadata = msgExtrasJson.optString(HikeConstants.METADATA);
+						int loveId = msgExtrasJson.optInt(HikeConstants.ConvMessagePacketKeys.LOVE_ID);
+						loveId = loveId==0 ? -1 : loveId;
+						ConvMessage convMessage = new ConvMessage();
+						convMessage.contentLove = new ContentLove();
+						convMessage.contentLove.loveId = loveId;
+                        convMessage.setMessageType(MESSAGE_TYPE.CONTENT);
+						convMessage.platformMessageMetadata = new PlatformMessageMetadata(metadata, getApplicationContext());
+                        convMessage.setIsSent(true);
+                        convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
+						multipleMessageList.add(convMessage);
 					}
 					/*
 					 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
@@ -1347,6 +1381,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_LONG).show();
 				}
 				if(multipleMessageList.size() ==0 || arrayList.size()==0){
+					if(fileTransferList.isEmpty()){
+						// if it is >0 then onpost execute of PreFileTransferAsycntask will start intent
+						startActivity(intent);
+						finish();
+					}
 					return;
 				}else if(isSharingFile){
 					ConvMessage convMessage = multipleMessageList.get(0);
@@ -1688,6 +1727,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		@Override
 		public void listFetched()
 		{
+			if(getIntent().getBooleanExtra(HikeConstants.Extras.SELECT_ALL_INITIALLY, false))
+			{
+				View selectAllCont = findViewById(R.id.select_all_container);
+				CheckBox cb = (CheckBox) selectAllCont.findViewById(R.id.select_all_cb);
+				cb.setChecked(true);
+			}
+
 			if (PreferenceManager.getDefaultSharedPreferences(ComposeChatActivity.this).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
 			{
 				lastSeenScheduler = LastSeenScheduler.getInstance(ComposeChatActivity.this);
@@ -1835,7 +1881,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		protected Void doInBackground(Void... params) {
 			for(FileTransferData file:files){
 			FileTransferManager.getInstance(getApplicationContext()).uploadFile(file.arrayList, file.file, file.fileKey, file.fileType, file.hikeFileType, file.isRecording, file.isForwardingFile,
-					((ContactInfo)file.arrayList.get(0)).isOnhike(), file.recordingDuration);
+					((ContactInfo)file.arrayList.get(0)).isOnhike(), file.recordingDuration,  FTAnalyticEvents.OTHER_ATTACHEMENT);
 			}
 			return null;
 		}

@@ -104,6 +104,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	
 	protected int pausedProgress ;
 
+	protected FTAnalyticEvents analyticEvents;
+
 	protected FileTransferBase(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, long msgId, HikeFileType hikeFileType)
 	{
 		this.handler = handler;
@@ -165,6 +167,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(fss);
+			out.flush();
+			fileOut.flush();
+			fileOut.getFD().sync();
 			out.close();
 			fileOut.close();
 		}
@@ -182,6 +187,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(fss);
+			out.flush();
+			fileOut.flush();
+			fileOut.getFD().sync();
 			out.close();
 			fileOut.close();
 		}
@@ -199,6 +207,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(fss);
+			out.flush();
+			fileOut.flush();
+			fileOut.getFD().sync();
 			out.close();
 			fileOut.close();
 		}
@@ -216,6 +227,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(fss);
+			out.flush();
+			fileOut.flush();
+			fileOut.getFD().sync();
 			out.close();
 			fileOut.close();
 		}
@@ -334,5 +348,4 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	{
 		this.pausedProgress = pausedProgress;
 	}
-
 }

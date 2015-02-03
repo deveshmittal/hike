@@ -48,6 +48,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,6 +63,7 @@ import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -92,6 +94,8 @@ import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -150,6 +154,9 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.TrafficsStatsFile;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -169,13 +176,17 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.service.ConnectionChangeReceiver;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
+import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.FtueActivity;
 import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -185,6 +196,11 @@ import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.bsb.hike.voip.VoIPService;
+import com.bsb.hike.voip.VoIPUtils;
+import com.bsb.hike.voip.view.VoIPActivity;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -354,7 +370,7 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}
-	
+
 	public static Intent createIntentFromMsisdn(String msisdnOrGroupId, boolean openKeyBoard)
 	{
 		Intent intent = new Intent();
@@ -564,7 +580,6 @@ public class Utils
 
 		if (!settings.getBoolean(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
-			disconnectAndStopService(activity);
 			activity.startActivity(new Intent(activity, WelcomeActivity.class));
 			activity.finish();
 			return true;
@@ -572,12 +587,103 @@ public class Utils
 
 		if (settings.getString(HikeMessengerApp.NAME_SETTING, null) == null)
 		{
-			disconnectAndStopService(activity);
 			activity.startActivity(new Intent(activity, SignupActivity.class));
 			activity.finish();
 			return true;
 		}
 
+		if (!settings.getBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false) || !settings.getBoolean(HikeMessengerApp.SIGNUP_COMPLETE, false))
+		{
+			if (isUserUpgrading(activity))
+			{
+				Editor editor = settings.edit();
+				editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+				editor.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
+				editor.commit();
+				return false;
+			}
+			else
+			{
+				activity.startActivity(new Intent(activity, SignupActivity.class));
+				activity.finish();
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if the user has successfully signedup. This means user is has passed signuptask.
+	 * Returns false otherwise. In this case it will open either SignupActivity or WelcomeActivity.
+	 * 
+	 * @param context
+	 * @param launchSignup  -- true if you want to launch respective activity, false otherwise
+	 * @return
+	 */
+	public static boolean isUserSignedUp(Context context, boolean launchSignup)
+	{
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(context);
+		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
+		{
+			if(launchSignup)
+			{
+				Intent i = new Intent(context, WelcomeActivity.class);
+				i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(i);
+			}
+			return false;
+		}
+
+		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
+		{
+			if(launchSignup)
+			{
+				Intent i = new Intent(context, SignupActivity.class);
+				i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(i);
+			}
+			return false;
+		}
+
+		if (!settingPref.getData(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false) || !settingPref.getData(HikeMessengerApp.SIGNUP_COMPLETE, false))
+		{
+			if (isUserUpgrading(context))
+			{
+				settingPref.saveData(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+				settingPref.saveData(HikeMessengerApp.SIGNUP_COMPLETE, true);
+				return true;
+			}
+			else
+			{
+				if(launchSignup)
+				{
+					Intent i = new Intent(context, SignupActivity.class);
+					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					context.startActivity(i);
+				}
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private static boolean isUserUpgrading(Context context)
+	{
+		SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String currentAppVersion = settings.getString(HikeMessengerApp.CURRENT_APP_VERSION, "");
+		String actualAppVersion = "";
+		try
+		{
+			actualAppVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+		}
+		catch (NameNotFoundException e)
+		{
+			Logger.e("Utils", "Unable to get the app version");
+		}
+		if (!currentAppVersion.equals("") && !currentAppVersion.equals(actualAppVersion))
+		{
+			return true;
+		}
 		return false;
 	}
 
@@ -591,14 +697,6 @@ public class Utils
 			return true;
 		}
 		return false;
-	}
-	
-	public static void disconnectAndStopService(Activity activity)
-	{
-		// Added these lines to prevent the bad username/password bug.
-		HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
-		app.disconnectFromService();
-		activity.stopService(new Intent(activity, HikeService.class));
 	}
 
 	public static String formatNo(String msisdn)
@@ -721,18 +819,14 @@ public class Utils
 		return highlight;
 	}
 
-	public static JSONObject getDeviceDetails(Context context)
+	public static void recordDeviceDetails(Context context)
 	{
 		try
 		{
-			// {"t": "le", "d"{"tag":"cbs", "device_id":
-			// "54330bc905bcf18a","_os": "DDD","_os_version": "EEE","_device":
-			// "FFF","_resolution": "GGG","_carrier": "HHH", "_app_version" :
-			// "x.x.x"}}
+			JSONObject metadata = new JSONObject();
+			
 			int height;
 			int width;
-			JSONObject object = new JSONObject();
-			JSONObject data = new JSONObject();
 
 			/*
 			 * Doing this to avoid the ClassCastException when the context is sent from the BroadcastReceiver. As it is, we don't need to send the resolution from the
@@ -743,7 +837,7 @@ public class Utils
 				height = ((Activity) context).getWindowManager().getDefaultDisplay().getHeight();
 				width = ((Activity) context).getWindowManager().getDefaultDisplay().getWidth();
 				String resolution = height + "x" + width;
-				data.put(HikeConstants.LogEvent.RESOLUTION, resolution);
+				metadata.put(HikeConstants.LogEvent.RESOLUTION, resolution);
 			}
 			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
@@ -755,12 +849,10 @@ public class Utils
 			}
 			catch (NoSuchAlgorithmException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			catch (UnsupportedEncodingException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			String os = "Android";
@@ -768,77 +860,58 @@ public class Utils
 			String device = Build.MANUFACTURER + " " + Build.MODEL;
 			String appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
 
-			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			Map<String, String> referralValues = retrieveReferralParams(context);
 			if (!referralValues.isEmpty())
 			{
 				for (Entry<String, String> entry : referralValues.entrySet())
 				{
-					data.put(entry.getKey(), entry.getValue());
+					metadata.put(entry.getKey(), entry.getValue());
 				}
 			}
-			data.put(HikeConstants.LogEvent.TAG, "cbs");
-			data.put(HikeConstants.LogEvent.DEVICE_ID, deviceId);
-			data.put(HikeConstants.LogEvent.OS, os);
-			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
-			data.put(HikeConstants.LogEvent.DEVICE, device);
-			data.put(HikeConstants.LogEvent.CARRIER, carrier);
-			data.put(HikeConstants.LogEvent.APP_VERSION, appVersion);
-			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-			object.put(HikeConstants.DATA, data);
-
-			return object;
+			metadata.put(HikeConstants.LogEvent.DEVICE_ID, deviceId);
+			metadata.put(HikeConstants.LogEvent.OS, os);
+			metadata.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
+			metadata.put(HikeConstants.LogEvent.DEVICE, device);
+			metadata.put(HikeConstants.LogEvent.CARRIER, carrier);
+			metadata.put(HikeConstants.LogEvent.APP_VERSION, appVersion);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.DEVICE_DETAILS, metadata, AnalyticsConstants.EVENT_TAG_CBS);
 		}
-		catch (JSONException e)
+		catch(JSONException e)
 		{
-			Logger.e("Utils", "Invalid JSON", e);
-			return null;
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 		catch (NameNotFoundException e)
 		{
 			Logger.e("Utils", "Package not found", e);
-			return null;
 		}
-
 	}
 
-	public static JSONObject getDeviceStats(Context context)
+	public static void getDeviceStats(Context context)
 	{
 		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ANALYTICS, 0);
 		Editor editor = prefs.edit();
 		Map<String, ?> keys = prefs.getAll();
 
-		JSONObject data = new JSONObject();
-		JSONObject obj = new JSONObject();
+		JSONObject metadata = new JSONObject();
 
 		try
 		{
-			if (keys.isEmpty())
-			{
-				obj = null;
-			}
-			else
+			if (!keys.isEmpty())
 			{
 				for (String key : keys.keySet())
 				{
 					Logger.d("Utils", "Getting keys: " + key);
-					data.put(key, prefs.getLong(key, 0));
+					metadata.put(key, prefs.getLong(key, 0));
 					editor.remove(key);
 				}
 				editor.commit();
-				data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
-				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-
-				obj.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
-				obj.put(HikeConstants.DATA, data);
+				HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.DEVICE_STATS, metadata);
 			}
 		}
 		catch (JSONException e)
 		{
 			Logger.e("Utils", "Invalid JSON", e);
 		}
-
-		return obj;
 	}
 
 	public static CharSequence addContactName(String firstName, CharSequence message)
@@ -1049,7 +1122,7 @@ public class Utils
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			requestAccountInfo.put(HikeConstants.DATA, data);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, requestAccountInfo);
+			HikeMqttManagerNew.getInstance().sendMessage(requestAccountInfo, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
@@ -1090,7 +1163,7 @@ public class Utils
 
 	public static void bytesToFile(byte[] bytes, File dst)
 	{
-		OutputStream out = null;
+		FileOutputStream out = null;
 		try
 		{
 			out = new FileOutputStream(dst);
@@ -1106,6 +1179,8 @@ public class Utils
 			{
 				try
 				{
+					out.flush();
+					out.getFD().sync();
 					out.close();
 				}
 				catch (IOException e)
@@ -1245,35 +1320,38 @@ public class Utils
 		return bao.toByteArray();
 	}
 
-	public static String getRealPathFromUri(Uri contentUri, Activity activity)
+	// If source is local file path then previous getRealPathFromUri implementation (which uses deprecated manage query) provides null, So adding this implementation to solve the issue.
+	public static String getRealPathFromUri(Uri uri, Context mContext)
 	{
-		String filePath = null;
-		String[] proj = { MediaStore.Images.Media.DATA };
+		String result = null;
 		Cursor cursor = null;
-		// The query can throw exception if is doesn't know the specified projections. This needs to be put in a try-catch block.
 		try
 		{
-			cursor = activity.managedQuery(contentUri, proj, null, null, null);
+		    cursor = mContext.getContentResolver().query(uri, null, null, null, null);
+		    if (cursor == null) {
+		        result = uri.getPath();
+		    } else {
+		        if(cursor.moveToFirst())
+		        {
+		        	int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+			        result = cursor.getString(idx);
+		        }
+		        else
+		        {
+		        	result = null;
+		        }
+		    }
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		if (cursor == null || cursor.getCount() == 0)
+		finally
 		{
-			// return null;
+			if(cursor != null)
+				cursor.close();
 		}
-		else
-		{
-			int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-			cursor.moveToFirst();
-			filePath = cursor.getString(column_index);
-		}
-		if (filePath == null)
-		{
-			filePath = FilePath.getPath(activity.getBaseContext(), contentUri);
-		}
-		return filePath;
+	    return result;
 	}
 
 	public static enum ExternalStorageState
@@ -1369,7 +1447,7 @@ public class Utils
 			{
 				src = new FileInputStream(new File(srcFilePath));
 			}
-			OutputStream dest = new FileOutputStream(new File(destFilePath));
+			FileOutputStream dest = new FileOutputStream(new File(destFilePath));
 
 			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
 			int len;
@@ -1379,6 +1457,8 @@ public class Utils
 				dest.write(buffer, 0, len);
 			}
 
+			dest.flush();
+			dest.getFD().sync();
 			src.close();
 			dest.close();
 
@@ -1432,7 +1512,7 @@ public class Utils
 				src = new FileInputStream(new File(srcFilePath));
 			}
 
-			OutputStream dest = new FileOutputStream(new File(destFilePath));
+			FileOutputStream dest = new FileOutputStream(new File(destFilePath));
 
 			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
 			int len;
@@ -1441,6 +1521,8 @@ public class Utils
 			{
 				dest.write(buffer, 0, len);
 			}
+			dest.flush();
+			dest.getFD().sync();
 			src.close();
 			dest.close();
 			return true;
@@ -1549,11 +1631,13 @@ public class Utils
 		{
 			AccountUtils.base = httpString + AccountUtils.host + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + "/v2";
+			AccountUtils.SDK_AUTH_BASE = AccountUtils.SDK_AUTH_BASE_URL_PROD;
 		}
 		else
 		{
 			AccountUtils.base = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v2";
+			AccountUtils.SDK_AUTH_BASE = AccountUtils.SDK_AUTH_BASE_URL_STAGING;
 		}
 
 		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
@@ -1562,9 +1646,12 @@ public class Utils
 		CheckForUpdateTask.UPDATE_CHECK_URL = httpString + (isProductionServer ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL);
 
 		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
+		AccountUtils.fastFileUploadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
 
+		AccountUtils.analyticsUploadUrl = AccountUtils.base + AccountUtils.ANALYTICS_UPLOAD_BASE;
+		
 		AccountUtils.rewardsUrl = isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.REWARDS_STAGING_BASE;
 		AccountUtils.gamesUrl = isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.GAMES_STAGING_BASE;
 		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE : AccountUtils.STICKERS_STAGING_BASE);
@@ -1640,7 +1727,7 @@ public class Utils
 		ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(msisdn, context);
 		if (!sentMqttPacket)
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize(sendNativeInvite));
+			HikeMqttManagerNew.getInstance().sendMessage(convMessage.serialize(sendNativeInvite), HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 
 		if (sendNativeInvite)
@@ -1770,17 +1857,33 @@ public class Utils
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.INVITE_SENT, null);
 
-		switch (whichScreen)
+		try
 		{
-		case FRIENDS_TAB:
-			Utils.sendUILogEvent(!isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK : HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK, contactInfo.getMsisdn());
-			break;
-		case UPDATES_TAB:
-			Utils.sendUILogEvent(!isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK : HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK, contactInfo.getMsisdn());
-			break;
-		case SMS_SECTION:
-			Utils.sendUILogEvent(!isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK : HikeConstants.LogEvent.REMIND_SMS_CLICK, contactInfo.getMsisdn());
-			break;
+			JSONObject md = new JSONObject();
+			String msisdn = contactInfo.getMsisdn();
+			
+			switch (whichScreen)
+			{
+			case FRIENDS_TAB:
+				md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK : HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK);				
+				break;
+			case UPDATES_TAB:
+				md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK : HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK);
+				break;
+			case SMS_SECTION:
+				md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK : HikeConstants.LogEvent.REMIND_SMS_CLICK);				
+				break;
+			}
+			
+			if(!TextUtils.isEmpty(msisdn))
+			{
+				md.put(HikeConstants.TO, msisdn);
+			}
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 	}
 
@@ -1856,6 +1959,8 @@ public class Utils
 			{
 				try
 				{
+					fileOutputStream.flush();
+					fileOutputStream.getFD().sync();
 					fileOutputStream.close();
 				}
 				catch (IOException e)
@@ -1939,6 +2044,8 @@ public class Utils
 			{
 				try
 				{
+					fileOutputStream.flush();
+					fileOutputStream.getFD().sync();
 					fileOutputStream.close();
 				}
 				catch (IOException e)
@@ -2190,7 +2297,7 @@ public class Utils
 		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		int ringerMode = audioManager.getRingerMode();
 
-		if (ringerMode != AudioManager.RINGER_MODE_SILENT)
+		if (ringerMode != AudioManager.RINGER_MODE_SILENT && !Utils.isUserInAnyTypeOfCall(context))
 		{
 			Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 			if (vibrator != null)
@@ -2383,7 +2490,7 @@ public class Utils
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
 			object.put(HikeConstants.DATA, data);
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
@@ -2495,25 +2602,29 @@ public class Utils
 
 	public static int getResolutionId()
 	{
-		switch (densityDpi)
+		if(densityDpi > 480)
 		{
-		case 120:
-			return HikeConstants.LDPI_ID;
-		case 160:
-			return HikeConstants.MDPI_ID;
-		case 240:
-			return HikeConstants.HDPI_ID;
-		case 320:
+			return HikeConstants.XXXHDPI_ID;
+		}
+		else if(densityDpi > 320)
+		{
+			return HikeConstants.XXHDPI_ID;
+		}
+		else if(densityDpi > 240)
+		{
 			return HikeConstants.XHDPI_ID;
-		case 213:
+		}
+		else if(densityDpi > 160)
+		{
 			return HikeConstants.HDPI_ID;
-		case 480:
-			return HikeConstants.XXHDPI_ID;
-		case 640:
-		case 400:
-			return HikeConstants.XXHDPI_ID;
-		default:
-			return HikeConstants.HDPI_ID;
+		}
+		else if(densityDpi > 120)
+		{
+			return HikeConstants.MDPI_ID;
+		}
+		else
+		{
+			return HikeConstants.LDPI_ID;
 		}
 	}
 
@@ -2528,11 +2639,14 @@ public class Utils
 		}
 		fos.write(b);
 		fos.flush();
+		fos.getFD().sync();
 		fos.close();
 	}
 
 	public static void setupFormattedTime(TextView tv, long timeElapsed)
 	{
+		if(timeElapsed < 0)
+			return;
 		int totalSeconds = (int) (timeElapsed);
 		int minutesToShow = (int) (totalSeconds / 60);
 		int secondsToShow = totalSeconds % 60;
@@ -2553,10 +2667,11 @@ public class Utils
 
 	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded)
 	{
-		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true, false);
+		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true, false, true);
 	}
 
-	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen, boolean dueToConnect)
+	public static void appStateChanged(Context context, boolean resetStealth,
+			boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen, boolean dueToConnect, boolean toLog)
 	{
 		if (!isUserAuthenticated(context))
 		{
@@ -2584,7 +2699,7 @@ public class Utils
 			}
 		}
 
-		sendAppState(context, requestBulkLastSeen, dueToConnect);
+		sendAppState(context, requestBulkLastSeen, dueToConnect, toLog);
 
 		if (resetStealth)
 		{
@@ -2604,7 +2719,7 @@ public class Utils
 		return ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
 	}
 
-	private static void sendAppState(Context context, boolean requestBulkLastSeen, boolean dueToConnect)
+	private static void sendAppState(Context context, boolean requestBulkLastSeen, boolean dueToConnect, boolean toLog)
 	{
 		JSONObject object = new JSONObject();
 
@@ -2624,17 +2739,25 @@ public class Utils
 				object.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
+				if(toLog)
+				{
+					HAManager.getInstance().recordSessionStart();
+				}
 			}
 			else if (!dueToConnect)
 			{
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_BACKGROUNDED, null);
+				if(toLog)
+				{
+					HAManager.getInstance().recordSessionEnd();
+				}
 			}
 			else
 			{
 				return;
 			}
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH_LOW, object);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ZERO);
 		}
 		catch (JSONException e)
 		{
@@ -2887,104 +3010,98 @@ public class Utils
 
 	public static void sendLogEvent(JSONObject data)
 	{
+		sendLogEvent(data, null, null);
+	}
+	
+	public static void sendLogEvent(JSONObject data, String subType, String toMsisdn){
+
 		JSONObject object = new JSONObject();
 		try
 		{
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
 			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-
+			if(!TextUtils.isEmpty(subType)){
+				JSONObject md = new JSONObject();
+				md.put(HikeConstants.SUB_TYPE, subType);
+				data.put(HikeConstants.METADATA, md);
+			}
+			if(!TextUtils.isEmpty(toMsisdn))
+			{
+				object.put(HikeConstants.TO, toMsisdn);
+			}
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 		catch (JSONException e)
 		{
 			Logger.w("LogEvent", e);
 		}
+	
 	}
 
 	private static void sendSMSSyncLogEvent(boolean syncing)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.PULL_OLD_SMS, syncing);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LogEvent", e);
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 
 	}
 
 	public static void sendDefaultSMSClientLogEvent(boolean defaultClient)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.UNIFIED_INBOX, defaultClient);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LogEvent", e);
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 
 	}
 
 	public static void sendFreeSmsLogEvent(boolean freeSmsOn)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.FREE_SMS_ON, freeSmsOn);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LogEvent", e);
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 
 	}
 
 	public static void sendNativeSmsLogEvent(boolean nativeSmsOn)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.NATIVE_SMS, nativeSmsOn);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LogEvent", e);
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 
 	}
@@ -3110,6 +3227,18 @@ public class Utils
 		else
 		{
 			asyncTask.execute(hikeHttpRequests);
+		}
+	}
+	
+	public static void executeAuthSDKTask(AuthSDKAsyncTask argTask, HttpRequestBase... requests)
+	{
+		if (isHoneycombOrHigher())
+		{
+			argTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requests);
+		}
+		else
+		{
+			argTask.execute(requests);
 		}
 	}
 
@@ -3269,80 +3398,38 @@ public class Utils
 		Toast.makeText(activity, R.string.shortcut_created, Toast.LENGTH_SHORT).show();
 	}
 
-	public static void onCallClicked(Activity activity, final String mContactNumber)
+	public static boolean isVoipActivated(Context context)
 	{
-		final Activity mActivity = activity;
-		final SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		int voipActivated = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.VOIP_ACTIVATED, 0);
+		return (voipActivated == 0)? false : true;
+	}
 
-		if (!settings.getBoolean(HikeConstants.NO_CALL_ALERT_CHECKED, false))
+	public static void onCallClicked(Context context, final String mContactNumber, VoIPUtils.CallSource source)
+	{
+		if(!isUserOnline(context))
 		{
-			final Dialog dialog = new Dialog(activity, R.style.Theme_CustomDialog);
-			dialog.setContentView(R.layout.operator_alert_popup);
-			dialog.setCancelable(true);
-
-			TextView header = (TextView) dialog.findViewById(R.id.header);
-			TextView body = (TextView) dialog.findViewById(R.id.body_text);
-			Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
-			Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
-
-			header.setText(R.string.call_not_free_head);
-			body.setText(R.string.call_not_free_body);
-
-			btnCancel.setText(R.string.cancel);
-			btnOk.setText(R.string.call);
-
-			CheckBox checkBox = (CheckBox) dialog.findViewById(R.id.body_checkbox);
-			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener()
-			{
-
-				@Override
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-				{
-					Editor editor = settings.edit();
-					editor.putBoolean(HikeConstants.NO_CALL_ALERT_CHECKED, isChecked);
-					editor.commit();
-				}
-			});
-			checkBox.setText(activity.getResources().getString(R.string.not_show_call_alert_msg));
-
-			btnOk.setOnClickListener(new OnClickListener()
-			{
-
-				@Override
-				public void onClick(View v)
-				{
-					Utils.logEvent(mActivity, HikeConstants.LogEvent.MENU_CALL);
-					Intent callIntent = new Intent(Intent.ACTION_CALL);
-					callIntent.setData(Uri.parse("tel:" + mContactNumber));
-					mActivity.startActivity(callIntent);
-					dialog.dismiss();
-				}
-			});
-
-			btnCancel.setOnClickListener(new OnClickListener()
-			{
-
-				@Override
-				public void onClick(View v)
-				{
-					dialog.dismiss();
-				}
-			});
-
-			dialog.show();
+			Toast.makeText(context, context.getString(R.string.voip_offline_error), Toast.LENGTH_SHORT).show();
+			return;
 		}
-		else
-		{
-			Utils.logEvent(activity, HikeConstants.LogEvent.MENU_CALL);
-			Intent callIntent = new Intent(Intent.ACTION_CALL);
-			callIntent.setData(Uri.parse("tel:" + mContactNumber));
-			activity.startActivity(callIntent);
-		}
+		Intent i = new Intent(context, VoIPService.class);
+		i.putExtra("action", "outgoingcall");
+		i.putExtra("msisdn", mContactNumber);
+		i.putExtra("call_source", source.ordinal());
+		context.startService(i);
 	}
 
 	public static String getFormattedDateTimeFromTimestamp(long milliSeconds, Locale current)
 	{
 		String dateFormat = "dd/MM/yyyy hh:mm:ss a";
+		DateFormat formatter = new SimpleDateFormat(dateFormat, current);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(milliSeconds * 1000);
+		return formatter.format(calendar.getTime());
+	}
+	
+	public static String getFormattedDateTimeWOSecondsFromTimestamp(long milliSeconds, Locale current)
+	{
+		String dateFormat = "dd/MM/yyyy hh:mm a";
 		DateFormat formatter = new SimpleDateFormat(dateFormat, current);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(milliSeconds * 1000);
@@ -3387,23 +3474,17 @@ public class Utils
 	{
 		try
 		{
-			JSONObject data = new JSONObject();
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.CRC_EVENT);
-
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.FILE_NAME, fileName);
 			metadata.put(HikeConstants.FILE_KEY, fileKey);
 			metadata.put(HikeConstants.MD5_HASH, md5);
 			metadata.put(HikeConstants.FILE_SIZE, recBytes);
 			metadata.put(HikeConstants.DOWNLOAD, downloading);
-
-			data.put(HikeConstants.METADATA, metadata);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.CRC_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LE", "Invalid json");
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "Invalid json");
 		}
 	}
 
@@ -3412,6 +3493,8 @@ public class Utils
 		Editor prefEditor = prefs.edit();
 		prefEditor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
 		prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
+		prefEditor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+		prefEditor.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
 		prefEditor.commit();
 	}
 
@@ -3863,122 +3946,7 @@ public class Utils
 		context.startActivity(i);
 	}
 
-	public static boolean isPlayTickSound(Context context)
-	{
-		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-		return tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !am.isMusicActive()
-				&& (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
-	}
-
-	/**
-	 * we are using stream_ring so that use can control volume from mobile and this stream is not in use when user is chatting and vice-versa
-	 * 
-	 * @param context
-	 * @param soundId
-	 */
-	public static void playSoundFromRaw(Context context, int soundId)
-	{
-
-		Logger.i("sound", "playing sound " + soundId);
-		MediaPlayer mp = new MediaPlayer();
-		mp.setAudioStreamType(AudioManager.STREAM_SYSTEM);
-		Resources res = context.getResources();
-		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
-
-		try
-		{
-			mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-			afd.close();
-
-			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-			{
-
-				@Override
-				public void onCompletion(MediaPlayer mp)
-				{
-					mp.release();
-
-				}
-			});
-			mp.prepare();
-			mp.start();
-
-		}
-		catch (IllegalArgumentException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-		catch (IllegalStateException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-	}
-
-	public static void playDefaultNotificationSound(Context context)
-	{
-		try
-		{
-			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-			Ringtone r = RingtoneManager.getRingtone(context, notification);
-			r.play();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
 	
-	/**
-	 * Plays non-ducking sound from given Uri. Plays on {@link android.Media.AudioManager#STREAM_SYSTEM AudioManager.STREAM_SYSTEM} to enable non-ducking playback.
-	 * 
-	 * @param context
-	 * @param soundUri
-	 */
-	public static void playSound(Context context, Uri soundUri)
-	{
-		MediaPlayer mp = new MediaPlayer();
-		mp.setAudioStreamType(AudioManager.STREAM_SYSTEM);
-		try
-		{
-			mp.setDataSource(context, soundUri);
-
-			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-			{
-
-				@Override
-				public void onCompletion(MediaPlayer mp)
-				{
-					mp.release();
-				}
-			});
-			mp.prepare();
-			mp.start();
-
-		}
-		catch (IllegalArgumentException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-		catch (IllegalStateException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			mp.release();
-		}
-	}
 
 	public static final void cancelScheduledStealthReset(Context context)
 	{
@@ -4873,39 +4841,282 @@ public class Utils
 		return ctx.getResources().getConfiguration().orientation;
 	}
 	
+	/**
+	 * Fetches the network connection using connectivity manager
+	 * @param context
+	 * @return
+	 * <li>-1 in case of no network</li>
+	 * <li> 0 in case of unknown network</li>
+	 * <li> 1 in case of wifi</li>
+	 * <li> 2 in case of 2g</li>
+	 * <li> 3 in case of 3g</li>
+	 * <li> 4 in case of 4g</li>
+	 *     
+	 */
+	public static short getNetworkType(Context context)
+	{
+		int networkType = -1;
+		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		// Contains all the information about current connection
+		NetworkInfo info = cm.getActiveNetworkInfo();
+		if (info != null)
+		{
+			if (!info.isConnected())
+				return -1;
+			// If device is connected via WiFi
+			if (info.getType() == ConnectivityManager.TYPE_WIFI)
+				return 1; // return 1024 * 1024;
+			else
+				networkType = info.getSubtype();
+		}
+
+		// There are following types of mobile networks
+		switch (networkType)
+		{
+		case TelephonyManager.NETWORK_TYPE_HSUPA: // ~ 1-23 Mbps
+		case TelephonyManager.NETWORK_TYPE_LTE: // ~ 10+ Mbps // API level 11
+		case TelephonyManager.NETWORK_TYPE_HSPAP: // ~ 10-20 Mbps // API level 13
+		case TelephonyManager.NETWORK_TYPE_EVDO_B: // ~ 5 Mbps // API level 9
+			return 4;
+		case TelephonyManager.NETWORK_TYPE_EVDO_0: // ~ 400-1000 kbps
+		case TelephonyManager.NETWORK_TYPE_EVDO_A: // ~ 600-1400 kbps
+		case TelephonyManager.NETWORK_TYPE_HSDPA: // ~ 2-14 Mbps
+		case TelephonyManager.NETWORK_TYPE_HSPA: // ~ 700-1700 kbps
+		case TelephonyManager.NETWORK_TYPE_UMTS: // ~ 400-7000 kbps
+		case TelephonyManager.NETWORK_TYPE_EHRPD: // ~ 1-2 Mbps // API level 11
+			return 3;
+		case TelephonyManager.NETWORK_TYPE_1xRTT: // ~ 50-100 kbps
+		case TelephonyManager.NETWORK_TYPE_CDMA: // ~ 14-64 kbps
+		case TelephonyManager.NETWORK_TYPE_EDGE: // ~ 50-100 kbps
+		case TelephonyManager.NETWORK_TYPE_GPRS: // ~ 100 kbps
+		case TelephonyManager.NETWORK_TYPE_IDEN: // ~25 kbps // API level 8
+			return 2;
+		case TelephonyManager.NETWORK_TYPE_UNKNOWN:
+		default:
+			return 0;
+		}
+	}
+
 	public static void sendDetailsAfterSignup(Context context, boolean upgrade, boolean sendBot)
 	{
 		sendDeviceDetails(context, upgrade, sendBot);
 		SharedPreferences accountPrefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP, false))
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FB_CLICK);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 		}
 		if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) > -1)
 		{
-			if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+			try
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+				JSONObject metadata = new JSONObject();
+				
+				if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+				{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+				}
+				else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+				{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+				}
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+	
+				Editor editor = accountPrefs.edit();
+				editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
+				editor.commit();
 			}
-			else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+			catch(JSONException e)
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 			}
-			Editor editor = accountPrefs.edit();
-			editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
-			editor.commit();
 		}
 	}
 
 	private static void sendDeviceDetails(Context context, boolean upgrade, boolean sendBot)
 	{
-		JSONObject obj = getDeviceDetails(context);
-		if (obj != null)
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-		}
+		recordDeviceDetails(context);
 		requestAccountInfo(upgrade, sendBot);
 		sendLocaleToServer(context);
 	}
+	
+	/**
+	 * @param calendar
+	 * @param hour   hour value in 24 hour format eg. 2PM = 14
+	 * @param minutes
+	 * @param seconds
+	 */
+	public static long getTimeInMillis(Calendar calendar, int hour, int minutes, int seconds, int milliseconds)
+	{
+		calendar.set(Calendar.HOUR_OF_DAY, hour);
+		calendar.set(Calendar.MINUTE, minutes);
+		calendar.set(Calendar.SECOND, seconds);
+		calendar.set(Calendar.MILLISECOND, milliseconds);
+		return calendar.getTimeInMillis();
+	}
+	public static void disableNetworkListner(Context context)
+	{
+		ComponentName mmComponentName = new ComponentName(context, ConnectionChangeReceiver.class);
 
+		context.getPackageManager().setComponentEnabledSetting(mmComponentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+
+	}
+
+	public static JSONObject getPostDeviceDetails(Context context)
+	{
+		String osVersion = Build.VERSION.RELEASE;
+		String devType = HikeConstants.ANDROID;
+		String os = HikeConstants.ANDROID;
+		String deviceVersion = Build.MANUFACTURER + " " + Build.MODEL;
+		String appVersion = "";
+		try
+		{
+			appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+		}
+		catch (NameNotFoundException e)
+		{
+			Logger.e("AccountUtils", "Unable to get app version");
+		}
+
+		TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		String deviceKey = manager.getDeviceId();
+
+		JSONObject data = new JSONObject();
+		try
+		{
+			data.put(HikeConstants.DEV_TYPE, devType);
+			data.put(HikeConstants.APP_VERSION, appVersion);
+			data.put(HikeConstants.LogEvent.OS, os);
+			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
+			data.put(HikeConstants.DEVICE_VERSION, deviceVersion);
+			data.put(HikeConstants.DEVICE_KEY, deviceKey);
+			Utils.addCommonDeviceDetails(data, context);
+		}
+		catch (JSONException e)
+		{
+			Logger.e("Exception", "Invalid JSON", e);
+		}
+		return data;
+	}
+
+	/**
+	 * Checks if is user signed up. Works with application context.
+	 * 
+	 * @return true, if is user signed up
+	 */
+	public static boolean requireAuth(Context appContext, boolean allowOpeningActivity)
+	{
+		appContext = appContext.getApplicationContext();
+
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(appContext);
+
+		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
+		{
+			if (allowOpeningActivity)
+			{
+				IntentManager.openWelcomeActivity(appContext);
+			}
+			return false;
+		}
+
+		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
+		{
+			if (allowOpeningActivity)
+			{
+				IntentManager.openSignupActivity(appContext);
+			}
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * Tells if User is on Telephonic/Audio/Vedio/Voip Call
+	 * @param context
+	 * @return
+	 */
+	public static boolean isUserInAnyTypeOfCall(Context context) {
+		
+		AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        
+		boolean callMode = manager.getMode() == AudioManager.MODE_IN_COMMUNICATION 
+				|| manager.getMode() == AudioManager.MODE_IN_CALL;
+        
+		return callMode;
+    } 
+	 /** Fetches the network connection using connectivity manager
+	 * @param context
+	 * @return
+	 * <li>-1 in case of no network</li>
+	 * <li> 0 in case of unknown network</li>
+	 * <li> 1 in case of wifi</li>
+	 * <li> 2 in case of 2g</li>
+	 * <li> 3 in case of 3g</li>
+	 * <li> 4 in case of 4g</li>
+	 *     
+	 */
+	public static String getNetworkTypeAsString(Context context)
+	{
+		String networkType = "";
+		switch (getNetworkType(context))
+		{
+		case -1:
+			networkType = "off";
+			break;
+
+		case 0:
+			networkType = "unknown";
+			break;
+
+		case 1:
+			networkType = "wifi";
+			break;
+
+		case 2:
+			networkType = "2g";
+			break;
+
+		case 3:
+			networkType = "3g";
+			break;
+
+		case 4:
+			networkType = "4g";
+			break;
+
+		default:
+			break;
+		}
+		return networkType;
+	}
+
+	/**
+	 * Returns Data Consumed in KB
+	 * @param appId
+	 * @return
+	 */
+	public static long getTotalDataConsumed(int appId)
+	{
+		long received = TrafficStats.getUidRxBytes(appId);  //In KB
+        
+		long sent = TrafficStats.getUidTxBytes(appId);   //In KB
+        
+		if(received != TrafficStats.UNSUPPORTED
+				&& sent != TrafficStats.UNSUPPORTED)
+		{
+	        return received/(1024) + sent/(1024);
+		}
+		else
+		{
+			return TrafficsStatsFile.getTotalBytesManual(appId);  //In KB
+		}
+	}
 }

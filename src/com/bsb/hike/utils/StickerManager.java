@@ -41,12 +41,16 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.CustomStickerCategory;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.SingleStickerDownloadTask;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
@@ -193,7 +197,13 @@ public class StickerManager
 
 	public static final String STICKER_RES_ID = "stickerResId";
 	
-	private Map<String, StickerCategory> stickerCategoriesMap;
+	private static final String REMOVE_LEGACY_GREEN_DOTS = "removeLegacyGreenDots";
+	
+	private final Map<String, StickerCategory> stickerCategoriesMap;
+	
+	public static final int DEFAULT_POSITION = 3;
+
+	public static final String STICKER_FOLDER_NAMES_UPGRADE_DONE = "upgradeForStickerFolderNames";
 	
 	public FilenameFilter stickerFileFilter = new FilenameFilter()
 	{
@@ -208,8 +218,8 @@ public class StickerManager
 
 	private static SharedPreferences preferenceManager;
 
-	private static StickerManager instance;
-
+	private static volatile StickerManager instance;
+	
 	public static StickerManager getInstance()
 	{
 		if (instance == null)
@@ -262,6 +272,24 @@ public class StickerManager
 			{
 				StickerManager.getInstance().setStickerUpdateAvailable(DOGGY_CATEGORY, true);
 			}
+		}
+		
+		/**
+		 * This code path is used for removing green dot bug, in which even though there are no stickers to download, the green dot persists.
+		 * 
+		 * TODO : Remove this code flow after 3-4 release cycles.
+		 */
+		
+		if(!settings.getBoolean(StickerManager.REMOVE_LEGACY_GREEN_DOTS, false))
+		{
+			removeLegacyGreenDots();
+			settings.edit().putBoolean(StickerManager.REMOVE_LEGACY_GREEN_DOTS, true).commit();
+		}
+		
+		if(!settings.getBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, false))
+		{
+			updateStickerFolderNames();
+			settings.edit().putBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, true).commit();
 		}
 	}
 
@@ -512,17 +540,29 @@ public class StickerManager
 
 	public void saveCustomCategories()
 	{
-		saveSortedListForCategory(RECENT);
+		saveSortedListForCategory(StickerManager.RECENT);
 	}
 	
 	public void saveSortedListForCategory(String catId)
 	{
-		CustomStickerCategory customCategory = ((CustomStickerCategory) stickerCategoriesMap.get(catId));
-		if(customCategory == null)
+		StickerCategory customCategory = stickerCategoriesMap.get(catId);
+
+		if (customCategory == null)
 		{
 			return;
 		}
-		Set<Sticker> list = customCategory.getStickerSet();
+
+		/**
+		 * Putting an instance of check here to avoid ClassCastException.
+		 */
+
+		if (!(customCategory instanceof CustomStickerCategory))
+		{
+			Logger.d("StickerManager", "Inside saveSortedListforCategory : " + customCategory.getCategoryName() + " is not CustomStickerCategory");
+			return;
+		}
+
+		Set<Sticker> list = ((CustomStickerCategory) customCategory).getStickerSet();
 		try
 		{
 			if (list.size() == 0)
@@ -557,6 +597,8 @@ public class StickerManager
 				}
 			}
 			out.flush();
+			fileOut.flush();
+			fileOut.getFD().sync();
 			out.close();
 			fileOut.close();
 			long t2 = System.currentTimeMillis();
@@ -1069,7 +1111,7 @@ public class StickerManager
 		category.updateDownloadedStickersCount();
 		if(downloadSource == DownloadSource.SHOP || downloadSource == DownloadSource.SETTINGS)
 		{
-			category.setState(StickerCategory.NONE);
+			category.setState(StickerCategory.DONE_SHOP_SETTINGS);
 		}
 		else
 		{
@@ -1162,10 +1204,10 @@ public class StickerManager
 				{
 				case PALLATE_ICON_TYPE:
 				case PALLATE_ICON_SELECTED_TYPE:
-					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(categoryId, null);
+					StickerDownloadManager.getInstance().DownloadEnableDisableImage(categoryId, null);
 					break;
 				case PREVIEW_IMAGE_TYPE:
-					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(categoryId, null);
+					StickerDownloadManager.getInstance().DownloadStickerPreviewImage(categoryId, null);
 					break;
 				default:
 					break;
@@ -1228,7 +1270,7 @@ public class StickerManager
 			return;
 		}
 
-		StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
+		StickerDownloadManager.getInstance().DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
 		{
 
 			@Override
@@ -1321,7 +1363,8 @@ public class StickerManager
 	
 	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, Context context)
 	{
-		initialiseDownloadStickerTask(category, source, null, context);
+		DownloadType downloadType = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
+		initialiseDownloadStickerTask(category, source, downloadType, context);
 	}
 	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, DownloadType downloadType, Context context)
 	{
@@ -1332,11 +1375,7 @@ public class StickerManager
 		if(category.getTotalStickers() == 0 || category.getDownloadedStickersCount() < category.getTotalStickers())
 		{
 			category.setState(StickerCategory.DOWNLOADING);
-			if(downloadType== null)
-			{
-				downloadType = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
-			}
-			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, downloadType, source, null);
+			StickerDownloadManager.getInstance().DownloadMultipleStickers(category, downloadType, source, null);
 		}
 		saveCategoryAsVisible(category);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
@@ -1399,7 +1438,17 @@ public class StickerManager
 			if (!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STICKER_SETTING_CHECK_BOX_CLICKED, false))
 			{
 				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STICKER_SETTING_CHECK_BOX_CLICKED, true);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_CHECK_BOX_CLICKED);
+				
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_CHECK_BOX_CLICKED);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 			}
 		}
 		else
@@ -1407,8 +1456,213 @@ public class StickerManager
 			if (!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STICKER_SETTING_UNCHECK_BOX_CLICKED, false))
 			{
 				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STICKER_SETTING_UNCHECK_BOX_CLICKED, true);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_UNCHECK_BOX_CLICKED);
+				
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_UNCHECK_BOX_CLICKED);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 			}
 		}
 	}
+	
+	/**
+	 * This method is used for adding a new sticker category in pallete on the fly. The category is placed at a position in the pallete if specified, else at the end
+	 * 
+	 * @param categoryId
+	 * @param categoryName
+	 * @param stickerCount
+	 * @param categorySize
+	 * @param position
+	 */
+	public void addNewCategoryInPallete(StickerCategory stickerCategory)
+	{
+		if (stickerCategoriesMap.containsKey(stickerCategory.getCategoryId()))
+		{
+			/**
+			 * Discard the add packet.
+			 */
+			return;
+		}
+
+		boolean isCategoryInserted = HikeConversationsDatabase.getInstance().insertNewCategoryInPallete(stickerCategory);
+		/**
+		 * If isCategoryInserted is false, we simply return, since it's a duplicate category
+		 */
+		if (!isCategoryInserted)
+		{
+			return;
+		}
+
+		ArrayList<StickerCategory> updateCategories = new ArrayList<StickerCategory>();
+		/**
+		 * Incrementing the index of other categories by 1 to accommodate the new category in between
+		 */
+
+		for (StickerCategory category : stickerCategoriesMap.values())
+		{
+			if (category.getCategoryIndex() < stickerCategory.getCategoryIndex())
+			{
+				continue;
+			}
+
+			category.setCategoryIndex(category.getCategoryIndex() + 1);
+			updateCategories.add(category);
+		}
+
+		stickerCategoriesMap.put(stickerCategory.getCategoryId(), stickerCategory);
+		HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(updateCategories);
+		/**
+		 * Now download the Enable disable images as well as preview image
+		 */
+		StickerDownloadManager.getInstance().DownloadEnableDisableImage(stickerCategory.getCategoryId(), null);
+		StickerDownloadManager.getInstance().DownloadStickerPreviewImage(stickerCategory.getCategoryId(), null);
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
+
+	}
+	
+	/**
+	 * To cater to a corner case, where server sent an update available packet, and before a user could download the new updates for a pack, the user received the new stickers. In
+	 * that case, the updateAvailable flag still remains true for that category. Thus, we are removing it in case the count of stickers in folder == the actual stickers.
+	 * 
+	 * This method updates the sticker category object in memory as well as database.
+	 * 
+	 * Called from {@link SingleStickerDownloadTask#call()} if a sticker is downloaded successfully
+	 */
+
+	public void checkAndRemoveUpdateFlag(String categoryId)
+	{
+		StickerCategory category = getCategoryForId(categoryId);
+
+		if (category == null)
+		{
+			category = HikeConversationsDatabase.getInstance().getStickerCategoryforId(categoryId);
+		}
+
+		if (category == null)
+		{
+			Logger.wtf(TAG, "No category found in db. Which sticker was being downloaded  : ? " + categoryId);
+			return;
+		}
+
+		/**
+		 * Proceeding only if a valid category is found
+		 */
+		
+		if (shouldRemoveGreenDot(category))
+		{
+			category.setUpdateAvailable(false);
+			
+			if(category.getState() == StickerCategory.UPDATE)
+			{
+				category.setState(StickerCategory.NONE);
+			}
+			
+			HikeConversationsDatabase.getInstance().saveUpdateFlagOfStickerCategory(category);
+		}
+	}
+	
+	/**
+	 * Checks if category has updateAvailable flag as true and the total count of downloaded stickers in folder is same as those present in the category.
+	 * 
+	 * @param category
+	 * @return
+	 */
+	private boolean shouldRemoveGreenDot(StickerCategory category)
+	{
+		if (category.isUpdateAvailable())
+		{
+			int stickerListSize = category.getStickerList().size();
+
+			if (stickerListSize > 0 && stickerListSize == category.getTotalStickers())
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
+	/**
+	 * This method is used to remove legacy green dots where needed
+	 */
+	
+	private void removeLegacyGreenDots()
+	{
+		List<StickerCategory> myStickersList = getMyStickerCategoryList();
+		ArrayList<StickerCategory> updatedList = new ArrayList<StickerCategory>();
+
+		if (myStickersList != null)
+		{
+			for (StickerCategory stickerCategory : myStickersList)
+			{
+				if (shouldRemoveGreenDot(stickerCategory))
+				{
+					stickerCategory.setUpdateAvailable(false);
+					updatedList.add(stickerCategory);
+				}
+			}
+			
+			if (updatedList.size() > 0)
+			{
+				HikeConversationsDatabase.getInstance().saveUpdateFlagOfStickerCategory(updatedList);
+			}
+		}
+	}
+	
+	/**
+	 * This method is to update our sticker folder names from large/small to stickers_l and stickers_s.
+	 * This is being done because some cleanmaster was cleaning large named folder content 
+	 */
+	public void updateStickerFolderNames()
+	{
+		File dir = context.getExternalFilesDir(null);
+		if (dir == null)
+		{
+			return;
+		}
+		String rootPath = dir.getPath() + HikeConstants.STICKERS_ROOT;
+		File stickersRoot = new File(rootPath);
+
+		if (!stickersRoot.exists() || !stickersRoot.canRead())
+		{
+			Logger.d("StickerManager", "sticker root doesn't exit or is not readable");
+			return;
+		}
+
+		File[] files = stickersRoot.listFiles();
+
+		if (files == null)
+		{
+			Logger.d("StickerManager", "sticker root is not a directory");
+			return;
+		}
+
+		// renaming large/small folders for all categories
+		for (File categoryRoot : files)
+		{
+			File[] categoryAssetFiles = categoryRoot.listFiles();
+			for (File categoryAssetFile : categoryAssetFiles)
+			{
+				if (categoryAssetFile.getName().equals(HikeConstants.OLD_LARGE_STICKER_FOLDER_NAME))
+				{
+					Logger.d("StickerManager", "changing large file name for : " + categoryRoot.getName() + "category");
+					categoryAssetFile.renameTo(new File(categoryRoot + HikeConstants.LARGE_STICKER_ROOT));
+				}
+				else if (categoryAssetFile.getName().equals(HikeConstants.OLD_SMALL_STICKER_FOLDER_NAME))
+				{
+					Logger.d("StickerManager", "changing small file name for : " + categoryRoot.getName() + "category");
+					categoryAssetFile.renameTo(new File(categoryRoot + HikeConstants.SMALL_STICKER_ROOT));
+				}
+			}
+
+		}
+	}
+	
 }

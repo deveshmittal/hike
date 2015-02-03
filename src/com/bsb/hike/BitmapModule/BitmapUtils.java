@@ -99,6 +99,7 @@ public class BitmapUtils
 		}
 		fos.write(b);
 		fos.flush();
+		fos.getFD().sync();
 		fos.close();
 	}
 

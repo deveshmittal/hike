@@ -9,8 +9,10 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.StickerAdapter;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.smartImageLoader.StickerOtherIconLoader;
 import com.bsb.hike.utils.StickerManager;
 import com.viewpagerindicator.IconPageIndicator;
@@ -61,8 +63,14 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator
 			else if(iconAdapter instanceof StickerAdapter)
 			{
 				//We run this on background thread to make opening of pallate fast
-				loadImage(iconAdapter.getCategoryIdForIndex(i), false, icon, false);
+				StickerCategory stickerCategory = iconAdapter.getCategoryForIndex(i);
+				loadImage(stickerCategory.getCategoryId(), false, icon, false);
 				updateAvailable.setVisibility(iconAdapter.isUpdateAvailable(i) ? View.VISIBLE : View.GONE);
+				if(stickerCategory.getState() == StickerCategory.DONE_SHOP_SETTINGS)
+				{
+					updateAvailable.setVisibility(View.VISIBLE);
+					updateAvailable.setImageResource(R.drawable.ic_done_pallete_2);
+				}
 			}
 
 			stickerParent.setTag(i);
@@ -81,8 +89,7 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator
 	public interface StickerEmoticonIconPagerAdapter extends IconPagerAdapter
 	{
 		boolean isUpdateAvailable(int index);
-		String getCategoryIdForIndex(int index);
-		
+		StickerCategory getCategoryForIndex(int index);
 	}
 
 	private final OnClickListener mTabClickListener = new OnClickListener()
@@ -128,7 +135,7 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator
 		ImageView icon = (ImageView) child.findViewById(R.id.category_btn);
 		child.setSelected(isSelected);
 		//We run this on UI thread otherwise there is a visible lag
-		loadImage(iconAdapter.getCategoryIdForIndex(index), isSelected, icon, true);
+		loadImage(iconAdapter.getCategoryForIndex(index).getCategoryId(), isSelected, icon, true);
 	}
 
 	private void loadImage(String catId, boolean isSelected,  ImageView imageView, boolean runOnUiThread )
