@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
@@ -22,6 +23,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.AnalyticsSender;
 import com.bsb.hike.analytics.AnalyticsStore;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
@@ -2984,12 +2986,59 @@ public class MqttMessagesManager
 		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
 		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance(context).getData(key, "").equals(id);
 	}
-	
+
 	public void saveGCMMessage(JSONObject json)
 	{
 		try
 		{
 			Logger.i("gcmMqttMessage", "message received " + json.toString());
+			
+			// Check if the message is expired
+			String expiryTime = json.optString(HikeConstants.EXPIRE_AT);
+			
+			JSONObject pushAckJson = json.optJSONObject(HikeConstants.PUSHACK);
+			
+			if (!TextUtils.isEmpty(expiryTime))
+			{
+				try
+				{
+					long expiry = Long.valueOf(expiryTime);
+					long currentEpoch = System.currentTimeMillis();
+					currentEpoch = currentEpoch / 1000;
+					if (currentEpoch > expiry)
+					{
+						Logger.i("gcmMqttMessage", "message expired " + json.toString());
+						JSONObject metadata = new JSONObject();
+						metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.GCM_EXPIRED);
+						metadata.put(HikeConstants.EXPIRE_AT, expiryTime);
+
+						if (pushAckJson != null)
+						{
+							metadata.put(HikeConstants.PUSHACK, pushAckJson);
+						}
+
+						HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.GCM_ANALYTICS_CONTEXT, EventPriority.HIGH, metadata);
+
+						// Discard message since it has expired
+						return;
+					}
+				}
+				catch (NumberFormatException nfe)
+				{
+					nfe.printStackTrace();
+					// Assuming message is not expired
+				}
+			}
+
+			if (pushAckJson != null)
+			{
+				// Record push ack
+				JSONObject metadata = new JSONObject();
+				metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.GCM_PUSH_ACK);
+				metadata.put(HikeConstants.PUSHACK, pushAckJson);
+				HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.GCM_ANALYTICS_CONTEXT, EventPriority.HIGH, metadata);
+			}
+			
 			String type = json.optString(HikeConstants.TYPE);
 			if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type))
 			{

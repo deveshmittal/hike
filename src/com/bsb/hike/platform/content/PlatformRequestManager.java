@@ -49,29 +49,14 @@ class PlatformRequestManager
 	 * 
 	 * @param argRequest
 	 */
-	public static void addRequest(PlatformContentRequest argRequest)
+	public static void addRequest(final PlatformContentRequest argRequest)
 	{
-		// Log.d(TAG, "addRequest");
-		// int newTemplate = argRequest.getContentData().templateHashCode();
-		//
-		// for (Integer downloadingTemplate : currentDownloadingTemplates)
-		// {
-		// if (downloadingTemplate.intValue() == newTemplate)
-		// {
-		// Log.d(TAG, "template for request is being downloaded, set wait state");
-		//
-		// // Template for request is being downloaded
-		// setWaitState(argRequest);
-		// }
-		// }
-
-		requestQueue.add(argRequest);
-
 		PlatformContentLoader.getLoader().post(new Runnable()
 		{
 			@Override
 			public void run()
 			{
+				requestQueue.add(argRequest); 
 				processNextRequest();
 			}
 		});
@@ -143,42 +128,57 @@ class PlatformRequestManager
 		setState(argRequest, PlatformContentRequest.STATE_WAIT);
 	}
 
-	public static synchronized void setReadyState(PlatformContentRequest argRequest)
+	public static synchronized void setReadyState(final PlatformContentRequest argRequest)
 	{
-		setState(argRequest, PlatformContentRequest.STATE_READY);
-		processNextRequest();
+		PlatformContentLoader.getLoader().post(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				setState(argRequest, PlatformContentRequest.STATE_READY);
+				processNextRequest();
+			}
+		});
 	}
 
-	public static boolean remove(PlatformContentRequest argRequest)
+	public static void remove(final PlatformContentRequest argRequest)
 	{
-		if (argRequest == null)
-		{
-			return false;
-		}
-
-		argRequest.setState(PlatformContentRequest.STATE_CANCELLED);
-
-		Log.d(TAG, "remove request - " + argRequest.getContentData().getContentJSON());
-		
-		getCurrentDownloadingTemplates().clear();
-
-		boolean status = requestQueue.remove(argRequest);
 
 		PlatformContentLoader.getLoader().post(new Runnable()
 		{
 			@Override
 			public void run()
 			{
+
+				if (argRequest == null)
+				{
+					return;
+				}
+
+				argRequest.setState(PlatformContentRequest.STATE_CANCELLED);
+
+				Log.d(TAG, "remove request - " + argRequest.getContentData().getContentJSON());
+
+				getCurrentDownloadingTemplates().clear();
+
+				requestQueue.remove(argRequest);
+
 				processNextRequest();
 			}
 		});
 
-		return status;
 	}
 
-	public static void reportFailure(PlatformContentRequest argRequest, ErrorCode error)
+	public static void reportFailure(final PlatformContentRequest argRequest, final ErrorCode error)
 	{
-		argRequest.getListener().onFailure(error);
+		PlatformContentLoader.getLoader().post(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				argRequest.getListener().onFailure(error);
+			}
+		});
 	}
 
 	public static void removeAll()

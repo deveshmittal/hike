@@ -1,5 +1,6 @@
 package com.bsb.hike.ui.fragments;
 
+import com.bsb.hike.platform.HikePlatformConstants;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -504,6 +505,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 		}
 
+        if (conv.isBotConv())
+        {
+            conv.analyticsForBots(HikePlatformConstants.BOT_LONG_PRESS, AnalyticsConstants.LONG_PRESS_EVENT);
+        }
+
 		final int stealthType = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 
 		if (stealthType == HikeConstants.STEALTH_ON || stealthType == HikeConstants.STEALTH_ON_FAKE)
@@ -566,6 +572,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				String option = options[which];
 				if (getString(R.string.shortcut).equals(option))
 				{
+                    if (conv.isBotConv())
+                    {
+                        conv.analyticsForBots(HikePlatformConstants.BOT_ADD_SHORTCUT, AnalyticsConstants.CLICK_EVENT);
+                    }
 					Utils.logEvent(getActivity(), HikeConstants.LogEvent.ADD_SHORTCUT);
 					Utils.createShortcut(getSherlockActivity(), conv);
 				}
@@ -585,6 +595,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
 							Utils.executeConvAsyncTask(task, conv);
 							deleteConfirmDialog.dismiss();
+                            if (conv.isBotConv())
+                            {
+                                conv.analyticsForBots(HikePlatformConstants.BOT_DELETE_CHAT, AnalyticsConstants.CLICK_EVENT);
+                            }
 						}
 					};
 
@@ -618,6 +632,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(getSherlockActivity(), ConversationFragment.this);
 					Utils.executeConvAsyncTask(task, conv);
+                    if (conv.isBotConv())
+                    {
+                        conv.analyticsForBots(HikePlatformConstants.BOT_EMAIL_CONVERSATION, AnalyticsConstants.CLICK_EVENT);
+                    }
 				}
 				else if (getString(R.string.deleteconversations).equals(option))
 				{
@@ -627,10 +645,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				else if (getString(R.string.viewcontact).equals(option))
 				{
 					viewContacts(conv);
+                    if (conv.isBotConv())
+                    {
+                        conv.analyticsForBots(HikePlatformConstants.BOT_VIEW_PROFILE, AnalyticsConstants.CLICK_EVENT);
+                    }
 				}
 				else if (getString(R.string.clear_whole_conversation).equals(option))
 				{
 					clearConversation(conv);
+                    if (conv.isBotConv())
+                    {
+                        conv.analyticsForBots(HikePlatformConstants.BOT_CLEAR_CONVERSATION,  AnalyticsConstants.CLICK_EVENT);
+                    }
 				}
 				else if (getString(R.string.add_to_contacts).equals(option))
 				{

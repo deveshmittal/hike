@@ -64,6 +64,12 @@ public class AnalyticsConstants
 
 	public static String CLICK_EVENT = "click";
 
+    public static String MICROAPP_UI_EVENT = "muiEvent";
+
+    public static String MICROAPP_NON_UI_EVENT = "mNonUiEvent";
+
+    public static String LONG_PRESS_EVENT = "longClick";
+
 	public static String SUB_TYPE = "st";
 
 	public static String EVENT_TYPE = "et";
@@ -71,6 +77,10 @@ public class AnalyticsConstants
 	public static String EVENT_KEY = "ek";
 
 	public static String TO = "to";
+
+    public static String ORIGIN = "org";
+
+    public static String UNREAD_COUNT = "uc";
 
 	public static final String ANALYTICS = "analytics";
 
@@ -89,6 +99,8 @@ public class AnalyticsConstants
 	public static final String CURRENT_TIME_STAMP = "cts";
 
 	public static final String EVENT_TAG_MOB = "mob";
+
+    public static final String EVENT_TAG_PLATFORM = "plf";
 
 	public static final String EVENT_TAG_CBS = "cbs";
 

@@ -10,7 +10,10 @@ import org.json.JSONObject;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.platform.HikePlatformConstants;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -463,4 +466,19 @@ public class Conversation implements Comparable<Conversation>
 			isMuted = (byte) (mute ? 1 : 0);
 		}
 	}
+
+    public void analyticsForBots(String key,  String subType)
+    {
+        JSONObject json = new JSONObject();
+        try {
+            json.put(AnalyticsConstants.EVENT_KEY, key);
+            json.put(AnalyticsConstants.ORIGIN, HikePlatformConstants.CONVERSATION_FRAGMENT);
+            json.put(AnalyticsConstants.UNREAD_COUNT, getUnreadCount());
+            json.put(HikeConstants.MSISDN, getMsisdn());
+            HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.UI_EVENT, subType, json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
 }
