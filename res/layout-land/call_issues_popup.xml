@@ -7,11 +7,11 @@
     android:background="@drawable/bg_voip_ftue_popup">
 
 	<LinearLayout
-	    android:layout_width="280dp"
-	    android:layout_height="344dp"
+	    android:layout_width="432dp"
+	    android:layout_height="240dp"
 	    android:orientation="vertical"
 	    android:layout_gravity="center"
-	    android:paddingTop="24dp"
+	    android:paddingTop="12dp"
 	    android:gravity="center" >
 	
 		<com.bsb.hike.view.CustomFontTextView
@@ -41,10 +41,11 @@
 		    android:id="@+id/issues_container"
 		    android:layout_width="match_parent"
 		    android:layout_height="wrap_content"
-		    android:orientation="horizontal"
+		    android:orientation="vertical"
 		    android:paddingLeft="23dp"
 		    android:paddingRight="23dp"
-		    android:layout_marginTop="24dp">
+		    android:layout_marginTop="24dp"
+		    android:stretchColumns="*">
 	
 		    <TableRow
 		        android:id="@+id/issues_row1">
@@ -76,8 +77,6 @@
 			        android:textStyle="italic"
 			        android:textColor="@color/call_issues"
 			        android:tag="noiseI"
-			        android:layout_marginRight="24dp"
-			        android:layout_marginLeft="24dp"
 			        android:scaleType="center" />
 		
 				<com.bsb.hike.view.CustomFontButton
@@ -94,11 +93,7 @@
 			        android:tag="hearI"
 			        android:background="@null"
 			        android:scaleType="center" />	
-			</TableRow>
-		
-			<TableRow
-			    android:id="@+id/issues_row2"
-		    	android:layout_marginTop="24dp">
+
 				<com.bsb.hike.view.CustomFontButton
 			        android:id="@+id/issue_call_drop"
 			        android:layout_width="0dp"
@@ -112,7 +107,6 @@
 			        android:textColor="@color/call_issues"
 			        android:tag="dropI"
 			        android:background="@null"
-			        android:layout_marginRight="24dp"
 			        android:scaleType="center" />
 		
 				<com.bsb.hike.view.CustomFontButton
@@ -128,7 +122,6 @@
 			        android:textStyle="italic"
 			        android:textColor="@color/call_issues"
 			        android:tag="netI"
-			        android:layout_marginRight="24dp"
 			        android:scaleType="center" />
 		
 				<com.bsb.hike.view.CustomFontButton
@@ -159,13 +152,14 @@
 		<com.bsb.hike.view.CustomFontButton
 	        android:id="@+id/call_issues_submit"
 	        android:layout_width="match_parent"
-	        android:layout_height="48dp"
+	        android:layout_height="0dp"
+	        android:layout_weight="1"
 	        android:layout_gravity="bottom"
 	        android:text="@string/report_issue"
-	        android:textSize="13dp"
-	        android:background="@null"
 	        android:gravity="center"
+	        android:textSize="13dp"
 	        android:textStyle="bold"
+	        android:background="@null"
 	        android:textColor="@color/call_rate_submit" />
 	</LinearLayout>
 </LinearLayout>
