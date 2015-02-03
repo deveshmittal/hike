@@ -5087,12 +5087,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
         if (convMessage.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT)
         {
-            analyticsForBots(HikePlatformConstants.BOT_CHAT_THEME_PICKER, HikeConstants.ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE, AnalyticsConstants.CLICK_EVENT, null);
+            analyticsForBots(HikePlatformConstants.CARD_DELETE, HikeConstants.ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE, AnalyticsConstants.CLICK_EVENT, null);
         }
 
         if (convMessage.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
         {
-            analyticsForBots(HikePlatformConstants.BOT_CHAT_THEME_PICKER, HikeConstants.ConvMessagePacketKeys.WEB_CONTENT_TYPE, AnalyticsConstants.CLICK_EVENT, null);
+            analyticsForBots(HikePlatformConstants.CARD_DELETE, HikeConstants.ConvMessagePacketKeys.WEB_CONTENT_TYPE, AnalyticsConstants.CLICK_EVENT, null);
         }
 
 	}
@@ -7983,6 +7983,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				JSONObject metadata = new JSONObject();
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FORWARD_MSG);
+                metadata.put(HikeConstants.MSISDN, mContactNumber);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 			}
 			catch(JSONException e)
