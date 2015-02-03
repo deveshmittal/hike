@@ -41,6 +41,25 @@ public interface HikePlatformConstants
 	String CRICKET_CHAT_THEME_ID = "39";
 	String CRICKET_PREF_NAME = "cricket_pref_name";
 
+    /**
+     * Analytics for Platform
+     */
+    public static final String BOT_LONG_PRESS = "bot_lp";
+    public static final String BOT_VIEW_PROFILE = "bot_vp";
+    public static final String BOT_ADD_SHORTCUT = "bot_as";
+    public static final String BOT_DELETE_CHAT = "bot_del";
+    public static final String BOT_CLEAR_CONVERSATION = "bot_clc";
+    public static final String BOT_EMAIL_CONVERSATION = "bot_emc";
+    public static final String CONVERSATION_FRAGMENT = "cf";
+    public static final String OVERFLOW_MENU = "om";
+    public static final String BOT_BLOCK_CHAT = "bot_blc";
+    public static final String BOT_UNBLOCK_CHAT = "bot_ublc";
+    public static final String BOT_MUTE_CHAT = "bot_muc";
+    public static final String BOT_UNMUTE_CHAT = "bot_umuc";
+    public static final String BOT_CHAT_THEME_PICKER = "bot_cht";
+    public static final String CARD_DELETE = "card_del";
+    public static final String ACTION_BAR = "ab";
+
 	public static final String PLATFORM_BRIDGE_NAME = "PlatformBridge";
 
 	public static final String CARD_DATA = "ld";
