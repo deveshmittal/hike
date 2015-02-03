@@ -143,26 +143,6 @@
                 android:visibility="gone" />
 
             <LinearLayout
-                android:id="@+id/last_seen_tip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="18dp"
-                android:visibility="gone" >
-
-                <include layout="@layout/tool_tip" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/emoticon_tip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:visibility="gone" >
-
-                <include layout="@layout/sticker_tool_tip" />
-            </LinearLayout>
-            
-            <LinearLayout
                 android:id="@+id/pin_tip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -170,18 +150,6 @@
                 android:visibility="gone" >
 
                 <include layout="@layout/pin_tool_tip" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/walkie_talkie_tip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="10dp"
-                android:visibility="gone" >
-
-                <include layout="@layout/tool_tip" />
             </LinearLayout>
 
             <LinearLayout
