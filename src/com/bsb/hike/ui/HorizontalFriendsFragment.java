@@ -155,6 +155,11 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     }
     
     private void addContactView(String msisdn, int index){
+    	ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
+    	addContactView(contactInfo, msisdn, index);
+    }
+    
+    private void addContactView(ContactInfo CI, String msisdn, int index){
     	if(!viewMap.containsKey(msisdn)){
     		View contactView = getLayoutInflater(null).inflate(R.layout.friends_horizontal_item,null);
     		contactView.setTag(msisdn);
@@ -170,10 +175,9 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 			{
 				iv.setImageDrawable(ContactManager.getInstance().getIcon(msisdn, true));
 			}
-        	ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
         	
-        	if(contactInfo != null)
-        		tv.setText(contactInfo.getFirstNameAndSurname());
+        	if(CI != null)
+        		tv.setText(CI.getFirstNameAndSurname());
         	else
         		tv.setText(msisdn);
         	viewStack.addView(contactView, index);
@@ -258,7 +262,7 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     	//count here means total non selected contacts
     	if(emptyCount == 0) return false;
     	changeDisplayString((maxShowListCount - preSelectedCount) - (emptyCount - 1));
-    	addContactView(contactInfo.getMsisdn(), index);
+    	addContactView(contactInfo, contactInfo.getMsisdn(), index);
     	scrollHorizontalView(maxShowListCount - emptyCount - 1, replaceView.getWidth());
     	viewStack.removeView(replaceView);
 		return true;
