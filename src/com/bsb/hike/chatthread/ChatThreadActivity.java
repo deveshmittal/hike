@@ -1,6 +1,7 @@
 package com.bsb.hike.chatthread;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import com.actionbarsherlock.view.Menu;
@@ -148,6 +149,13 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	{
 		chatThread.onStop();
 		super.onStop();
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig)
+	{
+		chatThread.onConfigurationChanged(newConfig);
+		super.onConfigurationChanged(newConfig);
 	}
 	
 	public String getContactNumber()
