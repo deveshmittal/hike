@@ -64,6 +64,10 @@ public class AnalyticsConstants
 
 	public static String CLICK_EVENT = "click";
 
+	public static String VIEW_EVENT = "view";
+
+	public static String ERROR_EVENT = "error";
+
     public static String MICROAPP_UI_EVENT = "muiEvent";
 
     public static String MICROAPP_NON_UI_EVENT = "mNonUiEvent";
