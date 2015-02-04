@@ -44,6 +44,7 @@ public interface HikePlatformConstants
     /**
      * Analytics for Platform
      */
+	public static final String BOT_OPEN = "bot_open";
     public static final String BOT_LONG_PRESS = "bot_lp";
     public static final String BOT_VIEW_PROFILE = "bot_vp";
     public static final String BOT_ADD_SHORTCUT = "bot_as";
