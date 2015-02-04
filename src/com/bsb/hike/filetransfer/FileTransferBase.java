@@ -167,6 +167,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(fss);
+			out.flush();
+			fileOut.flush();
+			fileOut.getFD().sync();
 			out.close();
 			fileOut.close();
 		}
@@ -184,6 +187,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(fss);
+			out.flush();
+			fileOut.flush();
+			fileOut.getFD().sync();
 			out.close();
 			fileOut.close();
 		}
@@ -201,6 +207,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(fss);
+			out.flush();
+			fileOut.flush();
+			fileOut.getFD().sync();
 			out.close();
 			fileOut.close();
 		}
@@ -218,6 +227,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(fss);
+			out.flush();
+			fileOut.flush();
+			fileOut.getFD().sync();
 			out.close();
 			fileOut.close();
 		}

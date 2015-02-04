@@ -1,5 +1,7 @@
 package com.bsb.hike.utils;
 
+import static com.bsb.hike.NUXConstants.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -14,13 +16,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.view.ViewDebug.FlagToString;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NUXConstants;
+import com.bsb.hike.NUXConstants.PushTypeEnum;
+import com.bsb.hike.NUXConstants.RewardTypeEnum;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.MultipleConvMessage;
@@ -31,9 +36,7 @@ import com.bsb.hike.models.NuxInviteFriends;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
-import com.bsb.hike.ui.HomeActivity;
-
-import static com.bsb.hike.NUXConstants.*;
+import com.bsb.hike.service.HikeMqttManagerNew;
 
 
 /**
@@ -48,7 +51,6 @@ public class NUXManager
 {
 	private static final NUXManager mmManager = new NUXManager();
 
-	
 
 	private HashSet<String> listNuxContacts;
 
@@ -392,7 +394,10 @@ public class NUXManager
 	private boolean isNUXValid()
 	{
 		NUXTaskDetails mmDetails = getNuxTaskDetailsPojo();
-		if (mmDetails.getMin() == 0 || mmDetails.getMax() == 0 || mmDetails.getMin() > mmDetails.getMax()||ContactManager.getInstance().getAllContacts().size()<mmDetails.getMin()||!Utils.isHoneycombOrHigher())
+	
+	Logger.d("ContactManager.getInstance()",ContactManager.getInstance().getAllContacts(true).size()+"");
+		
+		if (mmDetails.getMin() == 0 || mmDetails.getMax() == 0 || mmDetails.getMin() > mmDetails.getMax()||ContactManager.getInstance().getAllContacts(true).size()<mmDetails.getMin()||!Utils.isHoneycombOrHigher())
 		{
 			return false;
 		}
@@ -427,6 +432,10 @@ public class NUXManager
 			if (newTaskDetails.has(TD_MAX_CONTACTS))
 			{
 				task_details.put(TD_MAX_CONTACTS, newTaskDetails.getInt(TD_MAX_CONTACTS));
+			}
+			if(newTaskDetails.has(TD_PKT_CODE))
+			{
+				mprefs.saveData(TD_PKT_CODE, newTaskDetails.getLong(TD_PKT_CODE));
 			}
 		
 			mprefs.saveData(TASK_DETAILS, task_details.toString());
@@ -890,7 +899,7 @@ public class NUXManager
 			object.put(INVITE_ARRAY, mmArray);
 			root.put(HikeConstants.DATA, object);
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, root);
+			HikeMqttManagerNew.getInstance().sendMessage(root, HikeMqttManagerNew.MQTT_QOS_ONE);
 
 		}
 		catch (JSONException e)
@@ -1015,6 +1024,27 @@ public class NUXManager
 		}
 		return false;
 	}
+	
+	public void sendAnalytics(JSONObject metaData)
+	{
+		if (metaData != null)
+		{
+			try
+			{
+				metaData.put(TD_PKT_CODE, mprefs.getData(TD_PKT_CODE, 0l));
+				Logger.d("Analytics", metaData.toString());
+				HAManager.getInstance().record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, EventPriority.HIGH, metaData);
+			}
+			catch (JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+
+	}
+	
 	
 	/**
 	 * All these are testing functions will be removed afterwards.

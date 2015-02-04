@@ -89,8 +89,6 @@ public class HikePubSub implements Runnable
 
 	public static final String TYPING_CONVERSATION = "typingconv";
 
-	public static final String TOKEN_CREATED = "tokencreated";
-
 	/* sms credits have been modified */
 	public static final String SMS_CREDIT_CHANGED = "smscredits";
 
@@ -107,12 +105,6 @@ public class HikePubSub implements Runnable
 	public static final String MESSAGE_RECEIVED_FROM_SENDER = "messageReceivedFromSender";
 
 	public static final String MSG_READ = "msgRead";
-
-	/* publishes a message via mqtt to the server */
-	public static final String MQTT_PUBLISH = "serviceSend";
-
-	/* publishes a message via mqtt to the server with QoS 0 */
-	public static final String MQTT_PUBLISH_LOW = "serviceSendLow";
 
 	/* published when the app is asked to delete a message */
 	public static final String DELETE_MESSAGE = "deleteMessage";

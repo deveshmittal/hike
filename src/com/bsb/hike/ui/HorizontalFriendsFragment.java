@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +27,7 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NUXConstants;
@@ -32,6 +36,7 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
@@ -111,6 +116,7 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		{
 
 			showNextButton(true);
+        	sectionDisplayMessage.setText(R.string.nux_send_message);
 			nxtBtn.setText(nm.getNuxCustomMessagePojo().getButText());
 			//only when jumping from Compose Chat Activity
 			if(!TextUtils.isEmpty(selectedFriendsString))
@@ -154,6 +160,11 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     }
     
     private void addContactView(String msisdn, int index){
+    	ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
+    	addContactView(contactInfo, msisdn, index);
+    }
+    
+    private void addContactView(ContactInfo CI, String msisdn, int index){
     	if(!viewMap.containsKey(msisdn)){
     		View contactView = getLayoutInflater(null).inflate(R.layout.friends_horizontal_item,null);
     		contactView.setTag(msisdn);
@@ -169,10 +180,9 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 			{
 				iv.setImageDrawable(ContactManager.getInstance().getIcon(msisdn, true));
 			}
-        	ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
         	
-        	if(contactInfo != null)
-        		tv.setText(contactInfo.getFirstNameAndSurname());
+        	if(CI != null)
+        		tv.setText(CI.getFirstNameAndSurname());
         	else
         		tv.setText(msisdn);
         	viewStack.addView(contactView, index);
@@ -257,7 +267,7 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     	//count here means total non selected contacts
     	if(emptyCount == 0) return false;
     	changeDisplayString((maxShowListCount - preSelectedCount) - (emptyCount - 1));
-    	addContactView(contactInfo.getMsisdn(), index);
+    	addContactView(contactInfo, contactInfo.getMsisdn(), index);
     	scrollHorizontalView(maxShowListCount - emptyCount - 1, replaceView.getWidth());
     	viewStack.removeView(replaceView);
 		return true;
@@ -266,11 +276,8 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState)
 	{
+		Logger.d("UmangX","on Act Create called frag");
 		super.onActivityCreated(savedInstanceState);
-		if ((NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED))
-		{
-			KillActivity();
-		}
 	}
     
 	@Override
@@ -294,6 +301,17 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 
 			if (getActivity() instanceof ComposeChatActivity)
 			{
+				
+				try
+				{
+					JSONObject metaData=new JSONObject();
+					metaData.put(HikeConstants.EVENT_KEY,HikeConstants.LogEvent.NUX_FRNSEL_NEXT);
+					nm.sendAnalytics(metaData);
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
 				HashSet<String> contactsNux = new HashSet<String>(viewMap.keySet());
 				nm.startNuxCustomMessage(contactsNux.toString().replace("[", "").replace("]", ""), getActivity());
 
@@ -301,7 +319,28 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 			else if (getActivity() instanceof NuxSendCustomMessageActivity)
 			{
 				nm.sendMessage(contactsDisplayed, ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage());
-				
+				try
+				{
+					JSONObject metaData=new JSONObject();
+					metaData.put(HikeConstants.EVENT_KEY,HikeConstants.LogEvent.NUX_CUSMES_SEND);
+					boolean val = ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage().equals(nm.getNuxCustomMessagePojo().getCustomMessage());
+					metaData.put(NUXConstants.OTHER_STRING, val);
+					nm.sendAnalytics(metaData);
+					
+					JSONObject remind = new JSONObject();
+					remind.put(HikeConstants.TYPE, HikeConstants.NUX);
+					remind.put(HikeConstants.SUB_TYPE, NUXConstants.NUXREMINDTOSERVER);
+					JSONObject data = new JSONObject();
+					data.put(HikeConstants.Extras.MSG, ((NuxSendCustomMessageActivity) getActivity()).getCustomMessage());
+					remind.put(HikeConstants.DATA, data);
+					HikeMqttManagerNew.getInstance().sendMessage(remind, HikeMqttManagerNew.MQTT_QOS_ONE);
+					Logger.d("RemindPkt",remind.toString());
+					
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
 				Logger.d("UmangX","displayed : "+contactsDisplayed.toString());
 				contactsDisplayed.removeAll(nm.getLockedContacts());
 				if(!contactsDisplayed.isEmpty()){
@@ -315,17 +354,30 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 		}
 		
 	}
+	
+	@Override
+	public void onStop() {
+		super.onStop();
+		Logger.d("UmangX","on stop of frag");
+		if(NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED){
+			getActivity().finish();
+		}
+	}
 
 	@Override
+	
 	public void onResume()
 	{
 		super.onResume();
+		Logger.d("UmangX","on resume of frag");
 		if (NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_KILLED)
-			KillActivity();
+			getActivity().finish();
 	}
 
+	
 	private void KillActivity()
 	{
+		Logger.d("UmangX","kill Acitivty called from frag");
 		Intent in = (Utils.getHomeActivityIntent(getActivity()));
 		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

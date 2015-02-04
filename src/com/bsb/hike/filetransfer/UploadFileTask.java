@@ -75,6 +75,9 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.video.HikeVideoCompressor;
+import com.bsb.hike.video.VideoUtilities;
+import com.bsb.hike.video.VideoUtilities.VideoEditedInfo;
 
 public class UploadFileTask extends FileTransferBase
 {
@@ -415,6 +418,37 @@ public class UploadFileTask extends FileTransferBase
 					}
 					hikeFile.setFile(selectedFile);
 				}
+				else if(hikeFileType == HikeFileType.VIDEO)
+				{
+					File compFile = null;
+					VideoEditedInfo info = null;
+					if(android.os.Build.VERSION.SDK_INT >= 18 && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.COMPRESS_VIDEO, true))
+					{
+						info = VideoUtilities.processOpenVideo(mFile.getPath());
+						if(info != null)
+						{
+							if(info.isCompRequired)
+							{
+								hikeFile.setVideoEditedInfo(info);
+								HikeVideoCompressor instance = new HikeVideoCompressor();
+								compFile = instance.compressVideo(hikeFile);
+							}
+						}
+					}
+					if(compFile != null && compFile.exists()){
+						FTAnalyticEvents.sendVideoCompressionEvent(info.originalWidth + "x" + info.originalHeight, info.resultWidth + "x" + info.resultHeight,
+								(int) mFile.length(), (int) compFile.length(), 1);
+						selectedFile = compFile;
+					}else{
+						if(info != null)
+						{
+							FTAnalyticEvents.sendVideoCompressionEvent(info.originalWidth + "x" + info.originalHeight, info.resultWidth + "x" + info.resultHeight,
+									(int) mFile.length(), 0, 0);
+						}
+						selectedFile = mFile;
+					}
+					hikeFile.setFile(selectedFile);
+				}
 				// do not copy the file if it is video or audio or any other file
 				else
 				{
@@ -721,7 +755,12 @@ public class UploadFileTask extends FileTransferBase
 				Logger.d(getClass().getSimpleName(), "Verifying MD5");
 				JSONObject responseMd5 = verifyMD5(selectedFile);
 				if(responseMd5 != null)
+				{
+					FTAnalyticEvents.sendQuickUploadEvent(1);
 					return responseMd5;
+				}
+				else
+					FTAnalyticEvents.sendQuickUploadEvent(0);
 			}
 			catch (Exception e)
 			{

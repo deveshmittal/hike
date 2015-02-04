@@ -51,8 +51,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
 
-		Utils.setupServerURL(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, AccountUtils._PRODUCTION_HOST),
-				Utils.switchSSLOn(getApplicationContext()));
+		Utils.setupServerURL(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.PRODUCTION, true), Utils.switchSSLOn(getApplicationContext()));
 
 		mAcceptButton = (Button) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
@@ -115,27 +114,15 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private void changeHost()
 	{
 		Logger.d(getClass().getSimpleName(), "Hike Icon CLicked");
-		stagingToggle = (++stagingToggle) % 3;
-		int whichHost = AccountUtils._PRODUCTION_HOST;
-		
-		switch(stagingToggle)
-		{
-		case 0 : 
-			whichHost = AccountUtils._PRODUCTION_HOST;
-			break;
-		case 1 : 
-			whichHost = AccountUtils._STAGING_HOST;
-			break;
-		case 2 :
-			whichHost = AccountUtils._DEV_STAGING_HOST;
-			break;
-		}
 
-		Utils.setupServerURL(whichHost, Utils.switchSSLOn(this));
+		SharedPreferences sharedPreferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+		boolean production = sharedPreferences.getBoolean(HikeMessengerApp.PRODUCTION, true);
 
-		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-		editor.putInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, whichHost);
-		editor.commit();
+		Utils.setupServerURL(!production, Utils.switchSSLOn(this));
+
+		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,MODE_PRIVATE).edit();
+		editor.putBoolean(HikeMessengerApp.PRODUCTION, !production);
+		editor.commit();	
 		
 		Toast.makeText(WelcomeActivity.this, AccountUtils.base, Toast.LENGTH_SHORT).show();
 	}

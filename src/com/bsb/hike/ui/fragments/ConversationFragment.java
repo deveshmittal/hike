@@ -60,6 +60,8 @@ import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.adapters.EmptyConversationsAdapter;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -79,23 +81,17 @@ import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.HikeUser;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
-import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.HikeDialog;
-import com.bsb.hike.ui.HikeFragmentable;
-import com.bsb.hike.ui.HikeListActivity;
-import com.bsb.hike.ui.HomeActivity;
-import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.ui.WebViewActivity;
-import com.bsb.hike.utils.CustomAlertDialog;
-import com.bsb.hike.utils.HikeAnalyticsEvent;
-import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.IntentManager;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.NUXManager;
-import com.bsb.hike.utils.PairModified;
-import com.bsb.hike.utils.Utils;
+import com.bsb.hike.ui.*;
+import com.bsb.hike.utils.*;
 import com.bsb.hike.view.HoloCircularProgress;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener, HikeFragmentable, OnClickListener
 {
@@ -138,9 +134,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				else if (conv instanceof GroupConversation)
 				{
-					// TODO in case of leaving group from group info screen ==> 2 gcl event will trigger
-					// we can avoid these by moving delete conversation task to db
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+					//TODO in case of leaving group from group info screen ==> 2 gcl event will trigger
+					//we can avoid these by moving delete conversation task to db
+					HikeMqttManagerNew.getInstance().sendMessage(conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_QOS_ONE);
 				}
 
 				msisdns.add(conv.getMsisdn());
@@ -484,7 +480,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			
 			 Animation pulse = AnimationUtils.loadAnimation(getActivity(), R.anim.pulse);
 
-			lockImage.startAnimation(pulse);
+			//lockImage.startAnimation(pulse);
 			
 			// Changing the footer state to halfOpen when the reward is unlocked.
 			setFooterHalfOpen();
@@ -581,6 +577,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 				footerState.setEnumState(footerState.CLOSED);
 				changeFooterControllerBackground(footerState.CLOSED);
+				
+				try
+				{
+					JSONObject metaData = new JSONObject();
+					metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_EXPANDED_COM);
+					NUXManager.getInstance().sendAnalytics(metaData);
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				break;
 			case HALFOPEN:
 				
@@ -593,6 +602,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				footerState.setEnumState(footerState.CLOSED);
 				changeFooterControllerBackground(footerState.CLOSED);
+				
+				try
+				{
+					JSONObject metaData = new JSONObject();
+					metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_FOOTER_NOR_COM);
+					NUXManager.getInstance().sendAnalytics(metaData);
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				break;
 			case CLOSED:
 				
@@ -620,6 +641,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				
 				footerState.setEnumState(footerState.HALFOPEN);
 				changeFooterControllerBackground(footerState.HALFOPEN);
+				
+				
+				
+				try
+				{
+					JSONObject metaData = new JSONObject();
+					metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_FOOTER_COM_NOR);
+					NUXManager.getInstance().sendAnalytics(metaData);
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
 			}
 
 			break;
@@ -643,6 +677,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			footerState.setEnumState(footerState.OPEN);
 			changeFooterControllerBackground(footerState.OPEN);
+
+			try
+			{
+				JSONObject metaData = new JSONObject();
+				metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_FOOTER_NOR_EXP);
+				NUXManager.getInstance().sendAnalytics(metaData);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
 			break;
 
 		case R.id.tv_chatStatus:
@@ -654,12 +699,28 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 				if ((!TextUtils.isEmpty(mmReward.getTapToClaimLink())))
 				{
+					
+					try
+					{
+						JSONObject metaData = new JSONObject();
+						metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_TAP_CLAIM);
+						NUXManager.getInstance().sendAnalytics(metaData);
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+					}
+					
+					
 					HikeSharedPreferenceUtil mprefs=HikeSharedPreferenceUtil.getInstance(getActivity());
 					String tapToClaim=HikeConstants.ANDROID+"/"+ mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
 					String title= getString(R.string.hike);
 				
 					String link=String.format(mmReward.getTapToClaimLink(),tapToClaim);
 					Utils.startWebViewActivity(getActivity(),  link, title);
+					
+					
+					
 				}
 			}
 
@@ -667,6 +728,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				if ((!TextUtils.isEmpty(mmReward.getDetailsLink())))
 				{
+					
+					try
+					{
+						JSONObject metaData = new JSONObject();
+						metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_VIEW_MORE);
+						NUXManager.getInstance().sendAnalytics(metaData);
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+					}
+					
+					
 					HikeSharedPreferenceUtil mprefs = HikeSharedPreferenceUtil.getInstance(getActivity());
 					String tapToClaim = HikeConstants.ANDROID+"/"+ mprefs.getData(HikeMessengerApp.REWARDS_TOKEN, "");
 					String title = getString(R.string.hike);
@@ -676,6 +750,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			break;
 		case R.id.but_remind:
+			try
+			{
+				JSONObject metaData = new JSONObject();
+				metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_REMIND);
+				NUXManager.getInstance().sendAnalytics(metaData);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+
 			if(mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
 			{
 				butRemind.setEnabled(false);
@@ -688,7 +773,21 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			break;
 		case R.id.but_inviteMore:
-			if(mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+
+			
+			try
+			{
+				JSONObject metaData = new JSONObject();
+				metaData.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_INVITE_MORE);
+				metaData.put(NUXConstants.OTHER_STRING, butInviteMore.getText().toString());
+				NUXManager.getInstance().sendAnalytics(metaData);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+
+			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
 			{
 				butRemind.setEnabled(false);
 				butInviteMore.setEnabled(false);
@@ -928,8 +1027,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					Utils.cancelScheduledStealthReset(getActivity());
 
 					dialog.dismiss();
-					
-					Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 				}
 
 				@Override
@@ -2781,7 +2889,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						convs[i] = mAdapter.getItem(i);
 						if ((convs[i] instanceof GroupConversation))
 						{
-							HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convs[i].serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+							HikeMqttManagerNew.getInstance().sendMessage(convs[i].serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_QOS_ONE);
 						}
 					}
 					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
