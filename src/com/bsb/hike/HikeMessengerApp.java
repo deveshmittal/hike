@@ -157,6 +157,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String TOTAL_CREDITS_PER_MONTH = HikeConstants.TOTAL_CREDITS_PER_MONTH;
 
 	public static final String PRODUCTION = "production";
+	
+	public static final String PRODUCTION_HOST_TOGGLE = "productionHostToggle";
 
 	public static final String COUNTRY_CODE = "countryCode";
 
@@ -795,7 +797,6 @@ public void onTrimMemory(int level)
 			editor.remove(HikeConstants.RECEIVE_SMS_PREF);
 			editor.commit();
 		}
-
 		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), Utils.switchSSLOn(getApplicationContext()));
 
 		typingNotificationMap = new HashMap<String, TypingNotification>();

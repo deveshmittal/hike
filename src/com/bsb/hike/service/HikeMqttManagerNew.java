@@ -152,6 +152,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private static final int STAGING_BROKER_PORT_NUMBER_SSL = 8883;
 
+	private static final int DEV_STAGING_BROKER_PORT_NUMBER = 1883;
+
+	private static final int DEV_STAGING_BROKER_PORT_NUMBER_SSL = 8883;
+
 	private static final int FALLBACK_BROKER_PORT_NUMBER = 5222;
 	
 	// this represents number of msgs published whose callback is not yet arrived
@@ -459,12 +463,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			return;
 		}
 
-		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION, true);
+		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION,true);
 
 		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
 
 		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
-				: STAGING_BROKER_PORT_NUMBER);
+						: STAGING_BROKER_PORT_NUMBER);
+
 
 		Logger.d(TAG, "Broker host name: " + brokerHostName);
 		Logger.d(TAG, "Broker port: " + brokerPortNumber);
@@ -827,7 +832,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
 
 		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
-				: STAGING_BROKER_PORT_NUMBER);
+		                                : STAGING_BROKER_PORT_NUMBER);
 
 		if (!production)
 		{
