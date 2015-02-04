@@ -1636,6 +1636,7 @@ public class MqttMessagesManager
 		JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
 		long lastSeenTime = data.getLong(HikeConstants.LAST_SEEN);
 		int isOffline;
+		HAManager.getInstance().recordLastSeenEvent(MqttMessagesManager.class.getName(), "saveLastSeen", "", msisdn);
 		/*
 		 * Apply offset only if value is greater than 0
 		 */
@@ -1655,6 +1656,7 @@ public class MqttMessagesManager
 
 		ContactManager.getInstance().updateLastSeenTime(msisdn, lastSeenTime);
 		ContactManager.getInstance().updateIsOffline(msisdn, (int) isOffline);
+		HAManager.getInstance().recordLastSeenEvent(MqttMessagesManager.class.getName(), "saveLastSeen", "updated CM", msisdn);
 		ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, true);
 		pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED, contact);
 	}

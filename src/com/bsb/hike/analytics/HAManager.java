@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Environment;
+import android.text.TextUtils;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.analytics.AnalyticsConstants.AppOpenSource;
@@ -645,6 +646,38 @@ public class HAManager
 	public void endChatSession(String msisdn)
 	{
 		fgSessionInstance.endChatSesion(msisdn);
+	}
+
+	public void recordLastSeenEvent(String screen, String api, String msg, String toUser)
+	{
+		JSONObject metadata = null;
+		
+		try
+		{
+			metadata = new JSONObject();
+			
+			metadata.put("screen", screen);
+			
+			metadata.put("api", api);
+			
+			if(!"".equals(msg))
+			{
+				metadata.put("m", msg);
+			}
+			
+			if(!TextUtils.isEmpty(toUser))
+			{
+				metadata.put("to_user", toUser);
+			}
+			
+			HAManager.getInstance().record(AnalyticsConstants.LAST_SEEN_ANALYTICS, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.LAST_SEEN_ANALYTICS);
+				
+			Logger.d(AnalyticsConstants.LAST_SEEN_ANALYTICS_TAG, " --screen :"+ screen + " --api :"+ api + " -- msg :" + msg + " --to_user "+ toUser);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.LAST_SEEN_ANALYTICS_TAG, "invalid json");
+		}
 	}
 	
 }
