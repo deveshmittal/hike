@@ -142,17 +142,30 @@ public class PlatformJavaScriptBridge
     @JavascriptInterface
     public void logAnalytics(String isUI, String subType, String json)
     {
-        try {
-            if (Boolean.valueOf(isUI)) {
-                HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_UI_EVENT, subType, new JSONObject(json));
-            } else
-            {
-                HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_NON_UI_EVENT, subType, new JSONObject(json));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
+
+		try
+		{
+			JSONObject jsonObject = new JSONObject(json);
+			jsonObject.put(AnalyticsConstants.ORIGIN, Utils.conversationType(message.getMsisdn()));
+
+			if (Boolean.valueOf(isUI))
+			{
+				HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_UI_EVENT, subType, jsonObject);
+			}
+			else
+			{
+				HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_NON_UI_EVENT, subType, jsonObject);
+			}
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NullPointerException e)
+		{
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * Call this function to set the alarm at certain time that is defined by the second parameter.
 	 * The first param is a json that contains

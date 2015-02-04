@@ -5085,15 +5085,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
             }
         }
 
-        if (convMessage.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT)
+        if (convMessage.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || convMessage.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
         {
-            analyticsForBots(HikePlatformConstants.CARD_DELETE, HikeConstants.ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE, AnalyticsConstants.CLICK_EVENT, null);
+			String origin = Utils.conversationType(mContactNumber);
+            analyticsForBots(HikePlatformConstants.CARD_DELETE, origin, AnalyticsConstants.CLICK_EVENT, null);
         }
 
-        if (convMessage.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
-        {
-            analyticsForBots(HikePlatformConstants.CARD_DELETE, HikeConstants.ConvMessagePacketKeys.WEB_CONTENT_TYPE, AnalyticsConstants.CLICK_EVENT, null);
-        }
 
 	}
 
