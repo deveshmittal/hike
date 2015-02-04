@@ -96,8 +96,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private static final int ADD_TO_UNDELIVERED_MESSAGE = 111;
 	
-	protected ChatThreadTips mTips;
-	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -196,6 +194,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	protected void fetchConversationFinished(Conversation conversation)
 	{
+		showTips();
+		
 		super.fetchConversationFinished(conversation);
 		
 		//TODO : This is a basic working skeleton. This needs to be segragated into separate functions.
@@ -245,7 +245,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			// TODO : mAdapter.addAllUndeliverdMessages(messages);
 		}
 		
-		showTips();
 	}
 	
 	private void showTips()
@@ -791,6 +790,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			hideOverlay();
 		}
+		
+		if (mTips.isAnyTipOpen()) // Could be that we might have hidden a tip in Zero Credits case. To offset that, we show the hidden tip here
+		{
+			mTips.showHiddenTip();
+		}
 	}
 	
 	private void zeroCredits()
@@ -825,14 +829,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			
 			showOverlay(label, formatString , activity.getString(R.string.invite_now), str, R.drawable.ic_no_credits);
 		}
-
-		// TODO : Make tipView a member of superclass ?
+		
 		/**
-		 * if (tipView != null && tipView.getVisibility() == View.VISIBLE) { Object tag = tipView.getTag();
-		 * 
-		 * if (tag instanceof TipType && ((TipType)tag == TipType.EMOTICON)) { HikeTip.closeTip(TipType.EMOTICON, tipView, prefs); tipView = null; } }
+		 * If any tip is open, we hide it
 		 */
-
+		mTips.hideTip();
 	}
 	
 	private void updateChatMetadata()
@@ -1491,9 +1492,4 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		super.sendButtonClicked();
 	}
 	
-	@Override
-	public void onDismiss()
-	{
-		mTips.showHiddenTip();
-	}
 }

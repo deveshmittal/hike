@@ -15,6 +15,15 @@ import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.HikeTip.TipType;
 
+/**
+ * This class is a helper class which contains exhaustive set of tips which can be shown in the chat thread. The tips include Atomic tips which are server triggered as well FTUE
+ * tips. Every individual chat thread has the knowledge of its own set of tips, which it passes to this helper class.
+ * 
+ * It can call utility methods like {@link #showTip()}, {@link #closeTip(int)} etc to hide/show tips.
+ * 
+ * @author piyush
+ * 
+ */
 public class ChatThreadTips implements OnClickListener, OnTouchListener
 {
 	/**
@@ -170,7 +179,6 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		 */
 		if (filterTips(PIN_TIP))
 		{
-			//closeOtherOpenTips();
 			tipId = PIN_TIP;
 			tipView = mainView.findViewById(R.id.pin_tip);
 			tipView.setVisibility(View.VISIBLE);
@@ -220,9 +228,9 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 	/**
 	 * Closes any other open tips
 	 */
-	public void closeTip(int whichTip)
+	private void closeTip()
 	{
-		if (tipId == whichTip && tipView != null)
+		if (tipView != null)
 		{
 			tipId = -1;
 			tipView.setVisibility(View.GONE);
@@ -240,7 +248,7 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 			tipView.setVisibility(View.INVISIBLE);
 		}
 	}
-	
+
 	public void hideTip(int whichTip)
 	{
 		if (tipId == whichTip && tipView != null && tipView.getVisibility() == View.VISIBLE)
@@ -248,12 +256,12 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 			tipView.setVisibility(View.INVISIBLE);
 		}
 	}
-	
+
 	public void showHiddenTip()
 	{
 		if (tipView != null && tipView.getVisibility() == View.INVISIBLE)
 		{
-			tipView.setVisibility(View.INVISIBLE);
+			tipView.setVisibility(View.VISIBLE);
 		}
 	}
 
@@ -278,8 +286,7 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		case ATOMIC_ATTACHMENT_TIP:
 		case ATOMIC_CHAT_THEME_TIP:
 		case ATOMIC_STICKER_TIP:
-			closeTip(tipId);
-			mPrefs.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
+			setAtomicTipSeen(tipId);
 			break;
 
 		case PIN_TIP:
@@ -299,13 +306,22 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		 */
 		return true;
 	}
-	
+
 	public void setPinTipSeen()
 	{
 		if (tipId == PIN_TIP)
 		{
 			mPrefs.saveData(HikeMessengerApp.SHOWN_PIN_TIP, true);
-			closeTip(PIN_TIP);
+			closeTip();
+		}
+	}
+
+	public void setAtomicTipSeen(int whichTip)
+	{
+		if (tipId == whichTip)
+		{
+			mPrefs.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
+			closeTip();
 		}
 	}
 }

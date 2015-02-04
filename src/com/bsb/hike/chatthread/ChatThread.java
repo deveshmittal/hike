@@ -238,6 +238,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	protected int selectedCancelableMsgs;
 	
+	protected ChatThreadTips mTips;
+	
 	private class ChatThreadBroadcasts extends BroadcastReceiver
 	{
 		@Override
@@ -571,6 +573,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void showOverflowMenu()
 	{
+		/**
+		 * Hiding any open tip
+		 */
+		mTips.hideTip();
+		
 		int width = getResources().getDimensionPixelSize(R.dimen.overflow_menu_width);
 		int rightMargin = width + getResources().getDimensionPixelSize(R.dimen.overflow_menu_right_margin);
 		mActionBar.showOverflowMenu(width, LayoutParams.WRAP_CONTENT, -rightMargin, -(int) (0.5 * Utils.densityMultiplier), activity.findViewById(R.id.attachment_anchor));
@@ -703,6 +710,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void showThemePicker()
 	{
+		/**
+		 * We can now dismiss the chatTheme tip if it is there or we can hide any other visible tip
+		 */
+		mTips.setAtomicTipSeen(ChatThreadTips.ATOMIC_CHAT_THEME_TIP);
+		mTips.hideTip();
+
 		if (themePicker == null)
 		{
 			themePicker = new ThemePicker(activity, this, currentTheme);
@@ -712,6 +725,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void showAttchmentPicker()
 	{
+		/**
+		 * We can now dismiss the Attachment tip if it is there or we hide any other visible tip
+		 */
+		mTips.setAtomicTipSeen(ChatThreadTips.ATOMIC_ATTACHMENT_TIP);
+		mTips.hideTip();
+		
 		initAttachmentPicker(mConversation.isOnhike());
 		int width = (int) (Utils.densityMultiplier * 270);
 		int xOffset = -(int) (276 * Utils.densityMultiplier);
@@ -1634,6 +1653,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mActionMode.hideView(R.id.done_container);
 			mActionMode.hideView(R.id.done_container_divider);
 			hideShowActionModeMenus(MULTI_SELECT_ACTION_MODE);
+			/**
+			 * Hiding any open tip
+			 */
+			mTips.hideTip();
+			
 			return true;
 		}
 
@@ -1660,6 +1684,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (!(mAdapter.getSelectedCount() > 0))
 		{
 			mActionMode.finish();
+			/**
+			 * Showing any hidden tip
+			 */
+			mTips.showHiddenTip();
 			return false;
 		}
 
@@ -3790,5 +3818,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		/**
 		 * else if (isHikeToOfflineMode) { //chatThread.clickedHikeToOfflineMessage((ConvMessage) v.getTag()); }
 		 **/
+	}
+	
+	@Override
+	public void onDismiss()
+	{
+		mTips.showHiddenTip();
 	}
 }

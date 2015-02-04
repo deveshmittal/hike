@@ -5,16 +5,14 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.regex.Pattern;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Message;
 import android.text.Editable;
 import android.text.Spannable;
@@ -96,8 +94,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	
 	private static final String PIN_MESSAGE_SEPARATOR = ": ";
 	
-	protected ChatThreadTips mTips;
-
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -296,6 +292,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	protected void fetchConversationFinished(Conversation conversation)
 	{
 		mHashSpanWatcher = new HashSpanWatcher(mComposeView, HASH_PIN, getResources().getColor(R.color.sticky_yellow));
+		showTips();
+		
 		super.fetchConversationFinished(conversation);
 		
 		/**
@@ -497,7 +495,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		}
 		
 		// If the pin tip was previously being seen, and it wasn't closed, we need to show it again.
-		mTips.showHiddenTips(ChatThreadTips.PIN_TIP);
+		mTips.showHiddenTip(ChatThreadTips.PIN_TIP);
 	}
 
 	private void showPinHistory(boolean viaMenu)
@@ -1355,9 +1353,4 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		}
 	}
 	
-	@Override
-	public void onDismiss()
-	{
-		mTips.showHiddenTip();
-	}
 }
