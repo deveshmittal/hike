@@ -13,12 +13,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Environment;
+import android.text.TextUtils;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.analytics.AnalyticsConstants.AppOpenSource;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gms.internal.fs;
@@ -665,6 +668,42 @@ public class HAManager
 	public void endChatSession(String msisdn)
 	{
 		fgSessionInstance.endChatSesion(msisdn);
+	}
+
+	public void recordLastSeenEvent(String screen, String api, String msg, String toUser)
+	{
+		if(!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.DETAILED_HTTP_LOGGING_ENABLED, false))
+		{	
+			return;
+		}
+		JSONObject metadata = null;
+		
+		try
+		{
+			metadata = new JSONObject();
+			
+			metadata.put("screen", screen);
+			
+			metadata.put("api", api);
+			
+			if(!TextUtils.isEmpty(msg))
+			{
+				metadata.put("m", msg);
+			}
+			
+			if(!TextUtils.isEmpty(toUser))
+			{
+				metadata.put("to_user", toUser);
+			}
+			
+			HAManager.getInstance().record(AnalyticsConstants.LAST_SEEN_ANALYTICS, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.LAST_SEEN_ANALYTICS);
+				
+			Logger.d(AnalyticsConstants.LAST_SEEN_ANALYTICS_TAG, " --screen :"+ screen + " --api :"+ api + " -- msg :" + msg + " --to_user "+ toUser);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.LAST_SEEN_ANALYTICS_TAG, "invalid json");
+		}
 	}
 	
 }

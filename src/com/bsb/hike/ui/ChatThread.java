@@ -2606,6 +2606,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				lastSeenScheduler = LastSeenScheduler.getInstance(this);
 				lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
+				HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "createConversation", null, mContactNumber);
 			}
 		}
 
@@ -3276,6 +3277,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				mLastSeenView.setVisibility(View.VISIBLE);
 			}
 		}
+		HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "setLastSeenText", "Updated UI for LastSeen", mContactNumber);
 	}
 
 	private void hideLastSeenText()
@@ -4114,6 +4116,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			ContactInfo newContactInfo = (ContactInfo) object;
 
+			HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "recv pubsub LAST_SEEN_TIME_UPDATED", "going update UI", newContactInfo.getMsisdn());
 			updateLastSeen(newContactInfo.getMsisdn(), newContactInfo.getOffline(), newContactInfo.getLastSeenTime());
 		}
 		else if (HikePubSub.SEND_SMS_PREF_TOGGLED.equals(type))
@@ -4247,6 +4250,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						lastSeenScheduler.stop(false);
 					}
 					lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
+					HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "onEventRecv", "recv pubsub APP_FOREGROUNDED", mContactNumber);
 				}
 			});
 		}
@@ -8491,6 +8495,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public void lastSeenFetched(String msisdn, int offline, long lastSeenTime)
 		{
+			HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "lastSeenFetched", "going to update UI", mContactNumber);
 			updateLastSeen(msisdn, offline, lastSeenTime);
 		}
 	};
@@ -8541,6 +8546,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				if (lastSeenString == null)
 				{
+					HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "updateLastSeen", 
+							"lastSeen null so setLastSeenTextBasedOnHikeValue", mContactNumber);
 					setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 				}
 				else
