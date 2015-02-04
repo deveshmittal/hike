@@ -241,8 +241,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		
 		if(mConversation.isOnhike())
 		{
-			//GETTING AN NPE HERE
-			// TODO : mAdapter.addAllUndeliverdMessages(messages);
+			mAdapter.addAllUndeliverdMessages(messages);
 		}
 		
 	}
@@ -320,7 +319,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	protected String[] getPubSubListeners()
 	{
-		// TODO Add PubSubListeners
 		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.CONTACT_ADDED, HikePubSub.CONTACT_DELETED,
 				HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START,
 				HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.APP_FOREGROUNDED };
@@ -433,7 +431,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	protected boolean onMessageDelivered(Object object)
 	{
-		// TODO Auto-generated method stub
 		if (super.onMessageDelivered(object))
 		{
 			if (mConversation.isOnhike())
@@ -560,8 +557,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			setAvatar(R.drawable.ic_default_avatar);
 		}
-		// TODO : Add name to actionBar
-		// setLabel(pair.second);
+		
+		setLabel(pair.second);
 
 		if (messages != null && messages.size() > 0)
 		{
