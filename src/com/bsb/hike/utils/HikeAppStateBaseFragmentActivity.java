@@ -177,7 +177,9 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 			@Override
 			public void run()
 			{
-				if(tag.equals(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG) && !isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG))
+				boolean isCallRateFragShowing = isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
+				boolean isCallIssuesFragShowing = isFragmentAdded(HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG);
+				if(tag.equals(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG) && !isCallRateFragShowing && !isCallIssuesFragShowing)
 				{
 					CallRatePopup callRatePopup = new CallRatePopup();
 					callRatePopup.setArguments(bundle);
@@ -186,7 +188,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 					fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
 					fragmentTransaction.commitAllowingStateLoss();
 				}
-				else if(tag.equals(HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG) && !isFragmentAdded(HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG))
+				else if(tag.equals(HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG) && !isCallIssuesFragShowing)
 				{
 					CallIssuesPopup callIssuesPopup = new CallIssuesPopup();
 					callIssuesPopup.setArguments(bundle);
