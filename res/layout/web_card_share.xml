@@ -30,7 +30,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
-                android:text="Live 2015 World Cup scores only on hike messenger"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
