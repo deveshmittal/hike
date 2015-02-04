@@ -384,6 +384,10 @@ public class HikePubSub implements Runnable
 	
 	public static final String USER_JOINED_NOTIFICATION = "userJoinedNotification";
 	
+	public static final String CONV_UNREAD_COUNT_MODIFIED = "convUnreadCountModified";
+	
+	public static final String PLATFORM_CARD_ALARM = "platformCardAlarm";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

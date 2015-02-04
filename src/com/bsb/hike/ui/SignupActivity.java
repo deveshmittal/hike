@@ -751,7 +751,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 							startLoading();
 							dialog.cancel();
-							if (Utils.densityMultiplier < 1.5)
+							if (Utils.scaledDensityMultiplier < 1.5)
 							{
 								Utils.hideSoftKeyboard(SignupActivity.this, enterEditText);
 							}

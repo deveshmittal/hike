@@ -2,6 +2,7 @@ package com.bsb.hike.db;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -12,44 +13,69 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
 import android.util.SparseArray;
-
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
-import com.bsb.hike.models.*;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.CustomStickerCategory;
+import com.bsb.hike.models.FileListItem;
+import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeAlarmManager;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.HikeSharedFile;
+import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.Protip;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
 import com.bsb.hike.modules.contactmgr.GroupDetails;
 import com.bsb.hike.platform.ContentLove;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
+import com.bsb.hike.platform.PlatformWebMessageMetadata;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.utils.*;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
-import java.util.*;
-import java.util.Map.Entry;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBConstants,HIKE_CONV_DB
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBConstants, HIKE_CONV_DB
 {
 
 	private SQLiteDatabase mDb;
@@ -216,8 +242,64 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")"; 
 		sql = getStickerShopTableCreateQuery();
 		db.execSQL(sql);
+		
+		sql = CREATE_TABLE + DBConstants.ALARM_MGR_TABLE + "(" + _ID + " INTEGER PRIMARY KEY, " + TIME + " TEXT, " + DBConstants.WILL_WAKE_CPU + " INTEGER, " + DBConstants.INTENT
+				+ " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
+		db.execSQL(sql);
+
+		sql = CREATE_TABLE + DBConstants.BOT_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.NAME + " TEXT, " + DBConstants.CONVERSATION_METADATA + " TEXT, "+ DBConstants.IS_MUTE + " INTEGER DEFAULT 0)";
+		db.execSQL(sql);
 	}
 
+	public void insertIntoAlarmManagerDB(long time, int requestCode, boolean WillWakeCPU, Intent intent)
+	{
+		ContentValues cv = new ContentValues();
+		cv.put(DBConstants._ID, requestCode);
+		cv.put(DBConstants.TIME, time + "");
+		cv.put(DBConstants.WILL_WAKE_CPU, WillWakeCPU);
+		cv.put(DBConstants.INTENT, intent.toUri(0));
+
+		mDb.insertWithOnConflict(DBConstants.ALARM_MGR_TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+	}
+
+	public void deleteFromAlarmManagerDB(int requestCode)
+	{
+		mDb.delete(DBConstants.ALARM_MGR_TABLE, DBConstants._ID + "=" + requestCode, null);
+	}
+
+	public void rePopulateAlarmWhenClosed()
+	{
+		Logger.d("Alarm Manager", "rePopulating all Alarms");
+		String selectQuery = "SELECT  * FROM " + DBConstants.ALARM_MGR_TABLE;
+
+		Cursor cursor = mDb.rawQuery(selectQuery, null);
+		try
+		{
+			if (cursor.moveToFirst())
+			{
+				do
+				{
+					Logger.d("Alarm Manager", "rePopulating all Alarms");
+					int requestCode = cursor.getInt(cursor.getColumnIndex(DBConstants._ID));
+					long time = Long.parseLong(cursor.getString(cursor.getColumnIndex(DBConstants.TIME)));
+					int willWakeCpu = cursor.getInt(cursor.getColumnIndex(DBConstants.WILL_WAKE_CPU));
+					String intent = cursor.getString(cursor.getColumnIndex(DBConstants.INTENT));
+					Uri asd = Uri.parse(intent);
+
+					Intent intentAlarm = Intent.getIntent(asd.toString());
+
+					HikeAlarmManager.setAlarmwithIntentPersistance(HikeMessengerApp.getInstance(), time, requestCode, (willWakeCpu != 0), intentAlarm, false);
+
+				}
+				while (cursor.moveToNext());
+			}
+		}
+		catch (URISyntaxException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public void deleteAll()
 	{
 		mDb.delete(DBConstants.CONVERSATIONS_TABLE, null, null);
@@ -232,6 +314,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		mDb.delete(DBConstants.SHARED_MEDIA_TABLE, null, null);
 		mDb.delete(DBConstants.FILE_THUMBNAIL_TABLE, null, null);
 		mDb.delete(DBConstants.CHAT_BG_TABLE, null, null);
+		mDb.delete(DBConstants.BOT_TABLE, null, null);
 	}
 
 	@Override
@@ -612,25 +695,47 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			editor.putInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1);
 			editor.commit();
 		}
-		
+
 		/**
-		 * We introduced content here, so love concept came in message table for content shared by people.
-         * Ref count is introduced to keep a track on the number of messages where this thumbnail is attached.
+		 * We introduced content here, so love concept came in message table for content shared by people. Ref count is introduced to keep a track on the number of messages where
+		 * this thumbnail is attached.
 		 */
-        if (oldVersion < 32){
-            String alter2 = "ALTER TABLE " + DBConstants.FILE_THUMBNAIL_TABLE + " ADD COLUMN " + REF_COUNT + " INTEGER";
-            db.execSQL(alter2);
-            
-            String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER";
+		if (oldVersion < 32)
+		{
+			String alter2 = "ALTER TABLE " + DBConstants.FILE_THUMBNAIL_TABLE + " ADD COLUMN " + REF_COUNT + " INTEGER";
+			db.execSQL(alter2);
+
+			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER";
 			db.execSQL(alter);
-        }
+		}
+
+		if (oldVersion < 33)
+		{
+			String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.BOT_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.NAME + " TEXT, "
+					+ DBConstants.CONVERSATION_METADATA + " TEXT)";
+			db.execSQL(sql);
+
+		}
+
+		if (oldVersion < 34)
+		{
+			String sql2 = CREATE_TABLE + DBConstants.ALARM_MGR_TABLE + "(" + _ID + " INTEGER PRIMARY KEY, " + TIME + " TEXT, " + DBConstants.WILL_WAKE_CPU + " INTEGER, "
+					+ DBConstants.INTENT + " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
+			db.execSQL(sql2);
+		}
+
+		if (oldVersion < 35)
+		{
+			String alter = "ALTER TABLE " + DBConstants.BOT_TABLE + " ADD COLUMN " + DBConstants.IS_MUTE + " INTEGER DEFAULT 0";
+			db.execSQL(alter);
+		}
 	}
 
 	public void upgrade(int oldVersion, int newVersion)
 	{
 		onUpgrade(mDb, oldVersion, newVersion);
 	}
-	
+
 	public void clearTable(String table)
 	{
 		mDb.delete(table, null, null);
@@ -1311,7 +1416,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
         if(conv.getMessageType() == com.bsb.hike.HikeConstants.MESSAGE_TYPE.CONTENT) {
             insertStatement.bindString(messageMetadataColumn, conv.platformMessageMetadata != null ? conv.platformMessageMetadata.JSONtoString() : "");
 
-        }  else
+        } else if(conv.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || conv.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT) {
+			insertStatement.bindString(messageMetadataColumn, conv.platformWebMessageMetadata != null ? conv.platformWebMessageMetadata.JSONtoString() : "");
+
+		}else
         {
             insertStatement.bindString(messageMetadataColumn, conv.getMetadata() != null ? conv.getMetadata().serialize() : "");
         }
@@ -1907,8 +2015,22 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					mDb.delete(DBConstants.GROUP_INFO_TABLE, DBConstants.GROUP_ID + " =?", new String[] { msisdn });
 					removeChatThemeForMsisdn(msisdn);
 				}
+				setExtraConvUnreadCount(msisdn, 0);
 			}
 			mDb.setTransactionSuccessful();
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
+	}
+
+	public void deleteBot(String msisdn){
+		mDb.beginTransaction();
+		try
+		{
+			mDb.delete(DBConstants.BOT_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
+			removeChatThemeForMsisdn(msisdn);
 		}
 		finally
 		{
@@ -2017,6 +2139,59 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
+	public void insertBot(String msisdn, String name, String metadata, int isMute)
+	{
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.MSISDN, msisdn);
+		values.put(DBConstants.NAME, name);
+		values.put(DBConstants.CONVERSATION_METADATA, metadata);
+		values.put(DBConstants.IS_MUTE, isMute);
+		mDb.insertWithOnConflict(DBConstants.BOT_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+	}
+
+	public void updateBot(String msisdn, String name, String metadata, int isMute)
+	{
+		ContentValues values = new ContentValues();
+		if (!TextUtils.isEmpty(name))
+		{
+			values.put(DBConstants.NAME, name);
+		}
+		if (!TextUtils.isEmpty(metadata))
+		{
+			values.put(DBConstants.CONVERSATION_METADATA, metadata);
+		}
+		if (isMute != -1)
+		{
+			values.put(DBConstants.IS_MUTE, isMute);
+		}
+		mDb.updateWithOnConflict(DBConstants.BOT_TABLE, values, DBConstants.MSISDN + "=?", new String[] { msisdn }, SQLiteDatabase.CONFLICT_REPLACE);
+	}
+
+	public boolean isBotMuted(String msisdn)
+	{
+		Cursor c = null;
+		int muteInt = 0;
+		try
+		{
+			String selection = DBConstants.MSISDN + " = ?";
+
+			c = mDb.query(DBConstants.BOT_TABLE, new String[] { DBConstants.IS_MUTE }, selection, new String[] { msisdn }, null, null, null, null);
+
+			if (c.moveToFirst())
+			{
+				muteInt = c.getInt(c.getColumnIndex(DBConstants.IS_MUTE));
+			}
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		return muteInt == 0 ? false : true;
+	}
+
 	public List<ConvMessage> getConversationThread(String msisdn, int limit, Conversation conversation, long maxMsgId)
 	{
 		String limitStr = (limit == -1) ? null : new Integer(limit).toString();
@@ -2119,8 +2294,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				}
 				conv.setMessages(messages);
 			}
+			unreadCount += getExtraConvUnreadCount(msisdn);
 			conv.setUnreadCount(unreadCount);
-
 			return conv;
 		}
 		finally
@@ -2131,6 +2306,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			}
 		}
 
+	}
+
+	/*
+	 * This function returns unread count for any given msisdn , In addition to unread messages there could be many events which we might want to add in unread for any given
+	 * conversation , for example missed call, PIN, Micro App State chagned etc
+	 */
+	public int getExtraConvUnreadCount(String msisdn)
+	{
+		return HikeSharedPreferenceUtil.getInstance(mContext, HikeSharedPreferenceUtil.CONV_UNREAD_COUNT).getData(msisdn, 0);
+	}
+
+	/*
+	 * This function set unread count for any given msisdn , In addition to unread messages there could be many events which we might want to add in unread for any given
+	 * conversation , for example missed call, PIN, Micro App State chagned etc
+	 */
+	public void setExtraConvUnreadCount(String msisdn, int count)
+	{
+		HikeSharedPreferenceUtil.getInstance(mContext, HikeSharedPreferenceUtil.CONV_UNREAD_COUNT).saveData(msisdn, count);
 	}
 
 	public Conversation getConversation(String msisdn, int limit)
@@ -2179,7 +2372,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 			}
 
-			conv.setUnreadCount(unreadCount);
+			conv.setUnreadCount(unreadCount +getExtraConvUnreadCount(msisdn));
 
 			return conv;
 		}
@@ -2622,7 +2815,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					}
 				}
 
-				conv.setUnreadCount(c.getInt(unreadCountColumn));
+				conv.setUnreadCount(c.getInt(unreadCountColumn)+getExtraConvUnreadCount(msisdn));
 				conv.setIsStealth(c.getInt(isStealthColumn) == 1);
 
 				if (getMetadata)
@@ -2932,7 +3125,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.MSISDN + "= ?", args);
 
 		mDb.execSQL("DELETE FROM " + DBConstants.SHARED_MEDIA_TABLE + " WHERE " + DBConstants.MSISDN + "= ?", args);
-
+		
+		setExtraConvUnreadCount(msisdn, 0);
 		/*
 		 * Next we have to clear the conversation table.
 		 */
@@ -4745,6 +4939,35 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
+	public HashMap addBotToHashMap(HashMap<String, String> hikeBotNamesMap)
+	{
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.BOT_TABLE, new String[] { DBConstants.MSISDN, DBConstants.NAME }, null, null, null, null, null);
+
+			while (c.moveToNext())
+			{
+				int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+				int nameIdx = c.getColumnIndex(DBConstants.NAME);
+				String msisdn = c.getString(msisdnIdx);
+				String name = c.getString(nameIdx);
+				if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(msisdn))
+				{
+					hikeBotNamesMap.put(msisdn, name);
+				}
+			}
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		return hikeBotNamesMap;
+	}
+
 	public ConvMessage showParticipantStatusMessage(String groupId)
 	{
 
@@ -5149,7 +5372,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			{
                 if(message.getMessageType() == com.bsb.hike.HikeConstants.MESSAGE_TYPE.CONTENT){
                     message.platformMessageMetadata = new PlatformMessageMetadata(metadata, mContext);
-                }else{
+                }else if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || message.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT){
+					message.platformWebMessageMetadata = new PlatformWebMessageMetadata(metadata);
+				}else{
                     message.setMetadata(metadata);
                 }
 			}
@@ -6005,7 +6230,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 		return rowId < 0 ? false : true;
 	}
-	
+
 	/**
 	 * Used to persist the changes made to the {@link StickerCategory#isUpdateAvailable()} flag
 	 * 
@@ -6089,4 +6314,186 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return stickerCategory;
 	}
 
+
+	public Cursor getMessage(String messageId)
+	{
+		String selection = DBConstants.MESSAGE_ID + "=?";
+		return mDb.query(MESSAGES_TABLE, null, selection, new String[]{messageId}, null, null, null);
+	}
+	
+	public void updateMetadataOfMessage(long messageId, String metadata)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(MESSAGE_ID, messageId);
+		contentValues.put(MESSAGE_METADATA, metadata);
+		mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { String.valueOf(messageId) });
+	}
+	
+	public String getMetadataOfMessage(long messageId){
+		String selection = DBConstants.MESSAGE_ID + "=?";
+		Cursor c = mDb.query(MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_METADATA }, selection, new String[] { String.valueOf(messageId) }, null, null, null);
+		if(c.moveToFirst()){
+			return c.getString(c.getColumnIndex(MESSAGE_METADATA));
+		}
+		return null;
+	}
+	
+	/**
+	 * 
+	 * @param msisdn
+	 * @return unread count, -1 if conversation does not exist
+	 */
+	public int getConvUnreadCount(String msisdn){
+		String selection = DBConstants.MSISDN + "=?";
+		Cursor c = mDb.query(CONVERSATIONS_TABLE, new String[]{UNREAD_COUNT}, selection, new String[]{msisdn}, null, null, null);
+		if(c.moveToFirst()){
+			return c.getInt(c.getColumnIndex(DBConstants.UNREAD_COUNT));
+		}
+		return -1;
+	}
+	
+	/*
+	 * 
+	 * metadata:{'layout_id':'','file_id':'','card_data':{},'helper_data':{}}
+	 * 
+	 * This function reads helper json given in parameter and update it in metadata of message , it inserts new keys in metadata present in helper and updates old
+	 */
+	public String updateHelperData(long messageId, String helper)
+	{
+
+		String json = getMetadataOfMessage(messageId);
+		if (json != null)
+		{
+			try
+			{
+				JSONObject metadataJSON = new JSONObject(json);
+				JSONObject helperData = new JSONObject(helper);
+				JSONObject cardObj = metadataJSON.optJSONObject(HikePlatformConstants.CARD_OBJECT);
+				JSONObject oldHelper = cardObj.optJSONObject(HikePlatformConstants.HELPER_DATA);
+				if (oldHelper == null)
+				{
+					oldHelper = new JSONObject();
+				}
+				Iterator<String> i = helperData.keys();
+				while (i.hasNext())
+				{
+					String key = i.next();
+					oldHelper.put(key, helperData.get(key));
+				}
+				cardObj.put(HikePlatformConstants.HELPER_DATA, oldHelper);
+				metadataJSON.put(HikePlatformConstants.CARD_OBJECT, cardObj);
+				json = metadataJSON.toString();
+				updateMetadataOfMessage(messageId, json);
+				return json;
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			Logger.e("HikeconversationDB", "Meta data of message is null, id= " + messageId);
+		}
+		return null;
+	}
+
+	public String updateJSONMetadata(int messageId, String newMeta)
+	{
+		String json = getMetadataOfMessage(messageId);
+		if (json != null)
+		{
+			try
+			{
+				JSONObject metadataJSON = new JSONObject(json);
+				JSONObject newMetaData = new JSONObject(newMeta);
+				Iterator<String> i = newMetaData.keys();
+				while (i.hasNext())
+				{
+					String key = i.next();
+					if (newMetaData.get(key) != null)
+					{
+						//Algo is that there might be JSONObject as the value and we might want to update some keys inside that JSONObject, so we are using the try
+						//catch block for that. If JSONException is thrown, we will directly update the JSON, else will iterate again and then update.
+						try
+						{
+
+							JSONObject newMetaJSON = new JSONObject(String.valueOf(newMetaData.get(key)));
+							JSONObject metaJSON = new JSONObject(String.valueOf(metadataJSON.get(key)));
+							Iterator<String> index = newMetaJSON.keys();
+							while (index.hasNext())
+							{
+								String indexKey = index.next();
+								metaJSON.put(indexKey, newMetaJSON.get(indexKey));
+							}
+							metadataJSON.put(key, metaJSON);
+							Logger.d(mContext.getClass().getSimpleName(), "values are JSONObject, so updating the iterated JSON.");
+						}
+						catch (JSONException e)
+						{
+							Logger.d(mContext.getClass().getSimpleName(), "JSON exception thrown, so updating the original JSON directly.");
+							metadataJSON.put(key, newMetaData.get(key));
+						}
+
+					}
+				}
+				json = metadataJSON.toString();
+				updateMetadataOfMessage(messageId, json);
+				return json;
+			}
+			catch (JSONException e)
+			{
+				Logger.e("HikeconversationDB", "JSOn Exception = " + e.getMessage());
+			}
+		}
+		else
+		{
+			Logger.e("HikeconversationDB", "Meta data of message is null, id= " + messageId);
+		}
+		return null;
+	}
+
+	public void deleteAppAlarm(int messageId)
+	{
+		String json = getMetadataOfMessage(messageId);
+		if (json != null)
+		{
+			{
+				JSONObject metadataJSON = null;
+				try
+				{
+					metadataJSON = new JSONObject(json);
+					metadataJSON.remove(HikePlatformConstants.ALARM_DATA);
+					updateMetadataOfMessage(messageId, metadataJSON.toString());
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+
+			}
+		}
+	}
+
+	public void insertMicroAppALarm(int messageId,String alarmData)
+	{
+		String json = getMetadataOfMessage(messageId);
+		if (json != null)
+		{
+			{
+
+				try
+				{
+					JSONObject metadataJSON = new JSONObject(json);
+					metadataJSON.put(HikePlatformConstants.ALARM_DATA, alarmData);
+					updateMetadataOfMessage(messageId, metadataJSON.toString());
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+
+			}
+		}
+	}
 }

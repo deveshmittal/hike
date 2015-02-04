@@ -80,7 +80,9 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Shader.TileMode;
 import android.graphics.Typeface;
@@ -144,7 +146,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeConstants.ImageQuality;
@@ -153,8 +156,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.TrafficsStatsFile;
@@ -180,12 +181,12 @@ import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.ConnectionChangeReceiver;
+import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
-import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeAuthActivity;
@@ -223,6 +224,8 @@ public class Utils
 
 	private static TranslateAnimation mInFromRight;
 
+	public static float scaledDensityMultiplier = 1.0f;
+	
 	public static float densityMultiplier = 1.0f;
 
 	public static int densityDpi;
@@ -765,6 +768,14 @@ public class Utils
 		return msisdn!=null && !msisdn.startsWith("+");
 	}
 
+	public static String validateBotMsisdn(String msisdn){
+		if (!msisdn.startsWith("+")){
+			msisdn = "+" + msisdn;
+		}
+		return msisdn;
+	}
+
+
 	public static String defaultGroupName(List<PairModified<GroupParticipant, String>> participantList)
 	{
 		List<GroupParticipant> groupParticipants = new ArrayList<GroupParticipant>();
@@ -918,8 +929,9 @@ public class Utils
 	 */
 	public static void setDensityMultiplier(DisplayMetrics displayMetrics)
 	{
-		Utils.densityMultiplier = displayMetrics.scaledDensity;
+		Utils.scaledDensityMultiplier = displayMetrics.scaledDensity;
 		Utils.densityDpi = displayMetrics.densityDpi;
+		Utils.densityMultiplier = displayMetrics.density;
 	}
 
 	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
@@ -1143,12 +1155,23 @@ public class Utils
 		context.startActivity(s);
 	}
 
-	public static void startShareImageIntent(Context context, String mimeType, String imagePath)
+	public static void startShareImageIntent(String mimeType, String imagePath,String text)
 	{
 		Intent s = new Intent(android.content.Intent.ACTION_SEND);
 		s.setType(mimeType);
 		s.putExtra(Intent.EXTRA_STREAM, Uri.parse(imagePath));
-		context.startActivity(s);
+		if(!TextUtils.isEmpty(text))
+		{
+			s.putExtra(Intent.EXTRA_TEXT, text);
+		}
+		s.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		Logger.i("imageShare", "shared image with "+s.getExtras());
+		HikeMessengerApp.getInstance().getApplicationContext().startActivity(s);
+		
+	}
+	public static void startShareImageIntent(String mimeType, String imagePath)
+	{
+		startShareImageIntent(mimeType, imagePath, null);
 	}
 
 	public static void bytesToFile(byte[] bytes, File dst)
@@ -1220,6 +1243,19 @@ public class Utils
 		}
 		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
 		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
+	}
+
+	public static String drawableToString(Drawable ic)
+	{
+		if (ic != null)
+		{
+			Bitmap bitmap = ((BitmapDrawable) ic).getBitmap();
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			bitmap.compress(CompressFormat.PNG, 100, outputStream);
+			byte[] bitmapByte = outputStream.toByteArray();
+			return Base64.encodeToString(bitmapByte,Base64.DEFAULT);
+		}
+		return null;
 	}
 
 	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
@@ -1343,6 +1379,7 @@ public class Utils
 		}
 	    return result;
 	}
+
 
 	public static enum ExternalStorageState
 	{
@@ -2314,9 +2351,16 @@ public class Utils
 
 		if (ringerMode != AudioManager.RINGER_MODE_SILENT && !Utils.isUserInAnyTypeOfCall(context))
 		{
-			Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-			if (vibrator != null)
-				vibrator.vibrate(100);
+			vibrate(100);
+		}
+	}
+
+	public static void vibrate(int msecs)
+	{
+		Vibrator vibrator = (Vibrator) HikeMessengerApp.getInstance().getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
+		if (vibrator != null)
+		{
+			vibrator.vibrate(msecs);
 		}
 	}
 
@@ -2469,7 +2513,7 @@ public class Utils
 	 */
 	public static boolean loadOnUiThread()
 	{
-		return ((int) 10 * Utils.densityMultiplier) > 10;
+		return ((int) 10 * Utils.scaledDensityMultiplier) > 10;
 	}
 
 	public static void hideSoftKeyboard(Context context, View v)
@@ -3036,10 +3080,9 @@ public class Utils
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
 			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-			if(!TextUtils.isEmpty(subType)){
-				JSONObject md = new JSONObject();
-				md.put(HikeConstants.SUB_TYPE, subType);
-				data.put(HikeConstants.METADATA, md);
+			if(!TextUtils.isEmpty(subType))
+			{
+				data.put(HikeConstants.SUB_TYPE, subType);
 			}
 			if(!TextUtils.isEmpty(toMsisdn))
 			{
@@ -3403,7 +3446,7 @@ public class Utils
 
 		Bitmap bitmap = HikeBitmapFactory.drawableToBitmap(avatarDrawable, Bitmap.Config.RGB_565);
 
-		int dimension = (int) (Utils.densityMultiplier * 48);
+		int dimension = (int) (Utils.scaledDensityMultiplier * 48);
 
 		Bitmap scaled = HikeBitmapFactory.createScaledBitmap(bitmap, dimension, dimension, Bitmap.Config.RGB_565, false, true, true);
 		bitmap = null;
@@ -3596,12 +3639,17 @@ public class Utils
 		String res = height + "x" + width;
 		String operator = manager.getSimOperatorName();
 		String circle = manager.getSimOperator();
-		String pdm = Float.toString(Utils.densityMultiplier);
+		String pdm = Float.toString(Utils.scaledDensityMultiplier);
 
 		jsonObject.put(HikeConstants.RESOLUTION, res);
 		jsonObject.put(HikeConstants.OPERATOR, operator);
 		jsonObject.put(HikeConstants.CIRCLE, circle);
 		jsonObject.put(HikeConstants.PIXEL_DENSITY_MULTIPLIER, pdm);
+	}
+
+	public static ConvMessage makeConvMessage(String msisdn, boolean conversationOnHike)
+	{
+		return makeConvMessage(msisdn, "", conversationOnHike);
 	}
 
 	public static ConvMessage makeConvMessage(String msisdn, String message, boolean isOnhike)
@@ -4581,7 +4629,7 @@ public class Utils
 		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
 		 */
 		int inSampleSize = 1;
-		if (!chatTheme.isTiled() && Utils.densityMultiplier < 2)
+		if (!chatTheme.isTiled() && Utils.scaledDensityMultiplier < 2)
 		{
 			inSampleSize = 2;
 		}
@@ -5113,6 +5161,34 @@ public class Utils
 		return networkType;
 	}
 
+	public static String conversationType(String msisdn)
+	{
+		if (isBot(msisdn))
+		{
+			return HikeConstants.BOT;
+		}
+		else if (isGroupConversation(msisdn))
+		{
+			return HikeConstants.GROUP_CONVERSATION;
+		}
+		else
+		{
+			return HikeConstants.ONE_TO_ONE_CONVERSATION;
+		}
+	}
+
+	public static boolean isBot(String msisdn)
+	{
+		if (HikeMessengerApp.hikeBotNamesMap != null)
+		{
+			return HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn);
+		}
+		else
+		{
+			//Not probable
+			return false;
+		}
+	}
 	/**
 	 * Returns Data Consumed in KB
 	 * @param appId
@@ -5134,4 +5210,29 @@ public class Utils
 			return TrafficsStatsFile.getTotalBytesManual(appId);  //In KB
 		}
 	}
+	
+	public static Bitmap viewToBitmap(View view) {
+		try
+		{
+	    Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+	    Canvas canvas = new Canvas(bitmap);
+	    view.draw(canvas);
+	    return bitmap;
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static Bitmap undrawnViewToBitmap(View view) {
+		int measuredWidth = View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.UNSPECIFIED);
+		int measuredHeight = View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.UNSPECIFIED);
+
+		// Cause the view to re-layout
+		view.measure(measuredWidth, measuredHeight);
+		view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+	    return viewToBitmap(view);
+	}
+	
 }

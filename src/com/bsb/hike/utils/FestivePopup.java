@@ -53,7 +53,7 @@ public class FestivePopup
 		AlphaAnimation alphaAnim = new AlphaAnimation(0.2f, 1f);
 		alphaAnim.setFillAfter(true);
 
-		if (((int) Utils.densityMultiplier * 100) >= 100)
+		if (((int) Utils.scaledDensityMultiplier * 100) >= 100)
 		{
 			alphaAnim.setDuration(1400);
 			activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
@@ -203,7 +203,7 @@ public class FestivePopup
 		aa1.setDuration(350);
 		boxFallAnimSet.addAnimation(aa1);
 
-		Animation boxFallAnim = new TranslateAnimation(0, 0, -400 * Utils.densityMultiplier, 0);
+		Animation boxFallAnim = new TranslateAnimation(0, 0, -400 * Utils.scaledDensityMultiplier, 0);
 		boxFallAnim.setDuration(900);
 		boxFallAnimSet.addAnimation(boxFallAnim);
 
