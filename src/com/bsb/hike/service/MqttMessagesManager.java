@@ -18,6 +18,7 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.AnalyticsSender;
@@ -59,6 +60,7 @@ import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.FestivePopup;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -1113,6 +1115,12 @@ public class MqttMessagesManager
 		{
 			this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
 		}
+		if (data.has(HikeConstants.METADATA) )
+		{
+			JSONObject mmobObject = data.getJSONObject(HikeConstants.METADATA);
+			if (mmobObject.has(HikeConstants.NUX))
+				NUXManager.getInstance().parseNuxPacket(mmobObject.getJSONObject(HikeConstants.NUX).toString());
+		}
 	}
 
 	private void saveUserOptIn(JSONObject jsonObj) throws JSONException
@@ -1238,6 +1246,16 @@ public class MqttMessagesManager
 		{
 			int port = data.getInt(HikeConstants.VOIP_RELAY_SERVER_PORT);
 			editor.putInt(HikeConstants.VOIP_RELAY_SERVER_PORT, port);
+		}
+		if (data.has(HikeConstants.VOIP_QUALITY_TEST_ACCEPTABLE_PACKET_LOSS))
+		{
+			int apl = data.getInt(HikeConstants.VOIP_QUALITY_TEST_ACCEPTABLE_PACKET_LOSS);
+			editor.putInt(HikeConstants.VOIP_QUALITY_TEST_ACCEPTABLE_PACKET_LOSS, apl);
+		}
+		if (data.has(HikeConstants.VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION))
+		{
+			int scd = data.getInt(HikeConstants.VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION);
+			editor.putInt(HikeConstants.VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION, scd);
 		}
 		if (data.has(HikeConstants.REWARDS_TOKEN))
 		{
@@ -1403,6 +1421,7 @@ public class MqttMessagesManager
 		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
+		
 	}
 
 	private void saveRewards(JSONObject jsonObj) throws JSONException
@@ -1461,6 +1480,8 @@ public class MqttMessagesManager
 		// server on demand analytics data to be sent from client
 		if(data.optBoolean(AnalyticsConstants.ANALYTICS))
 		{		
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM DEMAND PACKET ROUTE---");
+
 			HAManager.getInstance().sendAnalyticsData(true);
 		}
 	}
@@ -2497,6 +2518,10 @@ public class MqttMessagesManager
 		{
 			saveTip(jsonObj);
 		}
+		else if(HikeConstants.MqttMessageTypes.NUX.equals(type))
+		{
+			saveNuxPacket(jsonObj);
+		}
 
 	}
 
@@ -2986,7 +3011,12 @@ public class MqttMessagesManager
 		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
 		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance(context).getData(key, "").equals(id);
 	}
-
+	
+	private void saveNuxPacket(JSONObject jsonObject)
+	{
+		NUXManager.getInstance().parseNuxPacket(jsonObject.toString());
+	}
+	
 	public void saveGCMMessage(JSONObject json)
 	{
 		try

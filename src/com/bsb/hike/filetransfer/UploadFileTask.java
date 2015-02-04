@@ -422,7 +422,7 @@ public class UploadFileTask extends FileTransferBase
 				{
 					File compFile = null;
 					VideoEditedInfo info = null;
-					if(android.os.Build.VERSION.SDK_INT >= 18)
+					if(android.os.Build.VERSION.SDK_INT >= 18 && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.COMPRESS_VIDEO, true))
 					{
 						info = VideoUtilities.processOpenVideo(mFile.getPath());
 						if(info != null)
@@ -430,7 +430,8 @@ public class UploadFileTask extends FileTransferBase
 							if(info.isCompRequired)
 							{
 								hikeFile.setVideoEditedInfo(info);
-								compFile = HikeVideoCompressor.getInstance().compressVideo(hikeFile);
+								HikeVideoCompressor instance = new HikeVideoCompressor();
+								compFile = instance.compressVideo(hikeFile);
 							}
 						}
 					}

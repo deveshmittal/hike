@@ -227,7 +227,7 @@ import com.bsb.hike.voip.view.CallRatePopup;
 import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
-		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener, IVoipCallListener
+		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener
 {
 	private static final String HASH_PIN = "#pin";
 
@@ -459,7 +459,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	protected void onPause()
 	{
-		super.onPause();
 		if (mAdapter != null)
 		{
 			// mAdapter.getStickerLoader().setPauseWork(false);
@@ -475,6 +474,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
 		activityVisible = false;
+		
+		//Logging ChatThread Screen closing for bot case
+		if(HikeMessengerApp.getInstance().isHikeBotNumber(mContactNumber))
+		{
+			HAManager.getInstance().endChatSession(mContactNumber);
+		}
+		super.onPause();
 	}
 
 	@Override
@@ -528,6 +534,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			   decrementUnreadPInCount();
 		}
 		updateOverflowMenuUnreadCount();
+		
+		//Logging ChatThread Screen opening for bot case
+		if(HikeMessengerApp.getInstance().isHikeBotNumber(mContactNumber))
+		{
+			HAManager.getInstance().startChatSession(mContactNumber);
+		}
 	}
 
 	private void showPopUpIfRequired()
@@ -699,7 +711,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		super.onCreate(savedInstanceState);
 
 		/* force the user into the reg-flow process if the token isn't set */
-		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
+		if (Utils.requireAuth(this))
 		{
 			return;
 		}
@@ -7009,6 +7021,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 								animatedBackground.setVisibility(View.GONE);
 								animatedBackground.clearAnimation();
 								shopIcon.clearAnimation();
+								
+								try
+								{
+									JSONObject metadata = new JSONObject();
+									metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STKR_SHOP_BTN_CLICKED);
+									HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+								}
+								catch(JSONException e)
+								{
+									Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+								}
 							}
 							if(HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))  //The shop icon would be blue unless the user clicks on it once
 							{
@@ -8047,10 +8070,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
-			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false) && mContactNumber.equals(HikeConstants.NUX_BOT))
-			{
-				intent.putExtra(HikeConstants.NUX_INVITE_FORWARD, true);
-			}
+			
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
 			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
@@ -9030,27 +9050,5 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			Utils.hideSoftKeyboard(ChatThread.this, mComposeView);
 		}
-	}
-
-	@Override
-	public void onVoipCallEnd(final Bundle bundle) 
-	{
-		runOnUiThread(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				if(!isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG))
-				{
-					CallRatePopup callRatePopup = new CallRatePopup();
-					callRatePopup.setArguments(bundle);
-
-					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-					fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
-					fragmentTransaction.commitAllowingStateLoss();
-				}
-			}
-		});
 	}
 }

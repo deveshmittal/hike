@@ -150,7 +150,7 @@ public class FestivePopup
 				{
 					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 				}
-				Intent intent = IntentManager.getForwardStickerIntent(activity, getStickerId(popupType), getCatId(popupType), false);
+				Intent intent = IntentManager.getForwardStickerIntent(activity, getStickerId(popupType), getCatId(popupType));
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				activity.startActivity(intent);
 			}
