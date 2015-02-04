@@ -162,14 +162,6 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 	}
 
 	/**
-	 * Sticker FTUE is essentially a pulsating dot animation which can be present alongside other tips as well Hence it requires different handling to show/close it
-	 */
-	public void hideStickerFtueTip()
-	{
-
-	}
-
-	/**
 	 * Utility method to show the Pin FTUE tip. If any other tip is showing, pin tip takes priority over it.
 	 */
 	public void showPinFtueTip()
@@ -314,6 +306,12 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 			mPrefs.saveData(HikeMessengerApp.SHOWN_PIN_TIP, true);
 			closeTip();
 		}
+	}
+	
+	public void setStickerStipSeen()
+	{
+		//Simply save data to prefs and remove pulsating dot animation.
+		// TODO
 	}
 
 	public void setAtomicTipSeen(int whichTip)

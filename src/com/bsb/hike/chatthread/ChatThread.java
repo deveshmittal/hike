@@ -700,6 +700,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void stickerClicked()
 	{
+		mTips.setStickerStipSeen();
 		mShareablePopupLayout.showPopup(mStickerPicker);
 	}
 
