@@ -1171,7 +1171,7 @@ public class Utils
 		{
 			s.putExtra(Intent.EXTRA_TEXT, text);
 		}
-		s.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+		s.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		Logger.i("imageShare", "shared image with "+s.getExtras());
 		HikeMessengerApp.getInstance().getApplicationContext().startActivity(s);
 		
