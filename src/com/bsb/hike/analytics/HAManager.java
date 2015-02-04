@@ -15,11 +15,13 @@ import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 import android.text.TextUtils;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.analytics.AnalyticsConstants.AppOpenSource;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gms.internal.fs;
@@ -670,6 +672,10 @@ public class HAManager
 
 	public void recordLastSeenEvent(String screen, String api, String msg, String toUser)
 	{
+		if(!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.DETAILED_HTTP_LOGGING_ENABLED, false))
+		{	
+			return;
+		}
 		JSONObject metadata = null;
 		
 		try
