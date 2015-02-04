@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -19,7 +20,9 @@ import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
@@ -60,10 +63,6 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 				DBBackupRestore.getInstance(ctx).deleteAllFiles();
 			}
 
-			HikeMessengerApp app = (HikeMessengerApp) ctx.getApplicationContext();
-			app.setServiceAsDisconnected();
-			ctx.stopService(new Intent(ctx, HikeService.class));
-
 			clearAppData();
 			Logger.d("DeleteAccountTask", "account deleted");
 
@@ -71,7 +70,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			 * We need to do this where on reset/delete account. We need to we need to run initial setup for stickers. for normal cases it runs from onCreate method of
 			 * HikeMessangerApp but in this case onCreate won't be called and user can complete signup.
 			 */
-			app.startUpdgradeIntent();
+			HikeMessengerApp.getInstance().startUpdgradeIntent();
 			return true;
 		}
 		catch (Exception e)
@@ -98,6 +97,14 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		appPrefEditor.clear();
 		editor.commit();
 		appPrefEditor.commit();
+		
+		NUXManager.getInstance().shutDownNUX();
+		/**
+		 * Stopping hike service which will call destroy mqtt
+		 */
+		HikeMessengerApp app = HikeMessengerApp.getInstance();
+		app.setServiceAsDisconnected();
+		app.stopService(new Intent(ctx, HikeService.class));
 
 		/**
 		 * Unregister from GCM service

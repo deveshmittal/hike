@@ -2081,7 +2081,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			}
 			catch (Exception e)
 			{
-				System.out.println("message" + e.getMessage());
 				e.printStackTrace();
 				return null;
 			}

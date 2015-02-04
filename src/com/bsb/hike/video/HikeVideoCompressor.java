@@ -4,7 +4,6 @@ import java.io.File;
 import java.nio.ByteBuffer;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaExtractor;
@@ -22,7 +21,6 @@ import com.bsb.hike.utils.Logger;
 public class HikeVideoCompressor {
 	
 	private final static String MIME_TYPE = "video/avc";
-    private static volatile HikeVideoCompressor instance = null;
     private static String TAG = "HikeVideoCompressor";
     
     private String videoPath;
@@ -36,17 +34,6 @@ public class HikeVideoCompressor {
     private int bitrate ;
     private int rotateRender;
     private File cacheFile;
-	
-    public static HikeVideoCompressor getInstance() {
-        if (instance == null) {
-            synchronized (HikeVideoCompressor.class) {
-                if (instance == null) {
-                	instance = new HikeVideoCompressor();
-                }
-            }
-        }
-        return instance;
-    }
 
 	public File compressVideo(final HikeFile hikeFile)
 	{

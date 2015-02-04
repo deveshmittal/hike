@@ -1,5 +1,9 @@
 package com.bsb.hike.analytics;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Utils;
 
@@ -20,6 +24,8 @@ public class Session
 		private int appId;
 
 		private long sessionStartingTimeStamp;
+		
+		private Map<String, ChatSession> msisdnChatSessionMap;
 
 		public Session()
 		{
@@ -33,6 +39,8 @@ public class Session
 			sessionId = System.currentTimeMillis();
 			
 			appOpenSource = AnalyticsConstants.AppOpenSource.REGULAR_APP_OPEN;
+			
+			msisdnChatSessionMap = new HashMap<String, ChatSession>();
 		}
 
 		public long getSessionId()
@@ -146,5 +154,47 @@ public class Session
 			msgType = "";
 
 			appOpenSource = AnalyticsConstants.AppOpenSource.REGULAR_APP_OPEN;
+			
+			msisdnChatSessionMap.clear();
+		}
+		
+		public void endChatSessions()
+		{
+			ArrayList<ChatSession> chatSessions = getChatSesions();
+			if(chatSessions != null && !chatSessions.isEmpty())
+			{
+				for (ChatSession chatSession : chatSessions)
+				{
+					chatSession.endChatSession();
+				}
+			}
+		}
+		
+		public void startChatSession(String msisdn)
+		{
+			ChatSession chatSession = msisdnChatSessionMap.get(msisdn);
+			if (chatSession == null)
+			{
+				chatSession = new ChatSession(msisdn);
+
+				msisdnChatSessionMap.put(msisdn, chatSession);
+			}
+
+			chatSession.startChatSession();
+
+		}
+
+		public void endChatSesion(String msisdn)
+		{
+			ChatSession chatSession = msisdnChatSessionMap.get(msisdn);
+			if (chatSession != null)
+			{
+				chatSession.endChatSession();
+			}
+		}
+
+		public ArrayList<ChatSession> getChatSesions()
+		{
+			return new ArrayList<ChatSession>(msisdnChatSessionMap.values());
 		}
 	}

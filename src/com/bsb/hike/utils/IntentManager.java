@@ -12,12 +12,16 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.models.NuxCustomMessage;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
+import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.NUXInviteActivity;
+import com.bsb.hike.ui.NuxSendCustomMessageActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
@@ -26,6 +30,15 @@ import com.bsb.hike.ui.WelcomeActivity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.android.gms.internal.co;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Message;
+import android.text.TextUtils;
+import android.widget.Toast;
 
 public class IntentManager
 {
@@ -215,17 +228,10 @@ public class IntentManager
 		return intent;
 	}
 
-	public static Intent getForwardStickerIntent(Context context, String stickerId, String categoryId, boolean isFtueFwd)
+	public static Intent getForwardStickerIntent(Context context, String stickerId, String categoryId)
 	{
 		Intent intent = new Intent(context, ComposeChatActivity.class);
-		if (isFtueFwd)
-		{
-			intent.putExtra(HikeConstants.Extras.FTUE_FORWARD, true);
-		}
-		else
-		{
-			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
-		}
+		intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 		JSONArray multipleMsgArray = new JSONArray();
 		try
 		{
@@ -272,4 +278,35 @@ public class IntentManager
 		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		appContext.startActivity(i);
 	}
+	
+	public static void openHomeActivity(Context context)
+	{
+		Intent in = new Intent(context, HomeActivity.class);
+		context.startActivity(in);
+	}
+
+	public static Intent openInviteFriends(Activity context)
+	{
+		// TODO Auto-generated method stub
+		Intent in = new Intent(context, NUXInviteActivity.class);
+		in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		return in;
+	}
+	
+	public static Intent openNuxFriendSelector(Activity context)
+	{
+		Intent in = new Intent(context, ComposeChatActivity.class);
+		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		in.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+		in.putExtra(HikeConstants.Extras.NUX_INCENTIVE_MODE, true);
+		return in;
+	}
+	
+	public static Intent openNuxCustomMessage(Activity context)
+	{
+		Intent in = new Intent(context, NuxSendCustomMessageActivity.class);
+		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		return in;
+	}
+
 }
