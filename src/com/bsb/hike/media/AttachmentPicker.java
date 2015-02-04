@@ -15,6 +15,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
@@ -53,9 +54,9 @@ public class AttachmentPicker extends OverFlowMenuLayout
 	 *            - if true, we will start respective activities on activity behalf and activity has to handle onActivityResult callback where request code is Overflowitem
 	 *            uniqueness
 	 */
-	public AttachmentPicker(List<OverFlowMenuItem> overflowItems, OverflowItemClickListener listener, Context context, boolean startRespectiveActivities)
+	public AttachmentPicker(List<OverFlowMenuItem> overflowItems, OverflowItemClickListener listener, OnDismissListener onDismissListener, Context context, boolean startRespectiveActivities)
 	{
-		super(overflowItems, listener, context);
+		super(overflowItems, listener, onDismissListener,context);
 		this.startRespectiveActivities = startRespectiveActivities;
 	}
 
@@ -68,9 +69,9 @@ public class AttachmentPicker extends OverFlowMenuLayout
 	 *            - if true, we will start respective activities on activity behalf and activity has to handle onActivityResult callback and request code will be constants given
 	 *            above
 	 */
-	public AttachmentPicker(OverflowItemClickListener listener, Activity activity, boolean startRespectiveActivities)
+	public AttachmentPicker(OverflowItemClickListener listener, OnDismissListener onDismissListener, Activity activity, boolean startRespectiveActivities)
 	{
-		this(null, listener, activity.getApplicationContext(), startRespectiveActivities);
+		this(null, listener, onDismissListener,activity.getApplicationContext(), startRespectiveActivities);
 		this.activity = activity;
 		initDefaultAttachmentList();
 	}

@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -22,6 +23,7 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 	protected OverflowItemClickListener listener;
 	protected View viewToShow;
 	protected PopUpLayout popUpLayout;
+	private OnDismissListener mOnDismisslistener;
 
 	/**
 	 * This class is made to show overflow menu items, by default it populates
@@ -33,10 +35,11 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 	 * @param context
 	 */
 	public OverFlowMenuLayout(List<OverFlowMenuItem> overflowItems,
-			OverflowItemClickListener listener, Context context) {
+			OverflowItemClickListener listener, OnDismissListener onDismissListener, Context context) {
 		this.overflowItems = overflowItems;
 		this.listener = listener;
 		this.context = context;
+		this.mOnDismisslistener = onDismissListener;
 		popUpLayout = new PopUpLayout(context);
 	}
 
@@ -111,6 +114,7 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 		initView();
 		popUpLayout.showPopUpWindow(width, height, xOffset, yOffset, anchor,
 				getView());
+		popUpLayout.setOnDismissListener(mOnDismisslistener);
 	}
 
 	public void appendItem(OverFlowMenuItem item) {

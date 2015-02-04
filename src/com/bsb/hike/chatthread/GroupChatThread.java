@@ -137,7 +137,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	{
 		if (groupConversation != null)
 		{
-			mActionBar.onCreateOptionsMenu(menu, R.menu.group_chat_thread_menu, getOverFlowItems(), this);
+			mActionBar.onCreateOptionsMenu(menu, R.menu.group_chat_thread_menu, getOverFlowItems(), this, this);
 			return super.onCreateOptionsMenu(menu);
 		}
 		
@@ -1353,5 +1353,11 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			Toast.makeText(activity.getApplicationContext(), R.string.unknown_error, Toast.LENGTH_SHORT).show();
 			je.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void onDismiss()
+	{
+		mTips.showHiddenTip();
 	}
 }

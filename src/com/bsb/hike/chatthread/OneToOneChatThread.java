@@ -114,7 +114,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		Logger.i(TAG, "on create options menu " + menu.hashCode());
 		
 		if (mConversation != null)
-		{	mActionBar.onCreateOptionsMenu(menu, R.menu.one_one_chat_thread_menu, getOverFlowItems(), this);
+		{	mActionBar.onCreateOptionsMenu(menu, R.menu.one_one_chat_thread_menu, getOverFlowItems(), this, this);
 			return super.onCreateOptionsMenu(menu);
 		}
 		
@@ -1489,5 +1489,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 		super.sendButtonClicked();
+	}
+	
+	@Override
+	public void onDismiss()
+	{
+		mTips.showHiddenTip();
 	}
 }

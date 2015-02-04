@@ -5,13 +5,12 @@ import java.util.Set;
 
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.PopupWindow.OnDismissListener;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.bsb.hike.R;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.media.OverFlowMenuLayout;
 import com.bsb.hike.media.OverflowItemClickListener;
@@ -50,15 +49,15 @@ public class HikeActionBar
 		this.mMenu = menu;
 	}
 
-	public void onCreateOptionsMenu(Menu menu, int menuLayout, List<OverFlowMenuItem> overflowItems, OverflowItemClickListener listener)
+	public void onCreateOptionsMenu(Menu menu, int menuLayout, List<OverFlowMenuItem> overflowItems, OverflowItemClickListener listener, OnDismissListener onDismissListener)
 	{
 		onCreateOptionsMenu(menu, menuLayout);
-		onCreateOverflowMenu(overflowItems, listener);
+		onCreateOverflowMenu(overflowItems, listener, onDismissListener);
 	}
 
-	private void onCreateOverflowMenu(List<OverFlowMenuItem> overflowItems, OverflowItemClickListener listener)
+	private void onCreateOverflowMenu(List<OverFlowMenuItem> overflowItems, OverflowItemClickListener listener, OnDismissListener onDismissListener)
 	{
-		overFlowMenuLayout = new OverFlowMenuLayout(overflowItems, listener, mActivity);
+		overFlowMenuLayout = new OverFlowMenuLayout(overflowItems, listener, onDismissListener, mActivity);
 	}
 
 	public boolean isOverflowMenuPopulated()
