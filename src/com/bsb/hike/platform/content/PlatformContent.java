@@ -22,7 +22,48 @@ public class PlatformContent
 
 	public static enum ErrorCode
 	{
-		INVALID_DATA, LOW_CONNECTIVITY, STORAGE_FULL, UNKNOWN, DOWNLOADING
+		INVALID_DATA
+				{
+					@Override
+					public String toString()
+					{
+						return "inv_data";
+					}
+				},
+
+		LOW_CONNECTIVITY
+				{
+					@Override
+					public String toString()
+					{
+						return "low_con";
+					}
+				},
+
+		STORAGE_FULL
+				{
+					@Override
+					public String toString()
+					{
+						return "st_full";
+					}
+				},
+		UNKNOWN
+				{
+					@Override
+					public String toString()
+					{
+						return "unknown";
+					}
+				},
+		DOWNLOADING
+				{
+					@Override
+					public String toString()
+					{
+						return "downloading";
+					}
+				}
 	}
 
 	/**
