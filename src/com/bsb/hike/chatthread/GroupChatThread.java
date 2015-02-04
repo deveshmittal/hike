@@ -453,7 +453,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			}
 			catch (JSONException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
@@ -470,7 +469,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		}
 		catch (JSONException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
