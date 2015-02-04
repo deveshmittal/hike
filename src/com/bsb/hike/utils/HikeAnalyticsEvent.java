@@ -105,4 +105,18 @@ public class HikeAnalyticsEvent
 			Logger.e("HikeAnalyticsEvent", "Exception is sending analytics event for gallery selections", e);
 		}
 	}
+
+    public static void analyticsForBots(String type, String subType, JSONObject json)
+    {
+        try
+        {
+            Logger.d("HikeAnalyticsEvent", json.toString());
+            HAManager.getInstance().record(type, subType, HAManager.EventPriority.HIGH, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+        }
+        catch (NullPointerException npe)
+        {
+            npe.printStackTrace();
+        }
+    }
+
 }

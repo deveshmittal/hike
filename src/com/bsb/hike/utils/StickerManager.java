@@ -121,7 +121,7 @@ public class StickerManager
 	
 	public static int MAX_CUSTOM_STICKERS_COUNT = 30;
 	
-	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
+	public static final int SIZE_IMAGE = (int) (80 * Utils.scaledDensityMultiplier);
 
 	public static final String UPGRADE_FOR_STICKER_SHOP_VERSION_1 = "upgradeForStickerShopVersion1";
 	

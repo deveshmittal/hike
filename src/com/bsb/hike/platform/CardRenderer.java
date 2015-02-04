@@ -132,6 +132,7 @@ public class CardRenderer implements View.OnLongClickListener {
                 case 5:
                     return COLOR_CARD_LAYOUT_SENT;
 
+
             }
 
         } else {
@@ -151,6 +152,7 @@ public class CardRenderer implements View.OnLongClickListener {
                 case 5:
                     return COLOR_CARD_LAYOUT_RECEIVED;
 
+
             }
 
         }
@@ -158,7 +160,7 @@ public class CardRenderer implements View.OnLongClickListener {
 
     }
 
-    public View getView(View view, ConvMessage convMessage, ViewGroup parent) {
+    public View getView(View view, final ConvMessage convMessage, ViewGroup parent) {
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 

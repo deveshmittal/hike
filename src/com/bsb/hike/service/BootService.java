@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -21,6 +23,7 @@ public class BootService extends BroadcastReceiver
 
 		// GCM_ID_SENT_PRELOAD=true,User Auth=false-->Best Scenario
 
+		HikeAlarmManager.repopulateAlarm();
 		if (mprefs.getData(HikeMessengerApp.GCM_ID_SENT_PRELOAD, false) && (!Utils.isUserAuthenticated(ctx)))
 		{
 			PreloadNotificationSchedular.scheduleNextAlarm(ctx);

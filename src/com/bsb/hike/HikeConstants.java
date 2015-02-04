@@ -79,6 +79,10 @@ public class HikeConstants
 
 	public static final String MSISDN = "msisdn";
 
+	public static final String BOT_THUMBNAIL = "dp";
+
+	public static final String BOT_CHAT_THEME = "bg_id";
+
 	public static final String NEW_USER = "nu";
 
 	public static final String EMAIL = "email";
@@ -86,6 +90,10 @@ public class HikeConstants
 	public static final String GENDER = "gender";
 
 	public static final String VERSION = "v";
+	
+	public static final String EXPIRE_AT = "expires_at";
+	
+	public static final String PUSHACK = "pushack";
 
 	public static final String CRITICAL = "c";
 
@@ -186,6 +194,12 @@ public class HikeConstants
 	public static final String PROFILE = "profile";
 
 	public static final String ICON = "icon";
+
+	public static final String BOT = "bot";
+
+	public static final String GROUP_CONVERSATION = "gc";
+
+	public static final String ONE_TO_ONE_CONVERSATION = "oc";
 
 	public static final String MUTED = "muted";
 
@@ -1809,6 +1823,13 @@ public class HikeConstants
 		public static final String VOIP_NATIVE_CALL_INTERRUPT = "tci";
 
 		public static final String VOIP_CALL_RELAY = "cpur";
+		
+		//GCM Events
+		public static final String GCM_EXPIRED = "gcmexp";
+		
+		public static final String GCM_PUSH_ACK = "gcmpack";
+		
+		public static final String GCM_ANALYTICS_CONTEXT = "gcmst";
 
 		public static final String VOIP_CONNECTION_FAILED = "connf";
 		
@@ -1957,6 +1978,12 @@ public class HikeConstants
 		
 		public static final String NUX = "nux";
 
+		public static final String CREATE_MULTIPLE_BOTS = "cbot";
+
+		public static final String DELETE_MULTIPLE_BOTS = "dbot";
+
+		public static final String GCM_ECHO = "gcmecho";
+
 		public static final String VOIP_SOCKET_INFO = "ve";
 		
 		/**
@@ -1980,7 +2007,6 @@ public class HikeConstants
 		
 		public static final String DELETE_BOT = "db";
 		
-		public static final String GCM_ECHO = "gcmecho";
 
 		/**
 		 * The person we are calling is on a client that cannot be upgraded
@@ -2115,12 +2141,18 @@ public class HikeConstants
 		public static final int TEXT_PIN = 1;
 		
 		public static final int CONTENT = 2;
+
+		public static final int WEB_CONTENT = 3;
+
+		public static final int FORWARD_WEB_CONTENT = 4;
 	}
 	
 	public static interface ConvMessagePacketKeys{
 		public static final String CONTENT_TYPE = "c";
 		public static final String PIN_TYPE = "pin";
 		public static final String LOVE_ID = "loveID";
+		public static final String WEB_CONTENT_TYPE = "wc";
+		public static final String FORWARD_WEB_CONTENT_TYPE = "fwc";
 	}
 	
 	public static class HASH_MESSAGE_TYPE
@@ -2218,7 +2250,7 @@ public class HikeConstants
 	public static final String GCM_ID = "gcm_id";
 	
 	public static final String ADD_CATEGORY = "addCat";
-
+	
 	public static final int LED_DEFAULT_WHITE_COLOR = 0xffffffff;
 	
 	public static final int LED_NONE_COLOR = -2; /**
@@ -2228,4 +2260,15 @@ public class HikeConstants
 
 	public static long STOP_NOTIF_SOUND_TIME = 3000; // In milliseconds
 	
+	public static final String PLAY_NOTIFICATION = "notif";
+	
+	public static final String SILENT = "silent";
+	
+	public static final String LOUD = "loud";
+	
+	public static final String OFF = "off";
+
+	public static final String ENABLE_DETAILED_HTTP_LOGGING = "edhl";
+
+
 }
