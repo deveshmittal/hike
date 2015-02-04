@@ -6,21 +6,26 @@ package com.bsb.hike.analytics;
  */
 public class AnalyticsConstants 
 {	
+	/** one day in milliseconds */
 	public static final long ONE_DAY = 24 * 60 * 60 * 1000;
 	
+	/** one hour in milliseconds */
 	public static final long ONE_HOUR =  60 * 60 * 1000;
+
+	/** one minute in milliseconds */
+	public static final long ONE_MINUTE =  60 * 1000;
 	
+	/** one day in seconds */
+	public static final int DAY_IN_SECONDS = 24 * 60 * 60;
+
 	//TODO: changed from 500 to 5 for testing
 	public static long MAX_FILE_SIZE = 5 * 1024;
 
 	//TODO: changed from 500 to 10 for testing
 	public static long MAX_ANALYTICS_SIZE = 10 * 1024;
-	
-	/** time of first attempt to send analytics data */ 
-	public static int HOUR_OF_DAY_TO_SEND = 8;
-	
+		
 	/** number of times upload should be tried in one day */
-	public static int ANALYTICS_UPLOAD_FREQUENCY = 3;
+	public static int ANALYTICS_UPLOAD_FREQUENCY = 2;
 	
 	/** try sending analytics data every 4 hours */
 	public static int UPLOAD_TIME_MULTIPLE = 4;
@@ -30,10 +35,9 @@ public class AnalyticsConstants
 	//TODO: changed from 50 to 10 for testing
 	public static final int MAX_EVENTS_IN_MEMORY = 10;
 	
-	public static final int DEFAULT_SEND_FREQUENCY = 24;
-	
-	public static final String HTTP_UPLOAD_URL = "http://staging.im.hike.in/v1/logs/analytics"; 
-	
+	/** Default frequency at which logs should be tried to be sent to server */
+	public static final int DEFAULT_SEND_FREQUENCY = 1440;
+		
 	public static final String EVENT_FILE_DIR = "/Analytics";
 	
 	public static final String NEW_LINE = "\n";

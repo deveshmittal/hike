@@ -2,6 +2,7 @@ package com.bsb.hike.analytics;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
@@ -51,7 +52,7 @@ public class HAManager
 
 	private int analyticsSendFreq = AnalyticsConstants.DEFAULT_SEND_FREQUENCY;
 
-	private int hourToSend;
+	private long hourToSend;
 	
 	private int analyticsUploadFrequency = 0;
 		
@@ -81,26 +82,33 @@ public class HAManager
 
 		fileMaxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_FILESIZE, AnalyticsConstants.MAX_FILE_SIZE);
 		
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File max size :" + fileMaxSize);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File max size :" + fileMaxSize + " KBs");
 		
 		analyticsMaxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, AnalyticsConstants.MAX_ANALYTICS_SIZE);
 		
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Total analytics size :" + analyticsMaxSize);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Total analytics size :" + analyticsMaxSize + " KBs");
 		
-		hourToSend = getPrefs().getInt(AnalyticsConstants.ANALYTICS_ALARM_TIME, -1);
-		
+		hourToSend = getPrefs().getLong(AnalyticsConstants.ANALYTICS_ALARM_TIME, -1);
+
+		Calendar cal = Calendar.getInstance();
+
 		if(hourToSend == -1)
 		{
-			hourToSend = getRandomTime();
+			int rndHour = getRandomTime();
+			hourToSend = Utils.getTimeInMillis(cal, rndHour, 0, 0, 0);
 			
 			Editor editor = getPrefs().edit();		
-			editor.putInt(AnalyticsConstants.ANALYTICS_ALARM_TIME, hourToSend);		
+			editor.putLong(AnalyticsConstants.ANALYTICS_ALARM_TIME, hourToSend);		
 			editor.commit();
 		}		
 		
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Current alarm time :" + hourToSend);
+		cal.setTimeInMillis(hourToSend);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm date(Constructor) :" + cal.get(Calendar.DAY_OF_MONTH));
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm time(Constructor) :" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));
 
 		analyticsSendFreq = getPrefs().getInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY, AnalyticsConstants.DEFAULT_SEND_FREQUENCY);
+
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Send frequency :" + analyticsSendFreq + " mins");
 
 		fgSessionInstance = new Session();
 		
@@ -264,7 +272,7 @@ public class HAManager
 	 * Returns the hour of the day when log file should be sent to the server
 	 * @return hour of the day(0-23)
 	 */
-	public int getWhenToSend()
+	public long getWhenToSend()
 	{		
 		return hourToSend;
 	}
@@ -288,6 +296,18 @@ public class HAManager
 		edit.putBoolean(AnalyticsConstants.ANALYTICS, isAnalyticsEnabled);
 		edit.commit();
 		this.isAnalyticsEnabled = isAnalyticsEnabled;
+	}
+	
+	/**
+	 * Used to set the next alarm time for sending analytics data
+	 * @param alarmTime in milliseconds
+	 */
+	public void setNextSendTimeToPrefs(long alarmTime)
+	{
+		Editor editor = getPrefs().edit();		
+		editor.putLong(AnalyticsConstants.ANALYTICS_ALARM_TIME, alarmTime);		
+		editor.commit();
+		hourToSend = alarmTime;
 	}
 	
 	/**
@@ -432,7 +452,7 @@ public class HAManager
 	private int getRandomTime()
 	{
 		Random rand = new Random();		
-		int time = rand.nextInt(24);				
+		int time = rand.nextInt(AnalyticsConstants.DAY_IN_SECONDS);				
 		return time;
 	}
 	

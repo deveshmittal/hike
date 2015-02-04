@@ -161,12 +161,15 @@ public class AnalyticsSender
 	 */
 	public void startUploadAndScheduleNextAlarm()
 	{
-		if(!isAnalyticsUploadReady())
-			return;
-		
 		HAManager instance = HAManager.getInstance();
+		long nextSchedule = instance.getWhenToSend();
 
-		long nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend(), 0, 0, 0);
+		if(!isAnalyticsUploadReady())
+		{
+			nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_MINUTE;
+			instance.setNextSendTimeToPrefs(nextSchedule);
+			return;
+		}		
 
 		if(!Utils.isUserOnline(context))
 		{			
@@ -178,38 +181,30 @@ public class AnalyticsSender
 			if(freq < AnalyticsConstants.ANALYTICS_UPLOAD_FREQUENCY)
 			{
 				instance.incrementAnalyticsUploadRetryCount();
-//				freq = instance.getAnalyticsUploadRetryCount();
-				nextSchedule = System.currentTimeMillis() + AnalyticsConstants.UPLOAD_TIME_MULTIPLE * AnalyticsConstants.ONE_HOUR;
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "UPLOAD RETRY COUNT :" + freq);
+				nextSchedule = System.currentTimeMillis() + AnalyticsConstants.UPLOAD_TIME_MULTIPLE * AnalyticsConstants.ONE_HOUR;				
+				
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "UPLOAD RETRY COUNT :" + instance.getAnalyticsUploadRetryCount());
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Alarm set for next 4 hours from current time.");
 				
 				// don't remove! added for testing purpose. 
-//				Calendar cal = Calendar.getInstance();
-//				cal.setTimeInMillis(nextSchedule);
-//								
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Day :" + cal.get(Calendar.DATE));
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Hour :" + cal.get(Calendar.HOUR_OF_DAY));				
+				Calendar cal = Calendar.getInstance();
+				cal.setTimeInMillis(nextSchedule);								
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm Date :" + cal.get(Calendar.DATE));
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm time :" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));
 			}
 			else
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Retries finished. Set alarm as per frequency now.");
 				instance.resetAnalyticsUploadRetryCount();
-				
+								
+				nextSchedule = System.currentTimeMillis() + instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_MINUTE;
+				instance.setNextSendTimeToPrefs(nextSchedule);
+
 				// don't remove! added for testing purpose. 
-//				Calendar cal = Calendar.getInstance();
-//				cal.setTimeInMillis(nextSchedule);
-//								
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Day :" + cal.get(Calendar.DATE));
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Hour :" + cal.get(Calendar.HOUR_OF_DAY));
-				
-				nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;
-				
-				// don't remove! added for testing purpose. 
-//				cal = Calendar.getInstance();
-//				cal.setTimeInMillis(nextSchedule);
-//								
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Day :" + cal.get(Calendar.DATE));
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Hour :" + cal.get(Calendar.HOUR_OF_DAY));
+				Calendar cal = Calendar.getInstance();
+				cal.setTimeInMillis(nextSchedule);
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm Date :" + cal.get(Calendar.DATE));
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm time :" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));
 			}
 		}
 		// regular path will set alarm for same time next day
@@ -217,13 +212,18 @@ public class AnalyticsSender
 		{
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "User is online.....");
 
-			nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;
-
+			nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_MINUTE;
+			instance.setNextSendTimeToPrefs(nextSchedule);
+			
+			// don't remove! added for testing purpose. 
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(nextSchedule);							
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm Date :" + cal.get(Calendar.DATE));
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm time :" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));			
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM ALARM ROUTE---");
 			
 			instance.sendAnalyticsData(false);			
 		}
-		
 		HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);		
 	}
 	
