@@ -1636,7 +1636,7 @@ public class MqttMessagesManager
 		JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
 		long lastSeenTime = data.getLong(HikeConstants.LAST_SEEN);
 		int isOffline;
-		HAManager.getInstance().recordLastSeenEvent(MqttMessagesManager.class.getName(), "saveLastSeen", "", msisdn);
+		HAManager.getInstance().recordLastSeenEvent(MqttMessagesManager.class.getName(), "saveLastSeen", null, msisdn);
 		/*
 		 * Apply offset only if value is greater than 0
 		 */

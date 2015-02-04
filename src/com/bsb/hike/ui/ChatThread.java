@@ -2527,7 +2527,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				lastSeenScheduler = LastSeenScheduler.getInstance(this);
 				lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
-				HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "createConversation", "", mContactNumber);
+				HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "createConversation", null, mContactNumber);
 			}
 		}
 

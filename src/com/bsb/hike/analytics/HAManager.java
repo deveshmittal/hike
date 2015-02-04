@@ -660,7 +660,7 @@ public class HAManager
 			
 			metadata.put("api", api);
 			
-			if(!"".equals(msg))
+			if(!TextUtils.isEmpty(msg))
 			{
 				metadata.put("m", msg);
 			}
