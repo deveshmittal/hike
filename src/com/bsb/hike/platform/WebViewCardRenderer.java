@@ -21,10 +21,12 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
+import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -343,6 +345,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		public void onPageFinished(WebView view, String url)
 		{
 			super.onPageFinished(view, url);
+			CookieManager.getInstance().setAcceptCookie(true);
 			Log.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
 			view.loadUrl("javascript:setData('"  + convMessage.getMsisdn() + "','"
 					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "','" + convMessage.isSent() +  "')");
