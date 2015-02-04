@@ -680,6 +680,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	{
 		try
 		{
+			
+			if(!Utils.isUserAuthenticated(context))
+			{
+				Logger.d(TAG, "User not Authenticated");
+				return;
+			}
+			
 			if (!isNetworkAvailable())
 			{
 				Logger.d(TAG, "No Network Connection so should not connect");
@@ -1311,13 +1318,22 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				Thread.sleep(10);
 				retryAttempts++;
 			}
+			if(mMessenger != null)
+			{
+				mMessenger = null;
+			}
+			
 			if (mMqttHandlerLooper != null)
 			{
 				if (Utils.hasKitKat())
 					mMqttHandlerLooper.quitSafely();
 				else
 					mMqttHandlerLooper.quit();
+				
+				mMqttHandlerLooper = null;
+				mqttThreadHandler = null;
 			}
+			initialised.getAndSet(false);
 			mqttMessageManager.close();
 			Logger.w(TAG, "Mqtt connection destroyed.");
 		}

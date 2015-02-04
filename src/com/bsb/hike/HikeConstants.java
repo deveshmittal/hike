@@ -454,6 +454,10 @@ public class HikeConstants
 	public static final String WF_AUTO_DOWNLOAD_AUDIO_PREF = "wfAutoDownloadAudioPref";
 
 	public static final String WF_AUTO_DOWNLOAD_VIDEO_PREF = "wfAutoDownloadVideoPref";
+
+	public static final String COMPRESS_VIDEO = "videoCompress";
+
+	public static final String COMPRESS_VIDEO_CATEGORY = "videoCompressCategory";
 	
 	public static final String IMAGE_QUALITY = "imageQuality";
 	
@@ -1674,6 +1678,8 @@ public class HikeConstants
 		
 		public static final String STICKER_BTN_CLICKED = "stickerBtnClicked";
 		
+		public static final String STKR_SHOP_BTN_CLICKED = "shopBtnClicked";		
+		
 		public static final String STICKER_SETTING_BTN_CLICKED = "stickerSettingBtnClicked";
 		
 		public static final String SEEN_REORDERING_TIP = "seenReorderingTip";
@@ -1691,7 +1697,11 @@ public class HikeConstants
 		public static final String SETTINGS_NOTIFICATION_H2O_ON = "settingsSNotifH2OEnabled";
 		
 		public static final String SETTINGS_NOTIFICATION_H2O_OFF = "settingsSNotifH2ODisabled";
+
+		public static final String SETTINGS_NOTIFICATION_NUJ_ON = "settingsSNotifNUJEnabled";
 		
+		public static final String SETTINGS_NOTIFICATION_NUJ_OFF = "settingsSNotifNUJDisabled";
+
 		/*
 		 * HikeSharedFiles Activity Screen = sharedMediaS<event>
 		 * */
@@ -1756,13 +1766,13 @@ public class HikeConstants
 		/*
 		 * Account Backup Events
 		 */
-		public static final String BACKUP = "backupClk";
+		public static final String BACKUP = "bckMnul";
 
-		public static final String BACKUP_RESTORE = "backupRestoreClk";
+		public static final String BACKUP_RESTORE = "bckRstr";
 
-		public static final String BACKUP_RESTORE_RETRY = "backupRestoreRetryClk";
+		public static final String BACKUP_RESTORE_RETRY = "rstrRtry";
 
-		public static final String BACKUP_RESTORE_SKIP = "backupRestoreSkipClk";
+		public static final String BACKUP_RESTORE_SKIP = "rstrSkp";
 
 		/*
 		 * Platform Events

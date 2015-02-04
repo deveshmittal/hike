@@ -1320,4 +1320,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
 	<string name="voip_partner_is_busy">Busy</string>
 	<string name="voip_call_on_hold">Call on hold.</string>
 	<string name="voip_call_issues_submit_toast">Your feedback has been submitted</string>
+    <string name="video_compress">VIDEO COMPRESSION</string>
+    <string name="send_compress_video">Send Compressed Video</string>
 </resources>
