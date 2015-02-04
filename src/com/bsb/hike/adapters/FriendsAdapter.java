@@ -87,10 +87,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public static final String RECENT_PHONE_NUM = "-128";
 	
 	public static final String RECENTLY_JOINED = "-129";
+	
+	public static final String RECOMMENDED = "-130";
 
 	public enum ViewType
 	{
-		SECTION, FRIEND, NOT_FRIEND_HIKE, NOT_FRIEND_SMS, FRIEND_REQUEST, EXTRA, EMPTY, FTUE_CONTACT, REMOVE_SUGGESTIONS, NEW_CONTACT
+		SECTION, FRIEND, NOT_FRIEND_HIKE, NOT_FRIEND_SMS, FRIEND_REQUEST, EXTRA, EMPTY, FTUE_CONTACT, REMOVE_SUGGESTIONS, NEW_CONTACT, RECOMMENDED
 	}
 
 	private LayoutInflater layoutInflater;
@@ -130,6 +132,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected List<ContactInfo> filteredGroupsList;
 	
 	protected List<ContactInfo> filteredRecentsList;
+	
+	protected List<ContactInfo> nuxRecommendedList;
+	
+	protected List<ContactInfo> nuxFilteredRecoList;
 
 	protected Context context;
 
@@ -194,6 +200,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		hikeContactsList = new ArrayList<ContactInfo>(0);
 		smsContactsList = new ArrayList<ContactInfo>(0);
 		recentlyJoinedHikeContactsList = new ArrayList<ContactInfo>(0);
+		nuxRecommendedList = new ArrayList<ContactInfo>(0);
 		
 		friendsStealthList = new ArrayList<ContactInfo>(0);
 		hikeStealthContactsList = new ArrayList<ContactInfo>(0);
@@ -203,6 +210,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		filteredHikeContactsList = new ArrayList<ContactInfo>(0);
 		filteredSmsContactsList = new ArrayList<ContactInfo>(0);
 		filteredRecentlyJoinedHikeContactsList = new ArrayList<ContactInfo>(0);
+		nuxFilteredRecoList = new ArrayList<ContactInfo>(0);
 		lastStatusMessagesMap = new HashMap<String, StatusMessage>();
 
 		listFetchedOnce = false;
@@ -250,7 +258,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				List<ContactInfo> filteredGroupList = new ArrayList<ContactInfo>();
 				List<ContactInfo> filteredRecentsList = new ArrayList<ContactInfo>();
 				List<ContactInfo> filteredRecentlyJoinedList = new ArrayList<ContactInfo>();
-
+				List<ContactInfo> nuxFilteredRecoList = new ArrayList<ContactInfo>();
+ 
 				filterList(friendsList, filteredFriendsList, textToBeFiltered);
 				filterList(hikeContactsList, filteredHikeContactsList, textToBeFiltered);
 				filterList(smsContactsList, filteredSmsContactsList, textToBeFiltered);
@@ -269,6 +278,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				{
 					filterList(recentlyJoinedHikeContactsList, filteredRecentlyJoinedList, textToBeFiltered);
 				}
+				
+				if(nuxRecommendedList != null && !nuxRecommendedList.isEmpty())
+				{
+
+					Logger.d("UmngR", "nux list :" +  nuxRecommendedList.toString());
+					filterList(nuxRecommendedList, nuxFilteredRecoList, textToBeFiltered);
+					Logger.d("UmngR", "nux  filter list :" +  nuxFilteredRecoList.toString());
+				}
 				List<List<ContactInfo>> resultList = new ArrayList<List<ContactInfo>>(3);
 				resultList.add(filteredFriendsList);
 				resultList.add(filteredHikeContactsList);
@@ -276,6 +293,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				resultList.add(filteredGroupList);
 				resultList.add(filteredRecentsList);
 				resultList.add(filteredRecentlyJoinedList);
+				Logger.d("UmngR", nuxFilteredRecoList.toString());
+				resultList.add(nuxFilteredRecoList);
 
 				results.values = resultList;
 				isFiltered = true;
@@ -345,6 +364,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				filteredRecentlyJoinedHikeContactsList.clear();
 				filteredRecentlyJoinedHikeContactsList.addAll(resultList.get(5));
 			}
+			if(nuxRecommendedList != null && !nuxRecommendedList.isEmpty())
+			{
+				nuxFilteredRecoList.clear();
+				nuxFilteredRecoList.addAll(resultList.get(6));
+			}
 			makeCompleteList(true);
 		}
 	}
@@ -358,6 +382,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		resultList.add(groupsList);
 		resultList.add(recentContactsList);
 		resultList.add(recentlyJoinedHikeContactsList);
+		resultList.add(nuxRecommendedList);
 
 		return resultList;
 	}
