@@ -233,6 +233,10 @@ class PlatformContentCache
 		{
 			npe.printStackTrace();
 		}
+		catch (IndexOutOfBoundsException ie)
+		{
+			ie.printStackTrace();
+		}
 	}
 
 	/**
