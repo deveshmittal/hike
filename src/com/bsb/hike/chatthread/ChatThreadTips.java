@@ -1,8 +1,6 @@
 package com.bsb.hike.chatthread;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -233,9 +231,9 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 	}
 
 	/**
-	 * Used to temporarily hide open tips
+	 * Used to temporarily hide any open tips
 	 */
-	public void hideOpenTips()
+	public void hideTip()
 	{
 		if (tipView != null && tipView.getVisibility() == View.VISIBLE)
 		{
@@ -250,8 +248,16 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 			tipView.setVisibility(View.INVISIBLE);
 		}
 	}
+	
+	public void showHiddenTip()
+	{
+		if (tipView != null && tipView.getVisibility() == View.INVISIBLE)
+		{
+			tipView.setVisibility(View.INVISIBLE);
+		}
+	}
 
-	public void showHiddenTips(int whichTip)
+	public void showHiddenTip(int whichTip)
 	{
 		if (tipId == whichTip && tipView != null && tipView.getVisibility() == View.INVISIBLE)
 		{
