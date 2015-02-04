@@ -816,6 +816,8 @@ public class HikeConstants
 
 	public static final String VOIP_CALL_RATE_FRAGMENT_TAG = "voipCallRateFragmentTag";
 
+	public static final String VOIP_CALL_ISSUES_FRAGMENT_TAG = "voipCallIssuesFragmentTag";
+
 	/*
 	 * Contact Type
 	 */
@@ -1012,6 +1014,10 @@ public class HikeConstants
 	public static final String VOIP_CALL_RATE_POPUP_FREQ = "vrmcf";
 
 	public static final String VOIP_RELAY_SERVER_PORT = "rsport";
+
+	public static final String VOIP_QUALITY_TEST_ACCEPTABLE_PACKET_LOSS = "apl";
+
+	public static final String VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION = "scd";
 
 	public static final class ResultCodes
 	{
@@ -1803,6 +1809,8 @@ public class HikeConstants
 		public static final String VOIP_NATIVE_CALL_INTERRUPT = "tci";
 
 		public static final String VOIP_CALL_RELAY = "cpur";
+
+		public static final String VOIP_CONNECTION_FAILED = "connf";
 		
 		// nux Analytics Event
 		
@@ -1828,9 +1836,7 @@ public class HikeConstants
 		
 		public static final String NUX_FOOTER_NOR_COM="nuxN2C";
 		
-		public static final String NUX_EXPANDED_COM="nuxE2C";
-		
-		
+		public static final String NUX_EXPANDED_COM="nuxE2C";		
 	}
 
 	public static final class MqttMessageTypes
