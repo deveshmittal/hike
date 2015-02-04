@@ -462,6 +462,10 @@ public class HikeConstants
 	public static final String WF_AUTO_DOWNLOAD_AUDIO_PREF = "wfAutoDownloadAudioPref";
 
 	public static final String WF_AUTO_DOWNLOAD_VIDEO_PREF = "wfAutoDownloadVideoPref";
+
+	public static final String COMPRESS_VIDEO = "videoCompress";
+
+	public static final String COMPRESS_VIDEO_CATEGORY = "videoCompressCategory";
 	
 	public static final String IMAGE_QUALITY = "imageQuality";
 	
@@ -530,12 +534,6 @@ public class HikeConstants
 	public static final String OPERATOR_SMS_ALERT_CHECKED = "opSmsAlertChecked";
 
 	public static final String SINGLE_INVITE_SMS_ALERT_CHECKED = "singleSmsAlertChecked";
-	
-	public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
-	
-	public static final String SHOW_NUX_SCREEN = "show_nux_screen";
-		
-	public static final String NUX_STICKER_DETAILS = "nuxStickerDetails";
 	
 	public static final String FTUE_ADD_SMS_ALERT_CHECKED = "ftueSmsAlertChecked";
 
@@ -826,6 +824,8 @@ public class HikeConstants
 
 	public static final String VOIP_CALL_RATE_FRAGMENT_TAG = "voipCallRateFragmentTag";
 
+	public static final String VOIP_CALL_ISSUES_FRAGMENT_TAG = "voipCallIssuesFragmentTag";
+
 	/*
 	 * Contact Type
 	 */
@@ -1002,15 +1002,7 @@ public class HikeConstants
 	public static final String SUCCESSFUL_SELECTIONS = "s";
 	
 	public static final String DRAWABLE = "drawable";
-	
-	public static final String NUX_STICKERS = "stickers";
-	
-	public static final String SHOW_NUX_INVITE_MODE = "showNuxInviteMode";
-
-	public static final String NUX_HOME_INVITE_FOOTER = "nuxHomeInviteFooter";
-
-	public static final String NUX_INVITE_FORWARD = "nuxInviteForward";
-	
+		
 	public static final String SELF_HIKE_ID = "-1";
 
 	public static final String VOIP_CALL_DURATION = "vcd";
@@ -1030,6 +1022,10 @@ public class HikeConstants
 	public static final String VOIP_CALL_RATE_POPUP_FREQ = "vrmcf";
 
 	public static final String VOIP_RELAY_SERVER_PORT = "rsport";
+
+	public static final String VOIP_QUALITY_TEST_ACCEPTABLE_PACKET_LOSS = "apl";
+
+	public static final String VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION = "scd";
 
 	public static final class ResultCodes
 	{
@@ -1377,17 +1373,13 @@ public class HikeConstants
 
 		public static final String CURRENT_POSITION = "currentPosition";
 		
-		public static final String FTUE_FORWARD = "ftueForward";
-		
-		public static final String FTUE_STICKER_ID_LIST = "ftueStickerIdsList";
-		
-		public static final String FTUE_STICKER_CATEGORY_LIST = "ftueStickerCategoryList";
-		
 		public static final String SDK_THIRD_PARTY_PKG = "third_party_app_pkg";
 		
 		public static final String SDK_CONNECTION_TYPE = "connection_type";
 
 		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
+		
+		public static final String NUX_INCENTIVE_MODE = "showNuxIncentiveMode";
 	}
 
 	public static final class LogEvent
@@ -1680,6 +1672,8 @@ public class HikeConstants
 		
 		public static final String STICKER_BTN_CLICKED = "stickerBtnClicked";
 		
+		public static final String STKR_SHOP_BTN_CLICKED = "shopBtnClicked";		
+		
 		public static final String STICKER_SETTING_BTN_CLICKED = "stickerSettingBtnClicked";
 		
 		public static final String SEEN_REORDERING_TIP = "seenReorderingTip";
@@ -1697,7 +1691,11 @@ public class HikeConstants
 		public static final String SETTINGS_NOTIFICATION_H2O_ON = "settingsSNotifH2OEnabled";
 		
 		public static final String SETTINGS_NOTIFICATION_H2O_OFF = "settingsSNotifH2ODisabled";
+
+		public static final String SETTINGS_NOTIFICATION_NUJ_ON = "settingsSNotifNUJEnabled";
 		
+		public static final String SETTINGS_NOTIFICATION_NUJ_OFF = "settingsSNotifNUJDisabled";
+
 		/*
 		 * HikeSharedFiles Activity Screen = sharedMediaS<event>
 		 * */
@@ -1745,30 +1743,17 @@ public class HikeConstants
 		public static final String ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED = "atomicAppHikeExtraClick";
 
 		public static final String ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED = "atomicAppHikeRewardsClick";
-
-		/*
-		 * NUX Events 
-		 */
-		public static final String NUX_STICKER_CLICKED = "nuxStckrClk";
-
-		public static final String NUX_STICKER_FORWARD = "nuxStckrFwd";
-
-		public static final String NUX_INVITE_BUTTON_CLICKED = "nuxInvteBtnClk";
-
-		public static final String NUX_INVITE_SENT = "nuxInvteSent";
-
-		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
 		
 		/*
 		 * Account Backup Events
 		 */
-		public static final String BACKUP = "backupClk";
+		public static final String BACKUP = "bckMnul";
 
-		public static final String BACKUP_RESTORE = "backupRestoreClk";
+		public static final String BACKUP_RESTORE = "bckRstr";
 
-		public static final String BACKUP_RESTORE_RETRY = "backupRestoreRetryClk";
+		public static final String BACKUP_RESTORE_RETRY = "rstrRtry";
 
-		public static final String BACKUP_RESTORE_SKIP = "backupRestoreSkipClk";
+		public static final String BACKUP_RESTORE_SKIP = "rstrSkp";
 
 		/*
 		 * Platform Events
@@ -1839,6 +1824,34 @@ public class HikeConstants
 		public static final String GCM_PUSH_ACK = "gcmpack";
 		
 		public static final String GCM_ANALYTICS_CONTEXT = "gcmst";
+
+		public static final String VOIP_CONNECTION_FAILED = "connf";
+		
+		// nux Analytics Event
+		
+		public static final String NUX_INTRO_BTN="nuxIB";
+		
+		public static final String NUX_INTRO_SKIP="nuxIS";
+		
+		public static final String NUX_FRNSEL_NEXT="nuxFSN";
+		
+		public static final String NUX_CUSMES_SEND="nuxMS";
+		
+		public static final String NUX_INVITE_MORE="nuxSF";
+		
+		public static final String NUX_REMIND="nuxRF";
+		
+		public static final String NUX_VIEW_MORE="nuxMr";
+		
+		public static final String NUX_TAP_CLAIM="nuxClm";
+		
+		public static final String NUX_FOOTER_COM_NOR="nuxC2N";
+		
+		public static final String NUX_FOOTER_NOR_EXP="nuxN2E";
+		
+		public static final String NUX_FOOTER_NOR_COM="nuxN2C";
+		
+		public static final String NUX_EXPANDED_COM="nuxE2C";		
 	}
 
 	public static final class MqttMessageTypes
@@ -1956,6 +1969,8 @@ public class HikeConstants
 		public static final String MULTIPLE_FORWARD = "mm";
 		
 		public static final String TIP = "tip";
+		
+		public static final String NUX = "nux";
 
 		public static final String CREATE_MULTIPLE_BOTS = "cbot";
 

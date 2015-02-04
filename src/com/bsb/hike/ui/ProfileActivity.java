@@ -116,7 +116,7 @@ import com.bsb.hike.voip.view.CallRatePopup;
 import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
-		View.OnClickListener, IVoipCallListener
+		View.OnClickListener
 {
 	private TextView mName;
 	
@@ -325,7 +325,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(com.actionbarsherlock.view.Window.FEATURE_ACTION_BAR_OVERLAY);
 
-		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
+		if (Utils.requireAuth(this))
 		{
 			return;
 		}
@@ -379,18 +379,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if(Intent.ACTION_ATTACH_DATA.equals(getIntent().getAction()))
 			{
-				setProfileImage(HikeConstants.GALLERY_RESULT, RESULT_OK, getIntent());
-				
-				try
-				{
-					JSONObject metadata = new JSONObject();
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SET_PROFILE_PIC_GALLERY);
-					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
-				}
-				catch(JSONException e)
-				{
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
-				}
+				setProfileImage(HikeConstants.GALLERY_RESULT, RESULT_OK, getIntent());				
 			}
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false))
 			{
@@ -1824,6 +1813,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					Utils.executeBoolResultAsyncTask(mActivityState.downloadPicasaImageTask);
 					mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.downloading_image));
 				}
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SET_PROFILE_PIC_GALLERY);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 				break;
 
 			case HikeConstants.CROP_RESULT:
@@ -3135,27 +3134,5 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		intent.putExtra(HikeConstants.Extras.CONTACT_INFO_TIMELINE, mLocalMSISDN);
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, contactInfo.isOnhike());
 		startActivity(intent);
-	}
-
-	@Override
-	public void onVoipCallEnd(final Bundle bundle) 
-	{
-		runOnUiThread(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				if(!isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG))
-				{
-					CallRatePopup callRatePopup = new CallRatePopup();
-					callRatePopup.setArguments(bundle);
-
-					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-					fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
-					fragmentTransaction.commitAllowingStateLoss();
-				}
-			}
-		});
 	}
 }

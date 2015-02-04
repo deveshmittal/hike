@@ -2,9 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="1009"
-    android:versionName="3.8.7" >
-
+    android:versionCode="1103"
+    android:versionName="3.7.2.13" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -168,11 +167,6 @@
             android:windowSoftInputMode="adjustPan|stateAlwaysVisible" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.FtueActivity"
-            android:label="@string/app_label"
-            android:launchMode="singleTop" >
-        </activity>
-        <activity
             android:name="com.bsb.hike.ui.ChatThread"
             android:label="@string/app_label"
             android:launchMode="singleTop"
@@ -296,6 +290,15 @@
             android:launchMode="singleTop"
             android:theme="@style/NoTitleBar" >
         </activity>
+          <activity
+            android:name="com.bsb.hike.ui.NUXInviteActivity"
+            android:screenOrientation="portrait"
+             android:launchMode="singleTop">
+        </activity> 
+        <activity
+            android:name="com.bsb.hike.ui.NuxSendCustomMessageActivity"
+              android:screenOrientation="portrait">
+        </activity>     
         <activity
             android:name=".ui.PinHistoryActivity"
             android:configChanges="orientation|screenSize|keyboard|keyboardHidden" >
