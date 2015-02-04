@@ -311,6 +311,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			
 		}
 		
+		showTips();
+		
 		toggleConversationMuteViewVisibility(groupConversation.isMuted());
 		toggleGroupLife(groupConversation.getIsGroupAlive());
 		addUnreadCountMessage();
@@ -321,7 +323,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		
 		updateUnreadPinCount();
 		
-		showTips();
 	}
 	
 	private void showTips()
@@ -342,19 +343,14 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	private void showImpMessage(ConvMessage impMessage, int animationId)
 	{
 		// TODO : Use HikeActionbarUtil
-		SharedPreferences prefs = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, activity.MODE_PRIVATE);
-		if (!prefs.getBoolean(HikeMessengerApp.SHOWN_PIN_TIP, false))
-		{
-
-			Editor editor = prefs.edit();
-			editor.putBoolean(HikeMessengerApp.SHOWN_PIN_TIP, true);
-			editor.commit();
-		}
-
+		// Hiding pin tip if open
+		mTips.hideTip(ChatThreadTips.PIN_TIP);
+		
 		if (tipView != null)
 		{
 			tipView.setVisibility(View.GONE);
 		}
+		
 		if (impMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
 			tipView = LayoutInflater.from(activity).inflate(R.layout.imp_message_text_pin, null);
@@ -490,10 +486,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 
 	private void hidePinFromUI(boolean playAnim)
 	{
-		if (!isShowingPin())
-		{
-			return;
-		}
 		if (playAnim)
 		{
 			playUpDownAnimation(tipView);
@@ -503,6 +495,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			tipView.setVisibility(View.GONE);
 			tipView = null;
 		}
+		
+		// If the pin tip was previously being seen, and it wasn't closed, we need to show it again.
+		mTips.showHiddenTips(ChatThreadTips.PIN_TIP);
 	}
 
 	private void showPinHistory(boolean viaMenu)
@@ -818,6 +813,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		{
 			tipView.setVisibility(View.GONE);
 		}
+		
+		mTips.setPinTipSeen();
 
 	}
 
