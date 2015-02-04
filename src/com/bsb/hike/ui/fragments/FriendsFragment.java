@@ -34,10 +34,11 @@ import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.lastseenmgr.FetchBulkLastSeenTask;
 import com.bsb.hike.ui.CreateNewGroupActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.Utils;
 
 public class FriendsFragment extends SherlockListFragment implements Listener, OnItemLongClickListener, OnScrollListener
@@ -53,13 +54,13 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 
 	private SharedPreferences preferences;
 
-	private LastSeenScheduler lastSeenScheduler;
-
 	private int previousFirstVisibleItem;
 
 	private int velocity;
 
 	private long previousEventTime;
+	
+	private RequestToken bulkLastseenRequestToken;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -124,13 +125,17 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			friendsAdapter.destroy();
 		}
 
-		if (lastSeenScheduler != null)
-		{
-			lastSeenScheduler.stop(true);
-			lastSeenScheduler = null;
-		}
-
+		cancelBulkLastSeenTask();
+		
 		super.onDestroy();
+	}
+	
+	private void cancelBulkLastSeenTask()
+	{
+		if (bulkLastseenRequestToken != null)
+		{
+			bulkLastseenRequestToken.cancel();
+		}
 	}
 
 	@Override
@@ -542,15 +547,10 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 				@Override
 				public void run()
 				{
-					if (lastSeenScheduler == null)
-					{
-						lastSeenScheduler = LastSeenScheduler.getInstance(getActivity());
-					}
-					else
-					{
-						lastSeenScheduler.stop(true);
-					}
-					lastSeenScheduler.start(true);
+					cancelBulkLastSeenTask();
+					
+					FetchBulkLastSeenTask bulkLastSeenTask = new FetchBulkLastSeenTask();
+					bulkLastseenRequestToken = bulkLastSeenTask.start();
 				}
 			});
 		}
@@ -607,8 +607,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			}
 			if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
 			{
-				lastSeenScheduler = LastSeenScheduler.getInstance(getActivity());
-				lastSeenScheduler.start(true);
+				FetchBulkLastSeenTask bulkLastSeenTask = new FetchBulkLastSeenTask();
+				bulkLastseenRequestToken = bulkLastSeenTask.start();
 			}
 		}
 	};

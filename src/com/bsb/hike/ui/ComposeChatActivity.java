@@ -40,6 +40,8 @@ import com.bsb.hike.models.*;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.lastseenmgr.FetchBulkLastSeenTask;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.service.HikeService;
@@ -102,7 +104,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private ProgressDialog progressDialog;
 
-	private LastSeenScheduler lastSeenScheduler;
+	private RequestToken bulkLastseenRequestToken;
 
 	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED, HikePubSub.LAST_SEEN_TIME_UPDATED,
 			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, HikePubSub.CONTACT_SYNC_STARTED, HikePubSub.CONTACT_SYNCED };
@@ -395,14 +397,18 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			progressDialog = null;
 		}
 
-		if (lastSeenScheduler != null)
-		{
-			lastSeenScheduler.stop(true);
-			lastSeenScheduler = null;
-		}
-
+		cancelBulkLastSeenTask();
+		
 		HikeMessengerApp.getPubSub().removeListeners(this, hikePubSubListeners);
 		super.onDestroy();
+	}
+	
+	private void cancelBulkLastSeenTask()
+	{
+		if (bulkLastseenRequestToken != null)
+		{
+			bulkLastseenRequestToken.cancel();
+		}
 	}
 
 	@Override
@@ -1533,15 +1539,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				@Override
 				public void run()
 				{
-					if (lastSeenScheduler == null)
-					{
-						lastSeenScheduler = LastSeenScheduler.getInstance(ComposeChatActivity.this);
-					}
-					else
-					{
-						lastSeenScheduler.stop(true);
-					}
-					lastSeenScheduler.start(true);
+
+					cancelBulkLastSeenTask();
+					
+					FetchBulkLastSeenTask bulkLastSeenTask = new FetchBulkLastSeenTask();
+					bulkLastseenRequestToken = bulkLastSeenTask.start();
 				}
 			});
 		}
@@ -1683,8 +1685,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 			if (PreferenceManager.getDefaultSharedPreferences(ComposeChatActivity.this).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
 			{
-				lastSeenScheduler = LastSeenScheduler.getInstance(ComposeChatActivity.this);
-				lastSeenScheduler.start(true);
+				FetchBulkLastSeenTask bulkLastSeenTask = new FetchBulkLastSeenTask();
+				bulkLastseenRequestToken = bulkLastSeenTask.start();
 			}
 		}
 	};

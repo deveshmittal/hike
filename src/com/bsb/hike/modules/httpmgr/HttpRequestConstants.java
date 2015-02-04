@@ -18,6 +18,10 @@ public class HttpRequestConstants
 	
 	private static final String BASE_V1 = "/v1";
 	
+	private static final String BASE_V2 = "/v2";
+	
+	private static final String BASE_USER = "/user";
+	
 	private static final String STICKERS_BASE = "/stickers";
 	
 	public static synchronized void toggleStaging(boolean production)
@@ -71,5 +75,15 @@ public class HttpRequestConstants
 	public static String multiStickerDownloadUrl()
 	{
 		return BASE_URL + BASE_V1 + STICKERS_BASE;
+	}
+	
+	public static String lastSeenUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_USER + "/lastseen";
+	}
+	
+	public static String bulkLastSeenUrl()
+	{
+		return BASE_URL + BASE_V2 + BASE_USER + "/bls";
 	}
 }

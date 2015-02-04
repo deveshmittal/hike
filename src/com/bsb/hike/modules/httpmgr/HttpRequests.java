@@ -6,6 +6,8 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPalleteIm
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPreviewImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerShopDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerSignupUpgradeUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.lastSeenUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.bulkLastSeenUrl;
 import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_HIGH;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_LONG;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
@@ -14,6 +16,7 @@ import com.bsb.hike.modules.httpmgr.request.JSONObjectRequest;
 import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
+import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
 import com.bsb.hike.utils.Utils;
 
 public class HttpRequests
@@ -83,6 +86,29 @@ public class HttpRequests
 				.setRequestType(REQUEST_TYPE_LONG)
 				.setPriority(PRIORITY_HIGH)
 				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken LastSeenRequest(String msisdn, IRequestListener requestListener, IRetryPolicy retryPolicy)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+											   .setUrl(lastSeenUrl() + "/" + msisdn)
+											   .setRetryPolicy(retryPolicy)
+											   .setRequestListener(requestListener)
+											   .setRequestType(REQUEST_TYPE_SHORT)
+											   .setPriority(PRIORITY_HIGH)
+											   .build();
+		return requestToken;
+	}
+	
+	public static RequestToken BulkLastSeenRequest(IRequestListener requestListener, IRetryPolicy retryPolicy)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+											   .setUrl(bulkLastSeenUrl())
+											   .setRetryPolicy(retryPolicy)
+											   .setRequestListener(requestListener)
+											   .setRequestType(REQUEST_TYPE_SHORT)
+											   .build();
 		return requestToken;
 	}
 }

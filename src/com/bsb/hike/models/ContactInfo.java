@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import android.text.TextUtils;
 
 import com.bsb.hike.models.utils.JSONSerializable;
-import com.bsb.hike.utils.LastSeenComparator;
+import com.bsb.hike.modules.lastseenmgr.LastSeenComparator;
 import com.bsb.hike.utils.Utils;
 
 public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>

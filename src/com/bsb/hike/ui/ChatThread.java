@@ -187,6 +187,8 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.lastseenmgr.FetchLastSeenTask;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -201,8 +203,6 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.HikeTip.TipType;
-import com.bsb.hike.utils.LastSeenScheduler;
-import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
@@ -335,6 +335,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private ViewStub pulsatingDot;
 	
 	private View pulsatingDotInflated;
+	
+	private RequestToken lastSeenRequestToken;
 
 	private int HIKE_TO_OFFLINE_TIP_STATE_1 = 1;
 
@@ -435,8 +437,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private View bottomFastScrollIndicator;
 
 	private View upFastScrollIndicator;
-
-	private LastSeenScheduler lastSeenScheduler;
 
 	int currentFirstVisibleItem = Integer.MAX_VALUE;
 
@@ -656,7 +656,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			attachmentWindow = null;
 		}
 
-		resetLastSeenScheduler();
+		cancelFetchLastseenTask();
 
 		StickerManager.getInstance().saveCustomCategories();
 		if (messageMap != null)
@@ -667,12 +667,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	}
 
-	private void resetLastSeenScheduler()
+	private void cancelFetchLastseenTask()
 	{
-		if (lastSeenScheduler != null)
+		if (lastSeenRequestToken != null)
 		{
-			lastSeenScheduler.stop(false);
-			lastSeenScheduler = null;
+			lastSeenRequestToken.cancel();
 		}
 	}
 
@@ -2498,10 +2497,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				/*
 				 * Making sure nothing is already scheduled wrt last seen.
 				 */
-				resetLastSeenScheduler();
+				cancelFetchLastseenTask();
 
-				lastSeenScheduler = LastSeenScheduler.getInstance(this);
-				lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
+				FetchLastSeenTask fetchLastseenTask = new FetchLastSeenTask(contactInfo.getMsisdn());
+				lastSeenRequestToken = fetchLastseenTask.start();
 			}
 		}
 
@@ -4106,15 +4105,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						return;
 					}
 
-					if (lastSeenScheduler == null)
-					{
-						lastSeenScheduler = LastSeenScheduler.getInstance(ChatThread.this);
-					}
-					else
-					{
-						lastSeenScheduler.stop(false);
-					}
-					lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
+					cancelFetchLastseenTask();
+					FetchLastSeenTask fetchLastseenTask = new FetchLastSeenTask(contactInfo.getMsisdn());
+					lastSeenRequestToken = fetchLastseenTask.start();
 				}
 			});
 		}
@@ -8261,16 +8254,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			screenOffEvent = true;
 		}
 	}
-
-	LastSeenFetchedCallback lastSeenFetchedCallback = new LastSeenFetchedCallback()
-	{
-
-		@Override
-		public void lastSeenFetched(String msisdn, int offline, long lastSeenTime)
-		{
-			updateLastSeen(msisdn, offline, lastSeenTime);
-		}
-	};
 
 	private void updateLastSeen(String msisdn, int offline, long lastSeenTime)
 	{
