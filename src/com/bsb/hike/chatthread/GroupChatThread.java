@@ -293,7 +293,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	{
 		mHashSpanWatcher = new HashSpanWatcher(mComposeView, HASH_PIN, getResources().getColor(R.color.sticky_yellow));
 		showTips();
-		
+		groupConversation = (GroupConversation) conversation;
 		super.fetchConversationFinished(conversation);
 		
 		/**
