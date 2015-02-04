@@ -1445,6 +1445,8 @@ public class MqttMessagesManager
 		// server on demand analytics data to be sent from client
 		if(data.optBoolean(AnalyticsConstants.ANALYTICS))
 		{		
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM DEMAND PACKET ROUTE---");
+
 			HAManager.getInstance().sendAnalyticsData(true);
 		}
 	}

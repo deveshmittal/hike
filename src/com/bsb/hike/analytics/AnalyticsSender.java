@@ -169,9 +169,7 @@ public class AnalyticsSender
 		long nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend(), 0, 0, 0);
 
 		if(!Utils.isUserOnline(context))
-		{
-			instance.sendAnalyticsData(false);
-			
+		{			
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "User is offline.....");
 
 			int freq = instance.getAnalyticsUploadRetryCount();
@@ -181,7 +179,7 @@ public class AnalyticsSender
 			{
 				instance.incrementAnalyticsUploadRetryCount();
 //				freq = instance.getAnalyticsUploadRetryCount();
-				nextSchedule = System.currentTimeMillis() + freq * AnalyticsConstants.UPLOAD_TIME_MULTIPLE * AnalyticsConstants.ONE_HOUR;
+				nextSchedule = System.currentTimeMillis() + AnalyticsConstants.UPLOAD_TIME_MULTIPLE * AnalyticsConstants.ONE_HOUR;
 //				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "UPLOAD RETRY COUNT :" + freq);
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Alarm set for next 4 hours from current time.");
 				
@@ -221,6 +219,8 @@ public class AnalyticsSender
 
 			nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;
 
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM ALARM ROUTE---");
+			
 			instance.sendAnalyticsData(false);			
 		}
 		
@@ -278,14 +278,17 @@ public class AnalyticsSender
 			catch (FileNotFoundException e) 
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File not found during upload.");
+				return;
 			}
 			catch(ClientProtocolException e)
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "ClientProtocol exception during upload.");
+				return;
 			}
 			catch(IOException e)
 			{
-				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception during upload.");			
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception during upload.");
+				return;
 			}
 			if (response != null)
 			{
@@ -312,14 +315,14 @@ public class AnalyticsSender
 						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Exiting upload process....");
 						return;
 					}
-
-				default:
-					break;
 				}
 			}
 			else
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "null response while uploading file to server.");
+				
+				if(!retryUpload())
+					return;
 			}
 		}
 	}		

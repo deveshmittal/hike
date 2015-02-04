@@ -20,7 +20,7 @@ public class AnalyticsConstants
 	public static int HOUR_OF_DAY_TO_SEND = 8;
 	
 	/** number of times upload should be tried in one day */
-	public static int ANALYTICS_UPLOAD_FREQUENCY = 2;
+	public static int ANALYTICS_UPLOAD_FREQUENCY = 3;
 	
 	/** try sending analytics data every 4 hours */
 	public static int UPLOAD_TIME_MULTIPLE = 4;
@@ -81,6 +81,8 @@ public class AnalyticsConstants
 	public static final String ANALYTICS_SEND_FREQUENCY = "analyticsfreq";
 	
 	public static final String ANALYTICS_ALARM_TIME = "analyticsalarmtime";
+
+	public static final String ANALYTICS_BACKUP = "backup";
 
 	public static final String EVENT_SUB_TYPE = "st";
 
@@ -167,4 +169,11 @@ public class AnalyticsConstants
 
 		public static final String FROM_NOTIFICATION = "notif";
 	}
+	
+	//Added For Chat Session
+	public static final String CHAT_ANALYTICS = "ctal";
+	
+	public static final String TO_USER = "to_user";
+	
+	public static final String EVENT_TAG_CHAT_SESSION = "ctal";
 }

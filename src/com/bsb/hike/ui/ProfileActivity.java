@@ -379,18 +379,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if(Intent.ACTION_ATTACH_DATA.equals(getIntent().getAction()))
 			{
-				setProfileImage(HikeConstants.GALLERY_RESULT, RESULT_OK, getIntent());
-				
-				try
-				{
-					JSONObject metadata = new JSONObject();
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SET_PROFILE_PIC_GALLERY);
-					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
-				}
-				catch(JSONException e)
-				{
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
-				}
+				setProfileImage(HikeConstants.GALLERY_RESULT, RESULT_OK, getIntent());				
 			}
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false))
 			{
@@ -1823,6 +1812,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					});
 					Utils.executeBoolResultAsyncTask(mActivityState.downloadPicasaImageTask);
 					mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.downloading_image));
+				}
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SET_PROFILE_PIC_GALLERY);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 				}
 				break;
 
