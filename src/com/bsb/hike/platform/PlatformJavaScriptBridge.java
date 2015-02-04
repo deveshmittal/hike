@@ -382,11 +382,11 @@ public class PlatformJavaScriptBridge
 	
 	@JavascriptInterface
 	public void share(){
-		share(null);
+		share(null,null);
 	}
 	
 	@JavascriptInterface
-	public void share(String text)
+	public void share(String text,String caption)
 	{
 		FileOutputStream fos = null;
 		File cardShareImageFile = null;
@@ -417,7 +417,8 @@ public class PlatformJavaScriptBridge
 			shB.compress(CompressFormat.JPEG, 100, fos);
 			fos.flush();
 			Logger.i(tag, "share webview card " + cardShareImageFile.getAbsolutePath());
-			Utils.startShareImageIntent("image/jpeg", "file://" + cardShareImageFile.getAbsolutePath(), mContext.getString(com.bsb.hike.R.string.cardShareCaption));
+			Utils.startShareImageIntent("image/jpeg", "file://" + cardShareImageFile.getAbsolutePath(),
+					TextUtils.isEmpty(caption) ? mContext.getString(com.bsb.hike.R.string.cardShareCaption) : caption);
 
 		}
 		catch (Exception e)
