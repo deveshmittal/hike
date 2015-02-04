@@ -843,7 +843,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		if (mBroadCastReceiver != null)
 		{
-			LocalBroadcastManager.getInstance(activity).unregisterReceiver(mBroadCastReceiver);
+			LocalBroadcastManager.getInstance(activity.getBaseContext()).unregisterReceiver(mBroadCastReceiver);
 		}
 	}
 
@@ -1032,8 +1032,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void emoticonSelected(int emoticonIndex)
 	{
-		// TODO : Implement this
-		// Utils.emoticonClicked(getApplicationContext(), emoticonIndex, mComposeView);
 		Logger.i(TAG, " This emoticon was selected : " + emoticonIndex);
 		Utils.emoticonClicked(activity.getApplicationContext(), emoticonIndex, mComposeView);
 	}
@@ -1163,7 +1161,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		intentFilter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
 		intentFilter.addAction(StickerManager.STICKERS_DOWNLOADED);
 
-		LocalBroadcastManager.getInstance(activity).registerReceiver(mBroadCastReceiver, intentFilter);
+		LocalBroadcastManager.getInstance(activity.getBaseContext()).registerReceiver(mBroadCastReceiver, intentFilter);
 
 		takeActionBasedOnIntent();
 	}
@@ -1786,6 +1784,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mAdapter.notifyDataSetChanged();
 
 		// TODO : UNHIDE TIPS IF WE HAVE HIDDEN THEM
+		
+		mTips.showHiddenTip();
 		/**
 		 * if we have hidden tips while initializing action mode we should unhide them
 		 * 
@@ -2731,8 +2731,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		boolean isRemoved = activity.removeFragment(tag);
 		if (isRemoved && updateActionBar)
 		{
-			// TODO :
-			// setupActionBar(false);
+			setupActionBar();
 		}
 		return isRemoved;
 	}
@@ -2783,15 +2782,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			@Override
 			public void onAnimationStart(Animation animation)
 			{
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void onAnimationRepeat(Animation animation)
 			{
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
