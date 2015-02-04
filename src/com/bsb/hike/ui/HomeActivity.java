@@ -285,7 +285,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private void setupFestivePopup()
 	{
 		final int festivePopupType = accountPrefs.getInt(HikeConstants.SHOW_FESTIVE_POPUP, -1);
-		if (festivePopupType == FestivePopup.REPUBLIC_DAY_POPUP)
+		if (festivePopupType == FestivePopup.VALENTINE_DAY_POPUP)
 		{
 			if(FestivePopup.isPastFestiveDate(festivePopupType))
 			{
@@ -323,7 +323,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					snowFallView = FestivePopup.startAndSetSnowFallView(HomeActivity.this, type);
+					snowFallView = FestivePopup.startAndSetSnowFallView(HomeActivity.this, type, false);
 				}
 			}, 300);
 		}

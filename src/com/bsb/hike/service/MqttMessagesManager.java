@@ -1912,7 +1912,7 @@ public class MqttMessagesManager
 		}
 		else if(subType.equals(HikeConstants.REPUBLIC_DAY_POPUP))
 		{
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.REPUBLIC_DAY_POPUP);
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.VALENTINE_DAY_POPUP);
 		}
 		else
 		{
