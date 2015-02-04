@@ -5190,4 +5190,15 @@ public class Utils
 			return null;
 		}
 	}
+	
+	public static Bitmap undrawnViewToBitmap(View view) {
+		int measuredWidth = View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.UNSPECIFIED);
+		int measuredHeight = View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.UNSPECIFIED);
+
+		// Cause the view to re-layout
+		view.measure(measuredWidth, measuredHeight);
+		view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+	    return viewToBitmap(view);
+	}
+	
 }

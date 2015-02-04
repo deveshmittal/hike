@@ -368,12 +368,21 @@ public class PlatformJavaScriptBridge
 	}
 	
 	@JavascriptInterface
-	public void share()
+	public void share(){
+		share(null);
+	}
+	
+	@JavascriptInterface
+	public void share(String text)
 	{
 		FileOutputStream fos = null;
 		File cardShareImageFile = null;
 		try
 		{
+			if (TextUtils.isEmpty(text))
+			{
+				text = mContext.getString(R.string.cardShareHeading); // fallback
+			}
 			cardShareImageFile = new File(mContext.getExternalCacheDir(), System.currentTimeMillis() + ".jpg");
 			fos = new FileOutputStream(cardShareImageFile);
 			View share = LayoutInflater.from(mContext).inflate(com.bsb.hike.R.layout.web_card_share, null);
@@ -382,26 +391,20 @@ public class PlatformJavaScriptBridge
 			Bitmap b = Utils.viewToBitmap(mWebView);
 			image.setImageBitmap(b);
 
+			// set heading here
+			TextView heading = (TextView) share.findViewById(R.id.heading);
+			heading.setText(text);
+
 			// set description text
-			//TODO get string from micro app
 			TextView tv = (TextView) share.findViewById(com.bsb.hike.R.id.description);
 			tv.setText(Html.fromHtml(mContext.getString(com.bsb.hike.R.string.cardShareDescription)));
 
-			int measuredWidth = View.MeasureSpec.makeMeasureSpec(share.getWidth(), View.MeasureSpec.UNSPECIFIED);
-			int measuredHeight = View.MeasureSpec.makeMeasureSpec(share.getHeight(), View.MeasureSpec.UNSPECIFIED);
-
-			// Cause the view to re-layout
-			share.measure(measuredWidth, measuredHeight);
-			share.layout(0, 0, share.getMeasuredWidth(), share.getMeasuredHeight());
-
-			Bitmap shB = Utils.viewToBitmap(share);
+			Bitmap shB = Utils.undrawnViewToBitmap(share);
 			Logger.i(tag, " width height of layout to share " + share.getWidth() + " , " + share.getHeight());
 			shB.compress(CompressFormat.JPEG, 100, fos);
 			fos.flush();
-			fos.close();
 			Logger.i(tag, "share webview card " + cardShareImageFile.getAbsolutePath());
-			Utils.startShareImageIntent("image/jpeg", "file://" + cardShareImageFile.getAbsolutePath(),
-					HikeMessengerApp.getInstance().getApplicationContext().getString(R.string.download) + " http://get.hike.in");
+			Utils.startShareImageIntent("image/jpeg", "file://" + cardShareImageFile.getAbsolutePath(), mContext.getString(com.bsb.hike.R.string.cardShareCaption));
 
 		}
 		catch (Exception e)
