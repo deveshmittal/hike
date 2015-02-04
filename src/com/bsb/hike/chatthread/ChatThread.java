@@ -124,7 +124,7 @@ import com.bsb.hike.utils.Utils;
  * @generated
  */
 
-public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener,
+public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, 
 		CaptureImageListener, PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener,
 		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener
 {
@@ -608,7 +608,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			bottomScrollIndicatorClicked();
 			break;
 		case R.id.back:
-			onBackPressed();
+			actionBarBackPressed();
 			break;
 		case R.id.contact_info:
 			openProfileScreen();
@@ -814,9 +814,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	}
 
-	@Override
 	public boolean onBackPressed()
 	{
+		if (removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true))
+		{
+			return true;
+		}
+		
 		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
 		{
 			mShareablePopupLayout.dismiss();
@@ -834,9 +838,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			return true;
 		}
 		
-		activity.backPressed();
-		
 		return false;
+	}
+	
+	private void actionBarBackPressed()
+	{
+		if (removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true))
+		{
+			return ;
+		}
+		
+		activity.backPressed();
 	}
 
 	private void removeBroadcastReceiver()
@@ -2732,6 +2744,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (isRemoved && updateActionBar)
 		{
 			setupActionBar();
+			activity.updateActionBarColor(currentTheme.headerBgResId());
 		}
 		return isRemoved;
 	}
