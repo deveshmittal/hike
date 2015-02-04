@@ -25,7 +25,6 @@ import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gms.internal.fs;
 
 /**
  * @author rajesh
@@ -58,20 +57,22 @@ public class HAManager
 
 	private long hourToSend;
 	
+	private boolean shouldSendLogs = false;
+	
 	private int analyticsUploadFrequency = 0;
 		
 	private String analyticsDirectory;
 
-//	private NetworkListener listner;
+	private NetworkListener listner;
 	
 	private Session fgSessionInstance;
-	
+		
 	/**
 	 * Constructor
 	 */
 	private HAManager() 
-	{		
-		this.context = HikeMessengerApp.getInstance().getApplicationContext(); 
+	{				
+		this.context = HikeMessengerApp.getInstance().getApplicationContext();
 		
 //		analyticsDirectory = context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
 
@@ -92,6 +93,8 @@ public class HAManager
 		
 		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Total analytics size :" + analyticsMaxSize + " KBs");
 		
+		shouldSendLogs = getPrefs().getBoolean(AnalyticsConstants.SEND_WHEN_CONNECTED, false);
+		
 		hourToSend = getPrefs().getLong(AnalyticsConstants.ANALYTICS_ALARM_TIME, -1);
 
 		Calendar cal = Calendar.getInstance();
@@ -99,7 +102,7 @@ public class HAManager
 		if(hourToSend == -1)
 		{
 			int rndHour = getRandomTime();
-			hourToSend = Utils.getTimeInMillis(cal, rndHour, 0, 0, 0);
+			hourToSend = Utils.getTimeInMillis(cal, 0, 0, rndHour, 0);
 			
 			Editor editor = getPrefs().edit();		
 			editor.putLong(AnalyticsConstants.ANALYTICS_ALARM_TIME, hourToSend);		
@@ -116,8 +119,8 @@ public class HAManager
 
 		fgSessionInstance = new Session();
 		
-		// set wifi listener
-//		listner = new NetworkListener(this.context);
+		// set network listener
+		listner = new NetworkListener(this.context);
 	}
 	
 	/**
@@ -288,6 +291,27 @@ public class HAManager
 	public boolean isAnalyticsEnabled()
 	{
 		return isAnalyticsEnabled;
+	}
+	
+	/**
+	 * Used to check if analytics data can be sent based on network availability 
+	 * @return true if data can be sent, false otherwise
+	 */
+	public boolean isSendAnalyticsDataWhenConnected()
+	{
+		return shouldSendLogs;
+	}
+	
+	/**
+	 * Used to set whether logs should be sent next time alarm is triggered and user is connected 
+	 * @param value to set
+	 */
+	public void setIsSendAnalyticsDataWhenConnected(boolean value)
+	{
+		Editor edit = getPrefs().edit(); 
+		edit.putBoolean(AnalyticsConstants.SEND_WHEN_CONNECTED, value);
+		edit.commit();
+		this.shouldSendLogs = value;
 	}
 	
 	/**
@@ -474,9 +498,7 @@ public class HAManager
 	 * @return array of strings with file names 
 	 */
 	protected static String[] getFileNames(Context context)
-	{
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Looking files in directory :" + context.getFilesDir() + "/Analytics/");
-		
+	{		
 		File dir = new File(HAManager.getInstance().getAnalyticsDirectory() + File.separator);
 
 		String[] fileNames = dir.list();
