@@ -161,11 +161,15 @@ public class AnalyticsSender
 	 */
 	public void startUploadAndScheduleNextAlarm()
 	{
-		if(!isAnalyticsUploadReady())
-			return;
-		
 		HAManager instance = HAManager.getInstance();
 		long nextSchedule = instance.getWhenToSend();
+
+		if(!isAnalyticsUploadReady())
+		{
+			nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_MINUTE;
+			instance.setNextSendTimeToPrefs(nextSchedule);
+			return;
+		}		
 
 		if(!Utils.isUserOnline(context))
 		{			
@@ -179,8 +183,7 @@ public class AnalyticsSender
 				instance.incrementAnalyticsUploadRetryCount();
 				nextSchedule = System.currentTimeMillis() + AnalyticsConstants.UPLOAD_TIME_MULTIPLE * AnalyticsConstants.ONE_HOUR;				
 				
-				freq = instance.getAnalyticsUploadRetryCount();				
-				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "UPLOAD RETRY COUNT :" + freq);
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "UPLOAD RETRY COUNT :" + instance.getAnalyticsUploadRetryCount());
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Alarm set for next 4 hours from current time.");
 				
 				// don't remove! added for testing purpose. 
@@ -194,8 +197,7 @@ public class AnalyticsSender
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Retries finished. Set alarm as per frequency now.");
 				instance.resetAnalyticsUploadRetryCount();
 								
-				// TODO :This condition will make client keep trying to upload data if frequency is <= 8 hours when user is offline even after 2nd retry
-				nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_MINUTE;
+				nextSchedule = System.currentTimeMillis() + instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_MINUTE;
 				instance.setNextSendTimeToPrefs(nextSchedule);
 
 				// don't remove! added for testing purpose. 

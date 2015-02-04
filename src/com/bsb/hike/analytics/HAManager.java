@@ -452,7 +452,7 @@ public class HAManager
 	private int getRandomTime()
 	{
 		Random rand = new Random();		
-		int time = rand.nextInt(24);				
+		int time = rand.nextInt(AnalyticsConstants.DAY_IN_SECONDS);				
 		return time;
 	}
 	

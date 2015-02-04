@@ -6,11 +6,17 @@ package com.bsb.hike.analytics;
  */
 public class AnalyticsConstants 
 {	
+	/** one day in milliseconds */
 	public static final long ONE_DAY = 24 * 60 * 60 * 1000;
 	
+	/** one hour in milliseconds */
 	public static final long ONE_HOUR =  60 * 60 * 1000;
 
+	/** one minute in milliseconds */
 	public static final long ONE_MINUTE =  60 * 1000;
+	
+	/** one day in seconds */
+	public static final int DAY_IN_SECONDS = 24 * 60 * 60;
 
 	//TODO: changed from 500 to 5 for testing
 	public static long MAX_FILE_SIZE = 5 * 1024;
@@ -31,9 +37,7 @@ public class AnalyticsConstants
 	
 	/** Default frequency at which logs should be tried to be sent to server */
 	public static final int DEFAULT_SEND_FREQUENCY = 1440;
-	
-	public static final String HTTP_UPLOAD_URL = "http://staging.im.hike.in/v1/logs/analytics"; 
-	
+		
 	public static final String EVENT_FILE_DIR = "/Analytics";
 	
 	public static final String NEW_LINE = "\n";
