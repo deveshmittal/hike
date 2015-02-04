@@ -2,6 +2,7 @@ package com.bsb.hike.platform;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.json.JSONException;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
@@ -368,42 +370,64 @@ public class PlatformJavaScriptBridge
 	@JavascriptInterface
 	public void share()
 	{
+		FileOutputStream fos = null;
+		File cardShareImageFile = null;
 		try
 		{
-//			File f = new File(Environment.getExternalStorageDirectory()+"/"+"share"+System.currentTimeMillis()+".jpeg");
-			File f = new File(mContext.getExternalCacheDir(),System.currentTimeMillis()+".jpeg");
-			FileOutputStream output = new FileOutputStream(f);
+			cardShareImageFile = new File(mContext.getExternalCacheDir(), System.currentTimeMillis() + ".jpg");
+			fos = new FileOutputStream(cardShareImageFile);
 			View share = LayoutInflater.from(mContext).inflate(com.bsb.hike.R.layout.web_card_share, null);
 			// set card image
 			ImageView image = (ImageView) share.findViewById(com.bsb.hike.R.id.image);
-//			Bitmap b = Utils.viewToBitmap(((WebViewHolder)mWebView.getTag()).main);
 			Bitmap b = Utils.viewToBitmap(mWebView);
 			image.setImageBitmap(b);
-			
+
 			// set description text
+			//TODO get string from micro app
 			TextView tv = (TextView) share.findViewById(com.bsb.hike.R.id.description);
 			tv.setText(Html.fromHtml(mContext.getString(com.bsb.hike.R.string.cardShareDescription)));
-			
+
 			int measuredWidth = View.MeasureSpec.makeMeasureSpec(share.getWidth(), View.MeasureSpec.UNSPECIFIED);
-		    int measuredHeight = View.MeasureSpec.makeMeasureSpec(share.getHeight(), View.MeasureSpec.UNSPECIFIED);
+			int measuredHeight = View.MeasureSpec.makeMeasureSpec(share.getHeight(), View.MeasureSpec.UNSPECIFIED);
 
-		    //Cause the view to re-layout
-		    share.measure(measuredWidth, measuredHeight);
-		    share.layout(0, 0, share.getMeasuredWidth(), share.getMeasuredHeight());
+			// Cause the view to re-layout
+			share.measure(measuredWidth, measuredHeight);
+			share.layout(0, 0, share.getMeasuredWidth(), share.getMeasuredHeight());
 
-		    Bitmap shB = Utils.viewToBitmap(share);
-			Logger.i(tag, " width height of layout to share "+share.getWidth() +" , "+share.getHeight());
-			shB.compress(CompressFormat.JPEG, 100, output);
-			output.close();
-			Logger.i(tag, "share webview card "+f.getAbsolutePath());
-			Utils.startShareImageIntent(mContext, "image/jpeg", "file://"+f.getAbsolutePath(),"Download  http://get.hike.in");
-			
+			Bitmap shB = Utils.viewToBitmap(share);
+			Logger.i(tag, " width height of layout to share " + share.getWidth() + " , " + share.getHeight());
+			shB.compress(CompressFormat.JPEG, 100, fos);
+			fos.flush();
+			fos.close();
+			Logger.i(tag, "share webview card " + cardShareImageFile.getAbsolutePath());
+			Utils.startShareImageIntent("image/jpeg", "file://" + cardShareImageFile.getAbsolutePath(),
+					HikeMessengerApp.getInstance().getApplicationContext().getString(R.string.download) + " http://get.hike.in");
+
 		}
 		catch (Exception e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			showToast(mContext.getString(com.bsb.hike.R.string.error_card_sharing));
+		}
+		finally
+		{
+			if (fos != null)
+			{
+				try
+				{
+					fos.close();
+				}
+				catch (IOException e)
+				{
+					// Do nothing
+					e.printStackTrace();
+				}
+			}
+			
+			if (cardShareImageFile != null && cardShareImageFile.exists())
+			{
+				cardShareImageFile.deleteOnExit();
+			}
 		}
 	}
 
