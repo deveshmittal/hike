@@ -63,6 +63,27 @@ public class VoIPConstants {
 		public static final String CALL_CONNECT_FAIL_REASON = "reason";
 	}
 
+	public static final class ConnectionFailCodes
+	{
+		public static final int PARTNER_UPGRADE = 0;
+
+		public static final int PARTNER_INCOMPAT = 1;
+
+		public static final int PARTNER_BLOCKED_USER = 2;
+
+		public static final int PARTNER_BUSY = 3;
+
+		public static final int UDP_CONNECTION_FAIL = 4;
+
+		public static final int EXTERNAL_SOCKET_RETRIEVAL_FAILURE = 5;
+
+		public static final int PARTNER_SOCKET_INFO_TIMEOUT = 6;
+
+		public static final int CALLER_BAD_NETWORK = 7;
+
+		public static final int CALLER_IN_NATIVE_CALL = 8;
+	}
+
 	
 	/**
 	 * Call quality

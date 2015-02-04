@@ -329,6 +329,7 @@ public class VoIPService extends Service {
 			if (VoIPUtils.isUserInCall(getApplicationContext())) {
 				Log.w(VoIPConstants.TAG, "We are already in a cellular call.");
 				sendHandlerMessage(VoIPActivity.MSG_ALREADY_IN_CALL);
+				sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.CALLER_IN_NATIVE_CALL);
 				return returnInt;
 			}
 
@@ -2106,6 +2107,7 @@ public class VoIPService extends Service {
 						if (keepRunning) {
 							Logger.w(VoIPConstants.TAG, "Network is not good enough.");
 							sendHandlerMessage(VoIPActivity.MSG_NETWORK_SUCKS);
+							sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.CALLER_BAD_NETWORK);
 						}
 						stop();
 						return;
@@ -2113,6 +2115,7 @@ public class VoIPService extends Service {
 				} else {
 					Logger.d(VoIPConstants.TAG, "Failed to retrieve external socket.");
 					sendHandlerMessage(VoIPActivity.MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE);
+					sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.EXTERNAL_SOCKET_RETRIEVAL_FAILURE);
 				}
 			}
 		}, "ICE_THREAD");
@@ -2207,6 +2210,7 @@ public class VoIPService extends Service {
 					VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1);
 					VoIPUtils.sendMissedCallNotificationToPartner(clientPartner);
 				}
+				sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.PARTNER_SOCKET_INFO_TIMEOUT);
 				stop();					
 			}
 		}, "PARTNER_TIMEOUT_THREAD");
@@ -2351,6 +2355,7 @@ public class VoIPService extends Service {
 						else
 							VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1);
 					}
+					sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.UDP_CONNECTION_FAIL);
 					stop();
 				}
 			}
