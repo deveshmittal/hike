@@ -314,7 +314,7 @@ public class VoIPActivity extends Activity implements CallActions
 			showMessage(message);
 			if (voipService != null)
 			{
-				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, 0);
+				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.PARTNER_UPGRADE);
 				voipService.stop();
 			}
 		}
@@ -326,7 +326,7 @@ public class VoIPActivity extends Activity implements CallActions
 			showMessage(message);
 			if (voipService != null)
 			{
-				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, 1);
+				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.PARTNER_INCOMPAT);
 				voipService.stop();
 			}
 		}
@@ -334,7 +334,7 @@ public class VoIPActivity extends Activity implements CallActions
 		if (action.equals(VoIPConstants.PARTNER_HAS_BLOCKED_YOU)) {
 			if (voipService != null)
 			{
-				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, 2);
+				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.PARTNER_BLOCKED_USER);
 				voipService.stop();
 			}
 		}
@@ -344,7 +344,7 @@ public class VoIPActivity extends Activity implements CallActions
 			showCallStatus(CallStatus.PARTNER_BUSY);
 			if (voipService != null)
 			{
-				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, 3);
+				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.PARTNER_BUSY);
 				voipService.stop();
 			}
 		}
