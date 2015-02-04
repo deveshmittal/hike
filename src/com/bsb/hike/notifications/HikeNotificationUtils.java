@@ -129,11 +129,11 @@ public class HikeNotificationUtils
 			return HikeMessengerApp.getInstance().getApplicationContext().getString(R.string.app_name);
 		}
 
-		String name = ContactManager.getInstance().getName(argMsisdn);
+		String name = HikeMessengerApp.hikeBotNamesMap.get(argMsisdn);
 
 		if (TextUtils.isEmpty(name))
 		{
-			name = HikeMessengerApp.hikeBotNamesMap.get(argMsisdn);
+			name = ContactManager.getInstance().getName(argMsisdn);
 		}
 		
 		if (TextUtils.isEmpty(name))

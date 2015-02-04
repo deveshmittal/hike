@@ -1989,8 +1989,6 @@ public class MqttMessagesManager
 					// chat thread -- by default silent is true, so no sound
 					boolean silent = data.optBoolean(HikeConstants.SILENT, true);
 					
-					destination = HikeNotificationUtils.getNameForMsisdn(destination);
-					
 					// open respective chat thread
 					HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
 				}

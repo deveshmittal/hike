@@ -177,11 +177,16 @@ public class DbConversationListener implements Listener
 			ContactManager.getInstance().toggleContactFavorite(msisdn, FavoriteType.NOT_FRIEND);
 
 			JSONObject blockObj = blockUnblockSerialize("b", msisdn);
-			/*
-			 * We remove the icon for a blocked user as well.
-			 */
-			HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+
+			if (!Utils.isBot(msisdn))
+			{
+				/*
+				 * We remove the icon for a blocked user as well.
+				 */
+				HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+			}
+			
 			// IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			HikeMqttManagerNew.getInstance().sendMessage(blockObj, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
