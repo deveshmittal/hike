@@ -1,6 +1,7 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -158,6 +159,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.TrafficsStatsFile;
 import com.bsb.hike.cropimage.CropImage;
+import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
@@ -172,6 +174,7 @@ import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
@@ -184,7 +187,6 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.FtueActivity;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeDialog;
@@ -687,18 +689,6 @@ public class Utils
 		return false;
 	}
 
-	public static boolean showNuxScreen(Activity activity)
-	{
-		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if (settings.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false))
-		{
-			activity.startActivity(new Intent(activity, FtueActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-			activity.finish();
-			return true;
-		}
-		return false;
-	}
-
 	public static String formatNo(String msisdn)
 	{
 		StringBuilder sb = new StringBuilder(msisdn);
@@ -1120,7 +1110,7 @@ public class Utils
 			data.put(HikeConstants.UPGRADE, upgrade);
 			data.put(HikeConstants.SENDBOT, sendbot);
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-
+			data.put(HikeConstants.RESOLUTION_ID, Utils.getResolutionId());
 			requestAccountInfo.put(HikeConstants.DATA, data);
 			HikeMqttManagerNew.getInstance().sendMessage(requestAccountInfo, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
@@ -1613,8 +1603,9 @@ public class Utils
 		boolean connectUsingSSL = Utils.switchSSLOn(ctx);
 		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), connectUsingSSL);
 	}
-
+		
 	public static void setupServerURL(boolean isProductionServer, boolean ssl)
+	
 	{
 		Logger.d("SSL", "Switching SSL on? " + ssl);
 
@@ -1625,9 +1616,10 @@ public class Utils
 
 		AccountUtils.host = isProductionServer ? AccountUtils.PRODUCTION_HOST : AccountUtils.STAGING_HOST;
 		AccountUtils.port = isProductionServer ? (ssl ? AccountUtils.PRODUCTION_PORT_SSL : AccountUtils.PRODUCTION_PORT) : (ssl ? AccountUtils.STAGING_PORT_SSL
-				: AccountUtils.STAGING_PORT);
+						: AccountUtils.STAGING_PORT);
 
 		if (isProductionServer)
+
 		{
 			AccountUtils.base = httpString + AccountUtils.host + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + "/v2";
@@ -1642,9 +1634,9 @@ public class Utils
 
 		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
 		AccountUtils.fileTransferUploadBase = httpString + AccountUtils.fileTransferHost + ":" + Integer.toString(AccountUtils.port) + "/v1";
-
+		 
 		CheckForUpdateTask.UPDATE_CHECK_URL = httpString + (isProductionServer ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL);
-
+		 
 		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
 		AccountUtils.fastFileUploadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
@@ -1662,6 +1654,29 @@ public class Utils
 		Logger.d("SSL", "UpdateCheck: " + CheckForUpdateTask.UPDATE_CHECK_URL);
 		Logger.d("SSL", "FTDloadBase: " + AccountUtils.fileTransferBaseDownloadUrl);
 		Logger.d("SSL", "FTViewBase: " + AccountUtils.fileTransferBaseViewUrl);
+	}
+
+	private static void setHostAndPort(int whichServer, boolean ssl)
+	{
+		switch (whichServer)
+		{
+
+		case AccountUtils._PRODUCTION_HOST:
+			AccountUtils.host = AccountUtils.PRODUCTION_HOST;
+			AccountUtils.port = ssl ? AccountUtils.PRODUCTION_PORT_SSL : AccountUtils.PRODUCTION_PORT;
+			break;
+			
+		case AccountUtils._STAGING_HOST:
+			AccountUtils.host = AccountUtils.STAGING_HOST;
+			AccountUtils.port = ssl ? AccountUtils.STAGING_PORT_SSL : AccountUtils.STAGING_PORT;
+			break;
+			
+		case AccountUtils._DEV_STAGING_HOST:
+			AccountUtils.host = AccountUtils.DEV_STAGING_HOST;
+			AccountUtils.port = ssl ? AccountUtils.STAGING_PORT_SSL : AccountUtils.STAGING_PORT;
+			break;
+		}
+
 	}
 
 	public static boolean shouldChangeMessageState(ConvMessage convMessage, int stateOrdinal)

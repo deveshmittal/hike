@@ -31,6 +31,7 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
@@ -54,6 +55,7 @@ import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gms.internal.co;
@@ -702,12 +704,12 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 
 		TextView messageView = viewHolder.subText;
-		CharSequence markedUp = getConversationText(conversation, message);
 		messageView.setVisibility(View.VISIBLE);
+		CharSequence markedUp = getConversationText(conversation, message);
 		messageView.setText(markedUp);
-
+		
 		updateViewsRelatedToMessageState(parentView, message, conversation);
-
+		
 		TextView tsView = viewHolder.timeStamp;
 		tsView.setText(message.getTimestampFormatted(true, context));
 	}
@@ -737,12 +739,13 @@ public class ConversationsAdapter extends BaseAdapter
 		TextView messageView = viewHolder.subText;
 
 		TextView unreadIndicator = viewHolder.unreadIndicator;
+		boolean isNuxLocked = NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_IS_ACTIVE && NUXManager.getInstance().isContactLocked(message.getMsisdn());
 		unreadIndicator.setVisibility(View.GONE);
 		imgStatus.setVisibility(View.GONE);
 		
-		if (message.getParticipantInfoState() == ParticipantInfoState.VOIP_CALL_SUMMARY ||
+		if (!isNuxLocked && (message.getParticipantInfoState() == ParticipantInfoState.VOIP_CALL_SUMMARY ||
 				message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING ||
-						message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING)
+						message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING))
 		{
 			String messageText = null;
 			int imageId = R.drawable.ic_voip_conv_miss;
@@ -784,13 +787,13 @@ public class ConversationsAdapter extends BaseAdapter
 		 */
 		else if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE || message.getState() == State.RECEIVED_UNREAD)
 		{
-			int resId = message.getImageState();
-			if (resId > 0)
+			
+			if (message.isSent())
 			{
-				imgStatus.setImageResource(resId);
+				imgStatus.setImageResource(message.getImageState());
 				imgStatus.setVisibility(View.VISIBLE);
 			}
-			else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0)
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0 && !message.isSent())
 			{
 				unreadIndicator.setVisibility(View.VISIBLE);
 
@@ -798,8 +801,11 @@ public class ConversationsAdapter extends BaseAdapter
 
 				unreadIndicator.setText(Integer.toString(conversation.getUnreadCount()));
 			}
-			else
-			{
+			if(isNuxLocked)
+			{ 
+				imgStatus.setVisibility(View.VISIBLE);
+				imgStatus.setImageBitmap(NUXManager.getInstance().getNuxChatRewardPojo().getPendingChatIcon());
+				messageView.setText(NUXManager.getInstance().getNuxChatRewardPojo().getChatWaitingText());		
 			}
 			
 			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) messageView.getLayoutParams();
@@ -807,9 +813,9 @@ public class ConversationsAdapter extends BaseAdapter
 			messageView.setLayoutParams(lp);
 		}
 
-		if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+		if (message.getState() == ConvMessage.State.RECEIVED_UNREAD || isNuxLocked)
 		{
-			/* set unread messages to BLUE */
+			/* set NUX waiting or unread messages to BLUE */
 			messageView.setTextColor(context.getResources().getColor(R.color.unread_message));
 		}
 		else
