@@ -21,6 +21,7 @@ import com.bsb.hike.modules.httpmgr.request.listener.IProgressListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
+import com.bsb.hike.modules.httpmgr.retry.DefaultRetryPolicy;
 import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
 
 /**
@@ -442,7 +443,7 @@ public abstract class Request<T> implements IRequestFacade
 
 		private short requestType = REQUEST_TYPE_LONG;
 
-		private IRetryPolicy retryPolicy;
+		private IRetryPolicy retryPolicy  = new DefaultRetryPolicy();
 
 		private CopyOnWriteArrayList<IRequestListener> requestListeners;
 
