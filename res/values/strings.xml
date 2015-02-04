@@ -1324,8 +1324,10 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="beta">BETA</string>
     <string name="error_card_sharing">Some error occured, please try again</string>
     <string name="cardShareDescription">
-<![CDATA[ Visit <font color="#57dcf9">http://get.hike.in</font> to get hike messanger
+<![CDATA[ Download hike messenger at <font color="#57dcf9">http://get.hike.in</font>
 	    ]]></string>
+	    <string name="cardShareCaption">Download hike messenger at http://get.hike.in</string>
+        <string name="cardShareHeading">Don\'t miss out on all the fun on hike !</string>
     <string name="voip_call_issues_header">Tell us about the issues</string>
     <string name="voip_call_issues_subheader">Select relevant options</string>
     <string name="report_issue">REPORT ISSUE</string>
