@@ -393,6 +393,10 @@ public class HikePubSub implements Runnable
 	public static final String SWITCH_OFF_NUX_MODE = "switchOffNuxMode";
 	
 	public static final String USER_JOINED_NOTIFICATION = "userJoinedNotification";
+	
+	public static final String STICKER_SHOP_DOWNLOAD_SUCCESS = "stickerShopDownloadSucess";
+	
+	public static final String STICKER_SHOP_DOWNLOAD_FAILURE = "stickerShopDownloadFailure";
 
 	private final Thread mThread;
 

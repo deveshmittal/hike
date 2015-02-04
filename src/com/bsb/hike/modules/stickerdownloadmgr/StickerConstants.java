@@ -1,13 +1,7 @@
 package com.bsb.hike.modules.stickerdownloadmgr;
 
 public class StickerConstants
-{
-	
-	public enum STState
-	{
-		NOT_STARTED, INITIALIZED, IN_PROGRESS, PAUSED, CANCELLED, COMPLETED, ERROR
-	}
-	
+{	
 	public enum DownloadType
 	{
 		NEW_CATEGORY, UPDATE, MORE_STICKERS
@@ -16,11 +10,6 @@ public class StickerConstants
 	public enum DownloadSource
 	{
 		FIRST_TIME, X_MORE, SHOP, RETRY, SETTINGS
-	}
-	
-	public enum HttpRequestType
-	{
-		POST, GET, HEAD
 	}
 	
 	public enum StickerRequestType

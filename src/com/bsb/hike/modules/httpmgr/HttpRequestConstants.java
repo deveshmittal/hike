@@ -18,6 +18,8 @@ public class HttpRequestConstants
 	
 	private static final String BASE_V1 = "/v1";
 	
+	private static final String STICKERS_BASE = "/stickers";
+	
 	public static synchronized void toggleStaging(boolean production)
 	{
 		isProduction = production;
@@ -43,6 +45,31 @@ public class HttpRequestConstants
 	
 	public static String singleStickerDownloadBase()
 	{
-		return BASE_URL + BASE_V1 + "/stickers";
+		return BASE_URL + BASE_V1 + STICKERS_BASE;
+	}
+	
+	public static String stickerSignupUpgradeUrl()
+	{
+		return BASE_URL + BASE_V1 + STICKERS_BASE + "/categories";
+	}
+	
+	public static String stickerShopDownloadUrl()
+	{
+		return BASE_URL + BASE_V1 + STICKERS_BASE + "/shop";
+	}
+	
+	public static String stickerPalleteImageDownloadUrl()
+	{
+		return BASE_URL + BASE_V1 + STICKERS_BASE + "/enable_disable";
+	}
+	
+	public static String stickerPreviewImageDownloadUrl()
+	{
+		return BASE_URL + BASE_V1 + STICKERS_BASE + "/preview";
+	}
+	
+	public static String multiStickerDownloadUrl()
+	{
+		return BASE_URL + BASE_V1 + STICKERS_BASE;
 	}
 }

@@ -88,9 +88,7 @@ import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
-import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.platform.CardRenderer;
 import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
@@ -826,35 +824,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				stickerHolder.image.setVisibility(View.GONE);
 				stickerHolder.image.setImageDrawable(null);
 
-				StickerDownloadManager.getInstance().DownloadSingleSticker(categoryId, stickerId, new IStickerResultListener()
-				{
-
-					@Override
-					public void onSuccess(Object result)
-					{
-						// TODO Auto-generated method stub
-						HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_DOWNLOADED, null);
-
-					}
-
-					@Override
-					public void onProgressUpdated(double percentage)
-					{
-						// TODO Auto-generated method stub
-
-					}
-
-					@Override
-					public void onFailure(Object result, StickerException exception)
-					{
-						if(result == null)
-						{
-							return ;
-						}
-						String largeStickerPath = (String) result;
-						(new File(largeStickerPath)).delete();
-					}
-				});
+				StickerDownloadManager.getInstance().DownloadSingleSticker(categoryId, stickerId);
 				
 			}
 			setTimeNStatus(position, stickerHolder, true, stickerHolder.placeHolder);

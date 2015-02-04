@@ -1,6 +1,6 @@
 package com.bsb.hike.modules.stickerdownloadmgr;
 
-import static com.bsb.hike.modules.httpmgr.HttpRequests.StickerPreviewImageDownloadRequest;
+import static com.bsb.hike.modules.httpmgr.HttpRequests.StickerPalleteImageDownloadRequest;
 import static com.bsb.hike.modules.httpmgr.exception.HttpException.REASON_CODE_OUT_OF_SPACE;
 
 import java.io.File;
@@ -19,15 +19,17 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
-public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
+public class StickerPalleteImageDownloadTask extends BaseStickerDownloadTask
 {
-	private String TAG = "StickerPreviewImageDownloadTask";
+	private String TAG = "StickerPalleteImageDownloadTask";
 
 	private String catId;
 
-	String previewImagePath;
+	private String enableImagePath;
 
-	protected StickerPreviewImageDownloadTask(String taskId, String categoryId)
+	private String disableImagePath;
+
+	protected StickerPalleteImageDownloadTask(String taskId, String categoryId)
 	{
 		super(taskId);
 		this.catId = categoryId;
@@ -38,7 +40,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			return;
 		}
 		
-		RequestToken requestToken = StickerPreviewImageDownloadRequest(categoryId, getPreProcessListener(), getRequestListener());
+		RequestToken requestToken = StickerPalleteImageDownloadRequest(categoryId, getPreProcessListener(), getRequestListener());
 		requestToken.execute();
 	}
 
@@ -58,7 +60,8 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 					return;
 				}
 
-				previewImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PREVIEW_IMAGE + StickerManager.OTHER_ICON_TYPE;
+				enableImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PALLATE_ICON_SELECTED + StickerManager.OTHER_ICON_TYPE;
+				disableImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PALLATE_ICON + StickerManager.OTHER_ICON_TYPE;
 
 				File otherDir = new File(dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT);
 				if (!otherDir.exists())
@@ -101,9 +104,13 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 						return;
 					}
 
-					String stickerData = data.getString(HikeConstants.PREVIEW_IMAGE);
-					HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(catId, StickerManager.PREVIEW_IMAGE_TYPE));
-					Utils.saveBase64StringToFile(new File(previewImagePath), stickerData);
+					String enableImg = data.getString(HikeConstants.ENABLE_IMAGE);
+					String disableImg = data.getString(HikeConstants.DISABLE_IMAGE);
+
+					HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(catId, StickerManager.PALLATE_ICON_SELECTED_TYPE));
+					HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(catId, StickerManager.PALLATE_ICON_TYPE));
+					Utils.saveBase64StringToFile(new File(enableImagePath), enableImg);
+					Utils.saveBase64StringToFile(new File(disableImagePath), disableImg);
 				}
 				catch (Exception e)
 				{
@@ -114,6 +121,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			@Override
 			public void onRequestProgressUpdate(float progress)
 			{
+				// TODO Auto-generated method stub
 
 			}
 

@@ -1,10 +1,19 @@
 package com.bsb.hike.modules.httpmgr;
 
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.multiStickerDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.singleStickerDownloadBase;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPalleteImageDownloadUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPreviewImageDownloadUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerShopDownloadUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerSignupUpgradeUrl;
+import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_HIGH;
+import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_LONG;
+import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
 
 import com.bsb.hike.modules.httpmgr.request.JSONObjectRequest;
 import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
+import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.utils.Utils;
 
 public class HttpRequests
@@ -14,7 +23,66 @@ public class HttpRequests
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(singleStickerDownloadBase() + "?catId=" + categoryId + "&stId=" + stickerId + "&resId=" + Utils.getResolutionId())
 				.setPreProcessListener(preProcessListener)
-				.setRequestListener(requestListener).build();
+				.setRequestListener(requestListener)
+				.build();
+		return requestToken;
+	}
+
+	public static RequestToken StickerSignupUpgradeRequest(IRequestBody body, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(stickerSignupUpgradeUrl())
+				.post(body)
+				.setRequestListener(requestListener)
+				.setRequestType(REQUEST_TYPE_SHORT)
+				.build();
+		return requestToken;
+	}
+
+	public static RequestToken StickerShopDownloadRequest(int offset, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(stickerShopDownloadUrl() + "?offset=" + offset)
+				.setRequestListener(requestListener)
+				.setRequestType(REQUEST_TYPE_SHORT)
+				.setPriority(PRIORITY_HIGH)
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken StickerPalleteImageDownloadRequest(String categoryId, IPreProcessListener preProcessListener, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(stickerPalleteImageDownloadUrl() + "?catId=" + categoryId + "&resId=" + Utils.getResolutionId())
+				.setPreProcessListener(preProcessListener)
+				.setRequestListener(requestListener)
+				.setRequestType(REQUEST_TYPE_LONG)
+				.setPriority(10) // Setting priority between sticker shop task and enable_disable icon task
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken StickerPreviewImageDownloadRequest(String categoryId, IPreProcessListener preProcessListener, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(stickerPreviewImageDownloadUrl() + "?catId=" + categoryId + "&resId=" + Utils.getResolutionId())
+				.setPreProcessListener(preProcessListener)
+				.setRequestListener(requestListener)
+				.setRequestType(REQUEST_TYPE_SHORT)
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken MultiStickerDownloadRequest(IPreProcessListener preProcessListener, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(multiStickerDownloadUrl())
+				.post(null)  // will set it in preprocess listener method using request facade
+				.setPreProcessListener(preProcessListener)
+				.setRequestListener(requestListener)
+				.setRequestType(REQUEST_TYPE_LONG)
+				.setPriority(PRIORITY_HIGH)
+				.build();
 		return requestToken;
 	}
 }

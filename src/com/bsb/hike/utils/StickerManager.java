@@ -46,12 +46,10 @@ import com.bsb.hike.models.CustomStickerCategory;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
-import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.SingleStickerDownloadTask;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class StickerManager
@@ -1191,10 +1189,10 @@ public class StickerManager
 				{
 				case PALLATE_ICON_TYPE:
 				case PALLATE_ICON_SELECTED_TYPE:
-					StickerDownloadManager.getInstance().DownloadEnableDisableImage(categoryId, null);
+					StickerDownloadManager.getInstance().DownloadStickerPalleteImage(categoryId);
 					break;
 				case PREVIEW_IMAGE_TYPE:
-					StickerDownloadManager.getInstance().DownloadStickerPreviewImage(categoryId, null);
+					StickerDownloadManager.getInstance().DownloadStickerPreviewImage(categoryId);
 					break;
 				default:
 					break;
@@ -1257,32 +1255,7 @@ public class StickerManager
 			return;
 		}
 
-		StickerDownloadManager.getInstance().DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
-		{
-
-			@Override
-			public void onSuccess(Object result)
-			{
-				// TODO Auto-generated method stub
-				JSONArray resultData = (JSONArray) result;
-				updateStickerCategoriesMetadata(resultData);
-				HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.STICKERS_SIZE_DOWNLOADED, true);
-			}
-
-			@Override
-			public void onProgressUpdated(double percentage)
-			{
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onFailure(Object result, StickerException exception)
-			{
-				// TODO Auto-generated method stub
-
-			}
-		});
+		StickerDownloadManager.getInstance().DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories());
 	}
 	
 	public void updateStickerCategoriesMetadata(JSONArray jsonArray)
@@ -1362,7 +1335,7 @@ public class StickerManager
 		if(category.getTotalStickers() == 0 || category.getDownloadedStickersCount() < category.getTotalStickers())
 		{
 			category.setState(StickerCategory.DOWNLOADING);
-			StickerDownloadManager.getInstance().DownloadMultipleStickers(category, downloadType, source, null);
+			StickerDownloadManager.getInstance().DownloadMultipleStickers(category, downloadType, source);
 		}
 		saveCategoryAsVisible(category);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
@@ -1487,8 +1460,8 @@ public class StickerManager
 		/**
 		 * Now download the Enable disable images as well as preview image
 		 */
-		StickerDownloadManager.getInstance().DownloadEnableDisableImage(stickerCategory.getCategoryId(), null);
-		StickerDownloadManager.getInstance().DownloadStickerPreviewImage(stickerCategory.getCategoryId(), null);
+		StickerDownloadManager.getInstance().DownloadStickerPalleteImage(stickerCategory.getCategoryId());
+		StickerDownloadManager.getInstance().DownloadStickerPreviewImage(stickerCategory.getCategoryId());
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
 
