@@ -5161,6 +5161,22 @@ public class Utils
 		return networkType;
 	}
 
+	public static String conversationType(String msisdn)
+	{
+		if (isBot(msisdn))
+		{
+			return HikeConstants.BOT;
+		}
+		else if (isGroupConversation(msisdn))
+		{
+			return HikeConstants.GROUP_CONVERSATION;
+		}
+		else
+		{
+			return HikeConstants.ONE_TO_ONE_CONVERSATION;
+		}
+	}
+
 	public static boolean isBot(String msisdn)
 	{
 		if (HikeMessengerApp.hikeBotNamesMap != null)
