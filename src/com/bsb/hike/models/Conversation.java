@@ -475,7 +475,7 @@ public class Conversation implements Comparable<Conversation>
             json.put(AnalyticsConstants.ORIGIN, HikePlatformConstants.CONVERSATION_FRAGMENT);
             json.put(AnalyticsConstants.UNREAD_COUNT, getUnreadCount());
             json.put(HikeConstants.CHAT_MSISDN, getMsisdn());
-            HikeAnalyticsEvent.analyticsForPlatform(AnalyticsConstants.UI_EVENT, subType, json);
+            HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, subType, json, AnalyticsConstants.EVENT_TAG_BOTS);
         } catch (JSONException e) {
             e.printStackTrace();
         }

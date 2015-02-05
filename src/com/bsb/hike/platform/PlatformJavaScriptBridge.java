@@ -164,11 +164,11 @@ public class PlatformJavaScriptBridge
 			jsonObject.put(HikePlatformConstants.CARD_TYPE, message.platformWebMessageMetadata.getAppName());
 			if (Boolean.valueOf(isUI))
 			{
-				HikeAnalyticsEvent.analyticsForPlatform(AnalyticsConstants.MICROAPP_UI_EVENT, subType, jsonObject);
+				HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.MICROAPP_UI_EVENT, subType, jsonObject, AnalyticsConstants.EVENT_TAG_PLATFORM);
 			}
 			else
 			{
-				HikeAnalyticsEvent.analyticsForPlatform(AnalyticsConstants.MICROAPP_NON_UI_EVENT, subType, jsonObject);
+				HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.MICROAPP_NON_UI_EVENT, subType, jsonObject, AnalyticsConstants.EVENT_TAG_PLATFORM);
 			}
 		}
 		catch (JSONException e)

@@ -101,9 +101,9 @@ public class PlatformWebMessageMetadata
 				this.cardHeight = Integer.parseInt(cardobj.optString(HikePlatformConstants.HEIGHT));
 			}
 
-			if (cardobj.has(HikePlatformConstants.LAYOUT_ID))
+			if (cardobj.has(HikePlatformConstants.LAYOUT))
 			{
-				setLayoutId(cardobj.optString(HikePlatformConstants.LAYOUT_ID));
+				setLayoutId(cardobj.optString(HikePlatformConstants.LAYOUT));
 			}
 
 			// Extract notif text

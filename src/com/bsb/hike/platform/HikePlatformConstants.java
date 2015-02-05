@@ -41,7 +41,7 @@ public interface HikePlatformConstants
 	String CRICKET_CHAT_THEME_ID = "39";
 	String CRICKET_PREF_NAME = "cricket_pref_name";
 	String APP_NAME = "appName";
-	String LAYOUT_ID = "layoutId";
+	String LAYOUT = "layoutId";
 
     /**
      * Analytics for Platform

@@ -312,7 +312,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			json.put(HikePlatformConstants.ERROR_CODE, reason.toString());
 			json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.BOT_ERROR);
-			HikeAnalyticsEvent.analyticsForPlatform(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, json);
+			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
 		}
 		catch (JSONException e)
 		{
@@ -338,7 +338,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			platformJSON.put(HikePlatformConstants.CARD_TYPE, message.platformWebMessageMetadata.getAppName());
 			platformJSON.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_LOADED);
 			platformJSON.put(HikePlatformConstants.CARD_STATE, state);
-			HikeAnalyticsEvent.analyticsForPlatform(AnalyticsConstants.UI_EVENT, AnalyticsConstants.VIEW_EVENT, platformJSON);
+			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.VIEW_EVENT, platformJSON, AnalyticsConstants.EVENT_TAG_PLATFORM);
 		}
 		catch (JSONException e)
 		{
