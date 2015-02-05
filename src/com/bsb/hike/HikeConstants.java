@@ -496,6 +496,8 @@ public class HikeConstants
 	public static final String BACKUP_PREF = "backupAccount";
 
     public static final String NUX_BOT = "+hike5+";
+    
+    public static final String CRICKET_BOT = "+hikecricket+";
 
     public static final String NUX = "nux";
 
@@ -2269,6 +2271,5 @@ public class HikeConstants
 	public static final String OFF = "off";
 
 	public static final String ENABLE_DETAILED_HTTP_LOGGING = "edhl";
-
 
 }
