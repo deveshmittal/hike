@@ -43,6 +43,7 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
@@ -129,7 +130,7 @@ import com.bsb.hike.utils.Utils;
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, 
 		CaptureImageListener, PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener,
-		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener
+		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener
 {
 	private static final String TAG = "chatthread";
 
@@ -243,6 +244,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected int selectedCancelableMsgs;
 	
 	protected ChatThreadTips mTips;
+	
+	private static String NEW_LINE_DELIMETER = "\n";
 	
 	private class ChatThreadBroadcasts extends BroadcastReceiver
 	{
@@ -1186,6 +1189,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mComposeView.setOnTouchListener(this);
 			
 		}
+		
+		mComposeView.setOnKeyListener(this);
 
 		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
 
@@ -3888,6 +3893,21 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			sendButtonClicked();
 			Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean onKey(View v, int keyCode, KeyEvent event)
+	{
+		if ((event.getAction() == KeyEvent.ACTION_UP) && (keyCode == KeyEvent.KEYCODE_ENTER) && event.isAltPressed())
+		{
+			mComposeView.append(NEW_LINE_DELIMETER);
+			/**
+			 * Micromax phones appear to fire this event twice. Doing this seems to fix the problem.
+			 */
+			KeyEvent.changeAction(event, KeyEvent.ACTION_DOWN);
 			return true;
 		}
 		return false;
