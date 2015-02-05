@@ -63,7 +63,15 @@ public class PlatformContent
 					{
 						return "downloading";
 					}
-				}
+		},
+		LOADED
+		{
+			@Override
+			public String toString()
+			{
+				return "loaded";
+			}
+		}
 	}
 
 	/**

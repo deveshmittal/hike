@@ -3,9 +3,6 @@ package com.bsb.hike.platform.content;
 import java.io.File;
 import java.io.FilenameFilter;
 
-import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.platform.HikePlatformConstants;
-import com.bsb.hike.utils.HikeAnalyticsEvent;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -208,35 +205,8 @@ class PlatformContentCache
 	public static void putFormedContent(PlatformContentModel content)
 	{
 		Log.d(TAG, "put formed content in cache");
-		cardLoadAnalytics(content);
-
+		
 		formedContentCache.put(content.hashCode(), content);
-	}
-
-	private static void cardLoadAnalytics(PlatformContentModel content)
-	{
-		JSONObject platformJSON = new JSONObject();
-
-		try
-		{
-			String state = content.cardObj.getLayoutId();
-			state = state.substring(0,state.length() - 5);
-			platformJSON.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_LOADED);
-			platformJSON.put(HikePlatformConstants.CARD_STATE, state);
-			HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.VIEW_EVENT, platformJSON);
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
-		catch (NullPointerException npe)
-		{
-			npe.printStackTrace();
-		}
-		catch (IndexOutOfBoundsException ie)
-		{
-			ie.printStackTrace();
-		}
 	}
 
 	/**
