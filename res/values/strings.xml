@@ -1259,7 +1259,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
 	<string name="connected_app_to_hike">1 app connected to hike</string>
 	<string name="confirm_disconnect_app">You will miss out on relevant benefits.</string>
     <string name="send_sticker_joy">Wish your friends with this sticker</string>
-    <string name="happy_new_year">Happy New Year</string>
     <string name="nux_invitefrnds_skip">SKIP</string>
     <string name="nux_invitefrnds_reward">Say more with stickers!</string>
     <string name="nux_invitefrnds_objective">Express more with stickers and chat with your best friends!</string>
@@ -1324,8 +1323,10 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="beta">BETA</string>
     <string name="error_card_sharing">Some error occured, please try again</string>
     <string name="cardShareDescription">
-<![CDATA[ Visit <font color="#57dcf9">http://get.hike.in</font> to get hike messanger
+<![CDATA[ Get hike messenger at <font color="#57dcf9">http://get.hike.in</font>
 	    ]]></string>
+	    <string name="cardShareCaption">Download hike messenger at http://get.hike.in</string>
+        <string name="cardShareHeading">Don\'t miss out on all the fun on hike !</string>
     <string name="voip_call_issues_header">Tell us about the issues</string>
     <string name="voip_call_issues_subheader">Select relevant options</string>
     <string name="report_issue">REPORT ISSUE</string>
@@ -1342,4 +1343,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
 	<string name="voip_call_issues_submit_toast">Your feedback has been submitted</string>
     <string name="video_compress">VIDEO COMPRESSION</string>
     <string name="send_compress_video">Send Compressed Video</string>
+    <string name="valentine_day">Happy Valentine\'s Day</string>
 </resources>

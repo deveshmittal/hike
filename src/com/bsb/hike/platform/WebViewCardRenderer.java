@@ -21,16 +21,20 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
+import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.platform.content.PlatformContent.ErrorCode;
@@ -39,6 +43,8 @@ import com.bsb.hike.platform.content.PlatformContentModel;
 import com.bsb.hike.platform.content.PlatformWebClient;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -139,6 +145,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		holder.myBrowser.setHorizontalScrollBarEnabled(false);
 		holder.myBrowser.addJavascriptInterface(holder.platformJavaScriptBridge, HikePlatformConstants.PLATFORM_BRIDGE_NAME);
 		holder.myBrowser.setWebViewClient(holder.webViewClient);
+		holder.myBrowser.getSettings().setDomStorageEnabled(true);
 		holder.platformJavaScriptBridge.allowUniversalAccess();
 		holder.platformJavaScriptBridge.allowDebugging();
 		holder.myBrowser.getSettings().setJavaScriptEnabled(true);
@@ -257,7 +264,23 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				@Override
 				public void onFailure(ErrorCode reason)
 				{
-					Logger.e(tag, "on failure called "+reason);
+					Logger.e(tag, "on failure called " + reason);
+					JSONObject json = new JSONObject();
+					try
+					{
+						json.put(HikePlatformConstants.ERROR_CODE, reason.toString());
+						json.put(HikeConstants.EVENT_KEY, HikePlatformConstants.BOT_ERROR);
+						HAManager.getInstance()
+								.record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.ERROR_EVENT, HAManager.EventPriority.HIGH, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+					}
+					catch (NullPointerException e)
+					{
+						e.printStackTrace();
+					}
 					if (reason == ErrorCode.DOWNLOADING)
 					{
 						// Do nothing
@@ -342,6 +365,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		public void onPageFinished(WebView view, String url)
 		{
 			super.onPageFinished(view, url);
+			CookieManager.getInstance().setAcceptCookie(true);
 			Log.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
 			view.loadUrl("javascript:setData('"  + convMessage.getMsisdn() + "','"
 					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "','" + convMessage.isSent() +  "')");

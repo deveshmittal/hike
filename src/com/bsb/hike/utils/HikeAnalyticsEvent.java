@@ -110,6 +110,7 @@ public class HikeAnalyticsEvent
     {
         try
         {
+            Logger.d("HikeAnalyticsEvent", json.toString());
             HAManager.getInstance().record(type, subType, HAManager.EventPriority.HIGH, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
         }
         catch (NullPointerException npe)

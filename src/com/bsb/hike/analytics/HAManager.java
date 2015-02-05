@@ -13,15 +13,18 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Environment;
+import android.text.TextUtils;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.analytics.AnalyticsConstants.AppOpenSource;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.platform.HikePlatformConstants;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gms.internal.fs;
 
 /**
  * @author rajesh
@@ -54,20 +57,22 @@ public class HAManager
 
 	private long hourToSend;
 	
+	private boolean shouldSendLogs = false;
+	
 	private int analyticsUploadFrequency = 0;
 		
 	private String analyticsDirectory;
 
-//	private NetworkListener listner;
+	private NetworkListener listner;
 	
 	private Session fgSessionInstance;
-	
+		
 	/**
 	 * Constructor
 	 */
 	private HAManager() 
-	{		
-		this.context = HikeMessengerApp.getInstance().getApplicationContext(); 
+	{				
+		this.context = HikeMessengerApp.getInstance().getApplicationContext();
 		
 //		analyticsDirectory = context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
 
@@ -88,6 +93,8 @@ public class HAManager
 		
 		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Total analytics size :" + analyticsMaxSize + " KBs");
 		
+		shouldSendLogs = getPrefs().getBoolean(AnalyticsConstants.SEND_WHEN_CONNECTED, false);
+		
 		hourToSend = getPrefs().getLong(AnalyticsConstants.ANALYTICS_ALARM_TIME, -1);
 
 		Calendar cal = Calendar.getInstance();
@@ -95,7 +102,7 @@ public class HAManager
 		if(hourToSend == -1)
 		{
 			int rndHour = getRandomTime();
-			hourToSend = Utils.getTimeInMillis(cal, rndHour, 0, 0, 0);
+			hourToSend = Utils.getTimeInMillis(cal, 0, 0, rndHour, 0);
 			
 			Editor editor = getPrefs().edit();		
 			editor.putLong(AnalyticsConstants.ANALYTICS_ALARM_TIME, hourToSend);		
@@ -112,8 +119,8 @@ public class HAManager
 
 		fgSessionInstance = new Session();
 		
-		// set wifi listener
-//		listner = new NetworkListener(this.context);
+		// set network listener
+		listner = new NetworkListener(this.context);
 	}
 	
 	/**
@@ -284,6 +291,27 @@ public class HAManager
 	public boolean isAnalyticsEnabled()
 	{
 		return isAnalyticsEnabled;
+	}
+	
+	/**
+	 * Used to check if analytics data can be sent based on network availability 
+	 * @return true if data can be sent, false otherwise
+	 */
+	public boolean isSendAnalyticsDataWhenConnected()
+	{
+		return shouldSendLogs;
+	}
+	
+	/**
+	 * Used to set whether logs should be sent next time alarm is triggered and user is connected 
+	 * @param value to set
+	 */
+	public void setIsSendAnalyticsDataWhenConnected(boolean value)
+	{
+		Editor edit = getPrefs().edit(); 
+		edit.putBoolean(AnalyticsConstants.SEND_WHEN_CONNECTED, value);
+		edit.commit();
+		this.shouldSendLogs = value;
 	}
 	
 	/**
@@ -470,9 +498,7 @@ public class HAManager
 	 * @return array of strings with file names 
 	 */
 	protected static String[] getFileNames(Context context)
-	{
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Looking files in directory :" + context.getFilesDir() + "/Analytics/");
-		
+	{		
 		File dir = new File(HAManager.getInstance().getAnalyticsDirectory() + File.separator);
 
 		String[] fileNames = dir.list();
@@ -638,6 +664,9 @@ public class HAManager
 					//2)duration:-Total time of Chat Session in whole session
 					metadata.put(AnalyticsConstants.SESSION_TIME, chatSession.getChatSessionTotalTime());
 					
+					//3)putting event key (ek) as bot_open
+					metadata.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.BOT_OPEN);
+					
 					HAManager.getInstance().record(AnalyticsConstants.CHAT_ANALYTICS, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_CHAT_SESSION);
 						
 					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "--session-id :" + fgSessionInstance.getSessionId() + "--to_user :" + chatSession.getMsisdn() + "--session-time :" + chatSession.getChatSessionTotalTime());
@@ -665,6 +694,42 @@ public class HAManager
 	public void endChatSession(String msisdn)
 	{
 		fgSessionInstance.endChatSesion(msisdn);
+	}
+
+	public void recordLastSeenEvent(String screen, String api, String msg, String toUser)
+	{
+		if(!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.DETAILED_HTTP_LOGGING_ENABLED, false))
+		{	
+			return;
+		}
+		JSONObject metadata = null;
+		
+		try
+		{
+			metadata = new JSONObject();
+			
+			metadata.put("screen", screen);
+			
+			metadata.put("api", api);
+			
+			if(!TextUtils.isEmpty(msg))
+			{
+				metadata.put("m", msg);
+			}
+			
+			if(!TextUtils.isEmpty(toUser))
+			{
+				metadata.put("to_user", toUser);
+			}
+			
+			HAManager.getInstance().record(AnalyticsConstants.LAST_SEEN_ANALYTICS, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.LAST_SEEN_ANALYTICS);
+				
+			Logger.d(AnalyticsConstants.LAST_SEEN_ANALYTICS_TAG, " --screen :"+ screen + " --api :"+ api + " -- msg :" + msg + " --to_user "+ toUser);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.LAST_SEEN_ANALYTICS_TAG, "invalid json");
+		}
 	}
 	
 }

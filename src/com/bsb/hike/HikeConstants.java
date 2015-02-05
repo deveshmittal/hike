@@ -195,6 +195,12 @@ public class HikeConstants
 
 	public static final String ICON = "icon";
 
+	public static final String BOT = "bot";
+
+	public static final String GROUP_CONVERSATION = "gc";
+
+	public static final String ONE_TO_ONE_CONVERSATION = "oc";
+
 	public static final String MUTED = "muted";
 
 	public static final String POST_AB = "postab";
@@ -2261,6 +2267,8 @@ public class HikeConstants
 	public static final String LOUD = "loud";
 	
 	public static final String OFF = "off";
+
+	public static final String ENABLE_DETAILED_HTTP_LOGGING = "edhl";
 
 
 }

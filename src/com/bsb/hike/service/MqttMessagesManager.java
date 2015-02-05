@@ -1418,6 +1418,11 @@ public class MqttMessagesManager
 			int freq = data.getInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY);
 			HAManager.getInstance().setAnalyticsSendFrequency(freq);
 		}
+		if(data.has(HikeConstants.ENABLE_DETAILED_HTTP_LOGGING))
+		{
+			boolean enableDetailedHttpLogging = data.getBoolean(HikeConstants.ENABLE_DETAILED_HTTP_LOGGING);
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.DETAILED_HTTP_LOGGING_ENABLED, enableDetailedHttpLogging);
+		}
 		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
@@ -1681,6 +1686,7 @@ public class MqttMessagesManager
 		JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
 		long lastSeenTime = data.getLong(HikeConstants.LAST_SEEN);
 		int isOffline;
+		HAManager.getInstance().recordLastSeenEvent(MqttMessagesManager.class.getName(), "saveLastSeen", null, msisdn);
 		/*
 		 * Apply offset only if value is greater than 0
 		 */
@@ -1700,6 +1706,7 @@ public class MqttMessagesManager
 
 		ContactManager.getInstance().updateLastSeenTime(msisdn, lastSeenTime);
 		ContactManager.getInstance().updateIsOffline(msisdn, (int) isOffline);
+		HAManager.getInstance().recordLastSeenEvent(MqttMessagesManager.class.getName(), "saveLastSeen", "updated CM", msisdn);
 		ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, true);
 		pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED, contact);
 	}
@@ -1957,8 +1964,9 @@ public class MqttMessagesManager
 		}
 		else if(subType.equals(HikeConstants.REPUBLIC_DAY_POPUP))
 		{
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.REPUBLIC_DAY_POPUP);
-		}else if(HikeConstants.PLAY_NOTIFICATION.equals(subType))
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.VALENTINE_DAY_POPUP);
+		}
+		else if(HikeConstants.PLAY_NOTIFICATION.equals(subType))
 		{
 			playNotification(jsonObj);
 		}

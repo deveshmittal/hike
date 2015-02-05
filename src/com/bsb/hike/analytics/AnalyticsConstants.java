@@ -36,7 +36,7 @@ public class AnalyticsConstants
 	public static final int MAX_EVENTS_IN_MEMORY = 10;
 	
 	/** Default frequency at which logs should be tried to be sent to server */
-	public static final int DEFAULT_SEND_FREQUENCY = 1440;
+	public static final int DEFAULT_SEND_FREQUENCY = 30;
 		
 	public static final String EVENT_FILE_DIR = "/Analytics";
 	
@@ -68,6 +68,10 @@ public class AnalyticsConstants
 
 	public static String CLICK_EVENT = "click";
 
+	public static String VIEW_EVENT = "view";
+
+	public static String ERROR_EVENT = "error";
+
     public static String MICROAPP_UI_EVENT = "muiEvent";
 
     public static String MICROAPP_NON_UI_EVENT = "mNonUiEvent";
@@ -94,7 +98,9 @@ public class AnalyticsConstants
 
 	public static final String ANALYTICS_SEND_FREQUENCY = "analyticsfreq";
 	
-	public static final String ANALYTICS_ALARM_TIME = "analyticsalarmsetting";
+	public static final String ANALYTICS_ALARM_TIME = "alarmsetting";
+	
+	public static final String SEND_WHEN_CONNECTED = "issendwhenconnected";
 
 	public static final String ANALYTICS_BACKUP = "backup";
 
@@ -192,4 +198,9 @@ public class AnalyticsConstants
 	public static final String TO_USER = "to_user";
 	
 	public static final String EVENT_TAG_CHAT_SESSION = "ctal";
+	
+	//Added For Last seen Event
+	public static final String LAST_SEEN_ANALYTICS_TAG = "last_seen_analytics";
+
+	public static final String LAST_SEEN_ANALYTICS = "last_seen_analytics";
 }

@@ -154,17 +154,30 @@ public class PlatformJavaScriptBridge
     @JavascriptInterface
     public void logAnalytics(String isUI, String subType, String json)
     {
-        try {
-            if (Boolean.valueOf(isUI)) {
-                HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_UI_EVENT, subType, new JSONObject(json));
-            } else
-            {
-                HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_NON_UI_EVENT, subType, new JSONObject(json));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
+
+		try
+		{
+			JSONObject jsonObject = new JSONObject(json);
+			jsonObject.put(AnalyticsConstants.ORIGIN, Utils.conversationType(message.getMsisdn()));
+
+			if (Boolean.valueOf(isUI))
+			{
+				HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_UI_EVENT, subType, jsonObject);
+			}
+			else
+			{
+				HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_NON_UI_EVENT, subType, jsonObject);
+			}
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NullPointerException e)
+		{
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * Call this function to set the alarm at certain time that is defined by the second parameter.
 	 * The first param is a json that contains
@@ -368,12 +381,21 @@ public class PlatformJavaScriptBridge
 	}
 	
 	@JavascriptInterface
-	public void share()
+	public void share(){
+		share(null,null);
+	}
+	
+	@JavascriptInterface
+	public void share(String text,String caption)
 	{
 		FileOutputStream fos = null;
 		File cardShareImageFile = null;
 		try
 		{
+			if (TextUtils.isEmpty(text))
+			{
+				text = mContext.getString(R.string.cardShareHeading); // fallback
+			}
 			cardShareImageFile = new File(mContext.getExternalCacheDir(), System.currentTimeMillis() + ".jpg");
 			fos = new FileOutputStream(cardShareImageFile);
 			View share = LayoutInflater.from(mContext).inflate(com.bsb.hike.R.layout.web_card_share, null);
@@ -382,26 +404,21 @@ public class PlatformJavaScriptBridge
 			Bitmap b = Utils.viewToBitmap(mWebView);
 			image.setImageBitmap(b);
 
+			// set heading here
+			TextView heading = (TextView) share.findViewById(R.id.heading);
+			heading.setText(text);
+
 			// set description text
-			//TODO get string from micro app
 			TextView tv = (TextView) share.findViewById(com.bsb.hike.R.id.description);
 			tv.setText(Html.fromHtml(mContext.getString(com.bsb.hike.R.string.cardShareDescription)));
 
-			int measuredWidth = View.MeasureSpec.makeMeasureSpec(share.getWidth(), View.MeasureSpec.UNSPECIFIED);
-			int measuredHeight = View.MeasureSpec.makeMeasureSpec(share.getHeight(), View.MeasureSpec.UNSPECIFIED);
-
-			// Cause the view to re-layout
-			share.measure(measuredWidth, measuredHeight);
-			share.layout(0, 0, share.getMeasuredWidth(), share.getMeasuredHeight());
-
-			Bitmap shB = Utils.viewToBitmap(share);
+			Bitmap shB = Utils.undrawnViewToBitmap(share);
 			Logger.i(tag, " width height of layout to share " + share.getWidth() + " , " + share.getHeight());
 			shB.compress(CompressFormat.JPEG, 100, fos);
 			fos.flush();
-			fos.close();
 			Logger.i(tag, "share webview card " + cardShareImageFile.getAbsolutePath());
 			Utils.startShareImageIntent("image/jpeg", "file://" + cardShareImageFile.getAbsolutePath(),
-					HikeMessengerApp.getInstance().getApplicationContext().getString(R.string.download) + " http://get.hike.in");
+					TextUtils.isEmpty(caption) ? mContext.getString(com.bsb.hike.R.string.cardShareCaption) : caption);
 
 		}
 		catch (Exception e)

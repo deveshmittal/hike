@@ -1164,7 +1164,7 @@ public class Utils
 		{
 			s.putExtra(Intent.EXTRA_TEXT, text);
 		}
-		s.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+		s.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		Logger.i("imageShare", "shared image with "+s.getExtras());
 		HikeMessengerApp.getInstance().getApplicationContext().startActivity(s);
 		
@@ -5161,6 +5161,22 @@ public class Utils
 		return networkType;
 	}
 
+	public static String conversationType(String msisdn)
+	{
+		if (isBot(msisdn))
+		{
+			return HikeConstants.BOT;
+		}
+		else if (isGroupConversation(msisdn))
+		{
+			return HikeConstants.GROUP_CONVERSATION;
+		}
+		else
+		{
+			return HikeConstants.ONE_TO_ONE_CONVERSATION;
+		}
+	}
+
 	public static boolean isBot(String msisdn)
 	{
 		if (HikeMessengerApp.hikeBotNamesMap != null)
@@ -5208,4 +5224,15 @@ public class Utils
 			return null;
 		}
 	}
+	
+	public static Bitmap undrawnViewToBitmap(View view) {
+		int measuredWidth = View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.UNSPECIFIED);
+		int measuredHeight = View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.UNSPECIFIED);
+
+		// Cause the view to re-layout
+		view.measure(measuredWidth, measuredHeight);
+		view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+	    return viewToBitmap(view);
+	}
+	
 }

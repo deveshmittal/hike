@@ -44,6 +44,7 @@ public interface HikePlatformConstants
     /**
      * Analytics for Platform
      */
+	public static final String BOT_OPEN = "bot_open";
     public static final String BOT_LONG_PRESS = "bot_lp";
     public static final String BOT_VIEW_PROFILE = "bot_vp";
     public static final String BOT_ADD_SHORTCUT = "bot_as";
@@ -59,7 +60,10 @@ public interface HikePlatformConstants
     public static final String BOT_CHAT_THEME_PICKER = "bot_cht";
     public static final String CARD_DELETE = "card_del";
     public static final String ACTION_BAR = "ab";
-
+	public static final String CARD_LOADED = "card_load";
+	public static final String CARD_STATE = "state";
+	public static final String ERROR_CODE = "err_code";
+	public static final String BOT_ERROR = "bot_err";
 	public static final String PLATFORM_BRIDGE_NAME = "PlatformBridge";
 
 	public static final String CARD_DATA = "ld";
