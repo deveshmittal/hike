@@ -165,11 +165,7 @@ public class GCMIntentService extends GCMBaseIntentService
 				try
 				{
 					json = new JSONObject(msg);
-					String type = json.optString(HikeConstants.TYPE);
-					if (sendToMqttmanqger(json, type))
-					{
-						MqttMessagesManager.getInstance(getApplicationContext()).saveGCMMessage(json);
-					}
+					MqttMessagesManager.getInstance(getApplicationContext()).saveGCMMessage(json);
 					msg = null; // prevents submitting same runnable again and again
 				}
 				catch (JSONException e)
@@ -180,19 +176,5 @@ public class GCMIntentService extends GCMBaseIntentService
 			}
 		}
 
-		private boolean sendToMqttmanqger(JSONObject json, String type)
-		{
-			if (HikeConstants.MqttMessageTypes.GCM_ECHO.equals(type))
-			{
-				// TODO : Code for DR comes here
-				JSONObject data = json.optJSONObject(HikeConstants.DATA);
-				if (data != null)
-				{
-					Utils.sendLogEvent(data, HikeConstants.MqttMessageTypes.GCM_ECHO, null);
-				}
-				return false;
-			}
-			return true;
-		}
 	};
 }
