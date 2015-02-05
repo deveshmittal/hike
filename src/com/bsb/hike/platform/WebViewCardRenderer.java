@@ -37,7 +37,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.platform.content.PlatformContent;
-import com.bsb.hike.platform.content.PlatformContent.ErrorCode;
+import com.bsb.hike.platform.content.PlatformContent.EventCode;
 import com.bsb.hike.platform.content.PlatformContentListener;
 import com.bsb.hike.platform.content.PlatformContentModel;
 import com.bsb.hike.platform.content.PlatformWebClient;
@@ -262,7 +262,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			{
 
 				@Override
-				public void onFailure(ErrorCode reason)
+				public void onEventOccured(EventCode reason)
 				{
 					Logger.e(tag, "on failure called " + reason);
 					JSONObject json = new JSONObject();
@@ -281,7 +281,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 					{
 						e.printStackTrace();
 					}
-					if (reason == ErrorCode.DOWNLOADING)
+					if (reason == EventCode.DOWNLOADING)
 					{
 						// Do nothing
 						return;
