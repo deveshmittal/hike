@@ -55,6 +55,9 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.ContactInfo;
@@ -1011,12 +1014,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				@Override
 				public void messageArrived(String arg0, MqttMessage arg1) throws Exception
 				{
+					String messageBody = null;
 					try
 					{
 						cancelNetworkErrorTimer();
 						byte[] bytes = arg1.getPayload();
 						bytes = Utils.uncompressByteArray(bytes);
-						String messageBody = new String(bytes, "UTF-8");
+						messageBody = new String(bytes, "UTF-8");
 						Logger.i(TAG, "messageArrived called " + messageBody);
 						JSONObject jsonObj = new JSONObject(messageBody);
 						mqttMessageManager.saveMqttMessage(jsonObj);
@@ -1024,10 +1028,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					catch (JSONException e)
 					{
 						Logger.e(TAG, "invalid JSON message", e);
+						sendError(messageBody, e);
 					}
 					catch (Throwable e)
 					{
 						Logger.e(TAG, "Exception when msg arrived : ", e);
+						sendError(messageBody, e);
 					}
 				}
 
@@ -1058,6 +1064,21 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			};
 		}
 		return mqttCallBack;
+	}
+	
+	private void sendError(String message, Throwable throwable)
+	{
+		JSONObject error = new JSONObject();
+		try
+		{
+			error.put(HikeConstants.ERROR_MESSAGE, message);
+			error.put(HikeConstants.EXCEPTION_MESSAGE, throwable.getMessage());
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, EventPriority.HIGH, error);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	// this should always run on MQTT Thread
