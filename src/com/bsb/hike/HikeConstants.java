@@ -79,6 +79,8 @@ public class HikeConstants
 
 	public static final String MSISDN = "msisdn";
 
+	public static final String CHAT_MSISDN = "chat_msisdn";
+
 	public static final String BOT_THUMBNAIL = "dp";
 
 	public static final String BOT_CHAT_THEME = "bg_id";
