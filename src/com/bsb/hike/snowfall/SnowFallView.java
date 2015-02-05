@@ -48,9 +48,9 @@ public class SnowFallView extends View
 	{
 		if(useConfettiAssets)
 		{
-			snow_flake = context.getResources().getDrawable(R.drawable.green_parachute);
-			snow_flake_large = context.getResources().getDrawable(R.drawable.safron_parachute);
-			snow_flake_trans = context.getResources().getDrawable(R.drawable.white_parachute);
+			//snow_flake = context.getResources().getDrawable(R.drawable.normal_smallest_petal);
+			//snow_flake_large = context.getResources().getDrawable(R.drawable.normal_small_petal);
+			//snow_flake_trans = context.getResources().getDrawable(R.drawable.normal_rose_petal);
 		}
 
 		snow_flake.setBounds(0, 0, snow_flake.getIntrinsicWidth(), snow_flake.getIntrinsicHeight());
@@ -69,7 +69,7 @@ public class SnowFallView extends View
 		snow_flake_count = Math.max(width, height) / 48;
 		coords = new int[snow_flake_count][];
 		drawables.clear();
-		int durationMultiplier = (int) (20 / Utils.scaledDensityMultiplier);
+		int durationMultiplier = (int) (15 / Utils.densityMultiplier);
 		for (int i = 0; i < snow_flake_count; i++)
 		{
 			Animation animation = new TranslateAnimation(0, height / 10 - random.nextInt(height / 5), 0, height + 50);

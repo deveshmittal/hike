@@ -9,7 +9,7 @@
 	    android:layout_width="@dimen/festive_popup_width"
 	    android:layout_height="@dimen/festive_popup_height"
 	    android:layout_gravity="center"
-	    android:background="@drawable/republic_day_popup_bg"
+	    android:background="@drawable/valentine_day_popup_bg"
 	    android:visibility="gone" >
 	
 	    <LinearLayout
@@ -25,6 +25,7 @@
 	            android:background="@drawable/diwali_popup_right_btn"
 	            android:textColor="@color/white"
 	            android:text="@string/wish_now"
+	            android:textSize="16dp"
 	            android:textStyle="bold|italic" />
 	    </LinearLayout>
 	
@@ -49,7 +50,9 @@
 	            android:id="@+id/festive_header"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:text="@string/happy_republic_day"
+	            android:layout_marginLeft="3.5dp"
+	            android:layout_marginTop="12dp"
+	            android:text="@string/valentine_day"
 	            android:textColor="@color/white"
 	            android:textSize="20dp"
 	            android:textStyle="bold|italic" />
@@ -57,6 +60,8 @@
 	        <com.bsb.hike.view.CustomFontTextView
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
+	            android:layout_marginLeft="2dp"
+	            android:layout_marginTop="1dp"
 	            android:text="@string/send_sticker_joy"
 	            android:textColor="@color/white"
 	            android:textSize="14dp" />
@@ -65,21 +70,18 @@
 	            android:id="@+id/sticker_popup_image"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:layout_marginTop="18dp"
+	            android:layout_marginTop="12dp"
 	            android:visibility="invisible"
-	            android:src="@drawable/vandemataram" />
+	            android:src="@drawable/cupidhikin" />
 	    </LinearLayout>
 
 	    <ImageButton
-            android:id="@+id/btn_cancel"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
-            android:scaleType="centerInside"
-            android:layout_alignParentRight="true"
-            android:background="@null"
-            android:layout_marginTop="3dp"
-            android:layout_marginRight="3dp"
-            android:src="@drawable/ic_cross_popup" />
+	        android:id="@+id/btn_cancel"
+	        android:layout_width="37dp"
+	        android:layout_height="37dp"
+	        android:layout_alignParentRight="true"
+	        android:background="@null"
+	        android:src="@drawable/ic_cross_popup" />
 	
 	</RelativeLayout>
 	 
