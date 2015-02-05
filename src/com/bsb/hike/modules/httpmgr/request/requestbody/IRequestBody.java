@@ -38,7 +38,7 @@ public interface IRequestBody
 	 * @param out
 	 * @throws IOException
 	 */
-	void writeTo(Request request, OutputStream out) throws IOException;
+	void writeTo(Request<?> request, OutputStream out) throws IOException;
 
 	/**
 	 * Returns the request body of okhttp that are processed in internal classes

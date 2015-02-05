@@ -5,11 +5,11 @@ import java.util.concurrent.Future;
 public abstract class RequestCall implements Runnable, Comparable<RequestCall>
 {
 
-	private Request request;
+	private Request<?> request;
 
 	private long submissionTime;
 	
-	public RequestCall(Request request)
+	public RequestCall(Request<?> request)
 	{
 		this.request = request;
 		this.submissionTime = System.currentTimeMillis();

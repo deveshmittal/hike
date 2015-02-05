@@ -1,27 +1,18 @@
 package com.bsb.hike.modules.httpmgr.response;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 /**
  * Contains the mime type , content and content length of the response body
  * 
  */
-public class ResponseBody
+public class ResponseBody<T>
 {
-	private static final int BUFFER_SIZE = 4096;
-
 	private String mimeType;
 
 	private int contentLength;
 
-	private byte[] content;
+	private T content;
 
-	private ResponseBody(String mimeType, int contentLength, byte[] content)
+	private ResponseBody(String mimeType, int contentLength, T content)
 	{
 		this.mimeType = mimeType;
 		this.contentLength = contentLength;
@@ -48,26 +39,12 @@ public class ResponseBody
 		this.contentLength = contentLength;
 	}
 
-	public byte[] getContent()
+	public T getContent()
 	{
 		return content;
 	}
-	
-	public JSONObject getContentJSON()
-	{
-		JSONObject jsonContent = null;
-		try
-		{
-			jsonContent = new JSONObject(new String(getContent()));
-		}
-		catch (JSONException e)
-		{
-			
-		}
-		return jsonContent;
-	}
 
-	public void setContent(byte[] content)
+	public void setContent(T content)
 	{
 		this.content = content;
 	}
@@ -79,49 +56,8 @@ public class ResponseBody
 	 * @param content
 	 * @return
 	 */
-	public static ResponseBody create(String mimeType, byte[] content)
+	public static <T> ResponseBody<T> create(String mimeType, int contentLength, T content)
 	{
-		return new ResponseBody(mimeType, content.length, content);
+		return new ResponseBody<T>(mimeType, contentLength, content);
 	}
-
-	/**
-	 * Returns the {@link ResponseBody} object using mimetype and input stream
-	 * 
-	 * @param mimeType
-	 * @param contentLength
-	 * @param in
-	 * @return
-	 * @throws IOException
-	 */
-	public static ResponseBody create(String mimeType, int contentLength, InputStream in) throws IOException
-	{
-		if (contentLength > Integer.MAX_VALUE)
-		{
-			throw new IOException("Cannot buffer entire body for content length: " + contentLength);
-		}
-
-		byte[] content = streamToBytes(in);
-		return new ResponseBody(mimeType, contentLength, content);
-	}
-
-	private static byte[] streamToBytes(InputStream stream) throws IOException
-	{
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		long time = System.currentTimeMillis();
-		if (stream != null)
-		{
-			byte[] buf = new byte[BUFFER_SIZE];
-			int r, count = 0;
-
-			while ((r = stream.read(buf)) != -1)
-			{
-				count++;
-				baos.write(buf, 0, r);
-			}
-			System.out.println(" stream to bytes while loop count : " + count + "   time : " + (System.currentTimeMillis() - time));
-		}
-		System.out.println(" stream to bytes method time : " + (System.currentTimeMillis() - time));
-		return baos.toByteArray();
-	}
-
 }

@@ -5,6 +5,7 @@ import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_LO
 import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_NORMAL;
 import static com.bsb.hike.modules.httpmgr.request.RequestConstants.GET;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -25,7 +26,7 @@ import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
 /**
  * Encapsulates all of the information necessary to make an HTTP request.
  */
-public class Request implements IRequestFacade
+public abstract class Request<T> implements IRequestFacade
 {
 	public static final short REQUEST_TYPE_LONG = 0x0;
 
@@ -63,7 +64,7 @@ public class Request implements IRequestFacade
 
 	private Future<?> future;
 
-	private Request(Builder builder)
+	protected Request(Init<?> builder)
 	{
 		this.id = builder.id;
 		this.method = builder.method;
@@ -77,7 +78,38 @@ public class Request implements IRequestFacade
 		this.preProcessListener = builder.preProcessListener;
 		this.responseOnUIThread = builder.responseOnUIThread;
 		this.asynchronous = builder.asynchronous;
+		ensureSaneDefaults();
 	}
+
+	private void ensureSaneDefaults()
+	{
+		if (TextUtils.isEmpty(url))
+		{
+			throw new IllegalStateException("Url must not be null and its length must be greater than 0");
+		}
+
+		if (priority > PRIORITY_LOW || priority < PRIORITY_HIGH)
+		{
+			throw new IllegalArgumentException("Priority can be between " + PRIORITY_LOW + " to " + PRIORITY_HIGH);
+		}
+
+		if (TextUtils.isEmpty(method))
+		{
+			method = GET;
+		}
+
+		if (null == headers)
+		{
+			headers = new ArrayList<Header>();
+		}
+
+		if (id < 0)
+		{
+			id = hashCode();
+		}
+	}
+	
+	public abstract T parseResponse(InputStream in) throws Throwable;
 
 	/**
 	 * Returns the unique id of the request
@@ -394,7 +426,7 @@ public class Request implements IRequestFacade
 		}
 	}
 
-	public static class Builder
+	protected static abstract class Init<S extends Init<S>>
 	{
 		private long id = -1;
 
@@ -420,15 +452,17 @@ public class Request implements IRequestFacade
 
 		private boolean asynchronous = true;
 
+		protected abstract S self();
+
 		/**
 		 * Sets the unique id of the request
 		 * 
 		 * @param id
 		 */
-		public Builder setId(long id)
+		public S setId(long id)
 		{
 			this.id = id;
-			return this;
+			return self();
 		}
 
 		/**
@@ -436,11 +470,11 @@ public class Request implements IRequestFacade
 		 * 
 		 * @return
 		 */
-		public Builder get()
+		public S get()
 		{
 			this.method = RequestConstants.GET;
 			this.body = null;
-			return this;
+			return self();
 		}
 
 		/**
@@ -448,11 +482,11 @@ public class Request implements IRequestFacade
 		 * 
 		 * @return
 		 */
-		public Builder head()
+		public S head()
 		{
 			this.method = RequestConstants.HEAD;
 			this.body = null;
-			return this;
+			return self();
 		}
 
 		/**
@@ -460,32 +494,32 @@ public class Request implements IRequestFacade
 		 * 
 		 * @return
 		 */
-		public Builder post(IRequestBody body)
+		public S post(IRequestBody body)
 		{
 			this.method = RequestConstants.POST;
 			this.body = body;
-			return this;
+			return self();
 		}
 
-		public Builder put(IRequestBody body)
+		public S put(IRequestBody body)
 		{
 			this.method = RequestConstants.PUT;
 			this.body = body;
-			return this;
+			return self();
 		}
 
-		public Builder delete()
+		public S delete()
 		{
 			this.method = RequestConstants.DELETE;
 			this.body = null;
-			return this;
+			return self();
 		}
 
-		public Builder patch(IRequestBody body)
+		public S patch(IRequestBody body)
 		{
 			this.method = RequestConstants.PATCH;
 			this.body = body;
-			return this;
+			return self();
 		}
 
 		/**
@@ -493,10 +527,10 @@ public class Request implements IRequestFacade
 		 * 
 		 * @param url
 		 */
-		public Builder setUrl(String url)
+		public S setUrl(String url)
 		{
 			this.url = url;
-			return this;
+			return self();
 		}
 
 		/**
@@ -504,10 +538,10 @@ public class Request implements IRequestFacade
 		 * 
 		 * @param headers
 		 */
-		public Builder setHeaders(List<Header> headers)
+		public S setHeaders(List<Header> headers)
 		{
 			this.headers = headers;
-			return this;
+			return self();
 		}
 
 		/**
@@ -519,10 +553,10 @@ public class Request implements IRequestFacade
 		 * @see #PRIORITY_NORMAL
 		 * @see #PRIORITY_HIGH
 		 */
-		public Builder setPriority(int priority)
+		public S setPriority(int priority)
 		{
 			this.priority = priority;
-			return this;
+			return self();
 		}
 
 		/**
@@ -533,10 +567,10 @@ public class Request implements IRequestFacade
 		 * @see #REQUEST_TYPE_LONG
 		 * @see #REQUEST_TYPE_SHORT
 		 */
-		public Builder setRequestType(short requestType)
+		public S setRequestType(short requestType)
 		{
 			this.requestType = requestType;
-			return this;
+			return self();
 		}
 
 		/**
@@ -546,10 +580,10 @@ public class Request implements IRequestFacade
 		 *            the new retry policy
 		 * @see
 		 */
-		public Builder setRetryPolicy(IRetryPolicy retryPolicy)
+		public S setRetryPolicy(IRetryPolicy retryPolicy)
 		{
 			this.retryPolicy = retryPolicy;
-			return this;
+			return self();
 		}
 
 		/**
@@ -557,14 +591,14 @@ public class Request implements IRequestFacade
 		 * 
 		 * @param requestListener
 		 */
-		public Builder setRequestListener(IRequestListener requestListener)
+		public S setRequestListener(IRequestListener requestListener)
 		{
 			if (this.requestListeners == null)
 			{
 				this.requestListeners = new CopyOnWriteArrayList<IRequestListener>();
 			}
 			this.requestListeners.add(requestListener);
-			return this;
+			return self();
 		}
 
 		/**
@@ -573,10 +607,10 @@ public class Request implements IRequestFacade
 		 * @param preProcessListener
 		 * @return
 		 */
-		public Builder setPreProcessListener(IPreProcessListener preProcessListener)
+		public S setPreProcessListener(IPreProcessListener preProcessListener)
 		{
 			this.preProcessListener = preProcessListener;
-			return this;
+			return self();
 		}
 
 		/**
@@ -584,10 +618,10 @@ public class Request implements IRequestFacade
 		 * 
 		 * @param runOnUIThread
 		 */
-		public Builder setResponseOnUIThread(boolean responseOnUIThread)
+		public S setResponseOnUIThread(boolean responseOnUIThread)
 		{
 			this.responseOnUIThread = responseOnUIThread;
-			return this;
+			return self();
 		}
 
 		/**
@@ -596,10 +630,10 @@ public class Request implements IRequestFacade
 		 * @param async
 		 * @return
 		 */
-		public Builder setAsynchronous(boolean async)
+		public S setAsynchronous(boolean async)
 		{
 			this.asynchronous = async;
-			return this;
+			return self();
 		}
 
 		/**
@@ -608,41 +642,7 @@ public class Request implements IRequestFacade
 		 * 
 		 * @return
 		 */
-		public RequestToken build()
-		{
-			ensureSaneDefaults();
-			Request request = new Request(this);
-			RequestToken requestToken = new RequestToken(request);
-			return requestToken;
-		}
-
-		private void ensureSaneDefaults()
-		{
-			if (TextUtils.isEmpty(url))
-			{
-				throw new IllegalStateException("Url must not be null and its length must be greater than 0");
-			}
-
-			if (priority > PRIORITY_LOW || priority < PRIORITY_HIGH)
-			{
-				throw new IllegalArgumentException("Priority can be between " + PRIORITY_LOW + " to " + PRIORITY_HIGH);
-			}
-
-			if (TextUtils.isEmpty(method))
-			{
-				method = GET;
-			}
-
-			if (null == headers)
-			{
-				headers = new ArrayList<Header>();
-			}
-
-			if (id < 0)
-			{
-				id = hashCode();
-			}
-		}
+		public abstract RequestToken build();
 	}
 
 	@Override
@@ -658,6 +658,7 @@ public class Request implements IRequestFacade
 		return (31 * urlHashCode) + headersHashCode + requestBodyHashCode;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object other)
 	{
@@ -671,7 +672,7 @@ public class Request implements IRequestFacade
 			return false;
 		}
 
-		Request req = (Request) other;
+		Request<T> req = (Request<T>) other;
 		if (this.getId() != req.getId())
 		{
 			return false;

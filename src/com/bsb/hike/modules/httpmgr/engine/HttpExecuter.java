@@ -1,14 +1,13 @@
 package com.bsb.hike.modules.httpmgr.engine;
 
+import static com.bsb.hike.modules.httpmgr.engine.HttpEngineConstants.KEEP_ALIVE_TIME;
+
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import android.os.Build;
-
-import com.bsb.hike.modules.httpmgr.request.RequestCall;
-import static com.bsb.hike.modules.httpmgr.engine.HttpEngineConstants.KEEP_ALIVE_TIME;
 
 /**
  * 

@@ -58,7 +58,7 @@ public class HttpManager
 	 * 
 	 * @param request
 	 */
-	public void addRequest(Request request)
+	public <T> void addRequest(Request<T> request)
 	{
 		addRequest(request, null);
 	}
@@ -69,7 +69,7 @@ public class HttpManager
 	 * @param request
 	 * @param options
 	 */
-	public void addRequest(Request request, ClientOptions options)
+	public <T> void addRequest(Request<T> request, ClientOptions options)
 	{
 		requestProcessor.addRequest(request, options);
 	}
@@ -79,7 +79,7 @@ public class HttpManager
 	 * 
 	 * @param request
 	 */
-	public void cancel(Request request)
+	public <T> void cancel(Request<T> request)
 	{
 		request.cancel();
 	}

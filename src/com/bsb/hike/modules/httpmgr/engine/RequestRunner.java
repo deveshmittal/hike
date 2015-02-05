@@ -21,11 +21,11 @@ public class RequestRunner
 
 	private HttpEngine engine;
 
-	private Map<Long, Request> requestMap;
+	private Map<Long, Request<?>> requestMap;
 
 	private RequestListenerNotifier requestListenerNotifier;
 
-	public RequestRunner(ClientOptions options, Map<Long, Request> requestMap, HttpEngine engine, RequestListenerNotifier requestListenerNotifier)
+	public RequestRunner(ClientOptions options, Map<Long, Request<?>> requestMap, HttpEngine engine, RequestListenerNotifier requestListenerNotifier)
 	{
 		defaultClient = new OkUrlClient(options);
 		this.engine = engine;
@@ -39,7 +39,7 @@ public class RequestRunner
 	 * @param request
 	 * @param options
 	 */
-	public void submit(final Request request, ClientOptions options)
+	public void submit(final Request<?> request, ClientOptions options)
 	{
 		IClient client = (null != options) ? defaultClient.clone(options) : defaultClient;
 

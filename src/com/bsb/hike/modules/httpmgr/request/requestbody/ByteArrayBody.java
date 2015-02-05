@@ -78,7 +78,7 @@ public class ByteArrayBody implements IRequestBody
 	}
 
 	@Override
-	public void writeTo(Request request, OutputStream out) throws IOException
+	public void writeTo(Request<?> request, OutputStream out) throws IOException
 	{
 		out.write(bytes);
 	}
