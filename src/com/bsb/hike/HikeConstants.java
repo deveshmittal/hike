@@ -1976,7 +1976,7 @@ public class HikeConstants
 
 		public static final String DELETE_MULTIPLE_BOTS = "dbot";
 
-		public static final String GCM_ECHO = "gcmecho";
+		public static final String PACKET_ECHO = "pecho";
 
 		public static final String VOIP_SOCKET_INFO = "ve";
 		

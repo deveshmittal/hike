@@ -58,12 +58,14 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.FestivePopup;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -2521,6 +2523,9 @@ public class MqttMessagesManager
 		else if(HikeConstants.MqttMessageTypes.NUX.equals(type))
 		{
 			saveNuxPacket(jsonObj);
+		}else if (HikeConstants.MqttMessageTypes.PACKET_ECHO.equals(type))
+		{
+			handlePacketEcho(jsonObj);
 		}
 
 	}
@@ -3017,70 +3022,94 @@ public class MqttMessagesManager
 		NUXManager.getInstance().parseNuxPacket(jsonObject.toString());
 	}
 	
+	private void handlePacketEcho(JSONObject json)
+	{
+		// TODO : Code for DR comes here
+		JSONObject data = json.optJSONObject(HikeConstants.DATA);
+		if (data != null)
+		{
+			try
+			{
+				JSONObject object = new JSONObject();
+				object.put(HikeConstants.DATA, data);
+				HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.MqttMessageTypes.PACKET_ECHO, object);
+			}catch(JSONException je){
+				je.printStackTrace();
+			}
+		}
+	}
+	
 	public void saveGCMMessage(JSONObject json)
 	{
 		try
 		{
-			Logger.i("gcmMqttMessage", "message received " + json.toString());
-			
-			// Check if the message is expired
-			String expiryTime = json.optString(HikeConstants.EXPIRE_AT);
-			
-			JSONObject pushAckJson = json.optJSONObject(HikeConstants.PUSHACK);
-			
-			if (!TextUtils.isEmpty(expiryTime))
-			{
-				try
-				{
-					long expiry = Long.valueOf(expiryTime);
-					long currentEpoch = System.currentTimeMillis();
-					currentEpoch = currentEpoch / 1000;
-					if (currentEpoch > expiry)
-					{
-						Logger.i("gcmMqttMessage", "message expired " + json.toString());
-						JSONObject metadata = new JSONObject();
-						metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.GCM_EXPIRED);
-						metadata.put(HikeConstants.EXPIRE_AT, expiryTime);
-
-						if (pushAckJson != null)
-						{
-							metadata.put(HikeConstants.PUSHACK, pushAckJson);
-						}
-
-						HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.GCM_ANALYTICS_CONTEXT, EventPriority.HIGH, metadata);
-
-						// Discard message since it has expired
-						return;
-					}
-				}
-				catch (NumberFormatException nfe)
-				{
-					nfe.printStackTrace();
-					// Assuming message is not expired
-				}
-			}
-
-			if (pushAckJson != null)
-			{
-				// Record push ack
-				JSONObject metadata = new JSONObject();
-				metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.GCM_PUSH_ACK);
-				metadata.put(HikeConstants.PUSHACK, pushAckJson);
-				HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.GCM_ANALYTICS_CONTEXT, EventPriority.HIGH, metadata);
-			}
-			
 			String type = json.optString(HikeConstants.TYPE);
-			if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type))
+			if (HikeConstants.MqttMessageTypes.PACKET_ECHO.equals(type))
 			{
-				saveMessage(json);
-			}
-			else if (HikeConstants.MqttMessageTypes.POPUP.equals(type))
-			{
-				savePopup(json);
+				handlePacketEcho(json);
 			}
 			else
 			{
-				Logger.e("gcmMqttMessage", "Unexpected type received via GCM mqtt equivalent messages");
+				Logger.i("gcmMqttMessage", "message received " + json.toString());
+
+				// Check if the message is expired
+				String expiryTime = json.optString(HikeConstants.EXPIRE_AT);
+
+				JSONObject pushAckJson = json.optJSONObject(HikeConstants.PUSHACK);
+
+				if (!TextUtils.isEmpty(expiryTime))
+				{
+					try
+					{
+						long expiry = Long.valueOf(expiryTime);
+						long currentEpoch = System.currentTimeMillis();
+						currentEpoch = currentEpoch / 1000;
+						if (currentEpoch > expiry)
+						{
+							Logger.i("gcmMqttMessage", "message expired " + json.toString());
+							JSONObject metadata = new JSONObject();
+							metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.GCM_EXPIRED);
+							metadata.put(HikeConstants.EXPIRE_AT, expiryTime);
+
+							if (pushAckJson != null)
+							{
+								metadata.put(HikeConstants.PUSHACK, pushAckJson);
+							}
+
+							HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.GCM_ANALYTICS_CONTEXT, EventPriority.HIGH, metadata);
+
+							// Discard message since it has expired
+							return;
+						}
+					}
+					catch (NumberFormatException nfe)
+					{
+						nfe.printStackTrace();
+						// Assuming message is not expired
+					}
+				}
+
+				if (pushAckJson != null)
+				{
+					// Record push ack
+					JSONObject metadata = new JSONObject();
+					metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.GCM_PUSH_ACK);
+					metadata.put(HikeConstants.PUSHACK, pushAckJson);
+					HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.GCM_ANALYTICS_CONTEXT, EventPriority.HIGH, metadata);
+				}
+
+				if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type))
+				{
+					saveMessage(json);
+				}
+				else if (HikeConstants.MqttMessageTypes.POPUP.equals(type))
+				{
+					savePopup(json);
+				}
+				else
+				{
+					Logger.e("gcmMqttMessage", "Unexpected type received via GCM mqtt equivalent messages");
+				}
 			}
 		}
 		catch (JSONException je)
