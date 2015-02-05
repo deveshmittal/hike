@@ -66,6 +66,9 @@ public interface HikePlatformConstants
 	public static final String CARD_STATE = "state";
 	public static final String ERROR_CODE = "err_code";
 	public static final String BOT_ERROR = "bot_err";
+	public static final String CARD_FORWARD = "card_fwd";
+	public static final String CARD_TYPES = "card_types";
+
 	public static final String PLATFORM_BRIDGE_NAME = "PlatformBridge";
 
 	public static final String CARD_DATA = "ld";

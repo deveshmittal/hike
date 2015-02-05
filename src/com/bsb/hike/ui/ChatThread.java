@@ -2288,6 +2288,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber,msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE), isConversationOnHike());
 							convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 							convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
+							JSONObject json = new JSONObject();
+							try
+							{
+								json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+								json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
+								json.put(HikeConstants.TO, mContactNumber);
+								HikeAnalyticsEvent.analyticsForPlatform(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
+							}
+							catch (JSONException e)
+							{
+								e.printStackTrace();
+							}
+							catch (NullPointerException e)
+							{
+								e.printStackTrace();
+							}
 							sendMessage(convMessage);
 
 						}
