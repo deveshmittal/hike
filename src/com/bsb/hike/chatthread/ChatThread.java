@@ -460,7 +460,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private void updateSharedPopups()
 	{
 		mShareablePopupLayout.updateMainView(activity.findViewById(R.id.chatThreadParentLayout));
-		mStickerPicker.updateListener(this);
+		mStickerPicker.updateListener(this, activity);
 		mEmoticonPicker.updateListener(this);
 	}
 
@@ -476,7 +476,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private void initStickerPicker()
 	{
-		mStickerPicker = new StickerPicker(activity.getBaseContext(), this);
+		mStickerPicker = new StickerPicker(activity.getBaseContext(), this, activity);
 	}
 
 	private void initEmoticonPicker()
@@ -843,6 +843,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	private void actionBarBackPressed()
 	{
+		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
+		
 		if (removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true))
 		{
 			return ;
