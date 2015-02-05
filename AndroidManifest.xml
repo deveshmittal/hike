@@ -296,7 +296,8 @@
              android:launchMode="singleTop">
         </activity> 
         <activity
-            android:name="com.bsb.hike.ui.NuxSendCustomMessageActivity"
+           	  android:name="com.bsb.hike.ui.NuxSendCustomMessageActivity"
+              android:launchMode="singleTop"
               android:screenOrientation="portrait">
         </activity>     
         <activity
