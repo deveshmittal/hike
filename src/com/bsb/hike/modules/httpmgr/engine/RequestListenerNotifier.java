@@ -88,7 +88,7 @@ public class RequestListenerNotifier
 	 */
 	public void notifyListenersOfRequestCancellation(Request<?> request)
 	{
-		notifyListenersOfRequestFailure(request, new HttpException("Cancellation Exception"));
+		notifyListenersOfRequestFailure(request, new HttpException(HttpException.REASON_CODE_CANCELLATION, "Request Cancellation Exception"));
 	}
 
 	/**
