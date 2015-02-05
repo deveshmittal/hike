@@ -159,7 +159,7 @@ public class PlatformJavaScriptBridge
 		{
 			String msisdn = message.getMsisdn();
 			JSONObject jsonObject = new JSONObject(json);
-			jsonObject.put(HikeConstants.CHAT_MSISDN, msisdn);
+			jsonObject.put(AnalyticsConstants.CHAT_MSISDN, msisdn);
 			jsonObject.put(AnalyticsConstants.ORIGIN, Utils.conversationType(msisdn));
 			jsonObject.put(HikePlatformConstants.CARD_TYPE, message.platformWebMessageMetadata.getAppName());
 			if (Boolean.valueOf(isUI))

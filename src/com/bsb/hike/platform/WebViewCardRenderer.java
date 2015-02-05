@@ -333,7 +333,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			String state = message.platformWebMessageMetadata.getLayoutId();
 			state = state.substring(0,state.length() - 5);
 			String origin = Utils.conversationType(message.getMsisdn());
-			platformJSON.put(HikeConstants.CHAT_MSISDN, message.getMsisdn());
+			platformJSON.put(AnalyticsConstants.CHAT_MSISDN, message.getMsisdn());
 			platformJSON.put(AnalyticsConstants.ORIGIN, origin);
 			platformJSON.put(HikePlatformConstants.CARD_TYPE, message.platformWebMessageMetadata.getAppName());
 			platformJSON.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_LOADED);

@@ -1538,7 +1538,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			{
 				contactList.append(TextUtils.isEmpty(contactList) ? contactInfo.getMsisdn() : "," + contactInfo.getMsisdn());
 			}
-			platformAnalyticsJson.put(HikeConstants.TO, contactList);
+			platformAnalyticsJson.put(AnalyticsConstants.TO, contactList);
 			platformAnalyticsJson.put(HikeConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
 			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, platformAnalyticsJson, AnalyticsConstants.EVENT_TAG_PLATFORM);
 		}
