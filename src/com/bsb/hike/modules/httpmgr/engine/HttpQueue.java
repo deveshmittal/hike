@@ -229,15 +229,17 @@ public class HttpQueue
 	private void changePriority(PriorityQueue<RequestCall> queue, RequestCall call)
 	{
 		List<RequestCall> requestCallsList = new ArrayList<RequestCall>();
-		while (true)
+
+		int size = queue.size();
+		for (int index = size - 1; index >= 0; --index)
 		{
 			RequestCall requestCall = queue.peek();
-			
+
 			if (requestCall == null)
 			{
 				break;
 			}
-			
+
 			if (requestCall.getSubmissionTime() < call.getSubmissionTime() && requestCall.getPriority() > call.getPriority())
 			{
 				queue.remove();
