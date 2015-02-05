@@ -1176,6 +1176,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * ensure that when the softkeyboard Done button is pressed (different than the send button we have), we send the message.
 		 */
 		mComposeView.setOnEditorActionListener(this);
+		
+		/**
+		 * Fix for android bug, where the focus is removed from the edittext when you have a layout with tabs (Emoticon layout) for hard keyboard devices
+		 * http://code.google.com/p/android/issues/detail?id=2516
+		 */
+		if (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)
+		{
+			mComposeView.setOnTouchListener(this);
+			
+		}
 
 		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
 
@@ -1890,7 +1900,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public boolean onTouch(View v, MotionEvent event)
 	{
-		return mGestureDetector.onTouchEvent(event);
+		switch (v.getId())
+		{
+		case R.id.msg_compose:
+			mComposeView.requestFocusFromTouch();
+			return event == null;
+
+		default:
+			return mGestureDetector.onTouchEvent(event);
+		}
+
 	}
 
 	@Override
