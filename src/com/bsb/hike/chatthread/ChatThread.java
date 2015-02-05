@@ -122,6 +122,8 @@ import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomLinearLayout;
+import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
 /**
  * 
@@ -130,7 +132,7 @@ import com.bsb.hike.utils.Utils;
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, 
 		CaptureImageListener, PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener,
-		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener
+		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, OnSoftKeyboardListener
 {
 	private static final String TAG = "chatthread";
 
@@ -178,6 +180,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static final int STICKER_CATEGORY_MAP_UPDATED = 21;
 	
 	protected static final int MULTI_SELECT_ACTION_MODE = 22; 
+	
+	protected static final int SCROLL_TO_END = 23;
 
 	protected ChatThreadActivity activity;
 
@@ -336,6 +340,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case STICKER_CATEGORY_MAP_UPDATED:
 			mStickerPicker.updateStickerAdapter();
 			mStickerPicker.updateIconPageIndicator();
+			break;
+		case SCROLL_TO_END:
+			mConversationsView.setSelection(messages.size() - 1);
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
@@ -1191,6 +1198,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		
 		mComposeView.setOnKeyListener(this);
+		
+		((CustomLinearLayout)activity.findViewById(R.id.chat_layout)).setOnSoftKeyboardListener(this);
 
 		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
 
@@ -3911,5 +3920,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			return true;
 		}
 		return false;
+	}
+	
+	@Override
+	public void onShown()
+	{
+		Logger.d(TAG, "Keyboard shown");
+		uiHandler.sendEmptyMessage(SCROLL_TO_END);
+	}
+
+	@Override
+	public void onHidden()
+	{
 	}
 }
