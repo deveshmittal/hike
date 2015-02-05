@@ -139,7 +139,7 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 
 					Intent intentAlarm = Intent.getIntent(asd.toString());
 
-					HikeAlarmManager.setAlarmwithIntent(HikeMessengerApp.getInstance(), time, requestCode, (willWakeCpu != 0), intentAlarm);
+					HikeAlarmManager.setAlarmWithIntent(HikeMessengerApp.getInstance(), time, requestCode, (willWakeCpu != 0), intentAlarm);
 
 				}
 				while (cursor.moveToNext());

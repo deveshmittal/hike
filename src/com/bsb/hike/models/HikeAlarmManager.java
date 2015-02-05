@@ -57,8 +57,6 @@ public class HikeAlarmManager
 	
 	private static final long TIME_ALARM_BOOT_SERVICE = 1 * 60 * 1000;// (1 min)
 
-	public static final String WAKE_CPU_FLAG = "wake_cpu";
-
 	public static final String INTENT_EXTRA = "intent_extra";
 
 	public static final String TAG = "HikeAlarmManager";
@@ -77,7 +75,7 @@ public class HikeAlarmManager
 	public static void setAlarm(Context context, long time, int requestCode, boolean WillWakeCPU)
 	{
 		Intent in = new Intent();
-		setAlarmwithIntent(context, time, requestCode, WillWakeCPU, in);
+		setAlarmWithIntent(context, time, requestCode, WillWakeCPU, in);
 	}
 
 	/**
@@ -94,7 +92,7 @@ public class HikeAlarmManager
 
 	
 	
-	public static void setAlarmwithIntent(Context context, long time, int requestCode, boolean WillWakeCPU, Intent intent)
+	public static void setAlarmWithIntent(Context context, long time, int requestCode, boolean WillWakeCPU, Intent intent)
 	{
 
 		AlarmManager mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -102,7 +100,6 @@ public class HikeAlarmManager
 		intent.setAction(INTENT_ALARM);
 		intent.putExtra(INTENT_EXTRA, requestCode);
 		intent.putExtra(ALARM_TIME, time);
-		intent.putExtra(WAKE_CPU_FLAG, WillWakeCPU);
 		
 		PendingIntent mPendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -131,7 +128,7 @@ public class HikeAlarmManager
 	 * 
 	 * @see <a href = "http://developer.android.com/reference/android/app/AlarmManager.html#setInexactRepeating(int, long, long, android.app.PendingIntent)"> setInExactAlarm </a>
 	 */
-	public static void setInexact(int requestCode, Context context, long triggerAtMillis, long intervalMillis, boolean WillWakeCPU)
+	public static void setInExact(int requestCode, Context context, long triggerAtMillis, long intervalMillis, boolean WillWakeCPU)
 	{
 
 		AlarmManager mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -164,7 +161,7 @@ public class HikeAlarmManager
 	 * 
 	 * This method 
 	 * Also see:
-	 * {@link HikeAlarmManager#setAlarmwithIntent(Context, long, int, boolean, Intent) }
+	 * {@link HikeAlarmManager#setAlarmWithIntent(Context, long, int, boolean, Intent) }
 	 */
 	public static void setAlarmPersistance(Context context, long time, int requestCode, boolean WillWakeCPU, Intent intent)
 	{
@@ -232,7 +229,6 @@ public class HikeAlarmManager
 	{
 
 		int requestCode = intent.getIntExtra(HikeAlarmManager.INTENT_EXTRA, HikeAlarmManager.REQUESTCODE_DEFAULT);
-		System.out.println(requestCode);
 		HikeContentDatabase.getInstance(context).deleteFromAlarmManagerDB(requestCode);
 		switch (requestCode)
 		{
@@ -278,7 +274,6 @@ public class HikeAlarmManager
 	{
 		int requestCode = intent.getIntExtra(HikeAlarmManager.INTENT_EXTRA, HikeAlarmManager.REQUESTCODE_DEFAULT);
 
-		System.out.println(requestCode);
 		HikeContentDatabase.getInstance(context).deleteFromAlarmManagerDB(requestCode);
 
 		switch (requestCode)

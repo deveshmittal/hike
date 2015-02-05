@@ -14,6 +14,9 @@ import com.bsb.hike.models.HikeAlarmManager;
 public class SimpleWakefulService extends IntentService
 {
 
+	private final long TIME_DIFFERENCE =10 * 60 * 1000;
+	
+	
 	public SimpleWakefulService()
 	{
 		super("SimpleWakeFulService");
@@ -31,9 +34,19 @@ public class SimpleWakefulService extends IntentService
 		try
 		{
 			long time = intent.getLongExtra(HikeAlarmManager.ALARM_TIME, HikeAlarmManager.REQUESTCODE_DEFAULT);
-			boolean cpuflag=intent.getBooleanExtra(HikeAlarmManager.WAKE_CPU_FLAG, true);
+			/**
+			 * 
+			 Could not remember why I did this ...so commenting it ....
+			//boolean cpuflag=intent.getBooleanExtra(HikeAlarmManager.WAKE_CPU_FLAG, true);
+			//if (!cpuflag || Math.abs(time - System.currentTimeMillis()) < (10 * 60 * 1000))
+			*/
 			
-			if (!cpuflag || Math.abs(time - System.currentTimeMillis()) < (10 * 60 * 1000))
+			/*
+			 * Here I am taking into account the optimization that the CPU will do to alarms ...So if you schedule an alarm at 3:00 pm and the alarm gets fired at 3:05 
+			 *  we are assuming that it is due to system optimization.
+			 */
+			
+			if(Math.abs(time - System.currentTimeMillis()) < (TIME_DIFFERENCE))
 				HikeAlarmManager.processTasks(intent, this);
 			else
 				HikeAlarmManager.processExpiredTask(intent, this);
