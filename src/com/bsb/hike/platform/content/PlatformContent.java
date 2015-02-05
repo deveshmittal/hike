@@ -20,7 +20,7 @@ public class PlatformContent
 		// Classic singleton
 	}
 
-	public static enum ErrorCode
+	public static enum EventCode
 	{
 		INVALID_DATA
 				{
@@ -133,7 +133,7 @@ public class PlatformContent
 		else
 		{
 			Log.e("PlatformContent", "Incorrect content data");
-			listener.onFailure(ErrorCode.INVALID_DATA);
+			listener.onEventOccured(EventCode.INVALID_DATA);
 			return null;
 		}
 

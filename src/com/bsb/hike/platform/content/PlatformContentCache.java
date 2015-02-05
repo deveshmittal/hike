@@ -121,7 +121,7 @@ class PlatformContentCache
 
 		if (downloadedTemplate == null)
 		{
-			PlatformRequestManager.reportFailure(content, PlatformContent.ErrorCode.INVALID_DATA);
+			PlatformRequestManager.reportFailure(content, PlatformContent.EventCode.INVALID_DATA);
 			PlatformRequestManager.remove(content);
 		}
 		else

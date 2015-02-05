@@ -3,7 +3,7 @@ package com.bsb.hike.platform.content;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import com.bsb.hike.platform.content.PlatformContent.ErrorCode;
+import com.bsb.hike.platform.content.PlatformContent.EventCode;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -169,14 +169,14 @@ class PlatformRequestManager
 
 	}
 
-	public static void reportFailure(final PlatformContentRequest argRequest, final ErrorCode error)
+	public static void reportFailure(final PlatformContentRequest argRequest, final EventCode error)
 	{
 		PlatformContentLoader.getLoader().post(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				argRequest.getListener().onFailure(error);
+				argRequest.getListener().onEventOccured(error);
 			}
 		});
 	}
