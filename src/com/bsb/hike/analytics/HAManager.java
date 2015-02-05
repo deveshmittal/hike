@@ -528,7 +528,7 @@ public class HAManager
 			metadata = new JSONObject();
 			
 			//2)con:- 2g/3g/4g/wifi/off
-			metadata.put(AnalyticsConstants.CONNECTION_TYPE, Utils.getNetworkTypeAsString(context));
+			metadata.put(AnalyticsConstants.CONNECTION_TYPE, Utils.getNetworkType(context));
 			
 			if (sessionStart)
 			{
