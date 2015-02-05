@@ -212,7 +212,7 @@ public class AnalyticsSender
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm Date :" + cal.get(Calendar.DATE));
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm time :" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));			
 				instance.setNextSendTimeToPrefs(nextSchedule);
-				HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, true);		
+				HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);		
 				return;
 			}
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM ALARM ROUTE---");			
