@@ -442,13 +442,6 @@
 	    <item name="android:background">@drawable/bg_updates_white</item>
 	</style>
 	
-	<style name="NuxScreenCardContainer">
-	    <item name="android:layout_marginLeft">@dimen/updates_margin</item>
-	    <item name="android:layout_marginRight">@dimen/updates_margin</item>
-	    <item name="android:layout_marginTop">@dimen/updates_margin_top</item>
-	    <item name="android:background">@drawable/bg_sticker_card_white</item>
-	</style>
-	
 	<style name="AvatarStyle">
 	    <item name="android:layout_width">match_parent</item>
 	    <item name="android:layout_height">match_parent</item>
@@ -656,7 +649,7 @@
 	<style name="SmallListContactItemHeader">
 	    <item name="android:layout_width">wrap_content</item>
 	    <item name="android:layout_height">wrap_content</item>
-	    <item name="android:textColor">@color/standerd_black</item>
+	    <item name="android:textColor">@color/standard_black</item>
 	    <item name="android:textSize">16sp</item>
 	    <item name="android:textStyle">bold|italic</item>
 	    <item name="android:ellipsize">end</item>
@@ -689,14 +682,7 @@
 	    <item name="android:layout_height">0.5dp</item>
 	    <item name="android:background">@drawable/home_list_divider</item>
 	</style>
-	
-	<style name="PinsReadContainer">
-	    <item name="android:layout_marginLeft">8dp</item>
-	    <item name="android:layout_marginRight">8dp</item>
-	    <item name="android:layout_marginTop">8dp</item>
-        <item name="android:background">@drawable/pins_bg_read_selector</item>
-	</style>
-	
+		
 	<style name="DiwaliPopupButton">
 	    <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">match_parent</item>
@@ -706,4 +692,10 @@
         <item name="android:textSize">18sp</item>
         <item name="android:textColor">@color/diwali_popup_btn_txt</item>
 	</style>
+	
+	<color name="transparent_black_color">#66ffffff</color>
+	<style name="TranslucentBlack" parent="android:Theme.Translucent.NoTitleBar">  
+        <item name="android:windowBackground">@color/transparent_black_color</item>  
+    </style>  
+    	
 </resources>

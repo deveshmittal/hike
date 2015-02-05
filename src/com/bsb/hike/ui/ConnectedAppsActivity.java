@@ -28,6 +28,9 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.R.string;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 
 /**
  * This class is responsible for displaying "Connected apps" screen in Settings. Also takes care of underlying functionality.
@@ -402,13 +405,11 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 	{
 		try
 		{
-			JSONObject analyticsJSON = new JSONObject();
-			JSONObject metaDataJSON = new JSONObject();
-			metaDataJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
-			metaDataJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, disconnectedAppTitle);
-			metaDataJSON.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
-			analyticsJSON.put(HikeConstants.METADATA, metaDataJSON);
-			Utils.sendLogEvent(analyticsJSON);
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
+			metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, disconnectedAppTitle);
+			metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.LogEvent.SDK_DISCONNECT_APP, metadata);			
 		}
 		catch (JSONException e)
 		{

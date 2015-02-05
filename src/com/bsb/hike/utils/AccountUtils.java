@@ -83,6 +83,14 @@ public class AccountUtils
 	public static final String PRODUCTION_HOST = "api.im.hike.in";
 
 	public static final String STAGING_HOST = "staging.im.hike.in";
+	
+	public static final String DEV_STAGING_HOST = "staging2.im.hike.in";
+	
+	public static final int _PRODUCTION_HOST = 0;
+
+	public static final int _STAGING_HOST = 1;
+
+	public static final int _DEV_STAGING_HOST = 2;
 
 	public static final int PRODUCTION_PORT = 80;
 
@@ -174,6 +182,10 @@ public class AccountUtils
 	
 	public static final String SDK_AUTH_PARAM_SHA1 = "sha1";
 
+	public static final String ANALYTICS_UPLOAD_BASE = "/logs/analytics";
+	
+	public static String analyticsUploadUrl = base + ANALYTICS_UPLOAD_BASE;
+	
 	public static void setToken(String token)
 	{
 		mToken = token;

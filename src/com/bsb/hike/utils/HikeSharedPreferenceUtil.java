@@ -13,6 +13,8 @@ public class HikeSharedPreferenceUtil
 {
 	private static final String DEFAULT_PREF_NAME = HikeMessengerApp.ACCOUNT_SETTINGS;
 
+	public static final String CONV_UNREAD_COUNT = "ConvUnreadCount";
+	
 	private SharedPreferences hikeSharedPreferences;
 
 	private Editor editor;

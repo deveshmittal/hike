@@ -52,11 +52,13 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 		for(String update : updateQueries){
 			db.execSQL(update);
 		}
+		
 		// DO any other update operation here
 	}
 	
 	private String[] getCreateQueries(){
 		String[] createAndIndexes = new String[3];
+		int i=0;
 		// CREATE TABLE
 		//CONTENT TABLE -> _id,content_id,love_id,channel_id,timestamp,metadata
 		String contentTable = CREATE_TABLE +CONTENT_TABLE
@@ -68,8 +70,8 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 				+HIKE_CONTENT.TIMESTAMP+" INTEGER, "
 				+METADATA+" TEXT"
 				+")";
-		createAndIndexes[0] = contentTable;
 		
+		createAndIndexes[i++] = contentTable;
 		//CREATE TABLE 
 		
 		//ALARM TABLE->id,time,willWakeCpu,time,intent
@@ -81,16 +83,16 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 				+ WILL_WAKE_CPU + " INTEGER, "
 				+ INTENT + " TEXT," 
 				+ HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
-		createAndIndexes[1]=alarmTable;
+		createAndIndexes[i++]=alarmTable;
 		
 		
-		// CREATE TABLE ENDS HERE
-		//CREATE INDEXES
+		// APP_ALARM TABLE - > id, data
 		String contentIndex = CREATE_INDEX + CONTENT_ID_INDEX + " ON "+CONTENT_TABLE +" ("+CONTENT_ID+")";
-		createAndIndexes[2] = contentIndex;
 		
 		
+		createAndIndexes[i++] = contentIndex;
 		// INDEX ENDS HERE
+		
 		return createAndIndexes;
 	}
 	
