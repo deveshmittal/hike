@@ -5121,7 +5121,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
         if (convMessage.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || convMessage.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
         {
 			String origin = Utils.conversationType(mContactNumber);
-            analyticsForBots(HikePlatformConstants.CARD_DELETE, origin, AnalyticsConstants.CLICK_EVENT, null);
+			JSONObject json = new JSONObject();
+			try
+			{
+				json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+				analyticsForBots(HikePlatformConstants.CARD_DELETE, origin, AnalyticsConstants.CLICK_EVENT, null);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			catch (NullPointerException e)
+			{
+				e.printStackTrace();
+			}
+
         }
 
 
