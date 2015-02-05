@@ -201,6 +201,11 @@ public class AccountUtils
 		appVersion = version;
 	}
 
+	public static String getAppVersion()
+	{
+		return appVersion;
+	}
+
 	public static synchronized HttpClient createClient()
 	{
 		if (mClient != null)
