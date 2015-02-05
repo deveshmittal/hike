@@ -1,10 +1,10 @@
 package com.bsb.hike.modules.httpmgr.engine;
 
 import static com.bsb.hike.modules.httpmgr.engine.HttpEngineConstants.CORE_POOL_SIZE;
+import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_LONG;
+import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,8 +14,6 @@ import android.util.Pair;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.RequestCall;
 import com.bsb.hike.utils.Logger;
-import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
-import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_LONG;
 
 public class HttpQueue
 {
@@ -29,7 +27,7 @@ public class HttpQueue
 	private PriorityQueue<RequestCall> longQueue;
 
 	private volatile AtomicInteger numShortRunningCalls = new AtomicInteger(0);
-	
+
 	private volatile AtomicInteger numLongRunningCalls = new AtomicInteger(0);
 
 	private short MAX_QUEUE_SIZE = CORE_POOL_SIZE;
@@ -185,7 +183,7 @@ public class HttpQueue
 	{
 		int longSize = numLongRunningCalls.get();
 		int shortSize = numShortRunningCalls.get();
-		
+
 		if (requestType == Request.REQUEST_TYPE_LONG)
 		{
 			if (numLongRunningCalls.get() < MAX_QUEUE_SIZE)

@@ -13,7 +13,6 @@ import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
-import java.util.Queue;
 
 import org.apache.http.conn.ConnectTimeoutException;
 
@@ -39,7 +38,7 @@ public class RequestExecuter
 {
 	private IClient client;
 
-	private Request request;
+	private Request<?> request;
 
 	private HttpEngine engine;
 
@@ -47,7 +46,7 @@ public class RequestExecuter
 
 	private Response response;
 
-	public RequestExecuter(IClient client, HttpEngine engine, Request request, IResponseListener listener)
+	public RequestExecuter(IClient client, HttpEngine engine, Request<?> request, IResponseListener listener)
 	{
 		this.client = client;
 		this.engine = engine;

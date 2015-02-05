@@ -32,7 +32,7 @@ public class RequestListenerNotifier
 	 * @param request
 	 * @param response
 	 */
-	public void notifyListenersOfRequestSuccess(Request request, Response response)
+	public void notifyListenersOfRequestSuccess(Request<?> request, Response response)
 	{
 		if (!request.isAsynchronous())
 		{
@@ -53,7 +53,7 @@ public class RequestListenerNotifier
 		}
 	}
 
-	private ResponseCall getResponseCall(final Request request, final Response response)
+	private ResponseCall getResponseCall(final Request<?> request, final Response response)
 	{
 		ResponseCall call = new ResponseCall()
 		{
@@ -66,7 +66,7 @@ public class RequestListenerNotifier
 		return call;
 	}
 
-	private void sendSuccess(Request request, Response response)
+	private void sendSuccess(Request<?> request, Response response)
 	{
 		if (request.isCancelled())
 		{
@@ -86,7 +86,7 @@ public class RequestListenerNotifier
 	 * 
 	 * @param request
 	 */
-	public void notifyListenersOfRequestCancellation(Request request)
+	public void notifyListenersOfRequestCancellation(Request<?> request)
 	{
 		notifyListenersOfRequestFailure(request, new HttpException("Cancellation Exception"));
 	}
@@ -97,7 +97,7 @@ public class RequestListenerNotifier
 	 * @param request
 	 * @param ex
 	 */
-	public void notifyListenersOfRequestFailure(Request request, HttpException ex)
+	public void notifyListenersOfRequestFailure(Request<?> request, HttpException ex)
 	{
 		if (!request.isAsynchronous())
 		{
@@ -118,7 +118,7 @@ public class RequestListenerNotifier
 		}
 	}
 
-	private ResponseCall getResponseCall(final Request request, final HttpException ex)
+	private ResponseCall getResponseCall(final Request<?> request, final HttpException ex)
 	{
 		ResponseCall call = new ResponseCall()
 		{
@@ -131,7 +131,7 @@ public class RequestListenerNotifier
 		return call;
 	}
 
-	private void sendFailure(Request request, HttpException ex)
+	private void sendFailure(Request<?> request, HttpException ex)
 	{
 		if (request.isCancelled())
 		{
@@ -151,7 +151,7 @@ public class RequestListenerNotifier
 	 * @param request
 	 * @param progress
 	 */
-	public void notifyListenersOfRequestProgress(Request request, float progress)
+	public void notifyListenersOfRequestProgress(Request<?> request, float progress)
 	{
 		if (!request.isAsynchronous())
 		{
@@ -172,7 +172,7 @@ public class RequestListenerNotifier
 		}
 	}
 
-	private void sendProgress(Request request, float progress)
+	private void sendProgress(Request<?> request, float progress)
 	{
 		if (request.isCancelled())
 		{
@@ -186,7 +186,7 @@ public class RequestListenerNotifier
 		}
 	}
 
-	private ResponseCall getResponseCall(final Request request, final float progress)
+	private ResponseCall getResponseCall(final Request<?> request, final float progress)
 	{
 		ResponseCall call = new ResponseCall()
 		{

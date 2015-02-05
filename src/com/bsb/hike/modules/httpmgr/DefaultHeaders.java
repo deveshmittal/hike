@@ -24,7 +24,7 @@ public final class DefaultHeaders
 		return headers;
 	}
 
-	public static void applyDefaultHeaders(Request request)
+	public static <T> void applyDefaultHeaders(Request<T> request)
 	{
 		request.addHeaders(getDefaultHeaders());
 	}

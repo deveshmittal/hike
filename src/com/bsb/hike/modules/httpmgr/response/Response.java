@@ -21,7 +21,7 @@ public class Response
 
 	private List<Header> headers;
 
-	private ResponseBody body;
+	private ResponseBody<?> body;
 
 	private Response(Builder builder)
 	{
@@ -77,7 +77,7 @@ public class Response
 	 * 
 	 * @return
 	 */
-	public ResponseBody getBody()
+	public ResponseBody<?> getBody()
 	{
 		return body;
 	}
@@ -92,7 +92,7 @@ public class Response
 
 		private List<Header> headers;
 
-		private ResponseBody body;
+		private ResponseBody<?> body;
 
 		/**
 		 * Sets the url of the response
@@ -149,7 +149,7 @@ public class Response
 		 * @return
 		 */
 
-		public Builder setBody(ResponseBody body)
+		public Builder setBody(ResponseBody<?> body)
 		{
 			this.body = body;
 			return this;

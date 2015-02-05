@@ -1,7 +1,5 @@
 package com.bsb.hike.modules.httpmgr.client;
 
-import java.io.IOException;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import com.bsb.hike.modules.httpmgr.Header;
@@ -171,22 +169,24 @@ public class OkClient implements IClient
 	}
 
 	@Override
-	public Response execute(Request request) throws IOException
+	public Response execute(Request<?> request) throws Throwable
 	{
 		com.squareup.okhttp.Request httpRequest = makeOkRequest(request);
 		Call call = client.newCall(httpRequest);
 		com.squareup.okhttp.Response response = call.execute();
-		return parseOkResponse(response);
+		return parseOkResponse(request, response);
 
 	}
 
 	/**
 	 * Parse hike http request to OkHttpRequest
 	 * 
+	 * @param <T>
+	 * 
 	 * @param request
 	 * @return
 	 */
-	private com.squareup.okhttp.Request makeOkRequest(Request request)
+	private com.squareup.okhttp.Request makeOkRequest(Request<?> request)
 	{
 		com.squareup.okhttp.Request.Builder httpRequestBuilder = new com.squareup.okhttp.Request.Builder();
 
@@ -204,18 +204,21 @@ public class OkClient implements IClient
 	/**
 	 * Parse OkhttpResponse to hike http response
 	 * 
+	 * @param <T>
+	 * 
 	 * @param response
 	 * @return
-	 * @throws IOException
+	 * @throws Throwable
 	 */
-	private Response parseOkResponse(com.squareup.okhttp.Response response) throws IOException
+	private <T> Response parseOkResponse(Request<T> request, com.squareup.okhttp.Response response) throws Throwable
 	{
 		Response.Builder responseBuilder = new Response.Builder();
 		responseBuilder.setUrl(response.request().urlString());
 		responseBuilder.setStatusCode(response.code());
 		responseBuilder.setReason(response.message());
 		com.squareup.okhttp.ResponseBody responseBody = response.body();
-		ResponseBody body = ResponseBody.create(responseBody.toString(), responseBody.bytes());
+		T bodyContent = request.parseResponse(responseBody.byteStream());
+		ResponseBody<T> body = ResponseBody.create(responseBody.toString(), (int) responseBody.contentLength(), bodyContent);
 		responseBuilder.setBody(body);
 		return responseBuilder.build();
 	}

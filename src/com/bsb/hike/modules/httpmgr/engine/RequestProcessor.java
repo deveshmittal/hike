@@ -16,7 +16,7 @@ import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListene
  */
 public class RequestProcessor
 {
-	private Map<Long, Request> requestMap;
+	private Map<Long, Request<?>> requestMap;
 
 	private RequestRunner requestRunner;
 
@@ -24,7 +24,7 @@ public class RequestProcessor
 
 	public RequestProcessor(ClientOptions options, HttpEngine engine, RequestListenerNotifier notifier)
 	{
-		this.requestMap = new ConcurrentHashMap<Long, Request>();
+		this.requestMap = new ConcurrentHashMap<Long, Request<?>>();
 		this.requestListenerNotifier = notifier;
 		requestRunner = new RequestRunner(options, requestMap, engine, requestListenerNotifier);
 	}
@@ -37,12 +37,12 @@ public class RequestProcessor
 	 * @param options
 	 *            {@link ClientOptions} options to be used for executing this request
 	 */
-	public void addRequest(final Request request, ClientOptions options)
+	public void addRequest(final Request<?> request, ClientOptions options)
 	{
 		long requestId = request.getId();
 		if (requestMap.containsKey(requestId))
 		{
-			Request req = requestMap.get(requestId);
+			Request<?> req = requestMap.get(requestId);
 			req.addRequestListeners(request.getRequestListeners());
 		}
 		else

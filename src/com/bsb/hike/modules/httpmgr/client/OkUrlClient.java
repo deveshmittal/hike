@@ -34,7 +34,7 @@ public class OkUrlClient extends UrlConnectionClient
 	}
 
 	@Override
-	protected HttpURLConnection openConnection(Request request) throws IOException
+	protected HttpURLConnection openConnection(Request<?> request) throws IOException
 	{
 		return okUrlFactory.open(new URL(request.getUrl()));
 	}

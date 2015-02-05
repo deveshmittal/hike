@@ -18,7 +18,6 @@ package com.bsb.hike.modules.httpmgr.request.requestbody;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.bsb.hike.modules.httpmgr.request.Request;
@@ -83,7 +82,7 @@ public class FileBody implements IRequestBody
 	}
 
 	@Override
-	public void writeTo(Request request, OutputStream out) throws IOException
+	public void writeTo(Request<?> request, OutputStream out) throws IOException
 	{
 		byte[] buffer = new byte[BUFFER_SIZE];
 		FileInputStream in = new FileInputStream(file);

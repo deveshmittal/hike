@@ -11,9 +11,9 @@ import com.bsb.hike.modules.httpmgr.request.Request;
  */
 public class RequestToken
 {
-	private Request request;
+	private Request<?> request;
 
-	public RequestToken(Request request)
+	public RequestToken(Request<?> request)
 	{
 		this.request = request;
 	}

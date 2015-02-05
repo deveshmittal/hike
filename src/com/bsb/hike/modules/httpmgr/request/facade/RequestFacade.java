@@ -15,9 +15,9 @@ import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 public class RequestFacade implements IRequestFacade
 {
 
-	private Request request;
+	private Request<?> request;
 	
-	public RequestFacade(Request request)
+	public RequestFacade(Request<?> request)
 	{
 		this.request = request;
 	}

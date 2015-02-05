@@ -16,26 +16,27 @@ import com.bsb.hike.modules.httpmgr.response.ResponseBody;
 
 /**
  * Reperesemts UrlConnection client wrapper
+ * 
  * @author anubhavgupta @ sidharth
- *
+ * 
  */
 public class UrlConnectionClient extends OkClient
 {
 	private static final int CHUNK_SIZE = 4096;
-	
+
 	public UrlConnectionClient()
 	{
 	}
 
 	@Override
-	public Response execute(Request request) throws IOException
+	public Response execute(Request<?> request) throws Throwable
 	{
 		HttpURLConnection connection = openConnection(request);
 		prepareRequest(connection, request);
-		return readResponse(connection);
+		return readResponse(request, connection);
 	}
 
-	protected HttpURLConnection openConnection(Request request) throws IOException
+	protected HttpURLConnection openConnection(Request<?> request) throws IOException
 	{
 		HttpURLConnection connection = (HttpURLConnection) new URL(request.getUrl()).openConnection();
 		connection.setConnectTimeout(Defaults.CONNECT_TIMEOUT_MILLIS);
@@ -43,7 +44,7 @@ public class UrlConnectionClient extends OkClient
 		return connection;
 	}
 
-	void prepareRequest(HttpURLConnection connection, Request request) throws IOException
+	void prepareRequest(HttpURLConnection connection, Request<?> request) throws IOException
 	{
 		connection.setRequestMethod(request.getMethod());
 		connection.setDoInput(true);
@@ -69,11 +70,11 @@ public class UrlConnectionClient extends OkClient
 				connection.setChunkedStreamingMode(CHUNK_SIZE);
 			}
 
-			body.writeTo(request,connection.getOutputStream());
+			body.writeTo(request, connection.getOutputStream());
 		}
 	}
 
-	Response readResponse(HttpURLConnection connection) throws IOException
+	<T> Response readResponse(Request<T> request, HttpURLConnection connection) throws Throwable
 	{
 		int status = connection.getResponseCode();
 		String reason = connection.getResponseMessage();
@@ -104,7 +105,9 @@ public class UrlConnectionClient extends OkClient
 			stream = connection.getInputStream();
 		}
 
-		ResponseBody responseBody = ResponseBody.create(mimeType, length, stream);
+		T bodyContent = request.parseResponse(stream);
+
+		ResponseBody<T> responseBody = ResponseBody.create(mimeType, length, bodyContent);
 		return new Response.Builder().setUrl(connection.getURL().toString()).setStatusCode(status).setReason(reason).setHeaders(headers).setBody(responseBody).build();
 	}
 }
