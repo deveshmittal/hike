@@ -157,16 +157,18 @@ public class PlatformJavaScriptBridge
 
 		try
 		{
+			String msisdn = message.getMsisdn();
 			JSONObject jsonObject = new JSONObject(json);
-			jsonObject.put(AnalyticsConstants.ORIGIN, Utils.conversationType(message.getMsisdn()));
-
+			jsonObject.put(AnalyticsConstants.CHAT_MSISDN, msisdn);
+			jsonObject.put(AnalyticsConstants.ORIGIN, Utils.conversationType(msisdn));
+			jsonObject.put(HikePlatformConstants.CARD_TYPE, message.platformWebMessageMetadata.getAppName());
 			if (Boolean.valueOf(isUI))
 			{
-				HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_UI_EVENT, subType, jsonObject);
+				HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.MICROAPP_UI_EVENT, subType, jsonObject, AnalyticsConstants.EVENT_TAG_PLATFORM);
 			}
 			else
 			{
-				HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_NON_UI_EVENT, subType, jsonObject);
+				HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.MICROAPP_NON_UI_EVENT, subType, jsonObject, AnalyticsConstants.EVENT_TAG_PLATFORM);
 			}
 		}
 		catch (JSONException e)

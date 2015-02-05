@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.bsb.hike.models.HikeHandlerUtil;
+import com.bsb.hike.platform.content.PlatformContent.EventCode;
 import com.samskivert.mustache.Template;
 
 /**
@@ -78,13 +79,15 @@ class PlatformContentLoader extends Handler
 				Log.d(TAG, "data binded");
 				// Add to cache
 				PlatformContentCache.putFormedContent(argContentRequest.getContentData());
+				
+				argContentRequest.getListener().onEventOccured(EventCode.LOADED);
 
 				PlatformRequestManager.completeRequest(argContentRequest);
 			}
 			else
 			{
 				// Incorrect data. Could not execute. Remove request from queue.
-				PlatformRequestManager.reportFailure(argContentRequest, PlatformContent.ErrorCode.INVALID_DATA);
+				PlatformRequestManager.reportFailure(argContentRequest, PlatformContent.EventCode.INVALID_DATA);
 				PlatformRequestManager.remove(argContentRequest);
 			}
 		}
