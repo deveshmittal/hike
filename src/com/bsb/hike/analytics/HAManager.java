@@ -534,9 +534,6 @@ public class HAManager
 			{
 				if (fgSessionInstance.getAppOpenSource() == AppOpenSource.FROM_NOTIFICATION)
 				{
-					// 4)srcctx :- uid/gid
-					metadata.put(AnalyticsConstants.SOURCE_CONTEXT, session.getSrcContext());
-
 					// 5)con-type :- normal/stleath 0/1
 					//metadata.put(AnalyticsConstants.CONVERSATION_TYPE, session.getConvType());
 
@@ -546,6 +543,9 @@ public class HAManager
 
 				// Not sending it for now. We will fix this code in later release when required
 				//metadata.put(AnalyticsConstants.SOURCE_APP_OPEN, session.getAppOpenSource());
+
+				// 4)srcctx :- uid/gid/null(in case of appOpen via Launcher)
+				metadata.put(AnalyticsConstants.SOURCE_CONTEXT, session.getSrcContext());
 				
 				HAManager.getInstance().record(AnalyticsConstants.SESSION_EVENT, AnalyticsConstants.FOREGROUND, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_SESSION);
 				
@@ -667,7 +667,7 @@ public class HAManager
 					//3)putting event key (ek) as bot_open
 					metadata.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.BOT_OPEN);
 					
-					HAManager.getInstance().record(AnalyticsConstants.CHAT_ANALYTICS, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_CHAT_SESSION);
+					HAManager.getInstance().record(AnalyticsConstants.CHAT_ANALYTICS, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_BOTS);
 						
 					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "--session-id :" + fgSessionInstance.getSessionId() + "--to_user :" + chatSession.getMsisdn() + "--session-time :" + chatSession.getChatSessionTotalTime());
 				}

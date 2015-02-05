@@ -201,8 +201,6 @@ public class AnalyticsConstants
 	
 	public static final String TO_USER = "to_user";
 	
-	public static final String EVENT_TAG_CHAT_SESSION = "ctal";
-	
 	//Added For Last seen Event
 	public static final String LAST_SEEN_ANALYTICS_TAG = "last_seen_analytics";
 
