@@ -327,6 +327,11 @@ public class HikeAlarmManager
 
 		switch (requestCode)
 		{
+		case HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS:
+		{				
+			AnalyticsSender.getInstance(context).startUploadAndScheduleNextAlarm();
+		}
+		break;
 		default:
 			PlatformAlarmManager.processTasks(intent, context);
 			break;

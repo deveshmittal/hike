@@ -32,7 +32,7 @@ public class SimpleWakefulService extends IntentService
 		{
 			long time = intent.getLongExtra(HikeAlarmManager.ALARM_TIME, HikeAlarmManager.REQUESTCODE_DEFAULT);
 
-			if (time > System.currentTimeMillis())
+			if (time >= System.currentTimeMillis())
 				HikeAlarmManager.processTasks(intent, this);
 			else
 				HikeAlarmManager.processExpiredTask(intent, this);
