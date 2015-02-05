@@ -106,7 +106,7 @@ public class HikeAnalyticsEvent
 		}
 	}
 
-    public static void analyticsForBots(String type, String subType, JSONObject json)
+    public static void analyticsForPlatform(String type, String subType, JSONObject json)
     {
         try
         {

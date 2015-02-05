@@ -162,11 +162,11 @@ public class PlatformJavaScriptBridge
 
 			if (Boolean.valueOf(isUI))
 			{
-				HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_UI_EVENT, subType, jsonObject);
+				HikeAnalyticsEvent.analyticsForPlatform(AnalyticsConstants.MICROAPP_UI_EVENT, subType, jsonObject);
 			}
 			else
 			{
-				HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.MICROAPP_NON_UI_EVENT, subType, jsonObject);
+				HikeAnalyticsEvent.analyticsForPlatform(AnalyticsConstants.MICROAPP_NON_UI_EVENT, subType, jsonObject);
 			}
 		}
 		catch (JSONException e)
