@@ -27,6 +27,8 @@ public class HttpException extends Exception
 	
 	public static final short REASON_CODE_AUTH_FAILURE = 0x6;
 	
+	public static final short REASON_CODE_CANCELLATION = 0x7;
+	
 	private int errorCode;
 
 	public HttpException(short errorCode)
