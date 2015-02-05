@@ -40,6 +40,7 @@ import android.text.style.StyleSpan;
 import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -47,6 +48,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -58,6 +60,7 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
 import android.widget.PopupWindow.OnDismissListener;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -126,7 +129,7 @@ import com.bsb.hike.utils.Utils;
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, 
 		CaptureImageListener, PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener,
-		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener
+		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener
 {
 	private static final String TAG = "chatthread";
 
@@ -1168,6 +1171,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		setMessagesRead(); // Setting messages as read if there are any unread ones
 		
 		mComposeView.addTextChangedListener(this);
+		
+		/**
+		 * ensure that when the softkeyboard Done button is pressed (different than the send button we have), we send the message.
+		 */
+		mComposeView.setOnEditorActionListener(this);
 
 		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
 
@@ -3844,5 +3852,25 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void onConfigurationChanged(Configuration newConfig)
 	{
 		Logger.d(TAG, "newConfig : " + newConfig.toString());
+	}
+	
+	
+	@Override
+	public boolean onEditorAction(TextView view, int actionId, KeyEvent keyEvent)
+	{
+		if (mConversation == null)
+		{
+			return false;
+		}
+
+		if ((view == mComposeView)
+				&& ((actionId == EditorInfo.IME_ACTION_SEND) || ((keyEvent != null) && (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+						&& (keyEvent.getAction() != KeyEvent.ACTION_UP) && (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS))))
+		{
+			sendButtonClicked();
+			Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+			return true;
+		}
+		return false;
 	}
 }
