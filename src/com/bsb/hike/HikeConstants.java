@@ -496,6 +496,8 @@ public class HikeConstants
 	public static final String BACKUP_PREF = "backupAccount";
 
     public static final String NUX_BOT = "+hike5+";
+    
+    public static final String CRICKET_BOT = "+hikecricket+";
 
     public static final String NUX = "nux";
 
@@ -987,7 +989,7 @@ public class HikeConstants
 	
 	public static final String SHOW_FESTIVE_POPUP = "showFestivePopup";
 
-	public static final String REPUBLIC_DAY_POPUP = "indiarepublic";
+	public static final String VALENTINE_DAY_POPUP = "valentine";
 
 	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
 
@@ -2269,6 +2271,5 @@ public class HikeConstants
 	public static final String OFF = "off";
 
 	public static final String ENABLE_DETAILED_HTTP_LOGGING = "edhl";
-
 
 }
