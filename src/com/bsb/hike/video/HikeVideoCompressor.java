@@ -348,7 +348,7 @@ public class HikeVideoCompressor {
         originalHeight = editor.originalHeight;
         bitrate = editor.bitrate;
         rotateRender = 0;
-        cacheFile = editor.destCachFilePath;
+        cacheFile = editor.destFile;
         
         if (Build.VERSION.SDK_INT > 20) {
             if (rotationValue == 90) {
