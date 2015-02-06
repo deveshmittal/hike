@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="1108"
-    android:versionName="3.7.2.18" >
+    android:versionCode="1107"
+    android:versionName="3.7.2.17" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -296,7 +296,8 @@
              android:launchMode="singleTop">
         </activity> 
         <activity
-            android:name="com.bsb.hike.ui.NuxSendCustomMessageActivity"
+           	  android:name="com.bsb.hike.ui.NuxSendCustomMessageActivity"
+              android:launchMode="singleTop"
               android:screenOrientation="portrait">
         </activity>     
         <activity

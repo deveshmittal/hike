@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -28,8 +29,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
@@ -55,7 +54,7 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 	private TextView sectionDisplayMessage;
 	private TextView nxtBtn;
 	private ImageView backBtn;
-	private HashSet<String> contactsDisplayed;
+	private ArrayList<String> contactsDisplayed;
 	
 	private void changeLayoutParams(){
 		WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
@@ -77,7 +76,6 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     public View onCreateView(LayoutInflater inf, ViewGroup parent, Bundle savedInstanceState) {
 
         View v =  inf.inflate(R.layout.display_selected_friends, parent, false); 
-        String selectedFriendsString = getActivity().getIntent().getStringExtra("selected_friends");
 
         viewStack = (LinearLayout) v.findViewById(R.id.horizontalView);
         hsc = (HorizontalScrollView) v.findViewById(R.id.scrollView);
@@ -88,7 +86,6 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
         backBtn.setOnClickListener(this);
         
         viewMap = new LinkedHashMap<String, View>();
-        contactsDisplayed = new HashSet<String>();
 		NUXManager nm = NUXManager.getInstance();
 		selectFriends = nm.getNuxSelectFriendsPojo();
 		preSelectedCount = nm.getCountLockedContacts() + nm.getCountUnlockedContacts();
@@ -110,6 +107,8 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 			maxShowListCount = nm.getNuxTaskDetailsPojo().getMax();
 			//scrollHorizontalView(0, viewStack.getChildAt(0).getWidth());
 		}
+        contactsDisplayed = new ArrayList<String>(maxShowListCount); 
+        String selectedFriendsString = getActivity().getIntent().getStringExtra(NUXConstants.SELECTED_FRIENDS);
 		
 		//this only appears for custom message screen
 		if (getActivity() instanceof NuxSendCustomMessageActivity) 
@@ -130,24 +129,14 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 			{
 				contactsDisplayed.addAll(nm.getLockedContacts());
 			}
-			for (String msisdn : contactsDisplayed) 
-			{
-				addContactView(msisdn, viewStack.getChildCount());		
-			}
+			
 		} else if (getActivity() instanceof ComposeChatActivity) {
 			nxtBtn.setText(selectFriends.getButText());
 			contactsDisplayed.addAll(nm.getLockedContacts());
-			for (String msisdn : contactsDisplayed) {
-				addContactView(msisdn, viewStack.getChildCount());
-			}
-			for (int i = 0; i < maxShowListCount - preSelectedCount; i++) 
-				addEmptyView();
 			changeDisplayString(0);
 		}
 		return v;
 	}
-    
-    
     
     private void addEmptyView(){
     	View emptyView = getLayoutInflater(null).inflate(R.layout.friends_horizontal_item,null);
@@ -159,34 +148,26 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     	viewStack.addView(emptyView);
     }
     
-    private void addContactView(String msisdn, int index){
-    	ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
-    	addContactView(contactInfo, msisdn, index);
-    }
-    
-    private void addContactView(ContactInfo CI, String msisdn, int index){
-    	if(!viewMap.containsKey(msisdn)){
+    private void addContactView(ContactInfo contactInfo, int index){
+    	if(!viewMap.containsKey(contactInfo.getMsisdn())){
     		View contactView = getLayoutInflater(null).inflate(R.layout.friends_horizontal_item,null);
-    		contactView.setTag(msisdn);
+    		contactView.setTag(contactInfo.getMsisdn());
         	TextView tv = (TextView)contactView.findViewById(R.id.msisdn);
         	ImageView iv = (ImageView ) contactView.findViewById(R.id.profile_image);
         	
-			if(ContactManager.getInstance().getIcon(msisdn, true) ==null){
+			if(ContactManager.getInstance().getIcon(contactInfo.getMsisdn(), true) ==null){
 				iv.setScaleType(ScaleType.CENTER_INSIDE);
-				iv.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
+				iv.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
 				iv.setImageResource(R.drawable.ic_profile);
 			}
 			else
 			{
-				iv.setImageDrawable(ContactManager.getInstance().getIcon(msisdn, true));
+				iv.setImageDrawable(ContactManager.getInstance().getIcon(contactInfo.getMsisdn(), true));
 			}
         	
-        	if(CI != null)
-        		tv.setText(CI.getFirstNameAndSurname());
-        	else
-        		tv.setText(msisdn);
+        	tv.setText(contactInfo.getFirstNameAndSurname());
         	viewStack.addView(contactView, index);
-        	viewMap.put(msisdn,contactView);
+        	viewMap.put(contactInfo.getMsisdn(),contactView);
     	}
     	
     }
@@ -267,7 +248,7 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     	//count here means total non selected contacts
     	if(emptyCount == 0) return false;
     	changeDisplayString((maxShowListCount - preSelectedCount) - (emptyCount - 1));
-    	addContactView(contactInfo, contactInfo.getMsisdn(), index);
+    	addContactView(contactInfo, index);
     	scrollHorizontalView(maxShowListCount - emptyCount - 1, replaceView.getWidth());
     	viewStack.removeView(replaceView);
 		return true;
@@ -276,8 +257,14 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState)
 	{
-		Logger.d("UmangX","on Act Create called frag");
 		super.onActivityCreated(savedInstanceState);
+		Logger.d("UmangX","on Act Create called frag");
+		for (ContactInfo contactInfo : ContactManager.getInstance().getContact(contactsDisplayed, true, true)) {
+			addContactView(contactInfo, viewStack.getChildCount());
+		}
+		if(getActivity() instanceof ComposeChatActivity)
+		for (int i = 0; i < maxShowListCount - preSelectedCount; i++) 
+			addEmptyView();
 	}
     
 	@Override
@@ -344,8 +331,9 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
 				Logger.d("UmangX","displayed : "+contactsDisplayed.toString());
 				contactsDisplayed.removeAll(nm.getLockedContacts());
 				if(!contactsDisplayed.isEmpty()){
-					nm.sendMsisdnListToServer(contactsDisplayed);
-					nm.saveNUXContact(contactsDisplayed);
+					HashSet<String> msisdns = new HashSet<String>(contactsDisplayed);
+					nm.sendMsisdnListToServer(msisdns);
+					nm.saveNUXContact(msisdns);
 				}
 				nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
 				KillActivity();
