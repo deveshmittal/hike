@@ -74,10 +74,8 @@ public class HAManager
 	{				
 		this.context = HikeMessengerApp.getInstance().getApplicationContext();
 		
-//		analyticsDirectory = context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
-
-		// analytics data moved to external storage for QA to manually check the files
-		analyticsDirectory = Environment.getExternalStorageDirectory() + AnalyticsConstants.EVENT_FILE_DIR;
+		analyticsDirectory = context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Storage dir :" + analyticsDirectory);
 
 		eventsList = new ArrayList<JSONObject>();
 						
