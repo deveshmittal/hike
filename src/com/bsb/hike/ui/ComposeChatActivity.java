@@ -1383,7 +1383,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 					 */
 				}
-				platformAnalyticsJson.put(HikePlatformConstants.CARD_TYPES, platformCards);
+				platformAnalyticsJson.put(HikePlatformConstants.CARD_TYPE, platformCards);
 				if(!fileTransferList.isEmpty()){
 					prefileTransferTask = new PreFileTransferAsycntask(fileTransferList,intent);
 					Utils.executeAsyncTask(prefileTransferTask);
