@@ -42,7 +42,7 @@ public class DBBackupRestore
 
 	public static final String SIZE = "sz";
 
-	public static final String STATE = "st";
+	public static final String STATUS = "sts";
 
 	public static final String TIME_TAKEN = "tt";
 
@@ -301,7 +301,7 @@ public class DBBackupRestore
 			metadata
 			.put(HikeConstants.EVENT_KEY, eventKey)
 			.put(SIZE, sizes)
-			.put(STATE, result)
+			.put(STATUS, result)
 			.put(TIME_TAKEN, timeTaken);
 			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ANALYTICS_BACKUP, metadata);
 		}
