@@ -1,13 +1,21 @@
 package com.bsb.hike.db;
 
+import java.net.URISyntaxException;
+
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.DBConstants.HIKE_CONTENT;
+import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
+import com.bsb.hike.models.HikeAlarmManager;
+import com.bsb.hike.utils.Logger;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
 
 public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants,HIKE_CONTENT{
 
@@ -62,13 +70,26 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 				+HIKE_CONTENT.TIMESTAMP+" INTEGER, "
 				+METADATA+" TEXT"
 				+")";
+		
 		createAndIndexes[i++] = contentTable;
+		//CREATE TABLE 
+		
+		//ALARM TABLE->id,time,willWakeCpu,time,intent
+		
+		String alarmTable = CREATE_TABLE + ALARM_MGR_TABLE 
+				+ "("
+				+ _ID + " INTEGER PRIMARY KEY, "
+				+ TIME + " TEXT, "
+				+ WILL_WAKE_CPU + " INTEGER, "
+				+ INTENT + " TEXT," 
+				+ HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
+		createAndIndexes[i++]=alarmTable;
+		
+		
 		// APP_ALARM TABLE - > id, data
-		String createAlarmtable = CREATE_TABLE + APP_ALARM_TABLE + "(" + HIKE_CONTENT.ID + " INTEGER UNIQUE " + ALARM_DATA + " TEXT " + ")";
-		createAndIndexes[i++] = createAlarmtable;
-		// CREATE TABLE ENDS HERE
-		// CREATE INDEXES
 		String contentIndex = CREATE_INDEX + CONTENT_ID_INDEX + " ON "+CONTENT_TABLE +" ("+CONTENT_ID+")";
+		
+		
 		createAndIndexes[i++] = contentIndex;
 		// INDEX ENDS HERE
 		
@@ -83,33 +104,55 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 		return updateAndIndexes;
 	}
 	
-	public void insertUpdateAppAlarm(int id, String data)
+	public void insertIntoAlarmManagerDB(long time, int requestCode, boolean WillWakeCPU, Intent intent)
 	{
-		Cursor c = mDB.query(APP_ALARM_TABLE, null, HIKE_CONTENT.ID + "=?", new String[] { String.valueOf(id) }, null, null, null);
 		ContentValues cv = new ContentValues();
-		cv.put(ALARM_DATA, data);
-		if (c.moveToFirst())
-		{
-			// update query
-			mDB.update(APP_ALARM_TABLE, cv, HIKE_CONTENT.ID + "=?", new String[] { String.valueOf(id) });
-		}
-		else
-		{
-			// insert query
-			cv.put(HIKE_CONTENT.ID, id);
-			mDB.insert(data, null, cv);
-		}
-	}
-	
-	public void deleteAppAlarm(int id){
-		mDB.delete(APP_ALARM_TABLE, HIKE_CONTENT.ID + "=?", new String[] { String.valueOf(id) });
+		cv.put(_ID, requestCode);
+		cv.put(TIME, time + "");
+		cv.put(WILL_WAKE_CPU, WillWakeCPU);
+		cv.put(INTENT, intent.toUri(0));
+
+		mDB.insertWithOnConflict(ALARM_MGR_TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
 	}
 
-	public String getAppAlarm(int id){
-		Cursor c = mDB.query(APP_ALARM_TABLE, null, HIKE_CONTENT.ID + "=?", new String[] { String.valueOf(id) }, null, null, null);
-		if(c.moveToFirst()){
-			return c.getString(c.getColumnIndex(ALARM_DATA));
-		}
-		return null;
+	public void deleteFromAlarmManagerDB(int requestCode)
+	{
+		mDB.delete(ALARM_MGR_TABLE, _ID + "=" + requestCode, null);
 	}
+
+	public void rePopulateAlarmWhenClosed()
+	{
+		Logger.d(HikeAlarmManager.TAG, "Populating alarm started");
+		String selectQuery = "SELECT  * FROM " + ALARM_MGR_TABLE;
+
+		Cursor cursor = mDB.rawQuery(selectQuery, null);
+		try
+		{
+			if (cursor.moveToFirst())
+			{
+				do
+				{
+					Logger.d(HikeAlarmManager.TAG, "rePopulating  Alarms");
+					int requestCode = cursor.getInt(cursor.getColumnIndex(_ID));
+					long time = Long.parseLong(cursor.getString(cursor.getColumnIndex(TIME)));
+					int willWakeCpu = cursor.getInt(cursor.getColumnIndex(WILL_WAKE_CPU));
+					String intent = cursor.getString(cursor.getColumnIndex(INTENT));
+					Uri asd = Uri.parse(intent);
+
+					Intent intentAlarm = Intent.getIntent(asd.toString());
+
+					HikeAlarmManager.setAlarmWithIntent(HikeMessengerApp.getInstance(), time, requestCode, (willWakeCpu != 0), intentAlarm);
+
+				}
+				while (cursor.moveToNext());
+			}
+		}
+		catch (URISyntaxException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+
 }

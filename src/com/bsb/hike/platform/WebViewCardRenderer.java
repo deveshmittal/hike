@@ -147,7 +147,6 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		holder.myBrowser.setWebViewClient(holder.webViewClient);
 		holder.myBrowser.getSettings().setDomStorageEnabled(true);
 		holder.platformJavaScriptBridge.allowUniversalAccess();
-		holder.platformJavaScriptBridge.allowDebugging();
 		holder.myBrowser.getSettings().setJavaScriptEnabled(true);
 
 	}

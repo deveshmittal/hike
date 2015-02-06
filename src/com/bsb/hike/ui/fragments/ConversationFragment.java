@@ -763,7 +763,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				e.printStackTrace();
 			}
 
-			if(mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+			if(!(mmNuxManager.getCurrentState() == NUXConstants.NUX_SKIPPED || mmNuxManager.getCurrentState() == NUXConstants.NUX_IS_ACTIVE))
 			{
 				butRemind.setEnabled(false);
 				butInviteMore.setEnabled(false);
@@ -789,8 +789,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				e.printStackTrace();
 			}
 
-			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
-			{
+			if(!(mmNuxManager.getCurrentState() == NUXConstants.NUX_SKIPPED || mmNuxManager.getCurrentState() == NUXConstants.NUX_IS_ACTIVE)){
 				butRemind.setEnabled(false);
 				butInviteMore.setEnabled(false);
 			} 
