@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.text.SpannableString;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -161,7 +162,8 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		if (TextUtils.isEmpty(argMessage))
 		{
-			throw new IllegalArgumentException("argMessage cannot be null or empty");
+			Log.wtf("HikeNotification", "Notification message is empty, check packet, msisdn= "+argMsisdn);
+			return;
 		}
 		addPair(argMsisdn, argMessage);
 	}
