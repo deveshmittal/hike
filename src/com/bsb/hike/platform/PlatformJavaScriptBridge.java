@@ -116,30 +116,29 @@ public class PlatformJavaScriptBridge
 	 * @param setEnabled
 	 */
 	@JavascriptInterface
-	public void setDebuggableEnabled(boolean setEnabled)
+	public void setDebuggableEnabled(final String setEnabled)
 	{
-
+		Logger.d(tag, "set debuggable enabled called with " + setEnabled);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
 		{
-			if (setEnabled)
+			mWebView.post(new Runnable()
 			{
+				@Override
+				public void run()
+				{
+					if (Boolean.valueOf(setEnabled))
+					{
 
-				mWebView.setWebContentsDebuggingEnabled(true);
-			}
-			else
-			{
-				mWebView.setWebContentsDebuggingEnabled(false);
-			}
+						mWebView.setWebContentsDebuggingEnabled(true);
+					}
+					else
+					{
+						mWebView.setWebContentsDebuggingEnabled(false);
+					}
+				}
+			});
 
-		}
-	}
 
-	@JavascriptInterface
-	public void allowDebugging()
-	{
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-		{
-			mWebView.setWebContentsDebuggingEnabled(true);
 		}
 	}
 
