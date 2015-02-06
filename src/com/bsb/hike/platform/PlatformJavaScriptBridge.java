@@ -96,7 +96,15 @@ public class PlatformJavaScriptBridge
 		ArrayList<Long> msgIds = new ArrayList<Long>(1);
 		msgIds.add(message.getMsgID());
 		Bundle bundle = new Bundle();
-		bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, false);
+		if (adapter.getCount() <= 1)
+		{
+			bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, true);
+		}
+		else
+		{
+			bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, false);
+		}
+
 		bundle.putString(HikeConstants.Extras.MSISDN, message.getMsisdn());
 		bundle.putBoolean(HikeConstants.Extras.DELETE_MEDIA_FROM_PHONE, false);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
