@@ -34,13 +34,13 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.platform.content.PlatformContent;
-import com.bsb.hike.platform.content.PlatformContent.ErrorCode;
+import com.bsb.hike.platform.content.PlatformContent.EventCode;
 import com.bsb.hike.platform.content.PlatformContentListener;
 import com.bsb.hike.platform.content.PlatformContentModel;
 import com.bsb.hike.platform.content.PlatformWebClient;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import org.json.JSONException;
@@ -262,33 +262,23 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			{
 
 				@Override
-				public void onFailure(ErrorCode reason)
+				public void onEventOccured(EventCode reason)
 				{
 					Logger.e(tag, "on failure called " + reason);
-					JSONObject json = new JSONObject();
-					try
+
+					if (reason == EventCode.DOWNLOADING)
 					{
-						json.put(HikePlatformConstants.ERROR_CODE, reason.toString());
-						json.put(HikeConstants.EVENT_KEY, HikePlatformConstants.BOT_ERROR);
-						HAManager.getInstance()
-								.record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.ERROR_EVENT, HAManager.EventPriority.HIGH, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
-					}
-					catch (JSONException e)
-					{
-						e.printStackTrace();
-					}
-					catch (NullPointerException e)
-					{
-						e.printStackTrace();
-					}
-					if (reason == ErrorCode.DOWNLOADING)
-					{
-						// Do nothing
+						//do nothing
 						return;
+					}
+					else if (reason == EventCode.LOADED)
+					{
+						cardLoadAnalytics(convMessage);
 					}
 					else
 					{
 						showConnErrState(viewHolder);
+						cardErrorAnalytics(reason);
 					}
 				}
 
@@ -313,6 +303,55 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 		return view;
 
+	}
+
+	private void cardErrorAnalytics(EventCode reason)
+	{
+		JSONObject json = new JSONObject();
+		try
+		{
+			json.put(HikePlatformConstants.ERROR_CODE, reason.toString());
+			json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.BOT_ERROR);
+			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NullPointerException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private static void cardLoadAnalytics(ConvMessage message)
+	{
+		JSONObject platformJSON = new JSONObject();
+
+		try
+		{
+			String state = message.platformWebMessageMetadata.getLayoutId();
+			state = state.substring(0,state.length() - 5);
+			String origin = Utils.conversationType(message.getMsisdn());
+			platformJSON.put(AnalyticsConstants.CHAT_MSISDN, message.getMsisdn());
+			platformJSON.put(AnalyticsConstants.ORIGIN, origin);
+			platformJSON.put(HikePlatformConstants.CARD_TYPE, message.platformWebMessageMetadata.getAppName());
+			platformJSON.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_LOADED);
+			platformJSON.put(HikePlatformConstants.CARD_STATE, state);
+			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.VIEW_EVENT, platformJSON, AnalyticsConstants.EVENT_TAG_PLATFORM);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NullPointerException npe)
+		{
+			npe.printStackTrace();
+		}
+		catch (IndexOutOfBoundsException ie)
+		{
+			ie.printStackTrace();
+		}
 	}
 
 	private void orientationChangeHandling(CustomWebView web)

@@ -16,6 +16,30 @@ public class PlatformWebMessageMetadata
 
 	private JSONObject cardobj ;
 
+	private String appName;
+
+	private String layoutId;
+
+	public String getLayoutId()
+	{
+		return layoutId;
+	}
+
+	public void setLayoutId(String layoutId)
+	{
+		this.layoutId = layoutId;
+	}
+
+	public String getAppName()
+	{
+		return appName;
+	}
+
+	public void setAppName(String appName)
+	{
+		this.appName = appName;
+	}
+
 	public int getCardHeight()
 	{
 		return cardHeight;
@@ -67,9 +91,19 @@ public class PlatformWebMessageMetadata
 				setHelperData(cardobj.optJSONObject(HikePlatformConstants.HELPER_DATA));
 			}
 
+			if (cardobj.has(HikePlatformConstants.APP_NAME))
+			{
+				setAppName(cardobj.optString(HikePlatformConstants.APP_NAME));
+			}
+
 			if (cardobj.has(HikePlatformConstants.HEIGHT))
 			{
 				this.cardHeight = Integer.parseInt(cardobj.optString(HikePlatformConstants.HEIGHT));
+			}
+
+			if (cardobj.has(HikePlatformConstants.LAYOUT))
+			{
+				setLayoutId(cardobj.optString(HikePlatformConstants.LAYOUT));
 			}
 
 			// Extract notif text

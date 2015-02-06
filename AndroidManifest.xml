@@ -310,7 +310,8 @@
             android:screenOrientation="user"
             android:theme="@style/LockPatternTheme" />
 
-        <receiver android:name=".service.BootService" >
+        <receiver android:name=".service.BootService"
+             android:enabled="true" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -418,6 +419,15 @@
         </receiver>
         <service android:name=".service.SimpleWakefulService" >
         </service>
+        
+        <receiver
+            android:name=".service.ReferralReceiver"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

@@ -23,7 +23,6 @@ public class BootService extends BroadcastReceiver
 
 		// GCM_ID_SENT_PRELOAD=true,User Auth=false-->Best Scenario
 
-		HikeAlarmManager.repopulateAlarm();
 		if (mprefs.getData(HikeMessengerApp.GCM_ID_SENT_PRELOAD, false) && (!Utils.isUserAuthenticated(ctx)))
 		{
 			PreloadNotificationSchedular.scheduleNextAlarm(ctx);

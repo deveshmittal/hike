@@ -11,7 +11,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.platform.content.PlatformContent.ErrorCode;
+import com.bsb.hike.platform.content.PlatformContent.EventCode;
 
 import android.os.AsyncTask;
 
@@ -87,13 +87,13 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 		catch (IOException ioe)
 		{
 			ioe.printStackTrace();
-			PlatformRequestManager.reportFailure(mRequest, ErrorCode.STORAGE_FULL);
+			PlatformRequestManager.reportFailure(mRequest, EventCode.STORAGE_FULL);
 			PlatformRequestManager.remove(mRequest);
 		}
 		catch (IllegalStateException ise)
 		{
 			ise.printStackTrace();
-			PlatformRequestManager.reportFailure(mRequest, ErrorCode.UNKNOWN);
+			PlatformRequestManager.reportFailure(mRequest, EventCode.UNKNOWN);
 			PlatformRequestManager.remove(mRequest);
 		}
 		finally
@@ -176,7 +176,7 @@ class PlatformTemplateDownloadTask extends AsyncTask<Void, Void, Void>
 		catch (IOException ioe)
 		{
 			ioe.printStackTrace();
-			PlatformRequestManager.reportFailure(mRequest, ErrorCode.LOW_CONNECTIVITY);
+			PlatformRequestManager.reportFailure(mRequest, EventCode.LOW_CONNECTIVITY);
 			PlatformRequestManager.remove(mRequest);
 		}
 

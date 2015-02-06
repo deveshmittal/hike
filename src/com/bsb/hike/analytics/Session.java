@@ -145,7 +145,7 @@ public class Session
 		public void reset()
 		{
 			// reset --> srcctx to ""
-			srcContext = "";
+			srcContext = null;
 
 			// reset --> contype to normal
 			convType = AnalyticsConstants.ConversationType.NORMAL;
