@@ -624,11 +624,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 				//Will remove after testing
 				
-				if (mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
-				{
-					
-				}
-				else
+				if(mmNuxManager.getCurrentState() == NUXConstants.NUX_SKIPPED || mmNuxManager.getCurrentState() == NUXConstants.NUX_IS_ACTIVE)
 				{
 					chatProgress.setText(String.format(mmReward.getStatusText(), mmNuxManager.getCountUnlockedContacts(), mmDetails.getMin()));
 					progressNux.setProgress(NUXManager.getInstance().getCountUnlockedContacts() / mmDetails.getMin());
@@ -695,6 +691,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		case R.id.tv_chatStatus:
 
 		//On click of TAP To Claim and View Details	
+			
+			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED||mmNuxManager.getCurrentState()==NUXConstants.NUX_NEW)
+			{
+				Toast.makeText(getActivity(), getActivity().getString(R.string.nux_expired), Toast.LENGTH_SHORT).show();
+				break;
+			}
 			
 			if (NUXManager.getInstance().getCurrentState() == NUXConstants.COMPLETED)
 			{
@@ -763,20 +765,24 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				e.printStackTrace();
 			}
 
-			if(!(mmNuxManager.getCurrentState() == NUXConstants.NUX_SKIPPED || mmNuxManager.getCurrentState() == NUXConstants.NUX_IS_ACTIVE))
+			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED||mmNuxManager.getCurrentState()==NUXConstants.NUX_NEW) 
 			{
-				butRemind.setEnabled(false);
-				butInviteMore.setEnabled(false);
-			} 
-			else 
+				Toast.makeText(getActivity(),  getActivity().getString(R.string.nux_expired), Toast.LENGTH_SHORT).show();
+				break;
+				
+			}
+		
+			if( mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
 			{
+				Toast.makeText(getActivity(),  getActivity().getString(R.string.nux_completed), Toast.LENGTH_SHORT).show();
+				break;
+			}
 				Intent in = IntentManager.openNuxCustomMessage(getActivity());
 				getActivity().startActivity(in);
-			}
 			break;
 		case R.id.but_inviteMore:
 
-			
+				
 			try
 			{
 				JSONObject metaData = new JSONObject();
@@ -789,14 +795,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				e.printStackTrace();
 			}
 
-			if(!(mmNuxManager.getCurrentState() == NUXConstants.NUX_SKIPPED || mmNuxManager.getCurrentState() == NUXConstants.NUX_IS_ACTIVE)){
-				butRemind.setEnabled(false);
-				butInviteMore.setEnabled(false);
-			} 
-			else 
+			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED||mmNuxManager.getCurrentState()==NUXConstants.NUX_NEW) 
 			{
-				NUXManager.getInstance().startNuxSelector(getActivity());
+				Toast.makeText(getActivity(),  getActivity().getString(R.string.nux_expired), Toast.LENGTH_SHORT).show();
+				break;
+				
+			} 
+			if( mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+			{
+				Toast.makeText(getActivity(),  getActivity().getString(R.string.nux_completed), Toast.LENGTH_SHORT).show();
+				break;
 			}
+				NUXManager.getInstance().startNuxSelector(getActivity());
 			break;
 
 		}
