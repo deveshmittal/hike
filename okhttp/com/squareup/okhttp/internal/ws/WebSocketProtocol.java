@@ -15,7 +15,10 @@
  */
 package com.squareup.okhttp.internal.ws;
 
-final class Protocol {
+public final class WebSocketProtocol {
+  /** Magic value which must be appended to the key in a response header. */
+  public static final String ACCEPT_MAGIC = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
   /*
   Each frame starts with two bytes of data.
 
@@ -27,7 +30,8 @@ final class Protocol {
   | |1|2|3|       |  |K|             |
   +-+-+-+-+-------+  +-+-------------+
   */
-	/** Byte 0 flag for whether this is the final fragment in a message. */
+  
+  /** Byte 0 flag for whether this is the final fragment in a message. */
 	static final int B0_FLAG_FIN = Integer.parseInt("10000000",2);
 	/** Byte 0 reserved flag 1. Must be 0 unless negotiated otherwise. */
 	static final int B0_FLAG_RSV1 = Integer.parseInt("01000000",2);
@@ -59,16 +63,16 @@ final class Protocol {
    * If this flag is set, the next four bytes represent the mask key. These bytes appear after
    * any additional bytes specified by {@link #B1_MASK_LENGTH}.
    */
-  //static final int B1_FLAG_MASK = 0b10000000;
-  static final int B1_FLAG_MASK = Integer.parseInt("10000000",2);
+//  static final int B1_FLAG_MASK = 0b10000000;
+	static final int B1_FLAG_MASK = Integer.parseInt("10000000",2);
   /**
    * Byte 1 mask for the payload length.
    * <p>
    * If this value is {@link #PAYLOAD_SHORT}, the next two bytes represent the length.
    * If this value is {@link #PAYLOAD_LONG}, the next eight bytes represent the length.
    */
-  //static final int B1_MASK_LENGTH = 0b01111111;
-  static final int B1_MASK_LENGTH = Integer.parseInt("01111111",2);
+//  static final int B1_MASK_LENGTH = 0b01111111;
+	static final int B1_MASK_LENGTH = Integer.parseInt("01111111",2);
 
   static final int OPCODE_CONTINUATION = 0x0;
   static final int OPCODE_TEXT = 0x1;
@@ -96,7 +100,7 @@ final class Protocol {
     }
   }
 
-  private Protocol() {
+  private WebSocketProtocol() {
     throw new AssertionError("No instances.");
   }
 }

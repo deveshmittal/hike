@@ -25,25 +25,24 @@ import okio.Source;
 import okio.Timeout;
 
 import static com.squareup.okhttp.internal.ws.WebSocket.PayloadType;
-import static com.squareup.okhttp.internal.Util.readFully;
-import static com.squareup.okhttp.internal.ws.Protocol.B0_FLAG_FIN;
-import static com.squareup.okhttp.internal.ws.Protocol.B0_FLAG_RSV1;
-import static com.squareup.okhttp.internal.ws.Protocol.B0_FLAG_RSV2;
-import static com.squareup.okhttp.internal.ws.Protocol.B0_FLAG_RSV3;
-import static com.squareup.okhttp.internal.ws.Protocol.B0_MASK_OPCODE;
-import static com.squareup.okhttp.internal.ws.Protocol.B1_FLAG_MASK;
-import static com.squareup.okhttp.internal.ws.Protocol.B1_MASK_LENGTH;
-import static com.squareup.okhttp.internal.ws.Protocol.PAYLOAD_MAX;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_BINARY;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_CONTINUATION;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_CONTROL_CLOSE;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_CONTROL_PING;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_CONTROL_PONG;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_FLAG_CONTROL;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_TEXT;
-import static com.squareup.okhttp.internal.ws.Protocol.PAYLOAD_LONG;
-import static com.squareup.okhttp.internal.ws.Protocol.PAYLOAD_SHORT;
-import static com.squareup.okhttp.internal.ws.Protocol.toggleMask;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.B0_FLAG_FIN;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.B0_FLAG_RSV1;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.B0_FLAG_RSV2;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.B0_FLAG_RSV3;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.B0_MASK_OPCODE;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.B1_FLAG_MASK;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.B1_MASK_LENGTH;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_BINARY;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_CONTINUATION;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_CONTROL_CLOSE;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_CONTROL_PING;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_CONTROL_PONG;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_FLAG_CONTROL;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_TEXT;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.PAYLOAD_LONG;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.PAYLOAD_MAX;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.PAYLOAD_SHORT;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.toggleMask;
 import static java.lang.Integer.toHexString;
 
 /**
@@ -51,13 +50,14 @@ import static java.lang.Integer.toHexString;
  */
 public final class WebSocketReader {
   public interface FrameCallback {
+    void onMessage(BufferedSource source, PayloadType type) throws IOException;
     void onPing(Buffer buffer);
-    void onClose(Buffer buffer) throws IOException;
+    void onPong(Buffer buffer);
+    void onClose(int code, String reason) throws IOException;
   }
 
   private final boolean isClient;
   private final BufferedSource source;
-  private final WebSocketListener listener;
   private final FrameCallback frameCallback;
 
   private final Source framedMessageSource = new FramedMessageSource();
@@ -76,57 +76,34 @@ public final class WebSocketReader {
   private final byte[] maskKey = new byte[4];
   private final byte[] maskBuffer = new byte[2048];
 
-  public WebSocketReader(boolean isClient, BufferedSource source, WebSocketListener listener,
-      FrameCallback frameCallback) {
+  public WebSocketReader(boolean isClient, BufferedSource source, FrameCallback frameCallback) {
     if (source == null) throw new NullPointerException("source");
-    if (listener == null) throw new NullPointerException("listener");
     if (frameCallback == null) throw new NullPointerException("frameCallback");
     this.isClient = isClient;
     this.source = source;
-    this.listener = listener;
     this.frameCallback = frameCallback;
   }
 
   /**
-   * Reads one message from source consuming any control frames that precede or are interleaved
-   * between frame fragments. This will result in one call to {@link WebSocketListener#onMessage}.
+   * Process the next protocol frame.
+   * <ul>
+   * <li>If it is a control frame this will result in a single call to {@link FrameCallback}.</li>
+   * <li>If it is a message frame this will result in a single call to {@link
+   * WebSocketListener#onMessage}. If the message spans multiple frames, each interleaved control
+   * frame will result in a corresponding call to {@link FrameCallback}.
+   * </ul>
    */
-  public void readMessage() throws IOException {
-    readUntilNonControlFrame();
-    if (closed) return;
-
-    PayloadType type;
-    switch (opcode) {
-      case OPCODE_TEXT:
-        type = PayloadType.TEXT;
-        break;
-      case OPCODE_BINARY:
-        type = PayloadType.BINARY;
-        break;
-      default:
-        throw new IllegalStateException("Unknown opcode: " + toHexString(opcode));
-    }
-
-    messageClosed = false;
-    listener.onMessage(Okio.buffer(framedMessageSource), type);
-    if (!messageClosed) {
-      throw new IllegalStateException("Listener failed to call close on message payload.");
-    }
-  }
-
-  /** Read headers and process any control frames until we reach a non-control frame. */
-  private void readUntilNonControlFrame() throws IOException {
-    while (!closed) {
-      readHeader();
-      if (!isControlFrame) {
-        break;
-      }
+  public void processNextFrame() throws IOException {
+    readHeader();
+    if (isControlFrame) {
       readControlFrame();
+    } else {
+      readMessageFrame();
     }
   }
 
   private void readHeader() throws IOException {
-    if (closed) throw new IllegalStateException("Closed");
+    if (closed) throw new IOException("Closed");
 
     int b0 = source.readByte() & 0xff;
 
@@ -170,7 +147,7 @@ public final class WebSocketReader {
 
     if (isMasked) {
       // Read the masking key as bytes so that they can be used directly for unmasking.
-      readFully(source, maskKey);
+      source.readFully(maskKey);
     }
   }
 
@@ -198,23 +175,51 @@ public final class WebSocketReader {
         frameCallback.onPing(buffer);
         break;
       case OPCODE_CONTROL_PONG:
-        // Thanks for the pong!
+        frameCallback.onPong(buffer);
         break;
       case OPCODE_CONTROL_CLOSE:
-        // If we have one, hand a cloned buffer to the frame callback since we also need to read it.
-        frameCallback.onClose(buffer != null ? buffer.clone() : null);
-        closed = true;
-
         int code = 0;
         String reason = "";
         if (buffer != null) {
           code = buffer.readShort();
           reason = buffer.readUtf8();
         }
-        listener.onClose(code, reason);
+        frameCallback.onClose(code, reason);
+        closed = true;
         break;
       default:
         throw new IllegalStateException("Unknown control opcode: " + toHexString(opcode));
+    }
+  }
+
+  private void readMessageFrame() throws IOException {
+    PayloadType type;
+    switch (opcode) {
+      case OPCODE_TEXT:
+        type = PayloadType.TEXT;
+        break;
+      case OPCODE_BINARY:
+        type = PayloadType.BINARY;
+        break;
+      default:
+        throw new IllegalStateException("Unknown opcode: " + toHexString(opcode));
+    }
+
+    messageClosed = false;
+    frameCallback.onMessage(Okio.buffer(framedMessageSource), type);
+    if (!messageClosed) {
+      throw new IllegalStateException("Listener failed to call close on message payload.");
+    }
+  }
+
+  /** Read headers and process any control frames until we reach a non-control frame. */
+  private void readUntilNonControlFrame() throws IOException {
+    while (!closed) {
+      readHeader();
+      if (!isControlFrame) {
+        break;
+      }
+      readControlFrame();
     }
   }
 
@@ -234,6 +239,9 @@ public final class WebSocketReader {
         readUntilNonControlFrame();
         if (opcode != OPCODE_CONTINUATION) {
           throw new ProtocolException("Expected continuation opcode. Got: " + toHexString(opcode));
+        }
+        if (isFinalFrame && frameLength == 0) {
+          return -1; // Fast-path for empty final frame.
         }
       }
 

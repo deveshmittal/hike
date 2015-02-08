@@ -19,10 +19,10 @@ package com.squareup.okhttp;
 
 import com.squareup.okhttp.internal.http.HttpDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -96,7 +96,7 @@ public final class Headers {
   /** Returns an immutable case-insensitive set of header names. */
   public Set<String> names() {
     TreeSet<String> result = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-    for (int i = 0; i < size(); i++) {
+    for (int i = 0, size = size(); i < size; i++) {
       result.add(name(i));
     }
     return Collections.unmodifiableSet(result);
@@ -105,7 +105,7 @@ public final class Headers {
   /** Returns an immutable list of the header values for {@code name}. */
   public List<String> values(String name) {
     List<String> result = null;
-    for (int i = 0; i < size(); i++) {
+    for (int i = 0, size = size(); i < size; i++) {
       if (name.equalsIgnoreCase(name(i))) {
         if (result == null) result = new ArrayList<String>(2);
         result.add(value(i));
@@ -118,13 +118,13 @@ public final class Headers {
 
   public Builder newBuilder() {
     Builder result = new Builder();
-    result.namesAndValues.addAll(Arrays.asList(namesAndValues));
+    Collections.addAll(result.namesAndValues, namesAndValues);
     return result;
   }
 
   @Override public String toString() {
     StringBuilder result = new StringBuilder();
-    for (int i = 0; i < size(); i++) {
+    for (int i = 0, size = size(); i < size; i++) {
       result.append(name(i)).append(": ").append(value(i)).append("\n");
     }
     return result.toString();
@@ -168,11 +168,42 @@ public final class Headers {
     return new Headers(namesAndValues);
   }
 
+  /**
+   * Returns headers for the header names and values in the {@link Map}.
+   */
+  public static Headers of(Map<String, String> headers) {
+    if (headers == null) {
+      throw new IllegalArgumentException("Expected map with header names and values");
+    }
+
+    // Make a defensive copy and clean it up.
+    String[] namesAndValues = new String[headers.size() * 2];
+    int i = 0;
+    for (Map.Entry<String, String> header : headers.entrySet()) {
+      if (header.getKey() == null || header.getValue() == null) {
+        throw new IllegalArgumentException("Headers cannot be null");
+      }
+      String name = header.getKey().trim();
+      String value = header.getValue().trim();
+      if (name.length() == 0 || name.indexOf('\0') != -1 || value.indexOf('\0') != -1) {
+        throw new IllegalArgumentException("Unexpected header: " + name + ": " + value);
+      }
+      namesAndValues[i] = name;
+      namesAndValues[i + 1] = value;
+      i += 2;
+    }
+
+    return new Headers(namesAndValues);
+  }
+
   public static final class Builder {
     private final List<String> namesAndValues = new ArrayList<String>(20);
 
-    /** Add an header line containing a field name, a literal colon, and a value. */
-    Builder addLine(String line) {
+    /**
+     * Add a header line without any validation. Only appropriate for headers from the remote peer
+     * or cache.
+     */
+    Builder addLenient(String line) {
       int index = line.indexOf(":", 1);
       if (index != -1) {
         return addLenient(line.substring(0, index), line.substring(index + 1));
@@ -183,6 +214,15 @@ public final class Headers {
       } else {
         return addLenient("", line); // No header name.
       }
+    }
+
+    /** Add an header line containing a field name, a literal colon, and a value. */
+    public Builder add(String line) {
+      int index = line.indexOf(":");
+      if (index == -1) {
+        throw new IllegalArgumentException("Unexpected header: " + line);
+      }
+      return add(line.substring(0, index).trim(), line.substring(index + 1));
     }
 
     /** Add a field with the specified value. */

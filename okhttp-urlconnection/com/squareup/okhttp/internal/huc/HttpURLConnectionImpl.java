@@ -47,10 +47,13 @@ import java.net.SocketPermission;
 import java.net.URL;
 import java.security.Permission;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import okio.BufferedSink;
 import okio.Sink;
@@ -68,6 +71,8 @@ import okio.Sink;
  * header fields, request method, etc.) are immutable.
  */
 public class HttpURLConnectionImpl extends HttpURLConnection {
+  private static final Set<String> METHODS = new LinkedHashSet<String>(
+      Arrays.asList("OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "PATCH"));
 
   final OkHttpClient client;
 
@@ -75,7 +80,7 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
 
   /** Like the superclass field of the same name, but a long and available on all platforms. */
   private long fixedContentLength = -1;
-  private int redirectionCount;
+  private int followUpCount;
   protected IOException httpEngineFailure;
   protected HttpEngine httpEngine;
   /** Lazily created (with synthetic headers) on first call to getHeaders(). */
@@ -126,8 +131,9 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
   @Override public final InputStream getErrorStream() {
     try {
       HttpEngine response = getResponse();
-      if (response.hasResponseBody() && response.getResponse().code() >= HTTP_BAD_REQUEST) {
-        return response.getResponseBodyBytes();
+      if (HttpEngine.hasBody(response.getResponse())
+          && response.getResponse().code() >= HTTP_BAD_REQUEST) {
+        return response.getResponse().body().byteStream();
       }
       return null;
     } catch (IOException e) {
@@ -228,11 +234,7 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
       throw new FileNotFoundException(url.toString());
     }
 
-    InputStream result = response.getResponseBodyBytes();
-    if (result == null) {
-      throw new ProtocolException("No response body exists; responseCode=" + getResponseCode());
-    }
-    return result;
+    return response.getResponse().body().byteStream();
   }
 
   @Override public final OutputStream getOutputStream() throws IOException {
@@ -316,7 +318,7 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
         .url(getURL())
         .method(method, null /* No body; that's passed separately. */);
     Headers headers = requestHeaders.build();
-    for (int i = 0; i < headers.size(); i++) {
+    for (int i = 0, size = headers.size(); i < size; i++) {
       builder.addHeader(headers.name(i), headers.value(i));
     }
 
@@ -349,8 +351,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
       engineClient = client.clone().setCache(null);
     }
 
-    return new HttpEngine(engineClient, request, bufferRequestBody, connection, null, requestBody,
-        priorResponse);
+    return new HttpEngine(engineClient, request, bufferRequestBody, true, false, connection, null,
+        requestBody, priorResponse);
   }
 
   private String defaultUserAgent() {
@@ -383,8 +385,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
         return httpEngine;
       }
 
-      if (response.isRedirect() && ++redirectionCount > HttpEngine.MAX_REDIRECTS) {
-        throw new ProtocolException("Too many redirects: " + redirectionCount);
+      if (++followUpCount > HttpEngine.MAX_FOLLOW_UPS) {
+        throw new ProtocolException("Too many follow-up requests: " + followUpCount);
       }
 
       // The first request was insufficient. Prepare for another...
@@ -405,7 +407,7 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
 
       if (!httpEngine.sameConnection(followUp.url())) {
         httpEngine.releaseConnection();
-      } 
+      }
 
       Connection connection = httpEngine.close();
       httpEngine = newHttpEngine(followUp.method(), connection, (RetryableSink) requestBody,
@@ -426,7 +428,7 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
           ? httpEngine.getConnection().getHandshake()
           : null;
       if (readResponse) {
-        httpEngine.readResponse(false);
+        httpEngine.readResponse();
       }
 
       return true;
@@ -550,9 +552,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
   }
 
   @Override public void setRequestMethod(String method) throws ProtocolException {
-    if (!HttpMethod.METHODS.contains(method)) {
-      throw new ProtocolException(
-          "Expected one of " + HttpMethod.METHODS + " but was " + method);
+    if (!METHODS.contains(method)) {
+      throw new ProtocolException("Expected one of " + METHODS + " but was " + method);
     }
     this.method = method;
   }

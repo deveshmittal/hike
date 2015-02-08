@@ -25,18 +25,18 @@ import okio.Sink;
 import okio.Timeout;
 
 import static com.squareup.okhttp.internal.ws.WebSocket.PayloadType;
-import static com.squareup.okhttp.internal.ws.Protocol.B0_FLAG_FIN;
-import static com.squareup.okhttp.internal.ws.Protocol.B1_FLAG_MASK;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_BINARY;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_CONTINUATION;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_CONTROL_CLOSE;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_CONTROL_PING;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_CONTROL_PONG;
-import static com.squareup.okhttp.internal.ws.Protocol.OPCODE_TEXT;
-import static com.squareup.okhttp.internal.ws.Protocol.PAYLOAD_LONG;
-import static com.squareup.okhttp.internal.ws.Protocol.PAYLOAD_MAX;
-import static com.squareup.okhttp.internal.ws.Protocol.PAYLOAD_SHORT;
-import static com.squareup.okhttp.internal.ws.Protocol.toggleMask;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.B0_FLAG_FIN;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.B1_FLAG_MASK;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_BINARY;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_CONTINUATION;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_CONTROL_CLOSE;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_CONTROL_PING;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_CONTROL_PONG;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.OPCODE_TEXT;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.PAYLOAD_LONG;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.PAYLOAD_MAX;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.PAYLOAD_SHORT;
+import static com.squareup.okhttp.internal.ws.WebSocketProtocol.toggleMask;
 
 /**
  * An <a href="http://tools.ietf.org/html/rfc6455">RFC 6455</a>-compatible WebSocket frame writer.
@@ -58,8 +58,8 @@ public final class WebSocketWriter {
   private boolean closed;
   private boolean activeWriter;
 
-  private final byte[] maskKey = new byte[4];
-  private final byte[] maskBuffer = new byte[2048];
+  private final byte[] maskKey;
+  private final byte[] maskBuffer;
 
   public WebSocketWriter(boolean isClient, BufferedSink sink, Random random) {
     if (sink == null) throw new NullPointerException("sink");
@@ -67,16 +67,14 @@ public final class WebSocketWriter {
     this.isClient = isClient;
     this.sink = sink;
     this.random = random;
-  }
 
-  public boolean isClosed() {
-    return closed;
+    // Masks are only a concern for client writers.
+    maskKey = isClient ? new byte[4] : null;
+    maskBuffer = isClient ? new byte[2048] : null;
   }
 
   /** Send a ping with the supplied {@code payload}. Payload may be {@code null} */
   public void writePing(Buffer payload) throws IOException {
-    if (closed) throw new IllegalStateException("Closed");
-
     synchronized (sink) {
       writeControlFrame(OPCODE_CONTROL_PING, payload);
     }
@@ -84,8 +82,6 @@ public final class WebSocketWriter {
 
   /** Send a pong with the supplied {@code payload}. Payload may be {@code null} */
   public void writePong(Buffer payload) throws IOException {
-    if (closed) throw new IllegalStateException("Closed");
-
     synchronized (sink) {
       writeControlFrame(OPCODE_CONTROL_PONG, payload);
     }
@@ -100,8 +96,6 @@ public final class WebSocketWriter {
    * @param reason Reason for shutting down or {@code null}. {@code code} is required if set.
    */
   public void writeClose(int code, String reason) throws IOException {
-    if (closed) throw new IllegalStateException("Closed");
-
     Buffer payload = null;
     if (code != 0) {
       if (code < 1000 || code >= 5000) {
@@ -115,14 +109,7 @@ public final class WebSocketWriter {
     } else if (reason != null) {
       throw new IllegalArgumentException("Code required to include reason.");
     }
-    writeClose(payload);
-  }
 
-  /**
-   * Send a close frame with optional payload. This is used when echoing a close and its
-   * payload back to the other peer.
-   */
-  public void writeClose(Buffer payload) throws IOException {
     synchronized (sink) {
       writeControlFrame(OPCODE_CONTROL_CLOSE, payload);
       closed = true;
@@ -130,12 +117,14 @@ public final class WebSocketWriter {
   }
 
   private void writeControlFrame(int opcode, Buffer payload) throws IOException {
+    if (closed) throw new IOException("Closed");
+
     int length = 0;
     if (payload != null) {
       length = (int) payload.size();
       if (length > PAYLOAD_MAX) {
         throw new IllegalArgumentException(
-            "Control frame payload must be less than " + PAYLOAD_MAX + "B.");
+            "Payload size must be less than or equal to " + PAYLOAD_MAX);
       }
     }
 
@@ -170,7 +159,6 @@ public final class WebSocketWriter {
    */
   public BufferedSink newMessageSink(PayloadType type) {
     if (type == null) throw new NullPointerException("type == null");
-    if (closed) throw new IllegalStateException("Closed");
     if (activeWriter) {
       throw new IllegalStateException("Another message writer is active. Did you call close()?");
     }
@@ -188,7 +176,6 @@ public final class WebSocketWriter {
   public void sendMessage(PayloadType type, Buffer payload) throws IOException {
     if (type == null) throw new NullPointerException("type == null");
     if (payload == null) throw new NullPointerException("payload == null");
-    if (closed) throw new IllegalStateException("Closed");
     if (activeWriter) {
       throw new IllegalStateException("A message writer is active. Did you call close()?");
     }
@@ -197,6 +184,8 @@ public final class WebSocketWriter {
 
   private void writeFrame(PayloadType payloadType, Buffer source, long byteCount,
       boolean isFirstFrame, boolean isFinal) throws IOException {
+    if (closed) throw new IOException("Closed");
+
     int opcode = OPCODE_CONTINUATION;
     if (isFirstFrame) {
       switch (payloadType) {
@@ -269,6 +258,8 @@ public final class WebSocketWriter {
     }
 
     @Override public void flush() throws IOException {
+      if (closed) throw new IOException("Closed");
+
       synchronized (sink) {
         sink.flush();
       }
@@ -280,6 +271,8 @@ public final class WebSocketWriter {
 
     @SuppressWarnings("PointlessBitwiseExpression")
     @Override public void close() throws IOException {
+      if (closed) throw new IOException("Closed");
+
       int length = 0;
 
       synchronized (sink) {
