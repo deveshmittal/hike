@@ -87,8 +87,8 @@ public class OkHttpClient implements Cloneable {
         return pooled.isReadable();
       }
 
-      @Override public void addLine(Headers.Builder builder, String line) {
-        builder.addLine(line);
+      @Override public void addLenient(Headers.Builder builder, String line) {
+        builder.addLenient(line);
       }
 
       @Override public void setCache(OkHttpClient client, InternalCache internalCache) {
@@ -120,13 +120,9 @@ public class OkHttpClient implements Cloneable {
         connection.connectAndSetOwner(client, owner, request);
       }
 
-      @Override public Call newCall(OkHttpClient client, Request request) {
-        return new Call(client, request);
-      }
-
-      @Override public Response callGetResponse(Call call, boolean forWebSocket)
-          throws IOException {
-        return call.getResponse(call.originalRequest, forWebSocket);
+      @Override
+      public void callEnqueue(Call call, Callback responseCallback, boolean forWebSocket) {
+        call.enqueue(responseCallback, forWebSocket);
       }
 
       @Override public void callEngineReleaseConnection(Call call) throws IOException {
@@ -137,17 +133,8 @@ public class OkHttpClient implements Cloneable {
         return call.engine.getConnection();
       }
 
-      @Override public boolean connectionClearOwner(Connection connection) {
-        return connection.clearOwner();
-      }
-
       @Override public void connectionSetOwner(Connection connection, Object owner) {
         connection.setOwner(owner);
-      }
-
-      @Override public void connectionCloseIfOwnedBy(Connection connection, Object owner)
-          throws IOException {
-        connection.closeIfOwnedBy(owner);
       }
     };
   }
@@ -161,6 +148,7 @@ public class OkHttpClient implements Cloneable {
   private List<Protocol> protocols;
   private List<ConnectionSpec> connectionSpecs;
   private final List<Interceptor> interceptors = new ArrayList<Interceptor>();
+  private final List<Interceptor> networkInterceptors = new ArrayList<Interceptor>();
   private ProxySelector proxySelector;
   private CookieHandler cookieHandler;
 
@@ -177,6 +165,7 @@ public class OkHttpClient implements Cloneable {
   private Network network;
   private boolean followSslRedirects = true;
   private boolean followRedirects = true;
+  private boolean retryOnConnectionFailure = true;
   private int connectTimeout;
   private int readTimeout;
   private int writeTimeout;
@@ -193,6 +182,7 @@ public class OkHttpClient implements Cloneable {
     this.protocols = okHttpClient.protocols;
     this.connectionSpecs = okHttpClient.connectionSpecs;
     this.interceptors.addAll(okHttpClient.interceptors);
+    this.networkInterceptors.addAll(okHttpClient.networkInterceptors);
     this.proxySelector = okHttpClient.proxySelector;
     this.cookieHandler = okHttpClient.cookieHandler;
     this.cache = okHttpClient.cache;
@@ -206,13 +196,15 @@ public class OkHttpClient implements Cloneable {
     this.network = okHttpClient.network;
     this.followSslRedirects = okHttpClient.followSslRedirects;
     this.followRedirects = okHttpClient.followRedirects;
+    this.retryOnConnectionFailure = okHttpClient.retryOnConnectionFailure;
     this.connectTimeout = okHttpClient.connectTimeout;
     this.readTimeout = okHttpClient.readTimeout;
     this.writeTimeout = okHttpClient.writeTimeout;
   }
 
   /**
-   * Sets the default connect timeout for new connections. A value of 0 means no timeout.
+   * Sets the default connect timeout for new connections. A value of 0 means no timeout, otherwise
+   * values must be between 1 and {@link Integer#MAX_VALUE} when converted to milliseconds.
    *
    * @see URLConnection#setConnectTimeout(int)
    */
@@ -221,6 +213,7 @@ public class OkHttpClient implements Cloneable {
     if (unit == null) throw new IllegalArgumentException("unit == null");
     long millis = unit.toMillis(timeout);
     if (millis > Integer.MAX_VALUE) throw new IllegalArgumentException("Timeout too large.");
+    if (millis == 0 && timeout > 0) throw new IllegalArgumentException("Timeout too small.");
     connectTimeout = (int) millis;
   }
 
@@ -230,7 +223,8 @@ public class OkHttpClient implements Cloneable {
   }
 
   /**
-   * Sets the default read timeout for new connections. A value of 0 means no timeout.
+   * Sets the default read timeout for new connections. A value of 0 means no timeout, otherwise
+   * values must be between 1 and {@link Integer#MAX_VALUE} when converted to milliseconds.
    *
    * @see URLConnection#setReadTimeout(int)
    */
@@ -239,6 +233,7 @@ public class OkHttpClient implements Cloneable {
     if (unit == null) throw new IllegalArgumentException("unit == null");
     long millis = unit.toMillis(timeout);
     if (millis > Integer.MAX_VALUE) throw new IllegalArgumentException("Timeout too large.");
+    if (millis == 0 && timeout > 0) throw new IllegalArgumentException("Timeout too small.");
     readTimeout = (int) millis;
   }
 
@@ -248,13 +243,15 @@ public class OkHttpClient implements Cloneable {
   }
 
   /**
-   * Sets the default write timeout for new connections. A value of 0 means no timeout.
+   * Sets the default write timeout for new connections. A value of 0 means no timeout, otherwise
+   * values must be between 1 and {@link Integer#MAX_VALUE} when converted to milliseconds.
    */
   public final void setWriteTimeout(long timeout, TimeUnit unit) {
     if (timeout < 0) throw new IllegalArgumentException("timeout < 0");
     if (unit == null) throw new IllegalArgumentException("unit == null");
     long millis = unit.toMillis(timeout);
     if (millis > Integer.MAX_VALUE) throw new IllegalArgumentException("Timeout too large.");
+    if (millis == 0 && timeout > 0) throw new IllegalArgumentException("Timeout too small.");
     writeTimeout = (int) millis;
   }
 
@@ -447,6 +444,32 @@ public class OkHttpClient implements Cloneable {
     return followRedirects;
   }
 
+  /**
+   * Configure this client to retry or not when a connectivity problem is encountered. By default,
+   * this client silently recovers from the following problems:
+   *
+   * <ul>
+   *   <li><strong>Unreachable IP addresses.</strong> If the URL's host has multiple IP addresses,
+   *       failure to reach any individual IP address doesn't fail the overall request. This can
+   *       increase availability of multi-homed services.
+   *   <li><strong>Stale pooled connections.</strong> The {@link ConnectionPool} reuses sockets
+   *       to decrease request latency, but these connections will occasionally time out.
+   *   <li><strong>Unreachable proxy servers.</strong> A {@link ProxySelector} can be used to
+   *       attempt multiple proxy servers in sequence, eventually falling back to a direct
+   *       connection.
+   * </ul>
+   *
+   * Set this to false to avoid retrying requests when doing so is destructive. In this case the
+   * calling application should do its own recovery of connectivity failures.
+   */
+  public final void setRetryOnConnectionFailure(boolean retryOnConnectionFailure) {
+    this.retryOnConnectionFailure = retryOnConnectionFailure;
+  }
+
+  public final boolean getRetryOnConnectionFailure() {
+    return retryOnConnectionFailure;
+  }
+
   final RouteDatabase routeDatabase() {
     return routeDatabase;
   }
@@ -484,8 +507,7 @@ public class OkHttpClient implements Cloneable {
    * successors (h2). The http/1.1 transport will never be dropped.
    *
    * <p>If multiple protocols are specified, <a
-   * href="https://technotes.googlecode.com/git/nextprotoneg.html">NPN</a> or
-   * <a href="http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg">ALPN</a>
+   * href="http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg">ALPN</a>
    * will be used to negotiate a transport.
    *
    * <p>{@link Protocol#HTTP_1_0} is not supported in this set. Requests are
@@ -531,6 +553,15 @@ public class OkHttpClient implements Cloneable {
    */
   public List<Interceptor> interceptors() {
     return interceptors;
+  }
+
+  /**
+   * Returns a modifiable list of interceptors that observe a single network request and response.
+   * These interceptors must call {@link Interceptor.Chain#proceed} exactly once: it is an error for
+   * a network interceptor to short-circuit or repeat a network request.
+   */
+  public List<Interceptor> networkInterceptors() {
+    return networkInterceptors;
   }
 
   /**
@@ -594,9 +625,9 @@ public class OkHttpClient implements Cloneable {
   /**
    * Java and Android programs default to using a single global SSL context,
    * accessible to HTTP clients as {@link SSLSocketFactory#getDefault()}. If we
-   * used the shared SSL context, when OkHttp enables NPN for its SPDY-related
-   * stuff, it would also enable NPN for other usages, which might crash them
-   * because NPN is enabled when it isn't expected to be.
+   * used the shared SSL context, when OkHttp enables ALPN for its SPDY-related
+   * stuff, it would also enable ALPN for other usages, which might crash them
+   * because ALPN is enabled when it isn't expected to be.
    *
    * <p>This code avoids that by defaulting to an OkHttp-created SSL context.
    * The drawback of this approach is that apps that customize the global SSL

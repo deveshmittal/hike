@@ -31,8 +31,8 @@ import java.net.Proxy;
 import java.net.Socket;
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocket;
-
 import okio.Source;
 
 import static com.squareup.okhttp.internal.Util.getDefaultPort;
@@ -236,8 +236,20 @@ public final class Connection {
     // Configure the socket's ciphers, TLS versions, and extensions.
     route.connectionSpec.apply(sslSocket, route);
 
-    // Force handshake. This can throw!
-    sslSocket.startHandshake();
+    try {
+      // Force handshake. This can throw!
+      sslSocket.startHandshake();
+
+      String maybeProtocol;
+      if (route.connectionSpec.supportsTlsExtensions()
+          && (maybeProtocol = platform.getSelectedProtocol(sslSocket)) != null) {
+        protocol = Protocol.get(maybeProtocol); // Throws IOE on unknown.
+      }
+    } finally {
+      platform.afterHandshake(sslSocket);
+    }
+
+    handshake = Handshake.get(sslSocket.getSession());
 
     // Verify that the socket's certificates are acceptable for the target host.
     if (!route.address.hostnameVerifier.verify(route.address.uriHost, sslSocket.getSession())) {
@@ -249,16 +261,7 @@ public final class Connection {
     }
 
     // Check that the certificate pinner is satisfied by the certificates presented.
-    route.address.certificatePinner.check(route.address.uriHost,
-        sslSocket.getSession().getPeerCertificates());
-
-    handshake = Handshake.get(sslSocket.getSession());
-
-    String maybeProtocol;
-    if (route.connectionSpec.supportsTlsExtensions()
-        && (maybeProtocol = platform.getSelectedProtocol(sslSocket)) != null) {
-      protocol = Protocol.get(maybeProtocol); // Throws IOE on unknown.
-    }
+    route.address.certificatePinner.check(route.address.uriHost, handshake.peerCertificates());
 
     if (protocol == Protocol.SPDY_3 || protocol == Protocol.HTTP_2) {
       sslSocket.setSoTimeout(0); // SPDY timeouts are set per-stream.
@@ -311,14 +314,6 @@ public final class Connection {
   /** Returns true if this connection is idle. */
   boolean isIdle() {
     return spdyConnection == null || spdyConnection.isIdle();
-  }
-
-  /**
-   * Returns true if this connection has been idle for longer than
-   * {@code keepAliveDurationNs}.
-   */
-  boolean isExpired(long keepAliveDurationNs) {
-    return getIdleStartTimeNs() < System.nanoTime() - keepAliveDurationNs;
   }
 
   /**
@@ -405,12 +400,12 @@ public final class Connection {
       // The response body from a CONNECT should be empty, but if it is not then we should consume
       // it before proceeding.
       long contentLength = OkHeaders.contentLength(response);
-      if (contentLength != -1) {
-        Source body = tunnelConnection.newFixedLengthSource(null, contentLength);
-        Util.skipAll(body, Integer.MAX_VALUE);
-      } else {
-        tunnelConnection.emptyResponseBody();
+      if (contentLength == -1L) {
+        contentLength = 0L;
       }
+      Source body = tunnelConnection.newFixedLengthSource(contentLength);
+      Util.skipAll(body, Integer.MAX_VALUE, TimeUnit.MILLISECONDS);
+      body.close();
 
       switch (response.code()) {
         case HTTP_OK:
@@ -434,5 +429,19 @@ public final class Connection {
               "Unexpected response code for CONNECT: " + response.code());
       }
     }
+  }
+
+  @Override public String toString() {
+    return "Connection{"
+        + route.address.uriHost + ":" + route.address.uriPort
+        + ", proxy="
+        + route.proxy
+        + " hostAddress="
+        + route.inetSocketAddress.getAddress().getHostAddress()
+        + " cipherSuite="
+        + (handshake != null ? handshake.cipherSuite() : "none")
+        + " protocol="
+        + protocol
+        + '}';
   }
 }

@@ -33,7 +33,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.ByteString;
@@ -101,7 +103,6 @@ import okio.Source;
  * }</pre>
  */
 public final class Cache {
-  // TODO: add APIs to iterate the cache?
   private static final int VERSION = 201105;
   private static final int ENTRY_METADATA = 0;
   private static final int ENTRY_BODY = 1;
@@ -137,8 +138,8 @@ public final class Cache {
   private int hitCount;
   private int requestCount;
 
-  public Cache(File directory, long maxSize) throws IOException {
-    cache = DiskLruCache.open(directory, VERSION, ENTRY_COUNT, maxSize);
+  public Cache(File directory, long maxSize) {
+    cache = DiskLruCache.create(directory, VERSION, ENTRY_COUNT, maxSize);
   }
 
   private static String urlToKey(Request request) {
@@ -259,6 +260,58 @@ public final class Cache {
     cache.evictAll();
   }
 
+  /**
+   * Returns an iterator over the URLs in this cache. This iterator doesn't throw {@code
+   * ConcurrentModificationException}, but if new responses are added while iterating, their URLs
+   * will not be returned. If existing responses are evicted during iteration, they will be absent
+   * (unless they were already returned).
+   *
+   * <p>The iterator supports {@linkplain Iterator#remove}. Removing a URL from the iterator evicts
+   * the corresponding response from the cache. Use this to evict selected responses.
+   */
+  public Iterator<String> urls() throws IOException {
+    return new Iterator<String>() {
+      final Iterator<DiskLruCache.Snapshot> delegate = cache.snapshots();
+
+      String nextUrl;
+      boolean canRemove;
+
+      @Override public boolean hasNext() {
+        if (nextUrl != null) return true;
+
+        canRemove = false; // Prevent delegate.remove() on the wrong item!
+        while (delegate.hasNext()) {
+          DiskLruCache.Snapshot snapshot = delegate.next();
+          try {
+            BufferedSource metadata = Okio.buffer(snapshot.getSource(ENTRY_METADATA));
+            nextUrl = metadata.readUtf8LineStrict();
+            return true;
+          } catch (IOException ignored) {
+            // We couldn't read the metadata for this snapshot; possibly because the host filesystem
+            // has disappeared! Skip it.
+          } finally {
+            snapshot.close();
+          }
+        }
+
+        return false;
+      }
+
+      @Override public String next() {
+        if (!hasNext()) throw new NoSuchElementException();
+        String result = nextUrl;
+        nextUrl = null;
+        canRemove = true;
+        return result;
+      }
+
+      @Override public void remove() {
+        if (!canRemove) throw new IllegalStateException("remove() before next()");
+        delegate.remove();
+      }
+    };
+  }
+
   public synchronized int getWriteAbortCount() {
     return writeAbortCount;
   }
@@ -267,7 +320,7 @@ public final class Cache {
     return writeSuccessCount;
   }
 
-  public long getSize() {
+  public long getSize() throws IOException {
     return cache.size();
   }
 
@@ -431,7 +484,7 @@ public final class Cache {
         Headers.Builder varyHeadersBuilder = new Headers.Builder();
         int varyRequestHeaderLineCount = readInt(source);
         for (int i = 0; i < varyRequestHeaderLineCount; i++) {
-          varyHeadersBuilder.addLine(source.readUtf8LineStrict());
+          varyHeadersBuilder.addLenient(source.readUtf8LineStrict());
         }
         varyHeaders = varyHeadersBuilder.build();
 
@@ -442,7 +495,7 @@ public final class Cache {
         Headers.Builder responseHeadersBuilder = new Headers.Builder();
         int responseHeaderLineCount = readInt(source);
         for (int i = 0; i < responseHeaderLineCount; i++) {
-          responseHeadersBuilder.addLine(source.readUtf8LineStrict());
+          responseHeadersBuilder.addLenient(source.readUtf8LineStrict());
         }
         responseHeaders = responseHeadersBuilder.build();
 
@@ -483,7 +536,7 @@ public final class Cache {
       sink.writeByte('\n');
       sink.writeUtf8(Integer.toString(varyHeaders.size()));
       sink.writeByte('\n');
-      for (int i = 0; i < varyHeaders.size(); i++) {
+      for (int i = 0, size = varyHeaders.size(); i < size; i++) {
         sink.writeUtf8(varyHeaders.name(i));
         sink.writeUtf8(": ");
         sink.writeUtf8(varyHeaders.value(i));
@@ -494,7 +547,7 @@ public final class Cache {
       sink.writeByte('\n');
       sink.writeUtf8(Integer.toString(responseHeaders.size()));
       sink.writeByte('\n');
-      for (int i = 0; i < responseHeaders.size(); i++) {
+      for (int i = 0, size = responseHeaders.size(); i < size; i++) {
         sink.writeUtf8(responseHeaders.name(i));
         sink.writeUtf8(": ");
         sink.writeUtf8(responseHeaders.value(i));

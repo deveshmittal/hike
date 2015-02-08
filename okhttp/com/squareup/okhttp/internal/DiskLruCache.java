@@ -21,9 +21,12 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.NoSuchElementException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -147,6 +150,10 @@ public final class DiskLruCache implements Closeable {
   private final LinkedHashMap<String, Entry> lruEntries = new LinkedHashMap<String, Entry>(0, 0.75f, true);
   private int redundantOpCount;
 
+  // Must be read and written when synchronized on 'this'.
+  private boolean initialized;
+  private boolean closed;
+
   /**
    * To differentiate between old and current snapshots, each entry is given
    * a sequence number each time an edit is committed. A snapshot is stale if
@@ -154,14 +161,13 @@ public final class DiskLruCache implements Closeable {
    */
   private long nextSequenceNumber = 0;
 
-  /** This cache uses a single background thread to evict entries. */
-  final ThreadPoolExecutor executorService = new ThreadPoolExecutor(0, 1, 60L, TimeUnit.SECONDS,
-      new LinkedBlockingQueue<Runnable>(), Util.threadFactory("OkHttp DiskLruCache", true));
+  /** Used to run 'cleanupRunnable' for journal rebuilds. */
+  private final Executor executor;
   private final Runnable cleanupRunnable = new Runnable() {
     public void run() {
       synchronized (DiskLruCache.this) {
-        if (journalWriter == null) {
-          return; // Closed.
+        if (!initialized | closed) {
+          return; // Nothing to do
         }
         try {
           trimToSize();
@@ -176,7 +182,7 @@ public final class DiskLruCache implements Closeable {
     }
   };
 
-  private DiskLruCache(File directory, int appVersion, int valueCount, long maxSize) {
+  DiskLruCache(File directory, int appVersion, int valueCount, long maxSize, Executor executor) {
     this.directory = directory;
     this.appVersion = appVersion;
     this.journalFile = new File(directory, JOURNAL_FILE);
@@ -184,19 +190,57 @@ public final class DiskLruCache implements Closeable {
     this.journalFileBackup = new File(directory, JOURNAL_FILE_BACKUP);
     this.valueCount = valueCount;
     this.maxSize = maxSize;
+    this.executor = executor;
+  }
+
+  // Visible for testing.
+  void initialize() throws IOException {
+    assert Thread.holdsLock(this);
+
+    if (initialized) {
+      return; // Already initialized.
+    }
+
+    // If a bkp file exists, use it instead.
+    if (journalFileBackup.exists()) {
+      // If journal file also exists just delete backup file.
+      if (journalFile.exists()) {
+        journalFileBackup.delete();
+      } else {
+        renameTo(journalFileBackup, journalFile, false);
+      }
+    }
+
+    // Prefer to pick up where we left off.
+    if (journalFile.exists()) {
+      try {
+        readJournal();
+        processJournal();
+        initialized = true;
+        return;
+      } catch (IOException journalIsCorrupt) {
+        Platform.get().logW("DiskLruCache " + directory + " is corrupt: "
+            + journalIsCorrupt.getMessage() + ", removing");
+        delete();
+        closed = false;
+      }
+    }
+
+    directory.mkdirs();
+    rebuildJournal();
+
+    initialized = true;
   }
 
   /**
-   * Opens the cache in {@code directory}, creating a cache if none exists
-   * there.
+   * Create a cache which will reside in {@code directory}. This cache is lazily initialized on
+   * first access and will be created if it does not exist.
    *
    * @param directory a writable directory
    * @param valueCount the number of values per cache entry. Must be positive.
    * @param maxSize the maximum number of bytes this cache should use to store
-   * @throws IOException if reading or writing the cache directory fails
    */
-  public static DiskLruCache open(File directory, int appVersion, int valueCount, long maxSize)
-      throws IOException {
+  public static DiskLruCache create(File directory, int appVersion, int valueCount, long maxSize) {
     if (maxSize <= 0) {
       throw new IllegalArgumentException("maxSize <= 0");
     }
@@ -204,37 +248,11 @@ public final class DiskLruCache implements Closeable {
       throw new IllegalArgumentException("valueCount <= 0");
     }
 
-    // If a bkp file exists, use it instead.
-    File backupFile = new File(directory, JOURNAL_FILE_BACKUP);
-    if (backupFile.exists()) {
-      File journalFile = new File(directory, JOURNAL_FILE);
-      // If journal file also exists just delete backup file.
-      if (journalFile.exists()) {
-        backupFile.delete();
-      } else {
-        renameTo(backupFile, journalFile, false);
-      }
-    }
+    // Use a single background thread to evict entries.
+    Executor executor = new ThreadPoolExecutor(0, 1, 60L, TimeUnit.SECONDS,
+        new LinkedBlockingQueue<Runnable>(), Util.threadFactory("OkHttp DiskLruCache", true));
 
-    // Prefer to pick up where we left off.
-    DiskLruCache cache = new DiskLruCache(directory, appVersion, valueCount, maxSize);
-    if (cache.journalFile.exists()) {
-      try {
-        cache.readJournal();
-        cache.processJournal();
-        return cache;
-      } catch (IOException journalIsCorrupt) {
-        Platform.get().logW("DiskLruCache " + directory + " is corrupt: "
-            + journalIsCorrupt.getMessage() + ", removing");
-        cache.delete();
-      }
-    }
-
-    // Create a new empty cache.
-    directory.mkdirs();
-    cache = new DiskLruCache(directory, appVersion, valueCount, maxSize);
-    cache.rebuildJournal();
-    return cache;
+    return new DiskLruCache(directory, appVersion, valueCount, maxSize, executor);
   }
 
   private void readJournal() throws IOException {
@@ -363,7 +381,7 @@ public final class DiskLruCache implements Closeable {
         } else {
           writer.writeUtf8(CLEAN).writeByte(' ');
           writer.writeUtf8(entry.key);
-          writer.writeUtf8(entry.getLengths());
+          entry.writeLengths(writer);
           writer.writeByte('\n');
         }
       }
@@ -402,44 +420,23 @@ public final class DiskLruCache implements Closeable {
    * the head of the LRU queue.
    */
   public synchronized Snapshot get(String key) throws IOException {
+    initialize();
+
     checkNotClosed();
     validateKey(key);
     Entry entry = lruEntries.get(key);
-    if (entry == null) {
-      return null;
-    }
+    if (entry == null || !entry.readable) return null;
 
-    if (!entry.readable) {
-      return null;
-    }
-
-    // Open all streams eagerly to guarantee that we see a single published
-    // snapshot. If we opened streams lazily then the streams could come
-    // from different edits.
-    Source[] sources = new Source[valueCount];
-    try {
-      for (int i = 0; i < valueCount; i++) {
-        sources[i] = Okio.source(entry.cleanFiles[i]);
-      }
-    } catch (FileNotFoundException e) {
-      // A file must have been deleted manually!
-      for (int i = 0; i < valueCount; i++) {
-        if (sources[i] != null) {
-          Util.closeQuietly(sources[i]);
-        } else {
-          break;
-        }
-      }
-      return null;
-    }
+    Snapshot snapshot = entry.snapshot();
+    if (snapshot == null) return null;
 
     redundantOpCount++;
     journalWriter.writeUtf8(READ).writeByte(' ').writeUtf8(key).writeByte('\n');
     if (journalRebuildRequired()) {
-      executorService.execute(cleanupRunnable);
+      executor.execute(cleanupRunnable);
     }
 
-    return new Snapshot(key, entry.sequenceNumber, sources, entry.lengths);
+    return snapshot;
   }
 
   /**
@@ -451,6 +448,8 @@ public final class DiskLruCache implements Closeable {
   }
 
   private synchronized Editor edit(String key, long expectedSequenceNumber) throws IOException {
+    initialize();
+
     checkNotClosed();
     validateKey(key);
     Entry entry = lruEntries.get(key);
@@ -493,7 +492,9 @@ public final class DiskLruCache implements Closeable {
    */
   public synchronized void setMaxSize(long maxSize) {
     this.maxSize = maxSize;
-    executorService.execute(cleanupRunnable);
+    if (initialized) {
+      executor.execute(cleanupRunnable);
+    }
   }
 
   /**
@@ -501,7 +502,8 @@ public final class DiskLruCache implements Closeable {
    * this cache. This may be greater than the max size if a background
    * deletion is pending.
    */
-  public synchronized long size() {
+  public synchronized long size() throws IOException {
+    initialize();
     return size;
   }
 
@@ -547,7 +549,7 @@ public final class DiskLruCache implements Closeable {
       entry.readable = true;
       journalWriter.writeUtf8(CLEAN).writeByte(' ');
       journalWriter.writeUtf8(entry.key);
-      journalWriter.writeUtf8(entry.getLengths());
+      entry.writeLengths(journalWriter);
       journalWriter.writeByte('\n');
       if (success) {
         entry.sequenceNumber = nextSequenceNumber++;
@@ -561,7 +563,7 @@ public final class DiskLruCache implements Closeable {
     journalWriter.flush();
 
     if (size > maxSize || journalRebuildRequired()) {
-      executorService.execute(cleanupRunnable);
+      executor.execute(cleanupRunnable);
     }
   }
 
@@ -583,6 +585,8 @@ public final class DiskLruCache implements Closeable {
    * @return true if an entry was removed.
    */
   public synchronized boolean remove(String key) throws IOException {
+    initialize();
+
     checkNotClosed();
     validateKey(key);
     Entry entry = lruEntries.get(key);
@@ -607,25 +611,27 @@ public final class DiskLruCache implements Closeable {
     lruEntries.remove(entry.key);
 
     if (journalRebuildRequired()) {
-      executorService.execute(cleanupRunnable);
+      executor.execute(cleanupRunnable);
     }
 
     return true;
   }
 
   /** Returns true if this cache has been closed. */
-  public boolean isClosed() {
-    return journalWriter == null;
+  public synchronized boolean isClosed() {
+    return closed;
   }
 
-  private void checkNotClosed() {
-    if (journalWriter == null) {
+  private synchronized void checkNotClosed() {
+    if (isClosed()) {
       throw new IllegalStateException("cache is closed");
     }
   }
 
   /** Force buffered operations to the filesystem. */
   public synchronized void flush() throws IOException {
+    if (!initialized) return;
+
     checkNotClosed();
     trimToSize();
     journalWriter.flush();
@@ -633,8 +639,9 @@ public final class DiskLruCache implements Closeable {
 
   /** Closes this cache. Stored values will remain on the filesystem. */
   public synchronized void close() throws IOException {
-    if (journalWriter == null) {
-      return; // Already closed.
+    if (!initialized || closed) {
+      closed = true;
+      return;
     }
     // Copying for safe iteration.
     for (Entry entry : lruEntries.values().toArray(new Entry[lruEntries.size()])) {
@@ -645,6 +652,7 @@ public final class DiskLruCache implements Closeable {
     trimToSize();
     journalWriter.close();
     journalWriter = null;
+    closed = true;
   }
 
   private void trimToSize() throws IOException {
@@ -669,6 +677,7 @@ public final class DiskLruCache implements Closeable {
    * normally but their values will not be stored.
    */
   public synchronized void evictAll() throws IOException {
+    initialize();
     // Copying for safe iteration.
     for (Entry entry : lruEntries.values().toArray(new Entry[lruEntries.size()])) {
       removeEntry(entry);
@@ -683,12 +692,71 @@ public final class DiskLruCache implements Closeable {
     }
   }
 
-  private static String sourceToString(Source in) throws IOException {
-    try {
-      return Okio.buffer(in).readUtf8();
-    } finally {
-      Util.closeQuietly(in);
-    }
+  /**
+   * Returns an iterator over the cache's current entries. This iterator doesn't throw {@code
+   * ConcurrentModificationException}, but if new entries are added while iterating, those new
+   * entries will not be returned by the iterator. If existing entries are removed during iteration,
+   * they will be absent (unless they were already returned).
+   *
+   * <p>If there are I/O problems during iteration, this iterator fails silently. For example, if
+   * the hosting filesystem becomes unreachable, the iterator will omit elements rather than
+   * throwing exceptions.
+   *
+   * <p><strong>The caller must {@link Snapshot#close close}</strong> each snapshot returned by
+   * {@link Iterator#next}. Failing to do so leaks open files!
+   *
+   * <p>The returned iterator supports {@link Iterator#remove}.
+   */
+  public synchronized Iterator<Snapshot> snapshots() throws IOException {
+    initialize();
+    return new Iterator<Snapshot>() {
+      /** Iterate a copy of the entries to defend against concurrent modification errors. */
+      final Iterator<Entry> delegate = new ArrayList<Entry>(lruEntries.values()).iterator();
+
+      /** The snapshot to return from {@link #next}. Null if we haven't computed that yet. */
+      Snapshot nextSnapshot;
+
+      /** The snapshot to remove with {@link #remove}. Null if removal is illegal. */
+      Snapshot removeSnapshot;
+
+      @Override public boolean hasNext() {
+        if (nextSnapshot != null) return true;
+
+        synchronized (DiskLruCache.this) {
+          // If the cache is closed, truncate the iterator.
+          if (closed) return false;
+
+          while (delegate.hasNext()) {
+            Entry entry = delegate.next();
+            Snapshot snapshot = entry.snapshot();
+            if (snapshot == null) continue; // Evicted since we copied the entries.
+            nextSnapshot = snapshot;
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      @Override public Snapshot next() {
+        if (!hasNext()) throw new NoSuchElementException();
+        removeSnapshot = nextSnapshot;
+        nextSnapshot = null;
+        return removeSnapshot;
+      }
+
+      @Override public void remove() {
+        if (removeSnapshot == null) throw new IllegalStateException("remove() before next()");
+        try {
+          DiskLruCache.this.remove(removeSnapshot.key);
+        } catch (IOException ignored) {
+          // Nothing useful to do here. We failed to remove from the cache. Most likely that's
+          // because we couldn't update the journal, but the cached entry will still be gone.
+        } finally {
+          removeSnapshot = null;
+        }
+      }
+    };
   }
 
   /** A snapshot of the values for an entry. */
@@ -705,6 +773,10 @@ public final class DiskLruCache implements Closeable {
       this.lengths = lengths;
     }
 
+    public String key() {
+      return key;
+    }
+
     /**
      * Returns an editor for this snapshot's entry, or null if either the
      * entry has changed since this snapshot was created or if another edit
@@ -717,11 +789,6 @@ public final class DiskLruCache implements Closeable {
     /** Returns the unbuffered stream with the value for {@code index}. */
     public Source getSource(int index) {
       return sources[index];
-    }
-
-    /** Returns the string value for {@code index}. */
-    public String getString(int index) throws IOException {
-      return sourceToString(getSource(index));
     }
 
     /** Returns the byte length of the value for {@code index}. */
@@ -738,7 +805,7 @@ public final class DiskLruCache implements Closeable {
 
   private static final Sink NULL_SINK = new Sink() {
     @Override public void write(Buffer source, long byteCount) throws IOException {
-      // Eat all writes silently. Nom nom.
+      source.skip(byteCount);
     }
 
     @Override public void flush() throws IOException {
@@ -785,15 +852,6 @@ public final class DiskLruCache implements Closeable {
     }
 
     /**
-     * Returns the last committed value as a string, or null if no value
-     * has been committed.
-     */
-    public String getString(int index) throws IOException {
-      Source source = newSource(index);
-      return source != null ? sourceToString(source) : null;
-    }
-
-    /**
      * Returns a new unbuffered output stream to write the value at
      * {@code index}. If the underlying output stream encounters errors
      * when writing to the filesystem, this edit will be aborted when
@@ -824,13 +882,6 @@ public final class DiskLruCache implements Closeable {
         }
         return new FaultHidingSink(sink);
       }
-    }
-
-    /** Sets the value at {@code index} to {@code value}. */
-    public void set(int index, String value) throws IOException {
-      BufferedSink writer = Okio.buffer(newSink(index));
-      writer.writeUtf8(value);
-      writer.close();
     }
 
     /**
@@ -943,14 +994,6 @@ public final class DiskLruCache implements Closeable {
       }
     }
 
-    public String getLengths() throws IOException {
-      StringBuilder result = new StringBuilder();
-      for (long size : lengths) {
-        result.append(' ').append(size);
-      }
-      return result.toString();
-    }
-
     /** Set lengths using decimal numbers like "10123". */
     private void setLengths(String[] strings) throws IOException {
       if (strings.length != valueCount) {
@@ -966,8 +1009,43 @@ public final class DiskLruCache implements Closeable {
       }
     }
 
+    /** Append space-prefixed lengths to {@code writer}. */
+    void writeLengths(BufferedSink writer) throws IOException {
+      for (long length : lengths) {
+        writer.writeByte(' ').writeUtf8(Long.toString(length));
+      }
+    }
+
     private IOException invalidLengths(String[] strings) throws IOException {
       throw new IOException("unexpected journal line: " + Arrays.toString(strings));
+    }
+
+    /**
+     * Returns a snapshot of this entry. This opens all streams eagerly to guarantee that we see a
+     * single published snapshot. If we opened streams lazily then the streams could come from
+     * different edits.
+     */
+    Snapshot snapshot() {
+      if (!Thread.holdsLock(DiskLruCache.this)) throw new AssertionError();
+
+      Source[] sources = new Source[valueCount];
+      long[] lengths = this.lengths.clone(); // Defensive copy since these can be zeroed out.
+      try {
+        for (int i = 0; i < valueCount; i++) {
+          sources[i] = Okio.source(cleanFiles[i]);
+        }
+        return new Snapshot(key, sequenceNumber, sources, lengths);
+      } catch (FileNotFoundException e) {
+        // A file must have been deleted manually!
+        for (int i = 0; i < valueCount; i++) {
+          if (sources[i] != null) {
+            Util.closeQuietly(sources[i]);
+          } else {
+            break;
+          }
+        }
+        return null;
+      }
     }
   }
 }
