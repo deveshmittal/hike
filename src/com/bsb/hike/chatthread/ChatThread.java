@@ -2232,6 +2232,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		message.obj = data;
 		uiHandler.sendMessage(message);
 	}
+	
+	protected void sendUIMessage(int what, long delayTime, Object data)
+	{
+		Message message = Message.obtain();
+		message.what = what;
+		message.obj = data;
+		uiHandler.sendMessageDelayed(message, delayTime);
+	}
 
 	/**
 	 * Utility method for adding listeners for pubSub
@@ -2545,7 +2553,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 		if (msg == null || TextUtils.isEmpty(msg.getMsisdn()) || !msg.getMsisdn().equals(msisdn))
 		{
-			Logger.i("ChatThread", "We are getting a wrong msisdn convMessage object in " + msisdn + " ChatThread");
+			Logger.i(TAG, "We are getting a wrong msisdn convMessage object in " + msisdn + " ChatThread");
 			return false;
 		}
 
