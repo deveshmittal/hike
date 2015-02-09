@@ -5028,5 +5028,27 @@ public class Utils
 		}
 		return true;
 	}
+	
+	/**
+	 * Return whether response received is valid or not.
+	 * @param response
+	 * @return <li>false if either response is null if we get "stat":"fail" in response or "stat" key is missing</li>
+	 * <li>true otherwise</li>
+	 */
+	public static boolean isResponseValid(JSONObject response)
+	{
+		try
+		{
+			if(response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
+			{
+				return false;
+			}
+		}
+		catch(JSONException e)
+		{
+			return false;
+		}
+		return true;
+	}
 
 }
