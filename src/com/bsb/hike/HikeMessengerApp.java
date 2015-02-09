@@ -47,6 +47,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.httpmgr.HttpManager;
 import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
@@ -859,6 +860,8 @@ public void onTrimMemory(int level)
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
 		
 		registerReceivers();
+		
+		HttpManager.init();
 	}
 	
 	public static HikeMessengerApp getInstance()
