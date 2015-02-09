@@ -89,4 +89,9 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V1 + "/account/profile/";
 	}
+	
+	public static String getStatusBase()
+	{
+		return BASE_URL + BASE_V1 + "/user/status";
+	}
 }

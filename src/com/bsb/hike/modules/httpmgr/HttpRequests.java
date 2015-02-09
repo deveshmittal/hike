@@ -9,15 +9,19 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPalleteIm
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPreviewImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerShopDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerSignupUpgradeUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStatusBase;
 import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_HIGH;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_LONG;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
+
+import org.json.JSONObject;
 
 import com.bsb.hike.modules.httpmgr.request.JSONObjectRequest;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
+import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
 import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
 import com.bsb.hike.utils.Utils;
 
@@ -121,6 +125,19 @@ public class HttpRequests
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken postStatusRequest(JSONObject json, IRequestListener requestListener)
+	{
+		JsonBody body = new JsonBody(json);
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(getStatusBase())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
+				.post(body)
 				.build();
 		return requestToken;
 	}

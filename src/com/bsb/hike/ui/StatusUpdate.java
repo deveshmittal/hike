@@ -48,6 +48,11 @@ import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.modules.httpmgr.HttpRequests;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
+import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -63,8 +68,7 @@ import com.facebook.Session.StatusCallback;
 import com.facebook.SessionState;
 
 public class StatusUpdate extends AuthSocialAccountBaseActivity implements Listener, OnSoftKeyboardListener, EmoticonClickListener
-{
-
+{	
 	private class ActivityTask
 	{
 		int moodId = -1;
@@ -497,14 +501,16 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 
 	private void postStatus()
 	{
-		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/user/status", RequestType.STATUS_UPDATE, new HikeHttpCallback()
+		IRequestListener requestListener = new IRequestListener()
 		{
-
 			@Override
-			public void onSuccess(JSONObject response)
+			public void onRequestSuccess(Response result)
 			{
 				mActivityTask = new ActivityTask();
 
+				JSONObject response = (JSONObject) result.getBody().getContent();
+				Logger.d(getClass().getSimpleName(), " post status request succeeded : " + response);
+				
 				JSONObject data = response.optJSONObject("data");
 
 				String mappedId = data.optString(HikeConstants.STATUS_ID);
@@ -538,16 +544,22 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 				}
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STATUS_POST_REQUEST_DONE, true);
 			}
-
+			
 			@Override
-			public void onFailure()
+			public void onRequestProgressUpdate(float progress)
+			{				
+			}
+			
+			@Override
+			public void onRequestFailure(HttpException httpException)
 			{
+				Logger.e(getClass().getSimpleName(), " post status request failed : " + httpException.getMessage());
 				Toast.makeText(getApplicationContext(), R.string.update_status_fail, Toast.LENGTH_SHORT).show();
 				mActivityTask.hikeHTTPTask = null;
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STATUS_POST_REQUEST_DONE, false);
 			}
-
-		});
+		};
+		
 		String status = null;
 		/*
 		 * If the text box is empty, the we take the hint text which is a prefill for moods.
@@ -583,9 +595,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		}
 		Logger.d(getClass().getSimpleName(), "JSON: " + data);
 
-		hikeHttpRequest.setJSONData(data);
-		mActivityTask.hikeHTTPTask = new HikeHTTPTask(null, 0);
-		Utils.executeHttpTask(mActivityTask.hikeHTTPTask, hikeHttpRequest);
+		RequestToken token = HttpRequests.postStatusRequest(data, requestListener);
+		token.execute();
 
 		/*
 		 * Starting the manual cancel as well.
