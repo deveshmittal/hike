@@ -1773,4 +1773,48 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 	
+	@Override
+	public void onClick(View v)
+	{
+		switch (v.getId())
+		{
+		case R.id.send_button:
+			onH20TipClicked();
+			break;
+		default:
+			super.onClick(v);
+		}
+	}
+	
+	
+	private void onH20TipClicked()
+	{
+		if (modeOfChat == H2S_MODE)
+		{
+			return;
+		}
+		
+		else
+		{
+			modeOfChat = H2S_MODE;
+			mAdapter.sethikeToOfflineMode(true);
+			initializeH20Mode();
+			setupH20TipViews(); 
+		}
+	}
+	
+	private void initializeH20Mode()
+	{
+		hikeToOfflineTipView.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
+		hikeToOfflineTipView.findViewById(R.id.close_tip).setVisibility(View.GONE);
+
+		for (Long msgid : undeliveredMessages.keySet())
+		{
+			ConvMessage convMsg = undeliveredMessages.get(msgid);
+			if (convMsg.getState() == State.SENT_CONFIRMED)
+			{
+				mAdapter.selectView(convMsg, true);
+			}
+		}
+	}
 }
