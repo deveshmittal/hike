@@ -2,6 +2,7 @@ package com.bsb.hike.chatthread;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.animation.Animation;
@@ -25,6 +27,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
@@ -34,12 +37,15 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ChatTheme;
@@ -74,6 +80,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private boolean mBlockOverlay;
 	
+	private short modeOfChat = H2H_MODE;
+	
 	private static final int CONTACT_ADDED_OR_DELETED = 101;
 	
 	private static final int SHOW_SMS_SYNC_DIALOG = 102;
@@ -94,7 +102,30 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private static final int SCHEDULE_LAST_SEEN = 110;
 	
-	private static final int ADD_TO_UNDELIVERED_MESSAGE = 111;
+	private static final int SCHEDULE_H20_TIP = 111;
+	
+	private static final int SCROLL_LIST_VIEW = 112;
+	
+	private static final int ADD_UNDELIVERED_MESSAGE = 114;
+	
+	private static short H2S_MODE = 0;  // Hike to SMS Mode
+	 
+	private static short H2H_MODE = 1;  // Hike to Hike Mode
+	
+	/* The waiting time in seconds before scheduling a H20 Tip */
+	private static final int DEFAULT_UNDELIVERED_WAIT_TIME = 30;
+	
+	private View hikeToOfflineTipView;
+	
+	/**
+	 * this is set of all the currently visible messages which are stuck in tick and are not sms
+	 */
+	private LinkedHashMap<Long, ConvMessage> undeliveredMessages = new LinkedHashMap<Long, ConvMessage>();
+
+	/**
+	 * Since {@link #undeliveredMessages} is a LinkedList, this variable is used to keep track of the head of the list 
+	 */
+	private ConvMessage firstPendingConvMessage = null;
 	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -515,9 +546,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			if (mConversation.isOnhike())
 			{
 				ConvMessage msg = findMessageById(msgId);
-				if (!msg.isSMS())
+				if (!msg.isSMS())  //Since ConvMessage is not sent as SMS, hence add it to undeliveredMap
 				{
-					sendUIMessage(ADD_TO_UNDELIVERED_MESSAGE, msg);
+					sendUIMessage(ADD_UNDELIVERED_MESSAGE, msg);
 				}
 			}
 			return true;
@@ -613,9 +644,14 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case SCHEDULE_LAST_SEEN :
 			scheduleLastSeen();
 			break;
-		case ADD_TO_UNDELIVERED_MESSAGE:
-			mAdapter.addToUndeliverdMessage((ConvMessage) msg.obj);
+		case SCHEDULE_H20_TIP:
+			showTipFromHandler();
 			break;
+		case SCROLL_LIST_VIEW:
+			mConversationsView.smoothScrollToPosition(messages.size() - 1);
+			break;
+		case ADD_UNDELIVERED_MESSAGE:
+			addToUndeliveredMessages((ConvMessage) msg.obj);
 		default:
 			Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
 			super.handleUIMessage(msg);
@@ -1155,7 +1191,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 * 
 	 * @return
 	 */
-	private String getConvLabel()
+	protected String getConvLabel()
 	{
 		String tempLabel = mConversation.getLabel();
 		tempLabel = Utils.getFirstName(tempLabel);
@@ -1487,6 +1523,254 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 		super.sendButtonClicked();
+	}
+	
+	
+	/**
+	 *  H20 TIP FUNCTIONS START HERE. 
+	 *  Unless explicitly stated, these functions are called on the UI Thread
+	 */
+	
+	/**
+	 * Utility function to insert a message to the undelivered map
+	 * 
+	 * @param msg
+	 */
+	private void addToUndeliveredMessages(ConvMessage msg)
+	{
+		Logger.d(TAG, "Adding to undelivered messages map");
+		undeliveredMessages.put(msg.getMsgID(), msg);
+		updateFirstPendingConvMessage();
+		scheduleH20Tip();
+	}
+
+	/**
+	 * Utility method for updating {@link #firstPendingConvMessage}
+	 */
+	private void updateFirstPendingConvMessage()
+	{
+		if (undeliveredMessages.isEmpty())
+		{
+			firstPendingConvMessage = null;
+		}
+		else
+		{
+			firstPendingConvMessage = undeliveredMessages.get(undeliveredMessages.keySet().iterator().next());
+		}
+	}
+	
+	private void scheduleH20Tip()
+	{
+		/**
+		 * If the msisdn is international, then don't show tip
+		 */
+		if (!msisdn.startsWith(HikeConstants.INDIA_COUNTRY_CODE))
+		{
+			return;
+		}
+		
+		
+		/**
+		 * If the OS is Kitkat or higher, we can't send a regular SMS, 
+		 * so if the user has 0 free SMS left or user ain't online, no point in showing the tip
+		 */
+		
+		if (Utils.isKitkatOrHigher() && (mCredits == 0  || (!Utils.isUserOnline(activity.getApplicationContext()))))
+		{
+			return;
+		}
+		
+		/**
+		 * Removing any previously scheduled tips
+		 */
+		if (uiHandler.hasMessages(SCHEDULE_H20_TIP))
+		{
+			uiHandler.removeMessages(SCHEDULE_H20_TIP);
+		}
+		
+		if (firstPendingConvMessage != null)
+		{	
+			long diff = (((long) System.currentTimeMillis() / 1000) - firstPendingConvMessage.getTimestamp());
+			boolean isOnline = Utils.isUserOnline(activity);
+			if (isOnline && (diff < DEFAULT_UNDELIVERED_WAIT_TIME))
+			{
+				uiHandler.sendEmptyMessageDelayed(SCHEDULE_H20_TIP, (DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
+			}
+			
+			else if (!undeliveredMessages.isEmpty())
+			{
+				showH20Tip();
+			}
+		}
+	}
+	
+	private void showTipFromHandler()
+	{
+		/**
+		 * If the message is null or has been delivered, we return here
+		 */
+		if (firstPendingConvMessage == null || !isMessageUndelivered(firstPendingConvMessage))
+		{
+			return;
+		}
+		
+		long diff = (((long) System.currentTimeMillis() / 1000) - firstPendingConvMessage.getTimestamp());
+		
+		if (Utils.isUserOnline(activity.getApplicationContext()) && (diff >= DEFAULT_UNDELIVERED_WAIT_TIME))
+		{
+			showH20Tip();
+		}
+	}
+	
+	/**
+	 * Returns whether the given message is delivered or not.
+	 * @param convMessage
+	 * @return
+	 */
+	private boolean isMessageUndelivered(ConvMessage convMessage)
+	{
+		boolean fileUploaded = true;
+		
+		if (convMessage.isFileTransferMessage())
+		{
+			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			fileUploaded = !TextUtils.isEmpty(hikeFile.getFileKey());
+		}
+		
+		return ((!convMessage.isSMS() && convMessage.getState().ordinal() < State.SENT_DELIVERED.ordinal()) || (convMessage.isSMS() && convMessage.getState().ordinal() < State.SENT_CONFIRMED
+				.ordinal())) && fileUploaded;
+	}
+	
+	private boolean isH20TipShowing()
+	{
+		if (hikeToOfflineTipView != null)
+		{
+			return hikeToOfflineTipView.getVisibility() == View.VISIBLE;
+		}
+		return false;
+	}
+	
+	/**
+	 * Get the msgId of {@link #firstPendingConvMessage}
+	 * 
+	 * @return
+	 */
+	private long getFirstPendingConvMessageId()
+	{
+		if (firstPendingConvMessage != null)
+		{
+			return firstPendingConvMessage.getMsgID();
+		}
+
+		else
+		{
+			return -1;
+		}
+	}
+
+	private void showH20Tip()
+	{
+		if (!mConversation.isOnhike() || isH20TipShowing())
+		{
+			return;
+		}
+		
+		if (!HikeMqttPersistence.getInstance().isMessageSent(getFirstPendingConvMessageId()))
+		{
+			return;
+		}
+		
+		if (isOnline)
+		{
+			mActionBarView.findViewById(R.id.contact_status).setVisibility(View.GONE);
+		}
+		
+		if (hikeToOfflineTipView == null)
+		{
+			hikeToOfflineTipView = LayoutInflater.from(activity.getApplicationContext()).inflate(R.layout.hike_to_offline_tip, null);
+		}
+		
+		hikeToOfflineTipView.clearAnimation();
+		
+		setupH20TipViews();
+		
+		LinearLayout tipContainer = (LinearLayout) activity.findViewById(R.id.tipContainerBottom);
+		
+		if (tipContainer.getChildCount() > 0)
+		{
+			tipContainer.removeAllViews();
+		}
+		
+		/**
+		 * if (tipView != null && tipView.getVisibility() == View.VISIBLE)
+		{
+			tipView.setVisibility(View.GONE);
+		}
+		 */
+		
+		tipContainer.addView(hikeToOfflineTipView);
+		hikeToOfflineTipView.setVisibility(View.VISIBLE);
+		
+		scrollListViewOnShowingOfflineTip();
+		//shouldRunTimer = false;
+	}
+	
+	/**
+	 * Utility methods for setting up H20Tip Views
+	 */
+	
+	private void setupH20TipViews()
+	{
+		setupH20TipViews(false);
+	}
+	
+	private void setupH20TipViews(boolean messagesSent)
+	{
+		setupH20TipViews(messagesSent, false);
+	}
+	
+	private void setupH20TipViews(boolean messagesSent, boolean isNativeSms)
+	{
+		if (modeOfChat == H2S_MODE) //Are we in SMS Mode now ?
+		{
+			((TextView) hikeToOfflineTipView.findViewById(R.id.tip_header)).setText(getResources().getString(R.string.selected_count, mAdapter.getSelectedCount()));
+			((TextView) hikeToOfflineTipView.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.hike_offline_mode_msg, mAdapter.getSelectedFreeSmsCount()));
+			((TextView) hikeToOfflineTipView.findViewById(R.id.send_button_text)).setText(R.string.send_uppercase);
+			hikeToOfflineTipView.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
+		}
+		
+		else
+		{
+			
+			/**
+			 * Only when the user has selected native sms as Always we show "Send Paid sms" in all other cases we show heading as "send free sms"
+			 */
+			
+			if (PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, false) && PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, false))
+			{
+				((TextView) hikeToOfflineTipView.findViewById(R.id.tip_header)).setText(R.string.send_paid_sms);
+			}
+			
+			else
+			{
+				((TextView) hikeToOfflineTipView.findViewById(R.id.tip_header)).setText(R.string.send_free_sms);
+			}
+			
+			((TextView) hikeToOfflineTipView.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.reciever_is_offline, getConvLabel()));
+			((TextView) hikeToOfflineTipView.findViewById(R.id.send_button_text)).setText(R.string.next_uppercase);
+			hikeToOfflineTipView.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
+			hikeToOfflineTipView.findViewById(R.id.close_tip).setVisibility(View.GONE);
+		}
+		
+		hikeToOfflineTipView.findViewById(R.id.send_button).setOnClickListener(this);
+	}
+	
+	private void scrollListViewOnShowingOfflineTip()
+	{
+		if (mConversationsView.getLastVisiblePosition() > messages.size() - 3)
+		{
+			uiHandler.sendEmptyMessage(SCROLL_LIST_VIEW);
+		}
 	}
 	
 }
