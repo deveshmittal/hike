@@ -16,6 +16,7 @@ import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
 
 import org.json.JSONObject;
 
+import com.bsb.hike.modules.httpmgr.request.ByteArrayRequest;
 import com.bsb.hike.modules.httpmgr.request.JSONObjectRequest;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
@@ -138,6 +139,18 @@ public class HttpRequests
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)
 				.post(body)
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken deleteStatusRequest(String statusId, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new ByteArrayRequest.Builder()
+				.setUrl(getStatusBase() + "/" + statusId)
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
+				.delete()
 				.build();
 		return requestToken;
 	}

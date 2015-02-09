@@ -1710,6 +1710,15 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		super.onBackPressed();
 	}
 
+	public void dismissLoadingDialog()
+	{
+		if (mDialog != null)
+		{
+			mDialog.dismiss();
+			mDialog = null;
+		}
+	}
+	
 	protected String getLargerIconId()
 	{
 		return mLocalMSISDN + "::large";
@@ -1732,6 +1741,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		super.onActivityResult(requestCode, resultCode, data);
 		setProfileImage(requestCode, resultCode, data);
+	}
+
+	public void showErrorToast(int stringResId, int duration)
+	{
+		Toast toast = Toast.makeText(ProfileActivity.this, stringResId, duration);
+		toast.show();
 	}
 
 	protected void setProfileImage(int requestCode, int resultCode, Intent data)
@@ -2900,12 +2915,13 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private void deleteStatus(final String statusId)
 	{
-		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/user/status/" + statusId, RequestType.DELETE_STATUS, new HikeHttpCallback()
+		IRequestListener requestListener = new IRequestListener()
 		{
-
 			@Override
-			public void onSuccess(JSONObject response)
+			public void onRequestSuccess(Response result)
 			{
+				Logger.d(TAG, " delete status request succeeded ");
+				dismissLoadingDialog();
 				HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_STATUS, statusId);
 				for (int i = 0; i < profileItems.size(); i++)
 				{
@@ -2926,9 +2942,21 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				profileAdapter.notifyDataSetChanged();
 			}
 
-		});
-		mActivityState.task = new HikeHTTPTask(this, R.string.delete_status_error);
-		Utils.executeHttpTask(mActivityState.task, hikeHttpRequest);
+			@Override
+			public void onRequestProgressUpdate(float progress)
+			{
+			}
+
+			@Override
+			public void onRequestFailure(HttpException httpException)
+			{
+				Logger.e(TAG, " delete status request failed : " + httpException.getMessage());
+				dismissLoadingDialog();
+				showErrorToast(R.string.delete_status_error, Toast.LENGTH_LONG);
+			}
+		};
+		RequestToken token = HttpRequests.deleteStatusRequest(statusId, requestListener);
+		token.execute();
 		mDialog = ProgressDialog.show(this, null, getString(R.string.deleting_status));
 	}
 
