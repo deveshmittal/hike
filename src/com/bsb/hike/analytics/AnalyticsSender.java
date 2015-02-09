@@ -12,6 +12,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
+
 import twitter4j.internal.http.HttpResponseCode;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -239,6 +241,7 @@ public class AnalyticsSender
 			String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
 	
 			httpClient = new DefaultHttpClient();
+			httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + AccountUtils.getAppVersion());
 			
 			HttpPost postCall = new HttpPost(AccountUtils.analyticsUploadUrl);
 	
