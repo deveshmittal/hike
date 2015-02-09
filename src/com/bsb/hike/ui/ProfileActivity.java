@@ -92,6 +92,15 @@ import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.httpmgr.HttpRequests;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.request.Request;
+import com.bsb.hike.modules.httpmgr.request.RequestConstants;
+import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
+import com.bsb.hike.modules.httpmgr.request.requestbody.ByteArrayBody;
+import com.bsb.hike.modules.httpmgr.request.requestbody.FileBody;
+import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.tasks.DownloadImageTask;
@@ -691,14 +700,15 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private void getHikeJoinedTimeFromServer()
 	{
-		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(HikeConstants.REQUEST_BASE_URLS.HTTP_REQUEST_PROFILE_BASE_URL + mLocalMSISDN, RequestType.HIKE_JOIN_TIME, new HikeHttpCallback()
+		IRequestListener requestListener = new IRequestListener()
 		{
 			@Override
-			public void onSuccess(JSONObject response)
+			public void onRequestSuccess(Response result)
 			{
-				Logger.d(getClass().getSimpleName(), "Response: " + response.toString());
 				try
 				{
+					JSONObject response = (JSONObject) result.getBody().getContent();
+					Logger.d(getClass().getSimpleName(), "Hike join time request succeeded, Response: " + response);
 					JSONObject profile = response.getJSONObject(HikeConstants.PROFILE);
 					long hikeJoinTime = profile.optLong(HikeConstants.JOIN_TIME, 0);
 					hikeJoinTime = Utils.applyServerTimeOffset(ProfileActivity.this, hikeJoinTime);
@@ -709,9 +719,21 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					e.printStackTrace();
 				}
 			}
-		});
-		mActivityState.getHikeJoinTimeTask = new HikeHTTPTask(null, -1);
-		Utils.executeHttpTask(mActivityState.getHikeJoinTimeTask, hikeHttpRequest);
+
+			@Override
+			public void onRequestProgressUpdate(float progress)
+			{
+			}
+
+			@Override
+			public void onRequestFailure(HttpException httpException)
+			{
+				Logger.e(getClass().getSimpleName(), "Hike join time request failed : " + httpException.getMessage());
+			}
+		};
+
+		RequestToken token = HttpRequests.getHikeJoinTimeRequest(mLocalMSISDN, requestListener);
+		token.execute();
 	}
 	
 	private void updateProfileHeaderView()
@@ -1224,32 +1246,50 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		initializeListviewAndAdapter();
 		if (contactInfo.isOnhike() && contactInfo.getHikeJoinTime() == 0)
 		{
-			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/profile/" + mLocalMSISDN, RequestType.HIKE_JOIN_TIME, new HikeHttpCallback()
-			{
-				@Override
-				public void onSuccess(JSONObject response)
-				{
-					Logger.d(getClass().getSimpleName(), "Response: " + response.toString());
-					try
-					{
-						JSONObject profile = response.getJSONObject(HikeConstants.PROFILE);
-						long hikeJoinTime = profile.optLong(HikeConstants.JOIN_TIME, 0);
-
-						Editor editor = preferences.edit();
-						editor.putLong(HikeMessengerApp.USER_JOIN_TIME, hikeJoinTime);
-						editor.commit();
-
-						HikeMessengerApp.getPubSub().publish(HikePubSub.USER_JOIN_TIME_OBTAINED, new Pair<String, Long>(mLocalMSISDN, hikeJoinTime));
-					}
-					catch (JSONException e)
-					{
-						e.printStackTrace();
-					}
-				}
-			});
-			mActivityState.getHikeJoinTimeTask = new HikeHTTPTask(null, -1);
-			Utils.executeHttpTask(mActivityState.getHikeJoinTimeTask, hikeHttpRequest);
+			getHikeJoinTime();
 		}
+	}
+
+	private void getHikeJoinTime()
+	{
+		IRequestListener requestListener = new IRequestListener()
+		{
+			@Override
+			public void onRequestSuccess(Response result)
+			{
+				try
+				{
+					JSONObject response = (JSONObject) result.getBody().getContent();
+					Logger.d(getClass().getSimpleName(), "Hike join time request succeeded, Response : " + response);
+					JSONObject profile = response.getJSONObject(HikeConstants.PROFILE);
+					long hikeJoinTime = profile.optLong(HikeConstants.JOIN_TIME, 0);
+
+					Editor editor = preferences.edit();
+					editor.putLong(HikeMessengerApp.USER_JOIN_TIME, hikeJoinTime);
+					editor.commit();
+
+					HikeMessengerApp.getPubSub().publish(HikePubSub.USER_JOIN_TIME_OBTAINED, new Pair<String, Long>(mLocalMSISDN, hikeJoinTime));
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onRequestProgressUpdate(float progress)
+			{
+			}
+
+			@Override
+			public void onRequestFailure(HttpException httpException)
+			{
+				Logger.e(getClass().getSimpleName(), "Hike join time request failed : " + httpException.getMessage());
+			}
+		};
+
+		RequestToken token = HttpRequests.getHikeJoinTimeRequest(mLocalMSISDN, requestListener);
+		token.execute();
 	}
 
 	boolean reachedEnd;
