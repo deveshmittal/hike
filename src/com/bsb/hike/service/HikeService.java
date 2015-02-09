@@ -9,48 +9,38 @@ import org.json.JSONObject;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.content.LocalBroadcastManager;
-import android.telephony.TelephonyManager;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.models.HikeAlarmManager;
+import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.HikeSDKRequestHandler;
-import com.bsb.hike.service.HikeMqttManagerNew.IncomingHandler;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
-import com.bsb.hike.ui.HikeAuthActivity;
-import com.bsb.hike.ui.SignupActivity;
-import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -219,8 +209,8 @@ public class HikeService extends Service
 
 		// reset status variable to initial state
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
-		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
-		mMqttManager.init();		
+		mMqttManager = HikeMqttManagerNew.getInstance();
+		mMqttManager.init();
 
 		/*
 		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
@@ -235,6 +225,7 @@ public class HikeService extends Service
 		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
 		assignUtilityThread();
+		scheduleNextAnalyticsSendAlarm();
 		DBBackupRestore.getInstance(getApplicationContext()).scheduleNextAutoBackup();
 
 		/*
@@ -409,7 +400,7 @@ public class HikeService extends Service
 			unregisterReceiver(postSignupProfilePic);
 			postSignupProfilePic = null;
 		}
-
+		
 	}
 
 	/************************************************************************/
@@ -589,11 +580,7 @@ public class HikeService extends Service
 
 			// Send the device details again which includes the new app
 			// version
-			JSONObject obj = Utils.getDeviceDetails(context);
-			if (obj != null)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-			}
+			Utils.recordDeviceDetails(context);
 
 			Utils.requestAccountInfo(true, false);
 
@@ -687,11 +674,7 @@ public class HikeService extends Service
 		@Override
 		public void run()
 		{
-			JSONObject obj = Utils.getDeviceStats(getApplicationContext());
-			if (obj != null)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-			}
+			Utils.getDeviceStats(getApplicationContext());
 			scheduleNextUserStatsSending();
 		}
 	};
@@ -821,4 +804,24 @@ public class HikeService extends Service
 		this.isInitialized = isInitialized;
 	}
 
+	/**
+	 * Used to schedule the alarm for sending analytics data to the server after the HikeService has been booted
+	 */
+	private void scheduleNextAnalyticsSendAlarm()
+	{
+		HAManager obj = HAManager.getInstance();
+		long nextAlarm = Utils.getTimeInMillis(Calendar.getInstance(), obj.getWhenToSend(), 0, 0, 0);
+ 		
+		// if next alarm time is less than the current time, add frequency to the current time itself
+		if(System.currentTimeMillis() > nextAlarm)
+ 		{
+			nextAlarm = System.currentTimeMillis() + obj.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;						
+ 		}
+		// please do not remove the following logs, for QA testing
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(nextAlarm);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm day number of the month on service boot up :" + cal.get(Calendar.DAY_OF_MONTH) + " " + cal.get(Calendar.MONTH));
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm hour number on service boot up :" + cal.get(Calendar.HOUR_OF_DAY));
+		HikeAlarmManager.setAlarm(getApplicationContext(), nextAlarm, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
+ 	}
 }

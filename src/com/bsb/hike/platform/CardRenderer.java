@@ -14,6 +14,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontTextView;
@@ -338,14 +340,12 @@ public class CardRenderer implements View.OnLongClickListener {
     }
 
     private void sendLogEvent(String cardName, String actionText) throws JSONException {
-        JSONObject analytics = new JSONObject();
-        JSONObject metaDataJSON = new JSONObject();
-        metaDataJSON.put(CardConstants.CARD_NAME, cardName);
-        metaDataJSON.put(CardConstants.ACTION_TEXT, actionText);
-        metaDataJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.CONTENT_CARD_TAPPED);
-        metaDataJSON.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
-        analytics.put(HikeConstants.METADATA, metaDataJSON);
-        Utils.sendLogEvent(analytics);
+        JSONObject metadata = new JSONObject();
+        metadata.put(CardConstants.CARD_NAME, cardName);
+        metadata.put(CardConstants.ACTION_TEXT, actionText);
+        metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.CONTENT_CARD_TAPPED);
+        metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
+        HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
     }
 
 
