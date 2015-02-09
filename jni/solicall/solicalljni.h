@@ -37,7 +37,7 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_processSpeakerFram
  * Signature: ([B[B)I
  */
 JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_processMicFrame
-  (JNIEnv *, jobject, jbyteArray, jbyteArray, jint);
+  (JNIEnv *, jobject, jbyteArray, jbyteArray);
 
 /*
  * Class:     com_bsb_hike_voip_SolicallWrapper

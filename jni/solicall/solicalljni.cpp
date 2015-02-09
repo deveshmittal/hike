@@ -10,7 +10,7 @@
 #define CHANNEL_ID 0
 #define FRAME_SIZE 1920
 
-#define  LOG_TAG    "NDK Message"
+#define  LOG_TAG    "VoIP NDK"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
@@ -30,7 +30,7 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_packageInit
     sSoliCallPackageInit mySoliCallPackageInit;
 
 	mySoliCallPackageInit.sVersion = 4;
-    mySoliCallPackageInit.pcSoliCallBin = "/data/tmp/";
+    mySoliCallPackageInit.pcSoliCallBin = "/storage/emulated/0/Android/data/com.bsb.hike/files/";
 
     int iRes = SoliCallPackageInit(&mySoliCallPackageInit);
 
@@ -53,21 +53,26 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_AECInit
     mySoliCallInit.bDoNotChangeTheOutput = false;
     mySoliCallInit.sAECTypeParam = 1;
     mySoliCallInit.sDelaySize = 2;
-    mySoliCallInit.sMaxAsyncSpeakerDelayAECParam = 3;
-    mySoliCallInit.sMaxAsyncMicDelayAECParam = 3;
+    mySoliCallInit.sMaxAsyncSpeakerDelayAECParam = 50;
+    mySoliCallInit.sMaxAsyncMicDelayAECParam = 50;
     mySoliCallInit.sSensitivityLevelAECParam = 6;
     mySoliCallInit.sAggressiveLevelAECParam = 10;
     mySoliCallInit.sAECHowlingLevelTreatment = 10;
     mySoliCallInit.sMaxCoefInAECParam = 100;
     mySoliCallInit.sMinCoefInAECParam = 1;
-    mySoliCallInit.sAECTailType = 0;
+    mySoliCallInit.sAECTailType = 1;
     mySoliCallInit.sAECMinTailType = 0;
     mySoliCallInit.iNumberOfSamplesInAECBurst = 2000;
     mySoliCallInit.iNumberOfSamplesInHighConfidenceAECBurst = 2000;
     mySoliCallInit.sAECMinOutputPercentageDuringEcho = 0;
 
 
+    // Initialize AEC
 	int iRes = SoliCallAECInit(CHANNEL_ID,&mySoliCallInit);
+
+	// Initialize AGC and NR
+	iRes = SoliCallInit(CHANNEL_ID,&mySoliCallInit);
+
 
     return (jint) iRes;
 }
@@ -79,7 +84,11 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_terminate
 	if (SoliCallAECTerminate(CHANNEL_ID) != SOLICALL_RC_SUCCESS)
 	{
 		LOGE("error in terminate\n");
-		exit(1);
+	}
+
+	if (SoliCallTerminate(CHANNEL_ID) != SOLICALL_RC_SUCCESS)
+	{
+		LOGE("error in terminate\n");
 	}
 }
 
@@ -93,7 +102,6 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_processSpeakerFram
 	if (SoliCallAECProcessSpkFrame(CHANNEL_ID, (BYTE *)in, env->GetArrayLength(stream)) != SOLICALL_RC_SUCCESS)
 	{
 		LOGE("Error in process frame. Did you pass the call length limit?\n");
-		exit(1);
 	}
 
 	release_byte_array(env, stream, in, JNI_ABORT);
@@ -103,21 +111,40 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_processSpeakerFram
 
 extern "C"
 JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_processMicFrame
-  (JNIEnv *env, jobject obj, jbyteArray input, jbyteArray output, jint start) {
+  (JNIEnv *env, jobject obj, jbyteArray input, jbyteArray output) {
 
 	jbyte *in, *out;
-	int bytesOut, iTmpCurrEchoAmplitude;
+	int bytesOut;
+	int iVAD, iConfidentVAD, iDTMF, iLastNoiseAmplitude, iEstimatedVoiceAmplitude;
+	int iCalculatedAGCCoef, iTmpCurrEchoAmplitude;
 
 	in = get_byte_array(env, input);
 //	out = get_byte_array(env, output);
 
 //	LOGD("ndk length: %d", env->GetArrayLength(input));
 
-	if (SoliCallAECProcessMicFrame(CHANNEL_ID, (BYTE *)(in + start), FRAME_SIZE, (BYTE *)in, &bytesOut, &iTmpCurrEchoAmplitude) != SOLICALL_RC_SUCCESS)
+	// AEC
+	if (SoliCallAECProcessMicFrame(CHANNEL_ID, (BYTE *)in, FRAME_SIZE, (BYTE *)in, &bytesOut, &iTmpCurrEchoAmplitude) != SOLICALL_RC_SUCCESS)
 	{
 		LOGE("Error in process frame. Did you pass the call length limit?\n");
-		exit(1);
 	}
+
+	/*
+	// AGC and NR
+	if (SoliCallProcessFrame(CHANNEL_ID, (BYTE *)in, FRAME_SIZE, (BYTE *)in, &bytesOut, &iVAD, &iConfidentVAD, &iDTMF, &iLastNoiseAmplitude, &iEstimatedVoiceAmplitude, &iCalculatedAGCCoef) != SOLICALL_RC_SUCCESS)
+	{
+		LOGE("Error in process frame. Did you pass the call length limit?\n");
+	}
+	*/
+
+	/*
+	// Combo AEC, AGC and NR
+	if (SoliCallComboAECNRProcessFrame(CHANNEL_ID, (BYTE *)(in + start), FRAME_SIZE, (BYTE *)in, &bytesOut,
+			&iVAD, &iConfidentVAD, &iDTMF, &iLastNoiseAmplitude, &iEstimatedVoiceAmplitude, &iCalculatedAGCCoef, &iTmpCurrEchoAmplitude) != SOLICALL_RC_SUCCESS)
+	{
+		LOGE("Error in process frame. Did you pass the call length limit?\n");
+	}
+	*/
 
 	release_byte_array(env, input, in, 0);
 
