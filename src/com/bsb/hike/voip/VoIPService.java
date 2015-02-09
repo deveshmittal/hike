@@ -2403,7 +2403,7 @@ public class VoIPService extends Service {
 		final int TOTAL_TEST_BYTES = (simulateBitrate * TOTAL_TEST_TIME) / 8;
 		final int TEST_PACKETS = TOTAL_TEST_TIME * 15;	// Assuming ~15 packets per second
 		final int TIME_TO_WAIT_FOR_PACKETS = 1;
-		final int ACCEPTABLE_LOSS_PCT = VoIPUtils.getQualityTestSimulatedCallDuration(getApplicationContext());
+		final int ACCEPTABLE_LOSS_PCT = VoIPUtils.getQualityTestAcceptablePacketLoss(getApplicationContext());
 
 		byte[] packetData = new byte[TOTAL_TEST_BYTES / TEST_PACKETS];
 		VoIPDataPacket dp = new VoIPDataPacket(PacketType.NETWORK_QUALITY);
