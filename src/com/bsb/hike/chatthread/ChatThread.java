@@ -3878,10 +3878,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			showMessageContextMenu(convMessage);
 		}
-		
-		/**
-		 * else if (isHikeToOfflineMode) { //chatThread.clickedHikeToOfflineMessage((ConvMessage) v.getTag()); }
-		 **/
 	}
 	
 	@Override

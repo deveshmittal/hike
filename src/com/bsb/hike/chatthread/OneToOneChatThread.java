@@ -272,7 +272,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		
 		if(mConversation.isOnhike())
 		{
-			mAdapter.addAllUndeliverdMessages(messages);
+			addAllUndeliverdMessages(messages);
 		}
 		
 	}
@@ -720,7 +720,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			
 			isOnline = mContactInfo.getOffline() == 0;
 			
-			if(isHikOfflineTipShowing() && isOnline)
+			if(isH20TipShowing() && isOnline)
 			{
 				/**
 				 * If hike to offline tip is showing and server sends that the user is online, we do not update the last seen field until all pending messages are delivered
@@ -730,17 +730,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			
 			sendUIMessage(UPDATE_LAST_SEEN, lastSeenString);
 		}
-	}
-	
-	private boolean isHikOfflineTipShowing()
-	{
-		// TODO :
-		/**
-		 * if (hikeToOfflineTipview != null) { /* if hike offline tip is in last state this means it is going to hide;
-		 * 
-		 * if (((Integer) hikeToOfflineTipview.getTag()) == HIKE_TO_OFFLINE_TIP_STATE_3) { return false; } return hikeToOfflineTipview.getVisibility() == View.VISIBLE; }
-		 */
-		return false;
 	}
 	
 	/**
@@ -1543,7 +1532,26 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		updateFirstPendingConvMessage();
 		scheduleH20Tip();
 	}
-
+	
+	private void addAllUndeliverdMessages(List<ConvMessage> messages)
+	{
+		for (ConvMessage convMessage : messages)
+		{
+			if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
+			{
+				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
+			}
+		}
+		if (firstPendingConvMessage == null)
+		{
+			updateFirstPendingConvMessage();
+		}
+		if (!isH20TipShowing())
+		{
+			scheduleH20Tip();
+		}
+	}
+	
 	/**
 	 * Utility method for updating {@link #firstPendingConvMessage}
 	 */
@@ -1712,6 +1720,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		hikeToOfflineTipView.setVisibility(View.VISIBLE);
 		
 		scrollListViewOnShowingOfflineTip();
+		mAdapter.setHikeOfflineTipShowing(true);
 		//shouldRunTimer = false;
 	}
 	
@@ -1785,7 +1794,53 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			super.onClick(v);
 		}
 	}
+
+	/**
+	 * Overriding this here since we need to intercept clicks for H20 overlay
+	 */
+	@Override
+	public void onOverLayClick(ConvMessage convMessage)
+	{
+		if (modeOfChat == H2S_MODE)
+		{
+			clickedH20Message(convMessage);
+		}
+		
+		else
+		{
+			super.onOverLayClick(convMessage);
+		}
+	}
 	
+	public void clickedH20Message(ConvMessage message)
+	{
+		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null || message.isBlockAddHeader())
+		{
+			return ;
+		}
+		
+		if (message.getState() != State.SENT_CONFIRMED || message.isSMS())
+		{
+			return;
+		}
+		
+		mAdapter.toggleSelection(message);
+		
+		if (!(mAdapter.getSelectedCount() > 0))
+		{
+			destroyH20Mode();
+		}
+		
+		setupH20TipViews();
+	}
+	
+	
+	private void destroyH20Mode()
+	{
+		modeOfChat = H2H_MODE;
+		mAdapter.sethikeToOfflineMode(false);
+		mAdapter.removeSelection();
+	}
 	
 	private void onH20TipClicked()
 	{

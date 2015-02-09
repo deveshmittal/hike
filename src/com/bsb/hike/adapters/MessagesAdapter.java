@@ -4052,18 +4052,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return unsentMessages;
 	}
 
-	public void addToUndeliverdMessage(ConvMessage convMessage)
-	{
-		undeliveredMessages.put(convMessage.getMsgID(), convMessage);
-		updateFirstPendingConvMessage();
-		// We need to schedule hike offline tip always when it is not there
-		// Coz there might be cases when user manualy removes the tip
-		if (!isHikeOfflineTipShowing)
-		{
-			//scheduleHikeOfflineTip();
-		}
-	}
-
 	public void removeFromUndeliverdMessage(final ConvMessage convMessage)
 	{
 		removeFromUndeliverdMessage(convMessage, false);
@@ -4101,25 +4089,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		undeliveredMessages.clear();
 		updateFirstPendingConvMessage();
-	}
-
-	public void addAllUndeliverdMessages(List<ConvMessage> messages)
-	{
-		for (ConvMessage convMessage : messages)
-		{
-			if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
-			{
-				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
-			}
-		}
-		if (firstPendingConvMessage == null)
-		{
-			updateFirstPendingConvMessage();
-		}
-		if (!isHikeOfflineTipShowing)
-		{
-			//scheduleHikeOfflineTip();
-		}
 	}
 
 	private void updateFirstPendingConvMessage()
