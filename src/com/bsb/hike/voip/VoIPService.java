@@ -908,7 +908,7 @@ public class VoIPService extends Service {
 							newQuality = CallQuality.EXCELLENT;
 						else if (qualityCounter >= idealPacketCount - VoIPConstants.QUALITY_WINDOW)
 							newQuality = CallQuality.GOOD;
-						else if (qualityCounter >= idealPacketCount - VoIPConstants.QUALITY_WINDOW)
+						else if (qualityCounter >= idealPacketCount - VoIPConstants.QUALITY_WINDOW * 2)
 							newQuality = CallQuality.FAIR;
 						else 
 							newQuality = CallQuality.WEAK;
