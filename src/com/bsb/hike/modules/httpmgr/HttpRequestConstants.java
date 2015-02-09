@@ -94,4 +94,9 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V1 + "/user/status";
 	}
+	
+	public static String postDeviceDetailsBase()
+	{
+		return BASE_URL + BASE_V1 + "/account/update";
+	}
 }
