@@ -3415,7 +3415,7 @@ public class Utils
 
 	public static boolean isVoipActivated(Context context)
 	{
-		int voipActivated = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.VOIP_ACTIVATED, 0);
+		int voipActivated = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.VOIP_ACTIVATED, 1);
 		return (voipActivated == 0)? false : true;
 	}
 
