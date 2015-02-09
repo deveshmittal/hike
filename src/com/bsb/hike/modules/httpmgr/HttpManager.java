@@ -35,6 +35,14 @@ public class HttpManager
 	}
 
 	/**
+	 * Initializes the http manager with default {@link ClientOptions}
+	 */
+	public static void init()
+	{
+		init(null);
+	}
+
+	/**
 	 * Initializes the http manager with {@link ClientOptions} passed as parameter
 	 * 
 	 * @param options
