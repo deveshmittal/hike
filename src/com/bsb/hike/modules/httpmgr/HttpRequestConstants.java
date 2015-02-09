@@ -99,4 +99,9 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V1 + "/account/update";
 	}
+	
+	public static String postGreenBlueDetailsBase()
+	{
+		return BASE_URL + BASE_V1 + "/account/info";
+	}
 }

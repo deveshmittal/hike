@@ -11,6 +11,7 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerShopDownl
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerSignupUpgradeUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStatusBase;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postDeviceDetailsBase;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postGreenBlueDetailsBase;
 import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_HIGH;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_LONG;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
@@ -161,6 +162,18 @@ public class HttpRequests
 		JsonBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(postDeviceDetailsBase())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.post(body)
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken postGreenBlueDetailsRequest(JSONObject json, IRequestListener requestListener)
+	{
+		JsonBody body = new JsonBody(json);
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(postGreenBlueDetailsBase())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.post(body)
