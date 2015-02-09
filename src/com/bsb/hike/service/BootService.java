@@ -29,7 +29,7 @@ public class BootService extends BroadcastReceiver
 		if (TextUtils.isEmpty(mprefs.getData(HikeMessengerApp.TOKEN_SETTING, null)))
 		{
 			return;
-		}
+		}		
 		
 		if(!Utils.isUserSignedUp(ctx.getApplicationContext(), false))
 		{
@@ -37,7 +37,6 @@ public class BootService extends BroadcastReceiver
 		}
 		
 		Intent startServiceIntent = new Intent(ctx, HikeService.class);
-		ctx.startService(startServiceIntent);
+		ctx.startService(startServiceIntent);		
 	}
-
 }

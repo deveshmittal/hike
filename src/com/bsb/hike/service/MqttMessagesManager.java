@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -32,7 +33,12 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.AnalyticsSender;
+import com.bsb.hike.analytics.AnalyticsStore;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
@@ -42,11 +48,6 @@ import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.*;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.GroupTypingNotification;
-import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.TypingNotification;
@@ -82,29 +83,29 @@ public class MqttMessagesManager
 
 	private static final String UJFile = "uj_file";
 
-	private HikeConversationsDatabase convDb;
+	private final HikeConversationsDatabase convDb;
 
-	private SharedPreferences settings;
+	private final SharedPreferences settings;
 
-	private SharedPreferences appPrefs;
+	private final SharedPreferences appPrefs;
 
-	private Context context;
+	private final Context context;
 
-	private HikePubSub pubSub;
+	private final HikePubSub pubSub;
 
-	private Map<String, TypingNotification> typingNotificationMap;
+	private final Map<String, TypingNotification> typingNotificationMap;
 
-	private Handler clearTypingNotificationHandler;
+	private final Handler clearTypingNotificationHandler;
 
-	private static MqttMessagesManager instance;
+	private static volatile MqttMessagesManager instance;
 
-	private String userMsisdn;
+	private final String userMsisdn;
 
 	private boolean isBulkMessage = false;
 
-	private SQLiteDatabase convWriteDb;
+	private final SQLiteDatabase convWriteDb;
 
-	private SQLiteDatabase userWriteDb;
+	private final SQLiteDatabase userWriteDb;
 
 	private LinkedList<ConvMessage> messageList;
 
@@ -1101,6 +1102,12 @@ public class MqttMessagesManager
 		{
 			this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
 		}
+		if (data.has(HikeConstants.METADATA) )
+		{
+			JSONObject mmobObject = data.getJSONObject(HikeConstants.METADATA);
+			if (mmobObject.has(HikeConstants.NUX))
+				NUXManager.getInstance().parseNuxPacket(mmobObject.getJSONObject(HikeConstants.NUX).toString());
+		}
 	}
 
 	private void saveUserOptIn(JSONObject jsonObj) throws JSONException
@@ -1226,6 +1233,16 @@ public class MqttMessagesManager
 		{
 			int port = data.getInt(HikeConstants.VOIP_RELAY_SERVER_PORT);
 			editor.putInt(HikeConstants.VOIP_RELAY_SERVER_PORT, port);
+		}
+		if (data.has(HikeConstants.VOIP_QUALITY_TEST_ACCEPTABLE_PACKET_LOSS))
+		{
+			int apl = data.getInt(HikeConstants.VOIP_QUALITY_TEST_ACCEPTABLE_PACKET_LOSS);
+			editor.putInt(HikeConstants.VOIP_QUALITY_TEST_ACCEPTABLE_PACKET_LOSS, apl);
+		}
+		if (data.has(HikeConstants.VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION))
+		{
+			int scd = data.getInt(HikeConstants.VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION);
+			editor.putInt(HikeConstants.VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION, scd);
 		}
 		if (data.has(HikeConstants.REWARDS_TOKEN))
 		{
@@ -1353,8 +1370,31 @@ public class MqttMessagesManager
 			UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);
 		}
 
+		// check for analytics configuration packet
+		if(data.has(AnalyticsConstants.ANALYTICS_FILESIZE))
+		{
+			long fileSize = data.getLong(AnalyticsConstants.ANALYTICS_FILESIZE);
+			HAManager.getInstance().setFileMaxSize(fileSize);
+		}
+		if(data.has(AnalyticsConstants.ANALYTICS))
+		{
+			boolean isAnalyticsEnabled = data.getBoolean(AnalyticsConstants.ANALYTICS);
+			HAManager.getInstance().setAnalyticsEnabled(isAnalyticsEnabled);
+		}
+		if(data.has(AnalyticsConstants.ANALYTICS_TOTAL_SIZE))
+		{
+			long size = data.getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE);
+			HAManager.getInstance().setAnalyticsMaxSizeOnClient(size);
+		}
+		if(data.has(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY))
+		{
+			int freq = data.getInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY);
+			HAManager.getInstance().setAnalyticsSendFrequency(freq);
+		}
+		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
+		
 	}
 
 	private void saveRewards(JSONObject jsonObj) throws JSONException
@@ -1409,6 +1449,13 @@ public class MqttMessagesManager
 			editor.putBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, false);
 			editor.commit();
 			context.sendBroadcast(new Intent(HikeService.SEND_GB_DETAILS_TO_SERVER_ACTION));
+		}
+		// server on demand analytics data to be sent from client
+		if(data.optBoolean(AnalyticsConstants.ANALYTICS))
+		{		
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM DEMAND PACKET ROUTE---");
+
+			HAManager.getInstance().sendAnalyticsData(true);
 		}
 	}
 
@@ -2406,6 +2453,10 @@ public class MqttMessagesManager
 		{
 			saveTip(jsonObj);
 		}
+		else if(HikeConstants.MqttMessageTypes.NUX.equals(type))
+		{
+			saveNuxPacket(jsonObj);
+		}
 	}
 
 	private void uploadGroupProfileImage(final String groupId, final boolean retryOnce)
@@ -2853,6 +2904,11 @@ public class MqttMessagesManager
 	{
 		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
 		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance(context).getData(key, "").equals(id);
+	}
+	
+	private void saveNuxPacket(JSONObject jsonObject)
+	{
+		NUXManager.getInstance().parseNuxPacket(jsonObject.toString());
 	}
 	
 	public void saveGCMMessage(JSONObject json)

@@ -32,6 +32,9 @@ public class VoIPConstants {
 
 	public static final String CALL_ID = "callId";
 	public static final String IS_CALL_INITIATOR = "isCallInitiator";
+	public static final String CALL_RATING = "rating";
+	public static final String CALL_NETWORK_TYPE = "network";
+	public static final String PARTNER_MSISDN = "pmsisdn";
 
 	public static final class Analytics
 	{
@@ -40,6 +43,8 @@ public class VoIPConstants {
 		public static final String CALL_ID = "callid";
 
 		public static final String IS_CALLER = "caller";
+
+		public static final String IS_ENDER = "ender";
 
 		public static final String NETWORK_TYPE = "net";
 
@@ -52,6 +57,31 @@ public class VoIPConstants {
 		public static final String DATA_RECEIVED = "drec";
 
 		public static final String STATE = "state";
+
+		public static final String DURATION = "dur";
+
+		public static final String CALL_CONNECT_FAIL_REASON = "reason";
+	}
+
+	public static final class ConnectionFailCodes
+	{
+		public static final int PARTNER_UPGRADE = 0;
+
+		public static final int PARTNER_INCOMPAT = 1;
+
+		public static final int PARTNER_BLOCKED_USER = 2;
+
+		public static final int PARTNER_BUSY = 3;
+
+		public static final int UDP_CONNECTION_FAIL = 4;
+
+		public static final int EXTERNAL_SOCKET_RETRIEVAL_FAILURE = 5;
+
+		public static final int PARTNER_SOCKET_INFO_TIMEOUT = 6;
+
+		public static final int CALLER_BAD_NETWORK = 7;
+
+		public static final int CALLER_IN_NATIVE_CALL = 8;
 	}
 
 	

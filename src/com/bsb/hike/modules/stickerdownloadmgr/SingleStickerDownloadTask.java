@@ -3,31 +3,20 @@ package com.bsb.hike.modules.stickerdownloadmgr;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 
-import javax.net.ssl.HttpsURLConnection;
-
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
+import android.support.v4.util.Pair;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.HikeConstants.FTResult;
-import com.bsb.hike.HikeConstants.STResult;
-import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.HttpRequestType;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -55,21 +44,45 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 	@Override
 	public STResult call() throws Exception
 	{
-		String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(catId);
-		
-		if (dirPath == null)
-		{
-			setException(new StickerException(StickerException.DIRECTORY_NOT_EXISTS));
-			Logger.e(StickerDownloadManager.TAG, "Sticker download failed directory does not exist for task : " + taskId);
-			return STResult.DOWNLOAD_FAILED;
-		}
-		
-		largeStickerPath = dirPath + HikeConstants.LARGE_STICKER_ROOT + "/" + stkId;
-		String smallStickerPath = dirPath + HikeConstants.SMALL_STICKER_ROOT + "/" + stkId;
-		
 		FileOutputStream fos = null;
+		
 		try
 		{
+			String urlString = AccountUtils.base + "/stickers?catId=" + catId + "&stId=" + stkId + "&resId=" + Utils.getResolutionId();
+			if(AccountUtils.ssl)
+			{
+				urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers?catId=" + catId + "&stId=" + stkId + "&resId=" + Utils.getResolutionId();
+			}
+			setDownloadUrl(urlString);
+			
+			Logger.d(StickerDownloadManager.TAG,  "Starting download task : " + taskId + " url : " + urlString );
+			JSONObject response = (JSONObject) download(null, HttpRequestType.GET);
+			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
+			{
+				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
+				Logger.e(StickerDownloadManager.TAG, "Sticker download failed null or invalid response for task : " + taskId);
+				return STResult.DOWNLOAD_FAILED;
+			}
+			Logger.d(StickerDownloadManager.TAG,  "Got response for download task : " + taskId + " response : " + response.toString());
+			
+			JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
+			
+			this.catId = response.getString(StickerManager.CATEGORY_ID);  //Fetching the category field from the response
+			
+			String stickerData = data.getString(stkId);
+			
+			String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(catId);
+
+			if (dirPath == null)
+			{
+				setException(new StickerException(StickerException.DIRECTORY_NOT_EXISTS));
+				Logger.e(StickerDownloadManager.TAG, "Sticker download failed directory does not exist for task : " + taskId);
+				return STResult.DOWNLOAD_FAILED;
+			}
+
+			largeStickerPath = dirPath + HikeConstants.LARGE_STICKER_ROOT + "/" + stkId;
+			String smallStickerPath = dirPath + HikeConstants.SMALL_STICKER_ROOT + "/" + stkId;
+
 			File largeDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
 			if (!largeDir.exists())
 			{
@@ -90,26 +103,6 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 					return STResult.DOWNLOAD_FAILED;
 				}
 			}
-			
-			String urlString = AccountUtils.base + "/stickers?catId=" + catId + "&stId=" + stkId + "&resId=" + Utils.getResolutionId();
-			if(AccountUtils.ssl)
-			{
-				urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers?catId=" + catId + "&stId=" + stkId + "&resId=" + Utils.getResolutionId();
-			}
-			setDownloadUrl(urlString);
-			
-			Logger.d(StickerDownloadManager.TAG,  "Starting download task : " + taskId + " url : " + urlString );
-			JSONObject response = (JSONObject) download(null, HttpRequestType.GET);
-			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
-			{
-				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
-				Logger.e(StickerDownloadManager.TAG, "Sticker download failed null or invalid response for task : " + taskId);
-				return STResult.DOWNLOAD_FAILED;
-			}
-			Logger.d(StickerDownloadManager.TAG,  "Got response for download task : " + taskId + " response : " + response.toString());
-			JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
-
-			String stickerData = data.getString(stkId);
 
 			Utils.saveBase64StringToFile(new File(largeStickerPath), stickerData);
 
@@ -138,23 +131,6 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 			setException(new StickerException(e));
 			return STResult.DOWNLOAD_FAILED;
 		}
-		finally
-		{
-			try
-			{
-				if (fos != null)
-				{
-					fos.close();
-				}
-			}
-			catch (IOException e)
-			{
-				Logger.e(getClass().getSimpleName(), "Error while closing file", e);
-				setException(new StickerException(StickerException.ERROR_CLOSING_FILE));
-				return STResult.DOWNLOAD_FAILED;
-			}
-		}
-		
 		StickerManager.getInstance().checkAndRemoveUpdateFlag(catId);
 		return STResult.SUCCESS;
 	}
@@ -162,8 +138,8 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 	@Override
 	protected void postExecute(STResult result)
 	{
-		// TODO Auto-generated method stub
-		setResult(largeStickerPath);
+		// Sending category back to the callee
+		setResult(catId);
 		super.postExecute(result);
 		
 	}

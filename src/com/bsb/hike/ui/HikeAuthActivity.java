@@ -34,6 +34,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.platform.HikePlatformConstants;
@@ -163,13 +165,11 @@ public class HikeAuthActivity extends Activity
 
 		try
 		{
-			JSONObject analyticsJSON = new JSONObject();
-			JSONObject metaDataJSON = new JSONObject();
-			metaDataJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_VIEWED);
-			metaDataJSON.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
-			metaDataJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
-			analyticsJSON.put(HikeConstants.METADATA, metaDataJSON);
-			Utils.sendLogEvent(analyticsJSON);
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_VIEWED);
+			metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
+			metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{
@@ -356,13 +356,11 @@ public class HikeAuthActivity extends Activity
 				{
 					try
 					{
-						JSONObject analyticsJSON = new JSONObject();
-						JSONObject metaDataJSON = new JSONObject();
-						metaDataJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_CONNECT);
-						metaDataJSON.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
-						metaDataJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
-						analyticsJSON.put(HikeConstants.METADATA, metaDataJSON);
-						Utils.sendLogEvent(analyticsJSON);
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_CONNECT);
+						metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
+						metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					}
 					catch (JSONException e)
 					{
@@ -380,13 +378,11 @@ public class HikeAuthActivity extends Activity
 				{
 					try
 					{
-						JSONObject analyticsJSON = new JSONObject();
-						JSONObject metaDataJSON = new JSONObject();
-						metaDataJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_DECLINED);
-						metaDataJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
-						metaDataJSON.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
-						analyticsJSON.put(HikeConstants.METADATA, metaDataJSON);
-						Utils.sendLogEvent(analyticsJSON);
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_DECLINED);
+						metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
+						metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					}
 					catch (JSONException e)
 					{
@@ -908,14 +904,12 @@ public class HikeAuthActivity extends Activity
 		progress_bar_conn_state.setVisibility(View.GONE);
 		try
 		{
-			JSONObject analyticsJSON = new JSONObject();
-			JSONObject metaDataJSON = new JSONObject();
-			metaDataJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_SUCCESS);
-			metaDataJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
-			metaDataJSON.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
-			metaDataJSON.put(HikeConstants.Extras.SDK_CONNECTION_TYPE, FileTransferManager.getInstance(getApplicationContext()).getNetworkType());
-			analyticsJSON.put(HikeConstants.METADATA, metaDataJSON);
-			Utils.sendLogEvent(analyticsJSON);
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_SUCCESS);
+			metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+			metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
+			metadata.put(HikeConstants.Extras.SDK_CONNECTION_TYPE, FileTransferManager.getInstance(getApplicationContext()).getNetworkType());
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{
@@ -981,14 +975,12 @@ public class HikeAuthActivity extends Activity
 		progress_bar_conn_state.setVisibility(View.GONE);
 		try
 		{
-			JSONObject analyticsJSON = new JSONObject();
-			JSONObject metaDataJSON = new JSONObject();
-			metaDataJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_FAILURE);
-			metaDataJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
-			metaDataJSON.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
-			metaDataJSON.put(HikeConstants.Extras.SDK_CONNECTION_TYPE, FileTransferManager.getInstance(getApplicationContext()).getNetworkType());
-			analyticsJSON.put(HikeConstants.METADATA, metaDataJSON);
-			Utils.sendLogEvent(analyticsJSON);
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_FAILURE);
+			metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+			metadata.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
+			metadata.put(HikeConstants.Extras.SDK_CONNECTION_TYPE, FileTransferManager.getInstance(getApplicationContext()).getNetworkType());
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{

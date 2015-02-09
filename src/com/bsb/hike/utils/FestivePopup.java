@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
@@ -21,6 +24,8 @@ import android.widget.RelativeLayout;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.ui.HomeActivity;
 
@@ -114,6 +119,19 @@ public class FestivePopup
 			
 			@Override
 			public void onClick(View v) {
+				stopFestiveAnimAndPopup(activity);
+				
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FESTIVE_POPUP_WISH);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
+
 				new Handler().postDelayed(new Runnable()
 				{
 					@Override
@@ -122,8 +140,17 @@ public class FestivePopup
 						stopFestiveAnimAndPopup(activity);
 					}
 				}, 500);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FESTIVE_POPUP_WISH);
-				Intent intent = IntentManager.getForwardStickerIntent(activity, getStickerId(popupType), getCatId(popupType), false);
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.FESTIVE_POPUP_WISH);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);					
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
+				Intent intent = IntentManager.getForwardStickerIntent(activity, getStickerId(popupType), getCatId(popupType));
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				activity.startActivity(intent);
 			}
@@ -132,7 +159,16 @@ public class FestivePopup
 			
 			@Override
 			public void onClick(View v) {
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FESTIVE_POPUP_DISMISS);
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FESTIVE_POPUP_DISMISS);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 				stopFestiveAnimAndPopup(activity);
 			}
 		});

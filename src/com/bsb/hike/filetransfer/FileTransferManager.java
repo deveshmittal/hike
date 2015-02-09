@@ -53,13 +53,13 @@ import com.bsb.hike.utils.Utils;
  */
 public class FileTransferManager extends BroadcastReceiver
 {
-	private Context context;
+	private final Context context;
 
-	private ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
+	private final ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
 
 	private String HIKE_TEMP_DIR_NAME = "hikeTmp";
 
-	private File HIKE_TEMP_DIR;
+	private final File HIKE_TEMP_DIR;
 
 	// Constant variables
 	private final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
@@ -78,13 +78,13 @@ public class FileTransferManager extends BroadcastReceiver
 	
 	private final int TASK_OVERFLOW_LIMIT = 90;
 
-	private ExecutorService pool;
+	private final ExecutorService pool;
 
-	public static FileTransferManager _instance = null;
+	private static volatile FileTransferManager _instance = null;
 
 	private SharedPreferences settings;
 
-	private Handler handler;
+	private final Handler handler;
 
 	public static String FT_CANCEL = "ft_cancel";
 
@@ -171,11 +171,6 @@ public class FileTransferManager extends BroadcastReceiver
 
 		public abstract int getMinChunkSize();
 	};
-
-	private FileTransferManager()
-	{
-		taskLimit = context.getResources().getInteger(R.integer.ft_limit);
-	}
 
 	private class MyThreadFactory implements ThreadFactory
 	{

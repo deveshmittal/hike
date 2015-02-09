@@ -157,6 +157,9 @@ import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
@@ -188,6 +191,7 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -221,7 +225,7 @@ import com.bsb.hike.voip.view.CallRatePopup;
 import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
-		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener, IVoipCallListener
+		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener
 {
 	private static final String HASH_PIN = "#pin";
 
@@ -453,7 +457,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	protected void onPause()
 	{
-		super.onPause();
 		if (mAdapter != null)
 		{
 			// mAdapter.getStickerLoader().setPauseWork(false);
@@ -469,6 +472,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
 		activityVisible = false;
+		
+		//Logging ChatThread Screen closing for bot case
+		if(HikeMessengerApp.getInstance().isHikeBotNumber(mContactNumber))
+		{
+			HAManager.getInstance().endChatSession(mContactNumber);
+		}
+		super.onPause();
 	}
 
 	@Override
@@ -522,6 +532,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			   decrementUnreadPInCount();
 		}
 		updateOverflowMenuUnreadCount();
+		
+		//Logging ChatThread Screen opening for bot case
+		if(HikeMessengerApp.getInstance().isHikeBotNumber(mContactNumber))
+		{
+			HAManager.getInstance().startChatSession(mContactNumber);
+		}
 	}
 
 	private void showPopUpIfRequired()
@@ -692,7 +708,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		super.onCreate(savedInstanceState);
 
 		/* force the user into the reg-flow process if the token isn't set */
-		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
+		if (Utils.requireAuth(this))
 		{
 			return;
 		}
@@ -1797,14 +1813,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
-			if (convMessage.getHashMessage()==HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE)
-			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_POSTED_VIA_ICON);
+			JSONObject metadata = new JSONObject();
 
-			}
-			else
+			try
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_POSTED_VIA_HASH_PIN);
+				if (convMessage.getHashMessage()==HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE)
+				{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_POSTED_VIA_ICON);
+				}
+				else
+				{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_POSTED_VIA_HASH_PIN);
+				}
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 			}
 		}
 	}
@@ -3355,7 +3380,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					e.printStackTrace();
 				}
 
-				mPubSub.publish(HikePubSub.MQTT_PUBLISH, object);
+		        HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 			}
 		}
 	}
@@ -3466,7 +3491,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal(), mConversation.getMsisdn());
 					if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 					{
-						mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle
+						HikeMqttManagerNew.getInstance().sendMessage(message.serializeDeliveryReportRead(), HikeMqttManagerNew.MQTT_QOS_ONE);
 					}
 					// return to
 					// sender
@@ -4255,7 +4280,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						e.printStackTrace();
 					}
 					// TODO make the calls here.
-					mPubSub.publish(HikePubSub.MQTT_PUBLISH, jsonObject);
+					HikeMqttManagerNew.getInstance().sendMessage(jsonObject, HikeMqttManagerNew.MQTT_QOS_ONE);
 					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 				}
 			}
@@ -6750,7 +6775,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, false))
 		{
 			HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, true);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_BTN_CLICKED);
+			
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_BTN_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 		}
 	}
 
@@ -6804,7 +6839,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						if (tag instanceof TipType && ((TipType)tag == TipType.EMOTICON))
 						{
 							HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
-							Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
+							
+							try
+							{
+								JSONObject metadata = new JSONObject();
+								metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
+								HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+							}
+							catch(JSONException e)
+							{
+								Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+							}
+
 							tipView = null;
 						}
 					}
@@ -6846,6 +6892,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 								animatedBackground.setVisibility(View.GONE);
 								animatedBackground.clearAnimation();
 								shopIcon.clearAnimation();
+								
+								try
+								{
+									JSONObject metadata = new JSONObject();
+									metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STKR_SHOP_BTN_CLICKED);
+									HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+								}
+								catch(JSONException e)
+								{
+									Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+								}
 							}
 							if(HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))  //The shop icon would be blue unless the user clicks on it once
 							{
@@ -7792,7 +7849,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		case R.id.forward_msgs:
 			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			Collections.sort(selectedMsgIds);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.FORWARD_MSG);
+			
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FORWARD_MSG);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+
 			Intent intent = new Intent(ChatThread.this, ComposeChatActivity.class);
 			String msg;
 			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
@@ -7841,10 +7909,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
-			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false) && mContactNumber.equals(HikeConstants.NUX_BOT))
-			{
-				intent.putExtra(HikeConstants.NUX_INVITE_FORWARD, true);
-			}
+			
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
 			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
@@ -8417,7 +8482,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				public void onClick(View v)
 				{
 					mAdapter.hikeOfflineSendClick();
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SECOND_OFFLINE_TIP_CLICKED);
+					
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SECOND_OFFLINE_TIP_CLICKED);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 				}
 			});
 
@@ -8453,7 +8528,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					initialiseHikeToOfflineMode();
 					setupHikeToOfflineTipViews();
-					Utils.sendUILogEvent(HikeConstants.LogEvent.FIRST_OFFLINE_TIP_CLICKED);
+					
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FIRST_OFFLINE_TIP_CLICKED);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						
+					}
 				}
 			};
 
@@ -8686,13 +8771,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		startActivity(intent);
 		Utils.resetPinUnreadCount(mConversation);
 		
-		if(viaMenu)
+		JSONObject metadata = new JSONObject();
+		
+		try
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU);
-		}else
-		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK);
+			if(viaMenu)
+			{
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU);
+			}else
+			{
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK);
+			}
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}		
 	}
 	
 	private void updateOverflowMenuUnreadCount()
@@ -8794,27 +8889,5 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			Utils.hideSoftKeyboard(ChatThread.this, mComposeView);
 		}
-	}
-
-	@Override
-	public void onVoipCallEnd(final Bundle bundle) 
-	{
-		runOnUiThread(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				if(!isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG))
-				{
-					CallRatePopup callRatePopup = new CallRatePopup();
-					callRatePopup.setArguments(bundle);
-
-					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-					fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
-					fragmentTransaction.commitAllowingStateLoss();
-				}
-			}
-		});
 	}
 }

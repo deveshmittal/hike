@@ -157,6 +157,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String TOTAL_CREDITS_PER_MONTH = HikeConstants.TOTAL_CREDITS_PER_MONTH;
 
 	public static final String PRODUCTION = "production";
+	
+	public static final String PRODUCTION_HOST_TOGGLE = "productionHostToggle";
 
 	public static final String COUNTRY_CODE = "countryCode";
 
@@ -427,7 +429,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN = "showCategoryReordering";
 	
 	public static final String STICKED_BTN_CLICKED_FIRST_TIME = "stickerBtnClickedFirstTime";
-	
+
 	public static final String STICKER_SETTING_CHECK_BOX_CLICKED = "stickerSettingCheckBoxClicked";
 	
 	public static final String STICKER_SETTING_UNCHECK_BOX_CLICKED = "stickerSettingUnCheckBoxClicked";
@@ -795,7 +797,6 @@ public void onTrimMemory(int level)
 			editor.remove(HikeConstants.RECEIVE_SMS_PREF);
 			editor.commit();
 		}
-
 		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), Utils.switchSSLOn(getApplicationContext()));
 
 		typingNotificationMap = new HashMap<String, TypingNotification>();
@@ -1076,7 +1077,7 @@ public void onTrimMemory(int level)
 			/*
 			 * Send a fg/bg packet on reconnecting.
 			 */
-			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true);
+			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true, false);
 		}
 	};
 
@@ -1091,5 +1092,10 @@ public void onTrimMemory(int level)
 			edit.putBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, true);
 			edit.commit();
 		}
+	}
+	
+	public boolean isHikeBotNumber(String msisdn)
+	{
+		return hikeBotNamesMap.containsKey(msisdn);
 	}
 }

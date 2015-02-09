@@ -153,6 +153,8 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 			{
 				if (fos != null)
 				{
+					fos.flush();
+					fos.getFD().sync();
 					fos.close();
 				}
 				if (is != null)
