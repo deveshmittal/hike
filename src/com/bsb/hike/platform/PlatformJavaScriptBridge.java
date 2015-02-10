@@ -3,6 +3,7 @@ package com.bsb.hike.platform;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import org.json.JSONException;
@@ -96,7 +97,15 @@ public class PlatformJavaScriptBridge
 		ArrayList<Long> msgIds = new ArrayList<Long>(1);
 		msgIds.add(message.getMsgID());
 		Bundle bundle = new Bundle();
-		bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, false);
+		if (adapter.getCount() <= 1)
+		{
+			bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, true);
+		}
+		else
+		{
+			bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, false);
+		}
+
 		bundle.putString(HikeConstants.Extras.MSISDN, message.getMsisdn());
 		bundle.putBoolean(HikeConstants.Extras.DELETE_MEDIA_FROM_PHONE, false);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
@@ -108,30 +117,29 @@ public class PlatformJavaScriptBridge
 	 * @param setEnabled
 	 */
 	@JavascriptInterface
-	public void setDebuggableEnabled(boolean setEnabled)
+	public void setDebuggableEnabled(final String setEnabled)
 	{
-
+		Logger.d(tag, "set debuggable enabled called with " + setEnabled);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
 		{
-			if (setEnabled)
+			mWebView.post(new Runnable()
 			{
+				@Override
+				public void run()
+				{
+					if (Boolean.valueOf(setEnabled))
+					{
 
-				mWebView.setWebContentsDebuggingEnabled(true);
-			}
-			else
-			{
-				mWebView.setWebContentsDebuggingEnabled(false);
-			}
+						mWebView.setWebContentsDebuggingEnabled(true);
+					}
+					else
+					{
+						mWebView.setWebContentsDebuggingEnabled(false);
+					}
+				}
+			});
 
-		}
-	}
 
-	@JavascriptInterface
-	public void allowDebugging()
-	{
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-		{
-			mWebView.setWebContentsDebuggingEnabled(true);
 		}
 	}
 
@@ -497,6 +505,7 @@ public class PlatformJavaScriptBridge
 	{
 		if (!TextUtils.isEmpty(heightS))
 		{
+			heightRunnable.mWebView = new WeakReference<WebView>(mWebView);
 			heightRunnable.height = Integer.parseInt(heightS);
 			mWebView.post(heightRunnable);
 		}
@@ -505,8 +514,9 @@ public class PlatformJavaScriptBridge
 
 	HeightRunnable heightRunnable = new HeightRunnable();
 
-	class HeightRunnable implements Runnable
+	static class HeightRunnable implements Runnable
 	{
+		WeakReference<WebView> mWebView;
 		int height;
 
 		@Override
@@ -515,24 +525,27 @@ public class PlatformJavaScriptBridge
 			if (height != 0)
 			{
 				height = (int) (Utils.densityMultiplier * height); // javascript returns us in dp
-
-				Logger.i(tag, "HeightRunnable called with height=" + height + " and current height is " + mWebView.getHeight());
-
-				int initHeight = mWebView.getMeasuredHeight();
-
-				Logger.i("HeightAnim", "InitHeight = " + initHeight + " TargetHeight = " + height);
-
-				if (initHeight == height)
+				WebView webView = mWebView.get();
+				if (webView != null) 
 				{
-					return;
-				}
-				else if (initHeight > height)
-				{
-					collapse(mWebView, height);
-				}
-				else if (initHeight < height)
-				{
-					expand(mWebView, height);
+					Logger.i(tag, "HeightRunnable called with height=" + height
+							+ " and current height is " + webView.getHeight());
+
+					int initHeight = webView.getMeasuredHeight();
+
+					Logger.i("HeightAnim", "InitHeight = " + initHeight
+							+ " TargetHeight = " + height);
+
+					if (initHeight == height) 
+					{
+						return;
+					} else if (initHeight > height) 
+					{
+						collapse(webView, height);
+					} else if (initHeight < height) 
+					{
+						expand(webView, height);
+					}
 				}
 
 			}
@@ -594,5 +607,10 @@ public class PlatformJavaScriptBridge
 	public void updateConvMessage(ConvMessage message)
 	{
 		this.message = message;
+	}
+	
+	public void onDestroy()
+	{
+		mWebView.removeCallbacks(heightRunnable);
 	}
 }

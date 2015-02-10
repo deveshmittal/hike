@@ -204,6 +204,9 @@ public class HikeService extends Service
 
 		}
 
+		// Repopulating the alarms on close // force close,System GC ,Device Reboot //other reason
+		HikeAlarmManager.repopulateAlarm(getApplicationContext());
+		
 		LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(REGISTER_TO_GCM_ACTION));
 		Logger.d("HikeService", "onCreate called");
 

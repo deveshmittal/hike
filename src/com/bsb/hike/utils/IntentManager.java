@@ -296,7 +296,6 @@ public class IntentManager
 	public static Intent openNuxFriendSelector(Activity context)
 	{
 		Intent in = new Intent(context, ComposeChatActivity.class);
-		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		in.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 		in.putExtra(HikeConstants.Extras.NUX_INCENTIVE_MODE, true);
 		return in;
@@ -305,7 +304,6 @@ public class IntentManager
 	public static Intent openNuxCustomMessage(Activity context)
 	{
 		Intent in = new Intent(context, NuxSendCustomMessageActivity.class);
-		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		return in;
 	}
 

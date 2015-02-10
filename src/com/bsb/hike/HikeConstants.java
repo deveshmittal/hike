@@ -2271,5 +2271,8 @@ public class HikeConstants
 	public static final String OFF = "off";
 
 	public static final String ENABLE_DETAILED_HTTP_LOGGING = "edhl";
-
+	
+	public static final String ERROR_MESSAGE = "em";
+	
+	public static final String EXCEPTION_MESSAGE = "exm";
 }

@@ -39,6 +39,7 @@ import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.platform.content.PlatformContent.EventCode;
 import com.bsb.hike.platform.content.PlatformContentListener;
 import com.bsb.hike.platform.content.PlatformContentModel;
+import com.bsb.hike.platform.content.PlatformRequestManager;
 import com.bsb.hike.platform.content.PlatformWebClient;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.Logger;
@@ -71,6 +72,9 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	BaseAdapter adapter;
 
 	private SparseArray<String> cardAlarms;
+	
+	// usually we have seen 3 cards will be inflated, so 3 holders will be initiated (just an optimizations)
+	ArrayList<WebViewHolder> holderList = new ArrayList<WebViewCardRenderer.WebViewHolder>(3);
 
 	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages, BaseAdapter adapter)
 	{
@@ -147,7 +151,6 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		holder.myBrowser.setWebViewClient(holder.webViewClient);
 		holder.myBrowser.getSettings().setDomStorageEnabled(true);
 		holder.platformJavaScriptBridge.allowUniversalAccess();
-		holder.platformJavaScriptBridge.allowDebugging();
 		holder.myBrowser.getSettings().setJavaScriptEnabled(true);
 
 	}
@@ -240,6 +243,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				Logger.i("HeightAnim", position + "set height given in card is =" + minHeight);
 				viewHolder.myBrowser.setLayoutParams(lp);
 			}
+			holderList.add(viewHolder);
 		}
 		else
 		{
@@ -429,7 +433,14 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	public void onDestroy()
 	{
+		PlatformRequestManager.onDestroy();
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PLATFORM_CARD_ALARM, this);
+		for(WebViewHolder holder : holderList)
+		{
+			holder.myBrowser.removeJavascriptInterface(HikePlatformConstants.PLATFORM_BRIDGE_NAME);
+			holder.platformJavaScriptBridge.onDestroy();
+		}
+		holderList.clear();
 	}
 
 	@Override
