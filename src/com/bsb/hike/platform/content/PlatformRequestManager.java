@@ -9,7 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-class PlatformRequestManager
+public class PlatformRequestManager
 {
 	private static String TAG = "PlatformRequestManager";
 
@@ -236,6 +236,18 @@ class PlatformRequestManager
 		{
 			processNextRequest();
 		}
+	}
+	
+	public static void onDestroy()
+	{
+		PlatformContentLoader.getLoader().post(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				PlatformRequestManager.removeAll();
+			}
+		});
 	}
 
 }
