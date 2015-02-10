@@ -195,20 +195,16 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		return list;
 	}
 
-	//private boolean isUserOnHike()
-	//{
-	//	return true;
-//	}
-
-	
 	@Override
 	protected Conversation fetchConversation()
 	{
 		mConversation = mConversationDb.getConversation(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, Utils.isGroupConversation(msisdn));
+		
+		mContactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
+		
 		if(mConversation == null)
 		{
-			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
-			mConversation = new Conversation(msisdn, (contactInfo != null) ? contactInfo.getName() : null, contactInfo.isOnhike());
+			mConversation = new Conversation(msisdn, (mContactInfo != null) ? mContactInfo.getName() : null, mContactInfo.isOnhike());
 			mConversation.setMessages(HikeConversationsDatabase.getInstance().getConversationThread(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, mConversation, -1));
 		}
 		
@@ -236,8 +232,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		super.fetchConversationFinished(conversation);
 		
 		//TODO : This is a basic working skeleton. This needs to be segragated into separate functions.
-		
-		mContactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
 		
 		mFavoriteType = mContactInfo.getFavoriteType();
 
@@ -1897,7 +1891,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				/**
 				 * We need to update the last seen value because the contact's ls time might have updated while the H20 tip was visible
 				 */
-				//updateLastSeen(, offline, lastSeenTime);
+				updateLastSeen(mContactInfo.getMsisdn(), mContactInfo.getOffline(), mContactInfo.getLastSeenTime());
 			}
 		}
 
