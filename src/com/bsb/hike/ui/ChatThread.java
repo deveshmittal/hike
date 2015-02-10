@@ -2047,6 +2047,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (mAdapter != null)
 		{
+			mAdapter.onDestroy();
 			messages.clear();
 			mAdapter.notifyDataSetChanged();
 		}
