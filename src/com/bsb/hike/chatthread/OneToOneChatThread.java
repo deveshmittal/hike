@@ -1,6 +1,7 @@
 package com.bsb.hike.chatthread;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -29,6 +30,7 @@ import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -38,6 +40,9 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
+import com.bsb.hike.dialog.H20Dialog;
+import com.bsb.hike.dialog.HikeDialog;
+import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -212,6 +217,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		mConversation.setTheme(chatTheme);
 		
 		mConversation.setConvBlocked(ContactManager.getInstance().isBlocked(msisdn));
+		mCredits = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
 		
 		return mConversation;
 	}
@@ -1533,8 +1539,48 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		scheduleH20Tip();
 	}
 	
+	/**
+	 * Run on UI Thread only
+	 * 
+	 * @param convMessages
+	 */
+	private void removeFromUndeliveredMessage(List<ConvMessage> convMessages)
+	{
+		for (ConvMessage convMessage : convMessages)
+		{
+			removeFromUndeliveredMessage(convMessage);
+		}
+	}
+	
+	/**
+	 * Run on UI Thread only
+	 * 
+	 * @param convMessage
+	 */
+	private void removeFromUndeliveredMessage(ConvMessage convMessage)
+	{
+		ConvMessage msg = undeliveredMessages.remove(convMessage.getMsgID());
+
+		if (msg != null)
+		{
+
+			if (undeliveredMessages.isEmpty())
+			{
+				// shouldRunTimerForHikeOfflineTip = true;
+				// hideTip
+			}
+
+			if (firstPendingConvMessage.equals(convMessage))
+			{
+				updateFirstPendingConvMessage();
+			}
+		}
+	}
+	
 	private void addAllUndeliverdMessages(List<ConvMessage> messages)
 	{
+		// Todo : Traverse this list in bottom up manner
+		
 		for (ConvMessage convMessage : messages)
 		{
 			if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
@@ -1774,6 +1820,94 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		hikeToOfflineTipView.findViewById(R.id.send_button).setOnClickListener(this);
 	}
 	
+	/**
+	 * Utility method to hide H20 Tip
+	 */
+	private void hideH20Tip()
+	{
+		hideH20Tip(false, false, false, false);
+	}
+
+	private void hideH20Tip(boolean messagesSent, boolean isNativeSMS)
+	{
+		hideH20Tip(messagesSent, isNativeSMS, false, false);
+	}
+
+	private void hideH20Tip(final boolean messagesSent, final boolean isNativeSms, boolean hideWithoutAnimation, boolean calledFromMsgDelivered)
+	{
+		/**
+		 * Proceeding only if the h20tipView is not null
+		 */
+		if (hikeToOfflineTipView == null)
+		{
+			return;
+		}
+
+		AnimationListener animationListener = new AnimationListener()
+		{
+
+			@Override
+			public void onAnimationStart(Animation animation)
+			{
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				if (hikeToOfflineTipView != null)
+				{
+					hikeToOfflineTipView.setVisibility(View.GONE);
+					if (modeOfChat == H2S_MODE)
+					{
+						destroyH20Mode();
+					}
+
+					((LinearLayout) activity.findViewById(R.id.tipContainerBottom)).removeView(hikeToOfflineTipView);
+
+					/**
+					 * When messages are sent we need to show a toast
+					 */
+
+					if (messagesSent)
+					{
+						String toastMsg = isNativeSms ? activity.getString(R.string.regular_sms_sent_confirmation) : activity.getString(R.string.hike_offline_messages_sent_msg,
+								mCredits - mAdapter.getSelectedFreeSmsCount());
+						Toast.makeText(activity.getApplicationContext(), toastMsg, Toast.LENGTH_SHORT).show();
+					}
+				}
+			}
+		};
+
+		if (hikeToOfflineTipView.getAnimation() == null)
+		{
+			setupH20TipHideAnimation(animationListener, hideWithoutAnimation);
+
+			if (calledFromMsgDelivered)
+			{
+				/**
+				 * We need to update the last seen value because the contact's ls time might have updated while the H20 tip was visible
+				 */
+				// updateLastSeen(contMsisdn, offline, lastSeenTime);
+			}
+		}
+
+	}
+
+	private void setupH20TipHideAnimation(AnimationListener animationListener, boolean hideWithoutAnimation)
+	{
+		Animation slideDown = AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.slide_down_noalpha);
+		slideDown.setDuration(hideWithoutAnimation ? 0 : 400);
+
+		slideDown.setAnimationListener(animationListener);
+
+		hikeToOfflineTipView.startAnimation(slideDown);
+	}
+
 	private void scrollListViewOnShowingOfflineTip()
 	{
 		if (mConversationsView.getLastVisiblePosition() > messages.size() - 3)
@@ -1846,7 +1980,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		if (modeOfChat == H2S_MODE)
 		{
-			return;
+			h20SendClick();
 		}
 		
 		else
@@ -1855,6 +1989,53 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			mAdapter.sethikeToOfflineMode(true);
 			initializeH20Mode();
 			setupH20TipViews(); 
+		}
+	}
+	
+	private void h20SendClick()
+	{
+		HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
+
+		if (firstPendingConvMessage != null && !selectedMessagesMap.isEmpty())
+		{
+			/**
+			 * Only show H2S option if the user himself is onLine Else show the send via Native SMS dialog
+			 */
+
+			if (!Utils.isUserOnline(activity.getApplicationContext()))
+			{
+				if (!Utils.isKitkatOrHigher())
+				{
+					showH20SMSDialog(true);
+				}
+			}
+			else
+			{
+				/**
+				 * Only show H2S option as a fallback if messaging Indian numbers
+				 */
+				if (!Utils.isKitkatOrHigher())
+				{
+					showH20SMSDialog(!mConversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
+				}
+
+				else
+				{
+					if (mCredits < mAdapter.getSelectedFreeSmsCount())
+					{
+						Toast.makeText(activity.getApplicationContext(), activity.getString(R.string.kitkat_not_enough_sms, mCredits), Toast.LENGTH_LONG).show();
+					}
+
+					/**
+					 * Send the messages
+					 */
+					else
+					{
+						sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages());
+					}
+				}
+			}
+
 		}
 	}
 	
@@ -1872,4 +2053,200 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			}
 		}
 	}
+	
+	/**
+	 * We try to send messages are either Native SMS or Hike SMS based on which preferences are set.
+	 * If the preferences are not set, we show the SMS Dialog.
+	 * 
+	 * @param nativeOnly
+	 */
+	
+	private void showH20SMSDialog(boolean nativeOnly)
+	{
+		// Trying to send normal Hike SMS
+		if (!nativeOnly && mCredits >= mAdapter.getSelectedFreeSmsCount())
+		{
+			sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages());
+			return;
+		}
+
+		// Send Undelivered messages as SMS
+		if (PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, false))
+		{ // Send Undelivered messages as Native SMS
+			if (PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, false))
+			{ // Is it the default SMS client on devices < Kitkat
+				if (!PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+				{
+					showSMSClientDialog(false);
+					return;
+				}
+
+				else
+				// Send Messages as Native SMS
+				{
+					sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages());
+					return;
+				}
+			}
+		}
+
+		/**
+		 * Show the H20 dialog with checkBoxes to select between Hike SMS or Native SMS
+		 */
+		else
+		{
+			HikeDialogFactory.showDialog(activity, HikeDialogFactory.SHOW_H20_SMS_DIALOG, this, nativeOnly, mAdapter.getSelectedFreeSmsCount(), mCredits);
+		}
+	}
+	
+	@Override
+	public void positiveClicked(HikeDialog dialog)
+	{
+		switch (dialog.getId())
+		{
+		case HikeDialogFactory.SHOW_H20_SMS_DIALOG:
+			smsDialogSendClick((H20Dialog) dialog);
+			break;
+			
+		case HikeDialogFactory.SMS_CLIENT_DIALOG:
+			dialog.dismiss();
+			onSMSClientDialogPositiveClick();
+			break;
+			
+		default :
+			super.positiveClicked(dialog);
+		}
+	}
+	
+	@Override
+	public void negativeClicked(HikeDialog dialog)
+	{
+		switch(dialog.getId())
+		{
+		case HikeDialogFactory.SMS_CLIENT_DIALOG:
+			dialog.dismiss();
+			Utils.setReceiveSmsSetting(activity.getApplicationContext(), false);
+			break;
+			
+		default:
+			super.negativeClicked(dialog);
+		}
+	}
+	
+	/**
+	 * To be shown when always/just once is pressed from H20 Dialog from {@link #showSMSDialog(boolean)}
+	 * @param dialog
+	 */
+	private void smsDialogSendClick(H20Dialog dialog)
+	{
+		boolean isHikeSMSChecked = dialog.isHikeSMSChecked();
+
+		if (isHikeSMSChecked)
+		{
+			sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages());
+		}
+
+		else
+		{
+			if (!PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+			{
+				showSMSClientDialog(false);
+			}
+
+			else
+			{
+				sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages());
+			}
+		}
+		
+	}
+	
+	private void showSMSClientDialog(boolean showingNativeInfoDialog)
+	{
+		HikeDialogFactory.showDialog(activity, HikeDialogFactory.SMS_CLIENT_DIALOG, this, false, null, showingNativeInfoDialog);
+	}
+	
+	private void onSMSClientDialogPositiveClick()
+	{
+		Utils.setReceiveSmsSetting(activity.getApplicationContext(), true);
+		sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages());
+		
+		if (!activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false))
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_SMS_SYNC_DIALOG, null);
+		}
+	}
+	
+	
+	private void sendAllMessagesAsSMS(boolean nativeSMS, List<ConvMessage> unsentMessages)
+	{
+		Logger.d(TAG, "Unsent messages: " + unsentMessages.size());
+
+		if (nativeSMS)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_NATIVE_SMS_FALLBACK, unsentMessages);
+			messagesSentCloseHikeToOfflineMode(nativeSMS);
+			removeFromUndeliveredMessage(unsentMessages);
+		}
+		else
+		{
+			if (mConversation.isOnhike())
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_HIKE_SMS_FALLBACK, unsentMessages);
+				messagesSentCloseHikeToOfflineMode(nativeSMS);
+				removeFromUndeliveredMessage(unsentMessages);
+			}
+			else
+			{
+				for (ConvMessage convMessage : unsentMessages)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
+					convMessage.setTimestamp(System.currentTimeMillis() / 1000);
+				}
+				mAdapter.notifyDataSetChanged();
+			}
+		}
+	}
+	
+	private List<ConvMessage> getAllUnsentSelectedMessages()
+	{
+		List<ConvMessage> unsentMessages = new ArrayList<ConvMessage>();
+		final HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
+		ArrayList<Long> selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+		Collections.sort(selectedMsgIds);
+
+		for (int i = 0; i < selectedMsgIds.size(); i++)
+		{
+			ConvMessage convMessage = selectedMessagesMap.get(selectedMsgIds.get(i));
+			if (convMessage == null)
+			{
+				continue;
+			}
+
+			if (!convMessage.isSent())
+			{
+				break;
+			}
+
+			if (!isMessageUndelivered(convMessage))
+			{
+				break;
+			}
+
+			if (convMessage.getState().ordinal() < State.SENT_CONFIRMED.ordinal())
+			{
+				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
+			}
+
+			unsentMessages.add(convMessage);
+		}
+		return unsentMessages;
+	}
+	
+	private void messagesSentCloseHikeToOfflineMode(boolean isNativeSMS)
+	{
+		destroyH20Mode();
+		hideH20Tip(true, isNativeSMS);
+	}
+	
 }
