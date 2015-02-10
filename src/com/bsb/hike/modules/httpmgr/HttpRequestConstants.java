@@ -142,4 +142,9 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + ":" + PORT + "/static/avatars/";
 	}
+
+	public static String postToSocialNetworkBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/spread";
+	}
 }

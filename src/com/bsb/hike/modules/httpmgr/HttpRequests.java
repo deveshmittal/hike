@@ -10,6 +10,7 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.lastSeenUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.multiStickerDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postDeviceDetailsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postGreenBlueDetailsBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postToSocialNetworkBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendUserLogsInfoBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.singleStickerDownloadBase;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.socialCredentialsBaseUrl;
@@ -259,6 +260,18 @@ public class HttpRequests
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)
 				.get()
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken postToSocialNetworkRequest(JSONObject json, IRequestListener requestListener)
+	{
+		JsonBody body = new JsonBody(json);
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(postToSocialNetworkBaseUrl())
+				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
+				.post(body)
 				.build();
 		return requestToken;
 	}

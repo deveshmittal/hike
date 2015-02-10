@@ -33,6 +33,11 @@ import com.bsb.hike.R;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
+import com.bsb.hike.modules.httpmgr.HttpRequests;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
+import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -330,35 +335,40 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 
 	private void postToSocialNetwork(final boolean facebook)
 	{
-		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/spread", RequestType.SOCIAL_POST, new HikeHttpCallback()
-		{
-
+		IRequestListener requestListener = new IRequestListener()
+		{		
 			@Override
-			public void onSuccess(JSONObject response)
+			public void onRequestSuccess(Response result)
 			{
+				JSONObject response = (JSONObject) result.getBody().getContent();
 				HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_POSTING_DIALOG, null);
 				parseResponse(response, facebook);
 			}
-
+			
 			@Override
-			public void onFailure()
+			public void onRequestProgressUpdate(float progress)
+			{
+			}
+			
+			@Override
+			public void onRequestFailure(HttpException httpException)
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_POSTING_DIALOG, null);
-				Toast.makeText(getApplicationContext(), R.string.posting_update_fail, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), R.string.posting_update_fail, Toast.LENGTH_SHORT).show();	
 			}
-
-		});
+		};
+		
 		JSONObject data = new JSONObject();
 		try
 		{
 			data.put(facebook ? HikeConstants.FACEBOOK_STATUS : HikeConstants.TWITTER_STATUS, true);
-			hikeHttpRequest.setJSONData(data);
+			
 			Logger.d(getClass().getSimpleName(), "JSON: " + data);
 
 			progressDialog = ProgressDialog.show(this, null, getString(facebook ? R.string.posting_update_facebook : R.string.posting_update_twitter));
 
-			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
-			Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
+			RequestToken token = HttpRequests.postToSocialNetworkRequest(data, requestListener);
+			token.execute();
 		}
 		catch (JSONException e)
 		{
