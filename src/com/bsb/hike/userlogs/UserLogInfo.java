@@ -26,6 +26,11 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
+import com.bsb.hike.modules.httpmgr.HttpRequests;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
+import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -230,31 +235,40 @@ public class UserLogInfo {
 		return locLogList;
 	}
 
-	public static void sendLogs(Context ctx, int flags) throws JSONException {
-		
-		JSONArray jsonLogArray = collectLogs(ctx, flags);	
+	public static void sendLogs(Context ctx, int flags) throws JSONException
+	{
+		JSONArray jsonLogArray = collectLogs(ctx, flags);
 		// if nothing is logged we do not send anything
-		if(jsonLogArray != null){		
+		if (jsonLogArray != null)
+		{
 			JSONObject jsonLogObj = getEncryptedJSON(ctx, jsonLogArray, flags);
-			
-			if(jsonLogObj != null) {
-				HikeHttpRequest userLogRequest = new HikeHttpRequest("/" + getLogKey(flags), 
-						RequestType.OTHER, new HikeHttpRequest.HikeHttpCallback() {
-							public void onFailure() {
-								Logger.d(TAG, "failure");
-							}
+			if (jsonLogObj != null)
+			{
+				IRequestListener requestListener = new IRequestListener()
+				{
+					@Override
+					public void onRequestSuccess(Response result)
+					{
+						JSONObject response = (JSONObject) result.getBody().getContent();
+						Logger.d(TAG, response.toString());
+					}
 
-							public void onSuccess(JSONObject response) {
-								Logger.d(TAG, response.toString());
-							}
+					@Override
+					public void onRequestProgressUpdate(float progress)
+					{
+					}
 
-						});
-				userLogRequest.setJSONData(jsonLogObj);
-				HikeHTTPTask userLogHttpTask = new HikeHTTPTask(null, 0);
-				Utils.executeHttpTask(userLogHttpTask, userLogRequest);
+					@Override
+					public void onRequestFailure(HttpException httpException)
+					{
+						Logger.d(TAG, "failure");
+					}
+				};
+
+				RequestToken token = HttpRequests.sendUserLogInfoRequest(getLogKey(flags), jsonLogObj, requestListener);
+				token.execute();
 			}
 		}
-		
 	}
 	
 	public static List<CallLogPojo> getCallLogs(Context ctx){

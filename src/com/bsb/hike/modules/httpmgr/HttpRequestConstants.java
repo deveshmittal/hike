@@ -111,4 +111,9 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/connect/";
 	}
+	
+	public static String sendUserLogsInfoBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + "/";
+	}
 }
