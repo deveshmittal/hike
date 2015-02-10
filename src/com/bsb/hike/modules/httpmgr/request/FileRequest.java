@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.bsb.hike.modules.httpmgr.RequestToken;
-import com.bsb.hike.modules.httpmgr.Utils;
 
 public class FileRequest extends Request<File>
 {
@@ -14,7 +13,7 @@ public class FileRequest extends Request<File>
 
 	private String filePath;
 
-	public FileRequest(Init<?> init)
+	private FileRequest(Init<?> init)
 	{
 		super(init);
 		this.filePath = init.filePath;
