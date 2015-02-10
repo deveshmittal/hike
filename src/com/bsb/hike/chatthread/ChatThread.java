@@ -2708,12 +2708,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 * @param convMessage
 	 * @param deleteMediaFromPhone
 	 */
-	private void deleteMessage(ConvMessage convMessage, boolean deleteMediaFromPhone)
+	protected void deleteMessage(ConvMessage convMessage, boolean deleteMediaFromPhone)
 	{
 		mAdapter.removeMessage(convMessage);
 		if (!convMessage.isSMS() && convMessage.getState() == State.SENT_CONFIRMED)
 		{
-			mAdapter.removeFromUndeliverdMessage(convMessage);
 			if (mAdapter.isSelected(convMessage))
 			{
 				mAdapter.toggleSelection(convMessage);

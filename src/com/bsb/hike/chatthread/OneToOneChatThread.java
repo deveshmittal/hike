@@ -950,8 +950,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		if(obj != null)
 		{
-			mAdapter.removeFromUndeliverdMessage((ConvMessage) obj, true);
-			if(mAdapter.getUndeliveredMessagesCount() == 0)
+			removeFromUndeliveredMessage((ConvMessage) obj);
+			
+			if(undeliveredMessages.size() == 0)
 			{
 				/*
 				 * if all messages are delivered OR we don't have any undelivered messages than only we should reset this timer not on delivery of some message
@@ -959,19 +960,16 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				// TODO :
 				// chatThread.shouldRunTimerForHikeOfflineTip = true;
 
-				// chatThread.hideHikeToOfflineTip(false, false, false, msgDelivered);
+				hideH20Tip(false, false, false, true);
 			}
 		}
 		
 		else
 		{
-			mAdapter.removeAllFromUndeliverdMessage();
-			
+			removeAllFromUndeliveredMessages();
 			// TODO :
 			// chatThread.shouldRunTimerForHikeOfflineTip = true;
-
-			// chatThread.hideHikeToOfflineTip();
-			
+			hideH20Tip();
 		}
 	}
 
@@ -1577,6 +1575,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 	
+	private void removeAllFromUndeliveredMessages()
+	{
+		undeliveredMessages.clear();
+		updateFirstPendingConvMessage();
+	}
+	
 	private void addAllUndeliverdMessages(List<ConvMessage> messages)
 	{
 		// Todo : Traverse this list in bottom up manner
@@ -1862,6 +1866,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				if (hikeToOfflineTipView != null)
 				{
 					hikeToOfflineTipView.setVisibility(View.GONE);
+					mAdapter.setHikeOfflineTipShowing(false);
 					if (modeOfChat == H2S_MODE)
 					{
 						destroyH20Mode();
@@ -1892,7 +1897,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				/**
 				 * We need to update the last seen value because the contact's ls time might have updated while the H20 tip was visible
 				 */
-				// updateLastSeen(contMsisdn, offline, lastSeenTime);
+				//updateLastSeen(, offline, lastSeenTime);
 			}
 		}
 
@@ -2249,4 +2254,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		hideH20Tip(true, isNativeSMS);
 	}
 	
+	@Override
+	protected void deleteMessage(ConvMessage convMessage, boolean deleteMediaFromPhone)
+	{
+		removeFromUndeliveredMessage(convMessage);
+		super.deleteMessage(convMessage, deleteMediaFromPhone);
+	}
 }
