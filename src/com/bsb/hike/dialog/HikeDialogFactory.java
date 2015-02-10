@@ -88,6 +88,8 @@ public class HikeDialogFactory
 	public static final int DELETE_ALL_CONVERSATIONS = 26;
 	
 	public static final int DELETE_MESSAGES_DIALOG = 27;
+	
+	public static final int SHOW_H20_SMS_DIALOG = 28;
 
 	public static HikeDialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -153,6 +155,9 @@ public class HikeDialogFactory
 			
 		case GPS_DIALOG:
 			return showGPSDialog(dialogId, context, listener, data);
+			
+		case SHOW_H20_SMS_DIALOG:
+			return showH20Dialog(dialogId, context, listener, data);
 		}
 		return null;
 	}
@@ -944,6 +949,95 @@ public class HikeDialogFactory
 		alert.show();
 		
 		return alert;
+	}
+	
+	private static HikeDialog showH20Dialog(int dialogId, final Context context, final HikeDialogListener listener, Object... data)
+	{
+		final H20Dialog dialog = new H20Dialog(context, R.style.Theme_CustomDialog, dialogId);
+		boolean nativeOnly = (boolean) data[0];
+		int selectedSMSCount = (int) data[1];
+		int mCredits = (int) data[2];
+		
+		dialog.setCancelable(true);
+		
+		TextView popupHeader = (TextView) dialog.findViewById(R.id.popup_header);
+		View hikeSMS = dialog.findViewById(R.id.hike_sms_container);
+		View nativeSMS = dialog.findViewById(R.id.native_sms_container);
+		TextView nativeHeader = (TextView) dialog.findViewById(R.id.native_sms_header);
+		TextView hikeSmsHeader = (TextView) dialog.findViewById(R.id.hike_sms_header);
+		TextView hikeSmsSubtext = (TextView) dialog.findViewById(R.id.hike_sms_subtext);
+
+		popupHeader.setText(context.getString(R.string.send_sms_as, selectedSMSCount));
+		hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext, mCredits));
+
+		hikeSMS.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
+		nativeSMS.setVisibility(Utils.isKitkatOrHigher() ? View.GONE : View.VISIBLE);
+
+		final CheckBox sendHike = (CheckBox) dialog.findViewById(R.id.hike_sms_checkbox);
+
+		final CheckBox sendNative = (CheckBox) dialog.findViewById(R.id.native_sms_checkbox);
+
+		final Button alwaysBtn = (Button) dialog.findViewById(R.id.btn_always);
+		final Button justOnceBtn = (Button) dialog.findViewById(R.id.btn_just_once);
+
+		sendHike.setChecked(true);
+		
+		if (!nativeOnly && mCredits < selectedSMSCount)
+		{
+			// Disable Free Hike SMS field and enable the native SMS one
+			hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext_diabled, mCredits));
+			hikeSmsSubtext.setEnabled(false);
+			hikeSmsHeader.setEnabled(false);
+			hikeSMS.setEnabled(false);
+			sendHike.setEnabled(false);
+			sendHike.setChecked(false);
+			sendNative.setChecked(true);
+		}
+
+		nativeHeader.setText(context.getString(R.string.regular_sms));
+		
+		OnClickListener onClickListener = new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				switch (v.getId())
+				{
+				case R.id.hike_sms_container:
+				case R.id.hike_sms_checkbox:
+					sendHike.setChecked(true);
+					sendNative.setChecked(false);
+					break;
+					
+				case R.id.native_sms_container:
+				case R.id.native_sms_checkbox:
+					sendHike.setChecked(false);
+					sendNative.setChecked(true);
+					break;
+					
+				case R.id.btn_always:
+					Utils.setSendUndeliveredAlwaysAsSmsSetting(context, true, !sendHike.isChecked());
+					listener.positiveClicked(dialog);
+					break;
+					
+				case R.id.btn_just_once:
+					listener.positiveClicked(dialog);
+					break;
+				}
+			}
+		};
+		
+		hikeSMS.setOnClickListener(onClickListener);
+		sendHike.setOnClickListener(onClickListener);
+		nativeSMS.setOnClickListener(onClickListener);
+		sendNative.setOnClickListener(onClickListener);
+		alwaysBtn.setOnClickListener(onClickListener);
+		justOnceBtn.setOnClickListener(onClickListener);
+
+
+		dialog.show();
+		return dialog;
 	}
 	
 }
