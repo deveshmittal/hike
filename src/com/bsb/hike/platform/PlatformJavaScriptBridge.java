@@ -525,24 +525,27 @@ public class PlatformJavaScriptBridge
 			if (height != 0)
 			{
 				height = (int) (Utils.densityMultiplier * height); // javascript returns us in dp
-
-				Logger.i(tag, "HeightRunnable called with height=" + height + " and current height is " + mWebView.get().getHeight());
-
-				int initHeight = mWebView.get().getMeasuredHeight();
-
-				Logger.i("HeightAnim", "InitHeight = " + initHeight + " TargetHeight = " + height);
-
-				if (initHeight == height)
+				WebView webView = mWebView.get();
+				if (webView != null) 
 				{
-					return;
-				}
-				else if (initHeight > height)
-				{
-					collapse(mWebView.get(), height);
-				}
-				else if (initHeight < height)
-				{
-					expand(mWebView.get(), height);
+					Logger.i(tag, "HeightRunnable called with height=" + height
+							+ " and current height is " + webView.getHeight());
+
+					int initHeight = webView.getMeasuredHeight();
+
+					Logger.i("HeightAnim", "InitHeight = " + initHeight
+							+ " TargetHeight = " + height);
+
+					if (initHeight == height) 
+					{
+						return;
+					} else if (initHeight > height) 
+					{
+						collapse(webView, height);
+					} else if (initHeight < height) 
+					{
+						expand(webView, height);
+					}
 				}
 
 			}
