@@ -953,6 +953,11 @@ public class ConvMessage
 	 */
 	public boolean isSilent()
 	{
+		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && platformWebMessageMetadata != null)
+		{
+			return platformWebMessageMetadata.isSilent();
+		}
+
 		// Do not play sound in case of bg change, participant joined, nuj/ruj, status updates
 		if ((getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) || (getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
 				|| (getParticipantInfoState() == ParticipantInfoState.USER_JOIN) || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))

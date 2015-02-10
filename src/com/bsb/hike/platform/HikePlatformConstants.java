@@ -36,6 +36,7 @@ public interface HikePlatformConstants
 	String HEIGHT = "h";
 	String CARD_OBJECT = "cardObj";
 	String NOTIF_TEXT_WC = "notifText";
+	String WC_PUSH_KEY = "push";
 	String CRICKET_BOT_MSISDN = "+hikecricket+";
 	String CRICKET_BOT_NAME = "World Cup 2015";
 	String CRICKET_CHAT_THEME_ID = "39";
