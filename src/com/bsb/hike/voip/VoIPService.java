@@ -964,15 +964,14 @@ public class VoIPService extends Service {
 						samplesToEncodeQueue.poll();
 					}
 					
-					while (decodedBuffersQueue.size() > MAX_SAMPLES_BUFFER + 1) {
-						// Logger.d(VoIPConstants.TAG, "Dropping decoded packet.");
-						droppedDecodedPackets += decodedBuffersQueue.size();
-						decodedBuffersQueue.clear();
-					}
-					
 					while (encodedBuffersQueue.size() > MAX_SAMPLES_BUFFER) {
 						Logger.d(VoIPConstants.TAG, "Dropping encoded packet.");
 						encodedBuffersQueue.poll();
+					}
+
+					while (decodedBuffersQueue.size() > MAX_SAMPLES_BUFFER) {
+						Logger.d(VoIPConstants.TAG, "Dropping decoded queue.");
+						decodedBuffersQueue.clear();
 					}
 
 					try {
@@ -1029,7 +1028,6 @@ public class VoIPService extends Service {
 				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				int lastPacketReceived = 0;
 				int uncompressedLength = 0;
-				byte[] solicallSpeakerBuffer = new byte[SolicallWrapper.SOLICALL_FRAME_SIZE * 2];
 				while (keepRunning == true) {
 					VoIPDataPacket dpdecode = samplesToDecodeQueue.peek();
 					if (dpdecode != null) {
@@ -1082,18 +1080,6 @@ public class VoIPService extends Service {
 									dp.write(packetData);
 								}
 								
-								// AEC
-								if (solicallAec != null && aecEnabled && aecSpeakerSignal && aecMicSignal) {
-									int index = 0;
-									while (index < packetData.length) {
-										int size = Math.min(SolicallWrapper.SOLICALL_FRAME_SIZE * 2, dp.getLength() - index);
-										System.arraycopy(packetData, index, solicallSpeakerBuffer, 0, size);
-										solicallAec.processSpeaker(solicallSpeakerBuffer);
-										index += size; 
-									}
-								} else
-									aecSpeakerSignal = true;
-
 								synchronized (decodedBuffersQueue) {
 									decodedBuffersQueue.add(dp);
 									decodedBuffersQueue.notify();
@@ -1303,15 +1289,12 @@ public class VoIPService extends Service {
                 			newSize = SolicallWrapper.SOLICALL_FRAME_SIZE * 2;
 
                 		byte[] data = new byte[newSize];
-                		byte[] withoutEcho = null;
                 		System.arraycopy(recordedData, index, data, 0, newSize);
                 		index += newSize;
 
-						withoutEcho = data;
-                		
 	                	// Add it to the samples to encode queue
 						VoIPDataPacket dp = new VoIPDataPacket(VoIPDataPacket.PacketType.VOICE_PACKET);
-	                	dp.write(withoutEcho);
+	                	dp.write(data);
 
 	                	synchronized (samplesToEncodeQueue) {
 		                	samplesToEncodeQueue.add(dp);
@@ -1371,15 +1354,28 @@ public class VoIPService extends Service {
 				// Clear the audio queue
 				decodedBuffersQueue.clear();
 				
+				byte[] solicallSpeakerBuffer = new byte[SolicallWrapper.SOLICALL_FRAME_SIZE * 2];
 				while (keepRunning == true) {
 					VoIPDataPacket dp = decodedBuffersQueue.peek();
 					if (dp != null) {
 						decodedBuffersQueue.poll();
 
+						// AEC
+						if (solicallAec != null && aecEnabled && aecSpeakerSignal && aecMicSignal) {
+							index = 0;
+							while (index < dp.getData().length) {
+								size = Math.min(SolicallWrapper.SOLICALL_FRAME_SIZE * 2, dp.getLength() - index);
+								System.arraycopy(dp.getData(), index, solicallSpeakerBuffer, 0, size);
+								solicallAec.processSpeaker(solicallSpeakerBuffer);
+								index += size; 
+							}
+						} else
+							aecSpeakerSignal = true;
+
 						// For streaming mode, we must write data in chunks <= buffer size
 						index = 0;
 						while (index < dp.getLength()) {
-							size = Math.min(SolicallWrapper.SOLICALL_FRAME_SIZE * 2, dp.getLength() - index);
+							size = Math.min(minBufSizePlayback / 2, dp.getLength() - index);
 							audioTrack.write(dp.getData(), index, size);
 							index += size; 
 						}

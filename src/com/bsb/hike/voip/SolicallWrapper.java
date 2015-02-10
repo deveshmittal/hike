@@ -10,11 +10,7 @@ public class SolicallWrapper {
 	private native int processMicFrame(byte[] input, byte[] output);
 	private native int terminate();
 	
-	private final int FRAME_SIZE = 4;	// 4 ms
-	private final int FRAME_MULTIPLIER = 5;		// We want to pass 20ms of data
-	private final int SPEAKER_BUFFER_SIZE = 1024 * 100;
-	private final int MIC_BUFFER_SIZE = SPEAKER_BUFFER_SIZE;
-	public static final int SOLICALL_FRAME_SIZE = 960; // permitted values are 120, 240, 480, 960, 1920, and 2880
+	public static final int SOLICALL_FRAME_SIZE = 960; 
 
 	static {
 		System.loadLibrary("solicall");
@@ -35,17 +31,13 @@ public class SolicallWrapper {
 	
 	public void processSpeaker(byte[] frame) {
 		int ret = 0;
-
 		synchronized (this) {
 			ret = processSpeakerFrame(frame);
 		}
-//		Logger.d(VoIPConstants.TAG, "AEC processSpeaker, size: " + frame.length + ", ret: " + ret);
 	}
 	
 	public int processMic(byte[] frame) {
-//		Logger.d(VoIPConstants.TAG, "AEC mic sending: " + frame.length);
 		int ret = 0;
-//		Logger.d(VoIPConstants.TAG, "AEC mic sending");
 		ret = processMicFrame(frame, null);
 		return ret;
 	}
