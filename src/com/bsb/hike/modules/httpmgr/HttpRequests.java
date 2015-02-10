@@ -11,6 +11,7 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.multiStickerDown
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postDeviceDetailsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postGreenBlueDetailsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postToSocialNetworkBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendTwitterInviteBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendUserLogsInfoBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.singleStickerDownloadBase;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.socialCredentialsBaseUrl;
@@ -271,6 +272,18 @@ public class HttpRequests
 				.setUrl(postToSocialNetworkBaseUrl())
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)
+				.post(body)
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken sendTwitterInviteRequest(JSONObject json, IRequestListener requestListener)
+	{
+		JsonBody body = new JsonBody(json);
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(sendTwitterInviteBaseUrl())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
 				.post(body)
 				.build();
 		return requestToken;

@@ -37,6 +37,8 @@ public class HttpRequestConstants
 
 	private static final String BASE_STICKER = "/stickers";
 
+	private static final String BASE_INVITE = "/invite";
+
 	public static synchronized void toggleStaging(boolean production)
 	{
 		isProduction = production;
@@ -146,5 +148,10 @@ public class HttpRequestConstants
 	public static String postToSocialNetworkBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/spread";
+	}
+	
+	public static String sendTwitterInviteBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_INVITE + "/twitter";
 	}
 }

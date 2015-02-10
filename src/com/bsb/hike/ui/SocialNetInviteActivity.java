@@ -45,11 +45,11 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.SocialNetInviteAdapter;
-import com.bsb.hike.http.HikeHttpRequest;
-import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
-import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.SocialNetFriendInfo;
-import com.bsb.hike.tasks.FinishableEvent;
+import com.bsb.hike.modules.httpmgr.HttpRequests;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
@@ -65,7 +65,7 @@ import com.facebook.model.GraphUser;
 import com.facebook.widget.WebDialog;
 import com.facebook.widget.WebDialog.OnCompleteListener;
 
-public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, FinishableEvent
+public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
 {
 	private ListView listView;
 
@@ -84,8 +84,6 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 	private Twitter twitter;
 
 	private SharedPreferences settings;
-
-	private HikeHTTPTask mTwitterInviteTask;
 
 	private Dialog mDialog;
 
@@ -139,11 +137,6 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 		else
 		{
 			Utils.executeStringResultTask(new GetTwitterFollowers());
-		}
-		mTwitterInviteTask = (HikeHTTPTask) getLastCustomNonConfigurationInstance();
-		if (mTwitterInviteTask != null)
-		{
-			mDialog = ProgressDialog.show(this, null, getString(R.string.posting_update_twitter));
 		}
 		setupActionBar();
 	}
@@ -223,14 +216,6 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 		outState.putBoolean(HikeConstants.Extras.IS_FACEBOOK, isFacebook);
 
 		super.onSaveInstanceState(outState);
-	}
-
-	/* store the task so we can keep keep the progress dialog going */
-	@Override
-	public Object onRetainCustomNonConfigurationInstance()
-	{
-		Logger.d("SocialNetInviteActivity", "onRetainNonConfigurationinstance");
-		return mTwitterInviteTask;
 	}
 
 	private void getFriends()
@@ -442,29 +427,32 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 	public void sendTwitterInvite(JSONObject data)
 	{
-		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/invite/twitter", RequestType.OTHER, new HikeHttpCallback()
-		{
-
+		IRequestListener requestListener = new IRequestListener()
+		{	
 			@Override
-			public void onSuccess(JSONObject response)
+			public void onRequestSuccess(com.bsb.hike.modules.httpmgr.response.Response result)
 			{
+				dismissLoadingDialog();
 				Toast.makeText(SocialNetInviteActivity.this, getString(R.string.posted_update), Toast.LENGTH_SHORT).show();
 				finish();
 			}
-
+			
 			@Override
-			public void onFailure()
+			public void onRequestProgressUpdate(float progress)
+			{				
+			}
+			
+			@Override
+			public void onRequestFailure(HttpException httpException)
 			{
+				dismissLoadingDialog();
 				Toast.makeText(SocialNetInviteActivity.this, R.string.posting_update_fail, Toast.LENGTH_SHORT).show();
 			}
-
-		});
-		hikeHttpRequest.setJSONData(data);
-		mTwitterInviteTask = new HikeHTTPTask(this, R.string.posting_update_fail);
-
-		Utils.executeHttpTask(mTwitterInviteTask, hikeHttpRequest);
+		};
+		
+		RequestToken token = HttpRequests.sendTwitterInviteRequest(data, requestListener);
+		token.execute();
 		mDialog = ProgressDialog.show(this, null, getString(R.string.posting_update_twitter));
-
 		return;
 	}
 
@@ -628,20 +616,15 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			mDialog.dismiss();
 			mDialog = null;
 		}
-		mTwitterInviteTask = null;
 		super.onDestroy();
 	}
 
-	@Override
-	public void onFinish(boolean success)
+	private void dismissLoadingDialog()
 	{
 		if (mDialog != null)
 		{
 			mDialog.dismiss();
 			mDialog = null;
 		}
-		mTwitterInviteTask = null;
-
 	}
-
 }
