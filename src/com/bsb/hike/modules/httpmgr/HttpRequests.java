@@ -1,17 +1,17 @@
 package com.bsb.hike.modules.httpmgr;
 
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.bulkLastSeenUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getHikeJoinTimeBase;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getHikeJoinTimeBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStatusBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.lastSeenUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.multiStickerDownloadUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postDeviceDetailsBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postGreenBlueDetailsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.singleStickerDownloadBase;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPalleteImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPreviewImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerShopDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerSignupUpgradeUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStatusBase;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postDeviceDetailsBase;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postGreenBlueDetailsBase;
 import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_HIGH;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_LONG;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
@@ -124,7 +124,7 @@ public class HttpRequests
 	public static RequestToken getHikeJoinTimeRequest(String msisdn, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(getHikeJoinTimeBase() + msisdn)
+				.setUrl(getHikeJoinTimeBaseUrl() + msisdn)
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)
@@ -136,7 +136,7 @@ public class HttpRequests
 	{
 		JsonBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(getStatusBase())
+				.setUrl(getStatusBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)
@@ -148,7 +148,7 @@ public class HttpRequests
 	public static RequestToken deleteStatusRequest(String statusId, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new ByteArrayRequest.Builder()
-				.setUrl(getStatusBase() + "/" + statusId)
+				.setUrl(getStatusBaseUrl() + "/" + statusId)
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)
@@ -161,7 +161,7 @@ public class HttpRequests
 	{
 		JsonBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(postDeviceDetailsBase())
+				.setUrl(postDeviceDetailsBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.post(body)
@@ -173,7 +173,7 @@ public class HttpRequests
 	{
 		JsonBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(postGreenBlueDetailsBase())
+				.setUrl(postGreenBlueDetailsBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.post(body)

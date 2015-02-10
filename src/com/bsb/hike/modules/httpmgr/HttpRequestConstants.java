@@ -19,10 +19,12 @@ public class HttpRequestConstants
 	private static final String BASE_V1 = "/v1";
 
 	private static final String BASE_V2 = "/v2";
+	
+	private static final String BASE_ACCOUNT = "/account";
 
 	private static final String BASE_USER = "/user";
 
-	private static final String STICKERS_BASE = "/stickers";
+	private static final String BASE_STICKER = "/stickers";
 
 	public static synchronized void toggleStaging(boolean production)
 	{
@@ -47,32 +49,32 @@ public class HttpRequestConstants
 
 	public static String singleStickerDownloadBase()
 	{
-		return BASE_URL + BASE_V1 + STICKERS_BASE;
+		return BASE_URL + BASE_V1 + BASE_STICKER;
 	}
 
 	public static String stickerSignupUpgradeUrl()
 	{
-		return BASE_URL + BASE_V1 + STICKERS_BASE + "/categories";
+		return BASE_URL + BASE_V1 + BASE_STICKER + "/categories";
 	}
 
 	public static String stickerShopDownloadUrl()
 	{
-		return BASE_URL + BASE_V1 + STICKERS_BASE + "/shop";
+		return BASE_URL + BASE_V1 + BASE_STICKER + "/shop";
 	}
 
 	public static String stickerPalleteImageDownloadUrl()
 	{
-		return BASE_URL + BASE_V1 + STICKERS_BASE + "/enable_disable";
+		return BASE_URL + BASE_V1 + BASE_STICKER + "/enable_disable";
 	}
 
 	public static String stickerPreviewImageDownloadUrl()
 	{
-		return BASE_URL + BASE_V1 + STICKERS_BASE + "/preview";
+		return BASE_URL + BASE_V1 + BASE_STICKER + "/preview";
 	}
 
 	public static String multiStickerDownloadUrl()
 	{
-		return BASE_URL + BASE_V1 + STICKERS_BASE;
+		return BASE_URL + BASE_V1 + BASE_STICKER;
 	}
 
 	public static String lastSeenUrl()
@@ -85,23 +87,23 @@ public class HttpRequestConstants
 		return BASE_URL + BASE_V2 + BASE_USER + "/bls";
 	}
 
-	public static String getHikeJoinTimeBase()
+	public static String getStatusBaseUrl()
 	{
-		return BASE_URL + BASE_V1 + "/account/profile/";
+		return BASE_URL + BASE_V1 + BASE_USER + "/status";
 	}
 	
-	public static String getStatusBase()
+	public static String getHikeJoinTimeBaseUrl()
 	{
-		return BASE_URL + BASE_V1 + "/user/status";
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/profile/";
 	}
 	
-	public static String postDeviceDetailsBase()
+	public static String postDeviceDetailsBaseUrl()
 	{
-		return BASE_URL + BASE_V1 + "/account/update";
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/update";
 	}
 	
-	public static String postGreenBlueDetailsBase()
+	public static String postGreenBlueDetailsBaseUrl()
 	{
-		return BASE_URL + BASE_V1 + "/account/info";
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/info";
 	}
 }
