@@ -142,6 +142,7 @@ public class HikeNotificationMsgStack implements Listener
 				{
 					addMessage(conv.getMsisdn(), conv.platformWebMessageMetadata.getNotifText());
 					mLastInsertedConvMessage = conv;
+					forceBlockNotificationSound = conv.isSilent();
 				}
 				else
 				{
