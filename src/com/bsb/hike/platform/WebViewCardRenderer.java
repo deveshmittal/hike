@@ -73,6 +73,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	private SparseArray<String> cardAlarms;
 	
+	// usually we have seen 3 cards will be inflated, so 3 holders will be initiated (just an optimizations)
 	ArrayList<WebViewHolder> holderList = new ArrayList<WebViewCardRenderer.WebViewHolder>(3);
 
 	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages, BaseAdapter adapter)
