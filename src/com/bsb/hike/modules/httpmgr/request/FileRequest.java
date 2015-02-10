@@ -13,7 +13,7 @@ public class FileRequest extends Request<File>
 
 	private String filePath;
 
-	public FileRequest(Init<?> init)
+	private FileRequest(Init<?> init)
 	{
 		super(init);
 		this.filePath = init.filePath;

@@ -11,7 +11,7 @@ import com.bsb.hike.modules.httpmgr.Utils;
 
 public class JSONObjectRequest extends Request<JSONObject>
 {	
-	public JSONObjectRequest(Init<?> init)
+	private JSONObjectRequest(Init<?> init)
 	{
 		super(init);
 	}
