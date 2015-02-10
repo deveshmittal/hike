@@ -1531,7 +1531,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 */
 	private void addToUndeliveredMessages(ConvMessage msg)
 	{
-		Logger.d(TAG, "Adding to undelivered messages map");
+		Logger.d(TAG, "Adding to undelivered messages map : " + undeliveredMessages.size());
 		undeliveredMessages.put(msg.getMsgID(), msg);
 		updateFirstPendingConvMessage();
 		scheduleH20Tip();
