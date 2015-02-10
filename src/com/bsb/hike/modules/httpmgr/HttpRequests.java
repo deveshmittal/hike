@@ -1,7 +1,10 @@
 package com.bsb.hike.modules.httpmgr;
 
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.bulkLastSeenUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getAvatarBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getGroupBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getHikeJoinTimeBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStaticAvatarBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStatusBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.lastSeenUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.multiStickerDownloadUrl;
@@ -21,6 +24,7 @@ import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
 import org.json.JSONObject;
 
 import com.bsb.hike.modules.httpmgr.request.ByteArrayRequest;
+import com.bsb.hike.modules.httpmgr.request.FileRequest;
 import com.bsb.hike.modules.httpmgr.request.JSONObjectRequest;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
@@ -202,6 +206,59 @@ public class HttpRequests
 				.setUrl(sendUserLogsInfoBaseUrl() + logKey)
 				.setRequestListener(requestListener)
 				.post(body)
+				.build();
+		return requestToken;
+	}
+	
+
+	public static RequestToken downloadStatusImageRequest(String id, String filePath, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new FileRequest.Builder()
+				.setUrl(getStatusBaseUrl() + "/" + id + "?only_image=true")
+				.setFile(filePath)
+				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
+				.get()
+				.build();
+		return requestToken;
+	}
+
+	public static RequestToken downloadProfileImageRequest(String id, String filePath, boolean hasCustomIcon, boolean isGroupConvs, IRequestListener requestListener)
+	{
+		String url;
+		if (hasCustomIcon)
+		{
+			if (isGroupConvs)
+			{
+				url = getGroupBaseUrl() + id + "/avatar?fullsize=1";
+			}
+			else
+			{
+				url = getAvatarBaseUrl() + "/" + id + "?fullsize=1";
+			}
+		}
+		else
+		{
+			url = getStaticAvatarBaseUrl() + filePath;
+		}
+		RequestToken requestToken = new FileRequest.Builder()
+				.setUrl(url)
+				.setFile(filePath)
+				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
+				.get()
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken downloadProtipRequest(String url, String filePath, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new FileRequest.Builder()
+				.setUrl(url)
+				.setFile(filePath)
+				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
+				.get()
 				.build();
 		return requestToken;
 	}

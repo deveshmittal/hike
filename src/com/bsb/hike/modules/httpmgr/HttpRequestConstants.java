@@ -1,5 +1,6 @@
 package com.bsb.hike.modules.httpmgr;
 
+
 public class HttpRequestConstants
 {
 	private static boolean isProduction = true;
@@ -13,13 +14,23 @@ public class HttpRequestConstants
 	private static final String PRODUCTION_API = "api.im.hike.in";
 
 	private static final String STAGING_API = "staging.im.hike.in";
+	
+	public static final int PRODUCTION_PORT = 80;
+
+	public static final int PRODUCTION_PORT_SSL = 443;
+
+	public static final int STAGING_PORT = 80;
+
+	public static final int STAGING_PORT_SSL = 443;
+	
+	public static final int PORT = STAGING_PORT;
 
 	private static String BASE_URL = HTTP + STAGING_API;
 
 	private static final String BASE_V1 = "/v1";
 
 	private static final String BASE_V2 = "/v2";
-	
+
 	private static final String BASE_ACCOUNT = "/account";
 
 	private static final String BASE_USER = "/user";
@@ -91,29 +102,44 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V1 + BASE_USER + "/status";
 	}
-	
+
 	public static String getHikeJoinTimeBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/profile/";
 	}
-	
+
 	public static String postDeviceDetailsBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/update";
 	}
-	
+
 	public static String postGreenBlueDetailsBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/info";
 	}
-	
+
 	public static String socialCredentialsBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/connect/";
 	}
-	
+
 	public static String sendUserLogsInfoBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + "/";
+	}
+
+	public static String getGroupBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + "/group/";
+	}
+
+	public static String getAvatarBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/avatar";
+	}
+
+	public static String getStaticAvatarBaseUrl()
+	{
+		return BASE_URL + ":" + PORT + "/static/avatars/";
 	}
 }
