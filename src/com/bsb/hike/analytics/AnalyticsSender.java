@@ -298,27 +298,36 @@ public class AnalyticsSender
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "http response :" + response.getStatusLine());
 				switch (response.getStatusLine().getStatusCode())
 				{
-				case HttpResponseCode.OK:
-				{
-					resetRetryParams();
+					case HttpResponseCode.OK:
+					{
+						resetRetryParams();
+	
+						new File(absolutePath).delete();
+	
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "deleted file :" + fileName);
+					}				
+					return wasUploadSuccessful;
 
-					new File(absolutePath).delete();
-
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "deleted file :" + fileName);
-				}				
-				return wasUploadSuccessful;
-
-				case HttpResponseCode.GATEWAY_TIMEOUT:
-				case HttpResponseCode.SERVICE_UNAVAILABLE:
-				case HttpResponseCode.INTERNAL_SERVER_ERROR:
-				case HttpResponseCode.NOT_FOUND:
+					case HttpResponseCode.GATEWAY_TIMEOUT:
+					case HttpResponseCode.SERVICE_UNAVAILABLE:
+					case HttpResponseCode.INTERNAL_SERVER_ERROR:
+					case HttpResponseCode.NOT_FOUND:
+					case HttpResponseCode.BAD_GATEWAY:
+					case HttpResponseCode.TOO_MANY_REQUESTS:
 
 					if (!retryUpload())
 					{
 						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Exiting upload process....");
 						wasUploadSuccessful = false;
-						return wasUploadSuccessful;
 					}
+					return wasUploadSuccessful;
+					
+					case HttpResponseCode.FORBIDDEN:
+					case HttpResponseCode.UNAUTHORIZED:
+					{
+						wasUploadSuccessful = true;
+					}
+					return wasUploadSuccessful;
 				}
 			}
 			else
@@ -328,8 +337,8 @@ public class AnalyticsSender
 				if(!retryUpload())
 				{
 					wasUploadSuccessful = false;
-					return wasUploadSuccessful;
 				}
+				return wasUploadSuccessful;
 			}
 		}
 	}		
