@@ -5037,14 +5037,7 @@ public class Utils
 	 */
 	public static boolean isResponseValid(JSONObject response)
 	{
-		try
-		{
-			if(response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
-			{
-				return false;
-			}
-		}
-		catch(JSONException e)
+		if (response == null || HikeConstants.FAIL.equals(response.optString(HikeConstants.STATUS)))
 		{
 			return false;
 		}
