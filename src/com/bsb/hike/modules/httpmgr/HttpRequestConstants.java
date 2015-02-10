@@ -106,4 +106,9 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/info";
 	}
+	
+	public static String socialCredentialsBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/connect/";
+	}
 }

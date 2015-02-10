@@ -8,6 +8,7 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.multiStickerDown
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postDeviceDetailsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postGreenBlueDetailsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.singleStickerDownloadBase;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.socialCredentialsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPalleteImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPreviewImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerShopDownloadUrl;
@@ -176,6 +177,18 @@ public class HttpRequests
 				.setUrl(postGreenBlueDetailsBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
+				.post(body)
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken sendSocialCredentialsRequest(String social, JSONObject json, IRequestListener requestListener)
+	{
+		JsonBody body = new JsonBody(json);
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(socialCredentialsBaseUrl() + social)
+				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
 				.post(body)
 				.build();
 		return requestToken;
