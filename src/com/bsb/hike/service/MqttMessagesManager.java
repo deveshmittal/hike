@@ -1992,15 +1992,18 @@ public class MqttMessagesManager
 				lastNotifPacket = hash;
 				String body = data.optString(HikeConstants.BODY);
 				String destination = data.optString("u");
-
+				
 				if (data.optBoolean(HikeConstants.PUSH, true) && !TextUtils.isEmpty(destination) && !TextUtils.isEmpty(body))
 				{
-					Logger.i("mqttMessageManager", "Play Notification packet from Server " + data.toString());
-					// chat thread -- by default silent is true, so no sound
-					boolean silent = data.optBoolean(HikeConstants.SILENT, true);
-					
-					// open respective chat thread
-					HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
+					if(!Utils.isConversationMuted(destination) && !ContactManager.getInstance().isBlocked(destination))
+					{
+						Logger.i("mqttMessageManager", "Play Notification packet from Server " + data.toString());
+						// chat thread -- by default silent is true, so no sound
+						boolean silent = data.optBoolean(HikeConstants.SILENT, true);
+
+						// open respective chat thread
+						HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
+					}
 				}
 			}
 			else
