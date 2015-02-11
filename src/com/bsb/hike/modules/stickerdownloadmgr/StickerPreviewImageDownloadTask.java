@@ -85,7 +85,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 				try
 				{
 					JSONObject response = (JSONObject) result.getBody().getContent();
-					if (response == null)
+					if (!Utils.isResponseValid(response))
 					{
 						Logger.e(TAG, "Sticker download failed null or invalid response");
 						onFailure(null);

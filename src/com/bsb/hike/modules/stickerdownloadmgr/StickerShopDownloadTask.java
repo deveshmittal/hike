@@ -15,6 +15,7 @@ import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 
 class StickerShopDownloadTask extends BaseStickerDownloadTask
 {
@@ -44,7 +45,7 @@ class StickerShopDownloadTask extends BaseStickerDownloadTask
 				{
 					JSONObject response = (JSONObject) result.getBody().getContent();
 
-					if (null == response)
+					if (!Utils.isResponseValid(response))
 					{
 						Logger.e(StickerDownloadManager.TAG, "Sticker download failed null response");
 						onFailure(null);
