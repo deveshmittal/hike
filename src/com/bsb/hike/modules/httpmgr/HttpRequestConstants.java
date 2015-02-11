@@ -154,4 +154,39 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V1 + BASE_INVITE + "/twitter";
 	}
+
+	public static String registerAccountBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT;
+	}
+	
+	public static String validateNumberBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/validate";
+	}
+	
+	public static String setProfileUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/profile";
+	}
+	
+	public static String postAddressbookBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/addressbook";
+	}
+	
+	public static String updateAddressbookBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/addressbook";
+	}
+	
+	public static String sendDeviceDetailBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/device";
+	}
+	
+	public static String preActivationBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + "/pa";
+	}
 }

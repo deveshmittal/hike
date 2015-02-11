@@ -48,6 +48,7 @@ import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.modules.iface.ITransientCache;
+import com.bsb.hike.tasks.UpdateAddressBookTask;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
@@ -1445,7 +1446,9 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 				ids_json.put(string);
 			}
 			Logger.d("ContactUtils", "New contacts:" + new_contacts_by_id.size() + " DELETED contacts: " + ids_json.length());
-			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
+			
+			UpdateAddressBookTask updateAddressBookTask = new UpdateAddressBookTask(new_contacts_by_id, ids_json);
+			List<ContactInfo> updatedContacts = updateAddressBookTask.execute();
 
 			List<ContactInfo> contactsToDelete = new ArrayList<ContactInfo>();
 			String myMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");

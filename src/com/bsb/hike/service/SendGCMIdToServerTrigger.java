@@ -1,21 +1,25 @@
 package com.bsb.hike.service;
 
+import static com.bsb.hike.modules.httpmgr.HttpRequests.sendDeviceDetailsRequest;
+import static com.bsb.hike.modules.httpmgr.HttpRequests.sendPreActivationRequest;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask.Status;
 
 import com.bsb.hike.GCMIntentService;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.http.HikeHttpRequest;
-import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
-import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.HikeHandlerUtil;
-import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
+import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
+import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
+import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -38,21 +42,16 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 
 	private HikeHandlerUtil mHikeHandler = null;
 
-	Context context = null;
-
-	
 	/**
 	 * 
-	 * This class is called when a SMS/Network change occurs preactivation.So has to maintain a single reference so that we can maintain the status  of the  task.
+	 * This class is called when a SMS/Network change occurs preactivation.So has to maintain a single reference so that we can maintain the status of the task.
 	 */
-	
-	private static HikeHTTPTask hikeHTTPTask = null;
+
+	private RequestToken requestToken = null;
 
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{
-		this.context = context;
-
 		if (mGcmIdToServer == null)
 			mGcmIdToServer = new RunnableGCMIdToServer(context);
 
@@ -96,32 +95,33 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 		@Override
 		public void run()
 		{
-			sentToServer(context);
+			sendToServer();
 		}
 
 	};
 
-	private void sentToServer(Context context)
+	private void sendToServer()
 	{
-		if (hikeHTTPTask != null && hikeHTTPTask.getStatus() == Status.RUNNING)
+		if (requestToken != null && requestToken.isRequestRunning())
 		{
 			return;
 		}
+
 		Logger.d(getClass().getSimpleName(), "Sending GCM ID");
-		final String regId = GCMRegistrar.getRegistrationId(context);
+		final String regId = GCMRegistrar.getRegistrationId(HikeMessengerApp.getInstance());
 
 		if (regId.isEmpty())
 		{
 			Intent in = new Intent(HikeService.REGISTER_TO_GCM_ACTION);
-			context.sendBroadcast(in);
+			HikeMessengerApp.getInstance().sendBroadcast(in);
 
 			Logger.d(getClass().getSimpleName(), "GCM id not found");
 			return;
 		}
 
 		Logger.d(getClass().getSimpleName(), "GCM id was not sent. Sending now");
-		HikeHttpRequest hikeHttpRequest = null;
-		JSONObject request = null;
+		
+		JSONObject requestBody = null;
 
 		switch (mprefs.getData(HikeConstants.REGISTER_GCM_SIGNUP, 0))
 		{
@@ -134,33 +134,22 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 			}
 			else
 			{
-				hikeHttpRequest = new HikeHttpRequest("/account/device", RequestType.OTHER, mmHikeHttpCallback);
-				request = new JSONObject();
+				requestBody = new JSONObject();
 				try
 				{
 					// Sending the incentive id to the server.
 
-					request.put(PreloadNotificationSchedular.INCENTIVE_ID, mprefs.getData(PreloadNotificationSchedular.INCENTIVE_ID, "-1"));
-					request.put(GCMIntentService.DEV_TYPE, HikeConstants.ANDROID);
-					request.put(GCMIntentService.DEV_TOKEN, regId);
+					requestBody.put(PreloadNotificationSchedular.INCENTIVE_ID, mprefs.getData(PreloadNotificationSchedular.INCENTIVE_ID, "-1"));
+					requestBody.put(GCMIntentService.DEV_TYPE, HikeConstants.ANDROID);
+					requestBody.put(GCMIntentService.DEV_TOKEN, regId);
 				}
 				catch (JSONException e)
 				{
 					Logger.d(getClass().getSimpleName(), "Invalid JSON", e);
 				}
-				hikeHTTPTask = new HikeHTTPTask(null, 0);
-				hikeHttpRequest.setJSONData(request);
-
-				if (Utils.isUserOnline(context))
-				{
-
-					Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
-				}
-
-				else
-				{
-					mmHikeHttpCallback.onFailure();
-				}
+				IRequestBody body = new JsonBody(requestBody);
+				requestToken = sendDeviceDetailsRequest(body, getRequestListener());
+				requestToken.execute();
 			}
 			break;
 		case HikeConstants.REGISTEM_GCM_BEFORE_SIGNUP:
@@ -171,90 +160,82 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 			}
 			else
 			{
-				hikeHttpRequest = new HikeHttpRequest("/pa", RequestType.PREACTIVATION, mmHikeHttpCallback);
-
-				hikeHTTPTask = new HikeHTTPTask(null, 0, false);
-
-				request = Utils.getPostDeviceDetails(context);
+				requestBody = Utils.getPostDeviceDetails(HikeMessengerApp.getInstance());
 				try
 				{
-					request.put(GCMIntentService.DEV_TOKEN, regId);
+					requestBody.put(GCMIntentService.DEV_TOKEN, regId);
 				}
 				catch (JSONException e)
 				{
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				hikeHttpRequest.setJSONData(request);
-
-				if (Utils.isUserOnline(context))
-				{
-
-					Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
-				}
-				else
-				{
-					mmHikeHttpCallback.onFailure();
-				}
+				IRequestBody body = new JsonBody(requestBody);
+				requestToken = sendPreActivationRequest(body, getRequestListener());
+				requestToken.execute();
 			}
 			break;
 		default:
 
 		}
-
 	}
 
-	private HikeHttpCallback mmHikeHttpCallback = new HikeHttpCallback()
+	private IRequestListener getRequestListener()
 	{
-
-		public void onSuccess(JSONObject response)
+		return new IRequestListener()
 		{
-
-			Logger.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send successful");
-			switch (mprefs.getData(HikeConstants.REGISTER_GCM_SIGNUP, 0))
+			
+			@Override
+			public void onRequestSuccess(Response result)
 			{
-			case HikeConstants.REGISTEM_GCM_BEFORE_SIGNUP:
-
-				if (response != null)
+				JSONObject response = (JSONObject) result.getBody().getContent();
+				Logger.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send successful");
+				switch (mprefs.getData(HikeConstants.REGISTER_GCM_SIGNUP, 0))
 				{
-					mprefs.saveData(HikeMessengerApp.GCM_ID_SENT_PRELOAD, true);
+				case HikeConstants.REGISTEM_GCM_BEFORE_SIGNUP:
 
-					/**
-					 * Sample String // String x = System.currentTimeMillis() + 60000 + ""; // String y = System.currentTimeMillis() + 180000 + ""; // String r =
-					 * "{  'notification_schedule':[{'timestamp':'" + x + "','incentive_id':'1','title':'hello hike','text':'20 free smms'},{'timestamp':'" + y // +
-					 * "','incentive_id':'2','title':'hello hike2','text':'50 free smms'}],'stat':'ok'}";
-					 */
-					mprefs.saveData(PreloadNotificationSchedular.NOTIFICATION_TIMELINE, response.toString());
+					if (response != null)
+					{
+						mprefs.saveData(HikeMessengerApp.GCM_ID_SENT_PRELOAD, true);
 
-					PreloadNotificationSchedular.scheduleNextAlarm(context);
+						/**
+						 * Sample String // String x = System.currentTimeMillis() + 60000 + ""; // String y = System.currentTimeMillis() + 180000 + ""; // String r =
+						 * "{  'notification_schedule':[{'timestamp':'" + x + "','incentive_id':'1','title':'hello hike','text':'20 free smms'},{'timestamp':'" + y // +
+						 * "','incentive_id':'2','title':'hello hike2','text':'50 free smms'}],'stat':'ok'}";
+						 */
+						mprefs.saveData(PreloadNotificationSchedular.NOTIFICATION_TIMELINE, response.toString());
 
-					/**
-					 * 
-					 * DeRegistering the NetworkChange Listener as we do not require anymore to listen to network changes.
-					 * 
-					 * 
-					 */
+						PreloadNotificationSchedular.scheduleNextAlarm(HikeMessengerApp.getInstance());
 
-					Utils.disableNetworkListner(context);
+						/**
+						 * 
+						 * DeRegistering the NetworkChange Listener as we do not require anymore to listen to network changes.
+						 * 
+						 * 
+						 */
+
+						Utils.disableNetworkListner(HikeMessengerApp.getInstance());
+					}
+					break;
+				case HikeConstants.REGISTEM_GCM_AFTER_SIGNUP:
+
+					mprefs.saveData(HikeMessengerApp.GCM_ID_SENT, true);
+					break;
+
 				}
-				break;
-			case HikeConstants.REGISTEM_GCM_AFTER_SIGNUP:
-
-				mprefs.saveData(HikeMessengerApp.GCM_ID_SENT, true);
-				break;
-
 			}
-
-		}
-
-		public void onFailure()
-		{
-
-			Logger.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send unsuccessful");
-			scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME, mGcmIdToServer);
-
-		}
-
-	};
-
+			
+			@Override
+			public void onRequestProgressUpdate(float progress)
+			{
+				
+			}
+			
+			@Override
+			public void onRequestFailure(HttpException httpException)
+			{
+				Logger.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send unsuccessful");
+				scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME, mGcmIdToServer);
+			}
+		};
+	}
 }

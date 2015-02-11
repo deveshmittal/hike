@@ -19,6 +19,13 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPalleteIm
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPreviewImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerShopDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerSignupUpgradeUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.registerAccountBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.validateNumberBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postAddressbookBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.updateAddressbookBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.setProfileUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendDeviceDetailBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.preActivationBaseUrl;
 import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_HIGH;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_LONG;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
@@ -198,7 +205,20 @@ public class HttpRequests
 				.setResponseOnUIThread(true)
 				.post(body)
 				.build();
+				return requestToken;
+	}
+	
+	public static RequestToken registerAccountRequest(IRequestBody body, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(registerAccountBaseUrl())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.post(body)
+				.setAsynchronous(false)
+				.build();
 		return requestToken;
+		
 	}
 	
 	public static RequestToken sendUserLogInfoRequest(String logKey, JSONObject json, IRequestListener requestListener)
@@ -212,7 +232,6 @@ public class HttpRequests
 		return requestToken;
 	}
 	
-
 	public static RequestToken downloadStatusImageRequest(String id, String filePath, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new FileRequest.Builder()
@@ -253,6 +272,30 @@ public class HttpRequests
 		return requestToken;
 	}
 	
+	public static RequestToken validateNumberRequest(IRequestBody body, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(validateNumberBaseUrl() + "?digits=4")
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.post(body)
+				.setAsynchronous(false)
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken setProfileRequest(IRequestBody body, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(setProfileUrl())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.post(body)
+				.setAsynchronous(false)
+				.build();
+		return requestToken;
+	}
+	
 	public static RequestToken downloadProtipRequest(String url, String filePath, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new FileRequest.Builder()
@@ -282,6 +325,52 @@ public class HttpRequests
 		JsonBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(sendTwitterInviteBaseUrl())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.post(body)
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken postAddressBookRequest(IRequestBody body, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(postAddressbookBaseUrl())
+				.setRequestType(Request.REQUEST_TYPE_LONG)
+				.setRequestListener(requestListener)
+				.post(body)
+				.setAsynchronous(false)
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken updateAddressBookRequest(IRequestBody body, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(updateAddressbookBaseUrl())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.patch(body)
+				.setAsynchronous(false)
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken sendDeviceDetailsRequest(IRequestBody body, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(sendDeviceDetailBaseUrl())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.post(body)
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken sendPreActivationRequest(IRequestBody body, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(preActivationBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.post(body)

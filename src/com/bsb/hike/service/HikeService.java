@@ -42,6 +42,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.contactmgr.ContactUtils;
 import com.bsb.hike.modules.httpmgr.HttpRequests;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
@@ -736,7 +737,7 @@ public class HikeService extends Service
 
 			List<ContactInfo> contactinfos = ContactManager.getInstance().getAllContacts();
 			ContactManager.getInstance().setGreenBlueStatus(context, contactinfos);
-			JSONObject data = AccountUtils.getWAJsonContactList(contactinfos);
+			JSONObject data = ContactUtils.getWAJsonContactList(contactinfos);
 
 			IRequestListener requestListener = new IRequestListener()
 			{
