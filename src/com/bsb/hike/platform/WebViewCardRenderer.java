@@ -437,7 +437,9 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PLATFORM_CARD_ALARM, this);
 		for(WebViewHolder holder : holderList)
 		{
-			holder.myBrowser.removeJavascriptInterface(HikePlatformConstants.PLATFORM_BRIDGE_NAME);
+			if (Utils.isHoneycombOrHigher())
+				holder.myBrowser.removeJavascriptInterface(HikePlatformConstants.PLATFORM_BRIDGE_NAME);
+			
 			holder.platformJavaScriptBridge.onDestroy();
 		}
 		holderList.clear();
