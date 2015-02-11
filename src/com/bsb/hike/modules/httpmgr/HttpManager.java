@@ -91,4 +91,9 @@ public class HttpManager
 	{
 		request.cancel();
 	}
+	
+	public <T> boolean isRequestRunning(Request<T> request)
+	{
+		return requestProcessor.isRequestRunning(request);
+	}
 }

@@ -72,4 +72,14 @@ public class RequestProcessor
 			requestRunner.submit(request, options);
 		}
 	}
+	
+	public boolean isRequestRunning(Request<?> request)
+	{
+		long requestId = request.getId();
+		if (requestMap.containsKey(requestId))
+		{
+			return true;
+		}
+		return false;
+	}
 }
