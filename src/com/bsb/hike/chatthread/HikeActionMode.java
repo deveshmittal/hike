@@ -74,10 +74,16 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	public boolean onCreateActionMode(ActionMode mode, Menu menu)
 	{
 		this.mActionMode = mode;
-		mode.setCustomView(LayoutInflater.from(mActivity).inflate(defaultLayoutId, null));
+		View view = LayoutInflater.from(mActivity).inflate(defaultLayoutId, null);
+		mode.setCustomView(view);
 		if(shouldInflateMenu)
 		{
 			inflateMenu(menu);
+		}
+		
+		if (mListener != null)
+		{
+			mListener.initActionbarActionModeView(actionModeId, view);
 		}
 
 		return true;
