@@ -1763,7 +1763,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		tipContainer.addView(hikeToOfflineTipView);
 		hikeToOfflineTipView.setVisibility(View.VISIBLE);
 		
-		scrollListViewOnShowingOfflineTip();
+		scrollListViewOnShowingH20Tip();
 		mAdapter.setH20TipShowing(true);
 		shouldScheduleH20Tip = false;
 	}
@@ -1907,7 +1907,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		hikeToOfflineTipView.startAnimation(slideDown);
 	}
 
-	private void scrollListViewOnShowingOfflineTip()
+	private void scrollListViewOnShowingH20Tip()
 	{
 		if (mConversationsView.getLastVisiblePosition() > messages.size() - 3)
 		{
@@ -2181,7 +2181,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 	
-	
+	/**
+	 * Methods to send Undelivered messages as SMS
+	 * 
+	 * @param nativeSMS
+	 * @param unsentMessages
+	 */
 	private void sendAllMessagesAsSMS(boolean nativeSMS, List<ConvMessage> unsentMessages)
 	{
 		Logger.d(TAG, "Unsent messages: " + unsentMessages.size());
