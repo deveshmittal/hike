@@ -440,6 +440,8 @@ public class StickerManager
 		{
 			if(updateAvailable != null)
 			{
+				// Update Available will be true only if total count received is greater than existing sticker count
+				updateAvailable = (totalStickerCount > category.getTotalStickers());
 				category.setUpdateAvailable(updateAvailable);
 			}
 			if(totalStickerCount != -1)
@@ -451,6 +453,15 @@ public class StickerManager
 				category.setCategorySize(categorySize);
 			}
 		}
+		
+		/**
+		 * Not setting update available flag for invisible category
+		 */
+		if (category == null && updateAvailable != null)  
+		{
+			updateAvailable = false;
+		}
+		
 		HikeConversationsDatabase.getInstance().updateStickerCategoryData(categoryId, updateAvailable, totalStickerCount, categorySize);
 	}
 
