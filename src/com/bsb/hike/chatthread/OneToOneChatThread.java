@@ -659,6 +659,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		case ADD_UNDELIVERED_MESSAGE:
 			addToUndeliveredMessages((ConvMessage) msg.obj);
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
 			super.handleUIMessage(msg);
