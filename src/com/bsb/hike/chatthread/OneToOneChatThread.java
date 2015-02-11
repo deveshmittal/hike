@@ -1821,6 +1821,14 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			((TextView) hikeToOfflineTipView.findViewById(R.id.send_button_text)).setText(R.string.next_uppercase);
 			hikeToOfflineTipView.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
 			hikeToOfflineTipView.findViewById(R.id.close_tip).setVisibility(View.GONE);
+			
+			/**
+			 * If action mode is on and H20 Tip comes, so we are disabling NextButton to avoid interference
+			 */
+			if(mActionMode.whichActionModeIsOn() != -1)  
+			{
+				setEnabledH20NextButton(false);
+			}
 		}
 		
 		hikeToOfflineTipView.findViewById(R.id.send_button).setOnClickListener(this);
@@ -2321,5 +2329,48 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		return (totalMsgLength / 140) + 1;
 	}
+	
+	/**
+	 * Used to enable/disable next button upon entering actionMode
+	 * 
+	 * @param enabled
+	 */
+	private void setEnabledH20NextButton(boolean enabled)
+	{
+		if (isH20TipShowing())
+		{
+			hikeToOfflineTipView.findViewById(R.id.send_button).setEnabled(enabled);
+			hikeToOfflineTipView.findViewById(R.id.send_button_text).setEnabled(enabled);
+			hikeToOfflineTipView.findViewById(R.id.send_button_tick).setEnabled(enabled);
+		}
+	}
 
+	/**
+	 * Overriding this method to disable the next button if h20 tip is showing
+	 */
+	@Override
+	public void initActionbarActionModeView(int id, View view)
+	{
+		switch (id)
+		{
+		case MULTI_SELECT_ACTION_MODE:
+			setEnabledH20NextButton(false);
+			break;
+		}
+		
+		super.initActionbarActionModeView(id, view);
+	}
+	
+	@Override
+	public void actionModeDestroyed(int id)
+	{
+		switch(id)
+		{
+		case MULTI_SELECT_ACTION_MODE:
+			setEnabledH20NextButton(true);
+			break;
+		}
+		
+		super.actionModeDestroyed(id);
+	}
 }
