@@ -84,6 +84,15 @@ public class VoIPConstants {
 		public static final int CALLER_IN_NATIVE_CALL = 8;
 	}
 
+	public static final class Extras
+	{
+		public static final String ACTION = "action";
+
+		public static final String MSISDN = "msisdn";
+
+		public static final String CALL_SOURCE = "call_source";
+	}
+
 	
 	/**
 	 * Call quality

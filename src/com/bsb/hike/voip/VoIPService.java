@@ -68,6 +68,7 @@ import com.bsb.hike.voip.VoIPClient.ConnectionMethods;
 import com.bsb.hike.voip.VoIPConstants.CallQuality;
 import com.bsb.hike.voip.VoIPDataPacket.PacketType;
 import com.bsb.hike.voip.VoIPEncryptor.EncryptionStage;
+import com.bsb.hike.voip.VoIPUtils.CallSource;
 import com.bsb.hike.voip.VoIPUtils.ConnectionClass;
 import com.bsb.hike.voip.protobuf.VoIPSerializer;
 import com.bsb.hike.voip.view.VoIPActivity;
@@ -213,7 +214,7 @@ public class VoIPService extends Service {
 		if (intent == null)
 			return returnInt;
 		
-		String action = intent.getStringExtra("action");
+		String action = intent.getStringExtra(VoIPConstants.Extras.ACTION);
 
 		if (action == null || action.isEmpty()) {
 			return returnInt;
@@ -315,18 +316,23 @@ public class VoIPService extends Service {
 		}
 		
 		// We are initiating a VoIP call
-		if (action.equals("outgoingcall")) {
+		if (action.equals("outgoingcall")) 
+		{
 
 			// Edge case. 
 			String myMsisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.MSISDN_SETTING, null);
-			if (myMsisdn != null && myMsisdn.equals(intent.getStringExtra("msisdn"))) {
+			String msisdn = intent.getStringExtra(VoIPConstants.Extras.MSISDN);
+
+			if (myMsisdn != null && myMsisdn.equals(msisdn)) 
+			{
 				Logger.wtf(VoIPConstants.TAG, "Don't be ridiculous!");
 				stop();
 				return returnInt;
 			}
 			
 			// Error case: we are in a cellular call
-			if (VoIPUtils.isUserInCall(getApplicationContext())) {
+			if (VoIPUtils.isUserInCall(getApplicationContext())) 
+			{
 				Log.w(VoIPConstants.TAG, "We are already in a cellular call.");
 				sendHandlerMessage(VoIPActivity.MSG_ALREADY_IN_CALL);
 				sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.CALLER_IN_NATIVE_CALL);
@@ -334,9 +340,8 @@ public class VoIPService extends Service {
 			}
 
 			// Edge case: call button was hit for someone we are already speaking with. 
-			if (getCallId() > 0 
-					&& clientPartner.getPhoneNumber().equals(intent.getStringExtra("msisdn"))
-					&& isAudioRunning() == true) {
+			if (getCallId() > 0 && clientPartner.getPhoneNumber().equals(msisdn) && isAudioRunning() == true) 
+			{
 				// Show activity
 				Logger.d(VoIPConstants.TAG, "Restoring activity..");
 				Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
@@ -345,7 +350,8 @@ public class VoIPService extends Service {
 				return returnInt;
 			}
 			
-			if (getCallId() > 0) {
+			if (getCallId() > 0) 
+			{
 				Logger.e(VoIPConstants.TAG, "Error. Already in a call.");
 				sendHandlerMessage(VoIPActivity.MSG_ALREADY_IN_CALL);
 				return returnInt;
@@ -356,7 +362,13 @@ public class VoIPService extends Service {
 			clientPartner.setPhoneNumber(intent.getStringExtra("msisdn"));
 			clientSelf.setInitiator(true);
 			clientPartner.setInitiator(false);
-			callSource = intent.getIntExtra("call_source", -1);
+
+			callSource = intent.getIntExtra(VoIPConstants.Extras.CALL_SOURCE, -1);
+			if(callSource == CallSource.MISSED_CALL_NOTIF.ordinal())
+			{
+				VoIPUtils.cancelMissedCallNotification(getApplicationContext());
+			}
+
 			setCallid(new Random().nextInt(2000000000));
 			Logger.d(VoIPConstants.TAG, "Making outgoing call to: " + clientPartner.getPhoneNumber() + ", id: " + getCallId());
 			
@@ -738,7 +750,7 @@ public class VoIPService extends Service {
 				stop();
 			}
 		},"HANG_UP_THREAD").start();
-		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration(), -1);
+		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration(), -1, false);
 	}
 	
 	public void rejectIncomingCall() {
@@ -752,8 +764,8 @@ public class VoIPService extends Service {
 			}
 		},"REJECT_INCOMING_CALL_THREAD").start();
 		
-		// sendHandlerMessage(VoIPActivity.MSG_INCOMING_CALL_DECLINED);
-		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1);
+		// Here we don't show a missed call notification, but add the message to the chat thread
+		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1, false);
 		sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_REJECT);
 	}
 	
@@ -1630,7 +1642,7 @@ public class VoIPService extends Service {
 						Logger.d(VoIPConstants.TAG, "Other party hung up.");
 						clientPartner.setEnder(true);
 						stop();
-						VoIPUtils.addMessageToChatThread(getApplicationContext(), clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration(), -1);
+						VoIPUtils.addMessageToChatThread(getApplicationContext(), clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, getCallDuration(), -1, true);
 						break;
 						
 					case START_VOICE:
@@ -2203,7 +2215,7 @@ public class VoIPService extends Service {
 
 				sendHandlerMessage(VoIPActivity.MSG_PARTNER_SOCKET_INFO_TIMEOUT);
 				if (clientSelf.isInitiator() && !reconnecting) {
-					VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1);
+					VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1, false);
 					VoIPUtils.sendMissedCallNotificationToPartner(clientPartner);
 				}
 				sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.PARTNER_SOCKET_INFO_TIMEOUT);
@@ -2347,9 +2359,9 @@ public class VoIPService extends Service {
 					sendHandlerMessage(VoIPActivity.MSG_CONNECTION_FAILURE);
 					if (!reconnecting) {
 						if (clientSelf.isInitiator())
-							VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1);
+							VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1, false);
 						else
-							VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1);
+							VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1, true);
 					}
 					sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.UDP_CONNECTION_FAIL);
 					stop();
@@ -2370,10 +2382,10 @@ public class VoIPService extends Service {
 						// Call not answered yet?
 						if (connected) {
 							if (!clientSelf.isInitiator())
-								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1);
+								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, -1, true);
 							else {
 								sendHandlerMessage(VoIPActivity.MSG_PARTNER_ANSWER_TIMEOUT);
-								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1);
+								VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0, -1, false);
 							}
 						}
 

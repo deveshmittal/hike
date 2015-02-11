@@ -3426,11 +3426,7 @@ public class Utils
 			Toast.makeText(context, context.getString(R.string.voip_offline_error), Toast.LENGTH_SHORT).show();
 			return;
 		}
-		Intent i = new Intent(context, VoIPService.class);
-		i.putExtra("action", "outgoingcall");
-		i.putExtra("msisdn", mContactNumber);
-		i.putExtra("call_source", source.ordinal());
-		context.startService(i);
+		context.startService(IntentManager.getVoipCallIntent(context, mContactNumber, source));
 	}
 
 	public static String getFormattedDateTimeFromTimestamp(long milliSeconds, Locale current)

@@ -8,6 +8,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.NuxCustomMessage;
+import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
 import com.bsb.hike.ui.CreditsActivity;
@@ -22,6 +23,9 @@ import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
+import com.bsb.hike.voip.VoIPConstants;
+import com.bsb.hike.voip.VoIPService;
+import com.bsb.hike.voip.VoIPUtils;
 import com.google.android.gms.internal.co;
 
 import android.app.Activity;
@@ -255,4 +259,20 @@ public class IntentManager
 		return in;
 	}
 
+	public static Intent getChatThreadIntent(Context context, String msisdn)
+	{
+		Intent intent = new Intent(context, ChatThread.class);
+		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		return intent;
+	}
+
+	public static Intent getVoipCallIntent(Context context, String msisdn, VoIPUtils.CallSource source)
+	{
+		Intent intent = new Intent(context, VoIPService.class);
+		intent.putExtra(VoIPConstants.Extras.ACTION, "outgoingcall");
+		intent.putExtra(VoIPConstants.Extras.MSISDN, msisdn);
+		intent.putExtra(VoIPConstants.Extras.CALL_SOURCE, source.ordinal());
+		return intent;
+	}
 }

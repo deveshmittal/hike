@@ -1335,4 +1335,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
 	<string name="voip_call_issues_submit_toast">Your feedback has been submitted</string>
     <string name="video_compress">VIDEO COMPRESSION</string>
     <string name="send_compress_video">Send Compressed Video</string>
+    <string name="voip_missed_call_notif">Missed Call</string>
+    <string name="voip_missed_call_action">Call Back</string>
+    <string name="voip_missed_call_message">Message</string>
 </resources>
