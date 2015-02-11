@@ -2373,4 +2373,33 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		
 		super.actionModeDestroyed(id);
 	}
+	
+	@Override
+	public boolean onBackPressed()
+	{
+		/**
+		 * Calling super class's method first
+		 */
+		if (!super.onBackPressed())
+		{
+			if (modeOfChat == H2S_MODE)
+			{
+				destroyH20Mode();
+				return true;
+			}
+
+			if (isH20TipShowing())
+			{
+				hideH20Tip();
+				return true;
+			}
+
+			return false;
+		}
+
+		else
+		{
+			return true;
+		}
+	}
 }
