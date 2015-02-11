@@ -3194,7 +3194,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	private void showClearConversationDialog()
 	{
-		HikeDialogFactory.showDialog(activity, HikeDialogFactory.CLEAR_CONVERSATION_DIALOG, this, null);
+		HikeDialogFactory.showDialog(activity, HikeDialogFactory.CLEAR_CONVERSATION_DIALOG, this);
 	}
 
 	/**

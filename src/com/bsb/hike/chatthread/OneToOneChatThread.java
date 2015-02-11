@@ -652,7 +652,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			scheduleLastSeen();
 			break;
 		case SCHEDULE_H20_TIP:
-			showTipFromHandler();
+			showH20TipFromHandler();
 			break;
 		case SCROLL_LIST_VIEW:
 			mConversationsView.smoothScrollToPosition(messages.size() - 1);
@@ -1611,6 +1611,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 	
+	/**
+	 * Used for scheduling the H20 Tip after sending a message
+	 * 
+	 */
 	private void scheduleH20Tip()
 	{
 		/**
@@ -1656,7 +1660,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 	
-	private void showTipFromHandler()
+	/**
+	 * Called from {@link #handleUIMessage(Message)}
+	 */
+	private void showH20TipFromHandler()
 	{
 		/**
 		 * If the message is null or has been delivered, we return here
@@ -1720,6 +1727,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 
+	/**
+	 * Method for displaying H20Tip
+	 */
 	private void showH20Tip()
 	{
 		if (!mConversation.isOnhike() || isH20TipShowing())
@@ -1754,11 +1764,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		
 		/**
-		 * if (tipView != null && tipView.getVisibility() == View.VISIBLE)
-		{
-			tipView.setVisibility(View.GONE);
-		}
+		 * Hide any other open FTUE Tips
 		 */
+		mTips.hideTip();
 		
 		tipContainer.addView(hikeToOfflineTipView);
 		hikeToOfflineTipView.setVisibility(View.VISIBLE);
@@ -1945,29 +1953,49 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 	
+	/**
+	 * Cater to a message click in H2S Mode
+	 * 
+	 * @param message
+	 */
 	public void clickedH20Message(ConvMessage message)
+	{
+		if (shouldProcessH20MessageTap(message))
+		{
+			mAdapter.toggleSelection(message);
+
+			if (!(mAdapter.getSelectedCount() > 0))
+			{
+				destroyH20Mode();
+			}
+
+			setupH20TipViews();
+		}
+	}
+	
+	/**
+	 * Indicates whether we should honour the click on a message when in H2S Mode, i.e, when we clicked the H20 tip to select messages 
+	 * @param message
+	 * @return
+	 */
+	private boolean shouldProcessH20MessageTap(ConvMessage message)
 	{
 		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null || message.isBlockAddHeader())
 		{
-			return ;
+			return false;
 		}
 		
 		if (message.getState() != State.SENT_CONFIRMED || message.isSMS())
 		{
-			return;
+			return false;
 		}
 		
-		mAdapter.toggleSelection(message);
-		
-		if (!(mAdapter.getSelectedCount() > 0))
-		{
-			destroyH20Mode();
-		}
-		
-		setupH20TipViews();
+		return true;
 	}
 	
-	
+	/**
+	 * Resets the {@link #modeOfChat to H2H Mode and clears selection in messages Adapter}
+	 */
 	private void destroyH20Mode()
 	{
 		modeOfChat = H2H_MODE;
@@ -1991,6 +2019,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 	
+	/**
+	 * Clicked the send button on H20Tip
+	 */
 	private void h20SendClick()
 	{
 		HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
@@ -2044,9 +2075,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		hikeToOfflineTipView.findViewById(R.id.close_tip).setVisibility(View.GONE);
 		
 		/**
-		 * Todo : 
-		 * Clear all the selectedItems from Messages Adapter first
+		 * Clearing any residual selected items
 		 */
+		
+		mAdapter.removeSelectedItems();
 		
 		for (Long msgid : undeliveredMessages.keySet())
 		{
@@ -2217,6 +2249,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 	
+	/**
+	 * Returns a list of all unsent selected messages.
+	 * Also alters their timestamps, since these messages might be potentially sent as SMS.
+	 * @return
+	 */
 	private List<ConvMessage> getAllUnsentSelectedMessages()
 	{
 		List<ConvMessage> unsentMessages = new ArrayList<ConvMessage>();
@@ -2252,12 +2289,20 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		return unsentMessages;
 	}
 	
+	/**
+	 * After sending messages as SMS, we close the tip and destroy H20 Mode
+	 * 
+	 * @param isNativeSMS
+	 */
 	private void messagesSentCloseHikeToOfflineMode(boolean isNativeSMS)
 	{
 		destroyH20Mode();
 		hideH20Tip(true, isNativeSMS);
 	}
 	
+	/**
+	 * Overridding {@link ChatThread.#deleteMessage(ConvMessage, boolean)}
+	 */
 	@Override
 	protected void deleteMessage(ConvMessage convMessage, boolean deleteMediaFromPhone)
 	{
