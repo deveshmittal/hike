@@ -62,6 +62,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -243,62 +244,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		sql = getStickerShopTableCreateQuery();
 		db.execSQL(sql);
 		
-		sql = CREATE_TABLE + DBConstants.ALARM_MGR_TABLE + "(" + _ID + " INTEGER PRIMARY KEY, " + TIME + " TEXT, " + DBConstants.WILL_WAKE_CPU + " INTEGER, " + DBConstants.INTENT
-				+ " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
-		db.execSQL(sql);
-
 		sql = CREATE_TABLE + DBConstants.BOT_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.NAME + " TEXT, " + DBConstants.CONVERSATION_METADATA + " TEXT, "+ DBConstants.IS_MUTE + " INTEGER DEFAULT 0)";
 		db.execSQL(sql);
-	}
-
-	public void insertIntoAlarmManagerDB(long time, int requestCode, boolean WillWakeCPU, Intent intent)
-	{
-		ContentValues cv = new ContentValues();
-		cv.put(DBConstants._ID, requestCode);
-		cv.put(DBConstants.TIME, time + "");
-		cv.put(DBConstants.WILL_WAKE_CPU, WillWakeCPU);
-		cv.put(DBConstants.INTENT, intent.toUri(0));
-
-		mDb.insertWithOnConflict(DBConstants.ALARM_MGR_TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
-	}
-
-	public void deleteFromAlarmManagerDB(int requestCode)
-	{
-		mDb.delete(DBConstants.ALARM_MGR_TABLE, DBConstants._ID + "=" + requestCode, null);
-	}
-
-	public void rePopulateAlarmWhenClosed()
-	{
-		Logger.d("Alarm Manager", "rePopulating all Alarms");
-		String selectQuery = "SELECT  * FROM " + DBConstants.ALARM_MGR_TABLE;
-
-		Cursor cursor = mDb.rawQuery(selectQuery, null);
-		try
-		{
-			if (cursor.moveToFirst())
-			{
-				do
-				{
-					Logger.d("Alarm Manager", "rePopulating all Alarms");
-					int requestCode = cursor.getInt(cursor.getColumnIndex(DBConstants._ID));
-					long time = Long.parseLong(cursor.getString(cursor.getColumnIndex(DBConstants.TIME)));
-					int willWakeCpu = cursor.getInt(cursor.getColumnIndex(DBConstants.WILL_WAKE_CPU));
-					String intent = cursor.getString(cursor.getColumnIndex(DBConstants.INTENT));
-					Uri asd = Uri.parse(intent);
-
-					Intent intentAlarm = Intent.getIntent(asd.toString());
-
-					HikeAlarmManager.setAlarmwithIntentPersistance(HikeMessengerApp.getInstance(), time, requestCode, (willWakeCpu != 0), intentAlarm, false);
-
-				}
-				while (cursor.moveToNext());
-			}
-		}
-		catch (URISyntaxException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 	}
 	public void deleteAll()
 	{
@@ -717,12 +665,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 		}
 
-		if (oldVersion < 34)
-		{
-			String sql2 = CREATE_TABLE + DBConstants.ALARM_MGR_TABLE + "(" + _ID + " INTEGER PRIMARY KEY, " + TIME + " TEXT, " + DBConstants.WILL_WAKE_CPU + " INTEGER, "
-					+ DBConstants.INTENT + " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
-			db.execSQL(sql2);
-		}
 
 		if (oldVersion < 35)
 		{
@@ -6230,6 +6172,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 		return rowId < 0 ? false : true;
 	}
+	
+	
 
 	/**
 	 * Used to persist the changes made to the {@link StickerCategory#isUpdateAvailable()} flag

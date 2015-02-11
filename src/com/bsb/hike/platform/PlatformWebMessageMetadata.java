@@ -14,7 +14,34 @@ public class PlatformWebMessageMetadata
 
 	private int cardHeight;
 
-	private JSONObject cardobj ;
+	private JSONObject cardobj;
+
+	private String appName;
+
+	private String layoutId;
+	
+	private static final String PUSH_SILENT= "silent";
+	
+
+	public String getLayoutId()
+	{
+		return layoutId;
+	}
+
+	public void setLayoutId(String layoutId)
+	{
+		this.layoutId = layoutId;
+	}
+
+	public String getAppName()
+	{
+		return appName;
+	}
+
+	public void setAppName(String appName)
+	{
+		this.appName = appName;
+	}
 
 	public int getCardHeight()
 	{
@@ -50,6 +77,8 @@ public class PlatformWebMessageMetadata
 
 	private JSONObject json;
 
+	private String mPush;
+
 	public PlatformWebMessageMetadata(String jsonString) throws JSONException
 	{
 		this(new JSONObject(jsonString));
@@ -67,9 +96,19 @@ public class PlatformWebMessageMetadata
 				setHelperData(cardobj.optJSONObject(HikePlatformConstants.HELPER_DATA));
 			}
 
+			if (cardobj.has(HikePlatformConstants.APP_NAME))
+			{
+				setAppName(cardobj.optString(HikePlatformConstants.APP_NAME));
+			}
+
 			if (cardobj.has(HikePlatformConstants.HEIGHT))
 			{
 				this.cardHeight = Integer.parseInt(cardobj.optString(HikePlatformConstants.HEIGHT));
+			}
+
+			if (cardobj.has(HikePlatformConstants.LAYOUT))
+			{
+				setLayoutId(cardobj.optString(HikePlatformConstants.LAYOUT));
 			}
 
 			// Extract notif text
@@ -77,10 +116,26 @@ public class PlatformWebMessageMetadata
 			{
 				setNotifText(cardobj.optString(HikePlatformConstants.NOTIF_TEXT_WC));
 			}
-		}else
+
+			if (cardobj.has(HikePlatformConstants.WC_PUSH_KEY))
+			{
+				setPush(cardobj.optString(HikePlatformConstants.WC_PUSH_KEY));
+			}
+		}
+		else
 		{
 			cardobj = new JSONObject();
 		}
+	}
+
+	private void setPush(String optString)
+	{
+		this.mPush = optString;
+	}
+
+	public boolean isSilent()
+	{
+		return PUSH_SILENT.equals(mPush);
 	}
 
 	public JSONObject getJSON()

@@ -6,37 +6,26 @@ package com.bsb.hike.analytics;
  */
 public class AnalyticsConstants 
 {	
-	/** one day in milliseconds */
-	public static final long ONE_DAY = 24 * 60 * 60 * 1000;
-	
-	/** one hour in milliseconds */
-	public static final long ONE_HOUR =  60 * 60 * 1000;
-
 	/** one minute in milliseconds */
 	public static final long ONE_MINUTE =  60 * 1000;
 	
 	/** one day in seconds */
 	public static final int DAY_IN_SECONDS = 24 * 60 * 60;
 
-	//TODO: changed from 500 to 5 for testing
-	public static long MAX_FILE_SIZE = 5 * 1024;
+	/** Default maximum size per file */ 
+	public static long MAX_FILE_SIZE = 200 * 1024; // 200KB
 
-	//TODO: changed from 500 to 10 for testing
-	public static long MAX_ANALYTICS_SIZE = 10 * 1024;
-		
-	/** number of times upload should be tried in one day */
-	public static int ANALYTICS_UPLOAD_FREQUENCY = 2;
-	
-	/** try sending analytics data every 4 hours */
-	public static int UPLOAD_TIME_MULTIPLE = 4;
-	
+	/** Default maximum analytics size on the client */
+	public static long MAX_ANALYTICS_SIZE = 1000 * 1024; // 1MB
+			
+	/** Default analytics service status */ 
 	public static boolean IS_ANALYTICS_ENABLED = true;
-	
-	//TODO: changed from 50 to 10 for testing
-	public static final int MAX_EVENTS_IN_MEMORY = 10;
+
+	/** Default maximum events count in memory before they are saved on the disk */
+	public static final int MAX_EVENTS_IN_MEMORY = 20;
 	
 	/** Default frequency at which logs should be tried to be sent to server */
-	public static final int DEFAULT_SEND_FREQUENCY = 30;
+	public static final int DEFAULT_SEND_FREQUENCY = 30; // 30 minutes
 		
 	public static final String EVENT_FILE_DIR = "/Analytics";
 	
@@ -113,6 +102,10 @@ public class AnalyticsConstants
 	public static final String EVENT_TAG_MOB = "mob";
 
     public static final String EVENT_TAG_PLATFORM = "plf";
+
+	public static final String EVENT_TAG_BOTS = "bot";
+
+	public static final String CHAT_MSISDN = "chat_msisdn";
 
 	public static final String EVENT_TAG_CBS = "cbs";
 
@@ -196,8 +189,6 @@ public class AnalyticsConstants
 	public static final String CHAT_ANALYTICS = "ctal";
 	
 	public static final String TO_USER = "to_user";
-	
-	public static final String EVENT_TAG_CHAT_SESSION = "ctal";
 	
 	//Added For Last seen Event
 	public static final String LAST_SEEN_ANALYTICS_TAG = "last_seen_analytics";
