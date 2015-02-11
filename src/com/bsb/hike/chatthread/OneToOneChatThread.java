@@ -2269,7 +2269,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 * Calculates the no. of SMSes based on message size
 	 * @return
 	 */
-	public int getSelectedFreeSmsCount()
+	private int getSelectedFreeSmsCount()
 	{
 		Collection<ConvMessage> selectedMessages = mAdapter.getSelectedMessagesMap().values();
 		int totalMsgLength = Utils.combineInOneSmsString(activity.getApplicationContext(), false, selectedMessages, true).length();
