@@ -3725,7 +3725,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				msg.setState(ConvMessage.State.SENT_DELIVERED);
 				if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
 				{
-					mAdapter.removeFromUndeliverdMessage(msg, true);
+					if(mAdapter != null)
+					{
+						mAdapter.removeFromUndeliverdMessage(msg, true);
+					}
 				}
 				runOnUiThread(mUpdateAdapter);
 			}
@@ -3757,7 +3760,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			 */
 			if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
 			{
-				mAdapter.removeAllFromUndeliverdMessage();
+				if(mAdapter != null)
+				{
+					mAdapter.removeAllFromUndeliverdMessage();
+				}
 			}
 			runOnUiThread(mUpdateAdapter);
 		}
@@ -4579,7 +4585,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				if (!msg.isSMS())
 				{
-					mAdapter.addToUndeliverdMessage(msg);
+					if(mAdapter != null)
+					{
+						mAdapter.addToUndeliverdMessage(msg);
+					}
 				}
 			}
 			if(updateView)
