@@ -288,7 +288,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private boolean sdrTipFadeInShown = false;
 
-	private boolean isHikeToOfflineMode = false;
+	private boolean isH20Mode = false;
 
 	private String myMsisdn;
 	
@@ -297,7 +297,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	/**
 	 * This variable is used to determine whether HiketoOffline tip is showing or not
 	 */
-	private boolean isHikeOfflineTipShowing;
+	private boolean isH20TipShowing;
 	
 	private OnClickListener mOnClickListener;
 
@@ -2229,7 +2229,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void setSelection(ConvMessage convMessage, View overlay)
 	{
-		if (isActionModeOn || isHikeToOfflineMode)
+		if (isActionModeOn || isH20Mode)
 		{
 			/*
 			 * This is an transparent overlay over all the message which will listen click events while action mode is on.
@@ -2821,7 +2821,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				status.setImageResource(smsDrawableResId);
 				return;
 			}
-			else if (isHikeOfflineTipShowing)
+			else if (isH20TipShowing)
 			{
 				status.setImageResource(boltDrawableResId);
 				return;
@@ -3634,9 +3634,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return msgIdForSdrTip != -1;
 	}
 
-	public void sethikeToOfflineMode(boolean isOn)
+	public void setH20Mode(boolean isOn)
 	{
-		isHikeToOfflineMode = isOn;
+		isH20Mode = isOn;
 	}
 
 	private void fillStatusMessageData(StatusViewHolder statusHolder, ConvMessage convMessage, View v)
@@ -3752,8 +3752,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	/**
 	 * @param isHikeOfflineTipShowing the isHikeOfflineTipShowing to set
 	 */
-	public void setHikeOfflineTipShowing(boolean isHikeOfflineTipShowing)
+	public void setH20TipShowing(boolean isHikeOfflineTipShowing)
 	{
-		this.isHikeOfflineTipShowing = isHikeOfflineTipShowing;
+		this.isH20TipShowing = isHikeOfflineTipShowing;
 	}
 }

@@ -1763,7 +1763,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		hikeToOfflineTipView.setVisibility(View.VISIBLE);
 		
 		scrollListViewOnShowingOfflineTip();
-		mAdapter.setHikeOfflineTipShowing(true);
+		mAdapter.setH20TipShowing(true);
 		shouldScheduleH20Tip = false;
 	}
 	
@@ -1859,7 +1859,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				if (hikeToOfflineTipView != null)
 				{
 					hikeToOfflineTipView.setVisibility(View.GONE);
-					mAdapter.setHikeOfflineTipShowing(false);
+					mAdapter.setH20TipShowing(false);
 					if (modeOfChat == H2S_MODE)
 					{
 						destroyH20Mode();
@@ -1970,7 +1970,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private void destroyH20Mode()
 	{
 		modeOfChat = H2H_MODE;
-		mAdapter.sethikeToOfflineMode(false);
+		mAdapter.setH20Mode(false);
 		mAdapter.removeSelection();
 	}
 	
@@ -1984,7 +1984,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		else
 		{
 			modeOfChat = H2S_MODE;
-			mAdapter.sethikeToOfflineMode(true);
+			mAdapter.setH20Mode(true);
 			initializeH20Mode();
 			setupH20TipViews(); 
 		}
