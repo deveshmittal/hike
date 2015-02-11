@@ -1249,8 +1249,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	protected void clearConversation()
 	{
+		removeAllFromUndeliveredMessages();
+		hideH20Tip();
 		super.clearConversation();
-		// TODO : hideHikeToOfflineTip();
 	}
 	
 	/**
