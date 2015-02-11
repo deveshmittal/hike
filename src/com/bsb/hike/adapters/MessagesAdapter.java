@@ -3639,14 +3639,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		isHikeToOfflineMode = isOn;
 	}
 
-	public int getSelectedFreeSmsCount()
-	{
-		Collection<ConvMessage> selectedMessages = getSelectedMessagesMap().values();
-		int totalMsgLength = Utils.combineInOneSmsString(context, false, selectedMessages, true).length();
-
-		return (totalMsgLength / 140) + 1;
-	}
-	
 	private void fillStatusMessageData(StatusViewHolder statusHolder, ConvMessage convMessage, View v)
 	{
 		StatusMessage statusMessage = convMessage.getMetadata().getStatusMessage();
