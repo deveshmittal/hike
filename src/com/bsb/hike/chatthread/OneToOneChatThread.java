@@ -1556,7 +1556,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			if (undeliveredMessages.isEmpty())
 			{
 				shouldScheduleH20Tip = true;
-				hideH20Tip();
+				hideH20Tip(false, false, false, isMsgDelivered);
 			}
 
 			if (firstPendingConvMessage.equals(convMessage))
