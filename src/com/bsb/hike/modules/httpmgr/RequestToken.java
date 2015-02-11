@@ -38,5 +38,10 @@ public class RequestToken
 	{
 		HttpManager.getInstance().cancel(request);
 	}
+	
+	public boolean isRequestRunning()
+	{
+		return HttpManager.getInstance().isRequestRunning(request);
+	}
 
 }
