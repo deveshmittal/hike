@@ -52,14 +52,12 @@ import android.widget.Chronometer;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient.ConnectionMethods;
 import com.bsb.hike.voip.VoIPConstants.CallQuality;
 import com.bsb.hike.voip.VoIPDataPacket.PacketType;
@@ -104,7 +102,7 @@ public class VoIPService extends Service {
 	private Resampler resampler;
 	private Thread partnerTimeoutThread = null;
 	private Thread recordingThread = null, playbackThread = null, sendingThread = null, receivingThread = null, codecCompressionThread = null, codecDecompressionThread = null;
-	private AudioTrack audioTrack;
+	private AudioTrack audioTrack = null;
 	private static int callId = 0;
 	private int totalPacketsSent = 0, totalPacketsReceived = 0;
 	private NotificationManager notificationManager;
@@ -156,6 +154,9 @@ public class VoIPService extends Service {
 	SolicallWrapper solicallAec = null;
 	private final boolean aecEnabled = true;
 	private boolean aecSpeakerSignal = false, aecMicSignal = false;
+	private int audiotrackFramesWritten = 0;
+	private boolean miscTrigger = false;
+	private int miscCounter = 0;
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -255,7 +256,7 @@ public class VoIPService extends Service {
 			
 			// Error case: we are in a cellular call
 			if (VoIPUtils.isUserInCall(getApplicationContext())) {
-				Log.w(VoIPConstants.TAG, "We are already in a cellular call.");
+				Logger.w(VoIPConstants.TAG, "We are already in a cellular call.");
 				try {
 					VoIPUtils.sendMessage(intent.getStringExtra("msisdn"), 
 							HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
@@ -901,6 +902,8 @@ public class VoIPService extends Service {
 
 					if (isAudioRunning())
 						chronoBackup++;
+					
+					miscTrigger = true;
 				}
 			}
 		}, "SEND_HEART_BEAT_THREAD").start();
@@ -970,8 +973,8 @@ public class VoIPService extends Service {
 					}
 
 					while (decodedBuffersQueue.size() > MAX_SAMPLES_BUFFER) {
-						Logger.d(VoIPConstants.TAG, "Dropping decoded queue.");
-						decodedBuffersQueue.clear();
+						Logger.d(VoIPConstants.TAG, "Dropping decoded packet.");
+						decodedBuffersQueue.poll();
 					}
 
 					try {
@@ -1327,10 +1330,6 @@ public class VoIPService extends Service {
 			@Override
 			public void run() {
 				
-				byte[] silence = new byte[1000];
-				final VoIPDataPacket voiceCache = new VoIPDataPacket(PacketType.VOICE_PACKET);
-				voiceCache.setData(silence);
-
 				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				int index = 0, size = 0;
 				Logger.d(VoIPConstants.TAG, "minBufSizePlayback: " + minBufSizePlayback);
@@ -1375,10 +1374,11 @@ public class VoIPService extends Service {
 						// For streaming mode, we must write data in chunks <= buffer size
 						index = 0;
 						while (index < dp.getLength()) {
-							size = Math.min(minBufSizePlayback / 2, dp.getLength() - index);
+							size = Math.min(minBufSizePlayback, dp.getLength() - index);
 							audioTrack.write(dp.getData(), index, size);
 							index += size; 
 						}
+						audiotrackFramesWritten += dp.getLength() / 2;
 
 					} else {
 						synchronized (decodedBuffersQueue) {
@@ -1411,6 +1411,47 @@ public class VoIPService extends Service {
 		}, "PLAY_BACK_THREAD");
 		
 		playbackThread.start();
+		startAudioTrackMonitoringThread();
+	}
+	
+	private void startAudioTrackMonitoringThread() {
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				final int frameDuration = (OpusWrapper.OPUS_FRAME_SIZE * 1000) / playbackSampleRate;		// Monitor will run every 60ms
+				
+				while (keepRunning) {
+					
+					if (audioTrack != null) {
+//						Logger.d(VoIPConstants.TAG, "Head position: " + audioTrack.getPlaybackHeadPosition() + 
+//								", written: " + audiotrackFramesWritten + 
+//								", decodedBuffersQueue: " + decodedBuffersQueue.size());
+
+						if (audiotrackFramesWritten < audioTrack.getPlaybackHeadPosition() + OpusWrapper.OPUS_FRAME_SIZE &&
+								decodedBuffersQueue.size() <= 1) {
+							// We are running low on speaker data
+		                	synchronized (decodedBuffersQueue) {
+		        				byte[] silence = new byte[OpusWrapper.OPUS_FRAME_SIZE * 2];
+		        				VoIPDataPacket dp = new VoIPDataPacket(PacketType.VOICE_PACKET);
+		        				dp.setData(silence);
+			                	decodedBuffersQueue.add(dp);
+			                	decodedBuffersQueue.notify();
+			                	Logger.w(VoIPConstants.TAG, "Adding silence to audiotrack");
+							}
+						}
+
+					}
+
+					try {
+						Thread.sleep(frameDuration);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				
+			}
+		}, "AUDIOTRACK_MONITOR_THREAD").start();
 	}
 	
 	private void startSendingAndReceiving() {
@@ -1495,6 +1536,14 @@ public class VoIPService extends Service {
 //						Logger.d(VoIPConstants.TAG, "Received something.");
 						totalBytesReceived += packet.getLength();
 						totalPacketsReceived++;
+						
+						miscCounter++;
+						if (miscTrigger == true) {
+							Logger.d(VoIPConstants.TAG, "miscCounter: " + miscCounter);
+							miscTrigger = false;
+							miscCounter = 0;
+						}
+						
 					} catch (IOException e) {
 						Logger.e(VoIPConstants.TAG, "startReceiving() IOException: " + e.toString());
 						break;
@@ -1993,7 +2042,7 @@ public class VoIPService extends Service {
 			return;
 			
 		// Ringer
-		Log.d(VoIPConstants.TAG, "Playing ringtone.");
+		Logger.d(VoIPConstants.TAG, "Playing ringtone.");
 		Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 		if (ringtone == null)
 			ringtone = RingtoneManager.getRingtone(getApplicationContext(), notification);

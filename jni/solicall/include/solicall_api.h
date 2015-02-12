@@ -54,7 +54,8 @@ typedef BYTE SOLICALL_RC;
     
     
 
-#define SOLICALL_API_VERSION 4
+#define SOLICALL_API_VERSION 5
+
 
 // Detect Aggressive Level is a number between 0 to 4
 #define SOLICALL_LOWEST_DETECT_AGGRESSIVE_LEVEL 0
@@ -102,16 +103,19 @@ typedef BYTE SOLICALL_RC;
 #define SOLICALL_MIN_AEC_TYPE 0
 #define SOLICALL_MAX_AEC_TYPE 8
 
-#define SOLICALL_MIN_AEC_ASYNC_DELAY 0
+#define SOLICALL_MIN_AEC_ASYNC_DELAY  0
 #define SOLICALL_MAX_AEC_ASYNC_DELAY 50
 
-#define SOLICALL_MIN_AEC_SENSITIVITY_LEVEL 0
+#define SOLICALL_MIN_AEC_SENSITIVITY_LEVEL  0
 #define SOLICALL_MAX_AEC_SENSITIVITY_LEVEL 10
 
-#define SOLICALL_MIN_AEC_AGGRESSIVE_LEVEL 0
+#define SOLICALL_MIN_AEC_STARTUP_AGGRESSIVE_LEVEL  0
+#define SOLICALL_MAX_AEC_STARTUP_AGGRESSIVE_LEVEL 10
+
+#define SOLICALL_MIN_AEC_AGGRESSIVE_LEVEL  0
 #define SOLICALL_MAX_AEC_AGGRESSIVE_LEVEL 20
 
-#define SOLICALL_MIN_AEC_HOWLING_LEVEL 0
+#define SOLICALL_MIN_AEC_HOWLING_LEVEL  0
 #define SOLICALL_MAX_AEC_HOWLING_LEVEL 20
 
 
@@ -218,6 +222,11 @@ typedef struct {
     // The higher the number, the more sensitive the AEC will be.  
     SHORT   sSensitivityLevelAECParam;
 
+    // The following parameters is the aggressive level of the AEC before any convergence is done. 
+    // This number ranges from SOLICALL_MIN_AEC_STARTUP_AGGRESSIVE_LEVEL to SOLICALL_MAX_AEC_STARTUP_AGGRESSIVE_LEVEL  
+    // The higher the number, the more aggressive the AEC will be at start.  
+    SHORT   sAecStartupAggressiveLevel;
+
     // The following parameters is the aggressive level of the AEC. 
     // This number ranges from SOLICALL_MIN_AEC_AGGRESSIVE_LEVEL to SOLICALL_MAX_AEC_AGGRESSIVE_LEVEL  
     // The higher the number, the more aggressive the AEC will be.  
@@ -263,6 +272,9 @@ typedef struct {
     // The lowest percentage to be output when an echo is detected. 
     SHORT   sAECMinOutputPercentageDuringEcho;
   
+	// the following parameter is the percent of comfort noise to be added to the output. 
+    SHORT   sComfortNoisePercent;
+
 } sSoliCallInit ;
 
 
