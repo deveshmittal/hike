@@ -1607,9 +1607,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	 * @param object - Message
 	 * @param qos level (MQTT_PUBLISH or MQTT_PUBLISH_LOW)
 	 */
-	public void sendMessage(Object object, int qos)
+	public void sendMessage(JSONObject o, int qos)
 	{
-		JSONObject o = (JSONObject) object;
+		// added check
+		if(o == null)
+		{
+			return ;
+		}
+		
 		String data = o.toString();
 
 		long msgId = -1;
