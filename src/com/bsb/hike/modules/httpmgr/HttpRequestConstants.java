@@ -132,7 +132,7 @@ public class HttpRequestConstants
 
 	public static String getGroupBaseUrl()
 	{
-		return BASE_URL + BASE_V1 + "/group/";
+		return BASE_URL + BASE_V1 + "/group";
 	}
 
 	public static String getAvatarBaseUrl()
@@ -142,7 +142,7 @@ public class HttpRequestConstants
 
 	public static String getStaticAvatarBaseUrl()
 	{
-		return BASE_URL + ":" + PORT + "/static/avatars/";
+		return BASE_URL + "/static/avatars";
 	}
 
 	public static String postToSocialNetworkBaseUrl()

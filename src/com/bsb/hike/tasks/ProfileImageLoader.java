@@ -1,48 +1,35 @@
 package com.bsb.hike.tasks;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import static com.bsb.hike.modules.httpmgr.HttpRequests.profileImageLoaderRequest;
 
-import javax.net.ssl.HttpsURLConnection;
+import java.io.File;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.adapters.ProfileAdapter;
-import com.bsb.hike.smartImageLoader.ImageWorker;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
+import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.HikeSSLUtil;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 {
-
-	private String urlString;
-
-	private boolean isSslON;
+	private String dirPath;
 
 	private String filePath;
-
-	private String fileName;
 
 	private String key;
 
 	private boolean isStatusImage;
+
+	private RequestToken requestToken;
+	
+	private boolean resultValue;
 
 	public ProfileImageLoader(Context context, String id, String fileName, boolean hasCustomIcon, boolean statusImage)
 	{
@@ -56,36 +43,10 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 		this.isStatusImage = statusImage;
 		this.key = id;
 
-		if (TextUtils.isEmpty(url))
-		{
-			if (statusImage)
-			{
-				this.urlString = AccountUtils.base + "/user/status/" + id + "?only_image=true";
-			}
-			else
-			{
-				boolean isGroupConversation = Utils.isGroupConversation(id);
+		this.dirPath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
+		this.filePath = dirPath + "/" + Utils.getTempProfileImageFileName(key);
 
-				if (hasCustomIcon)
-				{
-					this.urlString = AccountUtils.base + (isGroupConversation ? "/group/" + id + "/avatar" : "/account/avatar/" + id) + "?fullsize=1";
-				}
-				else
-				{
-					this.urlString = (AccountUtils.ssl ? AccountUtils.HTTPS_STRING : AccountUtils.HTTP_STRING) + AccountUtils.host + ":" + AccountUtils.port + "/static/avatars/"
-							+ fileName;
-				}
-				this.isSslON = AccountUtils.ssl;
-			}
-		}
-		else
-		{
-			this.urlString = url;
-			this.isSslON = url.startsWith(AccountUtils.HTTPS_STRING);
-		}
-
-		this.filePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
-		this.fileName = filePath + "/" + Utils.getTempProfileImageFileName(key);
+		requestToken = profileImageLoaderRequest(key, fileName, filePath, hasCustomIcon, statusImage, url, getRequestListener());
 	}
 
 	@Override
@@ -97,87 +58,17 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 	@Override
 	public Boolean loadInBackground()
 	{
-		FileOutputStream fos = null;
-		InputStream is = null;
-		try
+
+		File dir = new File(dirPath);
+		if (!dir.exists())
 		{
-			File dir = new File(filePath);
-			if (!dir.exists())
+			if (!dir.mkdirs())
 			{
-				if (!dir.mkdirs())
-				{
-					return Boolean.FALSE;
-				}
-			}
-
-			Logger.d(getClass().getSimpleName(), "Downloading profile image: " + urlString);
-			URL url = new URL(urlString);
-
-			URLConnection connection = url.openConnection();
-			AccountUtils.addUserAgent(connection);
-			connection.addRequestProperty("Cookie", "user=" + AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
-
-			if (isSslON)
-			{
-				((HttpsURLConnection) connection).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
-			}
-
-			is = new BufferedInputStream(connection.getInputStream());
-
-			fos = new FileOutputStream(fileName);
-
-			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
-			int len = 0;
-
-			while ((len = is.read(buffer)) != -1)
-			{
-				fos.write(buffer, 0, len);
-			}
-
-		}
-		catch (MalformedURLException e)
-		{
-			Logger.e(getClass().getSimpleName(), "Invalid URL", e);
-			Utils.removeTempProfileImage(key);
-			return Boolean.FALSE;
-		}
-		catch (IOException e)
-		{
-			Logger.e(getClass().getSimpleName(), "Error while downloding file", e);
-			Utils.removeTempProfileImage(key);
-			return Boolean.FALSE;
-		}
-		finally
-		{
-			try
-			{
-				if (fos != null)
-				{
-					fos.close();
-				}
-				if (is != null)
-				{
-					is.close();
-				}
-			}
-			catch (IOException e)
-			{
-				Logger.e(getClass().getSimpleName(), "Error while closing file", e);
-				Utils.removeTempProfileImage(key);
 				return Boolean.FALSE;
 			}
 		}
-
-		Utils.renameTempProfileImage(key);
-
-		String keypp = key;
-
-		if (!isStatusImage)
-			keypp = key + ProfileActivity.PROFILE_PIC_SUFFIX;
-
-		HikeMessengerApp.getLruCache().remove(keypp);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_IMAGE_DOWNLOADED, key);
-		return Boolean.TRUE;
+		requestToken.execute();
+		return Boolean.valueOf(resultValue);
 	}
 
 	@Override
@@ -192,6 +83,41 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 	{
 		cancelLoad();
 		Utils.removeTempProfileImage(key);
+	}
+
+	private IRequestListener getRequestListener()
+	{
+		return new IRequestListener()
+		{
+
+			@Override
+			public void onRequestSuccess(Response result)
+			{
+				Utils.renameTempProfileImage(key);
+
+				String keypp = key;
+
+				if (!isStatusImage)
+					keypp = key + ProfileActivity.PROFILE_PIC_SUFFIX;
+
+				HikeMessengerApp.getLruCache().remove(keypp);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_IMAGE_DOWNLOADED, key);
+				resultValue = true;
+			}
+
+			@Override
+			public void onRequestProgressUpdate(float progress)
+			{
+				
+			}
+
+			@Override
+			public void onRequestFailure(HttpException httpException)
+			{
+				Utils.removeTempProfileImage(key);
+				resultValue = false;
+			}
+		};
 	}
 
 }

@@ -8,29 +8,31 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStaticAvatarB
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStatusBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.lastSeenUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.multiStickerDownloadUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postAddressbookBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postDeviceDetailsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postGreenBlueDetailsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postToSocialNetworkBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.preActivationBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.registerAccountBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendDeviceDetailBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendTwitterInviteBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendUserLogsInfoBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.setProfileUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.singleStickerDownloadBase;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.socialCredentialsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPalleteImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPreviewImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerShopDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerSignupUpgradeUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.registerAccountBaseUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.validateNumberBaseUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postAddressbookBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.updateAddressbookBaseUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.setProfileUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendDeviceDetailBaseUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.preActivationBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.validateNumberBaseUrl;
 import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_HIGH;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_LONG;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
 
 import org.json.JSONObject;
+
+import android.text.TextUtils;
 
 import com.bsb.hike.modules.httpmgr.request.ByteArrayRequest;
 import com.bsb.hike.modules.httpmgr.request.FileRequest;
@@ -76,7 +78,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken StickerPalleteImageDownloadRequest(String categoryId, IPreProcessListener preProcessListener, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
@@ -88,7 +90,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken StickerPreviewImageDownloadRequest(String categoryId, IPreProcessListener preProcessListener, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
@@ -99,12 +101,12 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken MultiStickerDownloadRequest(IPreProcessListener preProcessListener, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(multiStickerDownloadUrl())
-				.post(null)  // will set it in preprocess listener method using request facade
+				.post(null) // will set it in preprocess listener method using request facade
 				.setPreProcessListener(preProcessListener)
 				.setRequestListener(requestListener)
 				.setRequestType(REQUEST_TYPE_LONG)
@@ -112,30 +114,30 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken LastSeenRequest(String msisdn, IRequestListener requestListener, IRetryPolicy retryPolicy)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-											   .setUrl(lastSeenUrl() + "/" + msisdn)
-											   .setRetryPolicy(retryPolicy)
-											   .setRequestListener(requestListener)
-											   .setRequestType(REQUEST_TYPE_SHORT)
-											   .setPriority(PRIORITY_HIGH)
-											   .build();
+				.setUrl(lastSeenUrl() + "/" + msisdn)
+				.setRetryPolicy(retryPolicy)
+				.setRequestListener(requestListener)
+				.setRequestType(REQUEST_TYPE_SHORT)
+				.setPriority(PRIORITY_HIGH)
+				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken BulkLastSeenRequest(IRequestListener requestListener, IRetryPolicy retryPolicy)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-											   .setUrl(bulkLastSeenUrl())
-											   .setRetryPolicy(retryPolicy)
-											   .setRequestListener(requestListener)
-											   .setRequestType(REQUEST_TYPE_SHORT)
-											   .build();
+				.setUrl(bulkLastSeenUrl())
+				.setRetryPolicy(retryPolicy)
+				.setRequestListener(requestListener)
+				.setRequestType(REQUEST_TYPE_SHORT)
+				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken getHikeJoinTimeRequest(String msisdn, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
@@ -146,7 +148,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken postStatusRequest(JSONObject json, IRequestListener requestListener)
 	{
 		JsonBody body = new JsonBody(json);
@@ -159,7 +161,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken deleteStatusRequest(String statusId, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new ByteArrayRequest.Builder()
@@ -171,7 +173,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken postDeviceDetailsRequest(JSONObject json, IRequestListener requestListener)
 	{
 		JsonBody body = new JsonBody(json);
@@ -183,7 +185,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken postGreenBlueDetailsRequest(JSONObject json, IRequestListener requestListener)
 	{
 		JsonBody body = new JsonBody(json);
@@ -195,7 +197,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken sendSocialCredentialsRequest(String social, JSONObject json, IRequestListener requestListener)
 	{
 		JsonBody body = new JsonBody(json);
@@ -205,9 +207,9 @@ public class HttpRequests
 				.setResponseOnUIThread(true)
 				.post(body)
 				.build();
-				return requestToken;
+		return requestToken;
 	}
-	
+
 	public static RequestToken registerAccountRequest(IRequestBody body, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
@@ -218,9 +220,9 @@ public class HttpRequests
 				.setAsynchronous(false)
 				.build();
 		return requestToken;
-		
+
 	}
-	
+
 	public static RequestToken sendUserLogInfoRequest(String logKey, JSONObject json, IRequestListener requestListener)
 	{
 		JsonBody body = new JsonBody(json);
@@ -231,7 +233,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken downloadStatusImageRequest(String id, String filePath, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new FileRequest.Builder()
@@ -251,7 +253,7 @@ public class HttpRequests
 		{
 			if (isGroupConvs)
 			{
-				url = getGroupBaseUrl() + id + "/avatar?fullsize=1";
+				url = getGroupBaseUrl() + "/" + id + "/avatar?fullsize=1";
 			}
 			else
 			{
@@ -260,7 +262,7 @@ public class HttpRequests
 		}
 		else
 		{
-			url = getStaticAvatarBaseUrl() + filePath;
+			url = getStaticAvatarBaseUrl() + "/" + filePath;
 		}
 		RequestToken requestToken = new FileRequest.Builder()
 				.setUrl(url)
@@ -271,7 +273,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken validateNumberRequest(IRequestBody body, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
@@ -283,7 +285,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken setProfileRequest(IRequestBody body, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
@@ -295,7 +297,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken downloadProtipRequest(String url, String filePath, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new FileRequest.Builder()
@@ -307,7 +309,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken postToSocialNetworkRequest(JSONObject json, IRequestListener requestListener)
 	{
 		JsonBody body = new JsonBody(json);
@@ -319,7 +321,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken sendTwitterInviteRequest(JSONObject json, IRequestListener requestListener)
 	{
 		JsonBody body = new JsonBody(json);
@@ -331,7 +333,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken postAddressBookRequest(IRequestBody body, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
@@ -343,7 +345,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken updateAddressBookRequest(IRequestBody body, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
@@ -355,7 +357,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken sendDeviceDetailsRequest(IRequestBody body, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
@@ -366,7 +368,7 @@ public class HttpRequests
 				.build();
 		return requestToken;
 	}
-	
+
 	public static RequestToken sendPreActivationRequest(IRequestBody body, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
@@ -374,6 +376,44 @@ public class HttpRequests
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.post(body)
+				.build();
+		return requestToken;
+	}
+
+	public static RequestToken profileImageLoaderRequest(String id, String fileName, String filePath, boolean hasCustomIcon, boolean statusImage, String url, IRequestListener requestListener)
+	{
+		String urlString;
+		
+		if (TextUtils.isEmpty(url))
+		{
+			if (statusImage)
+			{
+				urlString = getStatusBaseUrl() + "/" + id + "?only_image=true";
+			}
+			else
+			{
+				boolean isGroupConversation = Utils.isGroupConversation(id);
+
+				if (hasCustomIcon)
+				{
+					urlString = (isGroupConversation ? getGroupBaseUrl() + "/" + id + "/avatar" : getAvatarBaseUrl() + "/" + id)  + "?fullsize=1";
+				}
+				else
+				{
+					urlString = getStaticAvatarBaseUrl() + "/" + fileName;
+				}
+			}
+		}
+		else
+		{
+			urlString = url;
+		}
+		RequestToken requestToken = new FileRequest.Builder()
+				.setUrl(urlString)
+				.setFile(filePath)
+				.setRequestListener(requestListener)
+				.setAsynchronous(false)
+				.get()
 				.build();
 		return requestToken;
 	}
