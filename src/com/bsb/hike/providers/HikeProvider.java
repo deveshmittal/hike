@@ -277,7 +277,7 @@ public class HikeProvider extends ContentProvider
 	@Override
 	public ParcelFileDescriptor openFile(Uri uri, String mode)
 	{
-		Log.d("FileContentProvider", "fetching: " + uri);
+		Logger.d("FileContentProvider", "fetching: " + uri);
 
 		ParcelFileDescriptor parcel = null;
 
@@ -289,7 +289,7 @@ public class HikeProvider extends ContentProvider
 		}
 		catch (FileNotFoundException e)
 		{
-			Log.e("FileContentProvider", "uri " + uri.toString(), e);
+			Logger.e("FileContentProvider", "uri " + uri.toString(), e);
 		}
 		return parcel;
 	}

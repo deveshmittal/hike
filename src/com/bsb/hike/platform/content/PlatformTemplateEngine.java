@@ -2,8 +2,8 @@ package com.bsb.hike.platform.content;
 
 import java.util.HashMap;
 
-import android.util.Log;
 
+import com.bsb.hike.utils.Logger;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.samskivert.mustache.Mustache;
@@ -28,7 +28,7 @@ class PlatformTemplateEngine
 	 */
 	public static Template compileTemplate(String templateContent)
 	{
-		Log.d(TAG, "compile template");
+		Logger.d(TAG, "compile template");
 
 		try
 		{
@@ -52,7 +52,7 @@ class PlatformTemplateEngine
 	 */
 	public static boolean execute(Template template, PlatformContentRequest contentRequest)
 	{
-		Log.d(TAG, "binding data");
+		Logger.d(TAG, "binding data");
 		HashMap<String, Object> contentDataMap = new Gson().fromJson(contentRequest.getContentData().getContentJSON(), new TypeToken<HashMap<String, Object>>()
 		{
 		}.getType());

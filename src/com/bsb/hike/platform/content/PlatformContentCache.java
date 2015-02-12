@@ -8,8 +8,7 @@ import org.json.JSONObject;
 
 import android.support.v4.util.LruCache;
 import android.text.TextUtils;
-import android.util.Log;
-
+import com.bsb.hike.utils.Logger;
 import com.samskivert.mustache.Template;
 
 /**
@@ -59,7 +58,7 @@ class PlatformContentCache
 	{
 		Template template = templateCache.get(content.getContentData().templateHashCode());
 
-		Log.d(TAG, "getting template - " + content.getContentData().getContentJSON());
+		Logger.d(TAG, "getting template - " + content.getContentData().getContentJSON());
 
 		if (template == null)
 		{
@@ -79,7 +78,7 @@ class PlatformContentCache
 	 */
 	public static void putTemplate(int hashCode, Template template)
 	{
-		Log.d(TAG, "putting template in cache");
+		Logger.d(TAG, "putting template in cache");
 		if (template != null)
 		{
 			templateCache.put(hashCode, template);
@@ -95,7 +94,7 @@ class PlatformContentCache
 	 */
 	private static Template loadTemplateFromDisk(PlatformContentRequest content)
 	{
-		Log.d(TAG, "loading template from disk");
+		Logger.d(TAG, "loading template from disk");
 
 		// if (verifyVersion(content))
 		// {
@@ -115,7 +114,7 @@ class PlatformContentCache
 			return null;
 		}
 
-		Log.d(TAG, "loading template from disk - complete");
+		Logger.d(TAG, "loading template from disk - complete");
 
 		Template downloadedTemplate = PlatformTemplateEngine.compileTemplate(templateString);
 
@@ -204,7 +203,7 @@ class PlatformContentCache
 	 */
 	public static void putFormedContent(PlatformContentModel content)
 	{
-		Log.d(TAG, "put formed content in cache");
+		Logger.d(TAG, "put formed content in cache");
 		
 		formedContentCache.put(content.hashCode(), content);
 	}
@@ -218,7 +217,7 @@ class PlatformContentCache
 	 */
 	public static PlatformContentModel getFormedContent(PlatformContentRequest request)
 	{
-		Log.d(TAG, "get formed content from cache");
+		Logger.d(TAG, "get formed content from cache");
 
 		return formedContentCache.get(request.getContentData().hashCode());
 	}

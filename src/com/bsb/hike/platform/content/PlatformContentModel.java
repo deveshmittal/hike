@@ -5,9 +5,7 @@ import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import android.util.Log;
-
+import com.bsb.hike.utils.Logger;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -93,7 +91,7 @@ public class PlatformContentModel
 	 */
 	public static PlatformContentModel make(String contentData)
 	{
-		Log.d(TAG, "making PlatformContentModel");
+		Logger.d(TAG, "making PlatformContentModel");
 		JsonParser parser = new JsonParser();
 		JsonObject jsonObj = (JsonObject) parser.parse(contentData);
 		PlatformContentModel object = null;
