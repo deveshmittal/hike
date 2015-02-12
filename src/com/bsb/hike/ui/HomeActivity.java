@@ -468,7 +468,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION;
 		}
 
-		dialog = Utils.showSMSSyncDialog(this, dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION);
+		dialog = HikeDialogFactory.showDialog(this, HikeDialogFactory.SMS_SYNC_DIALOG, dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION);
 	}
 
 	private void showFreeInviteDialog()

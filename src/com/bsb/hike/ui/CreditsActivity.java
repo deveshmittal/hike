@@ -63,7 +63,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 			if (dialogShowingOrdinal != -1)
 			{
 				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
-				smsDialog = Utils.showSMSSyncDialog(this, dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG);
+				smsDialog = HikeDialogFactory.showDialog(this, HikeDialogFactory.SMS_SYNC_DIALOG, dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG);
 			}
 		}
 	}
@@ -265,7 +265,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 				@Override
 				public void run()
 				{
-					smsDialog = Utils.showSMSSyncDialog(CreditsActivity.this, true);
+					smsDialog = HikeDialogFactory.showDialog(CreditsActivity.this, HikeDialogFactory.SMS_SYNC_DIALOG, true);
 					dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG;
 				}
 			});

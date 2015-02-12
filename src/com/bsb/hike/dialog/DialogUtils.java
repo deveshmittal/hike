@@ -2,10 +2,21 @@ package com.bsb.hike.dialog;
 
 import java.util.ArrayList;
 
-import android.content.Context;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import android.content.Context;
+import android.os.AsyncTask;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.SMSSyncState;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 public class DialogUtils
 {
@@ -69,5 +80,45 @@ public class DialogUtils
 			return context.getResources().getString(R.string.share_with, readByString);
 		}
 	}
+	
+	public static void setupSyncDialogLayout(boolean syncConfirmation, View btnContainer, ProgressBar syncProgress, TextView info, View btnDivider)
+	{
+		btnContainer.setVisibility(syncConfirmation ? View.VISIBLE : View.GONE);
+		syncProgress.setVisibility(syncConfirmation ? View.GONE : View.VISIBLE);
+		btnDivider.setVisibility(syncConfirmation ? View.VISIBLE : View.GONE);
+		info.setText(syncConfirmation ? R.string.import_sms_info : R.string.importing_sms_info);
+	}
 
+	public static void executeSMSSyncStateResultTask(AsyncTask<Void, Void, SMSSyncState> asyncTask)
+	{
+		if (Utils.isHoneycombOrHigher())
+		{
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
+		else
+		{
+			asyncTask.execute();
+		}
+	}
+
+	public static void sendSMSSyncLogEvent(boolean syncing)
+	{
+		JSONObject data = new JSONObject();
+		JSONObject metadata = new JSONObject();
+
+		try
+		{
+			metadata.put(HikeConstants.PULL_OLD_SMS, syncing);
+
+			data.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
+
+			Utils.sendLogEvent(data);
+		}
+		catch (JSONException e)
+		{
+			Logger.w("LogEvent", e);
+		}
+
+	}
 }

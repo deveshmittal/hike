@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
@@ -22,17 +23,21 @@ import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.ImageQuality;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.AccountAdapter;
 import com.bsb.hike.models.AccountData;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.PhonebookContact;
+import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontTextView;
@@ -90,6 +95,8 @@ public class HikeDialogFactory
 	public static final int DELETE_MESSAGES_DIALOG = 27;
 	
 	public static final int SHOW_H20_SMS_DIALOG = 28;
+	
+	public static final int SMS_SYNC_DIALOG = 29; 
 
 	public static HikeDialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -158,6 +165,9 @@ public class HikeDialogFactory
 			
 		case SHOW_H20_SMS_DIALOG:
 			return showH20Dialog(dialogId, context, listener, data);
+			
+		case SMS_SYNC_DIALOG:
+			return showSMSSyncDialog(dialogId, context, listener, data);
 		}
 		return null;
 	}
@@ -1040,4 +1050,71 @@ public class HikeDialogFactory
 		return dialog;
 	}
 	
+	
+	private static HikeDialog showSMSSyncDialog(int dialogId, final Context context, final HikeDialogListener listener, Object... data)
+	{
+		final HikeDialog dialog = new HikeDialog(context, R.style.Theme_CustomDialog, dialogId);
+		dialog.setContentView(R.layout.enable_sms_client_popup);
+		
+		boolean syncConfirmation = (boolean) data[0]; 
+
+		final View btnContainer = dialog.findViewById(R.id.button_container);
+
+		final ProgressBar syncProgress = (ProgressBar) dialog.findViewById(R.id.loading_progress);
+		TextView header = (TextView) dialog.findViewById(R.id.header);
+		final TextView info = (TextView) dialog.findViewById(R.id.body);
+		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
+		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+		final View btnDivider = dialog.findViewById(R.id.sms_divider);
+
+		header.setText(R.string.import_sms);
+		info.setText(R.string.import_sms_info);
+		okBtn.setText(R.string.yes);
+		cancelBtn.setText(R.string.no);
+
+		DialogUtils.setupSyncDialogLayout(syncConfirmation, btnContainer, syncProgress, info, btnDivider);
+
+		okBtn.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.SMS_SYNC_START, null);
+
+				DialogUtils.executeSMSSyncStateResultTask(new SyncOldSMSTask(context));
+
+				DialogUtils.setupSyncDialogLayout(false, btnContainer, syncProgress, info, btnDivider);
+
+				DialogUtils.sendSMSSyncLogEvent(true);
+			}
+		});
+
+		cancelBtn.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				dialog.dismiss();
+
+				DialogUtils.sendSMSSyncLogEvent(false);
+			}
+		});
+
+		dialog.setOnDismissListener(new OnDismissListener()
+		{
+
+			@Override
+			public void onDismiss(DialogInterface dialog)
+			{
+				Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, true);
+				editor.commit();
+			}
+		});
+
+		dialog.show();
+		return dialog;
+	}
 }
