@@ -38,7 +38,7 @@ public class MessageSenderLayout
 	 * @ordered
 	 */
 	
-	public EmoticonLayout emoticonlayout;
+//	public EmoticonLayout emoticonlayout;
 	
 	/**
 	 * <!-- begin-user-doc -->
