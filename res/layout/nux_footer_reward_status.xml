@@ -43,8 +43,8 @@
         <com.bsb.hike.view.HoloCircularProgress
             xmlns:app="http://schemas.android.com/apk/res/com.bsb.hike"
             android:id="@+id/nux_progress"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:layout_centerInParent="true"
             android:visibility="visible"
             app:marker_visible="false"

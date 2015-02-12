@@ -79,11 +79,15 @@ import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.ContentLove;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
+import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.LastSeenScheduler;
@@ -1243,6 +1247,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			try
 			{
 				JSONArray multipleMsgFwdArray = new JSONArray(jsonString);
+				JSONObject platformAnalyticsJson = new JSONObject();
+				StringBuilder platformCards = new StringBuilder();
 				int msgCount = multipleMsgFwdArray.length();
 				for (int i = 0; i < msgCount; i++)
 				{
@@ -1353,11 +1359,31 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
                         convMessage.setIsSent(true);
                         convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
 						multipleMessageList.add(convMessage);
+					} else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.WEB_CONTENT || msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.FORWARD_WEB_CONTENT){
+						//Web content message
+						String metadata = msgExtrasJson.optString(HikeConstants.METADATA);
+
+						ConvMessage convMessage = new ConvMessage();
+						convMessage.setIsSent(true);
+						convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
+						convMessage.platformWebMessageMetadata =  new PlatformWebMessageMetadata(PlatformContent.getForwardCardData(metadata));
+
+						try
+						{
+							platformCards.append( TextUtils.isEmpty(platformCards) ? convMessage.platformWebMessageMetadata.getAppName() : "," + convMessage.platformWebMessageMetadata.getAppName());
+						}
+						catch (NullPointerException e)
+						{
+							e.printStackTrace();
+						}
+						convMessage.setMessage(msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE));
+						multipleMessageList.add(convMessage);
 					}
 					/*
 					 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 					 */
 				}
+				platformAnalyticsJson.put(HikePlatformConstants.CARD_TYPE, platformCards);
 				if(!fileTransferList.isEmpty()){
 					prefileTransferTask = new PreFileTransferAsycntask(fileTransferList,intent);
 					Utils.executeAsyncTask(prefileTransferTask);
@@ -1378,7 +1404,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
 					sendMessage(convMessage);
 				}else{
-					sendMultiMessages(multipleMessageList,arrayList,false);
+					sendMultiMessages(multipleMessageList,arrayList,platformAnalyticsJson,false);
 					if(fileTransferList.isEmpty()){
 						// if it is >0 then onpost execute of PreFileTransferAsycntask will start intent
 						startActivity(intent);
@@ -1503,8 +1529,23 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		return toReturn;
 	}
 
-	private void sendMultiMessages(ArrayList<ConvMessage> multipleMessageList, ArrayList<ContactInfo> arrayList,boolean createChatThread)
+	private void sendMultiMessages(ArrayList<ConvMessage> multipleMessageList, ArrayList<ContactInfo> arrayList, JSONObject platformAnalyticsJson, boolean createChatThread)
 	{
+		try
+		{
+			StringBuilder contactList = new StringBuilder();
+			for (ContactInfo contactInfo : arrayList)
+			{
+				contactList.append(TextUtils.isEmpty(contactList) ? contactInfo.getMsisdn() : "," + contactInfo.getMsisdn());
+			}
+			platformAnalyticsJson.put(AnalyticsConstants.TO, contactList);
+			platformAnalyticsJson.put(HikeConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
+			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, platformAnalyticsJson, AnalyticsConstants.EVENT_TAG_PLATFORM);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
 		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000, createChatThread, null);
 		mPubSub.publish(HikePubSub.MULTI_MESSAGE_SENT, multiMessages);
 	}

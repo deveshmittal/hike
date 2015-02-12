@@ -121,7 +121,7 @@ public class StickerManager
 	
 	public static int MAX_CUSTOM_STICKERS_COUNT = 30;
 	
-	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
+	public static final int SIZE_IMAGE = (int) (80 * Utils.scaledDensityMultiplier);
 
 	public static final String UPGRADE_FOR_STICKER_SHOP_VERSION_1 = "upgradeForStickerShopVersion1";
 	
@@ -1647,9 +1647,27 @@ public class StickerManager
 		// renaming large/small folders for all categories
 		for (File categoryRoot : files)
 		{
+			// if categoryRoot(eg. humanoid/love etc.) file is not a directory we should not do anything.
+			if(categoryRoot == null || !categoryRoot.isDirectory())
+			{
+				continue;
+			}
+			
 			File[] categoryAssetFiles = categoryRoot.listFiles();
+			
+			if(categoryAssetFiles == null)
+			{
+				continue;
+			}
+			
 			for (File categoryAssetFile : categoryAssetFiles)
 			{
+				// if categoryAssetFile(eg. large/small/other) is not a directory we should not do anything.
+				if(categoryAssetFile == null || !categoryAssetFile.isDirectory())
+				{
+					continue;
+				}
+				
 				if (categoryAssetFile.getName().equals(HikeConstants.OLD_LARGE_STICKER_FOLDER_NAME))
 				{
 					Logger.d("StickerManager", "changing large file name for : " + categoryRoot.getName() + "category");
