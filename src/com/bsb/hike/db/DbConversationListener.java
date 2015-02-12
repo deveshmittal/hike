@@ -128,7 +128,7 @@ public class DbConversationListener implements Listener
 					convMessage = mConversationDb.showParticipantStatusMessage(convMessage.getMsisdn());
 					if(convMessage != null)
 					{
-						HikeMqttManagerNew.getInstance().sendMessage(convMessage, HikeMqttManagerNew.MQTT_QOS_ONE);
+						mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 					}
 				}
 			}

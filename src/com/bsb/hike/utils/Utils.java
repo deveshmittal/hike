@@ -5235,4 +5235,22 @@ public class Utils
 	    return viewToBitmap(view);
 	}
 	
+	public static boolean isConversationMuted(String msisdn)
+	{
+		if ((Utils.isGroupConversation(msisdn)))
+		{
+			if (HikeConversationsDatabase.getInstance().isGroupMuted(msisdn))
+			{
+				return true;
+			}
+		}
+		else if (Utils.isBot(msisdn))
+		{
+			if (HikeConversationsDatabase.getInstance().isBotMuted(msisdn))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 }
