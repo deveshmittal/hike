@@ -484,16 +484,14 @@ public class ToastListener implements Listener
 						continue;
 					}
 					ParticipantInfoState participantInfoState = message.getParticipantInfoState();
-					if (participantInfoState != null && participantInfoState == ParticipantInfoState.USER_JOIN
-							&& (!mDefaultPreferences.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true)))
+					if (participantInfoState == ParticipantInfoState.USER_JOIN && (!mDefaultPreferences.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true)))
 
 					{
 						// User has disabled NUJ/RUJ message notifications
 						continue;
 					}
 
-					if (participantInfoState != null && participantInfoState == ParticipantInfoState.PARTICIPANT_JOINED
-							&& message.getMetadata().isNewGroup())
+					if (participantInfoState == ParticipantInfoState.PARTICIPANT_JOINED && message.getMetadata().isNewGroup())
 					{
 						continue;
 					}

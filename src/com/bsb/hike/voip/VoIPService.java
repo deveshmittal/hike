@@ -220,15 +220,16 @@ public class VoIPService extends Service {
 			return returnInt;
 		}
 		
-		if (action.equals("setpartnerinfo")) {
+		if (action.equals(VoIPConstants.Extras.SET_PARTNER_INFO)) 
+		{
 			
-			int partnerCallId = intent.getIntExtra("callId", 0);
+			int partnerCallId = intent.getIntExtra(VoIPConstants.Extras.CALL_ID, 0);
 			
 			// Error case: we receive a call while we are connecting / connected to another call
 			if (getCallId() != 0 && partnerCallId != getCallId()) {
 				Logger.w(VoIPConstants.TAG, "Call ID mismatch. Remote: " + partnerCallId + ", Self: " + getCallId());
 				try {
-					VoIPUtils.sendMessage(intent.getStringExtra("msisdn"), 
+					VoIPUtils.sendMessage(intent.getStringExtra(VoIPConstants.Extras.MSISDN), 
 							HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
 							HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
 				} catch (JSONException e) {
@@ -241,7 +242,7 @@ public class VoIPService extends Service {
 			if (VoIPUtils.isUserInCall(getApplicationContext())) {
 				Log.w(VoIPConstants.TAG, "We are already in a cellular call.");
 				try {
-					VoIPUtils.sendMessage(intent.getStringExtra("msisdn"), 
+					VoIPUtils.sendMessage(intent.getStringExtra(VoIPConstants.Extras.MSISDN), 
 							HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
 							HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
 				} catch (JSONException e) {
@@ -252,7 +253,7 @@ public class VoIPService extends Service {
 			
 			// Error case: partner is trying to reconnect to us, but we aren't
 			// expecting a reconnect
-			boolean partnerReconnecting = intent.getBooleanExtra("reconnecting", false);
+			boolean partnerReconnecting = intent.getBooleanExtra(VoIPConstants.Extras.RECONNECTING, false);
 			if (partnerReconnecting == true && partnerCallId != getCallId()) {
 				Logger.w(VoIPConstants.TAG, "Partner trying to reconnect? Remote: " + partnerCallId + ", Self: " + getCallId());
 //				hangUp();
@@ -260,20 +261,20 @@ public class VoIPService extends Service {
 			}
 
 			clientPartner = new VoIPClient();
-			clientPartner.setInternalIPAddress(intent.getStringExtra("internalIP"));
-			clientPartner.setInternalPort(intent.getIntExtra("internalPort", 0));
-			clientPartner.setExternalIPAddress(intent.getStringExtra("externalIP"));
-			clientPartner.setExternalPort(intent.getIntExtra("externalPort", 0));
-			clientPartner.setPhoneNumber(intent.getStringExtra("msisdn"));
-			clientPartner.setInitiator(intent.getBooleanExtra("initiator", true));
+			clientPartner.setInternalIPAddress(intent.getStringExtra(VoIPConstants.Extras.INTERNAL_IP));
+			clientPartner.setInternalPort(intent.getIntExtra(VoIPConstants.Extras.INTERNAL_PORT, 0));
+			clientPartner.setExternalIPAddress(intent.getStringExtra(VoIPConstants.Extras.EXTERNAL_IP));
+			clientPartner.setExternalPort(intent.getIntExtra(VoIPConstants.Extras.EXTERNAL_PORT, 0));
+			clientPartner.setPhoneNumber(intent.getStringExtra(VoIPConstants.Extras.MSISDN));
+			clientPartner.setInitiator(intent.getBooleanExtra(VoIPConstants.Extras.INITIATOR, true));
 			clientSelf.setInitiator(!clientPartner.isInitiator());
 
 			Logger.d(VoIPConstants.TAG, "Setting our relay to: " + 
-					intent.getStringExtra("relay") + ":" + intent.getIntExtra("relayport", VoIPConstants.ICEServerPort));
-			clientSelf.setRelayAddress(intent.getStringExtra("relay"));
-			clientPartner.setRelayAddress(intent.getStringExtra("relay"));
-			clientSelf.setRelayPort(intent.getIntExtra("relayport", VoIPConstants.ICEServerPort));
-			clientPartner.setRelayPort(intent.getIntExtra("relayport", VoIPConstants.ICEServerPort));
+					intent.getStringExtra(VoIPConstants.Extras.RELAY) + ":" + intent.getIntExtra(VoIPConstants.Extras.RELAY_PORT, VoIPConstants.ICEServerPort));
+			clientSelf.setRelayAddress(intent.getStringExtra(VoIPConstants.Extras.RELAY));
+			clientPartner.setRelayAddress(intent.getStringExtra(VoIPConstants.Extras.RELAY));
+			clientSelf.setRelayPort(intent.getIntExtra(VoIPConstants.Extras.RELAY_PORT, VoIPConstants.ICEServerPort));
+			clientPartner.setRelayPort(intent.getIntExtra(VoIPConstants.Extras.RELAY_PORT, VoIPConstants.ICEServerPort));
 
 			// Error case: we are receiving a delayed v0 message for a call we 
 			// initiated earlier. 
@@ -316,7 +317,7 @@ public class VoIPService extends Service {
 		}
 		
 		// We are initiating a VoIP call
-		if (action.equals("outgoingcall")) 
+		if (action.equals(VoIPConstants.Extras.OUTGOING_CALL)) 
 		{
 
 			// Edge case. 
@@ -359,7 +360,7 @@ public class VoIPService extends Service {
 			
 			// we are making an outgoing call
 			keepRunning = true;
-			clientPartner.setPhoneNumber(intent.getStringExtra("msisdn"));
+			clientPartner.setPhoneNumber(intent.getStringExtra(VoIPConstants.Extras.MSISDN));
 			clientSelf.setInitiator(true);
 			clientPartner.setInitiator(false);
 
