@@ -3,7 +3,6 @@ package com.bsb.hike.platform;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +17,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.view.CustomFontTextView;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -112,7 +112,7 @@ public class CardRenderer implements View.OnLongClickListener {
 
     public int getItemViewType(ConvMessage convMessage) {
 
-        Log.d(CardRenderer.class.getSimpleName(), "hash code for convMessage is " + String.valueOf(convMessage.hashCode()));
+        Logger.d(CardRenderer.class.getSimpleName(), "hash code for convMessage is " + String.valueOf(convMessage.hashCode()));
         int cardType = convMessage.platformMessageMetadata.layoutId;
         if (convMessage.isSent()) {
 

@@ -1,5 +1,6 @@
 package com.bsb.hike.platform.content;
 
+import com.bsb.hike.utils.Logger;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,7 +14,6 @@ import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 
 public class PlatformContentUtils
 {
@@ -91,7 +91,7 @@ public class PlatformContentUtils
 
 	public static ParcelFileDescriptor openFileParcel(Uri uri, String mode)
 	{
-		Log.d("FileContentProvider", "fetching: " + uri);
+		Logger.d("FileContentProvider", "fetching: " + uri);
 
 		ParcelFileDescriptor parcel = null;
 
@@ -103,7 +103,7 @@ public class PlatformContentUtils
 		}
 		catch (FileNotFoundException e)
 		{
-			Log.e("FileContentProvider", "uri " + uri.toString(), e);
+			Logger.e("FileContentProvider", "uri " + uri.toString(), e);
 		}
 		
 		return parcel;
@@ -136,7 +136,7 @@ public class PlatformContentUtils
 	protected static String readDataFromFile(File file)
 	{
 
-		Log.d("READING DATA FROM FILE: ", file.getAbsolutePath());
+		Logger.d("READING DATA FROM FILE: ", file.getAbsolutePath());
 		// Read text from file
 		StringBuilder text = new StringBuilder();
 

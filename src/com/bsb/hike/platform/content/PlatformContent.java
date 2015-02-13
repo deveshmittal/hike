@@ -1,6 +1,5 @@
 package com.bsb.hike.platform.content;
 
-import android.util.Log;
 
 import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeMessengerApp;
@@ -113,7 +112,7 @@ public class PlatformContent
 		}
 		else
 		{
-			Log.e("PlatformContent", "Incorrect content data");
+			Logger.e("PlatformContent", "Incorrect content data");
 			listener.onEventOccured(EventCode.INVALID_DATA);
 			return null;
 		}
