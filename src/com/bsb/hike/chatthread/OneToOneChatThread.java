@@ -1574,14 +1574,20 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private void addAllUndeliverdMessages(List<ConvMessage> messages)
 	{
-		// Todo : Traverse this list in bottom up manner
-		
-		for (ConvMessage convMessage : messages)
+		int i = messages.size() -1;
+		while(i >=0)
 		{
+			ConvMessage convMessage = messages.get(i);
 			if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
 			{
 				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
 			}
+			else
+			{
+				break;
+			}
+			
+			i--;
 		}
 		if (firstPendingConvMessage == null)
 		{
