@@ -87,6 +87,7 @@ public class VoIPActivity extends Activity implements CallActions
 	public static final int MSG_NETWORK_SUCKS = 18;
 	public static final int MSG_UPDATE_HOLD_BUTTON = 19;
 	public static final int MSG_ALREADY_IN_CALL = 20;
+	public static final int MSG_PHONE_NOT_SUPPORTED = 21;
 
 	private CallActionsView callActionsView;
 	private Chronometer callDuration;
@@ -172,6 +173,11 @@ public class VoIPActivity extends Activity implements CallActions
 				break;
 			case MSG_ALREADY_IN_CALL:
 				showMessage("Already in call. Please try again later.");
+				break;
+			case MSG_PHONE_NOT_SUPPORTED:
+				showMessage(getString(R.string.voip_phone_unsupported));
+				isCallActive = false;
+				voipService.hangUp();
 				break;
 			default:
 				super.handleMessage(msg);
