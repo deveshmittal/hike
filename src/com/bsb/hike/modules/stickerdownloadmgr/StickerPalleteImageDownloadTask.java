@@ -11,8 +11,9 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
+import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor.Chain;
 import com.bsb.hike.modules.httpmgr.request.facade.RequestFacade;
-import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.utils.Logger;
@@ -40,17 +41,17 @@ public class StickerPalleteImageDownloadTask extends BaseStickerDownloadTask
 			return;
 		}
 		
-		RequestToken requestToken = StickerPalleteImageDownloadRequest(categoryId, getPreProcessListener(), getRequestListener());
+		RequestToken requestToken = StickerPalleteImageDownloadRequest(categoryId, getRequestInterceptor(), getRequestListener());
 		requestToken.execute();
 	}
 
-	private IPreProcessListener getPreProcessListener()
+	private IRequestInterceptor getRequestInterceptor()
 	{
-		return new IPreProcessListener()
+		return new IRequestInterceptor()
 		{
-
+			
 			@Override
-			public void doInBackground(RequestFacade facade)
+			public void intercept(Chain chain)
 			{
 				String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(catId);
 				if (dirPath == null)
@@ -73,6 +74,7 @@ public class StickerPalleteImageDownloadTask extends BaseStickerDownloadTask
 						return;
 					}
 				}
+				chain.proceed();
 			}
 		};
 	}

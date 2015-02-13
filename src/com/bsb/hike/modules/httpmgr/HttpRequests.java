@@ -8,35 +8,35 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStaticAvatarB
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStatusBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.lastSeenUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.multiStickerDownloadUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postAddressbookBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postDeviceDetailsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postGreenBlueDetailsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postToSocialNetworkBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.preActivationBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.registerAccountBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendDeviceDetailBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendTwitterInviteBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendUserLogsInfoBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.setProfileUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.singleStickerDownloadBase;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.socialCredentialsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPalleteImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPreviewImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerShopDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerSignupUpgradeUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.registerAccountBaseUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.validateNumberBaseUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postAddressbookBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.updateAddressbookBaseUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.setProfileUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendDeviceDetailBaseUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.preActivationBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.validateNumberBaseUrl;
 import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_HIGH;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_LONG;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
 
 import org.json.JSONObject;
 
+import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
 import com.bsb.hike.modules.httpmgr.request.ByteArrayRequest;
 import com.bsb.hike.modules.httpmgr.request.FileRequest;
 import com.bsb.hike.modules.httpmgr.request.JSONObjectRequest;
 import com.bsb.hike.modules.httpmgr.request.Request;
-import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
@@ -45,13 +45,14 @@ import com.bsb.hike.utils.Utils;
 
 public class HttpRequests
 {
-	public static RequestToken SingleStickerDownloadRequest(String stickerId, String categoryId, IPreProcessListener preProcessListener, IRequestListener requestListener)
+	public static RequestToken SingleStickerDownloadRequest(String stickerId, String categoryId, IRequestInterceptor interceptor, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(singleStickerDownloadBase() + "?catId=" + categoryId + "&stId=" + stickerId + "&resId=" + Utils.getResolutionId())
-				.setPreProcessListener(preProcessListener)
 				.setRequestListener(requestListener)
 				.build();
+		
+		requestToken.getRequestInterceptors().addLast("sticker", interceptor);
 		return requestToken;
 	}
 
@@ -77,39 +78,39 @@ public class HttpRequests
 		return requestToken;
 	}
 	
-	public static RequestToken StickerPalleteImageDownloadRequest(String categoryId, IPreProcessListener preProcessListener, IRequestListener requestListener)
+	public static RequestToken StickerPalleteImageDownloadRequest(String categoryId, IRequestInterceptor interceptor, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(stickerPalleteImageDownloadUrl() + "?catId=" + categoryId + "&resId=" + Utils.getResolutionId())
-				.setPreProcessListener(preProcessListener)
 				.setRequestListener(requestListener)
 				.setRequestType(REQUEST_TYPE_LONG)
 				.setPriority(10) // Setting priority between sticker shop task and enable_disable icon task
 				.build();
+		requestToken.getRequestInterceptors().addLast("sticker", interceptor);
 		return requestToken;
 	}
 	
-	public static RequestToken StickerPreviewImageDownloadRequest(String categoryId, IPreProcessListener preProcessListener, IRequestListener requestListener)
+	public static RequestToken StickerPreviewImageDownloadRequest(String categoryId, IRequestInterceptor interceptor, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(stickerPreviewImageDownloadUrl() + "?catId=" + categoryId + "&resId=" + Utils.getResolutionId())
-				.setPreProcessListener(preProcessListener)
 				.setRequestListener(requestListener)
 				.setRequestType(REQUEST_TYPE_SHORT)
 				.build();
+		requestToken.getRequestInterceptors().addLast("sticker", interceptor);
 		return requestToken;
 	}
 	
-	public static RequestToken MultiStickerDownloadRequest(IPreProcessListener preProcessListener, IRequestListener requestListener)
+	public static RequestToken MultiStickerDownloadRequest(IRequestInterceptor interceptor, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(multiStickerDownloadUrl())
-				.post(null)  // will set it in preprocess listener method using request facade
-				.setPreProcessListener(preProcessListener)
+				.post(null)  // will set it in interceptor method using request facade
 				.setRequestListener(requestListener)
 				.setRequestType(REQUEST_TYPE_LONG)
 				.setPriority(PRIORITY_HIGH)
 				.build();
+		requestToken.getRequestInterceptors().addLast("sticker", interceptor);
 		return requestToken;
 	}
 	

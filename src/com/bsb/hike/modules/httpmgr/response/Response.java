@@ -5,13 +5,15 @@ import java.util.List;
 import android.text.TextUtils;
 
 import com.bsb.hike.modules.httpmgr.Header;
+import com.bsb.hike.modules.httpmgr.interceptor.IResponseInterceptor;
+import com.bsb.hike.modules.httpmgr.interceptor.Pipeline;
 
 /**
  * Encapsulates all of the information necessary to make an HTTP response.
  * 
  * @author sidharth
  */
-public class Response
+public class Response implements IResponseFacade
 {
 	private String url;
 
@@ -23,6 +25,8 @@ public class Response
 
 	private ResponseBody<?> body;
 
+	private Pipeline<IResponseInterceptor> responseInterceptors;
+
 	private Response(Builder builder)
 	{
 		this.url = builder.url;
@@ -30,6 +34,7 @@ public class Response
 		this.reason = builder.reason;
 		this.headers = builder.headers;
 		this.body = builder.body;
+		this.responseInterceptors = builder.responseInterceptors;
 	}
 
 	/**
@@ -82,6 +87,12 @@ public class Response
 		return body;
 	}
 
+	@Override
+	public Pipeline<IResponseInterceptor> getResponseInterceptors()
+	{
+		return this.responseInterceptors;
+	}
+
 	public static class Builder
 	{
 		private String url;
@@ -93,6 +104,8 @@ public class Response
 		private List<Header> headers;
 
 		private ResponseBody<?> body;
+
+		private Pipeline<IResponseInterceptor> responseInterceptors;
 
 		/**
 		 * Sets the url of the response
@@ -175,6 +188,11 @@ public class Response
 			if (statusCode < 0)
 			{
 				throw new IllegalStateException("status code < 0 " + statusCode);
+			}
+			
+			if (responseInterceptors == null)
+			{
+				responseInterceptors = new Pipeline<IResponseInterceptor>();
 			}
 		}
 	}

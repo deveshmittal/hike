@@ -18,8 +18,7 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
-import com.bsb.hike.modules.httpmgr.request.facade.RequestFacade;
-import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
+import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.utils.Logger;
@@ -44,24 +43,23 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 		super(taskId);
 		this.stickerId = stickerId;
 		this.categoryId = categoryId;
-		
+
 		if (!StickerManager.getInstance().isMinimumMemoryAvailable())
 		{
 			onFailure(new HttpException(REASON_CODE_OUT_OF_SPACE));
 			return;
 		}
-		
-		RequestToken token = SingleStickerDownloadRequest(stickerId, categoryId, getPreProcessListener(), getRequestListener());
+
+		RequestToken token = SingleStickerDownloadRequest(stickerId, categoryId, getInterceptor(), getRequestListener());
 		token.execute();
 	}
 
-	private IPreProcessListener getPreProcessListener()
+	private IRequestInterceptor getInterceptor()
 	{
-		return new IPreProcessListener()
+		return new IRequestInterceptor()
 		{
-
 			@Override
-			public void doInBackground(RequestFacade facade)
+			public void intercept(Chain chain)
 			{
 				String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId);
 
@@ -95,6 +93,8 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 						return;
 					}
 				}
+				
+				chain.proceed();
 			}
 		};
 	}

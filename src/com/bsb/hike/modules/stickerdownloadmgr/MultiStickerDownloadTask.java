@@ -15,13 +15,13 @@ import org.json.JSONObject;
 import android.os.Bundle;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
+import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor.Chain;
 import com.bsb.hike.modules.httpmgr.request.facade.RequestFacade;
-import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
@@ -62,11 +62,11 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 
 	private void download()
 	{
-		RequestToken requestToken = MultiStickerDownloadRequest(new IPreProcessListener()
+		RequestToken requestToken = MultiStickerDownloadRequest(new IRequestInterceptor()
 		{
-
+			
 			@Override
-			public void doInBackground(RequestFacade facade)
+			public void intercept(Chain chain)
 			{
 				Logger.d(TAG, "CategoryId: " + category.getCategoryId());
 				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(category.getCategoryId());
@@ -117,7 +117,8 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 					Logger.d(TAG, "Sticker Download Task Request : " + request.toString());
 
 					IRequestBody body = new JsonBody(request);
-					facade.setBody(body);
+					chain.getRequestFacade().setBody(body);
+					chain.proceed();
 				}
 				catch (JSONException e)
 				{
