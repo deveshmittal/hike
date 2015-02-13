@@ -343,12 +343,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	}
 
 	@Override
-	protected void sendMessage()
-	{
-		super.sendMessage();
-	}
-
-	@Override
 	protected void onMessageReceived(Object object)
 	{
 		super.onMessageReceived(object);
@@ -764,14 +758,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private void setSMSCredits()
 	{
 		updateUIForHikeStatus();
-		boolean animatedOnce = sharedPreference.getData(HikeConstants.Extras.ANIMATED_ONCE, false);
 
-		if (!animatedOnce)
-		{
-			sharedPreference.saveData(HikeConstants.Extras.ANIMATED_ONCE, true);
-		}
-
-		if ((mCredits % HikeConstants.SHOW_CREDITS_AFTER_NUM == 0 || !animatedOnce) && !mConversation.isOnhike())
+		if ((mCredits % HikeConstants.SHOW_CREDITS_AFTER_NUM == 0) && !mConversation.isOnhike())
 		{
 			showSMSCounter();
 		}
