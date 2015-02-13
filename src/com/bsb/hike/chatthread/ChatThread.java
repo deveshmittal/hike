@@ -2175,7 +2175,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				/**
 				 * ParticipantInfoState == NO_INFO indicates a normal message.
 				 */
-				handleAbnormalMessages();
+				handleSystemMessages();
 			}
 
 			if (isActivityVisible && Utils.isPlayTickSound(activity.getApplicationContext()))
@@ -2219,7 +2219,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		return mMessageMap.get(msgID);
 	}
 
-	protected void handleAbnormalMessages()
+	protected void handleSystemMessages()
 	{
 		// TODO DO NOTHING. Only classes which need to handle such type of messages need to override this method
 		return;

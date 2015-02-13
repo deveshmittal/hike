@@ -554,12 +554,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	}
 
 	/**
-	 * Called from {@link ChatThread}'s {@link #onMessageReceived(Object)}, to handle abnormal messages like User joined group, user left group etc.}
+	 * Called from {@link ChatThread}'s {@link #onMessageReceived(Object)}, to handle System messages like User joined group, user left group etc.}
 	 * 
 	 */
 
 	@Override
-	protected void handleAbnormalMessages()
+	protected void handleSystemMessages()
 	{
 		ContactManager conMgr = ContactManager.getInstance();
 		groupConversation.setGroupParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), false, false));
