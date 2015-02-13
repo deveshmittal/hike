@@ -6,7 +6,7 @@ import org.json.JSONObject;
 /**
  * Created by shobhitmandloi on 15/01/15.
  */
-public class PlatformWebMessageMetadata
+public class WebMetadata
 {
 	private String notifText = "";
 
@@ -72,19 +72,26 @@ public class PlatformWebMessageMetadata
 
 	public void setHelperData(JSONObject helperData)
 	{
-		this.helperData = helperData;
+		try
+		{
+			this.helperData = helperData;
+		}
+		catch (NullPointerException npe)
+		{
+			this.helperData = new JSONObject();
+		}
 	}
 
 	private JSONObject json;
 
 	private String mPush;
 
-	public PlatformWebMessageMetadata(String jsonString) throws JSONException
+	public WebMetadata(String jsonString) throws JSONException
 	{
 		this(new JSONObject(jsonString));
 	}
 
-	public PlatformWebMessageMetadata(JSONObject metadata)
+	public WebMetadata(JSONObject metadata)
 	{
 		this.json = metadata;
 		if (metadata.has(HikePlatformConstants.CARD_OBJECT))

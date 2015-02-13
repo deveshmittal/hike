@@ -19,7 +19,7 @@ import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 
-import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -2288,11 +2288,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							// as we will be changing msisdn and hike status while inserting in DB
 							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber,msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE), isConversationOnHike());
 							convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
-							convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
+							convMessage.webMetadata = new WebMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
 							JSONObject json = new JSONObject();
 							try
 							{
-								json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+								json.put(HikePlatformConstants.CARD_TYPE, convMessage.webMetadata.getAppName());
 								json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
 								json.put(AnalyticsConstants.TO, mContactNumber);
 								HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
@@ -5134,7 +5134,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			JSONObject json = new JSONObject();
 			try
 			{
-				json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+				json.put(HikePlatformConstants.CARD_TYPE, convMessage.webMetadata.getAppName());
 				json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_DELETE);
 				json.put(AnalyticsConstants.ORIGIN, origin);
 				json.put(AnalyticsConstants.CHAT_MSISDN, mContactNumber);
@@ -8097,8 +8097,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}  else if(message.getMessageType()==MESSAGE_TYPE.WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT){
 						multiMsgFwdObject.put(MESSAGE_TYPE.MESSAGE_TYPE, MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 						multiMsgFwdObject.put(HikeConstants.HIKE_MESSAGE, message.getMessage());
-						if(message.platformWebMessageMetadata!=null){
-							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
+						if(message.webMetadata !=null){
+							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.webMetadata.JSONtoString()));
 
 						}
 					}
