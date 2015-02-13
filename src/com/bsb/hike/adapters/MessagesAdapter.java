@@ -91,7 +91,6 @@ import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.ChatTheme;
@@ -250,8 +249,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private Context context;
 
-	private ChatThread chatThread;
-	
 	private com.bsb.hike.chatthread.ChatThread mChatThread;
 
 	private TextView smsToggleSubtext;
