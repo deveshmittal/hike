@@ -1,13 +1,19 @@
 package com.bsb.hike.utils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Message;
+import android.text.TextUtils;
+import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.models.NuxCustomMessage;
+import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
 import com.bsb.hike.ui.CreditsActivity;
@@ -22,6 +28,12 @@ import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
+import com.bsb.hike.voip.VoIPConstants;
+import com.bsb.hike.voip.VoIPService;
+import com.bsb.hike.voip.VoIPUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.google.android.gms.internal.co;
 
 import android.app.Activity;
@@ -173,6 +185,52 @@ public class IntentManager
 		
 		return intent;
 	}
+	
+	public static Intent getWebViewActivityIntent(Context context, String url, String title)
+	{
+
+		Intent intent = new Intent(context.getApplicationContext(), WebViewActivity.class);
+		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, url);
+
+		if (!TextUtils.isEmpty(title))
+		{
+			intent.putExtra(HikeConstants.Extras.TITLE, title);
+		}
+		intent.putExtra(HikeConstants.Extras.WEBVIEW_ALLOW_LOCATION, true);
+
+		return intent;
+
+	}
+
+	public static Intent getForwardIntentForConvMessage(Context context, ConvMessage convMessage, String metadata)
+	{
+		Intent intent = new Intent(context, ComposeChatActivity.class);
+		intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+		JSONArray multipleMsgArray = new JSONArray();
+		JSONObject multiMsgFwdObject = new JSONObject();
+		try
+		{
+			multiMsgFwdObject.put(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE, convMessage.getMessageType());
+			if (metadata != null)
+			{
+				multiMsgFwdObject.put(HikeConstants.METADATA, metadata);
+			}
+			multiMsgFwdObject.put(HikeConstants.HIKE_MESSAGE, convMessage.getMessage());
+			multipleMsgArray.put(multiMsgFwdObject);
+		}
+		catch (JSONException e)
+		{
+			Logger.e(context.getClass().getSimpleName(), "Invalid JSON", e);
+		}
+		String phoneNumber = convMessage.getMsisdn();
+		ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNoOrMsisdn(phoneNumber);
+		String mContactName = contactInfo.getName();
+		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
+		intent.putExtra(HikeConstants.Extras.PREV_MSISDN, convMessage.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
+
+		return intent;
+	}
 
 	public static Intent getForwardStickerIntent(Context context, String stickerId, String categoryId)
 	{
@@ -242,7 +300,6 @@ public class IntentManager
 	public static Intent openNuxFriendSelector(Activity context)
 	{
 		Intent in = new Intent(context, ComposeChatActivity.class);
-		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		in.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 		in.putExtra(HikeConstants.Extras.NUX_INCENTIVE_MODE, true);
 		return in;
@@ -251,8 +308,23 @@ public class IntentManager
 	public static Intent openNuxCustomMessage(Activity context)
 	{
 		Intent in = new Intent(context, NuxSendCustomMessageActivity.class);
-		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		return in;
 	}
 
+	public static Intent getChatThreadIntent(Context context, String msisdn)
+	{
+		Intent intent = new Intent(context, ChatThread.class);
+		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		return intent;
+	}
+
+	public static Intent getVoipCallIntent(Context context, String msisdn, VoIPUtils.CallSource source)
+	{
+		Intent intent = new Intent(context, VoIPService.class);
+		intent.putExtra(VoIPConstants.Extras.ACTION, VoIPConstants.Extras.OUTGOING_CALL);
+		intent.putExtra(VoIPConstants.Extras.MSISDN, msisdn);
+		intent.putExtra(VoIPConstants.Extras.CALL_SOURCE, source.ordinal());
+		return intent;
+	}
 }
