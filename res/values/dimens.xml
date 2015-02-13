@@ -169,4 +169,6 @@
 	<dimen name="sticker_grid_horizontal_padding">8dp</dimen>
 	<dimen name="drag_shadow_height">8dp</dimen>
 	<dimen name="sticker_settings_tip_margin">18dp</dimen>
+    <dimen name="tablet_list_width">300dp</dimen>
+    <dimen name="phone_list_height">200dp</dimen>
 </resources>
