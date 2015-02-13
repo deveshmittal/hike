@@ -1194,15 +1194,8 @@ public class VoIPService extends Service {
 				AudioRecord recorder;
 				int minBufSizeRecording = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 				Logger.d(VoIPConstants.TAG, "minBufSizeRecording: " + minBufSizeRecording);
-
-				if (minBufSizeRecording < 0) {
-					Logger.e(VoIPConstants.TAG, "AudioRecord init failed.");
-					sendHandlerMessage(VoIPActivity.MSG_PHONE_NOT_SUPPORTED);
-					return;
-				}
 				
 				int audioSource = VoIPUtils.getAudioSource();
-				recorder = new AudioRecord(audioSource, AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizeRecording);
 
 				/*
 				if (android.os.Build.VERSION.SDK_INT >= 16) {
@@ -1241,10 +1234,22 @@ public class VoIPService extends Service {
 				}
 				*/
 				// Start recording audio from the mic
-				try {
+				try
+				{
+					recorder = new AudioRecord(audioSource, AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizeRecording);
 					recorder.startRecording();
-				} catch (IllegalStateException e) {
-					Logger.d(VoIPConstants.TAG, "Recorder exception: " + e.toString());
+				}
+				catch(IllegalArgumentException e)
+				{
+					Logger.e(VoIPConstants.TAG, "AudioRecord init failed." + e.toString());
+					sendHandlerMessage(VoIPActivity.MSG_PHONE_NOT_SUPPORTED);
+					return;
+				}
+				catch (IllegalStateException e)
+				{
+					Logger.e(VoIPConstants.TAG, "Recorder exception: " + e.toString());
+					sendHandlerMessage(VoIPActivity.MSG_PHONE_NOT_SUPPORTED);
+					return;
 				}
 				
 				// Start processing recorded data
