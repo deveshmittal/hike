@@ -1,9 +1,9 @@
 package com.bsb.hike;
 
-import com.bsb.hike.models.StatusMessage.StatusMessageType;
-
 import android.net.Uri;
 import android.os.Environment;
+
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 
 public class HikeConstants
 {

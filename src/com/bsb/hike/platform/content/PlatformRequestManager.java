@@ -3,10 +3,10 @@ package com.bsb.hike.platform.content;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import com.bsb.hike.platform.content.PlatformContent.EventCode;
-
 import android.os.Handler;
 import android.os.Looper;
+
+import com.bsb.hike.platform.content.PlatformContent.EventCode;
 import com.bsb.hike.utils.Logger;
 
 public class PlatformRequestManager

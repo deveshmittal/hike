@@ -1,13 +1,12 @@
 package com.bsb.hike.platform.content;
 
 
-import com.bsb.hike.AppConfig;
+import java.io.File;
+
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
-
-import java.io.File;
 
 public class PlatformContent
 {

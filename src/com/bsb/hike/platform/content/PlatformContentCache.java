@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import android.support.v4.util.LruCache;
 import android.text.TextUtils;
+
 import com.bsb.hike.utils.Logger;
 import com.samskivert.mustache.Template;
 
