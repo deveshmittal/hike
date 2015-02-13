@@ -1,5 +1,6 @@
 package com.bsb.hike.ui.fragments;
 
+import com.bsb.hike.platform.HikePlatformConstants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,6 +26,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Message;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.text.TextUtils;
@@ -192,7 +194,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
-			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.MUTE_CONVERSATION_TOGGLED};
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.CONV_UNREAD_COUNT_MODIFIED};
 
 	private ConversationsAdapter mAdapter;
 
@@ -761,7 +763,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				e.printStackTrace();
 			}
 
-			if(mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+			if(!(mmNuxManager.getCurrentState() == NUXConstants.NUX_SKIPPED || mmNuxManager.getCurrentState() == NUXConstants.NUX_IS_ACTIVE))
 			{
 				butRemind.setEnabled(false);
 				butInviteMore.setEnabled(false);
@@ -787,8 +789,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				e.printStackTrace();
 			}
 
-			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
-			{
+			if(!(mmNuxManager.getCurrentState() == NUXConstants.NUX_SKIPPED || mmNuxManager.getCurrentState() == NUXConstants.NUX_IS_ACTIVE)){
 				butRemind.setEnabled(false);
 				butInviteMore.setEnabled(false);
 			} 
@@ -1121,6 +1122,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 		}
 
+        if (conv.isBotConv())
+        {
+            conv.analyticsForBots(HikePlatformConstants.BOT_LONG_PRESS, AnalyticsConstants.LONG_PRESS_EVENT);
+        }
+
 		final int stealthType = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 
 		if (stealthType == HikeConstants.STEALTH_ON || stealthType == HikeConstants.STEALTH_ON_FAKE)
@@ -1182,6 +1188,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				String option = options[which];
 				if (getString(R.string.shortcut).equals(option))
 				{
+                    if (conv.isBotConv())
+                    {
+                        conv.analyticsForBots(HikePlatformConstants.BOT_ADD_SHORTCUT, AnalyticsConstants.CLICK_EVENT);
+                    }
 					Utils.logEvent(getActivity(), HikeConstants.LogEvent.ADD_SHORTCUT);
 					Utils.createShortcut(getSherlockActivity(), conv);
 				}
@@ -1201,6 +1211,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
 							Utils.executeConvAsyncTask(task, conv);
 							deleteConfirmDialog.dismiss();
+                            if (conv.isBotConv())
+                            {
+                                conv.analyticsForBots(HikePlatformConstants.BOT_DELETE_CHAT, AnalyticsConstants.CLICK_EVENT);
+                            }
 						}
 					};
 
@@ -1234,6 +1248,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(getSherlockActivity(), ConversationFragment.this);
 					Utils.executeConvAsyncTask(task, conv);
+                    if (conv.isBotConv())
+                    {
+                        conv.analyticsForBots(HikePlatformConstants.BOT_EMAIL_CONVERSATION, AnalyticsConstants.CLICK_EVENT);
+                    }
 				}
 				else if (getString(R.string.deleteconversations).equals(option))
 				{
@@ -1243,10 +1261,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				else if (getString(R.string.viewcontact).equals(option))
 				{
 					viewContacts(conv);
+                    if (conv.isBotConv())
+                    {
+                        conv.analyticsForBots(HikePlatformConstants.BOT_VIEW_PROFILE, AnalyticsConstants.CLICK_EVENT);
+                    }
 				}
 				else if (getString(R.string.clear_whole_conversation).equals(option))
 				{
 					clearConversation(conv);
+                    if (conv.isBotConv())
+                    {
+                        conv.analyticsForBots(HikePlatformConstants.BOT_CLEAR_CONVERSATION,  AnalyticsConstants.CLICK_EVENT);
+                    }
 				}
 				else if (getString(R.string.add_to_contacts).equals(option))
 				{
@@ -1817,7 +1843,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				return;
 			}
 			conv.setUnreadCount(0);
-
+			HikeConversationsDatabase.getInstance().setExtraConvUnreadCount(msisdn, 0);
 			/*
 			 * look for the latest received messages and set them to read. Exit when we've found some read messages
 			 */
@@ -2540,6 +2566,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				};
 			});
 		}
+		else if(HikePubSub.CONV_UNREAD_COUNT_MODIFIED.equals(type))
+		{
+			unreadCountModified((Message) object);
+		}
 		else if (HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type))
 		{
 			if (!isAdded())
@@ -2574,11 +2604,34 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					{
 						((GroupConversation) conversation).setIsMuted(isMuted);
 					}
+					else if (conversation.isBotConv())
+					{
+						conversation.isMutedBotConv(true);
+					}
 
 					notifyDataSetChanged();
 				}
 			});
 		}
+	}
+	
+	private void unreadCountModified(Message message){
+		String msisdn = (String) message.obj;
+		final Conversation conv = mConversationsByMSISDN.get(msisdn);
+		if (conv == null)
+		{
+			return;
+		}
+		conv.setUnreadCount(message.arg1);
+		getActivity().runOnUiThread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				notifyDataSetChanged();
+			}
+		});
 	}
 
 	private Conversation getFirstConversation()
@@ -2631,7 +2684,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		messages.clear();
-
+		conversation.setUnreadCount(0);
 		/*
 		 * Adding a blank message
 		 */

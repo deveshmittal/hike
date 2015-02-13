@@ -299,16 +299,19 @@ public class VoIPActivity extends Activity implements CallActions
 		return super.onKeyDown(keyCode, event);
 	}
 
-	private void handleIntent(Intent intent) {
-		String action = intent.getStringExtra("action");
+	private void handleIntent(Intent intent) 
+	{
+		String action = intent.getStringExtra(VoIPConstants.Extras.ACTION);
 
 		if (action == null || action.isEmpty())
+		{
 			return;
-		else
-			Logger.d(VoIPConstants.TAG, "Intent action: " + action);
+		}
+		Logger.d(VoIPConstants.TAG, "Intent action: " + action);
 		
-		if (action.equals(VoIPConstants.PARTNER_REQUIRES_UPGRADE)) {
-			String message = intent.getStringExtra("message");
+		if (action.equals(VoIPConstants.PARTNER_REQUIRES_UPGRADE)) 
+		{
+			String message = intent.getStringExtra(VoIPConstants.Extras.MESSAGE);
 			if (message == null || message.isEmpty())
 				message = getString(R.string.voip_partner_upgrade);
 			showMessage(message);
@@ -319,8 +322,9 @@ public class VoIPActivity extends Activity implements CallActions
 			}
 		}
 		
-		if (action.equals(VoIPConstants.PARTNER_INCOMPATIBLE)) {
-			String message = intent.getStringExtra("message");
+		if (action.equals(VoIPConstants.PARTNER_INCOMPATIBLE)) 
+		{
+			String message = intent.getStringExtra(VoIPConstants.Extras.MESSAGE);
 			if (message == null || message.isEmpty())
 				message = getString(R.string.voip_partner_incompat);
 			showMessage(message);
@@ -331,7 +335,8 @@ public class VoIPActivity extends Activity implements CallActions
 			}
 		}
 		
-		if (action.equals(VoIPConstants.PARTNER_HAS_BLOCKED_YOU)) {
+		if (action.equals(VoIPConstants.PARTNER_HAS_BLOCKED_YOU)) 
+		{
 			if (voipService != null)
 			{
 				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.PARTNER_BLOCKED_USER);
@@ -339,7 +344,8 @@ public class VoIPActivity extends Activity implements CallActions
 			}
 		}
 		
-		if (action.equals(VoIPConstants.PARTNER_IN_CALL)) {
+		if (action.equals(VoIPConstants.PARTNER_IN_CALL)) 
+		{
 			showMessage(getString(R.string.voip_partner_is_busy));
 			showCallStatus(CallStatus.PARTNER_BUSY);
 			if (voipService != null)
@@ -349,21 +355,30 @@ public class VoIPActivity extends Activity implements CallActions
 			}
 		}
 		
-		if (action.equals(VoIPConstants.INCOMING_NATIVE_CALL_HOLD)) {
-			if (VoIPService.isConnected() && voipService != null && voipService.isAudioRunning()) {
-				showMessage(getString(R.string.voip_call_on_hold));
-				voipService.setHold(true);
-				showCallStatus(CallStatus.ON_HOLD);
-				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_NATIVE_CALL_INTERRUPT);
-			} else if (VoIPService.isConnected() && voipService != null)
-				voipService.hangUp();
+		if (action.equals(VoIPConstants.INCOMING_NATIVE_CALL_HOLD) && voipService != null) 
+		{
+			if (VoIPService.isConnected()) 
+			{
+				if(voipService.isAudioRunning())
+				{
+					showMessage(getString(R.string.voip_call_on_hold));
+					voipService.setHold(true);
+					showCallStatus(CallStatus.ON_HOLD);
+					voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_NATIVE_CALL_INTERRUPT);
+				}
+				else
+				{
+					voipService.hangUp();
+				}
+			}
 			else
-				if (voipService != null)
-					voipService.stop();
+			{
+				voipService.stop();
+			}
 		}
 		
 		// Clear the intent so the activity doesn't process intent again on resume
-		getIntent().removeExtra("action");
+		getIntent().removeExtra(VoIPConstants.Extras.ACTION);
 	}
 
 	private void connectMessenger() {

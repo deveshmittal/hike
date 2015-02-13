@@ -128,7 +128,7 @@ public class DbConversationListener implements Listener
 					convMessage = mConversationDb.showParticipantStatusMessage(convMessage.getMsisdn());
 					if(convMessage != null)
 					{
-						HikeMqttManagerNew.getInstance().sendMessage(convMessage, HikeMqttManagerNew.MQTT_QOS_ONE);
+						mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 					}
 				}
 			}
@@ -177,11 +177,16 @@ public class DbConversationListener implements Listener
 			ContactManager.getInstance().toggleContactFavorite(msisdn, FavoriteType.NOT_FRIEND);
 
 			JSONObject blockObj = blockUnblockSerialize("b", msisdn);
-			/*
-			 * We remove the icon for a blocked user as well.
-			 */
-			HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+
+			if (!Utils.isBot(msisdn))
+			{
+				/*
+				 * We remove the icon for a blocked user as well.
+				 */
+				HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+			}
+			
 			// IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			HikeMqttManagerNew.getInstance().sendMessage(blockObj, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
@@ -257,8 +262,17 @@ public class DbConversationListener implements Listener
 			String id = groupMute.first;
 			boolean mute = groupMute.second;
 
-			mConversationDb.toggleGroupMute(id, mute);
-			HikeMqttManagerNew.getInstance().sendMessage(serializeMsg(mute ? HikeConstants.MqttMessageTypes.MUTE : HikeConstants.MqttMessageTypes.UNMUTE, id), HikeMqttManagerNew.MQTT_QOS_ONE);
+			if (Utils.isBot(id))
+			{
+				// TODO Do we have to do MQTT PUBLISH here?
+			}
+			else
+			{
+				mConversationDb.toggleGroupMute(id, mute);
+				HikeMqttManagerNew.getInstance().sendMessage(serializeMsg(mute ? HikeConstants.MqttMessageTypes.MUTE : HikeConstants.MqttMessageTypes.UNMUTE, id),
+						HikeMqttManagerNew.MQTT_QOS_ONE);
+			}
+
 		}
 		else if (HikePubSub.DELETE_STATUS.equals(type))
 		{

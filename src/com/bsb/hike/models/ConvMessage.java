@@ -13,6 +13,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
+import com.bsb.hike.platform.PlatformWebMessageMetadata;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
@@ -79,6 +80,9 @@ public class ConvMessage
 	// private boolean showResumeButton = true;
 	public ContentLove contentLove;
 	public PlatformMessageMetadata platformMessageMetadata;
+
+	public PlatformWebMessageMetadata platformWebMessageMetadata;
+
 	public boolean isLovePresent(){
 		return contentLove!=null;
 	}
@@ -305,6 +309,7 @@ public class ConvMessage
 		this.unreadCount = other.unreadCount;
 		this.metadata = other.metadata;
 		this.platformMessageMetadata = other.platformMessageMetadata;
+		this.platformWebMessageMetadata = other.platformWebMessageMetadata;
 		this.contentLove = other.contentLove;
 		try {
 			this.readByArray = other.readByArray !=null? new JSONArray(other.readByArray.toString()) : null;
@@ -370,9 +375,21 @@ public class ConvMessage
 				platformMessageMetadata  = new PlatformMessageMetadata(data.optJSONObject(HikeConstants.METADATA), context);
                 platformMessageMetadata.addToThumbnailTable();
                 platformMessageMetadata.thumbnailMap.clear();
-			}else{
-			setMetadata(data.getJSONObject(HikeConstants.METADATA));
-		    }
+			}
+			else if (ConvMessagePacketKeys.WEB_CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE)))
+			{
+				this.messageType  = MESSAGE_TYPE.WEB_CONTENT;
+				platformWebMessageMetadata  = new PlatformWebMessageMetadata(data.optJSONObject(HikeConstants.METADATA));
+			}
+			else if (ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE)))
+			{
+				this.messageType  = MESSAGE_TYPE.FORWARD_WEB_CONTENT;
+				platformWebMessageMetadata  = new PlatformWebMessageMetadata(data.optJSONObject(HikeConstants.METADATA));
+			}
+			else
+			{
+				setMetadata(data.getJSONObject(HikeConstants.METADATA));
+			}
 		}
 		this.isStickerMessage = HikeConstants.STICKER.equals(obj.optString(HikeConstants.SUB_TYPE));
 		/**
@@ -496,6 +513,9 @@ public class ConvMessage
 				;
 			}
 			break;
+		case VOIP_MISSED_CALL_INCOMING:
+			this.mMessage = context.getString(R.string.voip_missed_call_notif);
+			break;
 		}
 		setState(isSelfGenerated ? State.RECEIVED_READ : State.RECEIVED_UNREAD);
 	}
@@ -597,7 +617,7 @@ public class ConvMessage
 	public String toString()
 	{
 		return "ConvMessage [mMessage=" + mMessage + ", mMsisdn=" + mMsisdn + ", mTimestamp=" + mTimestamp + ", mIsSent=" + mIsSent + ", mState="
-				+ mState + "]";
+				+ mState +", messageId="+msgID+"]";
 	}
 
 	@Override
@@ -721,6 +741,17 @@ public class ConvMessage
 					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.CONTENT_TYPE);
 					data.put(HikeConstants.METADATA, platformMessageMetadata.getJSON());
 					break;
+
+				case MESSAGE_TYPE.WEB_CONTENT:
+					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.WEB_CONTENT_TYPE);
+					data.put(HikeConstants.METADATA, platformWebMessageMetadata.getJSON());
+					break;
+
+				case MESSAGE_TYPE.FORWARD_WEB_CONTENT:
+					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE);
+					data.put(HikeConstants.METADATA, platformWebMessageMetadata.getJSON());
+					break;
+
 				}
 				
 				object.put(HikeConstants.TYPE, mInvite ? HikeConstants.MqttMessageTypes.INVITE : HikeConstants.MqttMessageTypes.MESSAGE);
@@ -925,6 +956,11 @@ public class ConvMessage
 	 */
 	public boolean isSilent()
 	{
+		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && platformWebMessageMetadata != null)
+		{
+			return platformWebMessageMetadata.isSilent();
+		}
+
 		// Do not play sound in case of bg change, participant joined, nuj/ruj, status updates
 		if ((getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) || (getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
 				|| (getParticipantInfoState() == ParticipantInfoState.USER_JOIN) || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
@@ -941,10 +977,13 @@ public class ConvMessage
 	{
 		return !(msgState==State.RECEIVED_READ || msgState == State.RECEIVED_UNREAD);
 	}
-	
+
 	public void setMsisdn(String msisdn){
 		this.mMsisdn = msisdn;
 	}
-	
-	
+
+	public boolean isVoipMissedCallMsg()
+	{
+		return participantInfoState == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING;
+	}
 }

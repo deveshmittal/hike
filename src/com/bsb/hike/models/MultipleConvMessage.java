@@ -114,10 +114,22 @@ public class MultipleConvMessage
 
 				if((convMessage.getMetadata()!=null)){
 					msg.put(HikeConstants.METADATA,convMessage.getMetadata().getJSON());
-				} else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT){
+				} else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT)
+				{
                     msg.put(HikeConstants.METADATA, convMessage.platformMessageMetadata.getJSON());
                     msg.put(HikeConstants.SUB_TYPE, HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE);
-                }
+
+                } else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
+				{
+					msg.put(HikeConstants.METADATA, convMessage.platformWebMessageMetadata.getJSON());
+					msg.put(HikeConstants.SUB_TYPE, HikeConstants.ConvMessagePacketKeys.WEB_CONTENT_TYPE);
+
+				}
+				else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT)
+				{
+					msg.put(HikeConstants.METADATA, convMessage.platformWebMessageMetadata.getJSON());
+					msg.put(HikeConstants.SUB_TYPE, HikeConstants.ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE);
+				}
 				
 				msgArray.put(msg);
 			}

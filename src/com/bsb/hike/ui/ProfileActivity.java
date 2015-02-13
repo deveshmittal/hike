@@ -1861,6 +1861,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public void onViewImageClicked(View v)
 	{
+		if(Utils.isBot(mLocalMSISDN))
+		{
+			return;
+		}
+		
 		ImageViewerInfo imageViewerInfo = (ImageViewerInfo) v.getTag();
 
 		String mappedId = imageViewerInfo.mappedId;
