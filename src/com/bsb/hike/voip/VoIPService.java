@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -37,6 +38,7 @@ import android.media.RingtoneManager;
 import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
@@ -46,7 +48,6 @@ import android.os.SystemClock;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.SparseIntArray;
 import android.widget.Chronometer;
 
@@ -357,7 +358,7 @@ public class VoIPService extends Service {
 			// Error case: we are in a cellular call
 			if (VoIPUtils.isUserInCall(getApplicationContext())) 
 			{
-				Log.w(VoIPConstants.TAG, "We are already in a cellular call.");
+				Logger.w(VoIPConstants.TAG, "We are already in a cellular call.");
 				sendHandlerMessage(VoIPActivity.MSG_ALREADY_IN_CALL);
 				sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.CALLER_IN_NATIVE_CALL);
 				return returnInt;
@@ -577,8 +578,23 @@ public class VoIPService extends Service {
 		audioManager.setSpeakerphoneOn(initialSpeakerMode);
 	}
 	
+	@SuppressWarnings("deprecation")
+	@SuppressLint("InlinedApi") 
 	private void initSoundPool() {
-		soundpool = new SoundPool(2, AudioManager.STREAM_VOICE_CALL, 0);
+		
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			AudioAttributes audioAttributes = new AudioAttributes.Builder()
+			.setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+			.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+			.build();
+
+			soundpool = new SoundPool.Builder()
+			.setMaxStreams(2)
+			.setAudioAttributes(audioAttributes)
+			.build();
+		} else {
+			soundpool = new SoundPool(2, AudioManager.STREAM_VOICE_CALL, 0);
+		}
 
 		soundpoolMap = new SparseIntArray(3);
 		soundpoolMap.put(SOUND_ACCEPT, soundpool.load(getApplicationContext(), SOUND_ACCEPT, 1));
@@ -1143,10 +1159,9 @@ public class VoIPService extends Service {
 							
 							// If we don't detect voice, then send nothing
 							if (ret == 0) {
-								Logger.d(VoIPConstants.TAG, "Not sending anything.");
+//								Logger.d(VoIPConstants.TAG, "Not sending anything.");
 								continue;
 							}
-//							Logger.d(VoIPConstants.TAG, "Voice: " + ret);
 						} else
 							aecMicSignal = true;
 						
@@ -1444,7 +1459,7 @@ public class VoIPService extends Service {
 			
 			@Override
 			public void run() {
-				final int frameDuration = (OpusWrapper.OPUS_FRAME_SIZE * 1000) / playbackSampleRate;		// Monitor will run every 60ms
+				final int frameDuration = (OpusWrapper.OPUS_FRAME_SIZE * 1000) / (playbackSampleRate * 2);		// Monitor will run every 30ms
 				
 				while (keepRunning) {
 					
@@ -1454,12 +1469,12 @@ public class VoIPService extends Service {
 //								", decodedBuffersQueue: " + decodedBuffersQueue.size());
 
 						if (audiotrackFramesWritten < audioTrack.getPlaybackHeadPosition() + OpusWrapper.OPUS_FRAME_SIZE &&
-								decodedBuffersQueue.size() <= 1) {
+								decodedBuffersQueue.size() == 0) {
 							// We are running low on speaker data
 		                	synchronized (decodedBuffersQueue) {
 			                	decodedBuffersQueue.add(silentPacket);
 			                	decodedBuffersQueue.notify();
-			                	Logger.w(VoIPConstants.TAG, "Adding silence to audiotrack");
+//			                	Logger.w(VoIPConstants.TAG, "Adding silence to audiotrack");
 							}
 						}
 
