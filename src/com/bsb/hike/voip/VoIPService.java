@@ -1261,6 +1261,12 @@ public class VoIPService extends Service {
 				AudioRecord recorder;
 				Logger.d(VoIPConstants.TAG, "minBufSizeRecording: " + minBufSizeRecording);
 
+				if (minBufSizeRecording < 0) {
+					Logger.e(VoIPConstants.TAG, "AudioRecord init failed.");
+					sendHandlerMessage(VoIPActivity.MSG_PHONE_NOT_SUPPORTED);
+					return;
+				}
+				
 				int audioSource = VoIPUtils.getAudioSource();
 				recorder = new AudioRecord(audioSource, AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizeRecording);
 
