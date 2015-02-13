@@ -170,8 +170,9 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_processMicFrame
 	{
 		LOGE("Error in process frame. Did you pass the call length limit?\n");
 	}
+//	LOGD("Voice: %d", iConfidentVAD);
 
 	release_byte_array(env, input, in, 0);
 
-	return bytesOut;
+	return iConfidentVAD;
 }

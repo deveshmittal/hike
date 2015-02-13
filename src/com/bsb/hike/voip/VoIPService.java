@@ -157,6 +157,11 @@ public class VoIPService extends Service {
 	private int audiotrackFramesWritten = 0;
 	private boolean miscTrigger = false;
 	private int miscCounter = 0;
+	private VoIPDataPacket silentPacket;
+
+	// VoIP version support
+	private final int VOIP_VERSION_SUPPORT = 2;
+	private int sessionVersion = 0;
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -1125,8 +1130,14 @@ public class VoIPService extends Service {
 
 						// AEC
 						if (solicallAec != null && aecEnabled && aecMicSignal && aecSpeakerSignal) {
-							solicallAec.processMic(dpencode.getData());
-//							Logger.d(VoIPConstants.TAG, "AEC mic process ret: " + ret);
+							int ret = solicallAec.processMic(dpencode.getData());
+							
+							// If we don't detect voice, then send nothing
+							if (ret == 0) {
+								Logger.d(VoIPConstants.TAG, "Not sending anything.");
+								continue;
+							}
+//							Logger.d(VoIPConstants.TAG, "Voice: " + ret);
 						} else
 							aecMicSignal = true;
 						
@@ -1415,6 +1426,11 @@ public class VoIPService extends Service {
 	}
 	
 	private void startAudioTrackMonitoringThread() {
+		
+		byte[] silence = new byte[OpusWrapper.OPUS_FRAME_SIZE * 2];
+		silentPacket = new VoIPDataPacket(PacketType.VOICE_PACKET);
+		silentPacket.setData(silence);
+
 		new Thread(new Runnable() {
 			
 			@Override
@@ -1432,10 +1448,7 @@ public class VoIPService extends Service {
 								decodedBuffersQueue.size() <= 1) {
 							// We are running low on speaker data
 		                	synchronized (decodedBuffersQueue) {
-		        				byte[] silence = new byte[OpusWrapper.OPUS_FRAME_SIZE * 2];
-		        				VoIPDataPacket dp = new VoIPDataPacket(PacketType.VOICE_PACKET);
-		        				dp.setData(silence);
-			                	decodedBuffersQueue.add(dp);
+			                	decodedBuffersQueue.add(silentPacket);
 			                	decodedBuffersQueue.notify();
 			                	Logger.w(VoIPConstants.TAG, "Adding silence to audiotrack");
 							}
@@ -2230,6 +2243,7 @@ public class VoIPService extends Service {
 			socketData.put("callId", getCallId());
 			socketData.put("initiator", clientSelf.isInitiator());
 			socketData.put("reconnecting", reconnecting);
+			socketData.put("version", VOIP_VERSION_SUPPORT);
 			
 			JSONObject data = new JSONObject();
 			data.put(HikeConstants.MESSAGE_ID, new Random().nextInt(10000));
