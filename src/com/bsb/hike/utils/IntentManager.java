@@ -17,6 +17,7 @@ import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.HikeAuthActivity;
+import com.bsb.hike.ui.HikeCameraActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -305,6 +306,12 @@ public class IntentManager
 	{
 		Intent in = new Intent(context, NuxSendCustomMessageActivity.class);
 		return in;
+	}
+	
+	public static void openHikeCameraActivity(Activity argActivity)
+	{
+		Intent in = new Intent(argActivity, HikeCameraActivity.class);
+		argActivity.startActivity(in);
 	}
 
 }

@@ -183,18 +183,18 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 	{
 		// TODO Auto-generated method stub
 		super.onPause();
-		if(adapter != null)
+		if (adapter != null)
 		{
 			adapter.getGalleryImageLoader().setExitTasksEarly(true);
 		}
 	}
-	
+
 	@Override
 	protected void onResume()
 	{
 		// TODO Auto-generated method stub
 		super.onResume();
-		if(adapter != null)
+		if (adapter != null)
 		{
 			adapter.getGalleryImageLoader().setExitTasksEarly(false);
 			adapter.notifyDataSetChanged();

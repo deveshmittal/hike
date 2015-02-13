@@ -1475,6 +1475,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
 
 		addEmailLogItem(optionsList);
+		
+		//Take a photo
+		optionsList.add(new OverFlowMenuItem(getString(R.string.take_photo), 10));
 
 		overFlowWindow = new PopupWindow(this);
 
@@ -1560,6 +1563,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 9:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
+					break;
+				case 10:
+					//Take a photo
+					IntentManager.openHikeCameraActivity(HomeActivity.this);
 					break;
 				}
 
