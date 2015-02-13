@@ -252,6 +252,12 @@ public class StickerManager
 		if(!settings.getBoolean(StickerManager.RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED, false)){
 			updateRecentStickerFile(settings);
 		}
+
+		if(!settings.getBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, false))
+		{
+			updateStickerFolderNames();
+			settings.edit().putBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, true).commit();
+		}
 		
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
 		setupStickerCategoryList(settings);
@@ -284,12 +290,6 @@ public class StickerManager
 		{
 			removeLegacyGreenDots();
 			settings.edit().putBoolean(StickerManager.REMOVE_LEGACY_GREEN_DOTS, true).commit();
-		}
-		
-		if(!settings.getBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, false))
-		{
-			updateStickerFolderNames();
-			settings.edit().putBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, true).commit();
 		}
 	}
 
