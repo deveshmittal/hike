@@ -15,7 +15,8 @@
     <LinearLayout
         android:id="@+id/emptyViewHolder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:orientation="horizontal" >  <!-- Added to remove error -->
     </LinearLayout>
 
     <ListView

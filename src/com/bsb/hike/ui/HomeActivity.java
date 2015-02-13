@@ -148,6 +148,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private Handler mHandler = new Handler();
 
 	private SnowFallView snowFallView;
+	
+	private TextView offlinemessagingIndicator;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
@@ -479,6 +481,21 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				newConversationIndicator.setVisibility(View.GONE);
 				startActivity(intent);
 			}
+		});
+		
+		offlinemessagingIndicator  =  (TextView)menu.findItem(R.id.offline_conversation).getActionView().findViewById(R.id.top_bar_indicator);
+		menu.findItem(R.id.offline_conversation).getActionView().findViewById(R.id.overflow_icon_image).setContentDescription("Start offline chatting");
+		((ImageView) menu.findItem(R.id.offline_conversation).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_offline_messaging);
+	    
+		
+		menu.findItem(R.id.offline_conversation).getActionView().setOnClickListener(new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v) {
+				 	
+			}
+			
 		});
 		
 		return true;

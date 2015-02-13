@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-
+   
+    <item android:id="@+id/offline_conversation"
+        android:actionLayout="@layout/overflow_icon_view"
+        android:showAsAction="always"
+        android:title="@string/start_offline_chat" >
+    </item>
     <item
         android:id="@+id/new_conversation"
         android:actionLayout="@layout/overflow_icon_view"
@@ -10,7 +15,9 @@
         android:id="@+id/overflow_menu"
         android:actionLayout="@layout/overflow_icon_view"
         android:showAsAction="always"
-        android:menuCategory="secondary" >
+        android:menuCategory="secondary"
+        android:title="menu" >    <!-- Added to remove error -->
     </item>
+    
 
 </menu>

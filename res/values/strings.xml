@@ -1344,4 +1344,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="video_compress">VIDEO COMPRESSION</string>
     <string name="send_compress_video">Send Compressed Video</string>
     <string name="valentine_day">Happy Valentine\'s Day</string>
+    <string name="start_offline_chat">Start Offline Chat</string>
 </resources>
