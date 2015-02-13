@@ -32,6 +32,7 @@ import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -75,6 +76,9 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.video.HikeVideoCompressor;
+import com.bsb.hike.video.VideoUtilities;
+import com.bsb.hike.video.VideoUtilities.VideoEditedInfo;
 
 public class UploadFileTask extends FileTransferBase
 {
@@ -415,6 +419,37 @@ public class UploadFileTask extends FileTransferBase
 					}
 					hikeFile.setFile(selectedFile);
 				}
+				else if(hikeFileType == HikeFileType.VIDEO)
+				{
+					File compFile = null;
+					VideoEditedInfo info = null;
+					if(android.os.Build.VERSION.SDK_INT >= 18 && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.COMPRESS_VIDEO, true))
+					{
+						info = VideoUtilities.processOpenVideo(mFile.getPath());
+						if(info != null)
+						{
+							if(info.isCompRequired)
+							{
+								hikeFile.setVideoEditedInfo(info);
+								HikeVideoCompressor instance = new HikeVideoCompressor();
+								compFile = instance.compressVideo(hikeFile);
+							}
+						}
+					}
+					if(compFile != null && compFile.exists()){
+						FTAnalyticEvents.sendVideoCompressionEvent(info.originalWidth + "x" + info.originalHeight, info.resultWidth + "x" + info.resultHeight,
+								(int) mFile.length(), (int) compFile.length(), 1);
+						selectedFile = compFile;
+					}else{
+						if(info != null)
+						{
+							FTAnalyticEvents.sendVideoCompressionEvent(info.originalWidth + "x" + info.originalHeight, info.resultWidth + "x" + info.resultHeight,
+									(int) mFile.length(), 0, 0);
+						}
+						selectedFile = mFile;
+					}
+					hikeFile.setFile(selectedFile);
+				}
 				// do not copy the file if it is video or audio or any other file
 				else
 				{
@@ -721,7 +756,12 @@ public class UploadFileTask extends FileTransferBase
 				Logger.d(getClass().getSimpleName(), "Verifying MD5");
 				JSONObject responseMd5 = verifyMD5(selectedFile);
 				if(responseMd5 != null)
+				{
+					FTAnalyticEvents.sendQuickUploadEvent(1);
 					return responseMd5;
+				}
+				else
+					FTAnalyticEvents.sendQuickUploadEvent(0);
 			}
 			catch (Exception e)
 			{
@@ -774,7 +814,7 @@ public class UploadFileTask extends FileTransferBase
 		}
 		// @GM setting transferred bytes if there are any
 		setBytesTransferred(mStart);
-		mUrl = new URL(AccountUtils.fileTransferUploadBase + "/user/pft/");
+		mUrl = new URL(AccountUtils.fileTransferBase + "/user/pft/");
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
 
@@ -1052,6 +1092,7 @@ public class UploadFileTask extends FileTransferBase
 				mUrl = new URL(AccountUtils.fileTransferBaseDownloadUrl + fileKey);
 				HttpClient client = new DefaultHttpClient();
 				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
+				client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + AccountUtils.getAppVersion());
 				HttpHead head = new HttpHead(mUrl.toString());
 				head.addHeader("Cookie", "user=" + token + ";uid=" + uId);
 	
@@ -1115,6 +1156,7 @@ public class UploadFileTask extends FileTransferBase
 			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
 			client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60 * 1000);
 			client.getParams().setParameter(CoreConnectionPNames.TCP_NODELAY, true);
+			client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + AccountUtils.getAppVersion());
 		}
 		long time = System.currentTimeMillis();
 		HttpPost post = new HttpPost(mUrl.toString());
@@ -1338,6 +1380,7 @@ public class UploadFileTask extends FileTransferBase
 				mUrl = new URL(AccountUtils.fastFileUploadUrl + fileMD5);
 				HttpClient client = new DefaultHttpClient();
 				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
+				client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + AccountUtils.getAppVersion());
 				HttpHead head = new HttpHead(mUrl.toString());
 
 				HttpResponse resp = client.execute(head);
