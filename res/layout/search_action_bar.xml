@@ -34,7 +34,7 @@
         android:background="@null"
         android:padding="8dp"
         android:textColor="@color/white"
-        android:textSize="12sp"
+        android:textSize="13sp"
         android:textStyle="italic" />
 
 </RelativeLayout>
