@@ -1032,5 +1032,61 @@ public class HikeBitmapFactory
 			}
 		}
 	}
+	
+	public static Bitmap decodeSmallStickerFromObject(Object bitmapSourceObject, int reqWidth, int reqHeight, Bitmap.Config con)
+	{
+		if (bitmapSourceObject == null)
+			return null;
+		// First decode with inJustDecodeBounds=true to check dimensions
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		decodeObject(bitmapSourceObject, options);
+
+		options.inPreferredConfig = con;
+		/*
+		 * this is an hit and trial approx factor for our stickers. 
+		 */
+		options.inSampleSize = calculateApproxSampleSize(options, reqWidth, reqHeight, 0.2);
+		options.inJustDecodeBounds = false;
+		Bitmap result = decodeObject(bitmapSourceObject, options);
+		if (options.inSampleSize < 2)
+		{
+			/*
+			 * if we calculated our sample size to be greater then 1 than all fine. if some how it is not the case than we need to create a scaled Bitmap which fits exactly into our
+			 * required window.
+			 */
+			result = createScaledBitmap(result, reqWidth, reqHeight, Bitmap.Config.ARGB_8888, true, true, false);
+		}
+		
+		return result;
+	}
+	
+	private static Bitmap decodeObject(Object object, BitmapFactory.Options options)
+	{
+		Bitmap bitmap = null;
+		if(object instanceof byte[])
+		{
+			byte[] byteArray = (byte[]) object; 
+			bitmap = decodeByteArray(byteArray, 0, byteArray.length, options);
+		}
+		else if (object instanceof String)
+		{
+			String filePath = (String) object;
+			bitmap = decodeFile(filePath, options);
+		}
+		return bitmap;
+	}
+	
+	/*
+	 * calculate a near about sample size base on give error parameter
+	 */
+	private static int calculateApproxSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight, double error)
+	{
+		double oneMinusError = 1-error;
+		reqHeight = (int)(reqHeight*oneMinusError);
+		reqWidth = (int)(reqWidth*oneMinusError);
+		
+		return calculateInSampleSize(options, reqWidth, reqHeight);
+	}
 
 }
