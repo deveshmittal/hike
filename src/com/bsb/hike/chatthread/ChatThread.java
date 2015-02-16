@@ -632,7 +632,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			 */
 			break;
 		case R.id.overlay_button:
-			onOverlayLayoutClicked();
+			onOverlayLayoutClicked((int)v.getTag());
 			break;
 		case R.id.scroll_top_indicator:
 			mConversationsView.setSelection(0);
@@ -2877,7 +2877,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 * @param drawableResId
 	 */
 
-	protected void showOverlay(String label, String formatString, String overlayBtnText, SpannableString str, int drawableResId)
+	protected void showOverlay(String label, String formatString, String overlayBtnText, SpannableString str, int drawableResId, int viewTag)
 	{
 		Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
 
@@ -2899,6 +2899,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		ImageView overlayImg = (ImageView) mOverlayLayout.findViewById(R.id.overlay_image);
 
 		overlayBtn.setOnClickListener(this);
+		overlayBtn.setTag(viewTag);
 
 		mComposeView.setEnabled(false);
 
@@ -2924,23 +2925,30 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		int start = formatString.indexOf("%1$s");
 		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start, start + label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-		showOverlay(label, formatString, activity.getString(R.string.unblock_title), str, R.drawable.ic_no);
+		showOverlay(label, formatString, activity.getString(R.string.unblock_title), str, R.drawable.ic_no, R.string.unblock_title);
 	}
 
-	private void onOverlayLayoutClicked()
+	private void onOverlayLayoutClicked(int tag)
 	{
-		if (activity.findViewById(R.id.overlay_layout).getVisibility() == View.VISIBLE && mConversation.isConvBlocked())
+		switch (tag)
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, getMsisdnMainUser());
-		}
 		
-		else  // No SMS credits case
-		{
+		/**
+		 * Block Case :
+		 */
+		case R.string.unblock_title:  
+			HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, getMsisdnMainUser());
+			break;
+			
+			/**
+			 * Zero SMS Credits :
+			 */
+		case R.string.invite_now:
 			Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.INVITE_OVERLAY_BUTTON);
 			inviteUser();
 			hideOverlay();
+			break;
 		}
-
 	}
 	
 	/**

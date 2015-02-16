@@ -845,7 +845,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			String formatted = String.format(formatString, label);
 			SpannableString str = new SpannableString(formatted);
 			
-			showOverlay(label, formatString , activity.getString(R.string.invite_now), str, R.drawable.ic_no_credits);
+			showOverlay(label, formatString , activity.getString(R.string.invite_now), str, R.drawable.ic_no_credits, R.string.invite_now);
 		}
 		
 		/**
