@@ -83,6 +83,16 @@ public class AccountUtils
 	public static final String PRODUCTION_HOST = "api.im.hike.in";
 
 	public static final String STAGING_HOST = "staging.im.hike.in";
+	
+	public static final String DEV_STAGING_HOST = "staging2.im.hike.in";
+	
+	public static final int _PRODUCTION_HOST = 0;
+
+	public static final int _STAGING_HOST = 1;
+
+	public static final int _DEV_STAGING_HOST = 2;
+
+	public static final int _PROD_DEBUGMQTT_HOST = 3;
 
 	public static final int PRODUCTION_PORT = 80;
 

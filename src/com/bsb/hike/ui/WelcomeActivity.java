@@ -40,6 +40,8 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private boolean isMicromaxDevice;
 
 	private Dialog errorDialog;
+	
+	private int stagingToggle = AccountUtils._PRODUCTION_HOST;
 
 	SignupTask mTask; 
 	
@@ -110,12 +112,31 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private void changeHost()
 	{
 		Logger.d(getClass().getSimpleName(), "Hike Icon CLicked");
+		stagingToggle = (++stagingToggle) % 3;
+		int whichHost = AccountUtils._PRODUCTION_HOST;
+		
+		switch(stagingToggle)
+		{
+		case 0 : 
+			whichHost = AccountUtils._PRODUCTION_HOST;
+			break;
+		case 1 : 
+			whichHost = AccountUtils._STAGING_HOST;
+			break;
+		case 2 :
+			whichHost = AccountUtils._DEV_STAGING_HOST;
+			break;
+		case 3 :
+			whichHost = AccountUtils._PROD_DEBUGMQTT_HOST;
+			break;
+		}
+
 
 		SharedPreferences sharedPreferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 		boolean production = sharedPreferences.getBoolean(HikeMessengerApp.PRODUCTION, true);
 
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-		editor.putBoolean(HikeMessengerApp.PRODUCTION, !production);
+		editor.putInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, whichHost);
 		editor.commit();
 		
 		Utils.setupUri();

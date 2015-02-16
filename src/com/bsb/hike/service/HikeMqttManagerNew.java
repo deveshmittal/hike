@@ -138,8 +138,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 	public static final String MQTT_CONNECTION_CHECK_ACTION = "com.bsb.hike.PING";
 
 	private static final String PRODUCTION_BROKER_HOST_NAME = "mqtt.im.hike.in";
-
-	private static final String STAGING_BROKER_HOST_NAME = AccountUtils.STAGING_HOST;
+	
+	private static final String DMQTT_PROD_BROKER_HOST_NAME = "dmqtt.im.hike.in";
 
 	private static final int PRODUCTION_BROKER_PORT_NUMBER = 8080;
 
@@ -401,32 +401,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 		}
 	}
 
-	private void setBrokerHostPort(boolean ssl)
-	{
-		Logger.d("SSL", "Switching broker port/host. SSL? " + ssl);
-		String brokerHost = settings.getString(HikeMessengerApp.BROKER_HOST, "");
-
-		/*
-		 * If we set a custom broker host we set those values.
-		 */
-		if (!TextUtils.isEmpty(brokerHost))
-		{
-			brokerHostName = brokerHost;
-			brokerPortNumber = settings.getInt(HikeMessengerApp.BROKER_PORT, 8080);
-			return;
-		}
-
-		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION, true);
-
-		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
-
-		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
-				: STAGING_BROKER_PORT_NUMBER);
-
-		Logger.d(TAG, "Broker host name: " + brokerHostName);
-		Logger.d(TAG, "Broker port: " + brokerPortNumber);
-	}
-
 	public void finish()
 	{
 		context.unregisterReceiver(this);
@@ -649,8 +623,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 
 			boolean connectUsingSSL = Utils.switchSSLOn();
 
-			// setBrokerHostPort(connectUsingSSL);
-
 			if (op == null)
 			{
 				op = new MqttConnectOptions();
@@ -772,14 +744,28 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 
 	private String getServerUri(boolean ssl)
 	{
-		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION, true);
+		int whichServer = settings.getInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, AccountUtils._PRODUCTION_HOST);
 
-		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
-
-		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
-				: STAGING_BROKER_PORT_NUMBER);
-
-		if (!production)
+		switch (whichServer) {
+		case AccountUtils._PRODUCTION_HOST:
+			brokerHostName = PRODUCTION_BROKER_HOST_NAME;
+			brokerPortNumber = (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER);
+			break;
+		case AccountUtils._PROD_DEBUGMQTT_HOST:
+			brokerHostName = DMQTT_PROD_BROKER_HOST_NAME;
+			brokerPortNumber = (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER);
+			break;
+		case AccountUtils._DEV_STAGING_HOST:
+			brokerHostName = AccountUtils.DEV_STAGING_HOST;
+			brokerPortNumber = (ssl ? STAGING_BROKER_PORT_NUMBER_SSL : STAGING_BROKER_PORT_NUMBER);
+			break;
+		case AccountUtils._STAGING_HOST:
+			brokerHostName = AccountUtils.STAGING_HOST;
+			brokerPortNumber = (ssl ? STAGING_BROKER_PORT_NUMBER_SSL : STAGING_BROKER_PORT_NUMBER);
+			break;
+		}
+		
+		if (!(whichServer == AccountUtils._PRODUCTION_HOST))
 		{
 			return brokerHostName + ":" + brokerPortNumber;
 		}
