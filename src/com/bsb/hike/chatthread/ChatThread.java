@@ -982,7 +982,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void initialiseLocationTransfer(double latitude, double longitude, int zoomLevel)
 	{
-		clearTempData();
 		FileTransferManager.getInstance(activity.getApplicationContext()).uploadLocation(msisdn, latitude, longitude, zoomLevel, mConversation.isOnhike());
 	}
 
