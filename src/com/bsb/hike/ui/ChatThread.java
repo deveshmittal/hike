@@ -890,7 +890,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			
 		}
 		Logger.i("chatthread", "on create end");
-
+		showDataFragment(R.id.chat_frame);
 	}
 	
 	private void startPulsatingDotAnimation()
@@ -8326,15 +8326,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onGlobalLayout()
 			{
-				Log.i("chatthread", "global layout listener");
+				//Log.i("chatthread", "global layout listener");
 				View root = findViewById(R.id.chatThreadParentLayout);
-				Log.i("chatthread", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
+				//Log.i("chatthread", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
 				Rect r = new Rect();
 				root.getWindowVisibleDisplayFrame(r);
 				// this is height of view which is visible on screen
 				int rootViewHeight = root.getRootView().getHeight();
 				int temp = rootViewHeight - r.bottom;
-				Logger.i("chatthread", "keyboard  height " + temp);
+			//	Logger.i("chatthread", "keyboard  height " + temp);
 				boolean islandScape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
 				if (temp > 0)
 				{
