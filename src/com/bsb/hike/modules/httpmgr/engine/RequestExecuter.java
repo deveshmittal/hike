@@ -298,10 +298,6 @@ public class RequestExecuter
 				RequestInterceptorChain chain = new RequestInterceptorChain(iterator, requestFacade);
 				iterator.next().intercept(chain);
 			}
-			else
-			{
-				processRequest();
-			}
 		}
 	}
 }
