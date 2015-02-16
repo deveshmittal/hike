@@ -34,7 +34,11 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import org.json.JSONException;
+import org.json.JSONObject;
 import android.os.Message;
 import android.os.Messenger;
 import android.preference.PreferenceManager;
@@ -44,11 +48,14 @@ import android.util.Pair;
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
+import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.ToastListener;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
+import com.bsb.hike.service.MqttMessagesManager;
 import com.bsb.hike.service.RegisterToGCMTrigger;
 import com.bsb.hike.service.SendGCMIdToServerTrigger;
 import com.bsb.hike.service.UpgradeIntentService;
@@ -60,7 +67,6 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 
 @ReportsCrashes(formKey = "", customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
@@ -75,6 +81,16 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
 
+	public static final String VOIP_SETTINGS = "voipsettings";
+
+	public static final String VOIP_AUDIO_GAIN = "voipaudiogain";
+	
+	public static final String VOIP_BITRATE_2G = "vb2g";
+	
+	public static final String VOIP_BITRATE_3G = "vb3g";
+	
+	public static final String VOIP_BITRATE_WIFI = "vbw";
+	
 	public static final String MSISDN_SETTING = "msisdn";
 
 	public static final String CARRIER_SETTING = "carrier";
@@ -420,12 +436,28 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN = "showCategoryReordering";
 	
 	public static final String STICKED_BTN_CLICKED_FIRST_TIME = "stickerBtnClickedFirstTime";
-	
+
 	public static final String STICKER_SETTING_CHECK_BOX_CLICKED = "stickerSettingCheckBoxClicked";
 	
 	public static final String STICKER_SETTING_UNCHECK_BOX_CLICKED = "stickerSettingUnCheckBoxClicked";
 
 	public static final String RETRY_NOTIFICATION_COOL_OFF_TIME = "retryNotificationCoolOffTime";
+	
+	public static final String LED_NOTIFICATION_COLOR_CODE = "led_notification_color_code";
+
+	public static final String NOTIFICATION_TONE_URI = "notificationToneUri";
+
+	public static final String NOTIFICATION_TONE_NAME = "notificaationToneName";
+
+	public static final String SHOWN_VOIP_INTRO_TIP = "shownVoipIntroTip";
+
+	public static final String SHOW_VOIP_CALL_RATE_POPUP = "showVoipCallRatePopup";
+
+	public static final String VOIP_CALL_RATE_POPUP_FREQUENCY = "voipCallRatePopupFrequency";
+
+	public static final String VOIP_ACTIVE_CALLS_COUNT = "voipCallsCount";
+
+	public static final String DETAILED_HTTP_LOGGING_ENABLED = "detailedHttpLoggingEnabled";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -734,16 +766,9 @@ public void onTrimMemory(int level)
 
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
 
-		// adding a check here for MobileAppTracker SDK update case
 		// we use this preference to check if this is a fresh install case or an
 		// update case
 		// in case of an update the SSL pref would not be null
-		TrackerUtil tUtil = TrackerUtil.getInstance(this.getApplicationContext());
-		if (tUtil != null)
-		{
-			tUtil.setTrackOptions(!preferenceManager.contains(HikeConstants.SSL_PREF));
-			Logger.d(getClass().getSimpleName(), "Init for apptracker sdk finished" + !preferenceManager.contains(HikeConstants.SSL_PREF));
-		}
 
 		boolean isSAUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE);
 
@@ -825,6 +850,9 @@ public void onTrimMemory(int level)
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_SUPPORT, "hike support");
 		hikeBotNamesMap.put(HikeConstants.NUX_BOT, "Natasha");
+		hikeBotNamesMap.put(HikeConstants.CRICKET_BOT, "Cricket");
+
+		HikeConversationsDatabase.getInstance().addBotToHashMap(hikeBotNamesMap);
 		initHikeLruCache(getApplicationContext());
 		initContactManager();
 		/*
@@ -837,8 +865,54 @@ public void onTrimMemory(int level)
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
 		
 		registerReceivers();
+
+		if (!HikeSharedPreferenceUtil.getInstance(getApplicationContext()).getData(HikePlatformConstants.CRICKET_PREF_NAME, false))
+		{
+			cricketBotEntry();
+			HikeSharedPreferenceUtil.getInstance(getApplicationContext()).saveData(HikePlatformConstants.CRICKET_PREF_NAME, true);
+		}
+
 	}
-	
+
+	// Hard coding the cricket bot on the App's onCreate so that there is a cricket bot entry
+	// when there is no bot currently in the app. Using the shared prefs for that matter.
+	// Hardcoding the bot name, bot msisdn and the bot chat theme. Can be updated using the
+	// AC packet cbot and delete using the ac packet dbot.
+	private void cricketBotEntry()
+	{
+		HikeHandlerUtil mThread = HikeHandlerUtil.getInstance();
+		mThread.startHandlerThread();
+		mThread.postRunnableWithDelay(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Logger.d("create bot", "cricket bot entry started");
+				final JSONObject jsonObject = new JSONObject();
+				try
+				{
+					jsonObject.put(HikeConstants.MSISDN, HikePlatformConstants.CRICKET_BOT_MSISDN);
+					jsonObject.put(HikeConstants.NAME, HikePlatformConstants.CRICKET_BOT_NAME);
+					jsonObject.put(HikeConstants.BOT_CHAT_THEME, HikePlatformConstants.CRICKET_CHAT_THEME_ID);
+
+					BitmapDrawable drawable = (BitmapDrawable) getApplicationContext().getResources().getDrawable(R.drawable.cric_icon);
+					String base64Icon = Utils.drawableToString(drawable);
+					if (base64Icon != null)
+					{
+						jsonObject.put(HikeConstants.BOT_THUMBNAIL, base64Icon);
+					}
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+
+				MqttMessagesManager.getInstance(getApplicationContext()).createBot(jsonObject);
+			}
+		}, 0);
+
+	}
+
 	public static HikeMessengerApp getInstance()
 	{
 		return _instance;
@@ -1061,7 +1135,7 @@ public void onTrimMemory(int level)
 			/*
 			 * Send a fg/bg packet on reconnecting.
 			 */
-			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true);
+			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true, false);
 		}
 	};
 
@@ -1076,5 +1150,10 @@ public void onTrimMemory(int level)
 			edit.putBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, true);
 			edit.commit();
 		}
+	}
+	
+	public boolean isHikeBotNumber(String msisdn)
+	{
+		return hikeBotNamesMap.containsKey(msisdn);
 	}
 }

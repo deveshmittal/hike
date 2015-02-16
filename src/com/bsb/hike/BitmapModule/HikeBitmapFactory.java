@@ -52,36 +52,6 @@ public class HikeBitmapFactory
 		return output;
 	}
 
-    public static Bitmap getRoundedRectangleBitmap(BitmapDrawable value, float cornerRadius){
-        if (value == null)
-            return null;
-
-        Bitmap output = value.getBitmap() ;
-        return getRoundedCornerBitmap(output, cornerRadius);
-
-    }
-
-    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, float cornerRadius) {
-
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
-                bitmap.getHeight(), Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-
-        final int color = 0xff424242;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        final RectF rectF = new RectF(rect);
-
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
-        canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, paint);
-
-        paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-
-        return output ;
-    }
 
 	public static Bitmap getBitMapFromTV(View textView)
 	{
@@ -159,7 +129,7 @@ public class HikeBitmapFactory
 		/*
 		 * http://developer.android.com/reference/android/graphics/Bitmap.Config. html
 		 */
-		Bitmap bitmap = createBitmap((int) (48 * Utils.densityMultiplier), (int) (48 * Utils.densityMultiplier), config);
+		Bitmap bitmap = createBitmap((int) (48 * Utils.scaledDensityMultiplier), (int) (48 * Utils.scaledDensityMultiplier), config);
 
 		if (bitmap == null)
 		{

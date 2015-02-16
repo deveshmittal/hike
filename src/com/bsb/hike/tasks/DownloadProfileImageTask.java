@@ -163,6 +163,8 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean>
 			{
 				if (fos != null)
 				{
+					fos.flush();
+					fos.getFD().sync();
 					fos.close();
 				}
 				if (is != null)

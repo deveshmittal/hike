@@ -440,6 +440,11 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		return transientCache.getAllContacts();
 	}
 
+	
+	public List<ContactInfo> getAllContacts(boolean ignoreUnknownContacts)
+	{
+		return transientCache.getAllContacts(ignoreUnknownContacts);
+	}
 	/**
 	 * This method should be called when last message in a group is changed, we remove the previous contact from the {@link PersistenceCache} and inserts the new contacts in memory
 	 * 
@@ -516,6 +521,39 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		persistenceCache.setGroupAlive(groupId, alive);
 	}
 
+	/**
+	 * Returns true if group is mute otherwise false
+	 * 
+	 * @param groupId
+	 * @return
+	 */
+	public boolean isGroupMute(String groupId)
+	{
+		return persistenceCache.isGroupMute(groupId);
+	}
+
+	/**
+	 * Sets the group mute status in {@link #persistenceCache}
+	 * 
+	 * @param groupId
+	 * @param mute
+	 */
+	public void setGroupMute(String groupId, boolean mute)
+	{
+		persistenceCache.setGroupMute(groupId, mute);
+	}
+	
+	/**
+	 * Gets the Name, alive and Mute status of Group
+	 * 
+	 * @param msisdn
+	 * @return GroupDetails
+	 */
+	public GroupDetails getGroupDetails(String msisdn)
+	{
+		return persistenceCache.getGroupDetails(msisdn);
+	}
+	
 	/**
 	 * This method returns a list {@link ContactInfo} objects of a particular favorite type and if parameter <code>onHike</code> is one then these are hike contacts otherwise non
 	 * hike contacts. This list should not contain contact whose msisdn is same as parameter <code>myMsisdn</code>. Unsaved contacts are also included in these.
@@ -1158,15 +1196,14 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	 * @param grpIds
 	 * @return
 	 */
-	public Map<String, Pair<String, Boolean>> getGroupNamesAndAliveStatus(List<String> grpIds)
+	public Map<String, GroupDetails> getGroupDetails(List<String> grpIds)
 	{
-		Map<String, Pair<String, Boolean>> groupNames = HikeConversationsDatabase.getInstance().getGroupNamesAndAliveStatus(grpIds);
-		for (Entry<String, Pair<String, Boolean>> mapEntry : groupNames.entrySet())
+		Map<String, GroupDetails> groupNames = HikeConversationsDatabase.getInstance().getIdGroupDetailsMap(grpIds);
+		for (Entry<String, GroupDetails> mapEntry : groupNames.entrySet())
 		{
 			String groupId = mapEntry.getKey();
-			String groupName = mapEntry.getValue().first;
-			boolean groupAlive = mapEntry.getValue().second;
-			persistenceCache.insertGroup(groupId, groupName, groupAlive);
+			GroupDetails grpDetails = mapEntry.getValue();
+			persistenceCache.insertGroup(groupId, grpDetails);
 		}
 		return groupNames;
 	}
@@ -1898,7 +1935,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 
 	public List<ContactInfo> getConversationGroupsAsContacts(boolean shouldSort)
 	{
-		List<GroupDetails> groupDetails = persistenceCache.getGroupDetails();
+		List<GroupDetails> groupDetails = persistenceCache.getGroupDetailsList();
 		List<ContactInfo> groupContacts = new ArrayList<ContactInfo>();
 		Map<String, Integer> groupCountMap = HikeConversationsDatabase.getInstance().getAllGroupsActiveParticipantCount();
 		for(GroupDetails group : groupDetails)

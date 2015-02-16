@@ -3,7 +3,6 @@ package com.bsb.hike.platform;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Base64;
-import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.platform.CardComponent.ImageComponent;
 import com.bsb.hike.platform.CardComponent.MediaComponent;
@@ -269,69 +268,6 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
         }
     }
 
-    public void changeCallToAction(){
-
-        if (json.has(ASSETS)) {
-            try {
-                JSONObject assets = json.getJSONObject(ASSETS);
-                if (assets.has(ACTIONS)) {
-                    JSONArray actions = assets.getJSONArray(ACTIONS);
-                    int len = actions.length();
-
-                    for (int i = 0; i < len; i++) {
-                        JSONObject obj = actions.getJSONObject(i);
-                        String tag = obj.optString(TAG);
-
-                        if (!TextUtils.isEmpty(tag) && tag.equals("CARD") && obj.has(ANDROID_INTENT)) {
-                            JSONObject androidIntent = obj.optJSONObject(ANDROID_INTENT);
-                            androidIntent.put(INTENT_URI, channelSource);
-
-                        }
-                    }
-                }
-                if (assets.has(TEXTS)){
-                    JSONArray actions = assets.getJSONArray(ACTIONS);
-                    int len = actions.length();
-                    for (int i = 0; i < len; i++) {
-                        JSONObject obj = actions.getJSONObject(i);
-                        String textTag = obj.optString(TAG);
-                        if (!TextUtils.isEmpty(textTag) && textTag.equals("T3"))
-                            obj.put(TEXT, mContext.getString(R.string.play_text));
-
-                        if (!TextUtils.isEmpty(textTag) && textTag.equals("T2"))
-                            obj.put(TEXT, mContext.getString(R.string.play_description));
-
-                    }
-
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        for (CardComponent.ActionComponent actionComponent : actionComponents) {
-            String actionTag = actionComponent.getTag();
-            if (!TextUtils.isEmpty(actionTag) && actionTag.equals("CARD") ) {
-                JSONObject intent = actionComponent.getAndroidIntent();
-                try {
-                    intent.put(INTENT_URI, channelSource);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        for (TextComponent textComponent : textComponents) {
-            String data = textComponent.getTag();
-            if (!TextUtils.isEmpty(data) && data.equals("T3"))
-                textComponent.text = mContext.getString(R.string.play_text);
-
-            if (!TextUtils.isEmpty(data) && data.equals("T2"))
-                textComponent.text = mContext.getString(R.string.play_description);
-
-        }
-
-    }
 
     private String getBase64FromDb(String key) {
         if (!TextUtils.isEmpty(key)) {
@@ -343,6 +279,16 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
             }
         }
         return "";
+    }
+
+    public JSONObject getHelperData(){
+
+        if (json.has(HELPER_DATA)){
+            JSONObject jsonObj = json.optJSONObject(HELPER_DATA);
+            if (null != jsonObj)
+                return jsonObj;
+        }
+        return new JSONObject();
     }
 
     public String JSONtoString() {
