@@ -54,8 +54,9 @@ public class RoundedDrawable extends Drawable {
     public RoundedDrawable(Bitmap bitmap) {
         mBitmap = bitmap;
 
-        mBitmapWidth = bitmap.getWidth();
-        mBitmapHeight = bitmap.getHeight();
+        int length = Math.min(bitmap.getWidth(), bitmap.getHeight());
+        mBitmapWidth =  length;
+        mBitmapHeight = length;
         mBitmapRect.set(0, 0, mBitmapWidth, mBitmapHeight);
 
         mBitmapPaint = new Paint();

@@ -39,7 +39,7 @@ public class BitmapUtils
 		return bao.toByteArray();
 	}
 
-	private static int iconHash(String s)
+	public static int iconHash(String s)
 	{
 		/*
 		 * ignore everything after :: so that your large icon by default matches your msisdn

@@ -487,7 +487,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 
 	private void setAvatar(String msisdn, ImageView avatar)
 	{
-		iconImageLoader.loadImage(msisdn, true, avatar, true);
+		iconImageLoader.loadImage(msisdn, avatar, false, true);
 	}
 
 	private void addMoods(ViewGroup container, int[] moods)

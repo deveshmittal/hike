@@ -83,7 +83,7 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		ContactInfo contact = (ContactInfo) getItem(section,position);
 		holder.name.setText(contact.getName());
 		holder.status.setText(contact.getMsisdn());
-		iconloader.loadImage(contact.getMsisdn(), true, holder.userImage, true);
+		iconloader.loadImage(contact.getMsisdn(), holder.userImage, true);
 		if (selectedFriends.contains(contact)) {
 			holder.checkbox.setChecked(true);
 		} else {

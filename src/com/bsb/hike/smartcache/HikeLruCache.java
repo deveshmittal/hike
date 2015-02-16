@@ -14,12 +14,16 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.media.ThumbnailUtils;
 import android.os.Build.VERSION_CODES;
 import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
 
 import android.util.Base64;
+
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
@@ -283,27 +287,60 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	 */
 	public BitmapDrawable getIconFromCache(String key)
 	{
-		return getIconFromCache(key, false);
-	}
-
-	public BitmapDrawable getIconFromCache(String key, boolean rounded)
-	{
-		String cacheKey = rounded ? key + ProfileActivity.PROFILE_ROUND_SUFFIX : key;
-		BitmapDrawable b = get(cacheKey);
+		BitmapDrawable b = get(key);
 		if (b == null)
 		{
 			int idx = key.lastIndexOf(ProfileActivity.PROFILE_PIC_SUFFIX);
 			if (idx > 0)
 				key = new String(key.substring(0, idx));
-			BitmapDrawable bd = (BitmapDrawable) ContactManager.getInstance().getIcon(key, rounded);
+			BitmapDrawable bd = (BitmapDrawable) ContactManager.getInstance().getIcon(key);
 			if (bd != null)
 			{
-				putInCache(cacheKey, bd);
+				putInCache(key, bd);
 			}
 			return bd;
 		}
 		else
 			return b;
+	}
+	
+	public BitmapDrawable getDefaultAvatar(String msisdn)
+	{
+		return getDefaultAvatar(msisdn, false);
+	}
+	
+	public BitmapDrawable getDefaultAvatar(String msisdn, boolean hiRes)
+	{
+		if(hiRes)
+		{
+			return HikeBitmapFactory.getDefaultAvatar(mResources, msisdn, hiRes);
+		}
+		else
+		{
+			boolean isGroupConversation = Utils.isGroupConversation(msisdn);
+			int index = BitmapUtils.iconHash(msisdn) % (HikeConstants.DEFAULT_AVATAR_KEYS.length);
+			String cacheKey = getDefaultAvatarKey(index, isGroupConversation);
+
+			BitmapDrawable bd = get(cacheKey);
+
+			if (bd == null)
+			{
+				bd = HikeBitmapFactory.getDefaultAvatar(mResources, msisdn, hiRes);
+				putInCache(cacheKey, bd);
+			}
+			return bd;
+		}
+	}
+	
+	private String getDefaultAvatarKey(int index, boolean isGroupConversation)
+	{
+		String key = HikeConstants.DEFAULT_AVATAR_KEYS[index];
+		if(isGroupConversation)
+		{
+			key += HikeConstants.IS_GROUP;
+		}
+		
+		return key;
 	}
 
 	public BitmapDrawable getFileIconFromCache(String key)
@@ -334,8 +371,6 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	{
 		remove(msisdn);
 		remove(msisdn + ProfileActivity.PROFILE_PIC_SUFFIX);
-		remove(msisdn + ProfileActivity.PROFILE_ROUND_SUFFIX);
-
 	}
 
 	public void clearIconCache()
