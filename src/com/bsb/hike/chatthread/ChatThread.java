@@ -2956,16 +2956,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	private void inviteUser()
 	{
-		if (!mConversation.isOnhike())
+		if (mConversation.isOnhike())
+		{
+			Toast.makeText(activity, R.string.already_hike_user, Toast.LENGTH_LONG).show();
+		}
+		
+		else
 		{
 			Utils.sendInviteUtil(new ContactInfo(msisdn, msisdn, mConversation.getContactName(), msisdn), activity.getApplicationContext(),
 					HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED, getString(R.string.native_header), getString(R.string.native_info));
-		}
-		// Will this case ever happen ?
-		else
-		{
-			Toast toast = Toast.makeText(activity, R.string.already_hike_user, Toast.LENGTH_LONG);
-			toast.show();
+
 		}
 	}
 
