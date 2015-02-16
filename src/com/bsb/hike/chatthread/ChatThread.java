@@ -639,7 +639,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			hideView(R.id.scroll_top_indicator);
 			break;
 		case R.id.selected_state_overlay:
-			onOverLayClick((ConvMessage) v.getTag());
+			onBlueOverLayClick((ConvMessage) v.getTag(), v);
 			break;
 		case R.id.block_unknown_contact:
 			HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, msisdn);
@@ -1670,17 +1670,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
-		return showMessageContextMenu(mAdapter.getItem(position - mConversationsView.getHeaderViewsCount()));
+		return showMessageContextMenu(mAdapter.getItem(position - mConversationsView.getHeaderViewsCount()), view);
 	}
 
-	protected boolean showMessageContextMenu(ConvMessage message)
+	protected boolean showMessageContextMenu(ConvMessage message, View v)
 	{
 		if (shouldProcessMessagesOnTap(message))
 		{
 			/**
-			 * Inflate ActionMode
+			 * Inflate ActionMode, if some other action mode is open
 			 */
-			if (mActionMode.whichActionModeIsOn() == -1)
+			if (mActionMode.whichActionModeIsOn() != MULTI_SELECT_ACTION_MODE)
 			{
 				mActionMode.showActionMode(MULTI_SELECT_ACTION_MODE, activity.getString(R.string.selected_count, mAdapter.getSelectedCount()), true, R.menu.multi_select_chat_menu);
 			}
@@ -1696,8 +1696,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			processMessageOnTap(message, mAdapter.isSelected(message));
 
 			mAdapter.setActionMode(true);
-			mAdapter.notifyDataSetChanged();
-
+			v.setVisibility(mAdapter.isSelected(message) ? View.VISIBLE : View.INVISIBLE);
+			
 			mActionMode.hideView(R.id.done_container);
 			mActionMode.hideView(R.id.done_container_divider);
 			hideShowActionModeMenus(MULTI_SELECT_ACTION_MODE);
@@ -3878,11 +3878,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 * Used to handle clicks on the Overlay mode when ActionMode is enabled
 	 * @param convMessage
 	 */
-	public void onOverLayClick(ConvMessage convMessage)
+	public void onBlueOverLayClick(ConvMessage convMessage, View view)
 	{
 		if (mActionMode.whichActionModeIsOn() == MULTI_SELECT_ACTION_MODE)
 		{
-			showMessageContextMenu(convMessage);
+			showMessageContextMenu(convMessage, view);
 		}
 	}
 	

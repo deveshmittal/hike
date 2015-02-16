@@ -1940,7 +1940,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 * Overriding this here since we need to intercept clicks for H20 overlay
 	 */
 	@Override
-	public void onOverLayClick(ConvMessage convMessage)
+	public void onBlueOverLayClick(ConvMessage convMessage, View view)
 	{
 		if (modeOfChat == H2S_MODE)
 		{
@@ -1949,7 +1949,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		
 		else
 		{
-			super.onOverLayClick(convMessage);
+			super.onBlueOverLayClick(convMessage, view);
 		}
 	}
 	
