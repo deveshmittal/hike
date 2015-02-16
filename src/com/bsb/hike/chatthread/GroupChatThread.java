@@ -1252,8 +1252,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		/**
 		 * Received message for current open chatThread
 		 */
-
-		if (groupConversation.getMsisdn().equals(((JSONObject) object).optString(HikeConstants.TO)))
+		if(shouldProcessGCJOrGCK(object)) //Defensive check
 		{
 			int addPeopleCount = 0;
 			if (joined)		// Participants added
@@ -1261,7 +1260,13 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 				JSONObject jObj = (JSONObject) object;
 
 				JSONArray participants = jObj.optJSONArray(HikeConstants.DATA);
-
+				
+				if(participants == null)  //If we don't get participants, we simply return here.
+				{
+					Logger.wtf(TAG, "onParticipantJoinedOrLeftGroup : Getting null participants array in : " + object.toString());
+					return;
+				}
+				
 				addPeopleCount = participants.length();
 			}
 
@@ -1272,6 +1277,28 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 
 			sendUIMessage(PARTICIPANT_JOINED_OR_LEFT_GROUP, addPeopleCount);
 		}
+	}
+	
+	/**
+	 * Indicates whether we should process a GCJ/GCK or not.
+	 * 
+	 * @param object
+	 * @return
+	 */
+	private boolean shouldProcessGCJOrGCK(Object object)
+	{
+		if (object instanceof JSONObject)
+		{
+			String msgMsisdn = ((JSONObject) object).optString(HikeConstants.TO);
+			if (msgMsisdn != null && groupConversation.getMsisdn().equals(msgMsisdn))
+			{
+				return true;
+			}
+		}
+		
+		//Default case : 
+		
+		return false;
 	}
 	
 	
