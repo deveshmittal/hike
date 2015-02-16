@@ -16,11 +16,15 @@ cfcf * Copyright (C) 2011 The Android Open Source Project
 
 package com.bsb.hike.offline;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -36,8 +40,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.offline.DeviceListFragment.DeviceActionListener;
+import com.bsb.hike.service.HikeMqttManagerNew;
 
 /**
  * An activity that uses WiFi Direct APIs to discover and connect with available
@@ -56,6 +62,9 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     private final IntentFilter intentFilter = new IntentFilter();
     private Channel channel;
     private BroadcastReceiver receiver = null;
+    private SharedPreferences settings;
+    private String myMsisdn;
+    private WifiP2pDevice myWifiP2pDevice;
 
     /**
      * @param isWifiP2pEnabled the isWifiP2pEnabled to set
@@ -76,8 +85,43 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         
+        settings = getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+        myMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+        Toast.makeText(getApplicationContext(), myMsisdn, Toast.LENGTH_SHORT).show();
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
+        
+        try {
+			Method m = manager.getClass().getMethod("setDeviceName", new Class[]{channel.getClass(), String.class,
+						WifiP2pManager.ActionListener.class});
+			String new_name = myMsisdn;
+			m.invoke(manager, channel, new_name, new WifiP2pManager.ActionListener() {
+				
+				@Override
+				public void onSuccess() {
+					Log.d(TAG, "Device Name changed to" + myMsisdn);
+				}
+				
+				@Override
+				public void onFailure(int reason) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        myWifiP2pDevice = new WifiP2pDevice();
+        myWifiP2pDevice.deviceName = myMsisdn;
         receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
     }
 

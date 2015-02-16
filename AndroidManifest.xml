@@ -427,6 +427,33 @@
                 <action android:name="com.android.vending.INSTALL_REFERRER" />
             </intent-filter>
         </receiver>
+        <activity
+            android:name="com.bsb.hike.offline.WiFiDirectActivity"
+            android:label="@string/app_name" android:launchMode="singleTask">
+            <!--  <intent-filter>
+                <action
+                    android:name="android.intent.action.MAIN" />
+                <category
+                    android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>   -->
+        </activity>
+
+        <!-- Used for transferring files  after a successful connection -->
+        <service android:enabled="true" android:name=".FileTransferService" />
+
+        <activity 
+            
+            android:name="com.bsb.hike.offline.FileExplorer">
+        </activity>
+        <activity
+            android:name="com.bsb.hike.offline.Explorerwindow"
+            android:label="@string/app_name" >
+             <!-- <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>  -->
+        </activity>
+        
 
     </application>
 
