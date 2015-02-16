@@ -44,6 +44,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.offline.DeviceListFragment.DeviceActionListener;
 import com.bsb.hike.service.HikeMqttManagerNew;
+import com.bsb.hike.utils.Logger;
 
 /**
  * An activity that uses WiFi Direct APIs to discover and connect with available
@@ -85,27 +86,26 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         
-        settings = getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-        myMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
-        Toast.makeText(getApplicationContext(), myMsisdn, Toast.LENGTH_SHORT).show();
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
         
+        /*
+         * Setting device Name to msisdn
+         */
         try {
+        	settings = getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+            myMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 			Method m = manager.getClass().getMethod("setDeviceName", new Class[]{channel.getClass(), String.class,
 						WifiP2pManager.ActionListener.class});
-			String new_name = myMsisdn;
-			m.invoke(manager, channel, new_name, new WifiP2pManager.ActionListener() {
+			m.invoke(manager, channel, myMsisdn, new WifiP2pManager.ActionListener() {
 				
 				@Override
 				public void onSuccess() {
-					Log.d(TAG, "Device Name changed to" + myMsisdn);
+					Log.d(TAG, "Device Name changed to " + myMsisdn);
 				}
-				
 				@Override
 				public void onFailure(int reason) {
-					// TODO Auto-generated method stub
-					
+					Logger.e(TAG, "Unable to set device name as msisdn");
 				}
 			});
 		} catch (NoSuchMethodException e) {

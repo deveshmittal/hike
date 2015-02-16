@@ -32,11 +32,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView.FindListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.platform.CardRenderer.ViewHolder;
+import com.bsb.hike.smartImageLoader.IconLoader;
 
 /**
  * A ListFragment that displays available peers on discovery and requests the
@@ -48,11 +54,13 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     ProgressDialog progressDialog = null;
     View mContentView = null;
     private WifiP2pDevice device;
+    private int mIconImageSize;
+    private IconLoader iconLoader;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.row_devices, peers));
+        this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.conversation_item, peers));
 
     }
 
@@ -122,18 +130,35 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
             if (v == null) {
                 LayoutInflater vi = (LayoutInflater) getActivity().getSystemService(
                         Context.LAYOUT_INFLATER_SERVICE);
-                v = vi.inflate(R.layout.row_devices, null);
+                v = vi.inflate(R.layout.conversation_item, null);
             }
             WifiP2pDevice device = items.get(position);
             if (device != null) {
-                TextView top = (TextView) v.findViewById(R.id.device_name);
-                TextView bottom = (TextView) v.findViewById(R.id.device_details);
+                //TextView top = (TextView) v.findViewById(R.id.device_name);
+                
+                //TextView bottom = (TextView) v.findViewById(R.id.device_details);
+            	
+            	Context context = getContext();
+            	mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+        		iconLoader = new IconLoader(context, mIconImageSize);
+        		
+        		ContactInfo deviceContact = ContactManager.getInstance().getContact(device.deviceName);
+        		TextView contact_name = (TextView) v.findViewById(R.id.contact);
+        		if(deviceContact != null)
+        			contact_name.setText(deviceContact.getName());
+        		else
+        			contact_name.setText(device.deviceName);
+        		
+            	ImageView avatarView =  (ImageView) v.findViewById(R.id.avatar);
+        		iconLoader.loadImage(device.deviceName, true, avatarView, false, true, true);
+        		
+        		/*
                 if (top != null) {
                     top.setText(device.deviceName);
                 }
                 if (bottom != null) {
                     bottom.setText(getDeviceStatus(device.status));
-                }
+                }*/
             }
 
             return v;
