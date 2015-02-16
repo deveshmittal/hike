@@ -1,10 +1,15 @@
 package com.bsb.hike.modules.httpmgr;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import com.bsb.hike.modules.httpmgr.client.ClientOptions;
 import com.bsb.hike.modules.httpmgr.engine.HttpEngine;
 import com.bsb.hike.modules.httpmgr.engine.RequestListenerNotifier;
 import com.bsb.hike.modules.httpmgr.engine.RequestProcessor;
 import com.bsb.hike.modules.httpmgr.request.Request;
+import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 
 /**
  * This class will be used for initialization by and outside world and for adding or canceling a request by {@link RequestToken}
@@ -92,6 +97,36 @@ public class HttpManager
 		request.cancel();
 	}
 	
+	/**
+	 * Removes particular listener from list of listeners for a request
+	 * 
+	 * @param request
+	 * @param listener
+	 */
+	public <T> void removeListener(Request<T> request, IRequestListener listener)
+	{
+		List<IRequestListener> listeners = new ArrayList<IRequestListener>(1);
+		listeners.add(listener);
+		
+		request.removeRequestListeners(listeners);
+	}
+	
+	/**
+	 * Removes list of listeners from list of request listeners for a request
+	 * 
+	 * @param request
+	 * @param listeners
+	 */
+	public <T> void removeListeners(Request<T> request, List<IRequestListener> listeners)
+	{
+		request.removeRequestListeners(listeners);
+	}
+	
+	/**
+	 * Determines whether a request is running or not
+	 * @param request
+	 * @return
+	 */
 	public <T> boolean isRequestRunning(Request<T> request)
 	{
 		return requestProcessor.isRequestRunning(request);

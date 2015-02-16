@@ -370,6 +370,10 @@ public abstract class Request<T> implements IRequestFacade
 		this.isCancelled = isCancelled;
 	}
 
+	/**
+	 * add list of listeners to existing list of request listeners
+	 * @param requestListeners
+	 */
 	public void addRequestListeners(List<IRequestListener> requestListeners)
 	{
 		if (this.requestListeners == null)
@@ -377,6 +381,19 @@ public abstract class Request<T> implements IRequestFacade
 			this.requestListeners = new CopyOnWriteArrayList<IRequestListener>();
 		}
 		this.requestListeners.addAll(requestListeners);
+	}
+	
+	/**
+	 * remove list of listeners from existing list of request listeners
+	 * @param requestListeners
+	 */
+	public void removeRequestListeners(List<IRequestListener> requestListeners)
+	{
+		if (this.requestListeners == null)
+		{
+			return;
+		}
+		this.requestListeners.removeAll(requestListeners);
 	}
 
 	/**
