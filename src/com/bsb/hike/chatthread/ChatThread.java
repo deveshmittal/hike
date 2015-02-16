@@ -1012,7 +1012,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void negativeClicked(HikeDialog dialog)
 	{
-
+		switch(dialog.getId())
+		{
+		case HikeDialogFactory.DELETE_MESSAGES_DIALOG:
+			dialog.dismiss();
+			mActionMode.finish();
+			break;
+		}
 	}
 
 	@Override
@@ -1023,13 +1029,24 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HikeDialogFactory.CONTACT_SEND_DIALOG:
 			initialiseContactTransfer(((PhonebookContact) dialog.data).jsonData);
 			dialog.dismiss();
+			
 			break;
 		case HikeDialogFactory.CONTACT_SAVE_DIALOG:
+			//TODO
 			break;
+			
 		case HikeDialogFactory.CLEAR_CONVERSATION_DIALOG:
 			clearConversation();
 			dialog.dismiss();
 			break;
+			
+		case HikeDialogFactory.DELETE_MESSAGES_DIALOG:
+			ArrayList<Long> selectedMsgIdsToDelete = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			deleteMessagesFromDb(selectedMsgIdsToDelete, ((CustomAlertDialog) dialog).isChecked());
+			dialog.dismiss();
+			mActionMode.finish();
+			break;
+			
 		}
 
 	}
@@ -3658,29 +3675,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (menuItem.getItemId())
 		{
 		case R.id.delete_msgs:
-			final ArrayList<Long> selectedMsgIdsToDelete = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
-			HikeDialogFactory.showDialog(activity, HikeDialogFactory.DELETE_MESSAGES_DIALOG, new HikeDialogListener()
-			{
-
-				@Override
-				public void positiveClicked(HikeDialog hikeDialog)
-				{
-					deleteMessagesFromDb(selectedMsgIdsToDelete, ((CustomAlertDialog) hikeDialog).isChecked());
-					hikeDialog.dismiss();
-					mActionMode.finish();
-				}
-
-				@Override
-				public void neutralClicked(HikeDialog hikeDialog)
-				{
-				}
-
-				@Override
-				public void negativeClicked(HikeDialog hikeDialog)
-				{
-				}
-			}, mAdapter.getSelectedCount(), mAdapter.containsMediaMessage(selectedMsgIdsToDelete));
-
+			ArrayList<Long> selectedMsgIdsToDelete = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			HikeDialogFactory.showDialog(activity, HikeDialogFactory.DELETE_MESSAGES_DIALOG, this, mAdapter.getSelectedCount(),
+					mAdapter.containsMediaMessage(selectedMsgIdsToDelete));
 			return true;
 
 		case R.id.forward_msgs:

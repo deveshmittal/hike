@@ -861,6 +861,16 @@ public class HikeDialogFactory
 			}
 		};
 		
+		OnClickListener negativeListener = new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				listener.negativeClicked(deleteConfirmDialog);
+			}
+		};
+		
 		switch (dialogId)
 		{
 		case DELETE_FILES_DIALOG:
@@ -868,49 +878,49 @@ public class HikeDialogFactory
 			deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header);
 			deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
 			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
 			break;
 			
 		case DELETE_PINS_DIALOG:
 			deleteConfirmDialog.setBody(((int) data[0] == 1) ? context.getString(R.string.confirm_delete_pin) : context.getString(R.string.confirm_delete_pins, (int) data[0]));
 			deleteConfirmDialog.setHeader(R.string.confirm_delete_pin_header);
 			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
 			break;
 			
 		case DELETE_STATUS_DIALOG:
 			deleteConfirmDialog.setHeader(R.string.delete_status);
 			deleteConfirmDialog.setBody(R.string.delete_status_confirmation);
 			deleteConfirmDialog.setOkButton(R.string.ok, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.no);
+			deleteConfirmDialog.setCancelButton(R.string.no, negativeListener);
 			break;
 			
 		case DELETE_FROM_GROUP:
 			deleteConfirmDialog.setHeader(R.string.remove_from_group);
 			deleteConfirmDialog.setBody(context.getString(R.string.remove_confirm, (String) data[0]));
 			deleteConfirmDialog.setOkButton(R.string.yes, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.no);
+			deleteConfirmDialog.setCancelButton(R.string.no, negativeListener);
 			break;
 			
 		case DELETE_CHAT_DIALOG:
 			deleteConfirmDialog.setHeader(R.string.delete);
 			deleteConfirmDialog.setBody(context.getString(R.string.confirm_delete_chat_msg, (String) data[0]));
 			deleteConfirmDialog.setOkButton(R.string.yes, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.no);
+			deleteConfirmDialog.setCancelButton(R.string.no, negativeListener);
 			break;
 			
 		case DELETE_GROUP_DIALOG:
 			deleteConfirmDialog.setHeader(R.string.delete);
 			deleteConfirmDialog.setBody(context.getString(R.string.confirm_delete_group_msg, (String) data[0]));
 			deleteConfirmDialog.setOkButton(android.R.string.ok, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
 			break;
 			
 		case DELETE_ALL_CONVERSATIONS:
 			deleteConfirmDialog.setHeader(R.string.deleteconversations);
 			deleteConfirmDialog.setBody(R.string.delete_all_question);
 			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
 			break;
 			
 		case DELETE_MESSAGES_DIALOG:
@@ -921,7 +931,7 @@ public class HikeDialogFactory
 				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
 			}
 			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
 			break;
 		}
 		
