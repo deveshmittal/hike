@@ -224,7 +224,6 @@ import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPUtils;
 import com.bsb.hike.voip.view.CallRatePopup;
-import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener
@@ -620,7 +619,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		super.onDestroy();
 		possibleKeyboardHeight = 0;
 		unregisterReceivers();
-		VoIPUtils.removeCallListener();
 
 		if (prefs != null && !prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
 		{
@@ -812,8 +810,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		/* ensure that when we hit Alt+Enter, we insert a newline */
 		mComposeView.setOnKeyListener(this);
-
-		VoIPUtils.setCallListener(this);
 
 		mConversationDb = HikeConversationsDatabase.getInstance();
 

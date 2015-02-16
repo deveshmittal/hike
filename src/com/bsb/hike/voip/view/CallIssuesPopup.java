@@ -78,11 +78,19 @@ public class CallIssuesPopup extends SherlockDialogFragment
 				{
 					dismiss();
 					Toast.makeText(getSherlockActivity(), R.string.voip_call_issues_submit_toast, Toast.LENGTH_SHORT).show();
+					getSherlockActivity().finish();
 				}
 			}
 		});
 
 		return view;
+	}
+
+	@Override
+	public void onCancel(DialogInterface dialog)
+	{
+		getSherlockActivity().finish();
+		super.onCancel(dialog);
 	}
 
 	private void populateSelectedIssues()

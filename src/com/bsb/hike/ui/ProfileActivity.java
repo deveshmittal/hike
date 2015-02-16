@@ -113,7 +113,6 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.voip.VoIPUtils;
 import com.bsb.hike.voip.view.CallRatePopup;
-import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
 		View.OnClickListener
@@ -307,7 +306,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		else if (profileType == ProfileType.CONTACT_INFO || profileType == ProfileType.CONTACT_INFO_TIMELINE)
 		{
 			HikeMessengerApp.getPubSub().removeListeners(this, contactInfoPubSubListeners);
-			VoIPUtils.removeCallListener();
 		}
 		else if (profileType == ProfileType.USER_PROFILE)
 		{
@@ -361,7 +359,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			this.profileType = ProfileType.CONTACT_INFO;
 			setupContactProfileScreen();
 			HikeMessengerApp.getPubSub().addListeners(this, contactInfoPubSubListeners);
-			VoIPUtils.setCallListener(this);
 		}
 		else if(getIntent().hasExtra(HikeConstants.Extras.CONTACT_INFO_TIMELINE))
 		{

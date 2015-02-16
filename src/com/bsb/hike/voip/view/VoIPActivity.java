@@ -409,7 +409,7 @@ public class VoIPActivity extends Activity implements CallActions
 		}
 	}
 
-	private void shutdown(Bundle bundle) {
+	private void shutdown(final Bundle bundle) {
 		
 		try {
 			if (isBound) {
@@ -421,8 +421,6 @@ public class VoIPActivity extends Activity implements CallActions
 		
 		releaseWakeLock();
 
-//		isRunning = false;
-
 		if(currentCallStatus!=CallStatus.PARTNER_BUSY)
 		{
 			showCallStatus(CallStatus.ENDED);
@@ -433,16 +431,22 @@ public class VoIPActivity extends Activity implements CallActions
 			callDuration.stop();
 		}
 
-		if(isCallActive)
-		{
-			VoIPUtils.setupCallRatePopup(getApplicationContext(), bundle);
-		}
-		isCallActive = false;
 		new Handler().postDelayed(new Runnable()
 		{
 			@Override
 			public void run()
 			{
+				if(isCallActive)
+				{
+					if(VoIPUtils.shouldShowCallRatePopupNow(getApplicationContext()))
+					{
+						Intent intent = new Intent(getApplicationContext(), CallRateActivity.class);
+						intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+						startActivity(intent);
+					}
+					VoIPUtils.setupCallRatePopupNextTime(getApplicationContext());
+				}
+				isCallActive = false;
 				finish();
 			}
 		}, 900);
