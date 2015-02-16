@@ -35,7 +35,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
@@ -1769,7 +1769,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					int startSpanIndex = messageText.indexOf(searchText);
 					SpannableString spanText = new SpannableString(markedUp);
-					spanText.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.blue_color_span)), startSpanIndex, startSpanIndex + searchText.length(),
+					spanText.setSpan(new BackgroundColorSpan(context.getResources().getColor(R.color.text_bg)), startSpanIndex, startSpanIndex + searchText.length(),
 							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 					textHolder.text.setText(spanText, TextView.BufferType.SPANNABLE);
 				}
