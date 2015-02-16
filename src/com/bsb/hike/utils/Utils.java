@@ -5263,4 +5263,34 @@ public class Utils
 		}
 		return false;
 	}
+	public static long getTotalDataRecieved(int appId)
+	{
+		long received = TrafficStats.getUidRxBytes(appId);  //In KB
+        
+		if(received != TrafficStats.UNSUPPORTED)
+		{
+	        return received;
+		}
+		else
+		{
+			Logger.d("data", "using manual file for recieved data");
+			return TrafficsStatsFile.getTotalBytesReceivedManual(appId);  //In KB
+		}
+	}
+	
+	public static long getTotalDataSent(int appId)
+	{
+		long sent = TrafficStats.getUidTxBytes(appId);  //In KB
+        
+		if(sent != TrafficStats.UNSUPPORTED)
+		{
+	        return sent;
+		}
+		else
+		{
+			Logger.d("data", "using manual file for sent data");
+			return TrafficsStatsFile.getTotalBytesSentManual(appId);  //In KB
+		}
+	}
+	
 }

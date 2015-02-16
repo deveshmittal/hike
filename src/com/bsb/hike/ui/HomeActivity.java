@@ -330,6 +330,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
         
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.home_screen, mainFragment).commit();
+        
+        showDataFragment(R.id.parent_layout);
 		
 	}
 

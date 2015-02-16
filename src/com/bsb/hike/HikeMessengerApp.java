@@ -36,6 +36,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.TrafficStats;
 import android.os.Handler;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -504,6 +505,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	RegisterToGCMTrigger mmRegisterToGCMTrigger = null;
 
 	SendGCMIdToServerTrigger mmGcmIdToServerTrigger = null;
+	
+	private long baseDataRecieved;
+
+	private long baseDataTransmitted;
 
 	class IncomingHandler extends Handler
 	{
@@ -671,7 +676,10 @@ public void onTrimMemory(int level)
 		super.onCreate();
 		
 		_instance = this;
-
+		
+		baseDataRecieved = Utils.getTotalDataRecieved(getApplicationInfo().uid);
+		baseDataTransmitted = Utils.getTotalDataSent(getApplicationInfo().uid);
+		
 		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
 
 		// first time or failed DB upgrade.
@@ -1153,5 +1161,17 @@ public void onTrimMemory(int level)
 	public boolean isHikeBotNumber(String msisdn)
 	{
 		return hikeBotNamesMap.containsKey(msisdn);
+	}
+
+	public long getBaseDataRecieved()
+	{
+		// TODO Auto-generated method stub
+		return baseDataRecieved;
+	}
+	
+	public long getBaseDataTransmitted()
+	{
+		// TODO Auto-generated method stub
+		return baseDataTransmitted;
 	}
 }
