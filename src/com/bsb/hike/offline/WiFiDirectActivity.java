@@ -144,7 +144,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
      * BroadcastReceiver receiving a state change event.
      */
     public void resetData() {
-        DeviceListFragment fragmentList = (DeviceListFragment) getFragmentManager()
+        /*DeviceListFragment fragmentList = (DeviceListFragment) getFragmentManager()
                 .findFragmentById(R.id.frag_list);
         DeviceDetailFragment fragmentDetails = (DeviceDetailFragment) getFragmentManager()
                 .findFragmentById(R.id.frag_detail);
@@ -153,7 +153,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
         }
         if (fragmentDetails != null) {
             fragmentDetails.resetViews();
-        }
+        }*/
     }
 
     @Override
@@ -218,13 +218,14 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     }
 
     @Override
+    
     public void showDetails(WifiP2pDevice device) {
-        DeviceDetailFragment fragment = (DeviceDetailFragment) getFragmentManager()
-                .findFragmentById(R.id.frag_detail);
-        fragment.showDetails(device);
+        //DeviceDetailFragment fragment = (DeviceDetailFragment) getFragmentManager()
+          //      .findFragmentById(R.id.frag_detail);
+        //fragment.showDetails(device);
 
     }
-
+	
     @Override
     public void connect(WifiP2pConfig config) {
         manager.connect(channel, config, new ActionListener() {
@@ -244,7 +245,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
 
     @Override
     public void disconnect() {
-        final DeviceDetailFragment fragment = (DeviceDetailFragment) getFragmentManager()
+        /*final DeviceDetailFragment fragment = (DeviceDetailFragment) getFragmentManager()
                 .findFragmentById(R.id.frag_detail);
         fragment.resetViews();
         manager.removeGroup(channel, new ActionListener() {
@@ -261,7 +262,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
                 Log.d(TAG, "Disconnect successful.");
             }
 
-        });
+        });*/
     }
 
     @Override

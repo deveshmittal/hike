@@ -5706,6 +5706,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		optionsList.add(new OverFlowMenuItem(getString(R.string.audio), 3, R.drawable.ic_attach_music));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.video), 2, R.drawable.ic_attach_video));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.file), 6, R.drawable.ic_attach_file));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.apk), 7, R.drawable.ic_attach_apk));
 		if (canShareContacts)
 		{
 			optionsList.add(new OverFlowMenuItem(getString(R.string.contact), 5, R.drawable.ic_attach_contact));
@@ -5829,7 +5830,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					intent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
 					startActivity(intent);
 					return;
-
+				case 7:
+					requestCode = HikeConstants.SHARE_APK_CODE;
+					Intent apkIntent = new Intent(ChatThread.this, com.bsb.hike.offline.FileExplorer.class);
+					startActivity(apkIntent);
+					return;
 				case 1:
 				default:
 					requestCode = HikeConstants.IMAGE_TRANSFER_CODE;

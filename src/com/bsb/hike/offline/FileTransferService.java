@@ -72,7 +72,7 @@ public class FileTransferService extends IntentService {
 				
 				stream.write(type,0,type.length);
 				
-				DeviceDetailFragment.copyFile(is, stream);
+				DeviceListFragment.copyFile(is, stream);
 				Log.d(WiFiDirectActivity.TAG, "Client: Data written");
 			} catch (IOException e) {
 				Log.e(WiFiDirectActivity.TAG, e.getMessage());
