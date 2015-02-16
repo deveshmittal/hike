@@ -1488,6 +1488,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			if (!Utils.getSendSmsPref(activity.getApplicationContext()))
 			{
+				Toast.makeText(activity, R.string.zero_sms_hint, Toast.LENGTH_LONG).show();
 				return;
 			}
 		}
