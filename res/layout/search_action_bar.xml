@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="48dp" >
+
+    <ImageView
+        android:id="@+id/next"
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:background="@color/green" />
+
+    <ImageView
+        android:id="@+id/previous"
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        android:layout_toLeftOf="@id/next"
+        android:background="@color/red_no_network" />
+
+    <View
+        android:id="@+id/search_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="8dp"
+        android:layout_toLeftOf="@id/previous"
+        android:background="@drawable/bg_top_bar_search_box" />
+
+    <com.bsb.hike.view.CustomFontEditText
+        android:id="@+id/search_text"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignLeft="@id/search_bg"
+        android:layout_alignRight="@id/search_bg"
+        android:background="@null"
+        android:padding="8dp"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="italic" />
+
+</RelativeLayout>

@@ -32,6 +32,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -44,6 +45,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
@@ -67,6 +69,8 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.widget.SearchView;
+import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -115,6 +119,7 @@ import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
@@ -124,6 +129,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
+import com.bsb.hike.view.CustomFontEditText;
 
 /**
  * 
@@ -183,6 +189,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	protected static final int SCROLL_TO_END = 23;
 
+	protected static final int SEARCH_ACTION_MODE = 24;
+
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -240,6 +248,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected HikeActionMode mActionMode;
 	
 	protected int selectedNonTextMsgs;
+
+	protected MessageSearchManager searchManager;
 
 	protected int selectedNonForwadableMsgs;
 	
@@ -558,6 +568,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case AttachmentPicker.GALLERY:
 			startHikeGallery(mConversation.isOnhike());
 			break;
+		case R.string.search:
+			setupSearchMode();
+			break;
 		default:
 			break;
 		}
@@ -581,8 +594,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected OverFlowMenuItem[] getOverFlowMenuItems()
 	{
-		return new OverFlowMenuItem[] { new OverFlowMenuItem(getString(R.string.clear_chat), 0, 0, R.string.clear_chat),
-				new OverFlowMenuItem(getString(R.string.email_chat), 0, 0, R.string.email_chat) };
+		return new OverFlowMenuItem[] {
+				new OverFlowMenuItem(getString(R.string.clear_chat), 0, 0, R.string.clear_chat),
+				new OverFlowMenuItem(getString(R.string.email_chat), 0, 0, R.string.email_chat),
+				new OverFlowMenuItem(getString(R.string.search), 0, 0, R.string.search)};
 	}
 
 	protected void showOverflowMenu()
@@ -892,7 +907,386 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		imageIntent.putExtra(GalleryActivity.START_FOR_RESULT, true);
 		activity.startActivityForResult(imageIntent, AttachmentPicker.GALLERY);
 	}
+	
+	public MessageSearchManager getMessageSearchManager()
+	{
+		return searchManager;
+	}
+	private void setupSearchMode()
+	{
+		mActionMode.showActionMode(SEARCH_ACTION_MODE, R.layout.search_action_bar);
+		int id = mComposeView.getId();
+		mComposeView = (CustomFontEditText) activity.findViewById(R.id.search_text);
+		mComposeView.setTag(id);
+		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
+		mComposeView.requestFocus();
+		searchManager = new MessageSearchManager();
+		mComposeView.addTextChangedListener(searchManager);
+		activity.findViewById(R.id.next).setOnClickListener(searchManager);
+		activity.findViewById(R.id.previous).setOnClickListener(searchManager);
+	}
 
+	public class MessageSearchManager implements OnClickListener, TextWatcher
+	{
+		private ArrayList<Integer> indexList;
+
+		private String searchText;
+
+		private int messageViewBacklash = 1;
+
+		private int loadMessageCount;
+
+		public MessageSearchManager()
+		{
+			indexList = new ArrayList<Integer>();
+		}
+
+		public void makeNewSearch(String s)
+		{
+			searchText = s;
+			indexList.clear();
+			loadMessageCount = 50;
+			updateUI();
+		}
+
+		public void endSearch()
+		{
+			searchText = "";
+			updateUI();
+		}
+
+		public String getSearchText()
+		{
+			return searchText;
+		}
+
+		private int nextMessage()
+		{
+			Logger.d("search", "nextMessage()");
+			Logger.d("search", "list: " + indexList.toString());
+			int currentCusrsor = getCurrentCursor();
+			Logger.d("search", "currentCusrsor: " + currentCusrsor);
+			int position = Collections.binarySearch(indexList, currentCusrsor);
+			Logger.d("search", "position: " + position);
+
+			int start, end, threshold = -1;
+			int lastMessageIndex = messages.size() - 1;
+			if (indexList.isEmpty())
+			{
+				start = currentCusrsor;
+				end = lastMessageIndex;
+			}
+			else
+			{
+				int lastIndex = indexList.get(indexList.size() - 1);
+				int firstIndex = indexList.get(0);
+				if (currentCusrsor >= lastIndex)
+				{
+					start = lastIndex + 1;
+					end = lastMessageIndex;
+					threshold = currentCusrsor;
+				}
+				else if (currentCusrsor < firstIndex)
+				{
+					start = currentCusrsor;
+					end = firstIndex - 1;
+				}
+				else
+				{
+					if (position >= 0)
+					{
+						position++;
+					}
+					else
+					{
+						position *= (-1);
+						position -= 1;
+					}
+					return (indexList.get(position) - messageViewBacklash);
+				}
+			}
+			boolean found = false;
+			if (end == lastMessageIndex)
+			{
+				found = searchFirstMessage(start, end, threshold);
+			}
+			else
+			{
+				found = searchAllMessages(start, end);
+			}
+			position = Collections.binarySearch(indexList, currentCusrsor);
+			if (position >= 0)
+			{
+				position++;
+			}
+			else
+			{
+				position *= (-1);
+				position -= 1;
+			}
+			if (position >=0 && position < indexList.size())
+			{
+				return (indexList.get(position) - messageViewBacklash);
+			}
+			else
+			{
+				return -1;
+			}
+		}
+
+		private int prevMessage()
+		{
+			Logger.d("search", "prevMessage()");
+			Logger.d("search", "list: " + indexList.toString());
+			int currentCusrsor = getCurrentCursor();
+			Logger.d("search", "currentCusrsor: " + currentCusrsor);
+			int position = Collections.binarySearch(indexList, currentCusrsor);
+			Logger.d("search", "position: " + position);
+
+			int start, end, threshold = -1;
+			if (indexList.isEmpty())
+			{
+				start = currentCusrsor;
+				end = 0;
+			}
+			else
+			{
+				int lastIndex = indexList.get(indexList.size() - 1);
+				int firstIndex = indexList.get(0);
+				if (currentCusrsor > lastIndex)
+				{
+					start = currentCusrsor;
+					end = lastIndex + 1;
+				}
+				else if (currentCusrsor <= firstIndex)
+				{
+					start = firstIndex - 1;
+					end = 0;
+					threshold = currentCusrsor;
+				}
+				else
+				{
+					if (position >= 0)
+					{
+						position--;
+					}
+					else
+					{
+						position *= (-1);
+						position -= 2;
+					}
+					return (indexList.get(position) - messageViewBacklash);
+				}
+			}
+			boolean found = false;
+			if (end == 0)
+			{
+				while (!found)
+				{
+					if (start == end)
+					{
+						break;
+					}
+					found = searchFirstMessage(start, end, threshold);
+					start = loadMessages();
+				}
+			}
+			else
+			{
+				found = searchAllMessages(start, end);
+			}
+			position = Collections.binarySearch(indexList, currentCusrsor);
+			if (position >= 0)
+			{
+				position--;
+			}
+			else
+			{
+				position *= (-1);
+				position -= 2;
+			}
+			if (position >=0 && position < indexList.size())
+			{
+				return (indexList.get(position) - messageViewBacklash);
+			}
+			else
+			{
+				return -1;
+			}
+		}
+
+		private boolean searchAllMessages(int from, int to)
+		{
+			boolean found = false;
+			if (from > to)
+			{
+				from ^= to ^= from ^= to;
+			}
+			for (; from >= to; from++)
+			{
+				if (doesMessageHaveText(messages.get(from), searchText))
+				{
+					indexList.add(from);
+					Collections.sort(indexList);
+					found = true;
+				}
+			}
+			return found;
+		}
+
+		private boolean searchFirstMessage(int from, int to, int threshold)
+		{
+			Logger.d("search", "searching first in range: " + from + "-" + to + " with threshold of " + threshold);
+			if (from > to)
+			{
+				for (; from >= to; from--)
+				{
+					if (doesMessageHaveText(messages.get(from), searchText))
+					{
+						indexList.add(from);
+						Collections.sort(indexList);
+						if (threshold >= 0)
+						{
+							if (from < threshold)
+							{
+								return true;
+							}
+						}
+						else
+						{
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+			else
+			{
+				for (; from <= to; from++)
+				{
+					if (doesMessageHaveText(messages.get(from), searchText))
+					{
+						indexList.add(from);
+						Collections.sort(indexList);
+						if (threshold >= 0)
+						{
+							if (from > threshold)
+							{
+								return true;
+							}
+						}
+						else
+						{
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+		}
+
+		private int loadMessages()
+		{
+			List<ConvMessage> msgList = loadMoreMessages(loadMessageCount);
+			loadMessageCount *= 2;
+			loadMessagesFinished(msgList);
+			if (msgList == null || msgList.isEmpty())
+			{
+				return 0;
+			}
+			else
+			{
+				return msgList.size();
+			}
+		}
+
+		private void updateIndex(int count)
+		{
+			for (Integer index : indexList)
+			{
+				index += count;
+			}
+		}
+
+		private boolean doesMessageHaveText(ConvMessage message, String text)
+		{
+			if (message.isFileTransferMessage())
+			{
+				if (message.getMetadata().getHikeFiles().get(0).getFileName().contains(text))
+				{
+					return true;
+				}
+			}
+			if (!TextUtils.isEmpty(message.getMessage()))
+			{
+				if (message.getMessage().contains(text))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private int getCurrentCursor()
+		{
+			int firstMessagePosition = mConversationsView.getFirstVisiblePosition();
+			firstMessagePosition += messageViewBacklash;
+			return firstMessagePosition;
+		}
+
+		private void updateUI()
+		{
+			mAdapter.notifyDataSetChanged();
+		}
+
+		private void setUI(int position)
+		{
+			if (position >= 0)
+			{
+				mConversationsView.setSelection(position);
+			}
+			else
+			{
+				showToast(R.string.access_error);
+			}
+		}
+
+		@Override
+		public void onClick(View v)
+		{
+			switch (v.getId())
+			{
+			case R.id.next:
+				int next = nextMessage();
+				Logger.d("search", "setting selection to position: " + next);
+				setUI(next);
+				break;
+			case R.id.previous:
+				int prev = prevMessage();
+				Logger.d("search", "setting selection to position: " + prev);
+				setUI(prev);
+				break;
+			}
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count, int after)
+		{
+		}
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before, int count)
+		{
+		}
+
+		@Override
+		public void afterTextChanged(Editable s)
+		{
+			makeNewSearch(s.toString());
+		}
+
+	}
+	
 	protected void shareCapturedImage(int resultCode, Intent data)
 	{
 		
@@ -1135,12 +1529,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected List<ConvMessage> loadMoreMessages()
 	{
+		return loadMoreMessages(HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME);
+	}
+	protected List<ConvMessage> loadMoreMessages(int oldMessagesToLoad)
+	{
 		int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
 
 		long firstMsgId = messages.get(startIndex).getMsgID();
 		Logger.i(TAG, "inside background thread: loading more messages " + firstMsgId);
 
-		return mConversationDb.getConversationThread(msisdn, HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME, mConversation, firstMsgId);
+		return mConversationDb.getConversationThread(msisdn, oldMessagesToLoad, mConversation, firstMsgId);
 	}
 
 	protected abstract int getContentView();
@@ -1550,6 +1948,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 				mAdapter.notifyDataSetChanged();
 				mConversationsView.setSelectionFromTop(firstVisibleItem + list.size(), scrollOffset);
+				
+				if (searchManager != null)
+				{
+					searchManager.updateIndex(list.size());
+				}
 			}
 
 			else
@@ -3602,7 +4005,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case MULTI_SELECT_ACTION_MODE:
 			destroyActionMode();
 			break;
-
+		case SEARCH_ACTION_MODE:
+			mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
+			searchManager.endSearch();
+			searchManager = null;
+			break;
 		default:
 			break;
 		}

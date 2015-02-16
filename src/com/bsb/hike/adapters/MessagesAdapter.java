@@ -32,8 +32,10 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
@@ -1758,6 +1760,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			markedUp = smileyParser.addSmileySpans(markedUp, false);
 			textHolder.text.setText(markedUp);
+			
+			if (mChatThread.getMessageSearchManager() != null)
+			{
+				String messageText = markedUp.toString();
+				String searchText = mChatThread.getMessageSearchManager().getSearchText();
+				if (messageText.contains(searchText))
+				{
+					int startSpanIndex = messageText.indexOf(searchText);
+					SpannableString spanText = new SpannableString(markedUp);
+					spanText.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.blue_color_span)), startSpanIndex, startSpanIndex + searchText.length(),
+							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+					textHolder.text.setText(spanText, TextView.BufferType.SPANNABLE);
+				}
+			}
+
 			Linkify.addLinks(textHolder.text, Linkify.ALL);
 			Linkify.addLinks(textHolder.text, Utils.shortCodeRegex, "tel:");
 

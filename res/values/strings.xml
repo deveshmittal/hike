@@ -558,7 +558,7 @@
     <string name="new_update">New Update</string>
     <string name="invite_via_facebook">Invite Via Facebook</string>
     <string name="invite_via_twitter">Invite Via Twitter</string>
-    <string name="search_hint">Search</string>
+    <string name="search">Search</string>
     <string name="fb_invite_success">Invite Successful</string>
     <string name="fb_invite_failed">Invite Canceled</string>
     <string name="social_invite_network_error">Unable to send invite. Check network settings.</string>

@@ -85,13 +85,13 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 		getSupportMenuInflater().inflate(R.menu.friends_menu, menu);
 		
 		final SearchView searchView = new SearchView(getSupportActionBar().getThemedContext());
-		searchView.setQueryHint(getString(R.string.search_hint));
+		searchView.setQueryHint(getString(R.string.search));
 		searchView.setIconifiedByDefault(false);
 		searchView.setIconified(false);
 		searchView.setOnQueryTextListener(onQueryTextListener);
 		searchView.clearFocus();
 
-		MenuItem searchItem = menu.add(Menu.NONE, Menu.NONE, 1, R.string.search_hint);
+		MenuItem searchItem = menu.add(Menu.NONE, Menu.NONE, 1, R.string.search);
 
 		searchItem.setIcon(R.drawable.ic_top_bar_search).setActionView(searchView)
 				.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
