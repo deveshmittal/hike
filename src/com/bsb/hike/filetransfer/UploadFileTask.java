@@ -412,7 +412,7 @@ public class UploadFileTask extends FileTransferBase
 					{
 						selectedFile = Utils.getOutputMediaFile(hikeFileType, null, true);
 					}
-					if (!Utils.copyImage(mFile.getPath(), selectedFile.getPath(), context))
+					if (!Utils.compressAndCopyImage(mFile.getPath(), selectedFile.getPath(), context))
 					{
 						Logger.d(getClass().getSimpleName(), "throwing copy file exception");
 						throw new Exception(FileTransferManager.READ_FAIL);

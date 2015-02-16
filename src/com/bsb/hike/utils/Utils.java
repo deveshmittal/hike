@@ -1508,15 +1508,21 @@ public class Utils
 		}
 	}
 
-	public static boolean copyImage(String srcFilePath, String destFilePath, Context context)
+	public static boolean compressAndCopyImage(String srcFilePath, String destFilePath, Context context)
+	{
+		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+		return compressAndCopyImage(srcFilePath, destFilePath, context, quality);
+	}
+	
+	public static boolean compressAndCopyImage(String srcFilePath, String destFilePath, Context context, int quality)
 	{
 		try
 		{
 			InputStream src;
 			String imageOrientation = Utils.getImageOrientation(srcFilePath);
 			Bitmap tempBmp = null;
-			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+
 			if (quality == ImageQuality.QUALITY_MEDIUM)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
@@ -2687,7 +2693,10 @@ public class Utils
 		}
 	}
 
-	public static void saveBase64StringToFile(File file, String base64String) throws IOException
+	/*
+	 * returns a decoded byteArray of input base64String. 
+	 */
+	public static byte[] saveBase64StringToFile(File file, String base64String) throws IOException
 	{
 		FileOutputStream fos = new FileOutputStream(file);
 
@@ -2700,6 +2709,7 @@ public class Utils
 		fos.flush();
 		fos.getFD().sync();
 		fos.close();
+		return b;
 	}
 
 	public static void setupFormattedTime(TextView tv, long timeElapsed)
@@ -5253,4 +5263,34 @@ public class Utils
 		}
 		return false;
 	}
+	public static long getTotalDataRecieved(int appId)
+	{
+		long received = TrafficStats.getUidRxBytes(appId);  //In KB
+        
+		if(received != TrafficStats.UNSUPPORTED)
+		{
+	        return received;
+		}
+		else
+		{
+			Logger.d("data", "using manual file for recieved data");
+			return TrafficsStatsFile.getTotalBytesReceivedManual(appId);  //In KB
+		}
+	}
+	
+	public static long getTotalDataSent(int appId)
+	{
+		long sent = TrafficStats.getUidTxBytes(appId);  //In KB
+        
+		if(sent != TrafficStats.UNSUPPORTED)
+		{
+	        return sent;
+		}
+		else
+		{
+			Logger.d("data", "using manual file for sent data");
+			return TrafficsStatsFile.getTotalBytesSentManual(appId);  //In KB
+		}
+	}
+	
 }

@@ -442,7 +442,19 @@
 	    <item name="android:background">@drawable/bg_updates_white</item>
 	</style>
 	
-	<style name="AvatarStyle">
+	<style name="NuxScreenCardContainer">
+	    <item name="android:layout_marginLeft">@dimen/updates_margin</item>
+	    <item name="android:layout_marginRight">@dimen/updates_margin</item>
+	    <item name="android:layout_marginTop">@dimen/updates_margin_top</item>
+	    <item name="android:background">@drawable/bg_sticker_card_white</item>
+	</style>
+	
+	<style name="RoundedStyle">
+	    <item name="riv_oval">true</item>
+	    <item name="riv_mutate_background">true</item>
+	</style>
+	
+	<style name="AvatarStyle" parent="RoundedStyle">
 	    <item name="android:layout_width">match_parent</item>
 	    <item name="android:layout_height">match_parent</item>
 	    <item name="android:layout_centerInParent">true</item>

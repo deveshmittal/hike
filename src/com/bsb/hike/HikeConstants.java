@@ -525,8 +525,6 @@ public class HikeConstants
 	
 	public static final String H2O_NOTIF_BOOLEAN_PREF = "hikeOfflineNotificationPref";
 
-	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
-	
 	public static final String UPGRADING = "upgrading";
 
 	public static final String UPGRADE_MSG_HASH_GROUP_READBY = "upgradeMsgHashGroupReadby";
@@ -2255,6 +2253,8 @@ public class HikeConstants
 	
 	public static final int LED_DEFAULT_WHITE_COLOR = 0xffffffff;
 	
+	public static final String GET_BULK_LAST_SEEN = "bls"; 
+	
 	public static final int LED_NONE_COLOR = -2; /**
 													Any Change In this Value Should be double checked 
 													as this may coincide with any other color value
@@ -2275,4 +2275,8 @@ public class HikeConstants
 	public static final String ERROR_MESSAGE = "em";
 	
 	public static final String EXCEPTION_MESSAGE = "exm";
+	
+	public static int DEFAULT_AVATARS[] = {R.drawable.avatar_01, R.drawable.avatar_02, R.drawable.avatar_03, R.drawable.avatar_04, R.drawable.avatar_05};
+	public static String DEFAULT_AVATAR_KEYS[] = {"avatar_01","avatar_02", "avatar_03", "avatar_04", "avatar_05"};
+	public static String IS_GROUP = "isGroup";
 }

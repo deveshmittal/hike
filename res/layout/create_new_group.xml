@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parent_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
@@ -11,10 +12,11 @@
         android:onClick="onChangeImageClicked"
         android:layout_marginTop="28dp" >
 
-        <ImageView
+        <com.bsb.hike.view.RoundedImageView
             android:id="@+id/group_profile_image"
             android:layout_width="96dp"
             android:layout_height="96dp"
+            style="@style/RoundedStyle"
             android:layout_centerHorizontal="true"
             android:src="@drawable/ic_default_avatar_group" />
 

@@ -116,6 +116,8 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
         
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.parent_layout, mainFragment).commit();
+        
+        showDataFragment(R.id.timeline_frame);
 		
 	}
 	
