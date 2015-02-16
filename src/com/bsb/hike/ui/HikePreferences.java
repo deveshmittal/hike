@@ -464,7 +464,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					UnlinkTwitterTask task = new UnlinkTwitterTask(HikePreferences.this, getApplicationContext());
 					blockingTaskType = BlockingTaskType.UNLINKING_TWITTER;
 					setBlockingTask(task);
-					Utils.executeBoolResultAsyncTask(task);
+					task.execute();
 					confirmDialog.dismiss();
 				}
 			};

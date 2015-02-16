@@ -32,9 +32,9 @@ import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
 
 import org.json.JSONObject;
 
-import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
 import android.text.TextUtils;
 
+import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
 import com.bsb.hike.modules.httpmgr.request.ByteArrayRequest;
 import com.bsb.hike.modules.httpmgr.request.FileRequest;
 import com.bsb.hike.modules.httpmgr.request.JSONObjectRequest;
@@ -415,6 +415,17 @@ public class HttpRequests
 				.setRequestListener(requestListener)
 				.setAsynchronous(false)
 				.get()
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken deleteSocialCreadentialsRequest(String social, IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(socialCredentialsBaseUrl() + social)
+				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
+				.delete()
 				.build();
 		return requestToken;
 	}
