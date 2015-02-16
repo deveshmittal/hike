@@ -1715,8 +1715,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mAdapter.setActionMode(true);
 			v.setVisibility(mAdapter.isSelected(message) ? View.VISIBLE : View.INVISIBLE);
 			
-			mActionMode.hideView(R.id.done_container);
-			mActionMode.hideView(R.id.done_container_divider);
 			hideShowActionModeMenus(MULTI_SELECT_ACTION_MODE);
 			/**
 			 * Hiding any open tip

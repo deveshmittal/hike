@@ -217,9 +217,10 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	{
 		if (mActionMode != null)
 		{
-			mActionMode.finish();
+			finish();
 			return true;
 		}
+		
 		return false;
 	}
 
@@ -227,6 +228,9 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	{
 		if (mActionMode != null)
 		{
+			actionModeId = -1;
+			menuResId = -1;	
+			shouldInflateMenu = false;
 			mActionMode.finish();
 		}
 	}
@@ -240,6 +244,12 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		MenuInflater mMenuInflater = mActionMode.getMenuInflater();
 		mMenuInflater.inflate(menuResId, menu);
 		this.mMenu = menu;
+		
+		/**
+		 * Also hide doneButton containers
+		 */
+		hideView(R.id.done_container);
+		hideView(R.id.done_container_divider);
 	}
 	
 	/**
@@ -273,7 +283,7 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		}
 	}
 	
-	public void hideView(int resId)
+	private void hideView(int resId)
 	{
 		mActionMode.getCustomView().findViewById(resId).setVisibility(View.GONE);
 	}
