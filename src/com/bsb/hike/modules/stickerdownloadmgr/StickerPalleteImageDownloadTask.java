@@ -12,37 +12,50 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
-import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor.Chain;
-import com.bsb.hike.modules.httpmgr.request.facade.RequestFacade;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
-public class StickerPalleteImageDownloadTask extends BaseStickerDownloadTask
+public class StickerPalleteImageDownloadTask
 {
 	private String TAG = "StickerPalleteImageDownloadTask";
 
-	private String catId;
+	private String categoryId;
 
 	private String enableImagePath;
 
 	private String disableImagePath;
 
-	protected StickerPalleteImageDownloadTask(String taskId, String categoryId)
+	public StickerPalleteImageDownloadTask(String categoryId)
 	{
-		super(taskId);
-		this.catId = categoryId;
-		
+		this.categoryId = categoryId;
+	}
+	
+	public void execute()
+	{
 		if (!StickerManager.getInstance().isMinimumMemoryAvailable())
 		{
 			onFailure(new HttpException(REASON_CODE_OUT_OF_SPACE));
 			return;
 		}
 		
-		RequestToken requestToken = StickerPalleteImageDownloadRequest(categoryId, getRequestInterceptor(), getRequestListener());
+		long requestId = getRequestId();
+		
+		RequestToken requestToken = StickerPalleteImageDownloadRequest(requestId, categoryId, getRequestInterceptor(), getRequestListener());
+		if(requestToken.isRequestRunning()) // return request already running
+		{
+			return ;
+		}
+		
 		requestToken.execute();
+	}
+	
+	private long getRequestId()
+	{
+		return (StickerRequestType.ENABLE_DISABLE.getLabel() + "\\" + categoryId).hashCode();
 	}
 
 	private IRequestInterceptor getRequestInterceptor()
@@ -53,7 +66,7 @@ public class StickerPalleteImageDownloadTask extends BaseStickerDownloadTask
 			@Override
 			public void intercept(Chain chain)
 			{
-				String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(catId);
+				String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId);
 				if (dirPath == null)
 				{
 					Logger.e(TAG, "Sticker download failed directory does not exist");
@@ -109,8 +122,8 @@ public class StickerPalleteImageDownloadTask extends BaseStickerDownloadTask
 					String enableImg = data.getString(HikeConstants.ENABLE_IMAGE);
 					String disableImg = data.getString(HikeConstants.DISABLE_IMAGE);
 
-					HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(catId, StickerManager.PALLATE_ICON_SELECTED_TYPE));
-					HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(catId, StickerManager.PALLATE_ICON_TYPE));
+					HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(categoryId, StickerManager.PALLATE_ICON_SELECTED_TYPE));
+					HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(categoryId, StickerManager.PALLATE_ICON_TYPE));
 					Utils.saveBase64StringToFile(new File(enableImagePath), enableImg);
 					Utils.saveBase64StringToFile(new File(disableImagePath), disableImg);
 				}
@@ -123,7 +136,6 @@ public class StickerPalleteImageDownloadTask extends BaseStickerDownloadTask
 			@Override
 			public void onRequestProgressUpdate(float progress)
 			{
-				// TODO Auto-generated method stub
 
 			}
 
@@ -135,17 +147,13 @@ public class StickerPalleteImageDownloadTask extends BaseStickerDownloadTask
 		};
 	}
 
-	@Override
 	void onSuccess(Object result)
 	{
-		// TODO Auto-generated method stub
-		super.onSuccess(result);
+		
 	}
 
-	@Override
 	void onFailure(Exception e)
 	{
-		// TODO Auto-generated method stub
-		super.onFailure(e);
+		Logger.e(TAG, "exception :", e);
 	}
 }

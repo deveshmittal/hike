@@ -20,18 +20,17 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
-import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor.Chain;
-import com.bsb.hike.modules.httpmgr.request.facade.RequestFacade;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
-public class MultiStickerDownloadTask extends BaseStickerDownloadTask
+public class MultiStickerDownloadTask
 {
 	private String TAG = "MultiStickerDownloadTask";
 
@@ -44,25 +43,30 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	private int existingStickerNumber = 0;
 
 	File largeStickerDir, smallStickerDir;
+	
+	private long requestId;
 
-	protected MultiStickerDownloadTask(String taskId, StickerCategory category, StickerConstants.DownloadType downloadType, DownloadSource source)
+	public MultiStickerDownloadTask(StickerCategory category, StickerConstants.DownloadType downloadType, DownloadSource source)
 	{
-		super(taskId);
 		this.category = category;
 		this.downloadType = downloadType;
 		this.source = source;
-
+	}
+	
+	public void execute()
+	{
 		if (!StickerManager.getInstance().isMinimumMemoryAvailable())
 		{
 			onFailure(new HttpException(REASON_CODE_OUT_OF_SPACE));
 			return;
 		}
+		requestId = getRequestId();
 		download();
 	}
 
 	private void download()
 	{
-		RequestToken requestToken = MultiStickerDownloadRequest(new IRequestInterceptor()
+		RequestToken requestToken = MultiStickerDownloadRequest(requestId, new IRequestInterceptor()
 		{
 			
 			@Override
@@ -221,7 +225,6 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			@Override
 			public void onRequestProgressUpdate(float progress)
 			{
-				// TODO Auto-generated method stub
 
 			}
 
@@ -231,7 +234,17 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 				onFailure(httpException);
 			}
 		});
+		
+		if(requestToken.isRequestRunning()) // duplicate check
+		{
+			return;
+		}
 		requestToken.execute();
+	}
+	
+	private long getRequestId()
+	{
+		return (StickerRequestType.MULTIPLE.getLabel() + "\\" + category.getCategoryId()).hashCode();
 	}
 
 	/**
@@ -286,7 +299,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 		return 10;
 	}
 
-	void onProgress(double percentage)
+	private void onProgress(double percentage)
 	{
 		Bundle b = new Bundle();
 		b.putSerializable(StickerManager.CATEGORY_ID, category.getCategoryId());
@@ -295,20 +308,18 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 		StickerManager.getInstance().onStickersDownloadProgress(b);
 	}
 	
-	@Override
-	void onSuccess(Object result)
+	private void onSuccess(Object result)
 	{
 		Bundle b = new Bundle();
 		b.putSerializable(StickerManager.CATEGORY_ID, category.getCategoryId());
 		b.putSerializable(HikeConstants.DOWNLOAD_SOURCE, source);
 		b.putSerializable(StickerManager.STICKER_DOWNLOAD_TYPE, downloadType);
 		StickerManager.getInstance().sucessFullyDownloadedStickers(b);
-		super.onSuccess(result);
 	}
 
-	@Override
-	void onFailure(Exception e)
+	private void onFailure(Exception e)
 	{
+		Logger.e(TAG, "on failure, exception ", e);
 		Bundle b = new Bundle();
 		b.putSerializable(StickerManager.CATEGORY_ID, category.getCategoryId());
 		b.putSerializable(HikeConstants.DOWNLOAD_SOURCE, source);
@@ -318,6 +329,5 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			b.putBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE, true);
 		}
 		StickerManager.getInstance().stickersDownloadFailed(b);
-		super.onFailure(e);
 	}
 }

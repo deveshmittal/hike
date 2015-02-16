@@ -88,7 +88,7 @@ import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
+import com.bsb.hike.modules.stickerdownloadmgr.SingleStickerDownloadTask;
 import com.bsb.hike.platform.CardRenderer;
 import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
@@ -824,7 +824,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				stickerHolder.image.setVisibility(View.GONE);
 				stickerHolder.image.setImageDrawable(null);
 
-				StickerDownloadManager.getInstance().DownloadSingleSticker(categoryId, stickerId);
+				SingleStickerDownloadTask singleStickerDownloadTask = new SingleStickerDownloadTask(stickerId, categoryId);
+				singleStickerDownloadTask.execute();
 				
 			}
 			setTimeNStatus(position, stickerHolder, true, stickerHolder.placeHolder);

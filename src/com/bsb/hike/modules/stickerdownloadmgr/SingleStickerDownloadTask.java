@@ -21,11 +21,12 @@ import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
-public class SingleStickerDownloadTask extends BaseStickerDownloadTask
+public class SingleStickerDownloadTask
 {
 
 	private static final String TAG = "SingleStickerDownloadTask";
@@ -38,20 +39,34 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 
 	private String smallStickerPath;
 
-	protected SingleStickerDownloadTask(String taskId, String stickerId, String categoryId)
+	public SingleStickerDownloadTask(String stickerId, String categoryId)
 	{
-		super(taskId);
 		this.stickerId = stickerId;
 		this.categoryId = categoryId;
-
+	}
+	
+	public void execute()
+	{
 		if (!StickerManager.getInstance().isMinimumMemoryAvailable())
 		{
 			onFailure(new HttpException(REASON_CODE_OUT_OF_SPACE));
 			return;
 		}
 
-		RequestToken token = SingleStickerDownloadRequest(stickerId, categoryId, getInterceptor(), getRequestListener());
+		long requestId = getRequestId(); // for duplicate check
+		
+		RequestToken token = SingleStickerDownloadRequest(requestId, stickerId, categoryId, getInterceptor(), getRequestListener());
+		
+		if(token.isRequestRunning()) // return if request is running
+		{
+			return;
+		}
 		token.execute();
+	}
+	
+	private long getRequestId()
+	{
+		return (StickerRequestType.SINGLE.getLabel() + "\\" + categoryId + "\\" + stickerId).hashCode();
 	}
 
 	private IRequestInterceptor getInterceptor()
@@ -174,17 +189,15 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 		};
 	}
 
-	@Override
-	void onSuccess(Object result)
+	private void onSuccess(Object result)
 	{
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_DOWNLOADED, null);
-		super.onSuccess(result);
 	}
 	
-	@Override
-	void onFailure(Exception e)
+	private void onFailure(Exception e)
 	{
+		Logger.e(TAG, "on failure, exception ", e);
 		(new File(largeStickerPath)).delete();
-		super.onFailure(e);
 	}
+	
 }

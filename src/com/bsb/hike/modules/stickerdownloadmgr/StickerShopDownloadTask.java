@@ -13,24 +13,43 @@ import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
-class StickerShopDownloadTask extends BaseStickerDownloadTask
+public class StickerShopDownloadTask
 {
-	protected StickerShopDownloadTask(String taskId, int offset)
+	private int offset;
+	
+	private final String TAG = "StickerShopDownloadTask";
+	
+	public StickerShopDownloadTask(int offset)
 	{
-		super(taskId);
-		
+		this.offset = offset;
+	}
+	
+	public void execute()
+	{
 		if (!StickerManager.getInstance().isMinimumMemoryAvailable())
 		{
 			onFailure(new HttpException(REASON_CODE_OUT_OF_SPACE));
 			return;
 		}
 
-		RequestToken requestToken = StickerShopDownloadRequest(offset, getRequestListener());
+		long requestId = getRequestId();
+		RequestToken requestToken = StickerShopDownloadRequest(requestId, offset, getRequestListener());
+		
+		if(requestToken.isRequestRunning())
+		{
+			return ;
+		}
 		requestToken.execute();
+	}
+	
+	private long getRequestId()
+	{
+		return StickerRequestType.SHOP.getLabel().hashCode();
 	}
 
 	private IRequestListener getRequestListener()
@@ -47,14 +66,14 @@ class StickerShopDownloadTask extends BaseStickerDownloadTask
 
 					if (!Utils.isResponseValid(response))
 					{
-						Logger.e(StickerDownloadManager.TAG, "Sticker download failed null response");
+						Logger.e(TAG, "Sticker download failed null response");
 						onFailure(null);
 					}
 
 					JSONArray resultData = response.optJSONArray(HikeConstants.DATA_2);
 					if (null == resultData)
 					{
-						Logger.e(StickerDownloadManager.TAG, "Sticker download failed null data");
+						Logger.e(TAG, "Sticker download failed null data");
 						onFailure(null);
 					}
 					
@@ -71,7 +90,6 @@ class StickerShopDownloadTask extends BaseStickerDownloadTask
 			@Override
 			public void onRequestProgressUpdate(float progress)
 			{
-				// TODO Auto-generated method stub
 
 			}
 
@@ -83,17 +101,14 @@ class StickerShopDownloadTask extends BaseStickerDownloadTask
 		};
 	}
 	
-	@Override
 	void onSuccess(Object result)
 	{
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_SHOP_DOWNLOAD_SUCCESS, result);
-		super.onSuccess(result);
 	}
 	
-	@Override
 	void onFailure(Exception e)
 	{
+		Logger.e(TAG, "on failure, exception ", e);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_SHOP_DOWNLOAD_FAILURE, e);
-		super.onFailure(e);
 	}
 }

@@ -15,21 +15,26 @@ import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
 import com.bsb.hike.modules.httpmgr.response.Response;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
-class StickerSignupUpgradeDownloadTask extends BaseStickerDownloadTask
+public class StickerSignupUpgradeDownloadTask
 {
 	
 	private static final String TAG = "StickerSignupUpgradeDownloadTask";
 	
-	protected StickerSignupUpgradeDownloadTask(String taskId, JSONArray categoryList)
+	private JSONArray categoryList;
+	
+	public StickerSignupUpgradeDownloadTask(JSONArray categoryList)
 	{
-
-		super(taskId);
-		
+		this.categoryList = categoryList;
+	}
+	
+	public void execute()
+	{
 		if(!StickerManager.getInstance().isMinimumMemoryAvailable())
 		{
 			onFailure(new HttpException(REASON_CODE_OUT_OF_SPACE));
@@ -45,8 +50,19 @@ class StickerSignupUpgradeDownloadTask extends BaseStickerDownloadTask
 		}
 
 		IRequestBody body = new JsonBody(postObject);
-		RequestToken requestToken = StickerSignupUpgradeRequest(body, getRequestListener());
+		long requestId = getRequestId();
+		RequestToken requestToken = StickerSignupUpgradeRequest(requestId, body, getRequestListener());
+		
+		if(requestToken.isRequestRunning())
+		{
+			return ;
+		}
 		requestToken.execute();
+	}
+	
+	private long getRequestId()
+	{
+		return StickerRequestType.SIGNUP_UPGRADE.getLabel().hashCode();
 	}
 	
 	private JSONObject getPostObject(JSONArray categoryList)
@@ -88,7 +104,7 @@ class StickerSignupUpgradeDownloadTask extends BaseStickerDownloadTask
 						return ;
 					}
 					
-					Logger.d(StickerDownloadManager.TAG,  "Got response for download : " + response.toString());
+					Logger.d(TAG,  "Got response for download : " + response.toString());
 					
 					JSONArray resultData = response.optJSONArray(HikeConstants.DATA_2);
 					if(null == resultData)
@@ -120,19 +136,15 @@ class StickerSignupUpgradeDownloadTask extends BaseStickerDownloadTask
 		};
 	}
 	
-	@Override
 	void onSuccess(Object result)
 	{
-		super.onSuccess(result);
-		
 		JSONArray resultData = (JSONArray) result;
 		StickerManager.getInstance().updateStickerCategoriesMetadata(resultData);
 		HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.getInstance()).saveData(StickerManager.STICKERS_SIZE_DOWNLOADED, true);
 	}
 
-	@Override
 	void onFailure(Exception e)
 	{
-		super.onFailure(e);
+		Logger.e(TAG, "on failure, exception ", e);
 	}
 }

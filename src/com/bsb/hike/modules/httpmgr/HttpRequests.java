@@ -47,10 +47,11 @@ import com.bsb.hike.utils.Utils;
 
 public class HttpRequests
 {
-	public static RequestToken SingleStickerDownloadRequest(String stickerId, String categoryId, IRequestInterceptor interceptor, IRequestListener requestListener)
+	public static RequestToken SingleStickerDownloadRequest(long requestId, String stickerId, String categoryId, IRequestInterceptor interceptor, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(singleStickerDownloadBase() + "?catId=" + categoryId + "&stId=" + stickerId + "&resId=" + Utils.getResolutionId())
+				.setId(requestId)
 				.setRequestListener(requestListener)
 				.build();
 		
@@ -58,10 +59,11 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken StickerSignupUpgradeRequest(IRequestBody body, IRequestListener requestListener)
+	public static RequestToken StickerSignupUpgradeRequest(long requestId, IRequestBody body, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(stickerSignupUpgradeUrl())
+				.setId(requestId)
 				.post(body)
 				.setRequestListener(requestListener)
 				.setRequestType(REQUEST_TYPE_SHORT)
@@ -69,10 +71,11 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken StickerShopDownloadRequest(int offset, IRequestListener requestListener)
+	public static RequestToken StickerShopDownloadRequest(long requestId, int offset, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(stickerShopDownloadUrl() + "?offset=" + offset)
+				.setId(requestId)
 				.setRequestListener(requestListener)
 				.setRequestType(REQUEST_TYPE_SHORT)
 				.setPriority(PRIORITY_HIGH)
@@ -80,10 +83,11 @@ public class HttpRequests
 		return requestToken;
 	}
 	
-	public static RequestToken StickerPalleteImageDownloadRequest(String categoryId, IRequestInterceptor interceptor, IRequestListener requestListener)
+	public static RequestToken StickerPalleteImageDownloadRequest(long requestId, String categoryId, IRequestInterceptor interceptor, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(stickerPalleteImageDownloadUrl() + "?catId=" + categoryId + "&resId=" + Utils.getResolutionId())
+				.setId(requestId)
 				.setRequestListener(requestListener)
 				.setRequestType(REQUEST_TYPE_LONG)
 				.setPriority(10) // Setting priority between sticker shop task and enable_disable icon task
@@ -92,10 +96,11 @@ public class HttpRequests
 		return requestToken;
 	}
 	
-	public static RequestToken StickerPreviewImageDownloadRequest(String categoryId, IRequestInterceptor interceptor, IRequestListener requestListener)
+	public static RequestToken StickerPreviewImageDownloadRequest(long requestId, String categoryId, IRequestInterceptor interceptor, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(stickerPreviewImageDownloadUrl() + "?catId=" + categoryId + "&resId=" + Utils.getResolutionId())
+				.setId(requestId)
 				.setRequestListener(requestListener)
 				.setRequestType(REQUEST_TYPE_SHORT)
 				.build();
@@ -103,10 +108,11 @@ public class HttpRequests
 		return requestToken;
 	}
 	
-	public static RequestToken MultiStickerDownloadRequest(IRequestInterceptor interceptor, IRequestListener requestListener)
+	public static RequestToken MultiStickerDownloadRequest(long requestId, IRequestInterceptor interceptor, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(multiStickerDownloadUrl())
+				.setId(requestId)
 				.post(null)  // will set it in interceptor method using request facade
 				.setRequestListener(requestListener)
 				.setRequestType(REQUEST_TYPE_LONG)
