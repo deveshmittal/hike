@@ -38,7 +38,9 @@ public class SolicallWrapper {
 	
 	public int processMic(byte[] frame) {
 		int ret = 0;
-		ret = processMicFrame(frame, null);
+		synchronized (this) {
+			ret = processMicFrame(frame, null);
+		}
 		return ret;
 	}
 }

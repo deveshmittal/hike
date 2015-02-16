@@ -160,6 +160,7 @@ public class VoIPService extends Service {
 	private boolean miscTrigger = false;
 	private int miscCounter = 0;
 	private VoIPDataPacket silentPacket;
+	private boolean useVADToReduceData = false;
 
 	// VoIP version support
 	private final int VOIP_VERSION_SUPPORT = 2;
@@ -1158,7 +1159,7 @@ public class VoIPService extends Service {
 							int ret = solicallAec.processMic(dpencode.getData());
 							
 							// If we don't detect voice, then send nothing
-							if (ret == 0) {
+							if (ret == 0 && useVADToReduceData) {
 //								Logger.d(VoIPConstants.TAG, "Not sending anything.");
 								continue;
 							}
