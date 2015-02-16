@@ -72,7 +72,11 @@ import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.modules.contactmgr.ContactUtils;
+import com.bsb.hike.modules.httpmgr.HttpRequests;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
+import com.bsb.hike.modules.httpmgr.response.Response;
 
 public class AccountUtils
 {
@@ -335,17 +339,6 @@ public class AccountUtils
 	private static void assertIfTokenNull()
 	{
 		// Assert.assertTrue("Token is empty", !TextUtils.isEmpty(mToken));
-	}
-	
-	public static void deleteOrUnlinkAccount(boolean deleteAccount) throws NetworkErrorException, IllegalStateException
-	{
-		HttpRequestBase request = deleteAccount ? new HttpDelete(base + "/account") : new HttpPost(base + "/account/unlink");
-		addToken(request);
-		JSONObject obj = executeRequest(request);
-		if ((obj == null) || "fail".equals(obj.optString("stat")))
-		{
-			throw new NetworkErrorException("Could not delete account");
-		}
 	}
 
 	public static void performRequest(HikeHttpRequest hikeHttpRequest, boolean addToken) throws NetworkErrorException, IllegalStateException

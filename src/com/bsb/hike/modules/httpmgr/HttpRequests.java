@@ -1,6 +1,7 @@
 package com.bsb.hike.modules.httpmgr;
 
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.bulkLastSeenUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.deleteAccountBase;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getAvatarBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getGroupBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getHikeJoinTimeBaseUrl;
@@ -24,6 +25,7 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPalleteIm
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPreviewImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerShopDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerSignupUpgradeUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.unlinkAccountBase;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.updateAddressbookBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.validateNumberBaseUrl;
 import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_HIGH;
@@ -426,6 +428,28 @@ public class HttpRequests
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)
 				.delete()
+				.build();
+		return requestToken;
+	}
+	
+	public static RequestToken deleteAccountRequest(IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(deleteAccountBase())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.delete()
+				.build();
+		return requestToken;
+	}
+
+	public static RequestToken unlinkAccountRequest(IRequestListener requestListener)
+	{
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(unlinkAccountBase())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.post(null)
 				.build();
 		return requestToken;
 	}

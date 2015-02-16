@@ -189,4 +189,14 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V1 + "/pa";
 	}
+
+	public static String deleteAccountBase()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT;
+	}
+
+	public static String unlinkAccountBase()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/unlink";
+	}
 }
