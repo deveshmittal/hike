@@ -4,6 +4,7 @@ import java.io.File;
 
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,9 +19,11 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.bsb.hike.R;
+import com.bsb.hike.photos.PictureEditer;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
+@SuppressWarnings("deprecation")
 public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener
 {
 	private static final String FLASH_AUTO = "fauto";
@@ -74,7 +77,8 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			cameraFragment.takePicture();
 			File savedImage = cameraFragment.getHost().getLastSavedFile();
 			// Start editor activity here
-
+			Intent i = new Intent(HikeCameraActivity.this, PictureEditer.class);   
+			i.putExtra("FilePath", savedImage.getAbsolutePath());
 			break;
 		case R.id.btngallery:
 			// Open gallery
