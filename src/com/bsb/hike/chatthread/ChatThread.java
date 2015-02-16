@@ -3653,7 +3653,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private boolean onActionModeMenuItemClicked(MenuItem menuItem)
 	{
-		final HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
+		HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
 		ArrayList<Long> selectedMsgIds;
 		switch (menuItem.getItemId())
 		{
@@ -3687,7 +3687,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			Collections.sort(selectedMsgIds);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.FORWARD_MSG);
-			Intent intent = new Intent(activity, ComposeChatActivity.class);
+			Intent intent = IntentFactory.getComposeChatActivityIntent(activity);
 			String msg;
 			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 			JSONArray multipleMsgArray = new JSONArray();
@@ -3727,6 +3727,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			catch (JSONException e)
 			{
 				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
+				return true; //No need to further process since there is a JSON Exception. 
 			}
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, msisdn);

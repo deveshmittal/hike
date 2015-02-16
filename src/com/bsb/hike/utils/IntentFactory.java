@@ -369,4 +369,9 @@ public class IntentFactory
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
 	}
+	
+	public static Intent getComposeChatActivityIntent(Context context)
+	{
+		return new Intent(context, ComposeChatActivity.class);
+	}
 }
