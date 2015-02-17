@@ -2364,4 +2364,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			return true;
 		}
 	}
+	
+	@Override
+	protected void destroyActionMode()
+	{
+		super.destroyActionMode();
+		
+		if (isH20TipShowing())
+		{
+			setEnabledH20NextButton(true);
+		}
+	}
 }

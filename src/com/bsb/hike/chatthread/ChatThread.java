@@ -1835,7 +1835,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		// mActionMode.showHideMenuItem(R.id.action_mode_overflow_menu, selectedCancelableMsgs == 1 && mAdapter.getSelectedCount() == 1);
 	}
 
-	private void destroyActionMode()
+	protected void destroyActionMode()
 	{
 		shareableMessagesCount = 0;
 		selectedNonForwadableMsgs = 0;
@@ -1844,15 +1844,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mAdapter.setActionMode(false);
 		mAdapter.notifyDataSetChanged();
 
-		// TODO : UNHIDE TIPS IF WE HAVE HIDDEN THEM
-
-		mTips.showHiddenTip();
 		/**
 		 * if we have hidden tips while initializing action mode we should unhide them
-		 * 
-		 * if (tipView != null && tipView.getVisibility() == View.INVISIBLE) { tipView.setVisibility(View.VISIBLE); } if (isHikeOfflineTipShowing()) {
-		 * setEnableHikeOfflineNextButton(true); }
-		 */
+		 */ 
+		mTips.showHiddenTip();
 	}
 
 	@Override
