@@ -296,12 +296,12 @@ public class VoIPUtils {
 		return callActive;
 	}
 	
-	@SuppressLint("InlinedApi") public static int getAudioSource() {
-		int source = MediaRecorder.AudioSource.VOICE_RECOGNITION;
+	public static int getAudioSource() {
+		int source = MediaRecorder.AudioSource.MIC;
 		String model = android.os.Build.MODEL;
 		
 		if (android.os.Build.VERSION.SDK_INT >= 11)
-			source = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
+			source = MediaRecorder.AudioSource.MIC;
 		
 		Logger.d(VoIPConstants.TAG, "Phone model: " + model);
 		
