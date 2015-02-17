@@ -491,6 +491,7 @@ public class HttpRequests
 				.setResponseOnUIThread(true)
 				.post(body)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 }
