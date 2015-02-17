@@ -88,10 +88,10 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 					break;
 
 				case ATOMIC_CHAT_THEME_TIP:
-					tipView = LayoutInflater.from(mContext).inflate(R.layout.tip_left_arrow, null);
-					((ImageView) (tipView.findViewById(R.id.arrow_pointer))).setImageResource(R.drawable.ftue_down_arrow);
+					tipView = LayoutInflater.from(mContext).inflate(R.layout.tip_middle_arrow, null);
+					((ImageView) (tipView.findViewById(R.id.arrow_pointer))).setImageResource(R.drawable.ftue_up_arrow);
 					setAtomicTipContent(tipView);
-					((LinearLayout) mainView.findViewById(R.id.tipContainerBottom)).addView(tipView, 0);
+					((LinearLayout) mainView.findViewById(R.id.tipContainerTop)).addView(tipView, 0);
 					break;
 
 				case ATOMIC_STICKER_TIP:
