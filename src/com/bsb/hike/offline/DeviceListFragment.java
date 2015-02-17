@@ -378,8 +378,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 			progressDialog.dismiss();
 		}
     	this.info = info;
+    	// No check for HoneyComb since WiFi Direct runs only on devices with Android 4+
     	if (!server_running){
-			new ServerAsyncTask(getActivity()).execute();
+			new ServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			server_running = true;
 		}
     	if(intent != null)
@@ -440,6 +441,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                     if (!dirs.exists())
                         dirs.mkdirs();
                     f.createNewFile();
+                    break;
                 case 2:
                 	 f = new File(Environment.getExternalStorageDirectory() + "/"
                              + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis() + ".jpg");
@@ -447,6 +449,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                      if (!dirs.exists())
                          dirs.mkdirs();
                      f.createNewFile();
+                     break;
                 }
                 Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
                 copyFile(inputstream, new FileOutputStream(f));
@@ -485,15 +488,6 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 				
 			}
 
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see android.os.AsyncTask#onPreExecute()
-		 */
-		@Override
-		protected void onPreExecute() {
-			//statusText.setText("Opening a server socket");
 		}
 
 	}

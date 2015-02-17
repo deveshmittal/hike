@@ -6830,6 +6830,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		FileTransferManager.getInstance(getApplicationContext()).uploadFile(mContactNumber, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile,
 				mConversation.isOnhike(), recordingDuration, attachementType);
 	}
+	
 	private void initialiseOfflineFileTransfer(String filePath,  String deviceAddress, int hikeFileType)
 	{
 		String localIP = com.bsb.hike.offline.Utils.getLocalIPAddress();
