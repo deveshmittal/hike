@@ -77,8 +77,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	private Dialog smsDialog;
 
-	private boolean isOnline;
-
 	private int mCredits;
 
 	private boolean mBlockOverlay;
@@ -235,8 +233,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		super.fetchConversationFinished(conversation);
 
-		// TODO : This is a basic working skeleton. This needs to be segragated into separate functions.
-
 		if (mConversation.isOnhike())
 		{
 			addUnkownContactBlockHeader();
@@ -253,8 +249,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			/*
 			 * Making sure nothing is already scheduled wrt last seen.
 			 */
-			isOnline = mContactInfo.getOffline() == 0;
-
 			resetLastSeenScheduler();
 
 			LastSeenScheduler lastSeenScheduler = LastSeenScheduler.getInstance(activity.getApplicationContext());
@@ -326,12 +320,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		Logger.d(TAG, " Got lastSeen Time for msisdn : " + contMsisdn + " LastSeenTime : " + lastSeenTime);
 		updateLastSeen(contMsisdn, offline, lastSeenTime);
-	}
-
-	@Override
-	protected void onMessageReceived(Object object)
-	{
-		super.onMessageReceived(object);
 	}
 
 	@Override
@@ -705,9 +693,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 			String lastSeenString = Utils.getLastSeenTimeAsString(activity.getApplicationContext(), lastSeenTime, offline, false, true);
 
-			isOnline = mContactInfo.getOffline() == 0;
-
-			if (isH20TipShowing() && isOnline)
+			/**
+			 * mContactInfo.getOffline == 0 indicates user is online
+			 */
+			if (isH20TipShowing() && (mContactInfo.getOffline() == 0))
 			{
 				/**
 				 * If hike to offline tip is showing and server sends that the user is online, we do not update the last seen field until all pending messages are delivered
@@ -726,7 +715,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 */
 	private void setLastSeen(String lastSeenString)
 	{
-		if (isOnline)
+		if (mContactInfo.getOffline() == 0) //User online ?
 		{
 			/**
 			 * If the user is online, we set this flag to true
@@ -1052,15 +1041,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private void hideLastSeenText()
 	{
 		mActionBarView.findViewById(R.id.contact_status).setVisibility(View.GONE);
-	}
-
-	/**
-	 * This calls the super class method with it's own defaultResId
-	 */
-	@Override
-	protected void setAvatar(int defaultResId)
-	{
-		super.setAvatar(defaultResId);
 	}
 
 	@Override
@@ -1718,8 +1698,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			return;
 		}
-
-		if (isOnline && mActionBarView != null)
+		
+		//User online and actionBarView is not null
+		
+		if ((mContactInfo.getOffline() == 0) && mActionBarView != null)
 		{
 			mActionBarView.findViewById(R.id.contact_status).setVisibility(View.GONE);
 		}
