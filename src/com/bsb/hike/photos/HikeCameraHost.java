@@ -67,6 +67,8 @@ public class HikeCameraHost implements CameraHost
 
 	private File mLastPhotoFile;
 
+	private HikePhotosListener mListener;
+
 	public static HikeCameraHost getInstance(boolean useFFC)
 	{
 		cameraHost = new HikeCameraHost(HikeMessengerApp.getInstance().getApplicationContext());
@@ -283,6 +285,7 @@ public class HikeCameraHost implements CameraHost
 					fos.flush();
 					fos.close();
 					mLastPhotoFile = photo;
+					mListener.onComplete(mLastPhotoFile);
 				}
 				catch (IOException e)
 				{
@@ -291,6 +294,11 @@ public class HikeCameraHost implements CameraHost
 			}
 		}
 
+	}
+
+	public void setOnImageSavedListener(HikePhotosListener argListener)
+	{
+		mListener = argListener;
 	}
 
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN)

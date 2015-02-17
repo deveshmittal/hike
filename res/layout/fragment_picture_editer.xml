@@ -10,7 +10,7 @@
         android:layout_height="0dp"
         android:layout_weight="6" >
 
-        <com.bsb.hike.photoEffects.PictureEditerView
+        <com.bsb.hike.photos.view.PictureEditerView
             android:id="@+id/editer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

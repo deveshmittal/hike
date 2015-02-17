@@ -127,7 +127,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 			isInsideAlbum = false;
 
-			sortBy = MediaStore.Images.Media.DATE_ADDED + " ASC";
+			sortBy = MediaStore.Images.Media.DATE_ADDED + " DESC";
 		}
 
 		Cursor cursor = getContentResolver().query(uri, projection, selection, args, sortBy);

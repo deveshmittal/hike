@@ -1,10 +1,7 @@
-package com.bsb.hike.photos;
+package com.bsb.hike.photos.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -14,10 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
-import com.bsb.hike.photos.FilterTools.FilterType;
-import com.bsb.hike.photos.HikeEffectsFactory.OnPreviewReadyListener;
 
-abstract class EffectItem extends LinearLayout 
+public abstract class EffectItem extends LinearLayout 
 {
 
 	private int ForegroundColor;
@@ -120,44 +115,6 @@ abstract class EffectItem extends LinearLayout
 
 
 
-//preview type to be changed to bitmap later
-
-class FilterEffectItem extends EffectItem implements OnPreviewReadyListener 
-{
-	private FilterType filter;
-
-	public FilterEffectItem(Context context, AttributeSet attrs) {
-		super(context,attrs);
-
-	}
-
-	public void init(Bitmap preview,String Title)
-	{
-
-		preview=Bitmap.createScaledBitmap(preview, PhotoEditerTools.dpToPx(this.getContext(), 80) , PhotoEditerTools.dpToPx(this.getContext(),80), false);
-		this.setImage(preview);
-		this.setText(Title);
-
-	}
-
-	public void setFilter(Context context,FilterType type) {
-		this.filter=type;
-		HikeEffectsFactory.LoadPreviewThumbnail(this.getIcon(), type, this); 
-	}
-
-	public FilterType getFilter() {
-		return filter;
-	}
-
-	@Override
-	public void onPreviewReady(Bitmap preview) {
-		// TODO Auto-generated method stub
-		setImage(preview);
-	}
-
-
-
-}
 
 /*class BorderEffectItem extends EffectItem 
 {
@@ -182,71 +139,6 @@ class FilterEffectItem extends EffectItem implements OnPreviewReadyListener
 
 }
  */
-class DoodleEffectItem extends EffectItem
-{
-	private int BrushWidth;
-	private int BrushColor;
-	private int RingColor;
-	
-	public DoodleEffectItem(Context context, AttributeSet attrs) {
-		super(context,attrs);
-		// TODO Auto-generated constructor stub
-		BrushWidth=PhotoEditerTools.dpToPx(context, 30) ;
-		BrushColor=0xFF000000;
-		RingColor=0xFFFFFFFF;
-		setImage(getCircleIcon());
-	}
 
-	public void Refresh()
-	{
-
-
-		setImage(getCircleIcon()); 
-		invalidate();
-	}
-
-	public int getBrushColor()
-	{
-		return BrushColor;
-	}
-
-	public void setBrushColor(int Color) {
-		BrushColor = Color;
-	}
-
-	public int getRingColor()
-	{
-		return RingColor;
-	}
-
-	public void setRingColor(int Color) {
-		RingColor = Color;
-	}
-
-
-	private Bitmap getCircleIcon()
-	{
-		int diameter=BrushWidth+PhotoEditerTools.dpToPx(this.getContext(), 4);
-		Bitmap bitmap=Bitmap.createBitmap(diameter, diameter, Config.ARGB_8888 );
-		Paint paint = new Paint();
-		paint.setAntiAlias(true);
-		paint.setColor(RingColor);
-		Canvas canvas = new Canvas(bitmap);
-		canvas.drawCircle(diameter/2, diameter/2, (diameter/2), paint);
-		paint.setColor(BrushColor);
-		canvas.drawCircle(diameter/2, diameter/2, (BrushWidth/2) , paint);
-		return bitmap;
-	}
-
-	public void setBrushWidth(int brushWidth) {
-		BrushWidth = brushWidth;
-	}
-
-	public int getBrushWidth() {
-		return BrushWidth;
-	}
-
-
-}
 
 
