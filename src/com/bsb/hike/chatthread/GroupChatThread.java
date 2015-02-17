@@ -810,7 +810,10 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			tipView.setVisibility(View.GONE);
 		}
 		
-		mTips.setPinTipSeen();
+		if (mTips.isGivenTipShowing(ChatThreadTips.PIN_TIP))
+		{
+			mTips.setTipSeen(ChatThreadTips.PIN_TIP);
+		}
 
 	}
 

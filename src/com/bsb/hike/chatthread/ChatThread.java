@@ -728,8 +728,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		/**
 		 * We can now dismiss the chatTheme tip if it is there or we can hide any other visible tip
 		 */
-		mTips.setAtomicTipSeen(ChatThreadTips.ATOMIC_CHAT_THEME_TIP);
-		mTips.hideTip();
+		if(mTips.isGivenTipShowing(ChatThreadTips.ATOMIC_CHAT_THEME_TIP))
+		{
+			mTips.setTipSeen(ChatThreadTips.ATOMIC_CHAT_THEME_TIP);
+		}
+		
+		else
+		{
+			mTips.hideTip();
+		}
 
 		if (themePicker == null)
 		{
@@ -743,8 +750,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		/**
 		 * We can now dismiss the Attachment tip if it is there or we hide any other visible tip
 		 */
-		mTips.setAtomicTipSeen(ChatThreadTips.ATOMIC_ATTACHMENT_TIP);
-		mTips.hideTip();
+		if(mTips.isGivenTipShowing(ChatThreadTips.ATOMIC_ATTACHMENT_TIP))
+		{
+			mTips.setTipSeen(ChatThreadTips.ATOMIC_ATTACHMENT_TIP);
+		}
+		else
+		{
+			mTips.hideTip();
+		}
 		
 		initAttachmentPicker(mConversation.isOnhike());
 		int width = (int) (Utils.densityMultiplier * 270);

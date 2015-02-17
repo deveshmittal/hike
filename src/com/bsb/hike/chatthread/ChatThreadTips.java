@@ -269,6 +269,11 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 	{
 		return tipId != -1;
 	}
+	
+	public boolean isGivenTipShowing(int whichTip)
+	{
+		return (tipView != null && tipId == whichTip);
+	}
 
 	@Override
 	public void onClick(View v)
@@ -278,11 +283,11 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		case ATOMIC_ATTACHMENT_TIP:
 		case ATOMIC_CHAT_THEME_TIP:
 		case ATOMIC_STICKER_TIP:
-			setAtomicTipSeen(tipId);
+			setTipSeen(tipId);
 			break;
 
 		case PIN_TIP:
-			setPinTipSeen();
+			setTipSeen(tipId);
 			break;
 
 		default:
@@ -299,27 +304,38 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		return true;
 	}
 
-	public void setPinTipSeen()
-	{
-		if (tipId == PIN_TIP)
-		{
-			mPrefs.saveData(HikeMessengerApp.SHOWN_PIN_TIP, true);
-			closeTip();
-		}
-	}
-	
 	public void setStickerStipSeen()
 	{
 		//Simply save data to prefs and remove pulsating dot animation.
 		// TODO
 	}
 
-	public void setAtomicTipSeen(int whichTip)
+	/**
+	 * Function to mark the tip as seen
+	 * @param whichTip
+	 */
+	public void setTipSeen(int whichTip)
 	{
+		/**
+		 * Proceeding only if we are showing the current tip indicated by whichTip
+		 */
 		if (tipId == whichTip)
 		{
-			mPrefs.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
-			closeTip();
+			switch (whichTip)
+			{
+			case PIN_TIP:
+				mPrefs.saveData(HikeMessengerApp.SHOWN_PIN_TIP, true);
+				closeTip();
+				break;
+
+			case ATOMIC_ATTACHMENT_TIP:
+			case ATOMIC_CHAT_THEME_TIP:
+			case ATOMIC_STICKER_TIP:
+				mPrefs.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
+				closeTip();
+				break;
+
+			}
 		}
 	}
 }
