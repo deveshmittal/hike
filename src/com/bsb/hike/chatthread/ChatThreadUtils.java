@@ -27,11 +27,10 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferManager;
-import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -304,6 +303,22 @@ public class ChatThreadUtils
 		}
 
 		return convMessage;
+	}
+	
+	protected static void setPokeMetadata(ConvMessage convMessage)
+	{
+		JSONObject metadata = new JSONObject();
+
+		try
+		{
+			metadata.put(HikeConstants.POKE, true);
+			convMessage.setMetadata(metadata);
+		}
+
+		catch (JSONException e)
+		{
+			Logger.e(TAG, "Invalid JSON in sendPoke() : " + e.toString());
+		}
 	}
 	
 }

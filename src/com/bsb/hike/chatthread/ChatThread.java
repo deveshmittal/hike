@@ -1274,22 +1274,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void sendPoke()
 	{
 		ConvMessage convMessage = Utils.makeConvMessage(msisdn, getString(R.string.poke_msg), mConversation.isOnhike());
-
-		JSONObject metadata = new JSONObject();
-
-		try
-		{
-			metadata.put(HikeConstants.POKE, true);
-			convMessage.setMetadata(metadata);
-		}
-
-		catch (JSONException e)
-		{
-			Logger.e(TAG, "Invalid JSON in sendPoke() : " + e.toString());
-		}
-
+		ChatThreadUtils.setPokeMetadata(convMessage);
 		sendMessage(convMessage);
-
 	}
 
 	private void initListView()
