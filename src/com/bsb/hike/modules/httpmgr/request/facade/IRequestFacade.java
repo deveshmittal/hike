@@ -19,7 +19,11 @@ import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
  */
 public interface IRequestFacade
 {
+	public List<Header> getHeaders();
+	
 	public void addHeaders(List<Header> headers);
+	
+	public IRequestBody getBody();
 	
 	public void setBody(IRequestBody body);
 	

@@ -48,8 +48,11 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.modules.stickerdownloadmgr.SingleStickerDownloadTask;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
+import com.bsb.hike.modules.stickerdownloadmgr.MultiStickerDownloadTask;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerPalleteImageDownloadTask;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerPreviewImageDownloadTask;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerSignupUpgradeDownloadTask;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class StickerManager
@@ -1189,10 +1192,12 @@ public class StickerManager
 				{
 				case PALLATE_ICON_TYPE:
 				case PALLATE_ICON_SELECTED_TYPE:
-					StickerDownloadManager.getInstance().DownloadStickerPalleteImage(categoryId);
+					StickerPalleteImageDownloadTask stickerPalleteImageDownloadTask = new StickerPalleteImageDownloadTask(categoryId);
+					stickerPalleteImageDownloadTask.execute();
 					break;
 				case PREVIEW_IMAGE_TYPE:
-					StickerDownloadManager.getInstance().DownloadStickerPreviewImage(categoryId);
+					StickerPreviewImageDownloadTask stickerPreviewImageDownloadtask = new StickerPreviewImageDownloadTask(categoryId);
+					stickerPreviewImageDownloadtask.execute();
 					break;
 				default:
 					break;
@@ -1255,7 +1260,8 @@ public class StickerManager
 			return;
 		}
 
-		StickerDownloadManager.getInstance().DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories());
+		StickerSignupUpgradeDownloadTask stickerSignupUpgradeDownloadTask = new StickerSignupUpgradeDownloadTask(getAllInitialyInsertedStickerCategories());
+		stickerSignupUpgradeDownloadTask.execute();
 	}
 	
 	public void updateStickerCategoriesMetadata(JSONArray jsonArray)
@@ -1335,7 +1341,8 @@ public class StickerManager
 		if(category.getTotalStickers() == 0 || category.getDownloadedStickersCount() < category.getTotalStickers())
 		{
 			category.setState(StickerCategory.DOWNLOADING);
-			StickerDownloadManager.getInstance().DownloadMultipleStickers(category, downloadType, source);
+			MultiStickerDownloadTask multiStickerDownloadTask = new MultiStickerDownloadTask(category, downloadType, source);
+			multiStickerDownloadTask.execute();
 		}
 		saveCategoryAsVisible(category);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
@@ -1460,8 +1467,10 @@ public class StickerManager
 		/**
 		 * Now download the Enable disable images as well as preview image
 		 */
-		StickerDownloadManager.getInstance().DownloadStickerPalleteImage(stickerCategory.getCategoryId());
-		StickerDownloadManager.getInstance().DownloadStickerPreviewImage(stickerCategory.getCategoryId());
+		StickerPalleteImageDownloadTask stickerPalleteImageDownloadTask = new StickerPalleteImageDownloadTask(stickerCategory.getCategoryId());
+		StickerPreviewImageDownloadTask stickerPreviewImageDownloadTask = new StickerPreviewImageDownloadTask(stickerCategory.getCategoryId());
+		stickerPalleteImageDownloadTask.execute();
+		stickerPreviewImageDownloadTask.execute();
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
 

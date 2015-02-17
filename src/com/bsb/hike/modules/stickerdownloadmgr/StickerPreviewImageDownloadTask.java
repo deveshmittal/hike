@@ -12,35 +12,47 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
-import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor.Chain;
-import com.bsb.hike.modules.httpmgr.request.facade.RequestFacade;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
-public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
+public class StickerPreviewImageDownloadTask
 {
 	private String TAG = "StickerPreviewImageDownloadTask";
 
-	private String catId;
+	private String categoryId;
 
 	String previewImagePath;
 
-	protected StickerPreviewImageDownloadTask(String taskId, String categoryId)
+	public StickerPreviewImageDownloadTask(String categoryId)
 	{
-		super(taskId);
-		this.catId = categoryId;
-		
+		this.categoryId = categoryId;
+	}
+	
+	public void execute()
+	{
 		if (!StickerManager.getInstance().isMinimumMemoryAvailable())
 		{
 			onFailure(new HttpException(REASON_CODE_OUT_OF_SPACE));
 			return;
 		}
 		
-		RequestToken requestToken = StickerPreviewImageDownloadRequest(categoryId, getRequestInterceptor(), getRequestListener());
+		long requestId = getRequestId();
+		RequestToken requestToken = StickerPreviewImageDownloadRequest(requestId, categoryId, getRequestInterceptor(), getRequestListener());
+		
+		if(requestToken.isRequestRunning()) // duplicate check
+		{
+			return;
+		}
 		requestToken.execute();
+	}
+	
+	private long getRequestId()
+	{
+		return (StickerRequestType.PREVIEW.getLabel() + "\\" + categoryId).hashCode();
 	}
 
 	private IRequestInterceptor getRequestInterceptor()
@@ -51,7 +63,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			@Override
 			public void intercept(Chain chain)
 			{
-				String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(catId);
+				String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId);
 				if (dirPath == null)
 				{
 					Logger.e(TAG, "Sticker download failed directory does not exist");
@@ -104,7 +116,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 					}
 
 					String stickerData = data.getString(HikeConstants.PREVIEW_IMAGE);
-					HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(catId, StickerManager.PREVIEW_IMAGE_TYPE));
+					HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(categoryId, StickerManager.PREVIEW_IMAGE_TYPE));
 					Utils.saveBase64StringToFile(new File(previewImagePath), stickerData);
 				}
 				catch (Exception e)
@@ -127,17 +139,13 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 		};
 	}
 
-	@Override
 	void onSuccess(Object result)
 	{
-		// TODO Auto-generated method stub
-		super.onSuccess(result);
+
 	}
 
-	@Override
 	void onFailure(Exception e)
 	{
-		// TODO Auto-generated method stub
-		super.onFailure(e);
+		Logger.e(TAG, "on failure, exception ", e);
 	}
 }
