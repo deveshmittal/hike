@@ -1,18 +1,27 @@
 package com.bsb.hike.utils;
 
+import java.io.File;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.UriMatcher;
+import android.net.Uri;
 import android.os.Message;
 import android.text.TextUtils;
 import android.widget.Toast;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.models.NuxCustomMessage;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
 import com.bsb.hike.ui.CreditsActivity;
@@ -28,18 +37,6 @@ import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.google.android.gms.internal.co;
-
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Message;
-import android.text.TextUtils;
-import android.widget.Toast;
 
 public class IntentManager
 {
@@ -247,6 +244,28 @@ public class IntentManager
 		}
 
 		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
+		return intent;
+	}
+	
+	public static Intent getForwardImageIntent(Context context, File argFile)
+	{
+		Intent intent = new Intent(context, ComposeChatActivity.class);
+		intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+		intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(argFile));
+		intent.setType("image");
+//		JSONArray multipleMsgArray = new JSONArray();
+//		try
+//		{
+//			JSONObject multiMsgFwdObject = new JSONObject();
+//			multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
+//			multipleMsgArray.put(multiMsgFwdObject);
+//		}
+//		catch (JSONException e)
+//		{
+//			Logger.e(context.getClass().getSimpleName(), "Invalid JSON", e);
+//		}
+
+//		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 		return intent;
 	}
 

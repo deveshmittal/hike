@@ -20,7 +20,7 @@ import com.bsb.hike.photos.FilterTools.FilterList;
 import com.bsb.hike.photos.PhotoEditerTools.MenuType;
 import com.bsb.hike.photos.view.DoodleEffectItem;
 import com.bsb.hike.photos.view.FilterEffectItem;
-import com.bsb.hike.ui.PictureEditer.EffectItemAdapter;
+import com.bsb.hike.ui.PictureEditer.EffectsClickListener;
 import com.jess.ui.TwoWayAbsListView;
 import com.jess.ui.TwoWayGridView;
 
@@ -29,11 +29,11 @@ public final class PreviewFragment extends Fragment
 
 	private MenuType myType;
 
-	private EffectItemAdapter handler;
+	private EffectsClickListener handler;
 
 	private Bitmap mOriginalBitmap;
 
-	public PreviewFragment(MenuType type, EffectItemAdapter adapter, Bitmap bitmap)
+	public PreviewFragment(MenuType type, EffectsClickListener adapter, Bitmap bitmap)
 	{
 
 		myType = type;
@@ -99,9 +99,9 @@ public final class PreviewFragment extends Fragment
 
 		private MenuType itemType;
 
-		private EffectItemAdapter adapter;
+		private EffectsClickListener adapter;
 
-		public ImageAdapter(Context context, MenuType type, EffectItemAdapter Adapter)
+		public ImageAdapter(Context context, MenuType type, EffectsClickListener Adapter)
 		{
 			mContext = context;
 			itemType = type;

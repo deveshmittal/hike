@@ -1,5 +1,11 @@
 package com.bsb.hike.ui;
 
+import java.io.File;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,8 +15,12 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.PhotoEditerTools;
 import com.bsb.hike.photos.PhotoEditerTools.MenuType;
 import com.bsb.hike.photos.view.DoodleEffectItem;
@@ -18,6 +28,8 @@ import com.bsb.hike.photos.view.FilterEffectItem;
 import com.bsb.hike.photos.view.PictureEditerView;
 import com.bsb.hike.ui.fragments.PreviewFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
 import com.viewpagerindicator.TabPageIndicator;
 
@@ -28,24 +40,22 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 	private int menuIcons[] = { R.drawable.filters, R.drawable.doodle };
 
-	private EffectItemAdapter clickHandler;
+	private EffectsClickListener effectsClickListener;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		
-		PhotoEditerTools.hideSystemUI(getWindow().getDecorView());
-		
+
 		setContentView(R.layout.fragment_picture_editer);
 
-		clickHandler = new EffectItemAdapter(this);
+		effectsClickListener = new EffectsClickListener(this);
 
 		Intent intent = getIntent();
 		String filename = intent.getStringExtra("FilePath");
 		editView = (PictureEditerView) findViewById(R.id.editer);
 		editView.loadImageFromFile(filename);
-		FragmentPagerAdapter adapter = new EffectsViewAdapter(getSupportFragmentManager(), clickHandler);
+		FragmentPagerAdapter adapter = new PhotoEditViewPagerAdapter(getSupportFragmentManager(), effectsClickListener);
 
 		ViewPager pager = (ViewPager) findViewById(R.id.pager);
 		pager.setAdapter(adapter);
@@ -53,23 +63,23 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		TabPageIndicator indicator = (TabPageIndicator) findViewById(R.id.indicator);
 		indicator.setViewPager(pager);
 
-		// ((Button)findViewById(R.id.saveButton)).setOnClickListener(clickHandler);
+		findViewById(R.id.done_btn).setOnClickListener(effectsClickListener);
 
 		TabPageIndicator tabs = (TabPageIndicator) findViewById(R.id.indicator);
-		
+
 		getSupportActionBar().hide();
 
 	}
 
-	public class EffectsViewAdapter extends FragmentPagerAdapter implements IconPagerAdapter
+	public class PhotoEditViewPagerAdapter extends FragmentPagerAdapter implements IconPagerAdapter
 	{
 
-		private EffectItemAdapter mAdapter;
+		private EffectsClickListener mItemClickListener;
 
-		public EffectsViewAdapter(FragmentManager fm, EffectItemAdapter adapter)
+		public PhotoEditViewPagerAdapter(FragmentManager fm, EffectsClickListener argItemClickListener)
 		{
 			super(fm);
-			mAdapter = adapter;
+			mItemClickListener = argItemClickListener;
 		}
 
 		@Override
@@ -79,9 +89,9 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 			switch (position)
 			{
 			case 0:
-				return new PreviewFragment(MenuType.Effects, mAdapter,editView.getImageOriginal());
+				return new PreviewFragment(MenuType.Effects, mItemClickListener, editView.getImageOriginal());
 			case 1:
-				return new PreviewFragment(MenuType.Doodle, mAdapter,editView.getImageOriginal());
+				return new PreviewFragment(MenuType.Doodle, mItemClickListener, editView.getImageOriginal());
 			}
 			return null;
 		}
@@ -105,7 +115,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		}
 	}
 
-	public class EffectItemAdapter implements OnClickListener
+	public class EffectsClickListener implements OnClickListener
 	{
 		private DoodleEffectItem doodlePreview;
 
@@ -113,7 +123,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 		private Context mContext;
 
-		public EffectItemAdapter(Context context)
+		public EffectsClickListener(Context context)
 		{
 			// TODO Auto-generated constructor stub
 			mContext = context;
@@ -168,13 +178,13 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 					doodlePreview.Refresh();
 					editView.setBrushWidth(PhotoEditerTools.dpToPx(mContext, doodleWidth));
 					break;
+				case R.id.done_btn:
+					File savedImage = editView.saveImage();
+					Intent forwardIntent = IntentManager.getForwardImageIntent(mContext, savedImage);
+					startActivity(forwardIntent);
+					break;
 				}
 			}
-			// else if(v.getId()==R.id.saveButton)
-			// {
-			// editView.saveImage();
-			// }
-
 		}
 
 	}

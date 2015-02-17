@@ -51,8 +51,6 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		getSupportActionBar().hide();
 		
-//		PhotoEditerTools.hideSystemUI(getWindow().getDecorView());
-
 		setContentView(R.layout.hike_camera_activity);
 
 		cameraFragment = CameraFragment.newInstance(false);

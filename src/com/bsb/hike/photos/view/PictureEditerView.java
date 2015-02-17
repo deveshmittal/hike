@@ -2,6 +2,7 @@ package com.bsb.hike.photos.view;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Random;
 
 import android.content.Context;
@@ -71,7 +72,7 @@ public class PictureEditerView extends FrameLayout
 	{
 		return imageOriginal;
 	}
-	
+
 	public void disableDoodling()
 	{
 
@@ -82,7 +83,7 @@ public class PictureEditerView extends FrameLayout
 		doodleLayer.setColor(Color);
 	}
 
-	public void saveImage()
+	public File saveImage()
 	{
 
 		imageEdited = updateSat(imageOriginal, currentEffect);
@@ -95,19 +96,44 @@ public class PictureEditerView extends FrameLayout
 		String fname = "Image-" + n + ".jpg";
 		File file = new File(myDir, fname);
 		if (file.exists())
+		{
 			file.delete();
+		}
+
+		FileOutputStream out = null;
 		try
 		{
-			FileOutputStream out = new FileOutputStream(file);
+			out = new FileOutputStream(file);
 			imageEdited.compress(Bitmap.CompressFormat.JPEG, 100, out);
-			out.flush();
-			out.close();
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
+		finally
+		{
+			if (out != null)
+			{
+				try
+				{
+					out.flush();
+					out.close();
+				}
+				catch (IOException e)
+				{
+					// Do nothing
+				}
+			}
+		}
 
+		if (file.exists())
+		{
+			return file;
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	private Bitmap updateSat(Bitmap src, ColorMatrixColorFilter filter)
@@ -126,10 +152,10 @@ public class PictureEditerView extends FrameLayout
 		return bitmapResult;
 	}
 
-//	public void loadImage()
-//	{
-//		effectLayer.handleImage((BitmapDrawable) getResources().getDrawable(R.drawable.test));
-//		imageOriginal = ((BitmapDrawable) getResources().getDrawable(R.drawable.test)).getBitmap();
-//	}
+	// public void loadImage()
+	// {
+	// effectLayer.handleImage((BitmapDrawable) getResources().getDrawable(R.drawable.test));
+	// imageOriginal = ((BitmapDrawable) getResources().getDrawable(R.drawable.test)).getBitmap();
+	// }
 
 }

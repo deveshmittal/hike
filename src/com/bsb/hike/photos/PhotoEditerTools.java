@@ -1,11 +1,7 @@
 package com.bsb.hike.photos;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 import android.content.Context;
 import android.graphics.Bitmap;
