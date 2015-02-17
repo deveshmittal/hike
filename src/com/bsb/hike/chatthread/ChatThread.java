@@ -247,7 +247,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected ChatThreadTips mTips;
 
-	private static String NEW_LINE_DELIMETER = "\n";
+	private static final String NEW_LINE_DELIMETER = "\n";
 
 	private class ChatThreadBroadcasts extends BroadcastReceiver
 	{
@@ -424,7 +424,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		audioRecordView = new AudioRecordView(activity, this);
 		mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
 
-		showNetworkError(checkNetworkError());
+		showNetworkError(ChatThreadUtils.checkNetworkError());
 	}
 
 	/**
@@ -904,11 +904,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		activity.startActivityForResult(imageIntent, AttachmentPicker.GALLERY);
 	}
 
-	protected void shareCapturedImage(int resultCode, Intent data)
-	{
-
-	}
-
 	protected void uploadFile(Uri uri, HikeFileType fileType)
 	{
 		Logger.i(TAG, "upload file , uri " + uri + " filetype " + fileType);
@@ -986,13 +981,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			double latitude = data.getDoubleExtra(HikeConstants.Extras.LATITUDE, 0);
 			double longitude = data.getDoubleExtra(HikeConstants.Extras.LONGITUDE, 0);
 			int zoomLevel = data.getIntExtra(HikeConstants.Extras.ZOOM_LEVEL, 0);
-			initialiseLocationTransfer(latitude, longitude, zoomLevel);
+			ChatThreadUtils.initialiseLocationTransfer(activity.getApplicationContext(), msisdn, latitude, longitude, zoomLevel, mConversation.isOnhike());
 		}
-	}
-
-	protected void initialiseLocationTransfer(double latitude, double longitude, int zoomLevel)
-	{
-		FileTransferManager.getInstance(activity.getApplicationContext()).uploadLocation(msisdn, latitude, longitude, zoomLevel, mConversation.isOnhike());
 	}
 
 	protected void onShareContact(int resultCode, Intent data)
@@ -1013,12 +1003,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	}
 
-	protected void initialiseContactTransfer(JSONObject contactJson)
-	{
-		Logger.i(TAG, "initiate contact transfer " + contactJson.toString());
-		FileTransferManager.getInstance(activity.getApplicationContext()).uploadContact(msisdn, contactJson, mConversation.isOnhike());
-	}
-
 	@Override
 	public void negativeClicked(HikeDialog dialog)
 	{
@@ -1037,7 +1021,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (dialog.getId())
 		{
 		case HikeDialogFactory.CONTACT_SEND_DIALOG:
-			initialiseContactTransfer(((PhonebookContact) dialog.data).jsonData);
+			ChatThreadUtils.initialiseContactTransfer(activity.getApplicationContext(), msisdn, ((PhonebookContact) dialog.data).jsonData, mConversation.isOnhike());
 			dialog.dismiss();
 
 			break;
@@ -1470,14 +1454,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						double latitude = msgExtrasJson.getDouble(HikeConstants.Extras.LATITUDE);
 						double longitude = msgExtrasJson.getDouble(HikeConstants.Extras.LONGITUDE);
 						int zoomLevel = msgExtrasJson.getInt(HikeConstants.Extras.ZOOM_LEVEL);
-						initialiseLocationTransfer(latitude, longitude, zoomLevel);
+						ChatThreadUtils.initialiseLocationTransfer(activity.getApplicationContext(), msisdn, latitude, longitude, zoomLevel, mConversation.isOnhike());
 					}
 					else if (msgExtrasJson.has(HikeConstants.Extras.CONTACT_METADATA))
 					{
 						try
 						{
 							JSONObject contactJson = new JSONObject(msgExtrasJson.getString(HikeConstants.Extras.CONTACT_METADATA));
-							initialiseContactTransfer(contactJson);
+							ChatThreadUtils.initialiseContactTransfer(activity.getApplicationContext(), msisdn, contactJson, mConversation.isOnhike());
 						}
 						catch (JSONException e)
 						{
@@ -1493,7 +1477,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						boolean isDis = sticker.isDisabled(sticker, activity.getApplicationContext());
 						// add this sticker to recents if this sticker is not disabled
 						if (!isDis)
+						{
 							StickerManager.getInstance().addRecentSticker(sticker);
+						}
 						/*
 						 * Making sure the sticker is not forwarded again on orientation change
 						 */
@@ -3233,17 +3219,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		activity.findViewById(R.id.network_error_chat).setVisibility(isNetworkError ? View.VISIBLE : View.GONE);
 	}
 
-	protected boolean checkNetworkError()
-	{
-		return HikeMessengerApp.networkError;
-	}
-
 	/**
 	 * This is called from the UI thread
 	 */
 	protected void updateNetworkState()
 	{
-		showNetworkError(checkNetworkError());
+		showNetworkError(ChatThreadUtils.checkNetworkError());
 	}
 
 	/**

@@ -216,4 +216,21 @@ public class ChatThreadUtils
 		}
 		return false;
 	}
+	
+	protected static boolean checkNetworkError()
+	{
+		return HikeMessengerApp.networkError;
+	}
+	
+	protected static void initialiseLocationTransfer(Context context, String msisdn, double latitude, double longitude, int zoomLevel, boolean convOnHike)
+	{
+		FileTransferManager.getInstance(context).uploadLocation(msisdn, latitude, longitude, zoomLevel, convOnHike);
+	}
+
+	protected static void initialiseContactTransfer(Context context, String msisdn, JSONObject contactJson, boolean convOnHike)
+	{
+		Logger.i(TAG, "initiate contact transfer " + contactJson.toString());
+		FileTransferManager.getInstance(context).uploadContact(msisdn, contactJson, convOnHike);
+	}
+	
 }

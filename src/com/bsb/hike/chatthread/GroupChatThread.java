@@ -990,7 +990,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	 */
 	private void muteConvToggledUIChange(boolean isMuted)
 	{
-		if (!checkNetworkError())
+		if (!ChatThreadUtils.checkNetworkError())
 		{
 			toggleConversationMuteViewVisibility(isMuted);
 		}
@@ -1015,7 +1015,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	{
 		super.updateNetworkState();
 
-		if (checkNetworkError())
+		if (ChatThreadUtils.checkNetworkError())
 		{
 			toggleConversationMuteViewVisibility(false);
 		}
