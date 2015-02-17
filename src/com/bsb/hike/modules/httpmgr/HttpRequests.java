@@ -32,7 +32,9 @@ import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
 
 import org.json.JSONObject;
 
+import com.bsb.hike.modules.httpmgr.interceptor.GzipRequestInterceptor;
 import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
+
 import android.text.TextUtils;
 
 import com.bsb.hike.modules.httpmgr.request.ByteArrayRequest;
@@ -68,6 +70,7 @@ public class HttpRequests
 				.setRequestListener(requestListener)
 				.setRequestType(REQUEST_TYPE_SHORT)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -118,7 +121,8 @@ public class HttpRequests
 				.setRequestType(REQUEST_TYPE_LONG)
 				.setPriority(PRIORITY_HIGH)
 				.build();
-		requestToken.getRequestInterceptors().addLast("sticker", interceptor);
+		requestToken.getRequestInterceptors().addFirst("sticker", interceptor);
+		requestToken.getRequestInterceptors().addAfter("sticker", "gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -166,6 +170,7 @@ public class HttpRequests
 				.setResponseOnUIThread(true)
 				.post(body)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -190,6 +195,7 @@ public class HttpRequests
 				.setRequestListener(requestListener)
 				.post(body)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -202,6 +208,7 @@ public class HttpRequests
 				.setRequestListener(requestListener)
 				.post(body)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -214,6 +221,7 @@ public class HttpRequests
 				.setResponseOnUIThread(true)
 				.post(body)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -226,6 +234,7 @@ public class HttpRequests
 				.post(body)
 				.setAsynchronous(false)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 
 	}
@@ -238,6 +247,7 @@ public class HttpRequests
 				.setRequestListener(requestListener)
 				.post(body)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -290,6 +300,7 @@ public class HttpRequests
 				.post(body)
 				.setAsynchronous(false)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -302,6 +313,7 @@ public class HttpRequests
 				.post(body)
 				.setAsynchronous(false)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -326,6 +338,7 @@ public class HttpRequests
 				.setResponseOnUIThread(true)
 				.post(body)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -338,6 +351,7 @@ public class HttpRequests
 				.setRequestListener(requestListener)
 				.post(body)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -350,6 +364,7 @@ public class HttpRequests
 				.post(body)
 				.setAsynchronous(false)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -373,6 +388,7 @@ public class HttpRequests
 				.setRequestListener(requestListener)
 				.post(body)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 
@@ -384,6 +400,7 @@ public class HttpRequests
 				.setRequestListener(requestListener)
 				.post(body)
 				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
 		return requestToken;
 	}
 

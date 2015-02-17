@@ -40,4 +40,14 @@ public class RequestFacade implements IRequestFacade
 	{
 		return request.getRequestInterceptors();
 	}
+	@Override
+	public List<Header> getHeaders()
+	{
+		return request.getHeaders();
+	}
+	@Override
+	public IRequestBody getBody()
+	{
+		return request.getBody();
+	}
 }
