@@ -1374,7 +1374,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					}
 					else if (msgExtrasJson.has(HikeConstants.Extras.POKE))
 					{
-						// as we will be changing msisdn and hike status while inserting in DB
 						sendPoke();
 					}
 					else if (msgExtrasJson.has(HikeConstants.Extras.FILE_PATH))
@@ -1414,7 +1413,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE)
 							&& msgExtrasJson.has(HikeConstants.Extras.ZOOM_LEVEL))
 					{
-						String fileKey = null;
 						double latitude = msgExtrasJson.getDouble(HikeConstants.Extras.LATITUDE);
 						double longitude = msgExtrasJson.getDouble(HikeConstants.Extras.LONGITUDE);
 						int zoomLevel = msgExtrasJson.getInt(HikeConstants.Extras.ZOOM_LEVEL);
@@ -1458,7 +1456,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 			catch (JSONException e)
 			{
-				Logger.e(getClass().getSimpleName(), "Invalid JSON Array", e);
+				Logger.e(TAG, "Invalid JSON Array", e);
 			}
 			intent.removeExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT);
 		}
@@ -1482,7 +1480,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 		else
 		{
-			String message = activity.getSharedPreferences(HikeConstants.DRAFT_SETTING, activity.MODE_PRIVATE).getString(msisdn, "");
+			String message = activity.getApplicationContext().getSharedPreferences(HikeConstants.DRAFT_SETTING, Context.MODE_PRIVATE).getString(msisdn, "");
 			mComposeView.setText(message);
 			mComposeView.setSelection(mComposeView.length());
 			SmileyParser.getInstance().addSmileyToEditable(mComposeView.getText(), false);
@@ -1740,16 +1738,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			selectedNonTextMsgs = ChatThreadUtils.incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
 
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-			File file = hikeFile.getFile();
-			FileSavedState fss;
-			if (message.isSent())
-			{
-				fss = FileTransferManager.getInstance(activity.getApplicationContext()).getUploadFileState(message.getMsgID(), file);
-			}
-			else
-			{
-				fss = FileTransferManager.getInstance(activity.getApplicationContext()).getDownloadFileState(message.getMsgID(), file);
-			}
+			
 			if ((message.isSent() && TextUtils.isEmpty(hikeFile.getFileKey())) || (!message.isSent() && !hikeFile.wasFileDownloaded()))
 			{
 				/*
@@ -1759,11 +1748,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				{
 					selectedNonForwadableMsgs = ChatThreadUtils.incrementDecrementMsgsCount(selectedNonForwadableMsgs, isMsgSelected);
 				}
-				/**
-				 * if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED )) { /* File Transfer is in progress. this can be canceLled.
-				 * 
-				 * selectedCancelableMsgs = incrementDecrementMsgsCount(selectedCancelableMsgs, isMsgSelected); }
-				 */
 			}
 			else
 			{
@@ -1795,8 +1779,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mActionMode.showHideMenuItem(R.id.share_msgs, shareableMessagesCount == 1 && mAdapter.getSelectedCount() == 1);
 
 		mActionMode.showHideMenuItem(R.id.forward_msgs, !(selectedNonForwadableMsgs > 0));
-
-		// mActionMode.showHideMenuItem(R.id.action_mode_overflow_menu, selectedCancelableMsgs == 1 && mAdapter.getSelectedCount() == 1);
 	}
 
 	protected void destroyActionMode()
