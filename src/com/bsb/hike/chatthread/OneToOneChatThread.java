@@ -46,7 +46,6 @@ import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -75,8 +74,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private ContactInfo mContactInfo;
 
 	private LastSeenScheduler lastSeenScheduler;
-
-	private FavoriteType mFavoriteType;
 
 	private Dialog smsDialog;
 
@@ -240,8 +237,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		// TODO : This is a basic working skeleton. This needs to be segragated into separate functions.
 
-		mFavoriteType = mContactInfo.getFavoriteType();
-
 		if (mConversation.isOnhike())
 		{
 			addUnkownContactBlockHeader();
@@ -252,7 +247,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			FetchHikeUser.fetchHikeUser(activity.getApplicationContext(), msisdn);
 		}
 
-		if (shouldShowLastSeen())
+		if (ChatThreadUtils.shouldShowLastSeen(activity.getApplicationContext(), mContactInfo.getFavoriteType(), mConversation.isOnhike()))
 		{
 
 			/*
@@ -298,16 +293,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			lastSeenScheduler.stop(false);
 			lastSeenScheduler = null;
 		}
-	}
-
-	private boolean shouldShowLastSeen()
-	{
-		if ((mFavoriteType == FavoriteType.FRIEND || mFavoriteType == FavoriteType.REQUEST_RECEIVED || mFavoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED)
-				&& mConversation.isOnhike())
-		{
-			return PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
-		}
-		return false;
 	}
 
 	protected void addUnkownContactBlockHeader()
@@ -400,7 +385,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			sendUIMessage(TYPING_CONVERSATION, typingNotification);
 		}
 
-		if (shouldShowLastSeen() && mContactInfo.getOffline() != -1)
+		if (ChatThreadUtils.shouldShowLastSeen(activity.getApplicationContext(), mContactInfo.getFavoriteType(), mConversation.isOnhike()) && mContactInfo.getOffline() != -1)
 		{
 			/*
 			 * Publishing an online event for this number.
@@ -701,7 +686,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		/**
 		 * Proceeding only if the current chat thread is open and we should show the last seen
 		 */
-		if (msisdn.equals(contMsisdn) && shouldShowLastSeen())
+		if (msisdn.equals(contMsisdn) && ChatThreadUtils.shouldShowLastSeen(activity.getApplicationContext(), mContactInfo.getFavoriteType(), mConversation.isOnhike()))
 		{
 			/**
 			 * Fix for case where server and client values are out of sync
@@ -1430,7 +1415,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			return;
 		}
 
-		if (!shouldShowLastSeen())
+		if (!ChatThreadUtils.shouldShowLastSeen(activity.getApplicationContext(), mContactInfo.getFavoriteType(), mConversation.isOnhike()))
 		{
 			return;
 		}
