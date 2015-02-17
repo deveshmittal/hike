@@ -518,6 +518,8 @@ public class HikeConstants
 	public static final String HELP_FAQS_PREF = "helpFaqs";
 
 	public static final String HELP_FEEDBACK_PREF = "helpFeedback";
+	
+	public static final String HELP_TNC_PREF = "helpTnc";
 
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
 	
