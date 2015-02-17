@@ -2324,19 +2324,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	}
 
 	@Override
-	public void actionModeDestroyed(int id)
-	{
-		switch (id)
-		{
-		case MULTI_SELECT_ACTION_MODE:
-			setEnabledH20NextButton(true);
-			break;
-		}
-
-		super.actionModeDestroyed(id);
-	}
-
-	@Override
 	public boolean onBackPressed()
 	{
 		/**
