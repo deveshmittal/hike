@@ -1375,18 +1375,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					else if (msgExtrasJson.has(HikeConstants.Extras.POKE))
 					{
 						// as we will be changing msisdn and hike status while inserting in DB
-						ConvMessage convMessage = Utils.makeConvMessage(msisdn, getString(R.string.poke_msg), mConversation.isOnhike());
-						JSONObject metadata = new JSONObject();
-						try
-						{
-							metadata.put(HikeConstants.POKE, true);
-							convMessage.setMetadata(metadata);
-							sendMessage(convMessage);
-						}
-						catch (JSONException e)
-						{
-							Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
-						}
+						sendPoke();
 					}
 					else if (msgExtrasJson.has(HikeConstants.Extras.FILE_PATH))
 					{
