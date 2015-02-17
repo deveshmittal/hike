@@ -31,6 +31,7 @@ import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PinHistoryActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.ShareLocation;
@@ -373,5 +374,14 @@ public class IntentFactory
 	public static Intent getComposeChatActivityIntent(Context context)
 	{
 		return new Intent(context, ComposeChatActivity.class);
+	}
+	
+	public static Intent getPinHistoryIntent(Context context, String msisdn)
+	{
+		Intent intent = new Intent();
+		intent.setClass(context, PinHistoryActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(HikeConstants.TEXT_PINS, msisdn);
+		return intent;
 	}
 }

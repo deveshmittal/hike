@@ -49,7 +49,6 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.ui.PinHistoryActivity;
 import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonTextWatcher;
@@ -497,10 +496,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 
 	private void showPinHistory(boolean viaMenu)
 	{
-		Intent intent = new Intent();
-		intent.setClass(activity.getApplicationContext(), PinHistoryActivity.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.putExtra(HikeConstants.TEXT_PINS, msisdn);
+		Intent intent = IntentFactory.getPinHistoryIntent(activity.getApplicationContext(), msisdn);
 		activity.startActivity(intent);
 		Utils.resetPinUnreadCount(mConversation);
 
