@@ -139,6 +139,18 @@ public class ChatThreadUtils
 		editor.remove(HikeMessengerApp.TEMP_NUM);
 		editor.commit();
 	}
+	
+	protected static void uploadFile(Context context, String msisdn, String filePath, HikeFileType fileType, boolean isConvOnHike)
+	{
+		Logger.i(TAG, "upload file , filepath " + filePath + " filetype " + fileType);
+		initialiseFileTransfer(context, msisdn, filePath, null, fileType, null, false, -1, false, isConvOnHike);
+	}
+	
+	protected static void uploadFile(Context context, String msisdn, Uri uri, HikeFileType fileType, boolean isConvOnHike)
+	{
+		Logger.i(TAG, "upload file , uri " + uri + " filetype " + fileType);
+		FileTransferManager.getInstance(context).uploadFile(uri, fileType, msisdn, isConvOnHike);
+	}
 
 	protected static void initiateFileTransferFromIntentData(Context context, String msisdn, String fileType, String filePath, boolean convOnHike)
 	{

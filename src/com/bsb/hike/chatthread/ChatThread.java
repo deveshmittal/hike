@@ -904,18 +904,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		activity.startActivityForResult(imageIntent, AttachmentPicker.GALLERY);
 	}
 
-	protected void uploadFile(Uri uri, HikeFileType fileType)
-	{
-		Logger.i(TAG, "upload file , uri " + uri + " filetype " + fileType);
-		FileTransferManager.getInstance(activity.getApplicationContext()).uploadFile(uri, fileType, msisdn, mConversation.isOnhike());
-	}
-
-	protected void uploadFile(String filePath, HikeFileType fileType)
-	{
-		Logger.i(TAG, "upload file , filepath " + filePath + " filetype " + fileType);
-		ChatThreadUtils.initialiseFileTransfer(activity.getApplicationContext(), msisdn, filePath, null, fileType, null, false, -1, false, mConversation.isOnhike());
-	}
-
 	protected void showToast(int messageId)
 	{
 		Toast.makeText(activity, getString(messageId), Toast.LENGTH_SHORT).show();
@@ -924,13 +912,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void imageCaptured(Uri uri)
 	{
-		uploadFile(uri, HikeFileType.IMAGE);
+		ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, uri, HikeFileType.IMAGE, mConversation.isOnhike());
 	}
 
 	@Override
 	public void imageCaptured(String imagePath)
 	{
-		uploadFile(imagePath, HikeFileType.IMAGE);
+		ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, imagePath, HikeFileType.IMAGE, mConversation.isOnhike());
 	}
 
 	@Override
@@ -946,10 +934,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (requestCode)
 		{
 		case AttachmentPicker.AUDIO:
-			uploadFile(filePath, HikeFileType.AUDIO);
+			ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, filePath, HikeFileType.AUDIO, mConversation.isOnhike());
 			break;
 		case AttachmentPicker.VIDEO:
-			uploadFile(filePath, HikeFileType.VIDEO);
+			ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, filePath, HikeFileType.VIDEO, mConversation.isOnhike());
 			break;
 		}
 
