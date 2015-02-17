@@ -1,6 +1,7 @@
 package com.bsb.hike.chatthread;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import org.json.JSONArray;
@@ -11,8 +12,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
@@ -26,8 +29,12 @@ import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 public class ChatThreadUtils
@@ -176,7 +183,7 @@ public class ChatThreadUtils
 		}
 		FileTransferManager.getInstance(context).uploadFile(msisdn, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile, convOnHike, recordingDuration);
 	}
-	
+
 	protected static void onShareFile(Context context, String msisdn, Intent intent, boolean isConvOnHike)
 	{
 		String fileKey = null;
@@ -216,12 +223,12 @@ public class ChatThreadUtils
 		}
 		return false;
 	}
-	
+
 	protected static boolean checkNetworkError()
 	{
 		return HikeMessengerApp.networkError;
 	}
-	
+
 	protected static void initialiseLocationTransfer(Context context, String msisdn, double latitude, double longitude, int zoomLevel, boolean convOnHike)
 	{
 		FileTransferManager.getInstance(context).uploadLocation(msisdn, latitude, longitude, zoomLevel, convOnHike);
@@ -232,10 +239,71 @@ public class ChatThreadUtils
 		Logger.i(TAG, "initiate contact transfer " + contactJson.toString());
 		FileTransferManager.getInstance(context).uploadContact(msisdn, contactJson, convOnHike);
 	}
-	
+
 	protected static int incrementDecrementMsgsCount(int var, boolean isMsgSelected)
 	{
 		return isMsgSelected ? var + 1 : var - 1;
 	}
 
+	protected static void deleteMessagesFromDb(ArrayList<Long> msgIds, boolean deleteMediaFromPhone, long lastMsgId, String msisdn)
+	{
+		boolean isLastMessage = (msgIds.contains(lastMsgId));
+		Bundle bundle = new Bundle();
+		bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, isLastMessage);
+		bundle.putString(HikeConstants.Extras.MSISDN, msisdn);
+		bundle.putBoolean(HikeConstants.Extras.DELETE_MEDIA_FROM_PHONE, deleteMediaFromPhone);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
+	}
+
+	protected static void setStickerMetadata(ConvMessage convMessage, String categoryId, String stickerId, String source)
+	{
+		JSONObject metadata = new JSONObject();
+		try
+		{
+			metadata.put(StickerManager.CATEGORY_ID, categoryId);
+
+			metadata.put(StickerManager.STICKER_ID, stickerId);
+
+			if (!source.equalsIgnoreCase(StickerManager.FROM_OTHER))
+			{
+				metadata.put(StickerManager.SEND_SOURCE, source);
+			}
+
+			convMessage.setMetadata(metadata);
+			Logger.d(TAG, "metadata: " + metadata.toString());
+		}
+		catch (JSONException e)
+		{
+			Logger.e(TAG, "Invalid JSON", e);
+		}
+	}
+
+	protected static ConvMessage getChatThemeConvMessage(Context context, long timestamp, String bgId, Conversation conv)
+	{
+
+		JSONObject jsonObject = new JSONObject();
+		JSONObject data = new JSONObject();
+		ConvMessage convMessage;
+		try
+		{
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(timestamp));
+			data.put(HikeConstants.BG_ID, bgId);
+
+			jsonObject.put(HikeConstants.DATA, data);
+			jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.CHAT_BACKGROUD);
+			jsonObject.put(HikeConstants.TO, conv.getMsisdn());
+			jsonObject.put(HikeConstants.FROM, HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.MSISDN_SETTING, ""));
+
+			convMessage = new ConvMessage(jsonObject, conv, context, true);
+
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+			convMessage = null;
+		}
+
+		return convMessage;
+	}
+	
 }

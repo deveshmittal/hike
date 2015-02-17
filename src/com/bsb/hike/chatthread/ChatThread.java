@@ -1036,7 +1036,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		case HikeDialogFactory.DELETE_MESSAGES_DIALOG:
 			ArrayList<Long> selectedMsgIdsToDelete = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
-			deleteMessagesFromDb(selectedMsgIdsToDelete, ((CustomAlertDialog) dialog).isChecked());
+			// TODO if last message is typing notification we will get wrong result here
+			ChatThreadUtils.deleteMessagesFromDb(selectedMsgIdsToDelete, ((CustomAlertDialog) dialog).isChecked(), messages.get(messages.size() - 1).getMsgID(), msisdn);
 			dialog.dismiss();
 			mActionMode.finish();
 			break;
@@ -3084,33 +3085,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private void sendSticker(Sticker sticker, String source)
 	{
 		ConvMessage convMessage = Utils.makeConvMessage(msisdn, StickerManager.STICKER_MESSAGE_TAG, mConversation.isOnhike());
-		JSONObject metadata = new JSONObject();
-
-		try
-		{
-			String categoryId;
-			categoryId = sticker.getCategoryId();
-
-			metadata.put(StickerManager.CATEGORY_ID, categoryId);
-
-			metadata.put(StickerManager.STICKER_ID, sticker.getStickerId());
-
-			/**
-			 * Implies, sticker is sent from Recent stickers
-			 */
-			if (!(source.equalsIgnoreCase(StickerManager.FROM_OTHER)))
-			{
-				metadata.put(StickerManager.SEND_SOURCE, source);
-			}
-
-			convMessage.setMetadata(metadata);
-		}
-
-		catch (JSONException e)
-		{
-			Logger.e(TAG, "Invalid JSON for Sending sticker : " + e.toString());
-		}
-
+		ChatThreadUtils.setStickerMetadata(convMessage, sticker.getCategoryId(), sticker.getStickerId(), source);
 		sendMessage(convMessage);
 	}
 
@@ -3118,28 +3093,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		long timestamp = System.currentTimeMillis() / 1000;
 		mConversationDb.setChatBackground(msisdn, currentTheme.bgId(), timestamp);
-
-		JSONObject jsonObject = new JSONObject();
-		JSONObject data = new JSONObject();
-
-		try
-		{
-			data.put(HikeConstants.MESSAGE_ID, Long.toString(timestamp));
-			data.put(HikeConstants.BG_ID, currentTheme.bgId());
-
-			jsonObject.put(HikeConstants.DATA, data);
-			jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.CHAT_BACKGROUD);
-			jsonObject.put(HikeConstants.TO, mConversation.getMsisdn());
-			jsonObject.put(HikeConstants.FROM, HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).getData(HikeMessengerApp.MSISDN_SETTING, ""));
-
-			ConvMessage convMessage = new ConvMessage(jsonObject, mConversation, activity.getApplicationContext(), true);
-
-			sendMessage(convMessage);
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
+		ConvMessage convMessage = ChatThreadUtils.getChatThemeConvMessage(activity.getApplicationContext(), timestamp, currentTheme.bgId(), mConversation);
+		sendMessage(convMessage);
 	}
 
 	/**
@@ -3585,17 +3540,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	}
 
 	// ------------------------ ACTIONMODE CALLBACKs ENDS -------------------------------
-
-	protected void deleteMessagesFromDb(ArrayList<Long> msgIds, boolean deleteMediaFromPhone)
-	{
-		// TODO if last message is typing notification we will get wrong result here
-		boolean isLastMessage = (msgIds.contains(messages.get(messages.size() - 1).getMsgID()));
-		Bundle bundle = new Bundle();
-		bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, isLastMessage);
-		bundle.putString(HikeConstants.Extras.MSISDN, msisdn);
-		bundle.putBoolean(HikeConstants.Extras.DELETE_MEDIA_FROM_PHONE, deleteMediaFromPhone);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
-	}
 
 	private boolean onActionModeMenuItemClicked(MenuItem menuItem)
 	{
