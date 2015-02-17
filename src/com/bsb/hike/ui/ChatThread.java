@@ -15,12 +15,15 @@ import java.util.regex.Pattern;
 import java.util.Random;
 import java.util.Set;
 
+import com.bsb.hike.offline.DeviceListFragment.DeviceActionListener;
+import com.bsb.hike.offline.*;
 import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
-
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
+
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1231,6 +1234,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (isHikeOfflineTipShowing())
 		{
 			hideHikeToOfflineTip();
+			return;
+		}
+		
+		if(com.bsb.hike.offline.WiFiDirectActivity.isOfflineFileTransferOn)
+		{
+			super.onBackPressed();
 			return;
 		}
 
@@ -5833,7 +5842,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 7:
 					requestCode = HikeConstants.SHARE_APK_CODE;
 					Intent apkIntent = new Intent(ChatThread.this, com.bsb.hike.offline.FileExplorer.class);
-					startActivity(apkIntent);
+					startActivityForResult(apkIntent,requestCode);
 					return;
 				case 1:
 				default:
@@ -6509,6 +6518,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			String contactId = data.getData().getLastPathSegment();
 			getContactData(contactId);
 		}
+		else if (requestCode == HikeConstants.SHARE_APK_CODE && resultCode == RESULT_OK)
+		{
+			Intent intent  =  getIntent();
+			String deviceAddress =   intent.getStringExtra("OfflineDeviceName");
+			String filePath = data.getStringExtra(FileTransferService.EXTRAS_FILE_PATH);
+			initialiseOfflineFileTransfer(filePath, deviceAddress, requestCode);
+		}
 		else if (resultCode == RESULT_CANCELED)
 		{
 			clearTempData();
@@ -6806,6 +6822,49 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		FileTransferManager.getInstance(getApplicationContext()).uploadFile(mContactNumber, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile,
 				mConversation.isOnhike(), recordingDuration, attachementType);
+	}
+	private void initialiseOfflineFileTransfer(String filePath,  String deviceAddress, int hikeFileType)
+	{
+		String localIP = com.bsb.hike.offline.Utils.getLocalIPAddress();
+		String IP_SERVER = com.bsb.hike.offline.DeviceListFragment.IP_SERVER;
+		int PORT = com.bsb.hike.offline.DeviceListFragment.PORT;
+		Log.d(WiFiDirectActivity.TAG,"localip " + localIP);
+		
+		// Trick to find the ip in the file /proc/net/arp
+		try
+		{
+			switch(hikeFileType)
+			{
+				case HikeConstants.SHARE_APK_CODE:
+					String client_mac_fixed = new String(deviceAddress).replace("99", "19");
+					String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
+			        Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
+			        Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);
+			        
+					Intent serviceIntent = new Intent(getApplicationContext(), FileTransferService.class);
+					serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
+					serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filePath);
+			
+					if(localIP.equals(IP_SERVER)){
+						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
+					}else{
+						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
+					}
+			
+					serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
+					long start = System.currentTimeMillis();
+					startService(serviceIntent);
+					long end = System.currentTimeMillis();
+					//Toast.makeText(getApplicationContext(), "Time taken: "+(end-start) +"ms", Toast.LENGTH_SHORT).show();
+					break;
+				default:
+					Toast.makeText(getApplicationContext(), "File not selected!", Toast.LENGTH_SHORT).show();
+			}
+		}
+		catch(NullPointerException e)
+		{
+			Log.e("wifidirectdemo", "Something went wrong. Please select the file again!");
+		}
 	}
 
 	private void initialiseLocationTransfer(double latitude, double longitude, int zoomLevel)

@@ -26,6 +26,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.util.TextUtils;
+
 import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -59,6 +61,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.CardRenderer.ViewHolder;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.musicg.processor.IntensityProcessor;
 
 /**
  * A ListFragment that displays available peers on discovery and requests the
@@ -79,13 +82,15 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     private IconLoader iconLoader;
     private WifiP2pInfo info;
     Intent intent;
+    private Object syncMsisdn;
     List<String> peers_msisdn = new ArrayList<String>();
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.conversation_item, peers));
-
+    	super.onActivityCreated(savedInstanceState);
+    	if(syncMsisdn == null)
+    		syncMsisdn = new Object();
+    	this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.conversation_item, peers));
     }
 
     @Override
@@ -174,33 +179,46 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
      */
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        WifiP2pDevice device = peers.get(position);
-    	ContactInfo deviceContact = ContactManager.getInstance().getContact(peers_msisdn.get(position));
-    	String phoneNumber = "";
-    	if(deviceContact == null)
-    		phoneNumber = peers_msisdn.get(position);
-    	else
-    		phoneNumber = deviceContact.getName();
-    	
-    	Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
-    	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
-    	
-    	WifiP2pConfig config = new WifiP2pConfig();
-		config.deviceAddress = device.deviceAddress;
-		config.wps.setup = WpsInfo.PBC;
-		if (progressDialog != null && progressDialog.isShowing()) {
-			progressDialog.dismiss();
-		}
-		progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
-				"Connecting to :" + device.deviceAddress, true, true,
-				new DialogInterface.OnCancelListener(){
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                Log.d("wifidirectdemo", "Hello cancelled");
-            }
-        });
-		
-		((DeviceActionListener) getActivity()).connect(config);
+    	if(syncMsisdn == null)
+    		syncMsisdn = new Object();
+    	synchronized(syncMsisdn){
+	        WifiP2pDevice device = peers.get(position);
+	    	ContactInfo deviceContact = ContactManager.getInstance().getContact(peers_msisdn.get(position));
+	    	String phoneNumber = "";
+	    	if(deviceContact == null)
+	    		phoneNumber = peers_msisdn.get(position);
+	    	else
+	    		phoneNumber = deviceContact.getName();
+	    	if(device.status!=WifiP2pDevice.CONNECTED){
+	    		
+	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
+	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
+	        	intent.putExtra("OfflineDeviceName", device.deviceAddress);
+	        	WifiP2pConfig config = new WifiP2pConfig();
+	    		config.deviceAddress = device.deviceAddress;
+	    		config.wps.setup = WpsInfo.PBC;
+	    		if (progressDialog != null && progressDialog.isShowing()) {
+	    			progressDialog.dismiss();
+	    		}
+	    		progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
+	    				"Connecting to :" + device.deviceAddress, true, true,
+	    				new DialogInterface.OnCancelListener(){
+	                @Override
+	                public void onCancel(DialogInterface dialog) {
+	                    Log.d("wifidirectdemo", "Hello cancelled");
+	                }
+	            });
+	    		
+	    		((DeviceActionListener) getActivity()).connect(config, 0);
+	    	}
+	    	else
+	    	{
+	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
+	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
+	        	intent.putExtra("OfflineDeviceName", device.deviceAddress);
+	        	startActivity(intent);
+	    	}
+    	}
     }
     
 
@@ -225,7 +243,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            View v = convertView;
+        	View v = convertView;
             if (v == null) {
                 LayoutInflater vi = (LayoutInflater) getActivity().getSystemService(
                         Context.LAYOUT_INFLATER_SERVICE);
@@ -233,6 +251,8 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
             }
             WifiP2pDevice device = items.get(position);
             if (device != null) {
+            	
+            	
                 //TextView top = (TextView) v.findViewById(R.id.device_name);
                 
                 //TextView bottom = (TextView) v.findViewById(R.id.device_details);
@@ -244,12 +264,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         		ContactInfo deviceContact = ContactManager.getInstance().getContact(device.deviceName);
         		TextView contact_name = (TextView) v.findViewById(R.id.contact);
         		String phoneName = "";
-        		if(deviceContact != null)
+        		if(deviceContact != null && !(TextUtils.isEmpty(deviceContact.getName())))
         			phoneName = deviceContact.getName();
         		else
-        			phoneName = device.deviceName;
-        		
-        		if(phoneName.compareTo("")==0)
         			phoneName = device.deviceName;
         		
         		contact_name.setText(phoneName);
@@ -288,18 +305,29 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
-        peers.clear();
-        peers.addAll(peerList.getDeviceList());
-        
-        for(int i=0; i<peers.size(); i++){
-        	peers_msisdn.add(peers.get(i).deviceName);
+        if(syncMsisdn == null)
+        	syncMsisdn = new Object();
+        synchronized(syncMsisdn){
+	        peers.clear();
+	        WifiP2pDevice device;
+	        for(int i=0; i<peerList.getDeviceList().size(); i++)
+	        {
+	        	device = (WifiP2pDevice) (peerList.getDeviceList().toArray())[i];
+	        	if(device.deviceName.startsWith("+"))
+	        		peers.add(device);
+	        }
+	        
+	        
+	        for(int i=0; i<peers.size(); i++){
+	        	peers_msisdn.add(peers.get(i).deviceName);
+	        }
+	        
+	        ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+	        if (peers.size() == 0) {
+	            Log.d(WiFiDirectActivity.TAG, "No devices found");
+	            return;
+	        }
         }
-        ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-        if (peers.size() == 0) {
-            Log.d(WiFiDirectActivity.TAG, "No devices found");
-            return;
-        }
-
     }
 
     public void clearPeers() {
@@ -334,7 +362,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
         void cancelDisconnect();
 
-        void connect(WifiP2pConfig config);
+        void connect(WifiP2pConfig config, int numOfTries);
 
         void disconnect();
     }

@@ -493,6 +493,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 			@Override
 			public void onClick(View v) {
+					com.bsb.hike.offline.WiFiDirectActivity.isOfflineFileTransferOn = true;
 				 	Intent intent = new Intent(getApplicationContext(), com.bsb.hike.offline.WiFiDirectActivity.class);
 				 	startActivity(intent);
 			}

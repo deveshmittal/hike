@@ -42,6 +42,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.offline.DeviceListFragment.DeviceActionListener;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.Logger;
@@ -66,26 +67,28 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     private SharedPreferences settings;
     private String myMsisdn;
     private WifiP2pDevice myWifiP2pDevice;
-
+    public static boolean isOfflineFileTransferOn = false;
+    private final int MAXTRIES = 5;
     /**
      * @param isWifiP2pEnabled the isWifiP2pEnabled to set
      */
+    
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
         this.isWifiP2pEnabled = isWifiP2pEnabled;
     }
-
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
         // add necessary intent values to be matched.
-
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         
+        isOfflineFileTransferOn = true;
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
         
@@ -138,22 +141,31 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
         super.onPause();
         unregisterReceiver(receiver);
     }
+    
+    @Override
+    protected void onRestart() {
+    	disconnect();
+    	
+    	// give time to disconnect
+    	try {
+			Thread.sleep(2*1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    	
+    	super.onRestart();
+    }
 
     /**
      * Remove all peers and clear all fields. This is called on
      * BroadcastReceiver receiving a state change event.
      */
     public void resetData() {
-        /*DeviceListFragment fragmentList = (DeviceListFragment) getFragmentManager()
+        DeviceListFragment fragmentList = (DeviceListFragment) getFragmentManager()
                 .findFragmentById(R.id.frag_list);
-        DeviceDetailFragment fragmentDetails = (DeviceDetailFragment) getFragmentManager()
-                .findFragmentById(R.id.frag_detail);
         if (fragmentList != null) {
             fragmentList.clearPeers();
         }
-        if (fragmentDetails != null) {
-            fragmentDetails.resetViews();
-        }*/
     }
 
     @Override
@@ -227,7 +239,13 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     }
 	
     @Override
-    public void connect(WifiP2pConfig config) {
+    public void connect(WifiP2pConfig config, int numOfTries) {
+    	if(numOfTries >= MAXTRIES)
+    	{
+    		Toast.makeText(WiFiDirectActivity.this, "Connect failed. Retry.",
+                    Toast.LENGTH_SHORT).show();
+    		return;
+    	}
         manager.connect(channel, config, new ActionListener() {
 
             @Override
@@ -241,33 +259,50 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
                         Toast.LENGTH_SHORT).show();
             }
         });
+        
+        /*// check after 5 seconds if connection is established
+        try {
+			Thread.sleep(5*1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+        
+        DeviceListFragment fragList = (DeviceListFragment) getFragmentManager()
+                .findFragmentById(R.id.frag_list);
+        if(!(fragList.getDevice().status == WifiP2pDevice.CONNECTED))
+        {
+        	cancelDisconnect();
+        	connect(config, numOfTries+1);
+        }*/
+        
     }
 
     @Override
     public void disconnect() {
-        /*final DeviceDetailFragment fragment = (DeviceDetailFragment) getFragmentManager()
-                .findFragmentById(R.id.frag_detail);
-        fragment.resetViews();
-        manager.removeGroup(channel, new ActionListener() {
-
+        	manager.removeGroup(channel, new ActionListener() {
             @Override
             public void onFailure(int reasonCode) {
                 Log.d(TAG, "Disconnect failed. Reason :" + reasonCode);
 
             }
-
+            
             @Override
             public void onSuccess() {
-                fragment.getView().setVisibility(View.GONE);
                 Log.d(TAG, "Disconnect successful.");
             }
 
-        });*/
+        });
+    }
+    
+    @Override
+    public void onBackPressed() 
+    {
+    	isOfflineFileTransferOn = false;
+    	super.onBackPressed();
     }
 
     @Override
     public void onChannelDisconnected() {
-        // we will try once more
         if (manager != null && !retryChannel) {
             Toast.makeText(this, "Channel lost. Trying again", Toast.LENGTH_LONG).show();
             resetData();
@@ -282,7 +317,6 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
 
     @Override
     public void cancelDisconnect() {
-
         /*
          * A cancel abort request by user. Disconnect i.e. removeGroup if
          * already connected. Else, request WifiP2pManager to abort the ongoing
