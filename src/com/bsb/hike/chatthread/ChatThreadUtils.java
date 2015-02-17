@@ -233,4 +233,9 @@ public class ChatThreadUtils
 		FileTransferManager.getInstance(context).uploadContact(msisdn, contactJson, convOnHike);
 	}
 	
+	protected static int incrementDecrementMsgsCount(int var, boolean isMsgSelected)
+	{
+		return isMsgSelected ? var + 1 : var - 1;
+	}
+
 }

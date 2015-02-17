@@ -1773,7 +1773,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		if (message.isFileTransferMessage())
 		{
-			selectedNonTextMsgs = incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
+			selectedNonTextMsgs = ChatThreadUtils.incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
 
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
 			File file = hikeFile.getFile();
@@ -1793,7 +1793,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				 */
 				if (message.isSent())
 				{
-					selectedNonForwadableMsgs = incrementDecrementMsgsCount(selectedNonForwadableMsgs, isMsgSelected);
+					selectedNonForwadableMsgs = ChatThreadUtils.incrementDecrementMsgsCount(selectedNonForwadableMsgs, isMsgSelected);
 				}
 				/**
 				 * if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED )) { /* File Transfer is in progress. this can be canceLled.
@@ -1807,7 +1807,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				// we do not support location and contact sharing
 				if (ftype != HikeFileType.LOCATION && ftype != HikeFileType.CONTACT)
 				{
-					shareableMessagesCount = incrementDecrementMsgsCount(shareableMessagesCount, isMsgSelected);
+					shareableMessagesCount = ChatThreadUtils.incrementDecrementMsgsCount(shareableMessagesCount, isMsgSelected);
 				}
 			}
 		}
@@ -1815,12 +1815,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		else if (message.getMetadata() != null && message.getMetadata().isPokeMessage())
 		{
 			// Poke message can only be deleted
-			selectedNonTextMsgs = incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
+			selectedNonTextMsgs = ChatThreadUtils.incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
 		}
 		else if (message.isStickerMessage())
 		{
 			// Sticker message is a non text message.
-			selectedNonTextMsgs = incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
+			selectedNonTextMsgs = ChatThreadUtils.incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
 		}
 	}
 
@@ -1853,11 +1853,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * if (tipView != null && tipView.getVisibility() == View.INVISIBLE) { tipView.setVisibility(View.VISIBLE); } if (isHikeOfflineTipShowing()) {
 		 * setEnableHikeOfflineNextButton(true); }
 		 */
-	}
-
-	public int incrementDecrementMsgsCount(int var, boolean isMsgSelected)
-	{
-		return isMsgSelected ? var + 1 : var - 1;
 	}
 
 	@Override
