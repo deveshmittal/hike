@@ -845,7 +845,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			return themePicker.onBackPressed();
 		}
 		
-		if (mActionMode.whichActionModeIsOn() != -1)
+		if (mActionMode.isActionModeOn())
 		{
 			mActionMode.finish();
 			return true;

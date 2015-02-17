@@ -266,6 +266,11 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		return -1;
 	}
 	
+	public boolean isActionModeOn()
+	{
+		return (mActionMode != null);
+	}
+	
 	public void updateTitle(String title)
 	{
 		setText(R.id.title, title, -1);
