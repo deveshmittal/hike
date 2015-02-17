@@ -93,7 +93,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                     }
                 });
 				
-				((DeviceActionListener) getActivity()).connect(config);
+				((DeviceActionListener) getActivity()).connect(config, 0);
 
 			}
 		});
