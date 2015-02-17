@@ -951,7 +951,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	@Override
 	public boolean onBackPressed()
 	{
-		if (activity.findViewById(R.id.impMessageCreateView).getVisibility() == View.VISIBLE)
+		if (mActionMode.whichActionModeIsOn() == PIN_CREATE_ACTION_MODE)
 		{
 			destroyPinCreateView();
 			return true;
