@@ -22,11 +22,11 @@ public class AnalyticsConstants
 	public static boolean IS_ANALYTICS_ENABLED = true;
 
 	/** Default maximum events count in memory before they are saved on the disk */
-	public static final int MAX_EVENTS_IN_MEMORY = 20;
+	public static final int MAX_EVENTS_IN_MEMORY = 10;
 	
 	/** Default frequency at which logs should be tried to be sent to server */
 	public static final int DEFAULT_SEND_FREQUENCY = 30; // 30 minutes
-		
+
 	public static final String EVENT_FILE_DIR = "/Analytics";
 	
 	public static final String NEW_LINE = "\n";
@@ -86,7 +86,9 @@ public class AnalyticsConstants
 	public static final String ANALYTICS_TOTAL_SIZE = "totalfs";
 
 	public static final String ANALYTICS_SEND_FREQUENCY = "analyticsfreq";
-	
+
+	public static final String ANALYTICS_IN_MEMORY_SIZE = "mem_size";
+
 	public static final String ANALYTICS_ALARM_TIME = "alarmsetting";
 	
 	public static final String SEND_WHEN_CONNECTED = "issendwhenconnected";
