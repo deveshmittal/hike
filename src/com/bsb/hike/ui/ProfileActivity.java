@@ -10,11 +10,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -22,7 +24,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -63,10 +64,10 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.SubMenu;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikeConstants.REQUEST_BASE_URLS;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
@@ -86,8 +87,6 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
-import com.bsb.hike.models.ProfileItem.ProfileContactItem.contactType;
-import com.bsb.hike.models.ProfileItem.ProfileSharedContent;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
@@ -102,12 +101,12 @@ import com.bsb.hike.modules.httpmgr.request.requestbody.ByteArrayBody;
 import com.bsb.hike.modules.httpmgr.request.requestbody.FileBody;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -120,12 +119,13 @@ import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.voip.VoIPUtils;
 import com.bsb.hike.voip.view.CallRatePopup;
 import com.bsb.hike.voip.view.IVoipCallListener;
+import com.google.gson.JsonObject;
 
-public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
+public class ProfileActivity extends ChangeProfileImageBaseActivity implements Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
 		View.OnClickListener, IVoipCallListener
 {
 	private TextView mName;
-	
+
 	private EditText mNameEdit;
 
 	private View currentSelection;
@@ -155,6 +155,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private int lastSavedGender;
 
 	private SharedPreferences preferences;
+
+	private AtomicInteger editProfileRequestsCount = new AtomicInteger(0);
 
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_GROUP,
 			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
@@ -1448,8 +1450,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public void saveChanges()
 	{
-		ArrayList<HikeHttpRequest> requests = new ArrayList<HikeHttpRequest>();
-
 		if ((this.profileType == ProfileType.USER_PROFILE_EDIT) && !TextUtils.isEmpty(mEmailEdit.getText()))
 		{
 			if (!Utils.isValidEmail(mEmailEdit.getText()))
@@ -1464,48 +1464,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			final String newName = mNameEdit.getText().toString().trim();
 			if (!TextUtils.isEmpty(newName) && !nameTxt.equals(newName))
 			{
-				/* user edited the text, so update the profile */
-				HikeHttpRequest request = new HikeHttpRequest(httpRequestURL + "/name", RequestType.OTHER, new HikeHttpRequest.HikeHttpCallback()
-				{
-					public void onFailure()
-					{
-						if (isBackPressed)
-						{
-							HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
-						}
-					}
-
-					public void onSuccess(JSONObject response)
-					{
-						if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO)
-						{
-							/*
-							 * if the request was successful, update the shared preferences and the UI
-							 */
-							String name = newName;
-							Editor editor = preferences.edit();
-							editor.putString(HikeMessengerApp.NAME_SETTING, name);
-							editor.commit();
-							HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_NAME_CHANGED, null);
-						}
-						if (isBackPressed)
-						{
-							HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
-						}
-					}
-				});
-
-				JSONObject json = new JSONObject();
-				try
-				{
-					json.put("name", newName);
-					request.setJSONData(json);
-				}
-				catch (JSONException e)
-				{
-					Logger.e("ProfileActivity", "Could not set name", e);
-				}
-				requests.add(request);
+				editProfileName(newName);
 			}
 		}
 
@@ -1520,160 +1479,297 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				failureWhileSettingProfilePic();
 				return;
 			}
-
 			final byte[] bytes = BitmapUtils.bitmapToBytes(smallerBitmap, Bitmap.CompressFormat.JPEG, 100);
-
 			if (profileAdapter != null)
 			{
 				profileAdapter.setProfilePreview(smallerBitmap);
 			}
-
-			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL + "/avatar", RequestType.PROFILE_PIC, new HikeHttpRequest.HikeHttpCallback()
-			{
-				public void onFailure()
-				{
-					Logger.d("ProfileActivity", "resetting image");
-					failureWhileSettingProfilePic();
-				}
-
-				public void onSuccess(JSONObject response)
-				{
-					mActivityState.destFilePath = null;
-					ContactManager.getInstance().setIcon(mLocalMSISDN, bytes, false);
-
-					Utils.renameTempProfileImage(mLocalMSISDN);
-
-					if (profileAdapter != null)
-					{
-						profileAdapter.setProfilePreview(null);
-					}
-
-					if (profileType == ProfileType.USER_PROFILE || profileType == ProfileType.USER_PROFILE_EDIT)
-					{
-
-						// HikeMessengerApp.getLruCache().clearIconForMSISDN(mLocalMSISDN);
-
-						/*
-						 * Making the profile pic change a status message.
-						 */
-						JSONObject data = response.optJSONObject("status");
-
-						if (data == null)
-						{
-							return;
-						}
-
-						String mappedId = data.optString(HikeConstants.STATUS_ID);
-						String msisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
-						String name = preferences.getString(HikeMessengerApp.NAME_SETTING, "");
-						long time = (long) System.currentTimeMillis() / 1000;
-
-						StatusMessage statusMessage = new StatusMessage(0, mappedId, msisdn, name, "", StatusMessageType.PROFILE_PIC, time, -1, 0);
-						HikeConversationsDatabase.getInstance().addStatusMessage(statusMessage, true);
-
-						ContactManager.getInstance().setIcon(statusMessage.getMappedId(), bytes, false);
-
-						String srcFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT + "/" + msisdn + ".jpg";
-
-						String destFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT + "/" + mappedId + ".jpg";
-
-						/*
-						 * Making a status update file so we don't need to download this file again.
-						 */
-						Utils.copyFile(srcFilePath, destFilePath, null);
-
-						int unseenUserStatusCount = preferences.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-						Editor editor = preferences.edit();
-						editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, ++unseenUserStatusCount);
-						editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
-						editor.commit();
-						/*
-						 * This would happen in the case where the user has added a self contact and received an mqtt message before saving this to the db.
-						 */
-
-						if (statusMessage.getId() != -1)
-						{
-							HikeMessengerApp.getPubSub().publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
-							HikeMessengerApp.getPubSub().publish(HikePubSub.TIMELINE_UPDATE_RECIEVED, statusMessage);
-						}
-					}
-
-					HikeMessengerApp.getLruCache().clearIconForMSISDN(mLocalMSISDN);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, mLocalMSISDN);
-
-					if (isBackPressed)
-					{
-						HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
-					}
-				}
-			});
-
-			request.setFilePath(mActivityState.destFilePath);
-			requests.add(request);
+			editProfileAvatar(bytes);
 		}
 
 		if ((this.profileType == ProfileType.USER_PROFILE_EDIT) && ((!emailTxt.equals(mEmailEdit.getText().toString())) || ((mActivityState.genderType != lastSavedGender))))
 		{
-			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL + "/profile", RequestType.OTHER, new HikeHttpRequest.HikeHttpCallback()
-			{
-				public void onFailure()
-				{
-					if (isBackPressed)
-					{
-						HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
-					}
-				}
-
-				public void onSuccess(JSONObject response)
-				{
-					Editor editor = preferences.edit();
-					if (Utils.isValidEmail(mEmailEdit.getText()))
-					{
-						editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit.getText().toString());
-					}
-					editor.putInt(HikeConstants.Extras.GENDER, currentSelection != null ? (currentSelection.getId() == R.id.guy ? 1 : 2) : 0);
-					editor.commit();
-					if (isBackPressed)
-					{
-						// finishEditing();
-						HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
-					}
-				}
-			});
-			JSONObject obj = new JSONObject();
-			try
-			{
-				Logger.d(getClass().getSimpleName(), "Profile details Email: " + mEmailEdit.getText() + " Gender: " + mActivityState.genderType);
-				if (!emailTxt.equals(mEmailEdit.getText().toString()))
-				{
-					obj.put(HikeConstants.EMAIL, mEmailEdit.getText());
-				}
-				if (mActivityState.genderType != lastSavedGender)
-				{
-					obj.put(HikeConstants.GENDER, mActivityState.genderType == 1 ? "m" : mActivityState.genderType == 2 ? "f" : "");
-				}
-				Logger.d(getClass().getSimpleName(), "JSON to be sent is: " + obj.toString());
-				request.setJSONData(obj);
-			}
-			catch (JSONException e)
-			{
-				Logger.e("ProfileActivity", "Could not set email or gender", e);
-			}
-			requests.add(request);
+			editProfileEmailGender();
 		}
 
-		if (!requests.isEmpty())
+		if (editProfileRequestsCount.get() > 0)
 		{
 			mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));
-			mActivityState.task = new HikeHTTPTask(this, R.string.update_profile_failed);
-			HikeHttpRequest[] r = new HikeHttpRequest[requests.size()];
-			requests.toArray(r);
-			Utils.executeHttpTask(mActivityState.task, r);
 		}
 		else if (isBackPressed)
 		{
 			finishEditing();
 		}
+	}
+
+	private void editProfileEmailGender()
+	{
+		editProfileRequestsCount.incrementAndGet();
+		JSONObject obj = new JSONObject();
+		try
+		{
+			Logger.d(getClass().getSimpleName(), "Profile details Email: " + mEmailEdit.getText() + " Gender: " + mActivityState.genderType);
+			if (!emailTxt.equals(mEmailEdit.getText().toString()))
+			{
+				obj.put(HikeConstants.EMAIL, mEmailEdit.getText());
+			}
+			if (mActivityState.genderType != lastSavedGender)
+			{
+				obj.put(HikeConstants.GENDER, mActivityState.genderType == 1 ? "m" : mActivityState.genderType == 2 ? "f" : "");
+			}
+			Logger.d(getClass().getSimpleName(), "JSON to be sent is: " + obj.toString());
+		}
+		catch (JSONException e)
+		{
+			Logger.e("ProfileActivity", "Could not set email or gender", e);
+		}
+
+		IRequestListener requestListener = new IRequestListener()
+		{
+			@Override
+			public void onRequestSuccess(Response result)
+			{
+				Editor editor = preferences.edit();
+				if (Utils.isValidEmail(mEmailEdit.getText()))
+				{
+					editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit.getText().toString());
+				}
+				editor.putInt(HikeConstants.Extras.GENDER, currentSelection != null ? (currentSelection.getId() == R.id.guy ? 1 : 2) : 0);
+				editor.commit();
+				if (isBackPressed)
+				{
+					// finishEditing();
+					HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
+				}
+				if (editProfileRequestsCount.decrementAndGet() == 0)
+				{
+					dismissLoadingDialog();
+				}
+			}
+
+			@Override
+			public void onRequestProgressUpdate(float progress)
+			{
+			}
+
+			@Override
+			public void onRequestFailure(HttpException httpException)
+			{
+				if (editProfileRequestsCount.decrementAndGet() == 0)
+				{
+					dismissLoadingDialog();
+				}
+				showErrorToast(R.string.update_profile_failed, Toast.LENGTH_LONG);
+				if (isBackPressed)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
+				}
+			}
+		};
+
+		RequestToken token = HttpRequests.editProfileEmailGenderRequest(obj, requestListener);
+		token.execute();
+	}
+
+	private void editProfileName(final String newName)
+	{
+		editProfileRequestsCount.incrementAndGet();
+		JSONObject json = new JSONObject();
+		try
+		{
+			json.put("name", newName);
+		}
+		catch (JSONException e)
+		{
+			Logger.e("ProfileActivity", "Could not set name", e);
+		}
+		IRequestListener requestListener = new IRequestListener()
+		{
+			@Override
+			public void onRequestSuccess(Response result)
+			{
+				if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO)
+				{
+					/*
+					 * if the request was successful, update the shared preferences and the UI
+					 */
+					String name = newName;
+					Editor editor = preferences.edit();
+					editor.putString(HikeMessengerApp.NAME_SETTING, name);
+					editor.commit();
+					HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_NAME_CHANGED, null);
+				}
+				if (isBackPressed)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
+				}
+				if (editProfileRequestsCount.decrementAndGet() == 0)
+				{
+					dismissLoadingDialog();
+				}
+			}
+
+			@Override
+			public void onRequestProgressUpdate(float progress)
+			{
+			}
+
+			@Override
+			public void onRequestFailure(HttpException httpException)
+			{
+				if (editProfileRequestsCount.decrementAndGet() == 0)
+				{
+					dismissLoadingDialog();
+				}
+				showErrorToast(R.string.update_profile_failed, Toast.LENGTH_LONG);
+				if (isBackPressed)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
+				}
+			}
+		};
+
+		RequestToken token = null;
+		if (this.profileType == ProfileType.GROUP_INFO)
+		{
+			token = HttpRequests.editProfileNameRequest(json, requestListener, groupConversation.getMsisdn());
+		}
+		else
+		{
+			token = HttpRequests.editProfileNameRequest(json, requestListener);
+		}
+		token.execute();
+	}
+
+	private void editProfileAvatar(final byte[] bytes)
+	{
+		editProfileRequestsCount.incrementAndGet();
+		IRequestListener requestListener = new IRequestListener()
+		{
+			@Override
+			public void onRequestSuccess(Response result)
+			{
+				JSONObject response = (JSONObject) result.getBody().getContent();
+
+				mActivityState.destFilePath = null;
+				ContactManager.getInstance().setIcon(mLocalMSISDN, bytes, false);
+				Utils.renameTempProfileImage(mLocalMSISDN);
+
+				runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						if (profileAdapter != null)
+						{
+							profileAdapter.setProfilePreview(null);
+						}
+					}
+				});
+				
+				if (profileType == ProfileType.USER_PROFILE || profileType == ProfileType.USER_PROFILE_EDIT)
+				{
+					/*
+					 * Making the profile pic change a status message.
+					 */
+					JSONObject data = response.optJSONObject("status");
+
+					if (data == null)
+					{
+						return;
+					}
+
+					String mappedId = data.optString(HikeConstants.STATUS_ID);
+					String msisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
+					String name = preferences.getString(HikeMessengerApp.NAME_SETTING, "");
+					long time = (long) System.currentTimeMillis() / 1000;
+
+					StatusMessage statusMessage = new StatusMessage(0, mappedId, msisdn, name, "", StatusMessageType.PROFILE_PIC, time, -1, 0);
+					HikeConversationsDatabase.getInstance().addStatusMessage(statusMessage, true);
+
+					ContactManager.getInstance().setIcon(statusMessage.getMappedId(), bytes, false);
+
+					String srcFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT + "/" + msisdn + ".jpg";
+
+					String destFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT + "/" + mappedId + ".jpg";
+
+					/*
+					 * Making a status update file so we don't need to download this file again.
+					 */
+					Utils.copyFile(srcFilePath, destFilePath, null);
+
+					int unseenUserStatusCount = preferences.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+					Editor editor = preferences.edit();
+					editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, ++unseenUserStatusCount);
+					editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
+					editor.commit();
+					/*
+					 * This would happen in the case where the user has added a self contact and received an mqtt message before saving this to the db.
+					 */
+
+					if (statusMessage.getId() != -1)
+					{
+						HikeMessengerApp.getPubSub().publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.TIMELINE_UPDATE_RECIEVED, statusMessage);
+					}
+				}
+
+				HikeMessengerApp.getLruCache().clearIconForMSISDN(mLocalMSISDN);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, mLocalMSISDN);
+
+				if (isBackPressed)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
+				}
+
+				runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						if (editProfileRequestsCount.decrementAndGet() == 0)
+						{
+							dismissLoadingDialog();
+						}
+					}
+				});
+			}
+
+			@Override
+			public void onRequestFailure(HttpException httpException)
+			{
+				Logger.d(TAG, "resetting image" + httpException.getMessage());
+				runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						if (editProfileRequestsCount.decrementAndGet() == 0)
+						{
+							dismissLoadingDialog();
+						}
+						showErrorToast(R.string.update_profile_failed, Toast.LENGTH_LONG);
+					}
+				});
+				failureWhileSettingProfilePic();
+			}
+
+			@Override
+			public void onRequestProgressUpdate(float progress)
+			{
+			}
+		};
+
+		RequestToken token = null;
+		if (this.profileType == ProfileType.GROUP_INFO)
+		{
+			token = HttpRequests.editProfileAvatarRequest(mActivityState.destFilePath, requestListener, groupConversation.getMsisdn());
+		}
+		else
+		{
+			token = HttpRequests.editProfileAvatarRequest(mActivityState.destFilePath, requestListener);
+		}
+		token.execute();
 	}
 
 	private void failureWhileSettingProfilePic()
@@ -1718,22 +1814,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			mDialog = null;
 		}
 	}
-	
+
 	protected String getLargerIconId()
 	{
 		return mLocalMSISDN + "::large";
-	}
-
-	@Override
-	public void onFinish(boolean success)
-	{
-		if (mDialog != null)
-		{
-			mDialog.dismiss();
-			mDialog = null;
-		}
-
-		mActivityState.task = null;
 	}
 
 	@Override

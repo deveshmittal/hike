@@ -3,11 +3,14 @@ package com.bsb.hike.modules.httpmgr;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.bulkLastSeenUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.deleteAccountBase;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.editProfileAvatarBase;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.editProfileEmailGenderBase;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.editProfileNameBase;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getAvatarBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getGroupBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getHikeJoinTimeBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStaticAvatarBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStatusBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.groupProfileBase;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.lastSeenUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.multiStickerDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postAddressbookBaseUrl;
@@ -487,6 +490,65 @@ public class HttpRequests
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(editProfileAvatarBase())
 				.setRequestType(Request.REQUEST_TYPE_LONG)
+				.setRequestListener(requestListener)
+				.post(body)
+				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
+		return requestToken;
+	}
+	
+	public static RequestToken editProfileNameRequest(JSONObject json, IRequestListener requestListener)
+	{
+		JsonBody body = new JsonBody(json);
+
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(editProfileNameBase())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
+				.post(body)
+				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
+		return requestToken;
+	}
+
+	public static RequestToken editProfileNameRequest(JSONObject json, IRequestListener requestListener, String groupId)
+	{
+		JsonBody body = new JsonBody(json);
+
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(groupProfileBase() + groupId + "/name")
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
+				.post(body)
+				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
+		return requestToken;
+	}
+
+	public static RequestToken editProfileAvatarRequest(String filePath, IRequestListener requestListener, String groupId)
+	{
+		File file = new File(filePath);
+		FileBody body = new FileBody("application/json", file);
+
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(groupProfileBase() + groupId + "/avatar")
+				.setRequestType(Request.REQUEST_TYPE_LONG)
+				.setRequestListener(requestListener)
+				.post(body)
+				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
+		return requestToken;
+	}
+
+	public static RequestToken editProfileEmailGenderRequest(JSONObject json, IRequestListener requestListener)
+	{
+		JsonBody body = new JsonBody(json);
+
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(editProfileEmailGenderBase())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)
 				.post(body)

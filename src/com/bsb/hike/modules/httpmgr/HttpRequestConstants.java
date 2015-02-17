@@ -204,4 +204,19 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/avatar";
 	}
+	
+	public static String editProfileNameBase()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/name";
+	}
+
+	public static String groupProfileBase()
+	{
+		return BASE_URL + BASE_V1 + "/group/";
+	}
+
+	public static String editProfileEmailGenderBase()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/profile";
+	}
 }
