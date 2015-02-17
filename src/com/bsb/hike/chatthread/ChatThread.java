@@ -47,7 +47,6 @@ import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
@@ -2857,39 +2856,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 			mLabelTextView.setText(label);
 		}
-	}
-
-	protected void playUpDownAnimation(final View view)
-	{
-		if (view == null)
-		{
-			return;
-		}
-		Animation an = AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_up_part);
-		an.setAnimationListener(new AnimationListener()
-		{
-
-			@Override
-			public void onAnimationStart(Animation animation)
-			{
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation animation)
-			{
-			}
-
-			@Override
-			public void onAnimationEnd(Animation animation)
-			{
-				view.setVisibility(View.GONE);
-				if (view == tipView)
-				{
-					tipView = null;
-				}
-			}
-		});
-		view.startAnimation(an);
 	}
 
 	/**

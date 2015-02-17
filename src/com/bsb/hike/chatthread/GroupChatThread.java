@@ -484,14 +484,13 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	{
 		if (playAnim)
 		{
-			playUpDownAnimation(tipView);
+			ChatThreadUtils.playUpDownAnimation(activity.getApplicationContext(), tipView);
 		}
 		else
 		{
 			tipView.setVisibility(View.GONE);
-			tipView = null;
 		}
-
+		tipView = null;
 		// If the pin tip was previously being seen, and it wasn't closed, we need to show it again.
 		mTips.showHiddenTip(ChatThreadTips.PIN_TIP);
 	}
@@ -840,8 +839,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
 		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
 		mBottomView.setVisibility(View.VISIBLE);
-		final View v = activity.findViewById(R.id.impMessageCreateView);
-		playUpDownAnimation(v);
+		ChatThreadUtils.playUpDownAnimation(activity.getApplicationContext(), activity.findViewById(R.id.impMessageCreateView));
 	}
 
 	private void sendPin()
@@ -1330,7 +1328,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		if (checkMessageTypeFromHash(convMessage, HASH_PIN))
 		{
 			Logger.d(TAG, "Found a pin message type");
-			modifyMessageToPin(convMessage);
+			ChatThreadUtils.modifyMessageToPin(activity.getApplicationContext(), convMessage);
 		}
 		return convMessage;
 	}
@@ -1353,28 +1351,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * This method is used to add pin related parameters in the convMessage
-	 * 
-	 * @param convMessage
-	 */
-	private void modifyMessageToPin(ConvMessage convMessage)
-	{
-		convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
-		JSONObject jsonObject = new JSONObject();
-		try
-		{
-			jsonObject.put(HikeConstants.PIN_MESSAGE, 1);
-			convMessage.setMetadata(jsonObject);
-			convMessage.setHashMessage(HikeConstants.HASH_MESSAGE_TYPE.HASH_PIN_MESSAGE);
-		}
-		catch (JSONException je)
-		{
-			Toast.makeText(activity.getApplicationContext(), R.string.unknown_error, Toast.LENGTH_SHORT).show();
-			je.printStackTrace();
-		}
 	}
 
 }
