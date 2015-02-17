@@ -199,4 +199,9 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/unlink";
 	}
+	
+	public static String editProfileAvatarBase()
+	{
+		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/avatar";
+	}
 }
