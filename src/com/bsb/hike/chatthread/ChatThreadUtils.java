@@ -2,6 +2,7 @@ package com.bsb.hike.chatthread;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.json.JSONArray;
@@ -26,8 +27,10 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -333,4 +336,78 @@ public class ChatThreadUtils
 		}
 	}
 	
+	protected static ConvMessage checkNUpdateFTMsg(Context context, ConvMessage message)
+	{
+		if (message.isSent() && message.isFileTransferMessage())
+		{
+			ConvMessage msg = FileTransferManager.getInstance(context).getMessage(message.getMsgID());
+			return msg;
+		}
+		return null;
+	}
+	
+	protected static void publishReadByForMessage(ConvMessage message, HikeConversationsDatabase mConversationDb, String msisdn)
+	{
+		message.setState(ConvMessage.State.RECEIVED_READ);
+		mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal(), msisdn);
+		if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle MR
+		}
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MSG_READ, msisdn);
+	}
+	
+	protected static boolean isLastMessageReceivedAndUnread(List<ConvMessage> messages)
+	{
+		ConvMessage lastMsg = null;
+
+		/**
+		 * Extracting the last contextual message
+		 */
+		for (int i = messages.size() - 1; i >= 0; i--)
+		{
+			ConvMessage msg = messages.get(i);
+
+			/**
+			 * Do nothing if it's a typing notification
+			 */
+			if (msg.getTypingNotification() != null)
+			{
+				continue;
+			}
+
+			lastMsg = msg;
+			break;
+		}
+
+		if (lastMsg == null)
+		{
+			return false;
+		}
+
+		return lastMsg.getState() == ConvMessage.State.RECEIVED_UNREAD || lastMsg.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE;
+	}
+	
+	protected static void publishMessagesRead(JSONArray ids, String msisdn)
+	{
+		if (ids != null)
+		{
+			JSONObject object = new JSONObject();
+
+			try
+			{
+				object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
+				object.put(HikeConstants.TO, msisdn);
+				object.put(HikeConstants.DATA, ids);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+		}
+	}
+
 }

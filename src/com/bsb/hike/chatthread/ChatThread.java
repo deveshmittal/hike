@@ -1932,7 +1932,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		for (int i = to - 1; i >= from; i--)
 		{
 			ConvMessage message = messages.get(i);
-			ConvMessage msg = checkNUpdateFTMsg(message);
+			ConvMessage msg = ChatThreadUtils.checkNUpdateFTMsg(activity.getApplicationContext(), message);
 			if (msg != null)
 			{
 				message = msg;
@@ -1940,16 +1940,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 			addtoMessageMap(message);
 		}
-	}
-
-	private ConvMessage checkNUpdateFTMsg(ConvMessage message)
-	{
-		if (message.isSent() && message.isFileTransferMessage())
-		{
-			ConvMessage msg = FileTransferManager.getInstance(activity.getApplicationContext()).getMessage(message.getMsgID());
-			return msg;
-		}
-		return null;
 	}
 
 	public static void addtoMessageMap(ConvMessage msg)
@@ -2108,14 +2098,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			if (activity.hasWindowFocus())
 			{
-				message.setState(ConvMessage.State.RECEIVED_READ);
-				mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal(), mConversation.getMsisdn());
-				if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
-				{
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle MR
-				}
-
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+				ChatThreadUtils.publishReadByForMessage(message, mConversationDb, msisdn);
 			}
 
 			if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
@@ -3144,24 +3127,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			 * If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read avoid sending read notifications for group chats
 			 * 
 			 */
+			ChatThreadUtils.publishMessagesRead(ids, msisdn);
 
-			if (ids != null)
-			{
-				JSONObject object = new JSONObject();
-
-				try
-				{
-					object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
-					object.put(HikeConstants.TO, mConversation.getMsisdn());
-					object.put(HikeConstants.DATA, ids);
-				}
-				catch (JSONException e)
-				{
-					e.printStackTrace();
-				}
-
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
-			}
 		}
 
 	}
@@ -3177,34 +3144,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			return false;
 		}
-
-		ConvMessage lastMsg = null;
-
-		/**
-		 * Extracting the last contextual message
-		 */
-		for (int i = messages.size() - 1; i >= 0; i--)
-		{
-			ConvMessage msg = messages.get(i);
-
-			/**
-			 * Do nothing if it's a typing notification
-			 */
-			if (msg.getTypingNotification() != null)
-			{
-				continue;
-			}
-
-			lastMsg = msg;
-			break;
-		}
-
-		if (lastMsg == null)
-		{
-			return false;
-		}
-
-		return lastMsg.getState() == ConvMessage.State.RECEIVED_UNREAD || lastMsg.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE;
+		
+		return ChatThreadUtils.isLastMessageReceivedAndUnread(messages);
 	}
 
 	/**
