@@ -54,6 +54,21 @@ public class PhotoEditerTools
 
 		return pixels;
 	}
+	
+	// This snippet hides the system bars.
+	public static void hideSystemUI(View mView) {
+	    // Set the IMMERSIVE flag.
+	    // Set the content to appear under the system bars so that the content
+	    // doesn't resize when the system bars hide and show.
+	    mView.setSystemUiVisibility(
+	            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+	            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+	            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+	            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+	            | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+	            | View.SYSTEM_UI_FLAG_IMMERSIVE);
+	}
+
 
 }
 
@@ -103,7 +118,7 @@ class BorderTools
 			else
 			{
 				list = new BorderList();
-				list.addBorder("Hearts", R.drawable.test);
+//				list.addBorder("Hearts", R.drawable.test);
 				return list;
 			}
 		}

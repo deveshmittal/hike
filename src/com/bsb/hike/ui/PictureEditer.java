@@ -34,6 +34,9 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		
+		PhotoEditerTools.hideSystemUI(getWindow().getDecorView());
+		
 		setContentView(R.layout.fragment_picture_editer);
 
 		clickHandler = new EffectItemAdapter(this);
@@ -53,6 +56,8 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		// ((Button)findViewById(R.id.saveButton)).setOnClickListener(clickHandler);
 
 		TabPageIndicator tabs = (TabPageIndicator) findViewById(R.id.indicator);
+		
+		getSupportActionBar().hide();
 
 	}
 
@@ -74,9 +79,9 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 			switch (position)
 			{
 			case 0:
-				return new PreviewFragment(MenuType.Effects, mAdapter);
+				return new PreviewFragment(MenuType.Effects, mAdapter,editView.getImageOriginal());
 			case 1:
-				return new PreviewFragment(MenuType.Doodle, mAdapter);
+				return new PreviewFragment(MenuType.Doodle, mAdapter,editView.getImageOriginal());
 			}
 			return null;
 		}

@@ -31,11 +31,14 @@ public final class PreviewFragment extends Fragment
 
 	private EffectItemAdapter handler;
 
-	public PreviewFragment(MenuType type, EffectItemAdapter adapter)
+	private Bitmap mOriginalBitmap;
+
+	public PreviewFragment(MenuType type, EffectItemAdapter adapter, Bitmap bitmap)
 	{
 
 		myType = type;
 		handler = adapter;
+		mOriginalBitmap = bitmap;
 	}
 
 	@Override
@@ -150,10 +153,9 @@ public final class PreviewFragment extends Fragment
 				{
 					convertView = LayoutInflater.from(mContext).inflate(R.layout.filter_preview_item, parent, false);
 				}
-				Bitmap test = ((BitmapDrawable) getResources().getDrawable(R.drawable.test)).getBitmap();
 				FilterList myFilters = FilterList.getHikeEffects();
 				FilterEffectItem temp = (FilterEffectItem) convertView;
-				temp.init(test, myFilters.names.get(position));
+				temp.init(mOriginalBitmap, myFilters.names.get(position));
 				temp.setFilter(mContext, myFilters.filters.get(position));
 				temp.setOnClickListener(adapter);
 				return temp;

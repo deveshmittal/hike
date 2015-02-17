@@ -20,6 +20,7 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorListener
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.bsb.hike.R;
 import com.bsb.hike.photos.HikePhotosListener;
+import com.bsb.hike.photos.PhotoEditerTools;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
@@ -49,6 +50,8 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		super.onCreate(savedInstanceState);
 
 		getSupportActionBar().hide();
+		
+//		PhotoEditerTools.hideSystemUI(getWindow().getDecorView());
 
 		setContentView(R.layout.hike_camera_activity);
 

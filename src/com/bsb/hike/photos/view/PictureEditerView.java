@@ -67,6 +67,11 @@ public class PictureEditerView extends FrameLayout
 		doodleLayer.setDrawEnabled(true);
 	}
 
+	public Bitmap getImageOriginal()
+	{
+		return imageOriginal;
+	}
+	
 	public void disableDoodling()
 	{
 
@@ -121,10 +126,10 @@ public class PictureEditerView extends FrameLayout
 		return bitmapResult;
 	}
 
-	public void loadImage()
-	{
-		effectLayer.handleImage((BitmapDrawable) getResources().getDrawable(R.drawable.test));
-		imageOriginal = ((BitmapDrawable) getResources().getDrawable(R.drawable.test)).getBitmap();
-	}
+//	public void loadImage()
+//	{
+//		effectLayer.handleImage((BitmapDrawable) getResources().getDrawable(R.drawable.test));
+//		imageOriginal = ((BitmapDrawable) getResources().getDrawable(R.drawable.test)).getBitmap();
+//	}
 
 }
