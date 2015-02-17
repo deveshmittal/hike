@@ -1151,7 +1151,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 
 			if (ids != null && ids.length() > 0)
 			{
-				doBulkMqttPublish(ids);
+				ChatThreadUtils.doBulkMqttPublish(ids, msisdn);
 			}
 
 		}
@@ -1321,32 +1321,11 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	protected ConvMessage createConvMessageFromCompose()
 	{
 		ConvMessage convMessage = super.createConvMessageFromCompose();
-		if (checkMessageTypeFromHash(convMessage, HASH_PIN))
+		if (ChatThreadUtils.checkMessageTypeFromHash(activity.getApplicationContext(), convMessage, HASH_PIN))
 		{
 			Logger.d(TAG, "Found a pin message type");
 			ChatThreadUtils.modifyMessageToPin(activity.getApplicationContext(), convMessage);
 		}
 		return convMessage;
 	}
-
-	private boolean checkMessageTypeFromHash(ConvMessage convMessage, String hashType)
-	{
-		Pattern p = Pattern.compile("(?i)" + hashType + ".*", Pattern.DOTALL);
-		String message = convMessage.getMessage();
-		if (p.matcher(message).matches())
-		{
-
-			convMessage.setMessage(message.substring(hashType.length()).trim());
-
-			if (TextUtils.isEmpty(convMessage.getMessage()))
-			{
-				Toast.makeText(activity.getApplicationContext(), R.string.text_empty_error, Toast.LENGTH_SHORT).show();
-				return false;
-			}
-
-			return true;
-		}
-		return false;
-	}
-
 }

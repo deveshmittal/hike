@@ -1335,7 +1335,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 			if (ids != null && ids.length() > 0)
 			{
-				doBulkMqttPublish(ids);
+				ChatThreadUtils.doBulkMqttPublish(ids, msisdn);
 			}
 		}
 	}

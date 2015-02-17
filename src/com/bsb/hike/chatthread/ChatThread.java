@@ -534,7 +534,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			onShareLocation(data);
 			break;
 		case AttachmentPicker.FILE:
-			onShareFile(data);
+			ChatThreadUtils.onShareFile(activity.getApplicationContext(), msisdn, data, mConversation.isOnhike());
 			break;
 		case AttachmentPicker.CONTACT:
 			onShareContact(resultCode, data);
@@ -918,7 +918,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void uploadFile(String filePath, HikeFileType fileType)
 	{
 		Logger.i(TAG, "upload file , filepath " + filePath + " filetype " + fileType);
-		initialiseFileTransfer(filePath, null, fileType, null, false, -1, false);
+		ChatThreadUtils.initialiseFileTransfer(activity.getApplicationContext(), msisdn, filePath, null, fileType, null, false, -1, false, mConversation.isOnhike());
 	}
 
 	protected void showToast(int messageId)
@@ -942,7 +942,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void imageCaptureFailed()
 	{
 		showToast(R.string.error_capture);
-		clearTempData();
+		ChatThreadUtils.clearTempData(activity.getApplicationContext());
 	}
 
 	@Override
@@ -1096,8 +1096,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void audioRecordSuccess(String filePath, long duration)
 	{
 		Logger.i(TAG, "Audio Recorded " + filePath + "--" + duration);
-		initialiseFileTransfer(filePath, null, HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true, duration, false);
-
+		ChatThreadUtils.initialiseFileTransfer(activity.getApplicationContext(), msisdn, filePath, null, HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE,
+				true, duration, false, mConversation.isOnhike());
 	}
 
 	@Override
@@ -1386,7 +1386,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 		else if (intent.hasExtra(HikeConstants.Extras.FILE_PATH))
 		{
-			onShareFile(intent);
+			ChatThreadUtils.onShareFile(activity.getApplicationContext(), msisdn, intent, mConversation.isOnhike());
 			// Making sure the file does not get forwarded again on
 			// orientation change.
 			intent.removeExtra(HikeConstants.Extras.FILE_PATH);
@@ -1459,7 +1459,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						}
 						else
 						{
-							initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true);
+							ChatThreadUtils.initialiseFileTransfer(activity.getApplicationContext(), msisdn, filePath, fileKey, hikeFileType, fileType, isRecording,
+									recordingDuration, true, mConversation.isOnhike());
 						}
 					}
 					else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE)
@@ -1519,7 +1520,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			String fileType = intent.getStringExtra(HikeConstants.Extras.FILE_TYPE);
 			for (String filePath : filePaths)
 			{
-				initiateFileTransferFromIntentData(fileType, filePath);
+				ChatThreadUtils.initiateFileTransferFromIntentData(activity.getApplicationContext(), msisdn, fileType, filePath, mConversation.isOnhike());
 			}
 			intent.removeExtra(HikeConstants.Extras.FILE_PATHS);
 		}
@@ -3434,26 +3435,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	}
 
-	protected void doBulkMqttPublish(JSONArray ids)
-	{
-		JSONObject jsonObject = new JSONObject();
-
-		try
-		{
-			jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
-			jsonObject.put(HikeConstants.TO, mConversation.getMsisdn());
-			jsonObject.put(HikeConstants.DATA, ids);
-		}
-
-		catch (JSONException e)
-		{
-			Logger.wtf(TAG, "Exception in Adding bulk messages : " + e.toString());
-		}
-
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, jsonObject);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
-	}
-
 	/**
 	 * Used for removing the typing notification
 	 * 
@@ -3748,87 +3729,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		default:
 			mActionMode.finish();
 			return false;
-		}
-	}
-
-	private void clearTempData()
-	{
-		Editor editor = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, activity.MODE_PRIVATE).edit();
-		editor.remove(HikeMessengerApp.TEMP_NAME);
-		editor.remove(HikeMessengerApp.TEMP_NUM);
-		editor.commit();
-	}
-
-	private void initiateFileTransferFromIntentData(String fileType, String filePath)
-	{
-		initiateFileTransferFromIntentData(fileType, filePath, null, false, -1);
-	}
-
-	private void initiateFileTransferFromIntentData(String fileType, String filePath, String fileKey, boolean isRecording, long recordingDuration)
-	{
-		HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
-
-		Logger.d(getClass().getSimpleName(), "Forwarding file- Type:" + fileType + " Path: " + filePath);
-
-		if (Utils.isPicasaUri(filePath))
-		{
-			FileTransferManager.getInstance(activity.getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, msisdn, mConversation.isOnhike());
-		}
-		else
-		{
-			initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true);
-		}
-	}
-
-	private void initialiseFileTransfer(String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration,
-			boolean isForwardingFile)
-	{
-		clearTempData();
-		if (filePath == null)
-		{
-			Toast.makeText(activity.getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
-			return;
-		}
-		File file = new File(filePath);
-		Logger.d(TAG, "File size: " + file.length() + " File name: " + file.getName());
-
-		if (HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
-		{
-			Toast.makeText(activity.getApplicationContext(), R.string.max_file_size, Toast.LENGTH_SHORT).show();
-			return;
-		}
-		FileTransferManager.getInstance(activity.getApplicationContext()).uploadFile(msisdn, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile,
-				mConversation.isOnhike(), recordingDuration);
-	}
-
-	private void onShareFile(Intent intent)
-	{
-		String fileKey = null;
-
-		if (intent.hasExtra(HikeConstants.Extras.FILE_KEY))
-		{
-			fileKey = intent.getStringExtra(HikeConstants.Extras.FILE_KEY);
-		}
-		String filePath = intent.getStringExtra(HikeConstants.Extras.FILE_PATH);
-		String fileType = intent.getStringExtra(HikeConstants.Extras.FILE_TYPE);
-
-		boolean isRecording = false;
-		long recordingDuration = -1;
-
-		if (intent.hasExtra(HikeConstants.Extras.RECORDING_TIME))
-		{
-			recordingDuration = intent.getLongExtra(HikeConstants.Extras.RECORDING_TIME, -1);
-			isRecording = true;
-			fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
-		}
-
-		if (filePath == null)
-		{
-			Toast.makeText(activity.getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
-		}
-		else
-		{
-			initiateFileTransferFromIntentData(fileType, filePath, fileKey, isRecording, recordingDuration);
 		}
 	}
 
