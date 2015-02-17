@@ -49,7 +49,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 	{
 		super.onCreate(savedInstanceState);
 
-		getSupportActionBar().hide();
+//		getSupportActionBar().hide();
 		
 //		PhotoEditerTools.hideSystemUI(getWindow().getDecorView());
 

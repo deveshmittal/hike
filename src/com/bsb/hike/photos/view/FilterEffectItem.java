@@ -24,7 +24,6 @@ public class FilterEffectItem extends EffectItem implements OnPreviewReadyListen
 	public void init(Bitmap preview, String Title)
 	{
 
-		preview = Bitmap.createScaledBitmap(preview, PhotoEditerTools.dpToPx(this.getContext(), 80), PhotoEditerTools.dpToPx(this.getContext(), 80), false);
 		this.setImage(preview);
 		this.setText(Title);
 
