@@ -28,35 +28,7 @@ public class FilterTools
 		// X_PRO_2,WILLOW,WALDEN,VALENCIA,TOASTER,SUTRO,SIERRA,RISE,NASHVILLE,MAYFAIR,LO_FI,KELVIN,INKWELL,HUDSON,HEFE,EARLYBIRD,BRANNAN,AMARO,E1977
 		// }
 
-		public static FilterList getInstagramEffects()
-		{
-			if (effectfilters == null)
-			{
-				effectfilters = new FilterList();
-				effectfilters.addFilter("X PRO 2", FilterType.X_PRO_2);
-				effectfilters.addFilter("Willow", FilterType.WILLOW);
-				effectfilters.addFilter("Walden", FilterType.WALDEN);
-				effectfilters.addFilter("Valencia", FilterType.VALENCIA);
-				effectfilters.addFilter("Toaster", FilterType.TOASTER);
-				effectfilters.addFilter("Sutro", FilterType.SUTRO);
-				effectfilters.addFilter("Sierra", FilterType.SIERRA);
-				effectfilters.addFilter("Rise", FilterType.RISE);
-				effectfilters.addFilter("NashVille", FilterType.NASHVILLE);
-				effectfilters.addFilter("MayFair", FilterType.MAYFAIR);
-				effectfilters.addFilter("Lo Fi", FilterType.LO_FI);
-				effectfilters.addFilter("Kelvin", FilterType.KELVIN);
-				effectfilters.addFilter("Inkwell", FilterType.INKWELL);
-				effectfilters.addFilter("Hudson", FilterType.HUDSON);
-				effectfilters.addFilter("Hefe", FilterType.HEFE);
-				effectfilters.addFilter("EarlyBird", FilterType.EARLYBIRD);
-				effectfilters.addFilter("Brannan", FilterType.BRANNAN);
-				effectfilters.addFilter("Amaro", FilterType.AMARO);
-				effectfilters.addFilter("E1977", FilterType.E1977);
-
-			}
-
-			return effectfilters;
-		}
+		
 
 		public static FilterList getHikeEffects()
 		{
@@ -68,6 +40,24 @@ public class FilterTools
 				effectfilters.addFilter("Polaroid", FilterType.POLAROID);
 				effectfilters.addFilter("Sepia", FilterType.SEPIA);
 				effectfilters.addFilter("Grayscale", FilterType.GRAYSCALE);
+				effectfilters.addFilter("X PRO 2", FilterType.X_PRO_2);
+				effectfilters.addFilter("Willow", FilterType.WILLOW);
+				effectfilters.addFilter("Walden", FilterType.WALDEN);
+				effectfilters.addFilter("Toaster", FilterType.TOASTER);
+				effectfilters.addFilter("Sutro", FilterType.SUTRO);
+				effectfilters.addFilter("Sierra", FilterType.SIERRA);
+				effectfilters.addFilter("Rise", FilterType.RISE);
+//				effectfilters.addFilter("NashVille", FilterType.NASHVILLE);
+				effectfilters.addFilter("Lo Fi", FilterType.LO_FI);
+				effectfilters.addFilter("Kelvin", FilterType.KELVIN);
+				effectfilters.addFilter("Inkwell", FilterType.INKWELL);
+//				effectfilters.addFilter("Hudson", FilterType.HUDSON);
+//				effectfilters.addFilter("Hefe", FilterType.HEFE);
+//				effectfilters.addFilter("EarlyBird", FilterType.EARLYBIRD);
+//				effectfilters.addFilter("Brannan", FilterType.BRANNAN);
+//				effectfilters.addFilter("Amaro", FilterType.AMARO);
+//				effectfilters.addFilter("E1977", FilterType.E1977);
+
 				/*
 				 * effectfilters.addFilter("Sobel Edge Detection", FilterType.SOBEL_EDGE_DETECTION); effectfilters.addFilter("Emboss", FilterType.EMBOSS);
 				 * effectfilters.addFilter("Posterize", FilterType.POSTERIZE); effectfilters.addFilter("Grouped effectfilters", FilterType.FILTER_GROUP);

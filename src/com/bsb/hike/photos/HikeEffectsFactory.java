@@ -17,29 +17,29 @@ import com.bsb.hike.photos.FilterTools.FilterType;
 
 
 public final class HikeEffectsFactory{
-	
+
 	private static HikeEffectsFactory instance;
-	
+
 	public static ColorMatrixColorFilter applyFiltertoBitmapDrawable(BitmapDrawable source,FilterType type,float value)
 	{
-		
+
 		ColorMatrix FilterColormatrix=getColorMatrixforFilter(type, value);
-		
+
 		return applyColorMatrixToDrawable(source, FilterColormatrix);
-		
+
 	}
-	
+
 	public static void LoadPreviewThumbnail(Bitmap scaledOriginal,FilterType type,OnPreviewReadyListener listener )
 	{
 		new LoadPreviewImageTask(scaledOriginal, getColorMatrixforFilter(type, 100)  , listener).execute();
-	
+
 	}
-	
+
 	private static ColorMatrix getColorMatrixforFilter(FilterType type,float value)
 	{
 		if(instance==null)
 			instance=new HikeEffectsFactory();
-		
+
 		ColorMatrix FilterColormatrix;
 		switch(type)
 		{
@@ -67,13 +67,46 @@ public final class HikeEffectsFactory{
 		case FADED:
 			FilterColormatrix=instance.partialFilterColorMatrix(instance.getFadedColorMatrix(),value);
 			break;
+		case X_PRO_2:
+			FilterColormatrix=instance.partialFilterColorMatrix(instance.XPRO2(),value);
+			break;
+		case WILLOW:
+			FilterColormatrix=instance.partialFilterColorMatrix(instance.willow(),value);
+			break;
+		case WALDEN:
+			FilterColormatrix=instance.partialFilterColorMatrix(instance.walden(),value);
+			break;
+		case TOASTER:
+			FilterColormatrix=instance.partialFilterColorMatrix(instance.toaster(),value);
+			break;
+		case SUTRO:
+			FilterColormatrix=instance.partialFilterColorMatrix(instance.sutro(),value);
+			break;
+		case SIERRA:
+			FilterColormatrix=instance.partialFilterColorMatrix(instance.sierra(),value);
+			break;
+		case RISE:
+			FilterColormatrix=instance.partialFilterColorMatrix(instance.rise(),value);
+			break;
+		case MAYFAIR:
+			FilterColormatrix=instance.partialFilterColorMatrix(instance.mayfair(),value);
+			break;
+		case LO_FI:
+			FilterColormatrix=instance.partialFilterColorMatrix(instance.lofi(),value);
+			break;
+		case KELVIN:
+			FilterColormatrix=instance.partialFilterColorMatrix(instance.kelvin(),value);
+			break;
+		case INKWELL:
+			FilterColormatrix=instance.partialFilterColorMatrix(instance.inkwell(),value);
+			break;
 		default:
 			FilterColormatrix=new ColorMatrix();
-			
+
 		}
 		return FilterColormatrix;
 	}
-	
+
 	/**
 	 * @author akhiltripathi
 	 * 
@@ -97,10 +130,10 @@ public final class HikeEffectsFactory{
 				partialArray[i]*=value;
 		}
 		ColorMatrix ret=new ColorMatrix(partialArray);
-		
+
 		return ret;
 	}
-	
+
 	public static Bitmap applyColorMatrixToBitmap(Bitmap bitmap,ColorMatrix matrix)
 	{
 		int w = bitmap.getWidth();
@@ -113,7 +146,7 @@ public final class HikeEffectsFactory{
 		canvasResult.drawBitmap(bitmap, 0, 0, paint);
 		return bitmapResult;
 	}
-	
+
 	private static ColorMatrixColorFilter applyColorMatrixToDrawable(BitmapDrawable drawable,ColorMatrix matrix)
 	{
 		ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
@@ -137,9 +170,9 @@ public final class HikeEffectsFactory{
 		ret.setSaturation(value);
 		return ret;
 	}
-	
+
 	private ColorMatrix getOriginalColorMatrix() {
-		
+
 		return null;
 	}
 
@@ -152,7 +185,7 @@ public final class HikeEffectsFactory{
 				0,0,0,1,0
 		};
 		ColorMatrix matrix = new ColorMatrix(array);
-		
+
 		return matrix;
 	}
 
@@ -173,10 +206,10 @@ public final class HikeEffectsFactory{
 				0, 0, scale, 0, translate,
 				0, 0, 0, 1, 0};
 		ColorMatrix matrix = new ColorMatrix(array);
-		
+
 		return matrix;
 	}
-	
+
 	private ColorMatrix getBrightnessColorMatrix(float value) {
 		value=(value-1)*100;
 		float[] array = new float[] {
@@ -185,10 +218,10 @@ public final class HikeEffectsFactory{
 				0, 0, 1, 0, value,
 				0, 0, 0, 1, 0};
 		ColorMatrix matrix = new ColorMatrix(array);
-		
+
 		return matrix;
 	}
-	
+
 
 	private ColorMatrix getBGRColorMatrix() {
 		float[] array = new float[] {
@@ -197,10 +230,10 @@ public final class HikeEffectsFactory{
 				1, 0, 0, 0, 0,
 				0, 0, 0, 1, 0};
 		ColorMatrix matrix = new ColorMatrix(array);
-		
+
 		return matrix;
 	}
-	
+
 	private ColorMatrix getOpacityColorMatrix(float value) {
 		float[] array = new float[] {
 				1, 0, 0, 0, 0,
@@ -208,31 +241,31 @@ public final class HikeEffectsFactory{
 				0, 0, 1, 0, 0,
 				0, 0, 0, value, 0};
 		ColorMatrix matrix = new ColorMatrix(array);
-		
+
 		return matrix;
 	}
-	
-	
+
+
 	private ColorMatrix getHueColorMatrix(float value)
-    {
-        value = value/ 180f * (float) Math.PI;
-       
-        float cosVal = (float) Math.cos(value);
-        float sinVal = (float) Math.sin(value);
-        float lumR = 0.213f;
-        float lumG = 0.715f;
-        float lumB = 0.072f;
-        float[] mat = new float[]
-        { 
-                lumR + cosVal * (1 - lumR) + sinVal * (-lumR), lumG + cosVal * (-lumG) + sinVal * (-lumG), lumB + cosVal * (-lumB) + sinVal * (1 - lumB), 0, 0, 
-                lumR + cosVal * (-lumR) + sinVal * (0.143f), lumG + cosVal * (1 - lumG) + sinVal * (0.140f), lumB + cosVal * (-lumB) + sinVal * (-0.283f), 0, 0,
-                lumR + cosVal * (-lumR) + sinVal * (-(1 - lumR)), lumG + cosVal * (-lumG) + sinVal * (lumG), lumB + cosVal * (1 - lumB) + sinVal * (lumB), 0, 0, 
-                0f, 0f, 0f, 1f, 0f, 
-                0f, 0f, 0f, 0f, 1f };
-        ColorMatrix colorMatrix =new ColorMatrix(mat);
-        return colorMatrix;
-        
-    }
+	{
+		value = value/ 180f * (float) Math.PI;
+
+		float cosVal = (float) Math.cos(value);
+		float sinVal = (float) Math.sin(value);
+		float lumR = 0.213f;
+		float lumG = 0.715f;
+		float lumB = 0.072f;
+		float[] mat = new float[]
+				{ 
+				lumR + cosVal * (1 - lumR) + sinVal * (-lumR), lumG + cosVal * (-lumG) + sinVal * (-lumG), lumB + cosVal * (-lumB) + sinVal * (1 - lumB), 0, 0, 
+				lumR + cosVal * (-lumR) + sinVal * (0.143f), lumG + cosVal * (1 - lumG) + sinVal * (0.140f), lumB + cosVal * (-lumB) + sinVal * (-0.283f), 0, 0,
+				lumR + cosVal * (-lumR) + sinVal * (-(1 - lumR)), lumG + cosVal * (-lumG) + sinVal * (lumG), lumB + cosVal * (1 - lumB) + sinVal * (lumB), 0, 0, 
+				0f, 0f, 0f, 1f, 0f, 
+				0f, 0f, 0f, 0f, 1f };
+		ColorMatrix colorMatrix =new ColorMatrix(mat);
+		return colorMatrix;
+
+	}
 
 
 	private ColorMatrix getBinaryColorMatrix() {
@@ -251,8 +284,8 @@ public final class HikeEffectsFactory{
 		colorMatrix.postConcat(threshold);
 		return colorMatrix;
 	}
-	
-	
+
+
 	private ColorMatrix getFadedColorMatrix() {
 
 		final ColorMatrix matrixA = new ColorMatrix(new float[] {
@@ -262,14 +295,14 @@ public final class HikeEffectsFactory{
 				0, 0, 0, 1, 0    //alpha
 		});
 
-		
+
 		return matrixA;
 	}
-	
+
 	private ColorMatrix getPolaroidColorMatrix() {
 
-		
-		
+
+
 		final ColorMatrix matrixA = new ColorMatrix(new float[] {
 				1.438f, -0.062f, -0.062f, 0, 0, //red
 				-0.122f, 1.378f, -0.122f, 0, 0, //green
@@ -294,38 +327,187 @@ public final class HikeEffectsFactory{
 		sepiaMatrix.set(sepMat);
 		return sepiaMatrix;
 	}
+
+	
+	//contrast(1.3) brightness(0.8) sepia(0.3) saturate(1.5) hue-rotate(-20deg)
+	ColorMatrix XPRO2()
+	{
+		ColorMatrix ret=getContrastColorMatrix( 1.3f);
+		ret.setConcat(getBrightnessColorMatrix( 0.8f), ret);
+		ret.setConcat(getSepiaColorMatrix( 40f), ret);
+		//ret.setSaturation(1.2f);
+		ret.setConcat(getHueColorMatrix( -20f), ret);
+		return ret;
+
+	}
+
+	//filter: saturate(0.02) contrast(0.85) brightness(1.2) sepia(0.02);
+	ColorMatrix willow()
+	{
+		ColorMatrix ret=new ColorMatrix();
+		ret.setSaturation(0.02f);
+
+		ret.setConcat(getContrastColorMatrix( 0.85f), ret);
+		ret.setConcat(getBrightnessColorMatrix( 0.75f), ret);
+		ret.setConcat(getSepiaColorMatrix( 2f), ret);
+		
+		return ret;
+
+	}
+
+	//filter: sepia(0.35) contrast(0.9) brightness(1.1) hue-rotate(-10deg) saturate(1.5);
+	ColorMatrix walden()
+	{
+		ColorMatrix ret=new ColorMatrix();
+		ret.setConcat(getSepiaColorMatrix( 45f), ret);
+		ret.setConcat(getContrastColorMatrix( 0.9f), ret);
+		ret.setConcat(getBrightnessColorMatrix( 0.9f), ret);
+		ret.setConcat(getHueColorMatrix( -10f), ret);
+
+		
+		return ret;
+
+	}
+
+	//filter:sepia(0.4) saturate(2.5) hue-rotate(-30deg) contrast(0.67);
+	ColorMatrix toaster()
+	{
+		ColorMatrix ret=new ColorMatrix();
+		ret.setConcat(getSepiaColorMatrix( 50f), ret);
+		ret.setConcat(getHueColorMatrix( -30f), ret);
+		ret.setConcat(getContrastColorMatrix( 0.67f), ret);
+
+		
+		return ret;
+
+	}
+
+	//filter: brightness(0.75) contrast(1.3) sepia(0.5) hue-rotate(-25deg);
+	ColorMatrix sutro()
+	{
+		ColorMatrix ret=new ColorMatrix();
+		ret.setConcat(getBrightnessColorMatrix( 0.65f), ret);
+		ret.setConcat(getContrastColorMatrix( 1.3f), ret);
+
+		ret.setConcat(getSepiaColorMatrix( 60f), ret);
+		ret.setConcat(getHueColorMatrix( -25f), ret);
+
+		
+		return ret;
+
+	}
+
+	//filter: contrast(0.8) saturate(1.2) sepia(0.15);
+	ColorMatrix sierra()
+	{
+		ColorMatrix ret=new ColorMatrix();
+		ret.setConcat(getContrastColorMatrix( 0.8f), ret);
+		//ColorMatrix ret2=new ColorMatrix();
+		//ret2.setSaturation(1.2f);
+		//ret.setConcat(ret2,ret);
+		ret.setConcat(getSepiaColorMatrix( 15f), ret);
+		
+		return ret;
+
+	}
+
+	// filter: saturate(1.4) sepia(0.25) hue-rotate(-15deg) contrast(0.8) brightness(1.1);
+	ColorMatrix rise()
+	{
+		ColorMatrix ret=new ColorMatrix();
+		ret.setConcat(getSepiaColorMatrix( 15f), ret);
+		ret.setConcat(getHueColorMatrix( -15f), ret);
+
+		ret.setConcat(getContrastColorMatrix( 0.8f), ret);
+		ret.setConcat(getBrightnessColorMatrix( 1.1f), ret);
+
+		
+		return ret;
+
+	}
+
+	ColorMatrix mayfair()
+	{
+		ColorMatrix ret=new ColorMatrix();
+		//ret.setSaturation(1.4f);
+		ret.setConcat(getContrastColorMatrix( 1.3f), ret);
+
+		return ret;
+
+	}
+
+	ColorMatrix lofi()
+	{
+		ColorMatrix ret=new ColorMatrix();
+		//ret.setSaturation(1.4f);
+		ret.setConcat(getContrastColorMatrix( 1.4f), ret);
+		ret.setConcat(getBrightnessColorMatrix( 0.7f), ret);
+		ret.setConcat(getSepiaColorMatrix( 5f), ret);
+
+		
+		return ret;
+
+	}
+
+	// filter: sepia(0.4) saturate(2.4) brightness(1.3) contrast(1);
+	ColorMatrix kelvin()
+	{
+		ColorMatrix ret=new ColorMatrix();
+		ret.setSaturation(3.4f);
+		ret.setConcat(getSepiaColorMatrix( 60f), ret);
+		ret.setConcat(getBrightnessColorMatrix( 1.1f), ret);
+		ret.setConcat(getContrastColorMatrix( 1f), ret);
+
+		
+		return ret;
+
+	}
+
+	//filter: grayscale(1) brightness(1.2) contrast(1.05);
+	ColorMatrix inkwell()
+	{
+		ColorMatrix ret=new ColorMatrix();
+		ret.setConcat(getBlackAndWhiteColorMatrix(), ret);
+		ret.setConcat(getBrightnessColorMatrix( 1.2f), ret);
+		ret.setConcat(getContrastColorMatrix( 1.05f), ret);
+
+		
+		return ret;
+
+	}
 	
 	private static class LoadPreviewImageTask extends AsyncTask<Void, Void, Bitmap> {
-	    
+
 		private Bitmap original;
 		ColorMatrix effectToBeApplied;
 		private OnPreviewReadyListener readyListener;
-		
+
 		public LoadPreviewImageTask(Bitmap bitmap,ColorMatrix effect,OnPreviewReadyListener listener) {
 			// TODO Auto-generated constructor stub
 			original=bitmap;
 			effectToBeApplied=effect;
 			readyListener=listener;
 		}
-		
+
 		protected void onPostExecute(Bitmap result) {
 			readyListener.onPreviewReady(result) ;
-	    }
-		
+		}
+
 		@Override
 		protected Bitmap doInBackground(Void... params) {
 			// TODO Auto-generated method stub
-			
+
 			return applyColorMatrixToBitmap(original, effectToBeApplied);
-				
-			
-			
+
+
+
 		}
 
 	}
-	
+
 	public interface OnPreviewReadyListener{
 		void onPreviewReady(Bitmap preview);
 	}
 
 }
+

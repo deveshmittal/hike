@@ -115,7 +115,7 @@ public final class PreviewFragment extends Fragment
 			switch (myType)
 			{
 			case Effects:
-				count = 5;
+				count = FilterList.getHikeEffects().filters.size();
 				break;
 			case Doodle:
 				count = PhotoEditerTools.DoodleColors.length;
