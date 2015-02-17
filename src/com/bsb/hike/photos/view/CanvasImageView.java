@@ -2,6 +2,8 @@ package com.bsb.hike.photos.view;
 
 import java.util.ArrayList;
 
+import com.bsb.hike.photos.PhotoEditerTools;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -20,8 +22,7 @@ class CanvasImageView extends ImageView implements OnTouchListener {
 	private ArrayList<PathPoints> paths = new ArrayList<PathPoints>();
 	private ArrayList<PathPoints> undonePaths = new ArrayList<PathPoints>();
 	private Bitmap mBitmap;
-	private int color=0xFFFF0000;
-	private int index=0;
+	private int color,brushWidth;
 	private boolean drawEnabled;
 
 	public CanvasImageView(Context context) {
@@ -40,12 +41,16 @@ class CanvasImageView extends ImageView implements OnTouchListener {
 		init();
 	}
 
+
 	public void setStrokeWidth(int width)
 	{
+		brushWidth=width;
 		mPaint.setStrokeWidth(width);
 	}
 
+
 	private void init() {
+
 
 		this.setOnTouchListener(this);
 		setDrawingCacheEnabled(true);
@@ -54,15 +59,12 @@ class CanvasImageView extends ImageView implements OnTouchListener {
 		mPaint = new Paint();
 		mPaint.setAntiAlias(true);
 		mPaint.setDither(true);
-		mPaint.setColor(0xFFFF0000);
 		mPaint.setStyle(Paint.Style.STROKE);
 		mPaint.setStrokeJoin(Paint.Join.ROUND);
 		mPaint.setStrokeCap(Paint.Cap.ROUND);
-		mPaint.setTextSize(30);
-		setStrokeWidth(40);
-		mPath = new Path();
-		paths.add(new PathPoints(mPath, 0xFFFF0000, false));
-
+		setStrokeWidth(PhotoEditerTools.dpToPx(getContext(), 30));
+		mPath=new Path();
+		
 	}
 
 	public void Refresh(Bitmap source)
@@ -82,20 +84,22 @@ class CanvasImageView extends ImageView implements OnTouchListener {
 
 		if(mBitmap!=null)
 		{
-			int i=0;
-			canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
-			for (i=index;i<paths.size();i++) {
-				PathPoints p=paths.get(i); 
+			for (PathPoints p : paths) {
+				mPaint.setColor(p.getColor());
+				mPaint.setStrokeWidth(p.getWidth());
 				if (p.isTextToDraw()) {
-					//canvas.drawText(p.textToDraw, p.x, p.y, mPaint);
+					canvas.drawText(p.textToDraw, p.x, p.y, mPaint);
 				} else {
 					canvas.drawPath(p.getPath(), mPaint);
 				}
 			}
-			index=i-1;
-
+			if(mPath!=null)
+			{
+				mPaint.setColor(color);
+				mPaint.setStrokeWidth(brushWidth);
+				canvas.drawPath(mPath, mPaint);
+			}
 		}
-		super.onDraw(canvas);
 
 	}
 
@@ -142,11 +146,9 @@ class CanvasImageView extends ImageView implements OnTouchListener {
 	private void touch_up() {
 		mPath.lineTo(mX, mY);
 		// commit the path to our offscreen
-		mCanvas.drawPath(mPath, mPaint);
+		paths.add(new PathPoints(mPath, color,brushWidth, false));
 
-		// kill this so we don't double draw
 		mPath=new Path();
-		paths.add(new PathPoints(mPath, color, false));
 
 	}
 
@@ -206,20 +208,23 @@ class CanvasImageView extends ImageView implements OnTouchListener {
 		private String textToDraw;
 		private boolean isTextToDraw;
 		private int x, y;
+		private int width;
 
-		public PathPoints(Path path, int color, boolean isTextToDraw) {
+		public PathPoints(Path path, int color,int brushWidth, boolean isTextToDraw) {
 			this.path = path;
 			this.color = color;
 			this.isTextToDraw = isTextToDraw;
+			this.width=brushWidth;
 		}
 
-		public PathPoints(int color, String textToDraw, boolean isTextToDraw,
+		public PathPoints(int color, String textToDraw,int brushWidth, boolean isTextToDraw,
 				int x, int y) {
 			this.color = color;
 			this.textToDraw = textToDraw;
 			this.isTextToDraw = isTextToDraw;
 			this.x = x;
 			this.y = y;
+			this.width=brushWidth;
 		}
 
 		public Path getPath() {
@@ -228,6 +233,14 @@ class CanvasImageView extends ImageView implements OnTouchListener {
 
 		public void setPath(Path path) {
 			this.path = path;
+		}
+
+		public int getWidth() {
+			return width;
+		}
+
+		public void setWidth(int BrushWidth) {
+			this.width = BrushWidth;
 		}
 
 

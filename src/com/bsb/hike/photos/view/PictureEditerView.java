@@ -118,6 +118,13 @@ public class PictureEditerView extends FrameLayout {
 
 	}
 
+	public void undoLastDoodleDraw()
+	{
+		doodleLayer.onClickUndo();
+
+	}
+
+	
 	private Bitmap updateSat(Bitmap src, ColorMatrixColorFilter filter) {
 
 		int w = src.getWidth();

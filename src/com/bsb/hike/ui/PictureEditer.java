@@ -54,6 +54,8 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		indicator.setViewPager(pager);
 
 		// ((Button)findViewById(R.id.saveButton)).setOnClickListener(clickHandler);
+		
+		findViewById(R.id.back).setOnClickListener(clickHandler);
 
 		TabPageIndicator tabs = (TabPageIndicator) findViewById(R.id.indicator);
 		
@@ -168,12 +170,12 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 					doodlePreview.Refresh();
 					editView.setBrushWidth(PhotoEditerTools.dpToPx(mContext, doodleWidth));
 					break;
+				case R.id.back:
+					editView.undoLastDoodleDraw();
+					break;
 				}
 			}
-			// else if(v.getId()==R.id.saveButton)
-			// {
-			// editView.saveImage();
-			// }
+			
 
 		}
 
