@@ -68,7 +68,7 @@ public class FileTransferService extends IntentService {
 					Log.d(WiFiDirectActivity.TAG, e.toString());
 				}
 				byte[]  type  =  new byte[1];
-				type[0] =  1;
+				type[0] =  (byte) intent.getExtras().getInt("fileType");
 				
 				stream.write(type,0,type.length);
 				

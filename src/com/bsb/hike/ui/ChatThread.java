@@ -5850,6 +5850,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Intent imageIntent = new Intent(ChatThread.this, GalleryActivity.class);
 					imageIntent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
 					imageIntent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
+					// If in offline file transfer mode send device address 
+					if(WiFiDirectActivity.isOfflineFileTransferOn)
+						{
+						    String  deviceAddress =  getIntent().getStringExtra("OfflineDeviceName"); 
+						    imageIntent.putExtra("OfflineDeviceName",deviceAddress);
+						}
 					startActivity(imageIntent);
 					return;
 				}
@@ -6472,35 +6478,36 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			if (selectedFile != null && requestCode == HikeConstants.IMAGE_CAPTURE_CODE)
 			{
 				final String fPath = filePath;
-				final int atType = attachementType;
+					final int atType = attachementType;
+					
+					HikeDialog.showDialog(ChatThread.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, new HikeDialog.HikeDialogListener()
+					{
+						@Override
+						public void onSucess(Dialog dialog)
+						{
+							initialiseFileTransfer(fPath, null, hikeFileType, null, false, -1, false, atType);
+							dialog.dismiss();
+						}
+	
+						@Override
+						public void negativeClicked(Dialog dialog)
+						{
+	
+						}
+	
+						@Override
+						public void positiveClicked(Dialog dialog)
+						{
+	
+						}
+	
+						@Override
+						public void neutralClicked(Dialog dialog)
+						{
+	
+						}
+					}, (Object[]) new Long[] { (long) 1, selectedFile.length() });
 				
-				HikeDialog.showDialog(ChatThread.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, new HikeDialog.HikeDialogListener()
-				{
-					@Override
-					public void onSucess(Dialog dialog)
-					{
-						initialiseFileTransfer(fPath, null, hikeFileType, null, false, -1, false, atType);
-						dialog.dismiss();
-					}
-
-					@Override
-					public void negativeClicked(Dialog dialog)
-					{
-
-					}
-
-					@Override
-					public void positiveClicked(Dialog dialog)
-					{
-
-					}
-
-					@Override
-					public void neutralClicked(Dialog dialog)
-					{
-
-					}
-				}, (Object[]) new Long[] { (long) 1, selectedFile.length() });
 			}else
 				initialiseFileTransfer(filePath, null, hikeFileType, null, false, -1, false, attachementType);
 		}
@@ -6831,35 +6838,37 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		Log.d(WiFiDirectActivity.TAG,"localip " + localIP);
 		
 		// Trick to find the ip in the file /proc/net/arp
+		String client_mac_fixed = new String(deviceAddress).replace("99", "19");
+		String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
+        Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
+        Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);
+        
+		Intent serviceIntent = new Intent(getApplicationContext(), FileTransferService.class);
+		serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
+		serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filePath);
+		
 		try
 		{
 			switch(hikeFileType)
 			{
 				case HikeConstants.SHARE_APK_CODE:
-					String client_mac_fixed = new String(deviceAddress).replace("99", "19");
-					String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
-			        Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
-			        Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);
-			        
-					Intent serviceIntent = new Intent(getApplicationContext(), FileTransferService.class);
-					serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
-					serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filePath);
-			
-					if(localIP.equals(IP_SERVER)){
-						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
-					}else{
-						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
-					}
-			
-					serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
-					long start = System.currentTimeMillis();
-					startService(serviceIntent);
-					long end = System.currentTimeMillis();
-					//Toast.makeText(getApplicationContext(), "Time taken: "+(end-start) +"ms", Toast.LENGTH_SHORT).show();
-					break;
+					
+					serviceIntent.putExtra("fileType", 1);
+			        break;
 				default:
 					Toast.makeText(getApplicationContext(), "File not selected!", Toast.LENGTH_SHORT).show();
 			}
+			if(localIP.equals(IP_SERVER)){
+				serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
+			}else{
+				serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
+			}
+	
+			serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
+			long start = System.currentTimeMillis();
+			startService(serviceIntent);
+			long end = System.currentTimeMillis();
+
 		}
 		catch(NullPointerException e)
 		{

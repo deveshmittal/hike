@@ -81,7 +81,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
+       
         // add necessary intent values to be matched.
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
@@ -145,7 +145,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     @Override
     protected void onRestart() {
     	disconnect();
-    	
+    	DeviceListFragment.intent =  null;
     	// give time to disconnect
     	try {
 			Thread.sleep(2*1000);

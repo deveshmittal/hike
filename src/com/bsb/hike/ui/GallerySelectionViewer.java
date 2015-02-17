@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +42,8 @@ import com.bsb.hike.adapters.GalleryAdapter;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.offline.FileTransferService;
+import com.bsb.hike.offline.WiFiDirectActivity;
 import com.bsb.hike.smartImageLoader.GalleryImageLoader;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
@@ -73,6 +76,8 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	private int totalSelections;
 
 	private boolean smlDialogShown = false;
+	
+	private String deviceAddress ;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -86,7 +91,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			fileTransferTask = (InitiateMultiFileTransferTask) object;
 			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
 		}
-
+		deviceAddress  =  getIntent().getExtras().getString("OfflineDeviceName");
 		galleryItems = getIntent().getParcelableArrayListExtra(HikeConstants.Extras.GALLERY_SELECTIONS);
 		totalSelections = galleryItems.size();
 
@@ -143,7 +148,11 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET));
 		intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
-
+		if(WiFiDirectActivity.isOfflineFileTransferOn)
+		{
+			  
+			  intent.putExtra("OfflineDeviceName",deviceAddress);
+		}
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		startActivity(intent);
@@ -236,59 +245,90 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			@Override
 			public void onClick(View v)
 			{
-				final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
-				long sizeOriginal = 0;
-				for (GalleryItem galleryItem : galleryItems)
-				{
-					fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
-					File file = new File(galleryItem.getFilePath());
-					sizeOriginal += file.length();
-				}
-				
-				final String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
-				final boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
-				
-				if (!smlDialogShown)
-				{
-					HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
-					{
-						@Override
-						public void onSucess(Dialog dialog)
+				if(!WiFiDirectActivity.isOfflineFileTransferOn){
+						final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
+						long sizeOriginal = 0;
+						for (GalleryItem galleryItem : galleryItems)
+						{
+							fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
+							File file = new File(galleryItem.getFilePath());
+							sizeOriginal += file.length();
+						}
+						
+						final String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+						final boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
+						
+						if (!smlDialogShown)
+						{
+							HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+							{
+								@Override
+								public void onSucess(Dialog dialog)
+								{
+									fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike, FTAnalyticEvents.GALLERY_ATTACHEMENT);
+									Utils.executeAsyncTask(fileTransferTask);
+									progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+									dialog.dismiss();
+								}
+		
+								@Override
+								public void negativeClicked(Dialog dialog)
+								{
+									// TODO Auto-generated method stub
+									
+								}
+		
+								@Override
+								public void positiveClicked(Dialog dialog)
+								{
+									// TODO Auto-generated method stub
+									
+								}
+		
+								@Override
+								public void neutralClicked(Dialog dialog)
+								{
+									// TODO Auto-generated method stub
+									
+								}
+							}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
+						}
+						else
 						{
 							fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike, FTAnalyticEvents.GALLERY_ATTACHEMENT);
 							Utils.executeAsyncTask(fileTransferTask);
 							progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
-							dialog.dismiss();
 						}
-
-						@Override
-						public void negativeClicked(Dialog dialog)
+					}else{
+						String deviceAddress  =  getIntent().getExtras().getString("OfflineDeviceName");
+						String localIP = com.bsb.hike.offline.Utils.getLocalIPAddress();
+						String IP_SERVER = com.bsb.hike.offline.DeviceListFragment.IP_SERVER;
+						int PORT = com.bsb.hike.offline.DeviceListFragment.PORT;
+						String client_mac_fixed = new String(deviceAddress).replace("99", "19");
+						String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
+					     
+						for (GalleryItem galleryItem : galleryItems)
 						{
-							// TODO Auto-generated method stub
-							
+							 String filePath = galleryItem.getFilePath();
+						     Intent serviceIntent = new Intent(getApplicationContext(), FileTransferService.class);
+							 serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
+							 serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filePath);
+							 serviceIntent.putExtra("fileType", 2);
+							 if(localIP.equals(IP_SERVER)){
+									serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
+								}else{
+									serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
+								}
+						
+							 serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
+							 startService(serviceIntent);
+								
 						}
-
-						@Override
-						public void positiveClicked(Dialog dialog)
-						{
-							// TODO Auto-generated method stub
-							
-						}
-
-						@Override
-						public void neutralClicked(Dialog dialog)
-						{
-							// TODO Auto-generated method stub
-							
-						}
-					}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
-				}
-				else
-				{
-					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike, FTAnalyticEvents.GALLERY_ATTACHEMENT);
-					Utils.executeAsyncTask(fileTransferTask);
-					progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
-				}
+						Intent intent = new Intent(GallerySelectionViewer.this, ChatThread.class);
+						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
+						startActivity(intent);
+					}
 			}
 		});
 		

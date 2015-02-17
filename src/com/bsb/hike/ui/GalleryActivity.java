@@ -33,6 +33,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.GalleryAdapter;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.GalleryItem;
+import com.bsb.hike.offline.WiFiDirectActivity;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -60,6 +61,8 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 	private long previousEventTime;
 
 	private int velocity;
+	
+	private String deviceAddress;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -86,6 +89,8 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		{
 			data = getIntent().getExtras();
 		}
+		
+		deviceAddress =  data.getString("OfflineDeviceName");
 
 		GalleryItem selectedBucket = data.getParcelable(HikeConstants.Extras.SELECTED_BUCKET);
 		msisdn = data.getString(HikeConstants.Extras.MSISDN);
@@ -311,6 +316,11 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
 		intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET));
+		if(WiFiDirectActivity.isOfflineFileTransferOn)
+		{
+			  
+			  intent.putExtra("OfflineDeviceName",deviceAddress);
+		}
 
 		startActivity(intent);
 	}
@@ -348,6 +358,11 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, galleryItem);
 			intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 			intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
+			if(WiFiDirectActivity.isOfflineFileTransferOn)
+			{
+				  
+				  intent.putExtra("OfflineDeviceName",deviceAddress);
+			}
 			startActivity(intent);
 		}
 		else

@@ -81,7 +81,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     private int mIconImageSize;
     private IconLoader iconLoader;
     private WifiP2pInfo info;
-    Intent intent;
+    public static Intent intent;
     private Object syncMsisdn;
     List<String> peers_msisdn = new ArrayList<String>();
 
@@ -191,7 +191,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    		phoneNumber = deviceContact.getName();
 	    	
 	    	//if(currentDevice.status != WifiP2pDevice.CONNECTED)
-	    	{
+	    	
 	    		
 	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
 	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
@@ -213,7 +213,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	            });
 	    		
 	    		((DeviceActionListener) getActivity()).connect(config, 0);
-	    	}
+	    	
 	    	/*
 	    	else
 	    	{
@@ -410,7 +410,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	public static class ServerAsyncTask extends AsyncTask<Void, Void, String> {
 
 		private final Context context;
-
+		byte type;
 		/**
 		 * @param context
 		 */
@@ -429,16 +429,24 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                 InputStream inputstream = client.getInputStream();
                 byte[] typeArr = new byte[1];
                 inputstream.read(typeArr, 0, typeArr.length);
-                byte type = typeArr[0];
+                type = typeArr[0];
                 File f = null;
+                File dirs = null;
                 switch(type){
                 case 1:
                     f = new File(Environment.getExternalStorageDirectory() + "/"
                             + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis() + ".apk");
-                    File dirs = new File(f.getParent());
+                    dirs = new File(f.getParent());
                     if (!dirs.exists())
                         dirs.mkdirs();
                     f.createNewFile();
+                case 2:
+                	 f = new File(Environment.getExternalStorageDirectory() + "/"
+                             + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis() + ".jpg");
+                     dirs = new File(f.getParent());
+                     if (!dirs.exists())
+                         dirs.mkdirs();
+                     f.createNewFile();
                 }
                 Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
                 copyFile(inputstream, new FileOutputStream(f));
@@ -459,10 +467,21 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		protected void onPostExecute(String result) {
 			if (result != null) {
 				//statusText.setText("File copied - " + result);
-				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-				String Foldername =  result.substring(0, result.lastIndexOf("/"));
-				intent.setDataAndType(Uri.parse(Foldername), "*/*");
-				context.startActivity(Intent.createChooser(intent, "Open folder"));
+				if(type==1)
+				{
+					Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+					String Foldername =  result.substring(0, result.lastIndexOf("/"));
+					intent.setDataAndType(Uri.parse(Foldername), "*/*");
+					context.startActivity(Intent.createChooser(intent, "Open folder"));
+					
+				}
+				else if(type==2)
+				{
+					Intent intent = new Intent();
+					intent.setAction(Intent.ACTION_VIEW);
+					intent.setDataAndType(Uri.parse("file://" + result), "image/*");
+					context.startActivity(intent);
+				}
 				
 			}
 
