@@ -61,8 +61,8 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
 import android.widget.PopupWindow.OnDismissListener;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
@@ -111,7 +111,6 @@ import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
-import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.utils.ChatTheme;
@@ -130,9 +129,9 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
  * @generated
  */
 
-public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, 
-		CaptureImageListener, PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener,
-		OnTouchListener, OnScrollListener, Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, OnSoftKeyboardListener
+public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, CaptureImageListener,
+		PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener,
+		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, OnSoftKeyboardListener
 {
 	private static final String TAG = "chatthread";
 
@@ -178,9 +177,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static final int DISABLE_TRANSCRIPT_MODE = 20;
 
 	protected static final int STICKER_CATEGORY_MAP_UPDATED = 21;
-	
-	protected static final int MULTI_SELECT_ACTION_MODE = 22; 
-	
+
+	protected static final int MULTI_SELECT_ACTION_MODE = 22;
+
 	protected static final int SCROLL_TO_END = 23;
 
 	protected ChatThreadActivity activity;
@@ -238,19 +237,19 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected View mActionBarView;
 
 	protected HikeActionMode mActionMode;
-	
+
 	protected int selectedNonTextMsgs;
 
 	protected int selectedNonForwadableMsgs;
-	
+
 	protected int shareableMessagesCount;
-	
+
 	protected int selectedCancelableMsgs;
-	
+
 	protected ChatThreadTips mTips;
-	
+
 	private static String NEW_LINE_DELIMETER = "\n";
-	
+
 	private class ChatThreadBroadcasts extends BroadcastReceiver
 	{
 		@Override
@@ -591,7 +590,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * Hiding any open tip
 		 */
 		mTips.hideTip();
-		
+
 		int width = getResources().getDimensionPixelSize(R.dimen.overflow_menu_width);
 		int rightMargin = width + getResources().getDimensionPixelSize(R.dimen.overflow_menu_right_margin);
 		mActionBar.showOverflowMenu(width, LayoutParams.WRAP_CONTENT, -rightMargin, -(int) (0.5 * Utils.densityMultiplier), activity.findViewById(R.id.attachment_anchor));
@@ -632,7 +631,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			 */
 			break;
 		case R.id.overlay_button:
-			onOverlayLayoutClicked((int)v.getTag());
+			onOverlayLayoutClicked((int) v.getTag());
 			break;
 		case R.id.scroll_top_indicator:
 			mConversationsView.setSelection(0);
@@ -728,11 +727,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		/**
 		 * We can now dismiss the chatTheme tip if it is there or we can hide any other visible tip
 		 */
-		if(mTips.isGivenTipShowing(ChatThreadTips.ATOMIC_CHAT_THEME_TIP))
+		if (mTips.isGivenTipShowing(ChatThreadTips.ATOMIC_CHAT_THEME_TIP))
 		{
 			mTips.setTipSeen(ChatThreadTips.ATOMIC_CHAT_THEME_TIP);
 		}
-		
+
 		else
 		{
 			mTips.hideTip();
@@ -750,7 +749,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		/**
 		 * We can now dismiss the Attachment tip if it is there or we hide any other visible tip
 		 */
-		if(mTips.isGivenTipShowing(ChatThreadTips.ATOMIC_ATTACHMENT_TIP))
+		if (mTips.isGivenTipShowing(ChatThreadTips.ATOMIC_ATTACHMENT_TIP))
 		{
 			mTips.setTipSeen(ChatThreadTips.ATOMIC_ATTACHMENT_TIP);
 		}
@@ -758,7 +757,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			mTips.hideTip();
 		}
-		
+
 		initAttachmentPicker(mConversation.isOnhike());
 		int width = (int) (Utils.densityMultiplier * 270);
 		int xOffset = -(int) (276 * Utils.densityMultiplier);
@@ -773,7 +772,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		if (attachmentPicker == null)
 		{
-			attachmentPicker = new AttachmentPicker(this, this,activity, true);
+			attachmentPicker = new AttachmentPicker(this, this, activity, true);
 			if (addContact)
 			{
 				attachmentPicker.appendItem(new OverFlowMenuItem(getString(R.string.contact), 0, R.drawable.ic_attach_contact, AttachmentPicker.CONTACT));
@@ -846,7 +845,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			return true;
 		}
-		
+
 		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
 		{
 			mShareablePopupLayout.dismiss();
@@ -857,28 +856,28 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			return themePicker.onBackPressed();
 		}
-		
+
 		if (mActionMode.isActionModeOn())
 		{
 			mActionMode.finish();
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	private void actionBarBackPressed()
 	{
 		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
 		{
 			mShareablePopupLayout.dismiss();
 		}
-		
+
 		if (removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true))
 		{
-			return ;
+			return;
 		}
-		
+
 		activity.backPressed();
 	}
 
@@ -908,7 +907,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void shareCapturedImage(int resultCode, Intent data)
 	{
-		
+
 	}
 
 	protected void uploadFile(Uri uri, HikeFileType fileType)
@@ -922,7 +921,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		Logger.i(TAG, "upload file , filepath " + filePath + " filetype " + fileType);
 		initialiseFileTransfer(filePath, null, fileType, null, false, -1, false);
 	}
-	
 
 	protected void showToast(int messageId)
 	{
@@ -1006,7 +1004,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			HikeDialogFactory.showDialog(activity, HikeDialogFactory.CONTACT_SEND_DIALOG, this, contact, getString(R.string.send), false);
 		}
 	}
-	
+
 	private void onForwardContact(String contactId)
 	{
 		PhonebookContact contact = PickContactParser.getContactData(contactId, activity);
@@ -1025,7 +1023,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void negativeClicked(HikeDialog dialog)
 	{
-		switch(dialog.getId())
+		switch (dialog.getId())
 		{
 		case HikeDialogFactory.DELETE_MESSAGES_DIALOG:
 			dialog.dismiss();
@@ -1042,24 +1040,24 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HikeDialogFactory.CONTACT_SEND_DIALOG:
 			initialiseContactTransfer(((PhonebookContact) dialog.data).jsonData);
 			dialog.dismiss();
-			
+
 			break;
 		case HikeDialogFactory.CONTACT_SAVE_DIALOG:
-			//TODO
+			// TODO
 			break;
-			
+
 		case HikeDialogFactory.CLEAR_CONVERSATION_DIALOG:
 			clearConversation();
 			dialog.dismiss();
 			break;
-			
+
 		case HikeDialogFactory.DELETE_MESSAGES_DIALOG:
 			ArrayList<Long> selectedMsgIdsToDelete = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			deleteMessagesFromDb(selectedMsgIdsToDelete, ((CustomAlertDialog) dialog).isChecked());
 			dialog.dismiss();
 			mActionMode.finish();
 			break;
-			
+
 		}
 
 	}
@@ -1208,14 +1206,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		initMessageSenderLayout();
 
 		setMessagesRead(); // Setting messages as read if there are any unread ones
-		
+
 		mComposeView.addTextChangedListener(this);
-		
+
 		/**
 		 * ensure that when the softkeyboard Done button is pressed (different than the send button we have), we send the message.
 		 */
 		mComposeView.setOnEditorActionListener(this);
-		
+
 		/**
 		 * Fix for android bug, where the focus is removed from the edittext when you have a layout with tabs (Emoticon layout) for hard keyboard devices
 		 * http://code.google.com/p/android/issues/detail?id=2516
@@ -1223,12 +1221,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)
 		{
 			mComposeView.setOnTouchListener(this);
-			
+
 		}
-		
+
 		mComposeView.setOnKeyListener(this);
-		
-		((CustomLinearLayout)activity.findViewById(R.id.chat_layout)).setOnSoftKeyboardListener(this);
+
+		((CustomLinearLayout) activity.findViewById(R.id.chat_layout)).setOnSoftKeyboardListener(this);
 
 		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
 
@@ -1261,7 +1259,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		/* get the number of credits and also listen for changes */
 		int mCredits = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
-		
+
 		mComposeViewWatcher = new ComposeViewWatcher(mConversation, mComposeView, (ImageButton) activity.findViewById(R.id.send_message), mCredits,
 				activity.getApplicationContext());
 
@@ -1727,13 +1725,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 			mAdapter.setActionMode(true);
 			v.setVisibility(mAdapter.isSelected(message) ? View.VISIBLE : View.INVISIBLE);
-			
+
 			hideShowActionModeMenus(MULTI_SELECT_ACTION_MODE);
 			/**
 			 * Hiding any open tip
 			 */
 			mTips.hideTip();
-			
+
 			return true;
 		}
 
@@ -1782,8 +1780,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		return true;
 	}
-	
-	
+
 	private void processMessageOnTap(ConvMessage message, boolean isMsgSelected)
 	{
 		if (message.isFileTransferMessage())
@@ -1860,7 +1857,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mAdapter.notifyDataSetChanged();
 
 		// TODO : UNHIDE TIPS IF WE HAVE HIDDEN THEM
-		
+
 		mTips.showHiddenTip();
 		/**
 		 * if we have hidden tips while initializing action mode we should unhide them
@@ -1869,7 +1866,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * setEnableHikeOfflineNextButton(true); }
 		 */
 	}
-	
+
 	public int incrementDecrementMsgsCount(int var, boolean isMsgSelected)
 	{
 		return isMsgSelected ? var + 1 : var - 1;
@@ -2259,7 +2256,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		message.obj = data;
 		uiHandler.sendMessage(message);
 	}
-	
+
 	protected void sendUIMessage(int what, long delayTime, Object data)
 	{
 		Message message = Message.obtain();
@@ -2433,7 +2430,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 
 	}
-	
+
 	/**
 	 * We save drafts here
 	 */
@@ -2960,17 +2957,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		switch (tag)
 		{
-		
+
 		/**
 		 * Block Case :
 		 */
-		case R.string.unblock_title:  
+		case R.string.unblock_title:
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, getMsisdnMainUser());
 			break;
-			
-			/**
-			 * Zero SMS Credits :
-			 */
+
+		/**
+		 * Zero SMS Credits :
+		 */
 		case R.string.invite_now:
 			Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.INVITE_OVERLAY_BUTTON);
 			inviteUser();
@@ -2978,7 +2975,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		}
 	}
-	
+
 	/**
 	 * Invite user
 	 */
@@ -2988,7 +2985,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			Toast.makeText(activity, R.string.already_hike_user, Toast.LENGTH_LONG).show();
 		}
-		
+
 		else
 		{
 			Utils.sendInviteUtil(new ContactInfo(msisdn, msisdn, mConversation.getContactName(), msisdn), activity.getApplicationContext(),
@@ -3224,6 +3221,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		return mAdapter.getChatTheme();
 	}
+
 	/**
 	 * Used to show clear conversation confirmation dialog
 	 */
@@ -3652,7 +3650,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void initActionbarActionModeView(int id, View view)
 	{
 	}
-	
+
 	@Override
 	public boolean onActionItemClicked(int actionModeId, MenuItem menuItem)
 	{
@@ -3735,7 +3733,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			catch (JSONException e)
 			{
 				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
-				return true; //No need to further process since there is a JSON Exception. 
+				return true; // No need to further process since there is a JSON Exception.
 			}
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, msisdn);
@@ -3759,7 +3757,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			return true;
 
 		case R.id.action_mode_overflow_menu:
-			
+
 			/**
 			 * for (ConvMessage convMessage : selectedMessagesMap.values()) { //showActionModeOverflow(convMessage); }
 			 */
@@ -3786,7 +3784,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			return false;
 		}
 	}
-	
+
 	private void clearTempData()
 	{
 		Editor editor = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, activity.MODE_PRIVATE).edit();
@@ -3836,7 +3834,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		FileTransferManager.getInstance(activity.getApplicationContext()).uploadFile(msisdn, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile,
 				mConversation.isOnhike(), recordingDuration);
 	}
-	
+
 	private void onShareFile(Intent intent)
 	{
 		String fileKey = null;
@@ -3867,24 +3865,25 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			initiateFileTransferFromIntentData(fileType, filePath, fileKey, isRecording, recordingDuration);
 		}
 	}
-	
+
 	public Activity getChatThreadActivity()
 	{
 		return activity;
 	}
-	
+
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count)
 	{
 	}
-	
+
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count, int after)
 	{
 	}
-	
+
 	/**
 	 * Used to handle clicks on the Overlay mode when ActionMode is enabled
+	 * 
 	 * @param convMessage
 	 */
 	public void onBlueOverLayClick(ConvMessage convMessage, View view)
@@ -3894,19 +3893,18 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			showMessageContextMenu(convMessage, view);
 		}
 	}
-	
+
 	@Override
 	public void onDismiss()
 	{
 		mTips.showHiddenTip();
 	}
-	
+
 	protected void onConfigurationChanged(Configuration newConfig)
 	{
 		Logger.d(TAG, "newConfig : " + newConfig.toString());
 	}
-	
-	
+
 	@Override
 	public boolean onEditorAction(TextView view, int actionId, KeyEvent keyEvent)
 	{
@@ -3925,7 +3923,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean onKey(View v, int keyCode, KeyEvent event)
 	{
@@ -3940,7 +3938,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		return false;
 	}
-	
+
 	@Override
 	public void onShown()
 	{
