@@ -80,11 +80,11 @@ public class ChatThreadUtils
 	 */
 	protected static void modifyMessageToPin(Context context, ConvMessage convMessage)
 	{
-		convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 		JSONObject jsonObject = new JSONObject();
 		try
 		{
 			jsonObject.put(HikeConstants.PIN_MESSAGE, 1);
+			convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 			convMessage.setMetadata(jsonObject);
 			convMessage.setHashMessage(HikeConstants.HASH_MESSAGE_TYPE.HASH_PIN_MESSAGE);
 		}

@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,7 +16,6 @@ import android.os.Message;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.util.Linkify;
@@ -30,7 +28,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -838,26 +835,17 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		ChatThreadUtils.playUpDownAnimation(activity.getApplicationContext(), activity.findViewById(R.id.impMessageCreateView));
 	}
 
+	/**
+	 * Utility method used for sending Pin
+	 */
+	
 	private void sendPin()
 	{
-		// send pin code
 		ConvMessage message = createConvMessageFromCompose();
 		if (message != null)
 		{
-			JSONObject jsonObject = new JSONObject();
-			try
-			{
-				jsonObject.put(HikeConstants.PIN_MESSAGE, 1);
-				message.setMetadata(jsonObject);
-				message.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
-				message.setHashMessage(HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE);
-				sendMessage(message);
-				// TODO : PinAnaytics code
-			}
-			catch (JSONException e)
-			{
-				e.printStackTrace();
-			}
+			ChatThreadUtils.modifyMessageToPin(activity.getApplicationContext(), message);
+			sendMessage(message);
 			mActionMode.finish();
 		}
 	}
