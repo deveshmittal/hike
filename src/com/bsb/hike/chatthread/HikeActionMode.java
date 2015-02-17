@@ -228,10 +228,10 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	{
 		if (mActionMode != null)
 		{
+			mActionMode.finish();
 			actionModeId = -1;
 			menuResId = -1;	
 			shouldInflateMenu = false;
-			mActionMode.finish();
 		}
 	}
 	
