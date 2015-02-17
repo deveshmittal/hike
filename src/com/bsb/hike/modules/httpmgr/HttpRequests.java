@@ -23,6 +23,7 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendDeviceDetail
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendTwitterInviteBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.sendUserLogsInfoBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.setProfileUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.signUpPinCallBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.singleStickerDownloadBase;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.socialCredentialsBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPalleteImageDownloadUrl;
@@ -548,6 +549,21 @@ public class HttpRequests
 
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(editProfileEmailGenderBase())
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
+				.post(body)
+				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
+		return requestToken;
+	}
+
+	public static RequestToken signUpPinCallRequest(JSONObject json, IRequestListener requestListener)
+	{
+		JsonBody body = new JsonBody(json);
+
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(signUpPinCallBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)

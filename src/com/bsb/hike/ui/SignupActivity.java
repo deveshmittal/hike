@@ -79,6 +79,10 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.modules.httpmgr.HttpRequests;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
@@ -96,7 +100,7 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 
-public class SignupActivity extends ChangeProfileImageBaseActivity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, OnClickListener, FinishableEvent,
+public class SignupActivity extends ChangeProfileImageBaseActivity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, OnClickListener,
 		OnCancelListener, Listener
 {
 
@@ -557,20 +561,31 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 	};
 
+	IRequestListener pincallRequestListener = new IRequestListener()
+	{
+		@Override
+		public void onRequestSuccess(com.bsb.hike.modules.httpmgr.response.Response result)
+		{
+			onFinish(false);
+		}
+
+		@Override
+		public void onRequestProgressUpdate(float progress)
+		{
+		}
+
+		@Override
+		public void onRequestFailure(HttpException httpException)
+		{
+			Toast.makeText(SignupActivity.this, R.string.call_me_fail, Toast.LENGTH_LONG).show();
+			onFinish(false);
+		}
+	};
+	
 	public void onClick(View v)
 	{
 		if (callmeBtn != null && v.getId() == callmeBtn.getId())
 		{
-			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/pin-call", RequestType.OTHER, new HikeHttpRequest.HikeHttpCallback()
-			{
-				public void onFailure()
-				{
-				}
-
-				public void onSuccess(JSONObject response)
-				{
-				}
-			});
 			JSONObject request = new JSONObject();
 			try
 			{
@@ -580,11 +595,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
-			hikeHttpRequest.setJSONData(request);
 
-			mActivityState.task = new HikeHTTPTask(this, R.string.call_me_fail, false);
-			Utils.executeHttpTask(mActivityState.task, hikeHttpRequest);
-
+			RequestToken requestToken = HttpRequests.signUpPinCallRequest(request, pincallRequestListener);
+			requestToken.execute();
+			
 			dialog = ProgressDialog.show(this, null, getResources().getString(R.string.calling_you));
 			dialog.setCancelable(true);
 			dialog.setOnCancelListener(this);
