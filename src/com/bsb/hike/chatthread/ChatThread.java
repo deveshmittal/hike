@@ -1486,9 +1486,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						intent.removeExtra(StickerManager.FWD_CATEGORY_ID);
 					}
 				}
-				/*
-				 * if (isActionModeOn) { destroyActionMode(); }
-				 */
+				
+				if (mActionMode != null && mActionMode.isActionModeOn())
+				{
+					mActionMode.finish();
+				}
 			}
 			catch (JSONException e)
 			{
