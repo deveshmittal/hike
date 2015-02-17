@@ -1,16 +1,16 @@
 package com.bsb.hike.modules.httpmgr;
 
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.bulkLastSeenUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.deleteAccountBase;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.editProfileAvatarBase;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.editProfileEmailGenderBase;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.editProfileNameBase;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.deleteAccountBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.editProfileAvatarBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.editProfileEmailGenderBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.editProfileNameBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getAvatarBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getGroupBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getHikeJoinTimeBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStaticAvatarBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.getStatusBaseUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.groupProfileBase;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.groupProfileBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.lastSeenUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.multiStickerDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.postAddressbookBaseUrl;
@@ -30,7 +30,7 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPalleteIm
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerPreviewImageDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerShopDownloadUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerSignupUpgradeUrl;
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.unlinkAccountBase;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.unlinkAccountBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.updateAddressbookBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.validateNumberBaseUrl;
 import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_HIGH;
@@ -465,7 +465,7 @@ public class HttpRequests
 	public static RequestToken deleteAccountRequest(IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(deleteAccountBase())
+				.setUrl(deleteAccountBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.delete()
@@ -476,7 +476,7 @@ public class HttpRequests
 	public static RequestToken unlinkAccountRequest(IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(unlinkAccountBase())
+				.setUrl(unlinkAccountBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.post(null)
@@ -489,7 +489,7 @@ public class HttpRequests
 		File file = new File(filePath);
 		FileBody body = new FileBody("application/json", file);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(editProfileAvatarBase())
+				.setUrl(editProfileAvatarBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_LONG)
 				.setRequestListener(requestListener)
 				.post(body)
@@ -503,7 +503,7 @@ public class HttpRequests
 		JsonBody body = new JsonBody(json);
 
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(editProfileNameBase())
+				.setUrl(editProfileNameBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)
@@ -518,7 +518,7 @@ public class HttpRequests
 		JsonBody body = new JsonBody(json);
 
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(groupProfileBase() + groupId + "/name")
+				.setUrl(groupProfileBaseUrl() + groupId + "/name")
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)
@@ -534,7 +534,7 @@ public class HttpRequests
 		FileBody body = new FileBody("application/json", file);
 
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(groupProfileBase() + groupId + "/avatar")
+				.setUrl(groupProfileBaseUrl() + groupId + "/avatar")
 				.setRequestType(Request.REQUEST_TYPE_LONG)
 				.setRequestListener(requestListener)
 				.post(body)
@@ -548,7 +548,7 @@ public class HttpRequests
 		JsonBody body = new JsonBody(json);
 
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(editProfileEmailGenderBase())
+				.setUrl(editProfileEmailGenderBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
 				.setResponseOnUIThread(true)

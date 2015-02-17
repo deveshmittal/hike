@@ -190,32 +190,32 @@ public class HttpRequestConstants
 		return BASE_URL + BASE_V1 + "/pa";
 	}
 
-	public static String deleteAccountBase()
+	public static String deleteAccountBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT;
 	}
 
-	public static String unlinkAccountBase()
+	public static String unlinkAccountBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/unlink";
 	}
 	
-	public static String editProfileAvatarBase()
+	public static String editProfileAvatarBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/avatar";
 	}
 	
-	public static String editProfileNameBase()
+	public static String editProfileNameBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/name";
 	}
 
-	public static String groupProfileBase()
+	public static String groupProfileBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + "/group/";
 	}
 
-	public static String editProfileEmailGenderBase()
+	public static String editProfileEmailGenderBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + BASE_ACCOUNT + "/profile";
 	}
