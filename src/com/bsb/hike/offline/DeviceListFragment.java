@@ -457,6 +457,14 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                         dirs.mkdirs();
                     f.createNewFile();
                     break;
+                case 4:
+                	f = new File(Environment.getExternalStorageDirectory() + "/"
+                            + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis() + ".mp3");
+                    dirs = new File(f.getParent());
+                    if (!dirs.exists())
+                        dirs.mkdirs();
+                    f.createNewFile();
+                    break;
                 }
                 Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
                 copyFile(inputstream, new FileOutputStream(f));
@@ -497,6 +505,13 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 					Intent intent = new Intent();
 					intent.setAction(Intent.ACTION_VIEW);
 					intent.setDataAndType(Uri.parse("file://" + result), "video/*");
+					context.startActivity(intent);
+				}
+				else if(type==4)
+				{
+					Intent intent = new Intent();
+					intent.setAction(Intent.ACTION_VIEW);
+					intent.setDataAndType(Uri.parse("file://" + result), "audio/*");
 					context.startActivity(intent);
 				}
 				

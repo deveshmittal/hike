@@ -6873,6 +6873,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case HikeConstants.VIDEO_TRANSFER_CODE:
 					serviceIntent.putExtra("fileType", 3);
 					break;
+				case HikeConstants.AUDIO_TRANSFER_CODE:
+					serviceIntent.putExtra("fileType", 4);
+					break;
 				default:
 					Toast.makeText(getApplicationContext(), "File not selected!", Toast.LENGTH_SHORT).show();
 			}
