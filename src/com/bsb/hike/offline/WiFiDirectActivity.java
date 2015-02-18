@@ -72,6 +72,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     public static boolean isOfflineFileTransferOn = false;
     private final int MAXTRIES = 5;
     private WifiManager wifiManager;
+    private WifiP2pDevice connectingToDevice;
     /**
      * @param isWifiP2pEnabled the isWifiP2pEnabled to set
      */
@@ -94,7 +95,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
         isOfflineFileTransferOn = true;
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
-        
+      
         /*
          * Setting device Name to msisdn
          */
@@ -130,7 +131,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
         wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         if(wifiManager.isWifiEnabled() == false)
         	wifiManager.setWifiEnabled(true);
-        (new CheckInvitedStuckTask()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        
     }
 
     /** register the BroadcastReceiver with the intent values to be matched */
@@ -216,13 +217,15 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     }
 	
     @Override
-    public void connect(WifiP2pConfig config, int numOfTries) {
+    public void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice connectingToDevice) {
     	if(numOfTries >= MAXTRIES)
     	{
     		Toast.makeText(WiFiDirectActivity.this, "Connect failed. Retry.",
                     Toast.LENGTH_SHORT).show();
     		return;
     	}
+    	this.connectingToDevice = connectingToDevice;
+    	(new CheckInvitedStuckTask(connectingToDevice)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         manager.connect(channel, config, new ActionListener() {
 
             @Override
@@ -292,24 +295,28 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
         }
     }
 
+    /*
+     * A cancel abort request by user. Disconnect i.e. removeGroup if
+     * already connected. Else, request WifiP2pManager to abort the ongoing
+     * request
+     */
     @Override
-    public void cancelDisconnect() {
-        /*
-         * A cancel abort request by user. Disconnect i.e. removeGroup if
-         * already connected. Else, request WifiP2pManager to abort the ongoing
-         * request
-         */
-        if (manager != null) {
+    public void cancelDisconnect() { 
+        if (manager != null) 
+        {
             final DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
                     .findFragmentById(R.id.frag_list);
             if (fragment.getDevice() == null
-                    || fragment.getDevice().status == WifiP2pDevice.CONNECTED) {
+                    || fragment.getDevice().status == WifiP2pDevice.CONNECTED) 
+            {
                 disconnect();
-            } else if (fragment.getDevice().status == WifiP2pDevice.AVAILABLE
-                    || fragment.getDevice().status == WifiP2pDevice.INVITED) {
+            }
+            else if (fragment.getDevice().status == WifiP2pDevice.AVAILABLE
+                    || fragment.getDevice().status == WifiP2pDevice.INVITED) 
+            {
 
                 manager.cancelConnect(channel, new ActionListener() {
-
+                	
                     @Override
                     public void onSuccess() {
                         Toast.makeText(WiFiDirectActivity.this, "Aborting connection",
@@ -324,6 +331,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
                     }
                 });
             }
+            enableDiscovery();
         }
 
     }
@@ -359,6 +367,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
             }
         });
     }
+    
     /*
      * This Async task resets the Wifi settings if device gets blocked in
      * Invited status
@@ -366,31 +375,58 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     public class CheckInvitedStuckTask extends AsyncTask<Void, Void, Void>
     {
     	
-    	private DeviceListFragment fragment = null;
-    	private WifiP2pDevice myDevice = null;
+    	private WifiP2pDevice connectingToDevice;
+    	private WifiP2pDevice latestInstance;
+    	private DeviceListFragment fragment;
+    	private boolean destroy = false;
+    	public CheckInvitedStuckTask(WifiP2pDevice connectingToDevice)
+    	{
+    		this.connectingToDevice = connectingToDevice;
+    		fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
+    	}
+    	
     	@Override
     	protected Void doInBackground(Void... params) 
     	{
-    		fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
-    		myDevice = fragment.getDevice();
-    		if((myDevice != null) &&myDevice.status == WifiP2pDevice.INVITED)
+    		while(true)
     		{
-    			try 
-    			{
-					Thread.sleep(5*1000);
-	    			// check if even after 5 seconds it is still in invited state
-	    			// then call reset
-	    			if(myDevice.status == WifiP2pDevice.INVITED){
-	    				cancelDisconnect();
-	    			}
-    			}
-    			catch (InterruptedException e) 
-    			{
+	    		try 
+	    		{
+	    			latestInstance = fragment.getLatestPeerInstance(connectingToDevice.deviceAddress);
+		    		if((latestInstance != null) && 
+		    				(latestInstance.status == WifiP2pDevice.INVITED))
+		    		{
+		    			Thread.sleep(5*1000);
+		    			// check if even after 5 seconds it is still in invited state
+		    			// then call reset
+		    			latestInstance = fragment.getLatestPeerInstance(connectingToDevice.deviceAddress);
+		    			if(latestInstance.status == WifiP2pDevice.INVITED){
+		    				connectingToDevice = null;
+		    				fragment = null;
+		    				this.destroy = true;
+		    				return null;
+		    			}
+		    		}
+		    		else
+		    		{
+		    			Thread.sleep(5*1000);
+		    		}
+	    		}
+	    		catch (InterruptedException e) 
+				{
 					Logger.e(TAG, "Sleep failed in CheckInvitedStuckTask");
 					e.printStackTrace();
-    			}
+				}
     		}
-			return null;
+    	}
+    	
+    	@Override
+    	protected void onPostExecute(Void result) {
+    		if(destroy)
+    		{
+    			//Toast.makeText(getApplicationContext(), "Got Stuck in Invited mode. Resetting..!!", Toast.LENGTH_SHORT).show();
+    			cancelDisconnect();
+    		}
     	}
     }
 }

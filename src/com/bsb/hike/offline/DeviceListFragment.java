@@ -191,8 +191,6 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    		phoneNumber = deviceContact.getName();
 	    	
 	    	//if(currentDevice.status != WifiP2pDevice.CONNECTED)
-	    	
-	    		
 	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
 	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
 	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
@@ -200,7 +198,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        	WifiP2pConfig config = new WifiP2pConfig();
 	    		config.deviceAddress = currentDevice.deviceAddress;
 	    		config.wps.setup = WpsInfo.PBC;
-	    		if (progressDialog != null && progressDialog.isShowing()) {
+	    		/*if (progressDialog != null && progressDialog.isShowing()) {
 	    			progressDialog.dismiss();
 	    		}
 	    		progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
@@ -210,9 +208,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	                public void onCancel(DialogInterface dialog) {
 	                    Log.d("wifidirectdemo", "Hello cancelled");
 	                }
-	            });
+	            });*/
 	    		
-	    		((DeviceActionListener) getActivity()).connect(config, 0);
+	    		((DeviceActionListener) getActivity()).connect(config, 0, currentDevice);
 	    	
 	    	/*
 	    	else
@@ -334,14 +332,30 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        }
         }
     }
-
+    
+    public WifiP2pDevice getLatestPeerInstance(String deviceAddress)
+    {
+    	WifiP2pDevice latestInstance = null;
+    	synchronized(syncMsisdn)
+    	{
+    		for(int i=0; i<peers.size(); i++)
+    		{
+    			if(peers.get(i).deviceAddress.compareTo(deviceAddress)==0)
+    			{
+    				latestInstance = peers.get(i);
+    				return latestInstance;
+    			}
+    		}
+    	}
+    	return latestInstance;
+    }
     public void clearPeers() {
         peers.clear();
         ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
     }
 
     /**
-     * 
+     * Show a progress bar to let the know the user know discoverPeers is running
      */
     public void onInitiateDiscovery() {
         if (progressDialog != null && progressDialog.isShowing()) {
@@ -367,7 +381,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
         void cancelDisconnect();
 
-        void connect(WifiP2pConfig config, int numOfTries);
+        void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice connectingToDevice);
 
         void disconnect();
     }
