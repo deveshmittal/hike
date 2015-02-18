@@ -118,7 +118,7 @@ public class VoIPService extends Service {
 	private Chronometer chronometer = null;
 	private int chronoBackup = 0;
 	private int playbackSampleRate = 0;
-	private boolean resamplerEnabled = false;
+	private boolean resamplerEnabled = true;
 	private Thread senderThread, reconnectingBeepsThread;
 	private Ringtone ringtone;
 	private Vibrator vibrator = null;
@@ -153,7 +153,7 @@ public class VoIPService extends Service {
 	private static final byte PP_PROTOCOL_BUFFER = 0x03;
 	
 	// Echo cancellation
-	private final boolean aecEnabled = false;
+	private final boolean aecEnabled = true;
 	private boolean useVADToReduceData = false;
 	SolicallWrapper solicallAec = null;
 	private boolean aecSpeakerSignal = false, aecMicSignal = false;
@@ -1105,14 +1105,7 @@ public class VoIPService extends Service {
 								VoIPDataPacket dp = new VoIPDataPacket(PacketType.VOICE_PACKET);
 								byte[] packetData = new byte[uncompressedLength];
 								System.arraycopy(uncompressedData, 0, packetData, 0, uncompressedLength);
-
-								if (resamplerEnabled && playbackSampleRate != AUDIO_SAMPLE_RATE) {
-									// We need to resample the output signal
-									byte[] output = resampler.reSample(packetData, 16, AUDIO_SAMPLE_RATE, playbackSampleRate);
-									dp.write(output);
-								} else {
-									dp.write(packetData);
-								}
+								dp.write(packetData);
 								
 								synchronized (decodedBuffersQueue) {
 									decodedBuffersQueue.add(dp);
@@ -1374,7 +1367,7 @@ public class VoIPService extends Service {
 				
 				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				int index = 0, size = 0;
-				Logger.d(VoIPConstants.TAG, "minBufSizePlayback: " + minBufSizePlayback);
+				Logger.d(VoIPConstants.TAG, "AUDIOTRACK - minBufSizePlayback: " + minBufSizePlayback + ", playbackSampleRate: " + playbackSampleRate);
 			
 				setAudioModeInCall();
 				try {
@@ -1413,14 +1406,24 @@ public class VoIPService extends Service {
 						} else
 							aecSpeakerSignal = true;
 
+						// Resample
+						if (resamplerEnabled && playbackSampleRate != AUDIO_SAMPLE_RATE) {
+							// We need to resample the output signal
+							byte[] output = resampler.reSample(dp.getData(), 16, AUDIO_SAMPLE_RATE, playbackSampleRate);
+							dp.write(output);
+						} 
+						
 						// For streaming mode, we must write data in chunks <= buffer size
 						index = 0;
+						long timer = System.currentTimeMillis();
 						while (index < dp.getLength()) {
-							size = Math.min(minBufSizePlayback, dp.getLength() - index);
+							size = Math.min(minBufSizePlayback / 2, dp.getLength() - index);
 							audioTrack.write(dp.getData(), index, size);
 							index += size; 
 						}
 						audiotrackFramesWritten += dp.getLength() / 2;
+//						Logger.d(VoIPConstants.TAG, "Time: " + (System.currentTimeMillis() - timer) + "ms, " +
+//								"Data: " + (dp.getLength() / 2) * 1000 / playbackSampleRate + "ms.");
 
 					} else {
 						synchronized (decodedBuffersQueue) {
