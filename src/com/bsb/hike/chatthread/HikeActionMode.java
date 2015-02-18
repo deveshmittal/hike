@@ -203,6 +203,9 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	protected void actionBarDestroyed()
 	{
 		this.mActionMode = null;
+		actionModeId = -1;
+		menuResId = -1;	
+		shouldInflateMenu = false;
 	}
 
 	protected void doneClicked()
@@ -229,9 +232,6 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		if (mActionMode != null)
 		{
 			mActionMode.finish();
-			actionModeId = -1;
-			menuResId = -1;	
-			shouldInflateMenu = false;
 		}
 	}
 	
