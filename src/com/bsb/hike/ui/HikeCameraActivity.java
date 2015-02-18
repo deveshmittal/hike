@@ -2,8 +2,6 @@ package com.bsb.hike.ui;
 
 import java.io.File;
 
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Build;
@@ -18,9 +16,9 @@ import android.widget.ImageButton;
 import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.photos.HikePhotosListener;
-import com.bsb.hike.photos.PhotoEditerTools;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
@@ -91,7 +89,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 					{
 						Logger.d(TAG, "Saved Image: " + (f != null ? f.getAbsolutePath() : "null"));
 						Intent i = new Intent(HikeCameraActivity.this, PictureEditer.class);
-						i.putExtra("FilePath", f.getAbsolutePath());
+						i.putExtra(HikeConstants.HikePhotos.FILENAME, f.getAbsolutePath());
 						HikeCameraActivity.this.startActivity(i);
 					}
 				});

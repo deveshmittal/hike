@@ -10,12 +10,13 @@ import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.photos.PhotoEditerTools;
-import com.bsb.hike.photos.PhotoEditerTools.MenuType;
-import com.bsb.hike.photos.view.DoodleEffectItem;
-import com.bsb.hike.photos.view.FilterEffectItem;
-import com.bsb.hike.photos.view.PictureEditerView;
+import com.bsb.hike.photos.HikePhotosUtils;
+import com.bsb.hike.photos.HikePhotosUtils.MenuType;
+import com.bsb.hike.photos.views.DoodleEffectItemLinearLayout;
+import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
+import com.bsb.hike.photos.views.PhotosEditerFrameLayoutView;
 import com.bsb.hike.ui.fragments.PreviewFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.viewpagerindicator.IconPagerAdapter;
@@ -24,26 +25,26 @@ import com.viewpagerindicator.TabPageIndicator;
 public class PictureEditer extends HikeAppStateBaseFragmentActivity
 {
 
-	PictureEditerView editView;
+	PhotosEditerFrameLayoutView editView;
 
 	private int menuIcons[] = { R.drawable.filters, R.drawable.doodle };
 
-	private EffectItemAdapter clickHandler;
+	private EditorClickListener clickHandler;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		
-		//PhotoEditerTools.hideSystemUI(getWindow().getDecorView());
-		
+
+		// PhotoEditerTools.hideSystemUI(getWindow().getDecorView());
+
 		setContentView(R.layout.fragment_picture_editer);
 
-		clickHandler = new EffectItemAdapter(this);
+		clickHandler = new EditorClickListener(this);
 
 		Intent intent = getIntent();
-		String filename = intent.getStringExtra("FilePath");
-		editView = (PictureEditerView) findViewById(R.id.editer);
+		String filename = intent.getStringExtra(HikeConstants.HikePhotos.FILENAME);
+		editView = (PhotosEditerFrameLayoutView) findViewById(R.id.editer);
 		editView.loadImageFromFile(filename);
 		FragmentPagerAdapter adapter = new EffectsViewAdapter(getSupportFragmentManager(), clickHandler);
 
@@ -54,21 +55,21 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		indicator.setViewPager(pager);
 
 		// ((Button)findViewById(R.id.saveButton)).setOnClickListener(clickHandler);
-		
+
 		findViewById(R.id.back).setOnClickListener(clickHandler);
 
 		TabPageIndicator tabs = (TabPageIndicator) findViewById(R.id.indicator);
-		
-		//getSupportActionBar().hide();
+
+		// getSupportActionBar().hide();
 
 	}
 
 	public class EffectsViewAdapter extends FragmentPagerAdapter implements IconPagerAdapter
 	{
 
-		private EffectItemAdapter mAdapter;
+		private EditorClickListener mAdapter;
 
-		public EffectsViewAdapter(FragmentManager fm, EffectItemAdapter adapter)
+		public EffectsViewAdapter(FragmentManager fm, EditorClickListener adapter)
 		{
 			super(fm);
 			mAdapter = adapter;
@@ -80,10 +81,10 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 			switch (position)
 			{
-			case 0:
-				return new PreviewFragment(MenuType.Effects, mAdapter,editView.getScaledImageOriginal());
-			case 1:
-				return new PreviewFragment(MenuType.Doodle, mAdapter,editView.getScaledImageOriginal());
+			case HikeConstants.HikePhotos.FILTER_FRAGMENT_ID:
+				return new PreviewFragment(MenuType.Effects, mAdapter, editView.getScaledImageOriginal());
+			case HikeConstants.HikePhotos.DOODLE_FRAGMENT_ID:
+				return new PreviewFragment(MenuType.Doodle, mAdapter, editView.getScaledImageOriginal());
 			}
 			return null;
 		}
@@ -91,7 +92,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		@Override
 		public CharSequence getPageTitle(int position)
 		{
-			return "";
+			return HikeConstants.HikePhotos.EMPTY_TAB_TITLE;
 		}
 
 		@Override
@@ -107,21 +108,22 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		}
 	}
 
-	public class EffectItemAdapter implements OnClickListener
+	public class EditorClickListener implements OnClickListener
 	{
-		private DoodleEffectItem doodlePreview;
+		private DoodleEffectItemLinearLayout doodlePreview;
 
-		private int doodleWidth = 30;
+		private int doodleWidth;
 
 		private Context mContext;
 
-		public EffectItemAdapter(Context context)
+		public EditorClickListener(Context context)
 		{
 			// TODO Auto-generated constructor stub
 			mContext = context;
+			doodleWidth = HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH;
 		}
 
-		public void setDoodlePreview(DoodleEffectItem view)
+		public void setDoodlePreview(DoodleEffectItemLinearLayout view)
 		{
 			doodlePreview = view;
 		}
@@ -136,20 +138,20 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		{
 			// TODO Auto-generated method stub
 
-			if (v.getClass() == FilterEffectItem.class)
+			if (v.getClass() == FilterEffectItemLinearLayout.class)
 			{
 				editView.disableDoodling();
-				FilterEffectItem me = (FilterEffectItem) v;
+				FilterEffectItemLinearLayout me = (FilterEffectItemLinearLayout) v;
 				editView.applyFilter(me.getFilter());
 			}
 
-			else if (v.getClass() == DoodleEffectItem.class)
+			else if (v.getClass() == DoodleEffectItemLinearLayout.class)
 			{
-				DoodleEffectItem me = (DoodleEffectItem) v;
+				DoodleEffectItemLinearLayout me = (DoodleEffectItemLinearLayout) v;
 				editView.setBrushColor(me.getBrushColor());
 				editView.enableDoodling();
 				doodlePreview.setBrushColor(me.getBrushColor());
-				doodlePreview.Refresh();
+				doodlePreview.refresh();
 
 			}
 			else
@@ -157,25 +159,24 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				switch (v.getId())
 				{
 				case R.id.plusWidth:
-					if (doodleWidth + 10 <= 80)
-						doodleWidth += 10;
-					doodlePreview.setBrushWidth(PhotoEditerTools.dpToPx(mContext, doodleWidth));
-					doodlePreview.Refresh();
-					editView.setBrushWidth(PhotoEditerTools.dpToPx(mContext, doodleWidth));
+					if (doodleWidth + HikeConstants.HikePhotos.DELTA_BRUSH_WIDTH <= HikeConstants.HikePhotos.MAX_BRUSH_WIDTH)
+						doodleWidth += HikeConstants.HikePhotos.DELTA_BRUSH_WIDTH;
+					doodlePreview.setBrushWidth(HikePhotosUtils.dpToPx(mContext, doodleWidth));
+					doodlePreview.refresh();
+					editView.setBrushWidth(HikePhotosUtils.dpToPx(mContext, doodleWidth));
 					break;
 				case R.id.minusWidth:
-					if (doodleWidth - 10 >= 10)
-						doodleWidth -= 10;
-					doodlePreview.setBrushWidth(PhotoEditerTools.dpToPx(mContext, doodleWidth));
-					doodlePreview.Refresh();
-					editView.setBrushWidth(PhotoEditerTools.dpToPx(mContext, doodleWidth));
+					if (doodleWidth - HikeConstants.HikePhotos.DELTA_BRUSH_WIDTH >= HikeConstants.HikePhotos.Min_BRUSH_WIDTH)
+						doodleWidth -= HikeConstants.HikePhotos.DELTA_BRUSH_WIDTH;
+					doodlePreview.setBrushWidth(HikePhotosUtils.dpToPx(mContext, doodleWidth));
+					doodlePreview.refresh();
+					editView.setBrushWidth(HikePhotosUtils.dpToPx(mContext, doodleWidth));
 					break;
 				case R.id.back:
 					editView.undoLastDoodleDraw();
 					break;
 				}
 			}
-			
 
 		}
 

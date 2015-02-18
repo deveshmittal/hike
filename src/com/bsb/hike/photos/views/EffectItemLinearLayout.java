@@ -1,4 +1,4 @@
-package com.bsb.hike.photos.view;
+package com.bsb.hike.photos.views;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,24 +11,36 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+/**
+ * @author akhiltripathi
+ *	
+ * Abstract class for thumbnails. 
+ * Any Feature added later must extend this thumbnail class to preview its effect on a thumbnail.
+ * 
+ */
 
-public abstract class EffectItem extends LinearLayout 
+public abstract class EffectItemLinearLayout extends LinearLayout
 {
 
-	private int ForegroundColor;
-	private int BackgroundColor;
+	private int foregroundColor;
+
+	private int backgroundColor;
+
 	private TextView label;
+
 	private ImageView icon;
+
 	private Bitmap postInflate;
 
-
-	public EffectItem(Context context, AttributeSet attrs) {
+	public EffectItemLinearLayout(Context context, AttributeSet attrs)
+	{
 		super(context, attrs);
 		// TODO Auto-generated constructor stub
 
-
 	}
-	public EffectItem(Context context) {
+
+	public EffectItemLinearLayout(Context context)
+	{
 		super(context);
 	}
 
@@ -47,12 +59,12 @@ public abstract class EffectItem extends LinearLayout
 
 	public int getBackgroundColor()
 	{
-		return this.BackgroundColor;
+		return this.backgroundColor;
 	}
 
 	public int getForegroundColor()
 	{
-		return this.ForegroundColor;
+		return this.foregroundColor;
 	}
 
 	public void setForegroundColor(int Color)
@@ -60,7 +72,6 @@ public abstract class EffectItem extends LinearLayout
 		this.label.setTextColor(getResources().getColor(Color));
 		this.label.invalidate();
 		this.invalidate();
-
 
 	}
 
@@ -80,65 +91,47 @@ public abstract class EffectItem extends LinearLayout
 
 	public void setImage(Bitmap bitmap)
 	{
-		if(this.icon!=null)
+		if (this.icon != null)
 		{
 			this.icon.setImageBitmap(bitmap);
 			this.icon.invalidate();
 		}
 		else
-			postInflate=bitmap;
+			postInflate = bitmap;
 		this.invalidate();
 	}
 
-	public Bitmap getIcon(){
-		return ((BitmapDrawable)this.icon.getDrawable()).getBitmap();
+	public Bitmap getIcon()
+	{
+		if (icon != null)
+		{
+			return ((BitmapDrawable) this.icon.getDrawable()).getBitmap();
+		}
+		else
+		{
+			return null;
+		}
 
 	}
 
 	@Override
-	protected void onFinishInflate() {
+	protected void onFinishInflate()
+	{
 		super.onFinishInflate();
-		try{
-			label= (TextView) findViewById(R.id.previewText);
-		}
-		catch(Exception e)
+		try
 		{
-
+			label = (TextView) findViewById(R.id.previewText);
 		}
-		icon=(ImageView) findViewById(R.id.previewIcon);
-		if(postInflate!=null)
+		catch (Exception e)
+		{
+			// do nothing
+		}
+		icon = (ImageView) findViewById(R.id.previewIcon);
+		if (postInflate != null)
+		{
 			setImage(postInflate);
+		}
 	}
-
 
 }
-
-
-
-
-/*class BorderEffectItem extends EffectItem 
-{
-	private int borderId;
-	public BorderEffectItem(Context context,Drawable preview,String title) {
-		super(context);
-		this.setImage(preview);
-		this.setText(title);
-
-		// TODO Auto-generated constructor stub
-	}
-
-	public void setBorderId(int borderId) {
-		this.borderId = borderId;
-	}
-
-	public Drawable getBorder() {
-		return getResources().getDrawable(borderId);
-
-	}
-
-
-}
- */
-
-
 

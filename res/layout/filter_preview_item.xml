@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.bsb.hike.photos.view.FilterEffectItem xmlns:android="http://schemas.android.com/apk/res/android"
+<com.bsb.hike.photos.views.FilterEffectItemLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="100dp"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
@@ -20,4 +20,4 @@
         android:textColor="#FFFFFFFF"
         android:layout_weight="1" />
 
-</com.bsb.hike.photos.view.FilterEffectItem>
+</com.bsb.hike.photos.views.FilterEffectItemLinearLayout>
