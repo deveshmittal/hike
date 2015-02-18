@@ -3554,18 +3554,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	public void removeSelection()
 	{
-		removeSelectedItems();
-		notifyDataSetChanged();
-	}
-	
-	public void removeSelectedItems()
-	{
 		if (mSelectedItemsIds != null)
 		{
 			mSelectedItemsIds.clear();
+			notifyDataSetChanged();
 		}
 	}
-
+	
 	public void selectView(ConvMessage convMsg, boolean value)
 	{
 		if (value)

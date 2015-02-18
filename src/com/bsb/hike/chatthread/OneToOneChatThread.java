@@ -2036,12 +2036,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		hikeToOfflineTipView.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
 		hikeToOfflineTipView.findViewById(R.id.close_tip).setVisibility(View.GONE);
 
-		/**
-		 * Clearing any residual selected items
-		 */
-
-		mAdapter.removeSelectedItems();
-
 		for (Long msgid : undeliveredMessages.keySet())
 		{
 			ConvMessage convMsg = undeliveredMessages.get(msgid);
