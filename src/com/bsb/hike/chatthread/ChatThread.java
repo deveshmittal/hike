@@ -1248,8 +1248,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public boolean onDoubleTap(MotionEvent e)
 	{
 		Logger.d(TAG, "Double Tap motion");
-		sendPoke();
-		return true;
+		if(mActionMode.isActionModeOn())
+		{
+			return false;
+		}
+			sendPoke();
+			return true;
 	}
 
 	protected void sendPoke()

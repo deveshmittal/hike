@@ -22,6 +22,7 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.animation.Animation;
@@ -2361,5 +2362,24 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			setEnabledH20NextButton(true);
 		}
+	}
+	
+	@Override
+	public boolean onDoubleTap(MotionEvent e)
+	{
+		if (modeOfChat == H2S_MODE)  // Are we in H2S mode ? 
+		{
+			return false;
+		}
+
+		if (!mConversation.isOnhike() && mCredits <= 0)
+		{
+			if (!Utils.getSendSmsPref(activity.getApplicationContext()))
+			{
+				return false;
+			}
+		}
+		
+		return super.onDoubleTap(e);
 	}
 }

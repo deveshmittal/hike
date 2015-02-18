@@ -1393,4 +1393,17 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		}
 		return convMessage;
 	}
+	
+	@Override
+	public boolean onDoubleTap(MotionEvent e)
+	{
+		if (!groupConversation.getIsGroupAlive())
+		{
+			return false;
+		}
+		else
+		{
+			return super.onDoubleTap(e);
+		}
+	}
 }
