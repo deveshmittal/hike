@@ -153,14 +153,14 @@ public class VoIPService extends Service {
 	private static final byte PP_PROTOCOL_BUFFER = 0x03;
 	
 	// Echo cancellation
+	private final boolean aecEnabled = false;
+	private boolean useVADToReduceData = false;
 	SolicallWrapper solicallAec = null;
-	private final boolean aecEnabled = true;
 	private boolean aecSpeakerSignal = false, aecMicSignal = false;
 	private int audiotrackFramesWritten = 0;
 	private boolean miscTrigger = false;
 	private int miscCounter = 0;
 	private VoIPDataPacket silentPacket;
-	private boolean useVADToReduceData = false;
 
 	// VoIP version support
 	private final int VOIP_VERSION_SUPPORT = 2;
@@ -1481,7 +1481,7 @@ public class VoIPService extends Service {
 		                	synchronized (decodedBuffersQueue) {
 			                	decodedBuffersQueue.add(silentPacket);
 			                	decodedBuffersQueue.notify();
-//			                	Logger.w(VoIPConstants.TAG, "Adding silence to audiotrack");
+			                	Logger.w(VoIPConstants.TAG, "Adding silence to audiotrack");
 							}
 						}
 

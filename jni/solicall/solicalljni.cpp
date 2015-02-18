@@ -64,7 +64,7 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_AECInit
     mySoliCallInit.sAECMinTailType = -1;
     mySoliCallInit.iNumberOfSamplesInAECBurst = 2000;
     mySoliCallInit.iNumberOfSamplesInHighConfidenceAECBurst = 2000;
-    mySoliCallInit.sAECMinOutputPercentageDuringEcho = 25;
+    mySoliCallInit.sAECMinOutputPercentageDuringEcho = 100; // 25;
 
     mySoliCallInit.sAecStartupAggressiveLevel = 10;
     mySoliCallInit.sComfortNoisePercent = 100;
