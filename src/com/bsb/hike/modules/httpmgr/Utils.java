@@ -3,6 +3,7 @@ package com.bsb.hike.modules.httpmgr;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -60,6 +61,18 @@ public class Utils
 		}
 		System.out.println(" stream to bytes method time : " + (System.currentTimeMillis() - time));
 		return baos.toByteArray();
+	}
+	
+	public static boolean containsHeader(List<Header> headers, String headerString)
+	{
+		for(Header header : headers)
+		{
+			if(header.getName().equalsIgnoreCase(headerString))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
