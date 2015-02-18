@@ -117,6 +117,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	/* The waiting time in seconds before scheduling a H20 Tip */
 	private static final int DEFAULT_UNDELIVERED_WAIT_TIME = 30;
 
+	private static final int DEFAULT_SMS_LENGTH = 140;
+
 	private View hikeToOfflineTipView;
 
 	/**
@@ -1776,7 +1778,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			/**
 			 * If action mode is on and H20 Tip comes, so we are disabling NextButton to avoid interference
 			 */
-			if (mActionMode.whichActionModeIsOn() != -1)
+			if (mActionMode.isActionModeOn())
 			{
 				setEnabledH20NextButton(false);
 			}
@@ -2280,7 +2282,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		Collection<ConvMessage> selectedMessages = mAdapter.getSelectedMessagesMap().values();
 		int totalMsgLength = Utils.combineInOneSmsString(activity.getApplicationContext(), false, selectedMessages, true).length();
 
-		return (totalMsgLength / 140) + 1;
+		return (totalMsgLength / DEFAULT_SMS_LENGTH) + 1;
 	}
 
 	/**
