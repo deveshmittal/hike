@@ -1333,10 +1333,6 @@ public class UploadFileTask extends FileTransferBase
 				}
 			});
 		}
-		if (selectedFile != null && hikeFileType != HikeFileType.AUDIO_RECORDING)
-		{
-			context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(selectedFile)));
-		}
 	}
 	
 	private void removeTask()
