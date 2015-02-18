@@ -256,6 +256,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private TextView chatProgress, rewardCard;
 
 	public boolean searchMode = false;
+	
+	private String searchText;
 
 	private enum hikeBotConvStat
 	{
@@ -1033,6 +1035,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), conv);
+		intent.putExtra(HikeConstants.Extras.CONV_SEARCH_QUERY, searchText);
 		startActivity(intent);
 
 		SharedPreferences prefs = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -1051,11 +1054,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	public void onSearchQueryChanged(String s)
 	{
+		searchText = s;
 		mAdapter.onQueryChanged(s);
 	}
 
 	public void removeSearch()
 	{
+		searchText = null;
 		mAdapter.removeSearch();
 	}
 
