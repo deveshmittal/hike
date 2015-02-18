@@ -23,4 +23,13 @@
         android:summary="@string/feedback_hinttext"
         android:title="@string/feedback" />
     
+    <com.bsb.hike.view.IconCheckBoxPreference
+        icon="@drawable/preference_vibe"
+        android:defaultValue="true"
+        android:key="showDataTracker"
+        android:layout="@layout/icon_preference"
+        android:summary="show data tracker"
+        android:title="Data tracker"
+        android:widgetLayout="@layout/checkbox_widget" />
+    
 </PreferenceScreen>
