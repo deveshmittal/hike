@@ -45,7 +45,7 @@ public class PlatformWebClient extends WebViewClient
 		WebResourceResponse response = null;
 		wrtInputStreamm = new FileInputStream(PlatformContentUtils.openFileParcel(myuri, "").getFileDescriptor());
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+		/*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
 		{
 			int statusCode = 200;
 			String reasonPhase = "OK";
@@ -53,7 +53,7 @@ public class PlatformWebClient extends WebViewClient
 			responseHeaders.put("Access-Control-Allow-Origin", "*");
 			response = new WebResourceResponse(PlatformContentConstants.ASSETS_FONTS_DIR + suffix, "UTF-8", statusCode, reasonPhase, responseHeaders, wrtInputStreamm);
 		}
-		else
+		else */
 		{
 			response = new WebResourceResponse(PlatformContentConstants.ASSETS_FONTS_DIR + suffix, "UTF-8", wrtInputStreamm);
 		}

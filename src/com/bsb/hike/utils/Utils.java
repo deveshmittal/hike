@@ -1,7 +1,6 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -37,8 +36,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,7 +71,6 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -93,9 +89,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.media.AudioManager;
 import android.media.ExifInterface;
-import android.media.MediaPlayer;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.TrafficStats;
@@ -146,8 +139,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeConstants.ImageQuality;
@@ -156,11 +148,12 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.TrafficsStatsFile;
 import com.bsb.hike.cropimage.CropImage;
-import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
@@ -175,21 +168,17 @@ import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.ConnectionChangeReceiver;
-import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.service.HikeMqttManagerNew;
-import com.bsb.hike.service.HikeService;
+import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.ComposeChatActivity;
-import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -201,9 +190,6 @@ import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPUtils;
-import com.bsb.hike.voip.view.VoIPActivity;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -229,8 +215,6 @@ public class Utils
 	public static float densityMultiplier = 1.0f;
 
 	public static int densityDpi;
-
-	private static Lock lockObj = new ReentrantLock();
 
 	private static final String defaultCountryName = "India";
 
@@ -1634,23 +1618,20 @@ public class Utils
 		return b;
 	}
 
+	
 	public static void setupUri()
 	{
 		SharedPreferences settings = HikeMessengerApp.getInstance().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		boolean connectUsingSSL = Utils.switchSSLOn();
-		Utils.setupServerURL(settings.getInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, AccountUtils._PRODUCTION_HOST), connectUsingSSL);
-	}
-
-	public static void setupServerURL(int whichServer, boolean ssl)
-	{
-		Logger.d("SSL", "Switching SSL on? " + ssl);
-
-		AccountUtils.ssl = ssl;
+		int whichServer = settings.getInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, AccountUtils._PRODUCTION_HOST);
+		
+		AccountUtils.ssl = (whichServer != AccountUtils._CUSTOM_HOST) ? Utils.switchSSLOn(): false;
 		AccountUtils.mClient = null;
+		
+		Logger.d("SSL", "Switching SSL on? " + AccountUtils.ssl);
 
-		String httpString = ssl ? AccountUtils.HTTPS_STRING : AccountUtils.HTTP_STRING;
+		String httpString = AccountUtils.ssl ? AccountUtils.HTTPS_STRING : AccountUtils.HTTP_STRING;
 
-		setHostAndPort(whichServer, ssl);
+		setHostAndPort(whichServer, AccountUtils.ssl);
 
 		if (whichServer == AccountUtils._PRODUCTION_HOST)
 		{
@@ -1665,29 +1646,26 @@ public class Utils
 			AccountUtils.SDK_AUTH_BASE = AccountUtils.SDK_AUTH_BASE_URL_STAGING;
 		}
 
-		AccountUtils.fileTransferHost = (whichServer == AccountUtils._PRODUCTION_HOST) ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
-		AccountUtils.fileTransferBase = httpString + AccountUtils.fileTransferHost + ":" + Integer.toString(AccountUtils.port) + "/v1";
-		 
-		CheckForUpdateTask.UPDATE_CHECK_URL = httpString + ((whichServer == AccountUtils._PRODUCTION_HOST) ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL);
-		 
+		AccountUtils.fileTransferHost = (whichServer == AccountUtils._PRODUCTION_HOST) ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.host;
+		
+		AccountUtils.fileTransferBase = httpString + AccountUtils.fileTransferHost + ":" + Integer.toString(AccountUtils.port) + "/v1";		 		 
 		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.fileTransferBase + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
 		AccountUtils.fastFileUploadUrl = AccountUtils.fileTransferBase + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
+		
+		CheckForUpdateTask.UPDATE_CHECK_URL =  ((whichServer == AccountUtils._PRODUCTION_HOST) ? httpString + CheckForUpdateTask.PRODUCTION_URL : AccountUtils.base + CheckForUpdateTask.STAGING_URL_BASE);
 
-		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
-				+ (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
-
-		AccountUtils.rewardsUrl = (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.REWARDS_STAGING_BASE);
-		AccountUtils.gamesUrl = (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.GAMES_STAGING_BASE);
-		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING + (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.STICKERS_PRODUCTION_BASE : AccountUtils.STICKERS_STAGING_BASE);
-		AccountUtils.h2oTutorialUrl = AccountUtils.HTTP_STRING + (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.H2O_TUTORIAL_PRODUCTION_BASE : AccountUtils.H2O_TUTORIAL_STAGING_BASE);
-		AccountUtils.analyticsUploadUrl = AccountUtils.base + AccountUtils.ANALYTICS_UPLOAD_BASE;
+		AccountUtils.rewardsUrl = (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.base + AccountUtils.REWARDS_STAGING_PATH);
+		AccountUtils.gamesUrl = (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.base + AccountUtils.GAMES_STAGING_PATH);
+		AccountUtils.stickersUrl = (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.HTTP_STRING + AccountUtils.STICKERS_PRODUCTION_BASE : AccountUtils.base + AccountUtils.STICKERS_STAGING_PATH);
+		AccountUtils.h2oTutorialUrl = (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.HTTP_STRING + AccountUtils.H2O_TUTORIAL_PRODUCTION_BASE : AccountUtils.base + AccountUtils.H2O_TUTORIAL_STAGING_PATH);
+		AccountUtils.analyticsUploadUrl = AccountUtils.base + AccountUtils.ANALYTICS_UPLOAD_PATH;
 
 		Logger.d("SSL", "Base: " + AccountUtils.base);
 		Logger.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
 		Logger.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferBase);
 		Logger.d("SSL", "UpdateCheck: " + CheckForUpdateTask.UPDATE_CHECK_URL);
 		Logger.d("SSL", "FTDloadBase: " + AccountUtils.fileTransferBaseDownloadUrl);
-		Logger.d("SSL", "FTViewBase: " + AccountUtils.fileTransferBaseViewUrl);
+	
 	}
 
 	private static void setHostAndPort(int whichServer, boolean ssl)
@@ -1710,6 +1688,14 @@ public class Utils
 			AccountUtils.host = AccountUtils.DEV_STAGING_HOST;
 			AccountUtils.port = ssl ? AccountUtils.STAGING_PORT_SSL : AccountUtils.STAGING_PORT;
 			break;
+		case AccountUtils._CUSTOM_HOST:
+			SharedPreferences sharedPreferences = HikeMessengerApp.getInstance().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
+			
+			AccountUtils.host = sharedPreferences.getString(HikeMessengerApp.CUSTOM_HTTP_HOST, AccountUtils.PRODUCTION_HOST);
+			AccountUtils.port = sharedPreferences.getInt(HikeMessengerApp.CUSTOM_HTTP_PORT, AccountUtils.PRODUCTION_PORT);
+			
+			break;
+
 		}
 
 	}
@@ -4094,7 +4080,7 @@ public class Utils
 
 	public static int getFreeSMSCount(Context context)
 	{
-		return context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, context.MODE_PRIVATE).getInt(HikeMessengerApp.SMS_SETTING, 0);
+		return context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).getInt(HikeMessengerApp.SMS_SETTING, 0);
 	}
 
 	public static void handleBulkLastSeenPacket(Context context, JSONObject jsonObj) throws JSONException

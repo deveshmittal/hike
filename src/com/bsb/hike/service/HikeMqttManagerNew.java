@@ -856,6 +856,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			brokerHostName = AccountUtils.STAGING_HOST;
 			brokerPortNumber = (ssl ? STAGING_BROKER_PORT_NUMBER_SSL : STAGING_BROKER_PORT_NUMBER);
 			break;
+		case AccountUtils._CUSTOM_HOST:
+			brokerHostName = settings.getString(HikeMessengerApp.CUSTOM_MQTT_HOST, PRODUCTION_BROKER_HOST_NAME);
+			brokerPortNumber = settings.getInt(HikeMessengerApp.CUSTOM_MQTT_PORT, PRODUCTION_BROKER_PORT_NUMBER);
+			break;
 		}
 		
 		if (!(whichServer == AccountUtils._PRODUCTION_HOST))

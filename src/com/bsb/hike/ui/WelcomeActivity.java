@@ -4,15 +4,21 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.Toast;
 
 import com.bsb.hike.AppConfig;
@@ -44,6 +50,8 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private int stagingToggle = AccountUtils._PRODUCTION_HOST;
 
 	SignupTask mTask; 
+	
+	View serverToggleContainer;
 	
 	@Override
 	public void onCreate(Bundle savedState)
@@ -112,7 +120,8 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private void changeHost()
 	{
 		Logger.d(getClass().getSimpleName(), "Hike Icon CLicked");
-		stagingToggle = (++stagingToggle) % 3;
+				
+		stagingToggle = (++stagingToggle) % 5;
 		int whichHost = AccountUtils._PRODUCTION_HOST;
 		
 		switch(stagingToggle)
@@ -129,21 +138,24 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		case 3 :
 			whichHost = AccountUtils._PROD_DEBUGMQTT_HOST;
 			break;
+		case 4: 
+			whichHost = AccountUtils._CUSTOM_HOST;
+			Intent intent = new Intent(this, ServerHostChangeActivity.class);
+			startActivity(intent);
+			break;
 		}
-
-
-//		SharedPreferences sharedPreferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-//		boolean production = sharedPreferences.getBoolean(HikeMessengerApp.PRODUCTION, true);
 
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 		editor.putInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, whichHost);
 		editor.commit();
-		
-		Utils.setupUri();
 
-		Toast.makeText(WelcomeActivity.this, AccountUtils.base, Toast.LENGTH_SHORT).show();
+		if(whichHost != AccountUtils._CUSTOM_HOST)
+		{		
+			Utils.setupUri();
+			Toast.makeText(WelcomeActivity.this, AccountUtils.base, Toast.LENGTH_SHORT).show();
+		}
 	}
-
+	
 	@Override
 	protected void onSaveInstanceState(Bundle outState)
 	{
