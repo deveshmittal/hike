@@ -1888,13 +1888,28 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		switch (v.getId())
 		{
 		case R.id.send_button:
-			onH20TipClicked();
+			if(modeOfChat == H2S_MODE)
+			{
+				h20SendClick();
+			}
+			else if(modeOfChat == H2H_MODE)
+			{
+				h20NextClick();
+			}
 			break;
 		default:
 			super.onClick(v);
 		}
 	}
-
+	
+	private void h20NextClick()
+	{
+		modeOfChat = H2S_MODE;
+		mAdapter.setH20Mode(true);
+		initializeH20Mode();
+		setupH20TipViews();
+	}
+	
 	/**
 	 * Overriding this here since we need to intercept clicks for H20 overlay
 	 */
@@ -1962,22 +1977,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		mAdapter.setH20Mode(false);
 		mAdapter.removeSelection();
 		setupH20TipViews();
-	}
-
-	private void onH20TipClicked()
-	{
-		if (modeOfChat == H2S_MODE)
-		{
-			h20SendClick();
-		}
-
-		else
-		{
-			modeOfChat = H2S_MODE;
-			mAdapter.setH20Mode(true);
-			initializeH20Mode();
-			setupH20TipViews();
-		}
 	}
 
 	/**
