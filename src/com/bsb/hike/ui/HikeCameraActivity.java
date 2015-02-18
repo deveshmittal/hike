@@ -1,34 +1,27 @@
 package com.bsb.hike.ui;
 
 import android.app.PendingIntent;
-import java.io.File;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.Animation;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
-import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
@@ -64,6 +57,11 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		super.onCreate(savedInstanceState);
 
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        
 		setContentView(R.layout.hike_camera_activity);
 
 		cameraFragment = CameraFragment.newInstance(false);
@@ -170,6 +168,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 	@Override
 	protected void onPause()
 	{
+		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
 		super.onPause();
 		orientationListener.disable();
 	}

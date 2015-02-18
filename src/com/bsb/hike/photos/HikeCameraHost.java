@@ -201,7 +201,11 @@ public class HikeCameraHost implements CameraHost
 	@Override
 	public Camera.Size getPreviewSize(int displayOrientation, int width, int height, Camera.Parameters parameters)
 	{
-		Log.d("CameraSize", "getPreviewSize");
+		List<Size> sizes = parameters.getSupportedPictureSizes();
+		for (Size size : sizes)
+		{
+			Log.d("PreviewSize", "h: " + size.height + " w: " + size.width);
+		}
 		return (CameraUtils.getBestAspectPreviewSize(displayOrientation, width, height, parameters));
 	}
 

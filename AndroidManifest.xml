@@ -314,15 +314,14 @@
         </activity>   
          <activity
            	  android:name="com.bsb.hike.ui.HikeCameraActivity"
+           	  android:theme="@style/Theme.Sherlock.NoActionBar"
               android:launchMode="singleTop"
-              android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
               android:screenOrientation="portrait">
         </activity>
         <activity
            	  android:name="com.bsb.hike.ui.PictureEditer"
               android:launchMode="singleTop"
-              
-              android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
+              android:theme="@style/Theme.Sherlock.NoActionBar"
               android:screenOrientation="portrait">
         </activity> 
         <activity

@@ -11,6 +11,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 
 import com.bsb.hike.HikeConstants;
@@ -40,8 +42,12 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 	public void onCreate(Bundle savedInstanceState)
 	{
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
-		
+
 		super.onCreate(savedInstanceState);
+
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		setContentView(R.layout.fragment_picture_editer);
 
@@ -206,4 +212,10 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 	}
 
+	@Override
+	protected void onPause()
+	{
+		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
+		super.onPause();
+	}
 }
