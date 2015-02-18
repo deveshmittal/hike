@@ -118,7 +118,6 @@ public class VoIPService extends Service {
 	private Chronometer chronometer = null;
 	private int chronoBackup = 0;
 	private int playbackSampleRate = 0;
-	private boolean resamplerEnabled = true;
 	private Thread senderThread, reconnectingBeepsThread;
 	private Ringtone ringtone;
 	private Vibrator vibrator = null;
@@ -153,6 +152,7 @@ public class VoIPService extends Service {
 	private static final byte PP_PROTOCOL_BUFFER = 0x03;
 	
 	// Echo cancellation
+	private boolean resamplerEnabled = true;
 	private final boolean aecEnabled = true;
 	private boolean useVADToReduceData = false;
 	SolicallWrapper solicallAec = null;
@@ -1484,7 +1484,7 @@ public class VoIPService extends Service {
 		                	synchronized (decodedBuffersQueue) {
 			                	decodedBuffersQueue.add(silentPacket);
 			                	decodedBuffersQueue.notify();
-			                	Logger.w(VoIPConstants.TAG, "Adding silence to audiotrack");
+			                	Logger.w(VoIPConstants.TAG, "Adding silence");
 							}
 						}
 
@@ -1519,6 +1519,7 @@ public class VoIPService extends Service {
 			
 			@Override
 			public void run() {
+				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				int voicePacketCount = 1;
 				while (keepRunning == true) {
 					
