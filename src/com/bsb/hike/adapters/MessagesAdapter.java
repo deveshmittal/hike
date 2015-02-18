@@ -1765,7 +1765,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				String messageText = markedUp.toString();
 				String searchText = mChatThread.getMessageSearchManager().getSearchText();
-				if (messageText.contains(searchText))
+				if (!TextUtils.isEmpty(searchText) && messageText.contains(searchText))
 				{
 					int startSpanIndex = messageText.indexOf(searchText);
 					SpannableString spanText = new SpannableString(markedUp);

@@ -918,6 +918,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		int id = mComposeView.getId();
 		mComposeView = (CustomFontEditText) activity.findViewById(R.id.search_text);
 		mComposeView.setTag(id);
+		View mBottomView = activity.findViewById(R.id.bottom_panel);
+		if (mShareablePopupLayout.isKeyboardOpen())
+		{ // ifkeyboard is not open, then keyboard will come which will make so much animation on screen
+			mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.up_down_lower_part));
+		}
+		mBottomView.setVisibility(View.GONE);
 		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
 		mComposeView.requestFocus();
 		searchManager = new MessageSearchManager();
@@ -1126,6 +1132,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			{
 				if (doesMessageHaveText(messages.get(from), searchText))
 				{
+					Logger.d("search","adding: " + from);
 					indexList.add(from);
 					Collections.sort(indexList);
 					found = true;
@@ -1143,6 +1150,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				{
 					if (doesMessageHaveText(messages.get(from), searchText))
 					{
+						Logger.d("search","adding: " + from);
 						indexList.add(from);
 						Collections.sort(indexList);
 						if (threshold >= 0)
@@ -1166,6 +1174,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				{
 					if (doesMessageHaveText(messages.get(from), searchText))
 					{
+						Logger.d("search","adding: " + from);
 						indexList.add(from);
 						Collections.sort(indexList);
 						if (threshold >= 0)
@@ -1221,6 +1230,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			{
 				if (message.getMessage().contains(text))
 				{
+					Logger.d("search", "returning true for: " + message.getMessage());
 					return true;
 				}
 			}
@@ -1285,6 +1295,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			makeNewSearch(s.toString());
 		}
 
+	}
+
+	private void destroySearchMode()
+	{
+		mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
+		View mBottomView = activity.findViewById(R.id.bottom_panel);
+		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
+		mBottomView.setVisibility(View.VISIBLE);
+		searchManager.endSearch();
+		searchManager = null;
 	}
 	
 	protected void shareCapturedImage(int resultCode, Intent data)
@@ -4006,9 +4026,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			destroyActionMode();
 			break;
 		case SEARCH_ACTION_MODE:
-			mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
-			searchManager.endSearch();
-			searchManager = null;
+			destroySearchMode();
 			break;
 		default:
 			break;
