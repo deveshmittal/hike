@@ -31,6 +31,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -446,4 +447,24 @@ public class ChatThreadUtils
 		}
 	}
 
+	protected static void decrementUnreadPInCount(Conversation mConversation, boolean isActivityVisible)
+	{
+		if (mConversation != null)
+		{
+			MetaData metadata = mConversation.getMetaData();
+			if (!metadata.isPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN) && isActivityVisible)
+			{
+				try
+				{
+					metadata.setPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
+					metadata.decrementUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+				HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
+			}
+		}
+	}
 }

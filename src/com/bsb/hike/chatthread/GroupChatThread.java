@@ -435,26 +435,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		}
 		
 		// decrement the unread count if message pinned
-		decrementUnreadPInCount();
+		ChatThreadUtils.decrementUnreadPInCount(mConversation, isActivityVisible);
 
-	}
-
-	public void decrementUnreadPInCount()
-	{
-		MetaData metadata = mConversation.getMetaData();
-		if (!metadata.isPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN) && isActivityVisible)
-		{
-			try
-			{
-				metadata.setPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
-				metadata.decrementUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
-			}
-			catch (JSONException e)
-			{
-				e.printStackTrace();
-			}
-			HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
-		}
 	}
 
 	private void hidePin()
@@ -1165,7 +1147,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 
 		if (isShowingPin())
 		{
-			decrementUnreadPInCount();
+			ChatThreadUtils.decrementUnreadPInCount(mConversation, isActivityVisible);
 		}
 
 		updateUnreadPinCount();
