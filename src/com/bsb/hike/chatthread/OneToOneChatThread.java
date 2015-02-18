@@ -333,7 +333,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	}
 
 	@Override
-	protected void addMessage(ConvMessage convMessage, boolean scrollToLast)
+	protected void addMessage(ConvMessage convMessage)
 	{
 		/*
 		 * If we were showing the typing bubble, we remove it from the add the new message and add the typing bubble back again
@@ -352,7 +352,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			mAdapter.addMessage(new ConvMessage(typingNotification));
 		}
 
-		super.addMessage(convMessage, scrollToLast);
+		super.addMessage(convMessage);
 	}
 
 	/**

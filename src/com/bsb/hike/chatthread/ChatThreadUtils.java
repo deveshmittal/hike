@@ -72,6 +72,42 @@ public class ChatThreadUtils
 		});
 		view.startAnimation(an);
 	}
+	
+	protected static void playPinUpAnimation(Context context, final View view, int animId)
+	{
+		if (view == null)
+		{
+			return;
+		}
+		
+		Animation an = AnimationUtils.loadAnimation(context, animId);
+		
+		an.setAnimationListener(new AnimationListener()
+		{
+			
+			@Override
+			public void onAnimationStart(Animation animation)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				view.setVisibility(View.VISIBLE);
+			}
+		});
+		
+		view.startAnimation(an);
+	}
 
 	/**
 	 * This method is used to add pin related parameters in the convMessage

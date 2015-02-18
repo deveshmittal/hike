@@ -230,8 +230,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private GestureDetector mGestureDetector;
 
-	protected View tipView;
-
 	protected View mActionBarView;
 
 	protected HikeActionMode mActionMode;
@@ -347,7 +345,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	}
 
-	protected void addMessage(ConvMessage convMessage, boolean scrollToLast)
+	protected void addMessage(ConvMessage convMessage)
 	{
 
 		addtoMessageMap(messages.size() - 1, messages.size());
@@ -364,11 +362,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		tryScrollingToBottom(convMessage, 0);
 
-	}
-
-	protected void addMessage(ConvMessage convMessage)
-	{
-		addMessage(convMessage, false);
 	}
 
 	public ChatThread(ChatThreadActivity activity, String msisdn)
@@ -678,6 +671,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		String message = mComposeView.getText().toString();
 		if (TextUtils.isEmpty(message))
 		{
+			showToast(R.string.text_empty_error);
 			return null; // Do not create message
 		}
 		ConvMessage convMessage = Utils.makeConvMessage(msisdn, message, mConversation.isOnhike());
@@ -699,7 +693,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		if (convMessage != null)
 		{
-			addMessage(convMessage, true);
+			addMessage(convMessage);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
 		}
 	}
