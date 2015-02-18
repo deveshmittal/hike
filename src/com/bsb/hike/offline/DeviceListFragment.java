@@ -189,8 +189,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    		phoneNumber = peers_msisdn.get(position);
 	    	else
 	    		phoneNumber = deviceContact.getName();
-	    	
-	    	//if(currentDevice.status != WifiP2pDevice.CONNECTED)
+
+	    	if(currentDevice.status != WifiP2pDevice.CONNECTED)
+	    	{	
 	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
 	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
 	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
@@ -211,15 +212,15 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	            });*/
 	    		
 	    		((DeviceActionListener) getActivity()).connect(config, 0, currentDevice);
+    	     }
 	    	
-	    	/*
 	    	else
 	    	{
 	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
 	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
 	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
 	        	startActivity(intent);
-	    	}*/
+	    	}
     	}
     }
     
@@ -464,6 +465,22 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                          dirs.mkdirs();
                      f.createNewFile();
                      break;
+                case 3:
+                	f = new File(Environment.getExternalStorageDirectory() + "/"
+                            + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis() + ".mp4");
+                    dirs = new File(f.getParent());
+                    if (!dirs.exists())
+                        dirs.mkdirs();
+                    f.createNewFile();
+                    break;
+                case 4:
+                	f = new File(Environment.getExternalStorageDirectory() + "/"
+                            + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis() + ".mp3");
+                    dirs = new File(f.getParent());
+                    if (!dirs.exists())
+                        dirs.mkdirs();
+                    f.createNewFile();
+                    break;
                 }
                 Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
                 copyFile(inputstream, new FileOutputStream(f));
@@ -497,6 +514,20 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 					Intent intent = new Intent();
 					intent.setAction(Intent.ACTION_VIEW);
 					intent.setDataAndType(Uri.parse("file://" + result), "image/*");
+					context.startActivity(intent);
+				}
+				else if(type==3)
+				{
+					Intent intent = new Intent();
+					intent.setAction(Intent.ACTION_VIEW);
+					intent.setDataAndType(Uri.parse("file://" + result), "video/*");
+					context.startActivity(intent);
+				}
+				else if(type==4)
+				{
+					Intent intent = new Intent();
+					intent.setAction(Intent.ACTION_VIEW);
+					intent.setDataAndType(Uri.parse("file://" + result), "audio/*");
 					context.startActivity(intent);
 				}
 				

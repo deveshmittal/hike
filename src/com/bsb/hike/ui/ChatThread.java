@@ -458,6 +458,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private ScreenOffReceiver screenOffBR;
 
 	private HashSpanWatcher hashWatcher;
+	
+	private Intent fromIntent;
 
 	@Override
 	protected void onPause()
@@ -731,7 +733,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		// we fetch the boolean extra to check if the keyboard has to be
 		// expanded.
 
-		Intent fromIntent = getIntent();
+		fromIntent = getIntent();
 		if (fromIntent.getBooleanExtra(HikeConstants.Extras.SHOW_KEYBOARD, false))
 			showKeyboard = true;
 
@@ -5782,7 +5784,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						return;
 					}
 				}
-
 				switch (itemKey)
 				{
 				case 0:
@@ -5853,7 +5854,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					// If in offline file transfer mode send device address 
 					if(WiFiDirectActivity.isOfflineFileTransferOn)
 						{
-						    String  deviceAddress =  getIntent().getStringExtra("OfflineDeviceName"); 
+						    String  deviceAddress =  fromIntent.getStringExtra("OfflineDeviceName"); 
 						    imageIntent.putExtra("OfflineDeviceName",deviceAddress);
 						}
 					startActivity(imageIntent);
@@ -6475,42 +6476,54 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				default:
 					break;
 			}
-			if (selectedFile != null && requestCode == HikeConstants.IMAGE_CAPTURE_CODE)
-			{
-				final String fPath = filePath;
-					final int atType = attachementType;
-					
-					HikeDialog.showDialog(ChatThread.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, new HikeDialog.HikeDialogListener()
+				if(!WiFiDirectActivity.isOfflineFileTransferOn)
+				{
+					if (selectedFile != null && requestCode == HikeConstants.IMAGE_CAPTURE_CODE)
 					{
-						@Override
-						public void onSucess(Dialog dialog)
-						{
-							initialiseFileTransfer(fPath, null, hikeFileType, null, false, -1, false, atType);
-							dialog.dismiss();
-						}
-	
-						@Override
-						public void negativeClicked(Dialog dialog)
-						{
-	
-						}
-	
-						@Override
-						public void positiveClicked(Dialog dialog)
-						{
-	
-						}
-	
-						@Override
-						public void neutralClicked(Dialog dialog)
-						{
-	
-						}
-					}, (Object[]) new Long[] { (long) 1, selectedFile.length() });
-				
-			}else
-				initialiseFileTransfer(filePath, null, hikeFileType, null, false, -1, false, attachementType);
-		}
+					
+							
+								final String fPath = filePath;
+									final int atType = attachementType;
+									
+									HikeDialog.showDialog(ChatThread.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, new HikeDialog.HikeDialogListener()
+									{
+										@Override
+										public void onSucess(Dialog dialog)
+										{
+											initialiseFileTransfer(fPath, null, hikeFileType, null, false, -1, false, atType);
+											dialog.dismiss();
+										}
+					
+										@Override
+										public void negativeClicked(Dialog dialog)
+										{
+					
+										}
+					
+										@Override
+										public void positiveClicked(Dialog dialog)
+										{
+					
+										}
+					
+										@Override
+										public void neutralClicked(Dialog dialog)
+										{
+					
+										}
+									}, (Object[]) new Long[] { (long) 1, selectedFile.length() });
+								
+				   }
+				else
+					initialiseFileTransfer(filePath, null, hikeFileType, null, false, -1, false, attachementType);
+				}
+			    else{
+			        	  
+			  			  String deviceAddress =   fromIntent.getStringExtra("OfflineDeviceName");
+			  			  initialiseOfflineFileTransfer(filePath, deviceAddress, requestCode);
+			         }
+			
+		 }
 		else if (requestCode == HikeConstants.SHARE_LOCATION_CODE && resultCode == RESULT_OK)
 		{
 			double latitude = data.getDoubleExtra(HikeConstants.Extras.LATITUDE, 0);
@@ -6527,8 +6540,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (requestCode == HikeConstants.SHARE_APK_CODE && resultCode == RESULT_OK)
 		{
-			Intent intent  =  getIntent();
-			String deviceAddress =   intent.getStringExtra("OfflineDeviceName");
+			String deviceAddress =   fromIntent.getStringExtra("OfflineDeviceName");
 			String filePath = data.getStringExtra(FileTransferService.EXTRAS_FILE_PATH);
 			initialiseOfflineFileTransfer(filePath, deviceAddress, requestCode);
 		}
@@ -6853,9 +6865,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			switch(hikeFileType)
 			{
 				case HikeConstants.SHARE_APK_CODE:
-					
 					serviceIntent.putExtra("fileType", 1);
 			        break;
+				case HikeConstants.IMAGE_CAPTURE_CODE:
+					serviceIntent.putExtra("fileType", 2);
+			        break;
+				case HikeConstants.VIDEO_TRANSFER_CODE:
+					serviceIntent.putExtra("fileType", 3);
+					break;
+				case HikeConstants.AUDIO_TRANSFER_CODE:
+					serviceIntent.putExtra("fileType", 4);
+					break;
 				default:
 					Toast.makeText(getApplicationContext(), "File not selected!", Toast.LENGTH_SHORT).show();
 			}
