@@ -377,8 +377,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 			progressDialog.dismiss();
 		}
     	this.info = info;
+    	// No check for HoneyComb since WiFi Direct runs only on devices with Android 4+
     	if (!server_running){
-			new ServerAsyncTask(getActivity()).execute();
+			new ServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			server_running = true;
 		}
     	if(intent != null)
@@ -501,15 +502,6 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 				
 			}
 
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see android.os.AsyncTask#onPreExecute()
-		 */
-		@Override
-		protected void onPreExecute() {
-			//statusText.setText("Opening a server socket");
 		}
 
 	}

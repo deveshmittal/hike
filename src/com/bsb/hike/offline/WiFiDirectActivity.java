@@ -20,17 +20,20 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -66,9 +69,9 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     private BroadcastReceiver receiver = null;
     private SharedPreferences settings;
     private String myMsisdn;
-    private WifiP2pDevice myWifiP2pDevice;
     public static boolean isOfflineFileTransferOn = false;
     private final int MAXTRIES = 5;
+    private WifiManager wifiManager;
     /**
      * @param isWifiP2pEnabled the isWifiP2pEnabled to set
      */
@@ -123,17 +126,19 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        myWifiP2pDevice = new WifiP2pDevice();
-        myWifiP2pDevice.deviceName = myMsisdn;
         receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
+        wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        if(wifiManager.isWifiEnabled() == false)
+        	wifiManager.setWifiEnabled(true);
+        (new CheckInvitedStuckTask()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /** register the BroadcastReceiver with the intent values to be matched */
     @Override
     public void onResume() {
         super.onResume();
-        //receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
         registerReceiver(receiver, intentFilter);
+        enableDiscovery();
     }
 
     @Override
@@ -148,11 +153,11 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     	DeviceListFragment.intent =  null;
     	// give time to disconnect
     	try {
-			Thread.sleep(2*1000);
+			Thread.sleep(1*1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-    	
+    	enableDiscovery();
     	super.onRestart();
     }
 
@@ -196,42 +201,13 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
                 return true;
 
             case R.id.atn_direct_discover:
-                if (!isWifiP2pEnabled) {
-                    Toast.makeText(WiFiDirectActivity.this, R.string.p2p_off_warning,
-                            Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-                final DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
-                        .findFragmentById(R.id.frag_list);
-                fragment.onInitiateDiscovery();
-                fragment.clearPeers();
-                manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
-                	
-                    @Override
-                    public void onSuccess() {
-                        Toast.makeText(WiFiDirectActivity.this, "Discovery Initiated",
-                                Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onFailure(int reasonCode) {
-                        Toast.makeText(WiFiDirectActivity.this, "Discovery Failed : " + reasonCode,
-                                Toast.LENGTH_SHORT).show();
-                        String err=new String();
-                        if(reasonCode==WifiP2pManager.BUSY) err="BUSY";
-                        if(reasonCode==WifiP2pManager.ERROR)err="ERROR";
-                        if(reasonCode==WifiP2pManager.P2P_UNSUPPORTED) err="P2P_UNSUPPORTED";
-                        Log.e(TAG,"FAIL - couldnt start to discover peers code: "+err);
-                    }
-                });
-                return true;
+                enableDiscovery();
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
     @Override
-    
     public void showDetails(WifiP2pDevice device) {
         //DeviceDetailFragment fragment = (DeviceDetailFragment) getFragmentManager()
           //      .findFragmentById(R.id.frag_detail);
@@ -350,5 +326,71 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
             }
         }
 
+    }
+    
+    public void enableDiscovery()
+    {
+    	if (!isWifiP2pEnabled) {
+            Toast.makeText(WiFiDirectActivity.this, R.string.p2p_off_warning,
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        final DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
+                .findFragmentById(R.id.frag_list);
+        //fragment.onInitiateDiscovery();
+        fragment.clearPeers();
+        manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
+        	
+            @Override
+            public void onSuccess() {
+                Toast.makeText(WiFiDirectActivity.this, "Discovery Initiated",
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(int reasonCode) {
+                Toast.makeText(WiFiDirectActivity.this, "Discovery Failed : " + reasonCode,
+                        Toast.LENGTH_SHORT).show();
+                String err=new String();
+                if(reasonCode==WifiP2pManager.BUSY) err="BUSY";
+                if(reasonCode==WifiP2pManager.ERROR)err="ERROR";
+                if(reasonCode==WifiP2pManager.P2P_UNSUPPORTED) err="P2P_UNSUPPORTED";
+                Log.e(TAG,"FAIL - couldnt start to discover peers code: "+err);
+            }
+        });
+    }
+    /*
+     * This Async task resets the Wifi settings if device gets blocked in
+     * Invited status
+     */
+    public class CheckInvitedStuckTask extends AsyncTask<Void, Void, Void>
+    {
+    	
+    	private DeviceListFragment fragment = null;
+    	private WifiP2pDevice myDevice = null;
+    	@Override
+    	protected Void doInBackground(Void... params) 
+    	{
+    		fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
+    		myDevice = fragment.getDevice();
+    		if((myDevice != null) &&myDevice.status == WifiP2pDevice.INVITED)
+    		{
+    			try 
+    			{
+					Thread.sleep(5*1000);
+	    			// check if even after 5 seconds it is still in invited state
+	    			// then call reset
+	    			if(myDevice.status == WifiP2pDevice.INVITED){
+	    				cancelDisconnect();
+	    			}
+    			}
+    			catch (InterruptedException e) 
+    			{
+					Logger.e(TAG, "Sleep failed in CheckInvitedStuckTask");
+					e.printStackTrace();
+    			}
+    		}
+			return null;
+    	}
     }
 }
