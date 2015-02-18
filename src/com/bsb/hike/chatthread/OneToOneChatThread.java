@@ -1742,16 +1742,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	private void setupH20TipViews()
 	{
-		setupH20TipViews(false);
-	}
-
-	private void setupH20TipViews(boolean messagesSent)
-	{
-		setupH20TipViews(messagesSent, false);
-	}
-
-	private void setupH20TipViews(boolean messagesSent, boolean isNativeSms)
-	{
 		if (modeOfChat == H2S_MODE) // Are we in SMS Mode now ?
 		{
 			((TextView) hikeToOfflineTipView.findViewById(R.id.tip_header)).setText(getResources().getString(R.string.selected_count, mAdapter.getSelectedCount()));
@@ -1971,6 +1961,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		modeOfChat = H2H_MODE;
 		mAdapter.setH20Mode(false);
 		mAdapter.removeSelection();
+		setupH20TipViews();
 	}
 
 	private void onH20TipClicked()
