@@ -7,11 +7,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
 import android.widget.Toast;
@@ -25,6 +27,7 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
 import com.bsb.hike.ui.CreditsActivity;
+import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeCameraActivity;
 import com.bsb.hike.ui.HikeListActivity;
@@ -71,19 +74,22 @@ public class IntentManager
 		context.startActivity(new Intent(context, CreditsActivity.class));
 	}
 
-	public static void openSettingAccount(Context context){
+	public static void openSettingAccount(Context context)
+	{
 		Intent intent = new Intent(context, HikePreferences.class);
 		intent.putExtra(HikeConstants.Extras.PREF, R.xml.account_preferences);
 		intent.putExtra(HikeConstants.Extras.TITLE, R.string.account);
 		context.startActivity(intent);
 	}
-	
-	public static void openSettingHelp(Context context){
+
+	public static void openSettingHelp(Context context)
+	{
 		Intent intent = new Intent(context, HikePreferences.class);
 		intent.putExtra(HikeConstants.Extras.PREF, R.xml.help_preferences);
 		intent.putExtra(HikeConstants.Extras.TITLE, R.string.help);
 		context.startActivity(intent);
 	}
+
 	public static void openInviteSMS(Context context)
 	{
 		context.startActivity(new Intent(context, HikeListActivity.class));
@@ -121,28 +127,30 @@ public class IntentManager
 	public static Intent getGamingIntent(Context context)
 	{
 		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		Intent intent = new Intent(context.getApplicationContext(), WebViewActivity.class);		
+		Intent intent = new Intent(context.getApplicationContext(), WebViewActivity.class);
 		String hikeExtrasUrl = prefs.getString(HikeConstants.HIKE_EXTRAS_URL, AccountUtils.gamesUrl);
-		               
-		if(!TextUtils.isEmpty(hikeExtrasUrl))                   
+
+		if (!TextUtils.isEmpty(hikeExtrasUrl))
 		{
-			if(Utils.switchSSLOn(context))
+			if (Utils.switchSSLOn(context))
 			{
-				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.HTTPS_STRING + hikeExtrasUrl + HikeConstants.ANDROID + "/" +  prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));				
+				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD,
+						AccountUtils.HTTPS_STRING + hikeExtrasUrl + HikeConstants.ANDROID + "/" + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
 			}
 			else
 			{
-				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.HTTP_STRING + hikeExtrasUrl + HikeConstants.ANDROID + "/" +  prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD,
+						AccountUtils.HTTP_STRING + hikeExtrasUrl + HikeConstants.ANDROID + "/" + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
 			}
 		}
-		               
+
 		String hikeExtrasName = prefs.getString(HikeConstants.HIKE_EXTRAS_NAME, context.getString(R.string.hike_extras));
-		
-		if(!TextUtils.isEmpty(hikeExtrasName))
+
+		if (!TextUtils.isEmpty(hikeExtrasName))
 		{
 			intent.putExtra(HikeConstants.Extras.TITLE, hikeExtrasName);
 		}
-		
+
 		return intent;
 	}
 
@@ -156,30 +164,32 @@ public class IntentManager
 		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Intent intent = new Intent(context.getApplicationContext(), WebViewActivity.class);
 		String rewards_url = prefs.getString(HikeConstants.REWARDS_URL, AccountUtils.rewardsUrl);
-		
-		if(!TextUtils.isEmpty(rewards_url))
+
+		if (!TextUtils.isEmpty(rewards_url))
 		{
-			if(Utils.switchSSLOn(context))  
+			if (Utils.switchSSLOn(context))
 			{
-				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.HTTPS_STRING + rewards_url + HikeConstants.ANDROID + "/" + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD,
+						AccountUtils.HTTPS_STRING + rewards_url + HikeConstants.ANDROID + "/" + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
 			}
 			else
 			{
-				 intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.HTTP_STRING + rewards_url + HikeConstants.ANDROID + "/" + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));				
-			}				
+				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD,
+						AccountUtils.HTTP_STRING + rewards_url + HikeConstants.ANDROID + "/" + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+			}
 		}
-				
+
 		String rewards_name = prefs.getString(HikeConstants.REWARDS_NAME, context.getString(R.string.rewards));
-		
-		if(!TextUtils.isEmpty(rewards_name))
+
+		if (!TextUtils.isEmpty(rewards_name))
 		{
 			intent.putExtra(HikeConstants.Extras.TITLE, rewards_name);
 		}
 		intent.putExtra(HikeConstants.Extras.WEBVIEW_ALLOW_LOCATION, true);
-		
+
 		return intent;
 	}
-	
+
 	public static Intent getWebViewActivityIntent(Context context, String url, String title)
 	{
 
@@ -246,26 +256,23 @@ public class IntentManager
 		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 		return intent;
 	}
-	
+
 	public static Intent getForwardImageIntent(Context context, File argFile)
 	{
 		Intent intent = new Intent(context, ComposeChatActivity.class);
 		intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 		intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(argFile));
 		intent.setType("image");
-//		JSONArray multipleMsgArray = new JSONArray();
-//		try
-//		{
-//			JSONObject multiMsgFwdObject = new JSONObject();
-//			multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
-//			multipleMsgArray.put(multiMsgFwdObject);
-//		}
-//		catch (JSONException e)
-//		{
-//			Logger.e(context.getClass().getSimpleName(), "Invalid JSON", e);
-//		}
+		return intent;
+	}
 
-//		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
+	public static Intent getHikeGalleryPickerIntent(Context context, boolean allowMultiSelect, PendingIntent argIntent)
+	{
+		Intent intent = new Intent(context, GalleryActivity.class);
+		Bundle b = new Bundle();
+		b.putParcelable(GalleryActivity.PENDING_INTENT_KEY, argIntent);
+		b.putBoolean(GalleryActivity.DISABLE_MULTI_SELECT_KEY, !allowMultiSelect);
+		intent.putExtras(b);
 		return intent;
 	}
 
@@ -273,7 +280,7 @@ public class IntentManager
 	{
 		appContext.startActivity(new Intent(appContext, ConnectedAppsActivity.class));
 	}
-	
+
 	public static void openHikeSDKAuth(Context appContext, Message msg)
 	{
 		Intent hikeAuthIntent = new Intent("com.bsb.hike.ui.HikeAuthActivity");
@@ -298,7 +305,7 @@ public class IntentManager
 		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		appContext.startActivity(i);
 	}
-	
+
 	public static void openHomeActivity(Context context)
 	{
 		Intent in = new Intent(context, HomeActivity.class);
@@ -312,7 +319,7 @@ public class IntentManager
 		in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return in;
 	}
-	
+
 	public static Intent openNuxFriendSelector(Activity context)
 	{
 		Intent in = new Intent(context, ComposeChatActivity.class);
@@ -320,13 +327,13 @@ public class IntentManager
 		in.putExtra(HikeConstants.Extras.NUX_INCENTIVE_MODE, true);
 		return in;
 	}
-	
+
 	public static Intent openNuxCustomMessage(Activity context)
 	{
 		Intent in = new Intent(context, NuxSendCustomMessageActivity.class);
 		return in;
 	}
-	
+
 	public static void openHikeCameraActivity(Activity argActivity)
 	{
 		Intent in = new Intent(argActivity, HikeCameraActivity.class);

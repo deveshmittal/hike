@@ -18,6 +18,7 @@ import android.widget.FrameLayout;
 
 import com.bsb.hike.R;
 import com.bsb.hike.photos.FilterTools.FilterType;
+import com.bsb.hike.photos.PhotoEditerTools;
 
 public class PictureEditerView extends FrameLayout
 {
@@ -31,7 +32,18 @@ public class PictureEditerView extends FrameLayout
 
 	private boolean enableDoodling = false, enableText = false;
 
-	private Bitmap imageOriginal, imageEdited;
+	private Bitmap imageOriginal, imageEdited, scaledImageOriginal;
+
+	public PictureEditerView(Context context)
+	{
+		super(context);
+		doodleLayer = new CanvasImageView(context);
+		vignetteLayer = new VignetteImageView(context);
+		effectLayer = new EffectsView(context);
+		addView(effectLayer);
+		addView(vignetteLayer);
+		addView(doodleLayer);
+	}
 
 	public PictureEditerView(Context context, AttributeSet attrs)
 	{
@@ -43,6 +55,24 @@ public class PictureEditerView extends FrameLayout
 		addView(vignetteLayer);
 		addView(doodleLayer);
 		// TODO Auto-generated constructor stub
+	}
+
+	public PictureEditerView(Context context, AttributeSet attrs, int defStyleAttr)
+	{
+		super(context, attrs, defStyleAttr);
+		doodleLayer = new CanvasImageView(context, attrs, defStyleAttr);
+		vignetteLayer = new VignetteImageView(context, attrs, defStyleAttr);
+		effectLayer = new EffectsView(context, attrs, defStyleAttr);
+		addView(effectLayer);
+		addView(vignetteLayer);
+		addView(doodleLayer);
+	}
+
+	public Bitmap getScaledImageOriginal()
+	{
+		if (scaledImageOriginal == null)
+			scaledImageOriginal = Bitmap.createScaledBitmap(imageOriginal, PhotoEditerTools.dpToPx(getContext(), 80), PhotoEditerTools.dpToPx(getContext(), 80), false);
+		return scaledImageOriginal;
 	}
 
 	public void setBrushWidth(int width)
@@ -147,15 +177,18 @@ public class PictureEditerView extends FrameLayout
 		Paint paint = new Paint();
 		paint.setColorFilter(filter);
 		canvasResult.drawBitmap(src, 0, 0, paint);
-		Bitmap temp = Bitmap.createScaledBitmap(doodleLayer.getBitmap(), src.getWidth(), src.getHeight(), true);
-		canvasResult.drawBitmap(temp, 0, 0, doodleLayer.getPaint());
+		if (doodleLayer.getBitmap() != null)
+		{
+			Bitmap temp = Bitmap.createScaledBitmap(doodleLayer.getBitmap(), src.getWidth(), src.getHeight(), true);
+			canvasResult.drawBitmap(temp, 0, 0, doodleLayer.getPaint());
+		}
 		return bitmapResult;
 	}
 
 	// public void loadImage()
 	// {
-	// effectLayer.handleImage((BitmapDrawable) getResources().getDrawable(R.drawable.test));
-	// imageOriginal = ((BitmapDrawable) getResources().getDrawable(R.drawable.test)).getBitmap();
+	// effectLayer.handleImage((BitmapDrawable)getResources().getDrawable(R.drawable.test));
+	// imageOriginal=((BitmapDrawable)getResources().getDrawable(R.drawable.test)).getBitmap();
 	// }
 
 }

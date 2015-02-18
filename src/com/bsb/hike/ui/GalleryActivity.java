@@ -5,10 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +42,10 @@ import com.bsb.hike.utils.Utils;
 public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements OnScrollListener, OnItemClickListener, OnItemLongClickListener
 {
 
+	public static final String DISABLE_MULTI_SELECT_KEY = "en_mul_sel";
+
+	public static final String PENDING_INTENT_KEY = "pen_intent";
+
 	private List<GalleryItem> galleryItemList;
 
 	private GalleryAdapter adapter;
@@ -60,6 +67,10 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 	private long previousEventTime;
 
 	private int velocity;
+
+	private boolean disableMultiSelect;
+
+	private PendingIntent pendingIntent;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -89,6 +100,8 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 		GalleryItem selectedBucket = data.getParcelable(HikeConstants.Extras.SELECTED_BUCKET);
 		msisdn = data.getString(HikeConstants.Extras.MSISDN);
+		disableMultiSelect = data.getBoolean(DISABLE_MULTI_SELECT_KEY);
+		pendingIntent = data.getParcelable(PENDING_INTENT_KEY);
 
 		String sortBy;
 		if (selectedBucket != null)
@@ -111,7 +124,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 					selectedGalleryItems.put(galleryItem.getId(), galleryItem);
 				}
 
-				if (!multiSelectMode)
+				if (!multiSelectMode && !disableMultiSelect)
 				{
 					multiSelectMode = true;
 					setupMultiSelectActionBar();
@@ -348,6 +361,8 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, galleryItem);
 			intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 			intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
+			intent.putExtra(PENDING_INTENT_KEY, pendingIntent);
+			intent.putExtra(DISABLE_MULTI_SELECT_KEY, disableMultiSelect);
 			startActivity(intent);
 		}
 		else
@@ -386,7 +401,22 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 				ArrayList<GalleryItem> item = new ArrayList<GalleryItem>(1);
 				item.add(galleryItem);
 				intent.putParcelableArrayListExtra(HikeConstants.Extras.GALLERY_SELECTIONS, item);
-				sendGalleryIntent(intent);
+
+				if (pendingIntent != null)
+				{
+					try
+					{
+						pendingIntent.send(GalleryActivity.this, RESULT_OK, intent);
+					}
+					catch (CanceledException e)
+					{
+						e.printStackTrace();
+					}
+				}
+				else
+				{
+					sendGalleryIntent(intent);
+				}
 			}
 		}
 	}

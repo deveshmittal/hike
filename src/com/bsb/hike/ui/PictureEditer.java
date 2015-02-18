@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,6 +20,7 @@ import android.widget.Button;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.PhotoEditerTools;
@@ -53,6 +55,23 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 		Intent intent = getIntent();
 		String filename = intent.getStringExtra("FilePath");
+
+		if (filename == null)
+		{
+			ArrayList<GalleryItem> itemList = intent.getExtras().getParcelableArrayList(HikeConstants.Extras.GALLERY_SELECTIONS);
+
+			if (itemList != null && !itemList.isEmpty())
+			{
+				filename = itemList.get(0).getFilePath();
+			}
+		}
+
+		if (filename == null)
+		{
+			PictureEditer.this.finish();
+			return;
+		}
+
 		editView = (PictureEditerView) findViewById(R.id.editer);
 		editView.loadImageFromFile(filename);
 		FragmentPagerAdapter adapter = new PhotoEditViewPagerAdapter(getSupportFragmentManager(), effectsClickListener);
@@ -66,8 +85,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		findViewById(R.id.done_btn).setOnClickListener(effectsClickListener);
 
 		TabPageIndicator tabs = (TabPageIndicator) findViewById(R.id.indicator);
-
-		getSupportActionBar().hide();
 
 	}
 
@@ -89,9 +106,9 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 			switch (position)
 			{
 			case 0:
-				return new PreviewFragment(MenuType.Effects, mItemClickListener, editView.getImageOriginal());
+				return new PreviewFragment(MenuType.Effects, mItemClickListener, editView.getScaledImageOriginal());
 			case 1:
-				return new PreviewFragment(MenuType.Doodle, mItemClickListener, editView.getImageOriginal());
+				return new PreviewFragment(MenuType.Doodle, mItemClickListener, editView.getScaledImageOriginal());
 			}
 			return null;
 		}

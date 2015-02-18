@@ -1,13 +1,20 @@
 package com.bsb.hike.ui.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.io.File;
 import java.io.IOException;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.photos.HikeCameraHost;
+import com.bsb.hike.photos.HikePhotosListener;
+import com.bsb.hike.ui.HikeCameraActivity;
+import com.bsb.hike.ui.PictureEditer;
+import com.bsb.hike.utils.Logger;
 import com.commonsware.cwac.camera.CameraHost;
 import com.commonsware.cwac.camera.CameraView;
 import com.commonsware.cwac.camera.PictureTransaction;
@@ -109,10 +116,37 @@ public class CameraFragment extends SherlockFragment
 		if (host == null)
 		{
 			host = HikeCameraHost.getInstance(useFFC);
+			host.setOnImageSavedListener(photoListener);
 		}
 
 		return (host);
 	}
+
+	private HikePhotosListener photoListener = new HikePhotosListener()
+	{
+		@Override
+		public void onFailure()
+		{
+
+		}
+
+		@Override
+		public void onComplete(final File f)
+		{
+			getActivity().runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Logger.d("CameraFragment", "Saved Image: " + (f != null ? f.getAbsolutePath() : "null"));
+					Intent i = new Intent(getActivity(), PictureEditer.class);
+					i.putExtra("FilePath", f.getAbsolutePath());
+					getActivity().startActivity(i);
+					getActivity().finish();
+				}
+			});
+		}
+	};
 
 	/**
 	 * Call this (or override getHost()) to supply the CameraHost used for most of the detailed interaction with the camera.

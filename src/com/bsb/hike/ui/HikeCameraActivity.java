@@ -1,31 +1,32 @@
 package com.bsb.hike.ui;
 
-import java.io.File;
-
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Camera;
-import android.os.Build;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.view.animation.OvershootInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 
 import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.bsb.hike.R;
-import com.bsb.hike.photos.HikePhotosListener;
-import com.bsb.hike.photos.PhotoEditerTools;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
-import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.IntentManager;
 
-@SuppressWarnings("deprecation")
 public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener
 {
 	private static final String FLASH_AUTO = "fauto";
@@ -36,26 +37,40 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private static final String TAG = "HikeCameraActivity";
 
+	private static final int GALLERY_PICKER_REQUEST = 2;
+
 	private CameraFragment cameraFragment;
 
-	private boolean isUsingFFC;
+	private boolean isUsingFFC = true;
 
 	private View containerView;
 
-	private Interpolator decelerator = new DecelerateInterpolator();
+	private Interpolator deceleratorInterp = new DecelerateInterpolator();
+	
+	private Interpolator overshootInterp = new OvershootInterpolator();
+
+	private OrientationEventListener orientationListener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
+		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
+
 		super.onCreate(savedInstanceState);
 
-		getSupportActionBar().hide();
-		
 		setContentView(R.layout.hike_camera_activity);
 
 		cameraFragment = CameraFragment.newInstance(false);
 
-		getSupportFragmentManager().beginTransaction().replace(R.id.container, cameraFragment).commit();
+		new Handler().postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				// replaceFragment(cameraFragment);
+				flipCamera(containerView);
+			}
+		}, 1000);
 
 		findViewById(R.id.btntakepic).setOnClickListener(HikeCameraActivity.this);
 
@@ -69,32 +84,74 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		containerView = findViewById(R.id.container);
 
-		cameraFragment.getHost().setOnImageSavedListener(new HikePhotosListener()
+		orientationListener = new OrientationEventListener(HikeCameraActivity.this, SensorManager.SENSOR_DELAY_UI)
 		{
+			float state = 0;
 
-			@Override
-			public void onFailure()
+			float stateLandscape1 = -90;
+
+			float stateLandscape2 = 90;
+
+			float statePortrait = 0;
+
+			public void onOrientationChanged(int orientation)
 			{
-
-			}
-
-			@Override
-			public void onComplete(final File f)
-			{
-				runOnUiThread(new Runnable()
+				if (orientation > 315 || orientation < 45)
 				{
-
-					@Override
-					public void run()
+					if (state != statePortrait)
 					{
-						Logger.d(TAG, "Saved Image: " + (f != null ? f.getAbsolutePath() : "null"));
-						Intent i = new Intent(HikeCameraActivity.this, PictureEditer.class);
-						i.putExtra("FilePath", f.getAbsolutePath());
-						HikeCameraActivity.this.startActivity(i);
+						Log.d("Animating", "from" + state + "to" + 0);
+						ObjectAnimator anim = ObjectAnimator.ofFloat(findViewById(R.id.btntakepic), "rotation", state, 0f);
+						anim.setDuration(500); // Duration in milliseconds
+						anim.setInterpolator(overshootInterp);
+						anim.start();
+						state = statePortrait;
+
 					}
-				});
+				}
+				else if (orientation > 45 && orientation < 180)
+				{
+					if (state != stateLandscape1)
+					{
+						Log.d("Animating", "from" + state + "to" + stateLandscape1);
+						ObjectAnimator anim = ObjectAnimator.ofFloat(findViewById(R.id.btntakepic), "rotation", state, stateLandscape1);
+						anim.setInterpolator(overshootInterp);
+						anim.setDuration(500); // Duration in milliseconds
+						anim.start();
+						state = stateLandscape1;
+
+					}
+				}
+				else if (orientation > 180 && orientation < 315)
+				{
+					if (state != stateLandscape2)
+					{
+						Log.d("Animating", "from" + state + "to" + stateLandscape2);
+						ObjectAnimator anim = ObjectAnimator.ofFloat(findViewById(R.id.btntakepic), "rotation", state, stateLandscape2);
+						anim.setDuration(500); // Duration in milliseconds
+						anim.setInterpolator(overshootInterp);
+						anim.start();
+						state = stateLandscape2;
+
+					}
+				}
 			}
-		});
+		};
+
+	}
+
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		orientationListener.enable();
+	}
+
+	@Override
+	protected void onPause()
+	{
+		super.onPause();
+		orientationListener.disable();
 	}
 
 	@Override
@@ -109,7 +166,11 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			break;
 		case R.id.btngallery:
 			// Open gallery
-
+			Intent intent = new Intent();
+			intent.setClass(HikeCameraActivity.this, PictureEditer.class);
+			PendingIntent pendingIntent = PendingIntent.getActivity(HikeCameraActivity.this, 0, intent, 0);
+			Intent galleryPickerIntent = IntentManager.getHikeGalleryPickerIntent(HikeCameraActivity.this, false, pendingIntent);
+			startActivityForResult(galleryPickerIntent, GALLERY_PICKER_REQUEST);
 			break;
 		case R.id.btnflip:
 			flipCamera(v);
@@ -138,9 +199,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				btnFlash.setImageDrawable(getResources().getDrawable(R.drawable.flashauto));
 				cameraFragment.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
 			}
-
 			break;
-
 		}
 	}
 
@@ -148,13 +207,15 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 	{
 		v.setEnabled(false);
 
-		ObjectAnimator visToInvis = ObjectAnimator.ofFloat(containerView, "rotationY", 0f, -90f);
+		// ObjectAnimator visToInvis = ObjectAnimator.ofFloat(containerView, "rotationY", 0f, -90f);
+		ObjectAnimator visToInvis = ObjectAnimator.ofFloat(containerView, "alpha", 1f, 0f);
 		visToInvis.setDuration(200);
-		visToInvis.setInterpolator(decelerator);
+		visToInvis.setInterpolator(deceleratorInterp);
 
-		final ObjectAnimator invisToVis = ObjectAnimator.ofFloat(containerView, "rotationY", 90f, 0f);
-		invisToVis.setDuration(200);
-		invisToVis.setInterpolator(decelerator);
+		// final ObjectAnimator invisToVis = ObjectAnimator.ofFloat(containerView, "rotationY", 90f, 0f);
+		final ObjectAnimator invisToVis = ObjectAnimator.ofFloat(containerView, "alpha", 0f, 1f);
+		invisToVis.setDuration(1000);
+		invisToVis.setInterpolator(deceleratorInterp);
 
 		visToInvis.addListener(new AnimatorListenerAdapter()
 		{
@@ -163,19 +224,15 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			{
 				isUsingFFC = isUsingFFC ? false : true;
 				cameraFragment = CameraFragment.newInstance(isUsingFFC);
-				getSupportFragmentManager().beginTransaction().replace(R.id.container, cameraFragment).commit();
+				replaceFragment(cameraFragment);
 				new Handler().postDelayed(new Runnable()
 				{
 					@Override
 					public void run()
 					{
 						invisToVis.start();
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-						{
-							containerView.animate().alpha(1f).setDuration(200).start();
-						}
 					}
-				}, 0);
+				}, 500);
 			}
 		});
 
@@ -191,9 +248,24 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		});
 
 		visToInvis.start();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+	}
+
+	private void replaceFragment(Fragment argFragment)
+	{
+		getSupportFragmentManager().beginTransaction().replace(R.id.container, argFragment).commit();
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (requestCode == GALLERY_PICKER_REQUEST)
 		{
-			containerView.animate().alpha(0.0f).setDuration(150).start();
+			if (resultCode == RESULT_OK)
+			{
+				// Access selected file
+			}
 		}
 	}
 }

@@ -100,6 +100,12 @@ public final class HikeEffectsFactory{
 		case INKWELL:
 			FilterColormatrix=instance.partialFilterColorMatrix(instance.inkwell(),value);
 			break;
+		case BGR:
+			FilterColormatrix=instance.partialFilterColorMatrix(instance.getBGRColorMatrix(),value);
+			break;
+		case INVERSION:
+			FilterColormatrix=instance.getInvertColorsColorMatrix(value);
+			break;
 		default:
 			FilterColormatrix=new ColorMatrix();
 

@@ -30,7 +30,7 @@
                 android:background="@android:color/transparent"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
-                android:src="@drawable/flashon"
+                android:src="@drawable/flashauto"
                 android:tag="fauto" />
         </LinearLayout>
     </RelativeLayout>

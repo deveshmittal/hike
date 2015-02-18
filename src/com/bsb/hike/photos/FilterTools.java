@@ -24,10 +24,6 @@ public class FilterTools
 			names.add(name);
 			filters.add(filter);
 		}
-
-		// X_PRO_2,WILLOW,WALDEN,VALENCIA,TOASTER,SUTRO,SIERRA,RISE,NASHVILLE,MAYFAIR,LO_FI,KELVIN,INKWELL,HUDSON,HEFE,EARLYBIRD,BRANNAN,AMARO,E1977
-		// }
-
 		
 
 		public static FilterList getHikeEffects()
@@ -38,16 +34,17 @@ public class FilterTools
 				effectfilters.addFilter("Original", FilterType.AMARO);
 				effectfilters.addFilter("Faded", FilterType.FADED);
 				effectfilters.addFilter("Polaroid", FilterType.POLAROID);
+				effectfilters.addFilter("BGR", FilterType.BGR);
 				effectfilters.addFilter("Sepia", FilterType.SEPIA);
 				effectfilters.addFilter("Grayscale", FilterType.GRAYSCALE);
 				effectfilters.addFilter("X PRO 2", FilterType.X_PRO_2);
 				effectfilters.addFilter("Willow", FilterType.WILLOW);
+				effectfilters.addFilter("Inversion", FilterType.INVERSION);
 				effectfilters.addFilter("Walden", FilterType.WALDEN);
 				effectfilters.addFilter("Toaster", FilterType.TOASTER);
 				effectfilters.addFilter("Sutro", FilterType.SUTRO);
 				effectfilters.addFilter("Sierra", FilterType.SIERRA);
 				effectfilters.addFilter("Rise", FilterType.RISE);
-//				effectfilters.addFilter("NashVille", FilterType.NASHVILLE);
 				effectfilters.addFilter("Lo Fi", FilterType.LO_FI);
 				effectfilters.addFilter("Kelvin", FilterType.KELVIN);
 				effectfilters.addFilter("Inkwell", FilterType.INKWELL);

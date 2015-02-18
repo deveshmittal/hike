@@ -9,14 +9,24 @@ import android.widget.ImageView;
 import com.bsb.hike.photos.HikeEffectsFactory;
 import com.bsb.hike.photos.FilterTools.FilterType;
 
-public class EffectsView extends ImageView
+class EffectsView extends ImageView
 {
 
 	private BitmapDrawable currentImage;
 
+	public EffectsView(Context context)
+	{
+		super(context);
+	}
+
 	public EffectsView(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
+	}
+
+	public EffectsView(Context context, AttributeSet attrs, int defStyleAttr)
+	{
+		super(context,attrs,defStyleAttr);
 	}
 
 	public BitmapDrawable getBitmapWithEffectsApplied()
@@ -24,16 +34,17 @@ public class EffectsView extends ImageView
 		return currentImage;
 	}
 
-	public void handleImage(BitmapDrawable image)
-	{
-		currentImage = image;
+
+	public void handleImage(BitmapDrawable image) {
+		currentImage=image;
 		this.setImageDrawable(image);
 
 	}
 
-	public ColorMatrixColorFilter applyEffect(FilterType filter, float value)
+	public ColorMatrixColorFilter applyEffect(FilterType filter,float value)
 	{
 		return HikeEffectsFactory.applyFiltertoBitmapDrawable(currentImage, filter, value);
 	}
 
 }
+
