@@ -3,6 +3,7 @@ package com.bsb.hike.utils;
 import android.content.Intent;
 import android.net.TrafficStats;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -210,6 +211,11 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
         
 		//We only add data fragment for devices where actual statistics is available;
 		if(TrafficStats.getUidTxBytes(HikeMessengerApp.getInstance().getApplicationInfo().uid) == TrafficStats.UNSUPPORTED)
+		{
+	        return;
+		}
+		
+		if(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeMessengerApp.SHOW_DATA_TRACKER, true))
 		{
 	        return;
 		}
