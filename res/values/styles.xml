@@ -330,8 +330,8 @@
         <item name="android:actionOverflowButtonStyle">@style/OverflowMenu</item>
         <item name="actionBarSize">@dimen/st__action_bar_default_height</item>
         <item name="android:actionBarSize">@dimen/st__action_bar_default_height</item>
-        <item name="actionModeBackground">@drawable/bg_header_transparent</item>
-        <item name="android:actionModeBackground">@drawable/bg_header_transparent</item>
+        <item name="actionModeBackground">@color/transparent</item>
+        <item name="android:actionModeBackground">@color/transparent</item>
         <item name="actionModeCloseButtonStyle">@style/NoCloseButton</item>
         <item name="actionModeCloseDrawable">@drawable/ic_close_chat_bg_palette</item>
         <item name="android:actionModeCloseButtonStyle">@style/NoCloseButton</item>
