@@ -1,21 +1,25 @@
-package com.bsb.hike.photos.view;
+package com.bsb.hike.photos.views;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
 
-import com.bsb.hike.photos.FilterTools.FilterType;
 import com.bsb.hike.photos.HikeEffectsFactory;
-import com.bsb.hike.photos.PhotoEditerTools;
 import com.bsb.hike.photos.HikeEffectsFactory.OnPreviewReadyListener;
+import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 
-//preview type to be changed to bitmap later
+/**
+ * @author akhiltripathi
+ *
+ *         Custom View for the Filter Preview thumbnails
+ * 
+ */
 
-public class FilterEffectItem extends EffectItem implements OnPreviewReadyListener
+public class FilterEffectItemLinearLayout extends EffectItemLinearLayout implements OnPreviewReadyListener
 {
 	private FilterType filter;
 
-	public FilterEffectItem(Context context, AttributeSet attrs)
+	public FilterEffectItemLinearLayout(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
 
@@ -32,7 +36,13 @@ public class FilterEffectItem extends EffectItem implements OnPreviewReadyListen
 	public void setFilter(Context context, FilterType type)
 	{
 		this.filter = type;
-		HikeEffectsFactory.LoadPreviewThumbnail(this.getIcon(), type, this);
+		initiateThumbnailCreation();
+
+	}
+
+	private void initiateThumbnailCreation()
+	{
+		HikeEffectsFactory.loadPreviewThumbnail(this.getIcon(), this.filter, this);
 	}
 
 	public FilterType getFilter()

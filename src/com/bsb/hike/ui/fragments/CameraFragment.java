@@ -142,7 +142,6 @@ public class CameraFragment extends SherlockFragment
 					Intent i = new Intent(getActivity(), PictureEditer.class);
 					i.putExtra("FilePath", f.getAbsolutePath());
 					getActivity().startActivity(i);
-					getActivity().finish();
 				}
 			});
 		}

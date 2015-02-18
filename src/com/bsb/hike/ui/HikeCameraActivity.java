@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import android.app.PendingIntent;
+import java.io.File;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -18,11 +20,15 @@ import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
@@ -46,7 +52,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 	private View containerView;
 
 	private Interpolator deceleratorInterp = new DecelerateInterpolator();
-	
+
 	private Interpolator overshootInterp = new OvershootInterpolator();
 
 	private OrientationEventListener orientationListener;
@@ -67,10 +73,9 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			@Override
 			public void run()
 			{
-				// replaceFragment(cameraFragment);
 				flipCamera(containerView);
 			}
-		}, 1000);
+		}, 200);
 
 		findViewById(R.id.btntakepic).setOnClickListener(HikeCameraActivity.this);
 
@@ -138,6 +143,21 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			}
 		};
 
+		containerView.setOnClickListener(new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				if (cameraFragment != null)
+				{
+					if (cameraFragment.isAutoFocusAvailable())
+					{
+						cameraFragment.autoFocus();
+					}
+				}
+			}
+		});
 	}
 
 	@Override

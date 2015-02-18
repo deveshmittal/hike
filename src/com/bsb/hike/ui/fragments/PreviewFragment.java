@@ -2,7 +2,6 @@ package com.bsb.hike.ui.fragments;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.Gravity;
@@ -15,12 +14,12 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 
 import com.bsb.hike.R;
-import com.bsb.hike.photos.PhotoEditerTools;
-import com.bsb.hike.photos.FilterTools.FilterList;
-import com.bsb.hike.photos.PhotoEditerTools.MenuType;
-import com.bsb.hike.photos.view.DoodleEffectItem;
-import com.bsb.hike.photos.view.FilterEffectItem;
-import com.bsb.hike.ui.PictureEditer.EffectsClickListener;
+import com.bsb.hike.photos.HikePhotosUtils;
+import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterList;
+import com.bsb.hike.photos.HikePhotosUtils.MenuType;
+import com.bsb.hike.photos.views.DoodleEffectItemLinearLayout;
+import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
+import com.bsb.hike.ui.PictureEditer.EditorClickListener;
 import com.jess.ui.TwoWayAbsListView;
 import com.jess.ui.TwoWayGridView;
 
@@ -29,11 +28,11 @@ public final class PreviewFragment extends Fragment
 
 	private MenuType myType;
 
-	private EffectsClickListener handler;
+	private EditorClickListener handler;
 
 	private Bitmap mOriginalBitmap;
 
-	public PreviewFragment(MenuType type, EffectsClickListener adapter, Bitmap bitmap)
+	public PreviewFragment(MenuType type, EditorClickListener adapter, Bitmap bitmap)
 	{
 
 		myType = type;
@@ -72,13 +71,13 @@ public final class PreviewFragment extends Fragment
 			adjuster.findViewById(R.id.plusWidth).setOnClickListener(handler);
 			adjuster.findViewById(R.id.minusWidth).setOnClickListener(handler);
 			ViewStub stub = (ViewStub) adjuster.findViewById(R.id.viewStub1);
-			DoodleEffectItem inflated = (DoodleEffectItem) stub.inflate();
+			DoodleEffectItemLinearLayout inflated = (DoodleEffectItemLinearLayout) stub.inflate();
 			inflated.setRingColor(0xFFFFD700);
 			handler.setDoodlePreview(inflated);
 			layout.addView(adjuster);
 			break;
 		case Effects:
-			gridView.setPadding(0, PhotoEditerTools.dpToPx(getActivity(), 15), 0, 0);
+			gridView.setPadding(0, HikePhotosUtils.dpToPx(getActivity(), 15), 0, 0);
 			break;
 		}
 
@@ -99,9 +98,9 @@ public final class PreviewFragment extends Fragment
 
 		private MenuType itemType;
 
-		private EffectsClickListener adapter;
+		private EditorClickListener adapter;
 
-		public ImageAdapter(Context context, MenuType type, EffectsClickListener Adapter)
+		public ImageAdapter(Context context, MenuType type, EditorClickListener Adapter)
 		{
 			mContext = context;
 			itemType = type;
@@ -118,7 +117,7 @@ public final class PreviewFragment extends Fragment
 				count = FilterList.getHikeEffects().filters.size();
 				break;
 			case Doodle:
-				count = PhotoEditerTools.DoodleColors.length;
+				count = HikePhotosUtils.DoodleColors.length;
 				break;
 			}
 			return count;
@@ -154,7 +153,7 @@ public final class PreviewFragment extends Fragment
 					convertView = LayoutInflater.from(mContext).inflate(R.layout.filter_preview_item, parent, false);
 				}
 				FilterList myFilters = FilterList.getHikeEffects();
-				FilterEffectItem temp = (FilterEffectItem) convertView;
+				FilterEffectItemLinearLayout temp = (FilterEffectItemLinearLayout) convertView;
 				temp.init(mOriginalBitmap, myFilters.names.get(position));
 				temp.setFilter(mContext, myFilters.filters.get(position));
 				temp.setOnClickListener(adapter);
@@ -168,9 +167,9 @@ public final class PreviewFragment extends Fragment
 				{
 					convertView = LayoutInflater.from(mContext).inflate(R.layout.doodle_preview_item, parent, false);
 				}
-				DoodleEffectItem temp3 = (DoodleEffectItem) convertView;
-				temp3.setBrushColor(PhotoEditerTools.DoodleColors[position]);
-				temp3.Refresh();
+				DoodleEffectItemLinearLayout temp3 = (DoodleEffectItemLinearLayout) convertView;
+				temp3.setBrushColor(HikePhotosUtils.DoodleColors[position]);
+				temp3.refresh();
 				temp3.setOnClickListener(adapter);
 				break;
 			case Quality:

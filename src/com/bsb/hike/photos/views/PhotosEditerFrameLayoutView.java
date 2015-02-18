@@ -1,4 +1,4 @@
-package com.bsb.hike.photos.view;
+package com.bsb.hike.photos.views;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,21 +12,26 @@ import android.graphics.Canvas;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Environment;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
-import com.bsb.hike.R;
-import com.bsb.hike.photos.FilterTools.FilterType;
-import com.bsb.hike.photos.PhotoEditerTools;
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.photos.HikePhotosUtils;
+import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
+import com.bsb.hike.utils.Utils;
 
-public class PictureEditerView extends FrameLayout
+/**
+ * @author akhiltripathi Custom View extends FrameLayout Packs all the editing layers <filter layer,vignette layer ,doodle layer> into a single view ,in same z-order
+ * 
+ */
+public class PhotosEditerFrameLayoutView extends FrameLayout
 {
 	private CanvasImageView doodleLayer;
 
 	private VignetteImageView vignetteLayer;
 
-	private EffectsView effectLayer;
+	private EffectsImageView effectLayer;
 
 	private ColorMatrixColorFilter currentEffect;
 
@@ -34,35 +39,35 @@ public class PictureEditerView extends FrameLayout
 
 	private Bitmap imageOriginal, imageEdited, scaledImageOriginal;
 
-	public PictureEditerView(Context context)
+	public PhotosEditerFrameLayoutView(Context context)
 	{
 		super(context);
 		doodleLayer = new CanvasImageView(context);
 		vignetteLayer = new VignetteImageView(context);
-		effectLayer = new EffectsView(context);
+		effectLayer = new EffectsImageView(context);
 		addView(effectLayer);
 		addView(vignetteLayer);
 		addView(doodleLayer);
 	}
 
-	public PictureEditerView(Context context, AttributeSet attrs)
+	public PhotosEditerFrameLayoutView(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
 		doodleLayer = new CanvasImageView(context, attrs);
 		vignetteLayer = new VignetteImageView(context, attrs);
-		effectLayer = new EffectsView(context, attrs);
+		effectLayer = new EffectsImageView(context, attrs);
 		addView(effectLayer);
 		addView(vignetteLayer);
 		addView(doodleLayer);
 		// TODO Auto-generated constructor stub
 	}
 
-	public PictureEditerView(Context context, AttributeSet attrs, int defStyleAttr)
+	public PhotosEditerFrameLayoutView(Context context, AttributeSet attrs, int defStyleAttr)
 	{
 		super(context, attrs, defStyleAttr);
 		doodleLayer = new CanvasImageView(context, attrs, defStyleAttr);
 		vignetteLayer = new VignetteImageView(context, attrs, defStyleAttr);
-		effectLayer = new EffectsView(context, attrs, defStyleAttr);
+		effectLayer = new EffectsImageView(context, attrs, defStyleAttr);
 		addView(effectLayer);
 		addView(vignetteLayer);
 		addView(doodleLayer);
@@ -71,7 +76,8 @@ public class PictureEditerView extends FrameLayout
 	public Bitmap getScaledImageOriginal()
 	{
 		if (scaledImageOriginal == null)
-			scaledImageOriginal = Bitmap.createScaledBitmap(imageOriginal, PhotoEditerTools.dpToPx(getContext(), 80), PhotoEditerTools.dpToPx(getContext(), 80), false);
+			scaledImageOriginal = Bitmap.createScaledBitmap(imageOriginal, HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_WIDTH),
+					HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_HEIGHT), false);
 		return scaledImageOriginal;
 	}
 
@@ -82,9 +88,14 @@ public class PictureEditerView extends FrameLayout
 
 	public void applyFilter(FilterType filter)
 	{
-		currentEffect = effectLayer.applyEffect(filter, 100);
+		currentEffect = effectLayer.applyEffect(filter, HikeConstants.HikePhotos.DEFAULT_FILTER_APPLY_PERCENTAGE);
 	}
 
+	/**
+	 * 
+	 * @param FilePath
+	 *            : absolute address of the file to be handled by the editor object
+	 */
 	@SuppressWarnings("deprecation")
 	public void loadImageFromFile(String FilePath)
 	{
@@ -94,13 +105,8 @@ public class PictureEditerView extends FrameLayout
 
 	public void enableDoodling()
 	{
-		doodleLayer.Refresh(imageOriginal);
+		doodleLayer.refresh(imageOriginal);
 		doodleLayer.setDrawEnabled(true);
-	}
-
-	public Bitmap getImageOriginal()
-	{
-		return imageOriginal;
 	}
 
 	public void disableDoodling()
@@ -116,14 +122,10 @@ public class PictureEditerView extends FrameLayout
 	public File saveImage()
 	{
 
-		imageEdited = updateSat(imageOriginal, currentEffect);
-		String root = Environment.getExternalStorageDirectory().toString();
-		File myDir = new File(root + "/colormatrix");
-		myDir.mkdirs();
-		Random generator = new Random();
-		int n = 10000;
-		n = generator.nextInt(n);
-		String fname = "Image-" + n + ".jpg";
+		imageEdited = FlattenLayersToBitmap(imageOriginal, currentEffect);
+		File myDir = new File(Utils.getFileParent(HikeFileType.IMAGE, false));
+		myDir.mkdir();
+		String fname = Utils.getOriginalFile(HikeFileType.IMAGE, null);
 		File file = new File(myDir, fname);
 		if (file.exists())
 		{
@@ -166,7 +168,13 @@ public class PictureEditerView extends FrameLayout
 		}
 	}
 
-	private Bitmap updateSat(Bitmap src, ColorMatrixColorFilter filter)
+	public void undoLastDoodleDraw()
+	{
+		doodleLayer.onClickUndo();
+
+	}
+
+	private Bitmap FlattenLayersToBitmap(Bitmap src, ColorMatrixColorFilter filter)
 	{
 
 		int w = src.getWidth();
@@ -184,11 +192,5 @@ public class PictureEditerView extends FrameLayout
 		}
 		return bitmapResult;
 	}
-
-	// public void loadImage()
-	// {
-	// effectLayer.handleImage((BitmapDrawable)getResources().getDrawable(R.drawable.test));
-	// imageOriginal=((BitmapDrawable)getResources().getDrawable(R.drawable.test)).getBitmap();
-	// }
 
 }
