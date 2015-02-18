@@ -33,11 +33,11 @@ public class CustomWebView extends WebView
 		super(context, attrs, defStyleAttr);
 	}
 
-	/*@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	public CustomWebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
 	{
 		super(context, attrs, defStyleAttr, defStyleRes);
-	}*/
+	}
 
 
 	// if webView is not visible, call onPause of WebView, else call onResume.
