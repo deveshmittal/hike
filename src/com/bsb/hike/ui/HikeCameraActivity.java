@@ -58,10 +58,9 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		super.onCreate(savedInstanceState);
 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        
+
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
 		setContentView(R.layout.hike_camera_activity);
 
 		cameraFragment = CameraFragment.newInstance(false);
@@ -195,6 +194,12 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			flipCamera(v);
 			break;
 		case R.id.btntoggleflash:
+
+			if (isUsingFFC)
+			{
+				//TODO Temporary fix . Change UI
+				return;
+			}
 
 			ImageButton btnFlash = (ImageButton) v;
 
