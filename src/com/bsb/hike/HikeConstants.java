@@ -1017,8 +1017,6 @@ public class HikeConstants
 
 		public static final String FADE_IN = "fadeIn";
 
-		public static final String ANIMATED_ONCE = "animatedOnce";
-
 		public static final String EDIT_PROFILE = "editProfile";
 
 		public static final String EMAIL = "email";
@@ -1292,6 +1290,7 @@ public class HikeConstants
 		public static final String DELETED_MESSAGE_TYPE = "deletedMessageType";
 
 		public static final String CURRENT_POSITION = "currentPosition";
+		
 	}
 
 	public static final class LogEvent

@@ -1,26 +1,18 @@
-package com.bsb.hike.utils;
+package com.bsb.hike.dialog;
 
-import com.bsb.hike.ui.HikeDialog.HDialog;
-
-import android.app.Dialog;
 import android.content.Context;
 import android.view.ViewGroup;
 import android.widget.Spinner;
 
-public class ContactDialog extends HDialog
+public class ContactDialog extends HikeDialog
 {
-	
 	private ViewGroup parentLayout;
 
 	private Spinner spinner;
-	public ContactDialog(Context context,int id)
-	{
-		super(context,id);
-	}
 
-	public ContactDialog(Context context, int theme,int id)
+	public ContactDialog(Context context, int theme, int id)
 	{
-		super(context, theme,id);
+		super(context, theme, id);
 	}
 
 	public void setViewReferences(ViewGroup parent, Spinner spinner)
@@ -41,4 +33,5 @@ public class ContactDialog extends HDialog
 			parentLayout.removeView(spinner);
 		}
 	}
+
 }

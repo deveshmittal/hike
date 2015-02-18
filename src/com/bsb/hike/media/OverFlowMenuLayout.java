@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import android.content.Context;
-import android.text.method.HideReturnsTransformationMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +11,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 
 public class OverFlowMenuLayout implements OnItemClickListener {
@@ -22,6 +23,7 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 	protected OverflowItemClickListener listener;
 	protected View viewToShow;
 	protected PopUpLayout popUpLayout;
+	private OnDismissListener mOnDismisslistener;
 
 	/**
 	 * This class is made to show overflow menu items, by default it populates
@@ -33,10 +35,11 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 	 * @param context
 	 */
 	public OverFlowMenuLayout(List<OverFlowMenuItem> overflowItems,
-			OverflowItemClickListener listener, Context context) {
+			OverflowItemClickListener listener, OnDismissListener onDismissListener, Context context) {
 		this.overflowItems = overflowItems;
 		this.listener = listener;
 		this.context = context;
+		this.mOnDismisslistener = onDismissListener;
 		popUpLayout = new PopUpLayout(context);
 	}
 
@@ -74,10 +77,20 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 				TextView freeSmsCount = (TextView) convertView
 						.findViewById(R.id.free_sms_count);
 				freeSmsCount.setVisibility(View.GONE);
-
+				
 				TextView newGamesIndicator = (TextView) convertView
 						.findViewById(R.id.new_games_indicator);
-				newGamesIndicator.setVisibility(View.GONE);
+				
+				if(item.unreadCount <= 0)
+				{	
+					newGamesIndicator.setVisibility(View.GONE);
+				}
+				
+				else
+				{
+					newGamesIndicator.setText(setUnreadCounter(item.unreadCount));
+					newGamesIndicator.setVisibility(View.VISIBLE);
+				}
 
 				return convertView;
 			}
@@ -101,6 +114,7 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 		initView();
 		popUpLayout.showPopUpWindow(width, height, xOffset, yOffset, anchor,
 				getView());
+		popUpLayout.setOnDismissListener(mOnDismisslistener);
 	}
 
 	public void appendItem(OverFlowMenuItem item) {
@@ -120,10 +134,41 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 	public void removeItem(int id) {
 		Iterator<OverFlowMenuItem> iterator = overflowItems.iterator();
 		while (iterator.hasNext()) {
-			if (iterator.next().uniqueness == id) {
+			if (iterator.next().id == id) {
 				iterator.remove();
 				break;
 			}
+		}
+	}
+	
+	public List<OverFlowMenuItem> getOverFlowMenuItems()
+	{
+		return overflowItems;
+	}
+	
+
+	public void notifyDateSetChanged()
+	{
+		if(viewToShow != null)
+		{
+			ListView overFlowListView = (ListView) viewToShow
+				.findViewById(R.id.overflow_menu_list);
+			
+			((ArrayAdapter)overFlowListView.getAdapter()).notifyDataSetChanged();
+		}
+		
+	}
+	
+	private String setUnreadCounter(int counter)
+	{
+		if(counter >= HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY)
+		{
+			return context.getString(R.string.max_pin_unread_counter);
+		}
+		
+		else
+		{
+			return Integer.toString(counter);
 		}
 	}
 

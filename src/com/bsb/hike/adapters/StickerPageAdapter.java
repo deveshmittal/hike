@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.media.StickerPicker.StickerPickerListener;
+import com.bsb.hike.media.StickerPickerListener;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
@@ -159,7 +159,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			switch (viewType)
 			{
 			case STICKER:
-				convertView = new RecyclingImageView(mContext);
+				convertView = new ImageView(mContext);
 				int padding = (int) (5 * Utils.densityMultiplier);
 				convertView.setLayoutParams(ll);
 				((ImageView) convertView).setScaleType(ScaleType.FIT_CENTER);

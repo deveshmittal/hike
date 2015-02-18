@@ -494,7 +494,7 @@ public class FileTransferManager extends BroadcastReceiver
 			FileTransferBase task = ((MyFutureTask) obj).getTask();
 			task.setPausedProgress(task._bytesTransferred);
 			task.setState(FTState.PAUSED);
-			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
 			Logger.d(getClass().getSimpleName(), "pausing the task....");
 		}
 	}
@@ -838,7 +838,7 @@ public class FileTransferManager extends BroadcastReceiver
 			FileTransferBase task = ((MyFutureTask) obj).getTask();
 			if(task.getPausedProgress() == task._bytesTransferred && task._state == FTState.PAUSED){
 				task.setState(FTState.IN_PROGRESS);
-				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+				HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
 			}
 		}
 	}

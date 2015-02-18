@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.R;
 
@@ -16,56 +17,75 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 {
 	public static interface ActionModeListener
 	{
-		public void actionModeDestroyed(int id);
+		public void actionModeDestroyed(int actionModeId);
 
-		public void doneClicked(int id);
+		public void doneClicked(int actionModeId);
 
-		public void initActionbarActionModeView(int id,View view);
+		public void initActionbarActionModeView(int actionModeId, View view);
+		
+		public boolean onActionItemClicked(int actionModeId, MenuItem menuItem);
 	}
 
-	private static final int DEFAULT_LAYOUT = R.layout.hike_action_mode;
+	private static final int DEFAULT_LAYOUT_RESID = R.layout.hike_action_mode;
 
-	protected ActionMode actionMode;
+	protected ActionMode mActionMode;
 
-	protected SherlockFragmentActivity sherlockFragmentActivity;
+	protected SherlockFragmentActivity mActivity;
 
-	private int title, save, layoutId = DEFAULT_LAYOUT, id;
+	private int defaultLayoutId = DEFAULT_LAYOUT_RESID, actionModeId;
+	
+	private String actionModeTitle = "";
+	
+	private String doneButtonText = "";
 
-	private ActionModeListener listener;
+	private ActionModeListener mListener;
+	
+	private boolean shouldInflateMenu;
+	
+	private int menuResId = -1;
+	
+	private Menu mMenu;
 
-	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity)
+	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, ActionModeListener listener)
 	{
-		this(sherlockFragmentActivity, -1, -1, DEFAULT_LAYOUT);
+		this(sherlockFragmentActivity, "", "", DEFAULT_LAYOUT_RESID, listener);
 	}
 
-	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int layoutId)
+	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int layoutId, ActionModeListener listener)
 	{
-		this(sherlockFragmentActivity, -1, -1, layoutId);
+		this(sherlockFragmentActivity, "", "", layoutId, listener);
 	}
 
-	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int title, int save, int layoutId)
+	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, String title, String save, int layoutId, ActionModeListener listener)
 	{
-		this.sherlockFragmentActivity = sherlockFragmentActivity;
-		this.layoutId = layoutId;
-		this.title = title;
-		this.save = save;
-	}
-
-	public void setListener(ActionModeListener listener)
-	{
-		this.listener = listener;
+		this.mActivity = sherlockFragmentActivity;
+		this.defaultLayoutId = layoutId;
+		this.actionModeTitle = title;
+		this.doneButtonText = save;
+		this.mListener = listener;
 	}
 
 	protected void startActionMode()
 	{
-		sherlockFragmentActivity.startActionMode(this);
+		mActivity.startActionMode(this);
 	}
 
 	@Override
 	public boolean onCreateActionMode(ActionMode mode, Menu menu)
 	{
-		this.actionMode = mode;
-		mode.setCustomView(LayoutInflater.from(sherlockFragmentActivity).inflate(layoutId, null));
+		this.mActionMode = mode;
+		View view = LayoutInflater.from(mActivity).inflate(defaultLayoutId, null);
+		mode.setCustomView(view);
+		if(shouldInflateMenu)
+		{
+			inflateMenu(menu);
+		}
+		
+		if (mListener != null)
+		{
+			mListener.initActionbarActionModeView(actionModeId, view);
+		}
+
 		return true;
 	}
 
@@ -79,44 +99,65 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	@Override
 	public boolean onActionItemClicked(ActionMode mode, MenuItem item)
 	{
+		if (mListener != null)
+		{
+			return mListener.onActionItemClicked(actionModeId, item);
+		}
+		
 		return false;
 	}
 
 	@Override
 	public void onDestroyActionMode(ActionMode mode)
 	{
-		this.actionMode = null;
-		if (listener != null)
+		if (mListener != null)
 		{
-			listener.actionModeDestroyed(id);
+			mListener.actionModeDestroyed(actionModeId);
 		}
 		actionBarDestroyed();
 	}
 
 	public void showActionMode(int id)
 	{
-		showActionMode(id, layoutId);
+		showActionMode(id, defaultLayoutId);
 	}
 
 	public void showActionMode(int id, int layoutId)
 	{
-		this.layoutId = layoutId;
-		showActionMode(id, title, save);
+		this.defaultLayoutId = layoutId;
+		showActionMode(id, actionModeTitle, doneButtonText);
 	}
 
-	public void showActionMode(int id, int title, int save)
+	public void showActionMode(int id, String title, String doneButtonText)
 	{
-		this.id = id;
-		this.title = title;
-		this.save = save;
-		sherlockFragmentActivity.startActionMode(this);
+		this.actionModeId = id;
+		this.actionModeTitle = title;
+		this.doneButtonText = doneButtonText;
+		mActivity.startActionMode(this);
+	}
+	
+	/**
+	 * Used to show an actionMode with a custom menu. The menu layout resId is passed in the params
+	 * 
+	 * @param id
+	 * @param title
+	 * @param showMenu
+	 * @param menuResId
+	 */
+	public void showActionMode(int id, String title, boolean showMenu, int menuResId)
+	{
+		this.actionModeId = id;
+		this.actionModeTitle = title;
+		this.shouldInflateMenu = showMenu;
+		this.menuResId = showMenu ? menuResId : -1;
+		mActivity.startActionMode(this);
 	}
 
 	private void initDefaultView()
 	{
-		setText(R.id.title, title, -1);
-		setText(R.id.save, save, R.anim.scale_in);
-		actionMode.getCustomView().findViewById(R.id.done_container).setOnClickListener(this);
+		setText(R.id.title, actionModeTitle, -1);
+		setText(R.id.save, doneButtonText, R.anim.scale_in);
+		mActionMode.getCustomView().findViewById(R.id.done_container).setOnClickListener(this);
 	}
 
 	/**
@@ -124,34 +165,32 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	 */
 	protected void initView()
 	{
-		if (layoutId == DEFAULT_LAYOUT)
+		if (defaultLayoutId == DEFAULT_LAYOUT_RESID)
 		{
 			initDefaultView();
 		}
 		else
 		{
-			if (listener != null)
+			if (mListener != null)
 			{
-				listener.initActionbarActionModeView(id,actionMode.getCustomView());
+				mListener.initActionbarActionModeView(actionModeId, mActionMode.getCustomView());
 			}
 		}
 	}
 
-	private View setText(int viewId, int textId, int animId)
+	private void setText(int viewId, String text, int animId)
 	{
-		if (textId != -1)
+		if (viewId != -1)
 		{
-			TextView tv = (TextView) actionMode.getCustomView().findViewById(viewId);
-			tv.setText(textId);
+			TextView tv = (TextView) mActionMode.getCustomView().findViewById(viewId);
+			tv.setText(text);
 			if (animId != -1)
 			{
-				tv.startAnimation(AnimationUtils.loadAnimation(sherlockFragmentActivity, animId));
+				tv.startAnimation(AnimationUtils.loadAnimation(mActivity, animId));
 			}
-			return tv;
 		}
-		return null;
 	}
-
+	
 	@Override
 	public void onClick(View v)
 	{
@@ -163,31 +202,94 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 
 	protected void actionBarDestroyed()
 	{
+		this.mActionMode = null;
+		actionModeId = -1;
+		menuResId = -1;	
+		shouldInflateMenu = false;
 	}
 
 	protected void doneClicked()
 	{
-		if (listener != null)
+		if (mListener != null)
 		{
-			listener.doneClicked(id);
+			mListener.doneClicked(actionModeId);
 		}
 	}
 
 	public boolean onBackPressed()
 	{
-		if (actionMode != null)
+		if (mActionMode != null)
 		{
-			actionMode.finish();
+			finish();
 			return true;
 		}
+		
 		return false;
 	}
 
 	public void finish()
 	{
-		if (actionMode != null)
+		if (mActionMode != null)
 		{
-			actionMode.finish();
+			mActionMode.finish();
 		}
+	}
+	
+	private void inflateMenu(Menu menu)
+	{
+		if (menuResId == -1)
+		{
+			throw new RuntimeException("Trying to inflate menu with menuId as -1");
+		}
+		MenuInflater mMenuInflater = mActionMode.getMenuInflater();
+		mMenuInflater.inflate(menuResId, menu);
+		this.mMenu = menu;
+		
+		/**
+		 * Also hide doneButton containers
+		 */
+		hideView(R.id.done_container);
+		hideView(R.id.done_container_divider);
+	}
+	
+	/**
+	 * -1 indicates no action mode is on currently
+	 * @return
+	 */
+	public int whichActionModeIsOn()
+	{
+		if (mActionMode != null)
+		{
+			return actionModeId;
+		}
+
+		return -1;
+	}
+	
+	public boolean isActionModeOn()
+	{
+		return (mActionMode != null);
+	}
+	
+	public void updateTitle(String title)
+	{
+		setText(R.id.title, title, -1);
+	}
+	
+	public void showHideMenuItem(int menuItemResId, boolean show)
+	{
+		if (mMenu != null)
+		{
+			MenuItem item = mMenu.findItem(menuItemResId);
+			if (item != null)
+			{
+				item.setVisible(show);
+			}
+		}
+	}
+	
+	private void hideView(int resId)
+	{
+		mActionMode.getCustomView().findViewById(resId).setVisibility(View.GONE);
 	}
 }

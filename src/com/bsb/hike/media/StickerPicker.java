@@ -9,9 +9,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.models.Sticker;
@@ -22,14 +21,8 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
-public class StickerPicker implements OnClickListener, ShareablePopup, Listener
+public class StickerPicker implements OnClickListener, ShareablePopup, StickerPickerListener
 {
-
-	public interface StickerPickerListener
-	{
-		public void stickerSelected(Sticker sticker, String source);
-	}
-
 	private StickerPickerListener listener;
 
 	private Context mContext;
@@ -41,6 +34,10 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 	private View viewToDisplay;
 
 	private int mLayoutResId = -1;
+	
+	private StickerEmoticonIconPageIndicator mIconPageIndicator;
+	
+	private SherlockFragmentActivity mActivity;
 
 	private static final String TAG = "StickerPicker";
 
@@ -50,11 +47,11 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 	 * @param activity
 	 * @param listener
 	 */
-	public StickerPicker(Context context, StickerPickerListener listener)
+	public StickerPicker(Context context, StickerPickerListener listener, SherlockFragmentActivity activity)
 	{
 		this.mContext = context;
 		this.listener = listener;
-		registerPubSub();
+		this.mActivity = activity;
 	}
 
 	/**
@@ -64,9 +61,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 	 * @param listener
 	 * @param popUpLayout
 	 */
-	public StickerPicker(int layoutResId, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
+	public StickerPicker(int layoutResId, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout, SherlockFragmentActivity activity)
 	{
-		this(context, listener);
+		this(context, listener, activity);
 		this.mLayoutResId = layoutResId;
 		this.popUpLayout = popUpLayout;
 	}
@@ -79,9 +76,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 	 * @param listener
 	 * @param popUpLayout
 	 */
-	public StickerPicker(View view, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
+	public StickerPicker(View view, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout, SherlockFragmentActivity activity)
 	{
-		this(context, listener);
+		this(context, listener, activity);
 		this.viewToDisplay = view;
 		this.popUpLayout = popUpLayout;
 		initViewComponents(viewToDisplay);
@@ -98,9 +95,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 	 * @param eatTouchEventViewIds
 	 */
 
-	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, int[] eatTouchEventViewIds)
+	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, int[] eatTouchEventViewIds, SherlockFragmentActivity activity)
 	{
-		this(context, listener);
+		this(context, listener, activity);
 		popUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, context.getApplicationContext(), eatTouchEventViewIds);
 	}
 
@@ -112,9 +109,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 	 *            this is your activity Or fragment root view which gets resized when keyboard toggles
 	 * @param firstTimeHeight
 	 */
-	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight)
+	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, SherlockFragmentActivity activity)
 	{
-		this(context, listener, mainView, firstTimeHeight, null);
+		this(context, listener, mainView, firstTimeHeight, null, activity);
 	}
 
 	public void showStickerPicker()
@@ -164,9 +161,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 			throw new IllegalArgumentException("View Pager was not found in the view passed.");
 		}
 
-		stickerAdapter = new StickerAdapter(mContext, listener);
+		stickerAdapter = new StickerAdapter(mContext, this);
 
-		StickerEmoticonIconPageIndicator mIconPageIndicator = (StickerEmoticonIconPageIndicator) view.findViewById(R.id.sticker_icon_indicator);
+		mIconPageIndicator = (StickerEmoticonIconPageIndicator) view.findViewById(R.id.sticker_icon_indicator);
 
 		View shopIcon = (view.findViewById(R.id.shop_icon));
 
@@ -222,24 +219,18 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 
 	private void shopIconClicked()
 	{
-		if (!HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false)) // The shop icon would be blue unless the user clicks
+		if (!HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false)) // The shop icon would be blue unless the user clicks
 		// on it once
 		{
-			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
+			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
 		}
-		if (HikeSharedPreferenceUtil.getInstance(mContext).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false)) // The shop icon would be blue unless the user clicks
+		if (HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false)) // The shop icon would be blue unless the user clicks
 		// on it once
 		{
-			HikeSharedPreferenceUtil.getInstance(mContext).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
+			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
 		}
 		Intent i = new Intent(mContext, StickerShopActivity.class);
-		/**
-		 * Was getting a runtime exception over here : 
-		 * Calling startActivity() from outside of an Activity  context requires the FLAG_ACTIVITY_NEW_TASK flag. Is this really what you want?
-		 *
-		 */
-		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		mContext.startActivity(i);
+		mActivity.startActivity(i);
 	}
 
 	public void updateDimension(int width, int height)
@@ -295,58 +286,38 @@ public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 		// TODO Implement this.
 		viewToDisplay = null;
 		stickerAdapter = null;
-
+		mActivity = null;
 	}
 
-	public void updateListener(StickerPickerListener mListener)
+	public void updateListener(StickerPickerListener mListener, SherlockFragmentActivity activity)
 	{
 		this.listener = mListener;
+		this.mActivity = activity;
 	}
 	
-	private void registerPubSub()
+	public void updateStickerAdapter()
 	{
-		HikeMessengerApp.getPubSub().addListeners(this, new String[] {HikePubSub.STICKER_CATEGORY_MAP_UPDATED});
-	}
-	
-	private void updateStickerAdapter()
-	{
-		if (stickerAdapter != null && viewToDisplay != null)
+		if (stickerAdapter != null)
 		{
-			/**
-			 * Calling this on UI Thread. Still not 100% sure about this though.
-			 */
 			stickerAdapter.instantiateStickerList();
-			viewToDisplay.post(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					stickerAdapter.notifyDataSetChanged();
-
-				}
-			});
+			stickerAdapter.notifyDataSetChanged();
 		}
 	}
 
-	/**
-	 * (non-Javadoc)
-	 * @see com.bsb.hike.HikePubSub.Listener#onEventReceived(java.lang.String, java.lang.Object)
-	 */
-	
-	@Override
-	public void onEventReceived(String type, Object object)
+	public void updateIconPageIndicator()
 	{
-		Logger.d(TAG, "Inside onEvent Received of PubSub thread. " + type);
-		
-		switch (type)
+		if (mIconPageIndicator != null)
 		{
-		case HikePubSub.STICKER_CATEGORY_MAP_UPDATED:
-			updateStickerAdapter();
-			break;
-		default:
-			Logger.e(TAG, "PubSub Registered But Not used : " + type);
-			break;
+			mIconPageIndicator.notifyDataSetChanged();
+		}
+	}
+
+	@Override
+	public void stickerSelected(Sticker sticker, String source)
+	{
+		if (listener != null)
+		{
+			listener.stickerSelected(sticker, source);
 		}
 	}
 }

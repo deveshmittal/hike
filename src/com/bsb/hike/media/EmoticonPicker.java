@@ -21,13 +21,8 @@ import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
  * @author piyush
  * 
  */
-public class EmoticonPicker implements ShareablePopup
+public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 {
-	public interface EmoticonPickerListener
-	{
-		public void emoticonSelected(int emoticonIndex);
-	}
-
 	private EmoticonPickerListener mEmoPickerListener;
 
 	private Context mContext;
@@ -187,7 +182,7 @@ public class EmoticonPicker implements ShareablePopup
 		 */
 		int firstCategoryToShow = (mRecentEmoticons.length < recentEmoticonsSizeReq) ? 1 : 0;
 
-		EmoticonAdapter mEmoticonAdapter = new EmoticonAdapter(mContext, mEmoPickerListener, isPortrait, tabDrawables);
+		EmoticonAdapter mEmoticonAdapter = new EmoticonAdapter(mContext, this, isPortrait, tabDrawables);
 
 		mPager.setVisibility(View.VISIBLE);
 
@@ -251,6 +246,15 @@ public class EmoticonPicker implements ShareablePopup
 	public void updateListener(EmoticonPickerListener listener)
 	{
 		this.mEmoPickerListener = listener;
+	}
+
+	@Override
+	public void emoticonSelected(int emoticonIndex)
+	{
+		if (mEmoPickerListener != null)
+		{
+			mEmoPickerListener.emoticonSelected(emoticonIndex);
+		}
 	}
 
 }

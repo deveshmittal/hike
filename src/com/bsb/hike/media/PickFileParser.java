@@ -9,41 +9,51 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 
-public class PickFileParser {
+public class PickFileParser
+{
 
-	public static interface PickFileListener {
+	public static interface PickFileListener
+	{
 		public void pickFileSuccess(int requestCode, String filePath);
 
 		public void pickFileFailed(int requestCode);
 	}
 
-	public static void OnActivityResult(int requestCode, int resultCode,
-			Intent data, PickFileListener listener,Activity activity) {
-		if (resultCode == Activity.RESULT_OK) {
-			if (data == null || data.getData() == null) {
+	public static void onAudioOrVideoResult(int requestCode, int resultCode, Intent data, PickFileListener listener, Activity activity)
+	{
+		if (resultCode == Activity.RESULT_OK)
+		{
+			if (data == null || data.getData() == null)
+			{
 				listener.pickFileFailed(requestCode);
-			} else {
+			}
+			else
+			{
 				String filePath = parseUri(data, activity);
 				listener.pickFileSuccess(requestCode, filePath);
 			}
-		} else {
+		}
+		else
+		{
 			listener.pickFileFailed(requestCode);
 		}
 	}
-	
-	public static String parseUri(Intent data,Activity activity){
+
+	public static String parseUri(Intent data, Activity activity)
+	{
 		Uri fileURI = data.getData();
 		String fileUriStart = "file://";
 		String fileUriString = fileURI.toString();
 		String filePath = null;
-		if (fileUriString.startsWith(fileUriStart)) {
+		if (fileUriString.startsWith(fileUriStart))
+		{
 			/*
 			 * Done to fix the issue in a few Sony devices.
 			 */
-			filePath = new File(URI.create(Utils
-					.replaceUrlSpaces(fileUriString)))
-					.getAbsolutePath();
-		} else {
+			filePath = new File(URI.create(Utils.replaceUrlSpaces(fileUriString))).getAbsolutePath();
+		}
+		else
+		{
 			// content path/uri returned
 			filePath = Utils.getRealPathFromUri(fileURI, activity);
 		}

@@ -8,8 +8,6 @@ import java.util.List;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -41,10 +39,13 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.PinHistoryAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.dialog.CustomAlertDialog;
+import com.bsb.hike.dialog.HikeDialog;
+import com.bsb.hike.dialog.HikeDialogFactory;
+import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.ChatTheme;
-import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -462,33 +463,32 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		switch (item.getItemId())
 		{
 		case R.id.delete_msgs:
-			final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(PinHistoryActivity.this);
-			
-			if (pinAdapter.getSelectedPinsCount() == 1)
+			HikeDialogFactory.showDialog(PinHistoryActivity.this, HikeDialogFactory.DELETE_PINS_DIALOG, new HikeDialogListener()
 			{
-				deleteConfirmDialog.setHeader(R.string.confirm_delete_pin_header);
-				deleteConfirmDialog.setBody(R.string.confirm_delete_pin);
-			}
-			else
-			{
-				deleteConfirmDialog.setHeader(R.string.confirm_delete_pins_header);
-				deleteConfirmDialog.setBody(getString(R.string.confirm_delete_pins, pinAdapter.getSelectedPinsCount()));
-			}
-			View.OnClickListener dialogOkClickListener = new View.OnClickListener()
-			{
+				
 				@Override
-				public void onClick(View v)
+				public void positiveClicked(HikeDialog hikeDialog)
 				{
 					removeMessage(selectedPinIds);					
 					pinAdapter.notifyDataSetChanged();
 					destroyActionMode();
-					deleteConfirmDialog.dismiss();
+					hikeDialog.dismiss();
 				}
-			};
-
-			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel);
-			deleteConfirmDialog.show();
+				
+				@Override
+				public void neutralClicked(HikeDialog hikeDialog)
+				{
+					
+				}
+				
+				@Override
+				public void negativeClicked(HikeDialog hikeDialog)
+				{
+					
+				}
+				
+			}, pinAdapter.getSelectedPinsCount());
+			
 			return true;
 			
 		case R.id.copy_msgs:

@@ -72,6 +72,24 @@ public class Conversation implements Comparable<Conversation>
 	private MetaData metaData;
 	
 	private ChatTheme theme;
+	
+	private boolean isConvBlocked;
+	
+	/**
+	 * @return the isConvBlocked
+	 */
+	public boolean isConvBlocked()
+	{
+		return isConvBlocked;
+	}
+
+	/**
+	 * @param isConvBlocked the isConvBlocked to set
+	 */
+	public void setConvBlocked(boolean isConvBlocked)
+	{
+		this.isConvBlocked = isConvBlocked;
+	}
 
 	public void setTheme(ChatTheme theme)
 	{
@@ -93,10 +111,22 @@ public class Conversation implements Comparable<Conversation>
 		this.lastPin = string;
 	}
 	
-
+	/**
+	 * Returns -1 if there is a JSON Exception while reading from metadata
+	 * 
+	 * @return
+	 */
 	public int getUnreadPinCount()
 	{
-		return unreadPinCount;
+		try
+		{
+			return metaData.getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+		}
+
+		catch (JSONException e)
+		{
+			return -1;
+		}
 	}
 
 	public void setUnreadPinCount(int unreadPinCount)

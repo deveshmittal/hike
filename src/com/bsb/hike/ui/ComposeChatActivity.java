@@ -14,8 +14,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.bsb.hike.modules.contactmgr.ContactManager;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
@@ -29,9 +27,9 @@ import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewStub;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -46,7 +44,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
@@ -59,33 +56,33 @@ import com.bsb.hike.adapters.ComposeChatAdapter;
 import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
+import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.dialog.HikeDialog;
+import com.bsb.hike.dialog.HikeDialogFactory;
+import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.Sticker;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeService;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
-import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.CustomTypeFace;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
-import com.google.android.gms.internal.ad;
-import com.google.android.gms.internal.ar;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener, OnScrollListener
 {
@@ -725,8 +722,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, gcjJson);
 
 		ContactInfo conversationContactInfo = new ContactInfo(groupId, groupId, groupId, groupId);
-		Intent intent = Utils.createIntentFromContactInfo(conversationContactInfo, true);
-		intent.setClass(this, ChatThread.class);
+		Intent intent = IntentFactory.createChatThreadIntentFromContactInfo(this, conversationContactInfo, true);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 		finish();
@@ -871,104 +867,34 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private void forwardConfirmation(final ArrayList<ContactInfo> arrayList)
 	{
-		final CustomAlertDialog forwardConfirmDialog = new CustomAlertDialog(this);
-		if (isSharingFile)
+		HikeDialogFactory.showDialog(this, HikeDialogFactory.FORWARD_CONFIRMATION_DIALOG, new HikeDialogListener()
 		{
-			forwardConfirmDialog.setHeader(R.string.share);
-			forwardConfirmDialog.setBody(getForwardConfirmationText(arrayList, false));
-		}
-		else
-		{
-			forwardConfirmDialog.setHeader(R.string.forward);
-			forwardConfirmDialog.setBody(getForwardConfirmationText(arrayList, true));
-		}
-		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
-		{
-
+			
 			@Override
-			public void onClick(View v)
+			public void positiveClicked(HikeDialog hikeDialog)
 			{
 				Utils.sendUILogEvent(HikeConstants.LogEvent.CONFIRM_FORWARD);
-				forwardConfirmDialog.dismiss();
+				hikeDialog.dismiss();
 				forwardMultipleMessages(arrayList);
 			}
-		};
-
-		forwardConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
-		forwardConfirmDialog.setCancelButton(R.string.cancel);
-		forwardConfirmDialog.show();
+			
+			@Override
+			public void neutralClicked(HikeDialog hikeDialog)
+			{
+			}
+			
+			@Override
+			public void negativeClicked(HikeDialog hikeDialog)
+			{
+			}
+		}, isSharingFile, arrayList);
 	}
 	
-	private String getForwardConfirmationText(ArrayList<ContactInfo> arrayList, boolean forwarding)
-	{
-		// multi forward case
-		if(forwarding)
-		{
-			return arrayList.size() ==1 ? getResources().getString(R.string.forward_to_singular):getResources().getString(R.string.forward_to_plural, arrayList.size());
-		}
-		StringBuilder sb = new StringBuilder();
-
-		int lastIndex = arrayList.size()-1;
-
-		boolean moreNamesThanMaxCount = false;
-		if (lastIndex < 0)
-		{
-			lastIndex = 0;
-		}
-		else if (lastIndex == 1)
-		{
-			/*
-			 * We increment the last index if its one since we can accommodate another name in this case.
-			 */
-			//lastIndex++;
-			moreNamesThanMaxCount = true;
-		}
-		else if (lastIndex > 0)
-		{
-			moreNamesThanMaxCount = true;
-		}
-
-		for (int i = arrayList.size() - 1; i >= lastIndex; i--)
-		{
-			sb.append(arrayList.get(i).getFirstName());
-			if (i > lastIndex + 1)
-			{
-				sb.append(", ");
-			}
-			else if (i == lastIndex + 1)
-			{
-				if (moreNamesThanMaxCount)
-				{
-					sb.append(", ");
-				}
-				else
-				{
-					sb.append(" and ");
-				}
-			}
-		}
-		String readByString = sb.toString();
-		if (moreNamesThanMaxCount)
-		{
-			
-				return getResources().getString(R.string.share_with_names_numbers, readByString, lastIndex);
-			
-		}
-		else
-		{
-			
-				return getResources().getString(R.string.share_with, readByString);
-			
-			
-		}
-	}
-
 	private void forwardMultipleMessages(ArrayList<ContactInfo> arrayList)
 	{
 		Intent presentIntent = getIntent();
 		if(isSharingFile){
-	        Intent intent = Utils.createIntentFromContactInfo(arrayList.get(0), true);
-	        intent.setClass(this, ChatThread.class);
+	        Intent intent = IntentFactory.createChatThreadIntentFromContactInfo(this, arrayList.get(0), true);
 	        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	        String type = presentIntent.getType();
 	        forwardMessageAsPerType(presentIntent, intent,arrayList);
@@ -988,9 +914,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			Intent intent = null;
 			if(arrayList.size()==1){
 				// forwarding to 1 is special case , we want to create conversation if does not exist and land to recipient
-				intent = Utils.createIntentFromMsisdn(arrayList.get(0).getMsisdn(), false);
+				intent = IntentFactory.createChatThreadIntentFromMsisdn(this, arrayList.get(0).getMsisdn(), false);
 				intent.putExtras(presentIntent);
-				intent.setClass(this, ChatThread.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 				finish();
@@ -999,8 +924,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				if(presentIntent.hasExtra(HikeConstants.Extras.PREV_MSISDN)){
 					// open chat thread from where we initiated
 					String id = presentIntent.getStringExtra(HikeConstants.Extras.PREV_MSISDN);
-					intent = Utils.createIntentFromMsisdn(id, false);
-					intent.setClass(this, ChatThread.class);
+					intent = IntentFactory.createChatThreadIntentFromMsisdn(this, id, false);
 				}else{
 					//home activity
 					intent = Utils.getHomeActivityIntent(this);
@@ -1371,9 +1295,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				@Override
 				public void run()
 				{
-					Intent intent = new Intent(ComposeChatActivity.this, ChatThread.class);
+					Intent intent = IntentFactory.createChatThreadIntentFromMsisdn(ComposeChatActivity.this, msisdn, false); 
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 					startActivity(intent);
 					finish();
 

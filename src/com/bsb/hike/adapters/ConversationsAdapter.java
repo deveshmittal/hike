@@ -7,8 +7,6 @@ import org.json.JSONArray;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.CountDownTimer;
 import android.text.Html;
 import android.text.TextUtils;
@@ -38,21 +36,15 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.ui.HikeListActivity;
-import com.bsb.hike.ui.HikePreferences;
-import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gms.internal.co;
-import com.google.android.gms.internal.ed;
 
 public class ConversationsAdapter extends BaseAdapter
 {
@@ -520,45 +512,45 @@ public class ConversationsAdapter extends BaseAdapter
 		int what = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC_WHAT, -1);
 		switch(what){
 		case HikeConstants.ATOMIC_APP_TIP_SETTINGS:
-			IntentManager.openSetting(context);
+			IntentFactory.openSetting(context);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_CLICKED);
 			break;
 		case HikeConstants.ATOMIC_APP_TIP_SETTINGS_NOTIF:
-			IntentManager.openSettingNotification(context);
+			IntentFactory.openSettingNotification(context);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_NOTIF_CLICKED);
 			break;
 		case HikeConstants.ATOMIC_APP_TIP_SETTINGS_PRIVACY:
-			IntentManager.openSettingPrivacy(context);
+			IntentFactory.openSettingPrivacy(context);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_PRIVACY_CLICKED);
 			break;
 		case HikeConstants.ATOMIC_APP_TIP_SETTINGS_SMS:
-			IntentManager.openSettingSMS(context);
+			IntentFactory.openSettingSMS(context);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_SMS_CLICKED);
 			break;
 		case HikeConstants.ATOMIC_APP_TIP_SETTINGS_MEDIA:
-			IntentManager.openSettingMedia(context);
+			IntentFactory.openSettingMedia(context);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_MEDIA_CLICKED);
 			break;
 		case HikeConstants.ATOMIC_APP_TIP_INVITE_FREE_SMS:
-			IntentManager.openInviteSMS(context);
+			IntentFactory.openInviteSMS(context);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_FREE_SMS_CLICKED);
 			break;
 		case HikeConstants.ATOMIC_APP_TIP_INVITE_WATSAPP:
 			if(Utils.isPackageInstalled(context, HikeConstants.PACKAGE_WATSAPP)){
-				IntentManager.openInviteWatsApp(context);
+				IntentFactory.openInviteWatsApp(context);
 			}
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_WHATSAPP_CLICKED);
 			break;
 		case HikeConstants.ATOMIC_APP_TIP_TIMELINE:
-			IntentManager.openTimeLine(context);
+			IntentFactory.openTimeLine(context);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_TIMELINE_CLICKED);
 			break;
 		case HikeConstants.ATOMIC_APP_TIP_HIKE_EXTRA:
-			IntentManager.openHikeExtras(context);
+			IntentFactory.openHikeExtras(context);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED);
 			break;
 		case HikeConstants.ATOMIC_APP_TIP_HIKE_REWARDS:
-			IntentManager.openHikeRewards(context);
+			IntentFactory.openHikeRewards(context);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED);
 			break;
 		default:
