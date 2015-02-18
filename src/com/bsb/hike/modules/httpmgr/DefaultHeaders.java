@@ -9,15 +9,15 @@ import com.bsb.hike.utils.AccountUtils;
 public final class DefaultHeaders
 {
 
-	private static List<Header> getDefaultHeaders()
+	private static <T> List<Header> getDefaultHeaders(Request<T> request)
 	{
 		List<Header> headers = new ArrayList<Header>(2);
 
-		if (AccountUtils.appVersion != null)
+		if (AccountUtils.appVersion != null && !Utils.containsHeader(request.getHeaders(), "User-Agent"));
 		{
 			headers.add(new Header("User-Agent", "android-" + AccountUtils.appVersion));
 		}
-		if (AccountUtils.mToken != null && AccountUtils.mUid != null)
+		if (AccountUtils.mToken != null && AccountUtils.mUid != null && !Utils.containsHeader(request.getHeaders(), "Cookie"))
 		{
 			headers.add(new Header("Cookie", "user=" + AccountUtils.mToken + "; UID=" + AccountUtils.mUid));
 		}
@@ -26,7 +26,7 @@ public final class DefaultHeaders
 
 	public static <T> void applyDefaultHeaders(Request<T> request)
 	{
-		request.addHeaders(getDefaultHeaders());
+		request.addHeaders(getDefaultHeaders(request));
 	}
 
 	private DefaultHeaders()
