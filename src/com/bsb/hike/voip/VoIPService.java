@@ -76,7 +76,7 @@ public class VoIPService extends Service {
 	private final int PACKET_TRACKING_SIZE = 128;
 	private final int HEARTBEAT_INTERVAL = 1000;
 	private final int HEARTBEAT_TIMEOUT = 5000;
-	private final int HEARTBEAT_HARD_TIMEOUT = 30000;
+	private final int HEARTBEAT_HARD_TIMEOUT = 60000;
 	private final int MAX_SAMPLES_BUFFER = 3;
 	private static final int NOTIFICATION_IDENTIFIER = 10;
 
@@ -119,6 +119,7 @@ public class VoIPService extends Service {
 	private int chronoBackup = 0;
 	private int playbackSampleRate = 0;
 	private Thread senderThread, reconnectingBeepsThread;
+	private boolean reconnectingBeeps = false;
 	private Ringtone ringtone;
 	private Vibrator vibrator = null;
 	private int callSource = -1;
@@ -293,9 +294,6 @@ public class VoIPService extends Service {
 			clientPartner.setPhoneNumber(intent.getStringExtra(VoIPConstants.Extras.MSISDN));
 			clientPartner.setInitiator(intent.getBooleanExtra(VoIPConstants.Extras.INITIATOR, true));
 			clientSelf.setInitiator(!clientPartner.isInitiator());
-
-			Logger.d(VoIPConstants.TAG, "Setting our relay to: " + 
-					intent.getStringExtra(VoIPConstants.Extras.RELAY) + ":" + intent.getIntExtra(VoIPConstants.Extras.RELAY_PORT, VoIPConstants.ICEServerPort));
 			clientSelf.setRelayAddress(intent.getStringExtra(VoIPConstants.Extras.RELAY));
 			clientPartner.setRelayAddress(intent.getStringExtra(VoIPConstants.Extras.RELAY));
 			clientSelf.setRelayPort(intent.getIntExtra(VoIPConstants.Extras.RELAY_PORT, VoIPConstants.ICEServerPort));
@@ -333,7 +331,6 @@ public class VoIPService extends Service {
 				} else {
 					// We have already sent our socket info to partner
 					// And now they have sent us their's, so let's establish connection
-					// OR, we are reconnecting
 					establishConnection();
 				}
 			}
@@ -855,7 +852,6 @@ public class VoIPService extends Service {
 		if (reconnecting)
 			return;
 
-		startReconnectBeeps();
 		reconnectAttempts++;
 		Logger.w(VoIPConstants.TAG, "VoIPService reconnect()");
 		sendHandlerMessage(VoIPActivity.MSG_RECONNECTING);
@@ -866,6 +862,10 @@ public class VoIPService extends Service {
 	}
 	
 	private void startReconnectBeeps() {
+		if (reconnectingBeeps)
+			return;
+		reconnectingBeeps = true;
+		
 		reconnectingBeepsThread = new Thread(new Runnable() {
 			
 			@Override
@@ -881,6 +881,7 @@ public class VoIPService extends Service {
 						break;
 					}
 				}
+				reconnectingBeeps = false;
 			}
 		}, "RECONNECT_THREAD");
 		reconnectingBeepsThread.start();
@@ -948,6 +949,7 @@ public class VoIPService extends Service {
 				while (keepRunning == true) {
 					if (System.currentTimeMillis() - lastHeartbeat > HEARTBEAT_TIMEOUT && !reconnecting) {
 						// Logger.w(VoIPConstants.TAG, "Heartbeat failure. Reconnecting.. ");
+						startReconnectBeeps();
 						if (clientSelf.isInitiator() && isConnected() && isAudioRunning())
 							reconnect();
 						else if (!isConnected())	// Give the call receiver time so the initiator can reestablish connection.
@@ -1714,6 +1716,12 @@ public class VoIPService extends Service {
 					case HEARTBEAT:
 						// Logger.d(VoIPConstants.TAG, "Received heartbeat.");
 						lastHeartbeat = System.currentTimeMillis();
+						
+						// Mostly redundant check to ensure that neither of the phones
+						// is playing the reconnecting tone
+						if (reconnectingBeepsThread != null)
+							reconnectingBeepsThread.interrupt();
+						
 						break;
 						
 					case ACK:
@@ -2150,45 +2158,40 @@ public class VoIPService extends Service {
 				
 				try {
 					Logger.d(VoIPConstants.TAG, "Retrieving external socket information..");
-					InetAddress host = InetAddress.getByName(VoIPConstants.ICEServerName);
-					socket = new DatagramSocket();
-					socket.setReuseAddress(true);
-					socket.setSoTimeout(2000);
-					
-					/**
-					 * If we are initiating the connection, then we set the relay server
-					 * to be used by both clients. 
-					 */
-					if (clientSelf.isInitiator()) {
-						clientSelf.setRelayAddress(host.getHostAddress());
-						clientSelf.setRelayPort(VoIPUtils.getRelayPort(getApplicationContext()));
-					}
-
 					VoIPDataPacket dp = new VoIPDataPacket(PacketType.RELAY_INIT);
-					// byte[] dpData = VoIPSerializer.serialize(dp);
-					// DatagramPacket outgoingPacket = new DatagramPacket(dpData, dpData.length, host, VoIPConstants.ICEServerPort);
-//					sendPacket(dp, false);
 					DatagramPacket incomingPacket = new DatagramPacket(receiveData, receiveData.length);
 
 					boolean continueSending = true;
 					int counter = 0;
 
+					socket = new DatagramSocket();
+					socket.setReuseAddress(true);
+					socket.setSoTimeout(2000);
+
 					while (continueSending && keepRunning && (counter < 10 || reconnecting)) {
 						counter++;
 						try {
+							InetAddress host = InetAddress.getByName(VoIPConstants.ICEServerName);
+							
+							/**
+							 * If we are initiating the connection, then we set the relay server
+							 * to be used by both clients. 
+							 */
+							if (clientSelf.isInitiator()) {
+								clientSelf.setRelayAddress(host.getHostAddress());
+								clientSelf.setRelayPort(VoIPUtils.getRelayPort(getApplicationContext()));
+							}
+
 							clientSelf.setInternalIPAddress(VoIPUtils.getLocalIpAddress(getApplicationContext())); 
 							clientSelf.setInternalPort(socket.getLocalPort());
 
-//							Logger.d(VoIPConstants.TAG, "ICE Sending: " + outgoingPacket.getData().toString() + " to " + host.getHostAddress() + ":" + VoIPConstants.ICEServerPort);
 							Logger.d(VoIPConstants.TAG, "ICE Sending.");
-//							socket.send(outgoingPacket);
 							sendPacket(dp, false);
 							socket.receive(incomingPacket);
 							
 							String serverResponse = new String(incomingPacket.getData(), 0, incomingPacket.getLength());
 							Logger.d(VoIPConstants.TAG, "ICE Received: " + serverResponse);
 							setExternalSocketInfo(serverResponse);
-//							Logger.w(VoIPConstants.TAG, "Setting continueSending to false");
 							continueSending = false;
 							
 						} catch (SocketTimeoutException e) {
@@ -2206,10 +2209,8 @@ public class VoIPService extends Service {
 						}
 					}
 
-				} catch (SocketException e) {
-					Logger.d(VoIPConstants.TAG, "SocketException: " + e.toString());
-				} catch (UnknownHostException e) {
-					Logger.d(VoIPConstants.TAG, "UnknownHostException: " + e.toString());
+				} catch (SocketException e2) {
+					Logger.d(VoIPConstants.TAG, "retrieveExternalSocket() IOException2: " + e2.toString());
 				}
 				
 				if (haveExternalSocketInfo()) {
@@ -2312,7 +2313,7 @@ public class VoIPService extends Service {
 			
 			@Override
 			public void run() {
-				for (int i = 0; i < numLoop; i++) {
+				for (int i = 0; i < numLoop || reconnecting; i++) {
 					try {
 						Thread.sleep(VoIPConstants.TIMEOUT_PARTNER_SOCKET_INFO / numLoop);
 						sendSocketInfoToPartner();		// Retry sending socket info. 
@@ -2341,9 +2342,8 @@ public class VoIPService extends Service {
 	 */
 	public void establishConnection() {
 		
-		if (!reconnecting && (establishingConnection || connected)) {
+		if (establishingConnection) {
 			Logger.w(VoIPConstants.TAG, "Already trying to establish connection.");
-//			sendSocketInfoToPartner();
 			return;
 		}
 		
@@ -2357,7 +2357,6 @@ public class VoIPService extends Service {
 		if (partnerTimeoutThread != null)
 			partnerTimeoutThread.interrupt();
 		Logger.d(VoIPConstants.TAG, "Trying to establish P2P connection..");
-		Logger.d(VoIPConstants.TAG, "Listening on port: " + socket.getLocalPort());
 		
 		// Sender thread
 		senderThread = new Thread(new Runnable() {
@@ -2380,16 +2379,13 @@ public class VoIPService extends Service {
 								clientPartner.setPreferredConnectionMethod(ConnectionMethods.PUBLIC);
 								dp = new VoIPDataPacket(PacketType.COMM_UDP_SYN_PUBLIC);
 								sendPacket(dp, false);
-//								Logger.d(VoIPConstants.TAG, "Sending private ping.");
 							}
-//							Logger.d(VoIPConstants.TAG, "Receiving thread status: " + receivingThread.getState());
 							Thread.sleep(200);
 						} else {
 							synchronized (clientPartner) {
 								clientPartner.setPreferredConnectionMethod(ConnectionMethods.RELAY);
 								dp = new VoIPDataPacket(PacketType.COMM_UDP_SYN_RELAY);
 								sendPacket(dp, false);
-//								Logger.d(VoIPConstants.TAG, "Sending relay ping.");
 							}
 							Thread.sleep(500);
 						}
@@ -2422,7 +2418,6 @@ public class VoIPService extends Service {
 
 				if (senderThread != null)
 					senderThread.interrupt();
-//				receivingThread.interrupt();
 				establishingConnection = false;
 				if (reconnectingBeepsThread != null)
 					reconnectingBeepsThread.interrupt();
@@ -2431,7 +2426,6 @@ public class VoIPService extends Service {
 					Logger.d(VoIPConstants.TAG, "UDP connection established :) " + clientPartner.getPreferredConnectionMethod());
 					if (clientSelf.isInitiator() && !reconnecting) {
 						sendHandlerMessage(VoIPActivity.CONNECTION_ESTABLISHED_FIRST_TIME);
-//						playOnSpeaker(R.raw.ring_tone, true);
 						setAudioModeInCall();
 						ringtoneStreamID = playFromSoundPool(SOUND_INCOMING_RINGTONE, true);
 					} 
