@@ -2319,30 +2319,18 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	public boolean onBackPressed()
 	{
-		/**
-		 * Calling super class's method first
-		 */
-		if (!super.onBackPressed())
+		if (modeOfChat == H2S_MODE)
 		{
-			if (modeOfChat == H2S_MODE)
-			{
-				destroyH20Mode();
-				return true;
-			}
-
-			if (isH20TipShowing())
-			{
-				hideH20Tip();
-				return true;
-			}
-
-			return false;
-		}
-
-		else
-		{
+			destroyH20Mode();
 			return true;
 		}
+
+		else if (isH20TipShowing())
+		{
+			hideH20Tip();
+			return true;
+		}
+		return super.onBackPressed();
 	}
 	
 	@Override
