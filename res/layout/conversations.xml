@@ -1,24 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
-    <LinearLayout
-        android:id="@+id/emptyViewHolder"
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-    </LinearLayout>
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
 
-    <include
-        android:id="@+id/search_empty_view"
-        layout="@layout/list_empty_view"
-        android:visibility="gone" />
+        <LinearLayout
+            android:id="@+id/emptyViewHolder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+        </LinearLayout>
 
-    <ListView
-        android:id="@id/android:list"
-        style="@style/HomeList"
-        android:divider="@null"
-        android:dividerHeight="0dp" />
+        <ListView
+            android:id="@id/android:list"
+            style="@style/HomeList"
+            android:divider="@null"
+            android:dividerHeight="0dp" />
+    </RelativeLayout>
 
-</RelativeLayout>
+    <ViewStub
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+       android:id="@+id/nux_footer" >
+    </ViewStub>
+
+</FrameLayout>

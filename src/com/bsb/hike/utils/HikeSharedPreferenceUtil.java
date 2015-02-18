@@ -2,17 +2,19 @@ package com.bsb.hike.utils;
 
 import java.util.HashMap;
 
-import com.bsb.hike.HikeMessengerApp;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
+import com.bsb.hike.HikeMessengerApp;
+
 public class HikeSharedPreferenceUtil
 {
 	private static final String DEFAULT_PREF_NAME = HikeMessengerApp.ACCOUNT_SETTINGS;
 
+	public static final String CONV_UNREAD_COUNT = "ConvUnreadCount";
+	
 	private SharedPreferences hikeSharedPreferences;
 
 	private Editor editor;
