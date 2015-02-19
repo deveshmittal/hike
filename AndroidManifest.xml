@@ -127,6 +127,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
         <activity
             android:name=".ui.ComposeChatActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -309,6 +310,11 @@
             android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
             android:screenOrientation="user"
             android:theme="@style/LockPatternTheme" />
+         <activity
+            android:name=".ui.ServerHostChangeActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" 
+            android:label="@string/app_label"
+            />
 
         <receiver android:name=".service.BootService"
              android:enabled="true" >

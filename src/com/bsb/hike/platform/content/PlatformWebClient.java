@@ -53,7 +53,7 @@ public class PlatformWebClient extends WebViewClient
 			responseHeaders.put("Access-Control-Allow-Origin", "*");
 			response = new WebResourceResponse(PlatformContentConstants.ASSETS_FONTS_DIR + suffix, "UTF-8", statusCode, reasonPhase, responseHeaders, wrtInputStreamm);
 		}
-		else
+		else 
 		{
 			response = new WebResourceResponse(PlatformContentConstants.ASSETS_FONTS_DIR + suffix, "UTF-8", wrtInputStreamm);
 		}

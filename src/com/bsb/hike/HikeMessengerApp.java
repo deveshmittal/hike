@@ -163,6 +163,14 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	
 	public static final String PRODUCTION_HOST_TOGGLE = "productionHostToggle";
 
+	public static final String CUSTOM_MQTT_HOST = "cmqttho";
+	
+	public static final String CUSTOM_MQTT_PORT = "cmmqttpo";
+
+	public static final String CUSTOM_HTTP_HOST = "cmhttpho";
+	
+	public static final String CUSTOM_HTTP_PORT = "chttppo";
+
 	public static final String COUNTRY_CODE = "countryCode";
 
 	public static final String FILE_PATH = "filePath";
@@ -774,8 +782,8 @@ public void onTrimMemory(int level)
 			editor.remove(HikeConstants.RECEIVE_SMS_PREF);
 			editor.commit();
 		}
-		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), Utils.switchSSLOn(getApplicationContext()));
 
+		Utils.setupUri();
 		typingNotificationMap = new HashMap<String, TypingNotification>();
 
 		stealthMsisdn = new HashSet<String>();

@@ -134,7 +134,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	public static final String MQTT_CONNECTION_CHECK_ACTION = "com.bsb.hike.PING";
 
 	private static final String PRODUCTION_BROKER_HOST_NAME = "mqtt.im.hike.in";
-
+	
+	private static final String DMQTT_PROD_BROKER_HOST_NAME = "dmqtt.im.hike.in";
+	
 	private static final String STAGING_BROKER_HOST_NAME = AccountUtils.STAGING_HOST;
 
 	private static final int PRODUCTION_BROKER_PORT_NUMBER = 8080;
@@ -695,9 +697,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			if (forceDisconnect)
 				return;
 
-			boolean connectUsingSSL = Utils.switchSSLOn(context);
-
-			// setBrokerHostPort(connectUsingSSL);
+			boolean connectUsingSSL = Utils.switchSSLOn();
 
 			if (op == null)
 			{
@@ -820,6 +820,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private String getServerUri(boolean ssl)
 	{
+		int whichServer = settings.getInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, AccountUtils._PRODUCTION_HOST);
+		
 		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION, true);
 
 		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
@@ -827,7 +829,30 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
 		                                : STAGING_BROKER_PORT_NUMBER);
 
-		if (!production)
+		switch (whichServer) {
+		case AccountUtils._PRODUCTION_HOST:
+			brokerHostName = PRODUCTION_BROKER_HOST_NAME;
+			brokerPortNumber = (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER);
+			break;
+		case AccountUtils._PROD_DEBUGMQTT_HOST:
+			brokerHostName = DMQTT_PROD_BROKER_HOST_NAME;
+			brokerPortNumber = (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER);
+			break;
+		case AccountUtils._DEV_STAGING_HOST:
+			brokerHostName = AccountUtils.DEV_STAGING_HOST;
+			brokerPortNumber = (ssl ? STAGING_BROKER_PORT_NUMBER_SSL : STAGING_BROKER_PORT_NUMBER);
+			break;
+		case AccountUtils._STAGING_HOST:
+			brokerHostName = AccountUtils.STAGING_HOST;
+			brokerPortNumber = (ssl ? STAGING_BROKER_PORT_NUMBER_SSL : STAGING_BROKER_PORT_NUMBER);
+			break;
+		case AccountUtils._CUSTOM_HOST:
+			brokerHostName = settings.getString(HikeMessengerApp.CUSTOM_MQTT_HOST, PRODUCTION_BROKER_HOST_NAME);
+			brokerPortNumber = settings.getInt(HikeMessengerApp.CUSTOM_MQTT_PORT, PRODUCTION_BROKER_PORT_NUMBER);
+			break;
+		}
+		
+		if (!(whichServer == AccountUtils._PRODUCTION_HOST))
 		{
 			return brokerHostName + ":" + brokerPortNumber;
 		}
@@ -1374,7 +1399,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			Logger.d(TAG, "Network change event happened. Network connected : " + isNetwork);
 			if (isNetwork)
 			{
-				boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
+				boolean shouldConnectUsingSSL = Utils.switchSSLOn();
 				boolean isSSLConnected = isSSLAlreadyOn();
 				// reconnect using SSL as currently not connected using SSL
 				if (shouldConnectUsingSSL && !isSSLConnected)
@@ -1390,7 +1415,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					connectOnMqttThread();
 				}
 			}
-			Utils.setupUri(context); // TODO : this should be moved out from here to some other place
+			Utils.setupUri(); // TODO : this should be moved out from here to some other place
 		}
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
 		{
@@ -1410,7 +1435,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			/*
 			 * ssl settings toggled so disconnect and reconnect mqtt
 			 */
-			boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
+			boolean shouldConnectUsingSSL = Utils.switchSSLOn();
 			boolean isSSLConnected = isSSLAlreadyOn();
 			Logger.d(TAG, "SSL Preference has changed. OnSSL : " + shouldConnectUsingSSL + " ,isSSLAlreadyOn : " + isSSLConnected);
 			// reconnect using SSL as currently not connected using SSL
