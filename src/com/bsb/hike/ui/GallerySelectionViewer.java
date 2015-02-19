@@ -322,12 +322,14 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 						
 							 serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
 							 startService(serviceIntent);
-								
+							 	
 						}
+						
 						Intent intent = new Intent(GallerySelectionViewer.this, ChatThread.class);
 						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
 						startActivity(intent);
+						
 					}
 			}
 		});
