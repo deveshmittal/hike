@@ -38,14 +38,13 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.modules.iface.ITransientCache;
 import com.bsb.hike.utils.AccountUtils;
@@ -440,6 +439,11 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		return transientCache.getAllContacts();
 	}
 
+	
+	public List<ContactInfo> getAllContacts(boolean ignoreUnknownContacts)
+	{
+		return transientCache.getAllContacts(ignoreUnknownContacts);
+	}
 	/**
 	 * This method should be called when last message in a group is changed, we remove the previous contact from the {@link PersistenceCache} and inserts the new contacts in memory
 	 * 

@@ -17,11 +17,10 @@ import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.service.HikeService;
-import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -95,6 +94,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		editor.commit();
 		appPrefEditor.commit();
 		
+		NUXManager.getInstance().shutDownNUX();
 		/**
 		 * Stopping hike service which will call destroy mqtt
 		 */
