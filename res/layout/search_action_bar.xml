@@ -8,6 +8,7 @@
         android:layout_width="40dp"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
+        android:background="@drawable/bg_action_bar_icon"
         android:scaleType="centerInside"
         android:src="@drawable/ic_search_next" />
 
@@ -15,7 +16,9 @@
         android:id="@+id/previous"
         android:layout_width="40dp"
         android:layout_height="match_parent"
+        android:layout_marginRight="2dp"
         android:layout_toLeftOf="@id/next"
+        android:background="@drawable/bg_action_bar_icon"
         android:scaleType="centerInside"
         android:src="@drawable/ic_search_prev" />
 
@@ -24,6 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="8dp"
+        android:layout_marginRight="4dp"
         android:layout_toLeftOf="@id/previous"
         android:background="@drawable/bg_top_bar_search_box"
         android:gravity="center_vertical"
