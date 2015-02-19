@@ -975,6 +975,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		private int nextMessage()
 		{
+			if (TextUtils.isEmpty(searchText))
+			{
+				return -1;
+			}
 			Logger.d("search", "nextMessage()");
 			Logger.d("search", "list: " + indexList.toString());
 			int currentCusrsor = getCurrentCursor();
@@ -1049,6 +1053,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		private int prevMessage()
 		{
+			if (TextUtils.isEmpty(searchText))
+			{
+				return -1;
+			}
 			Logger.d("search", "prevMessage()");
 			Logger.d("search", "list: " + indexList.toString());
 			int currentCusrsor = getCurrentCursor();
