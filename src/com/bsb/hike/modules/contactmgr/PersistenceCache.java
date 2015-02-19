@@ -444,13 +444,16 @@ class PersistenceCache extends ContactsCache
 	 */
 	void loadMemory()
 	{
+		if(HikeConversationsDatabase.getInstance() == null)
+			return;
+		
 		ConversationMsisdns allmsisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
 		// oneToOneMsisdns contains list of msisdns with whom one to one conversation currently exists
 		// groupLastMsisdnsMap is map between group Id and list of last msisdns (msisdns of last message) in a group
 		List<String> oneToOneMsisdns = allmsisdns.getOneToOneMsisdns();
 		Map<String, Pair<List<String>, Long>> groupLastMsisdnsMap = allmsisdns.getGroupLastMsisdnsWithTimestamp();
 
-		Map<String, Pair<String, Boolean>> groupNamesMap = HikeConversationsDatabase.getInstance().getGroupNamesAndAliveStatus();
+		Map<String, GroupDetails> groupNamesMap = HikeConversationsDatabase.getInstance().getIdGroupDetailsMap();
 
 		HashSet<String> grouplastMsisdns = new HashSet<String>();
 
@@ -458,11 +461,10 @@ class PersistenceCache extends ContactsCache
 		 * groupPersistence is now populated using groupNamesMap(for group name) and groupLastMsisdnsMap(msisdns in last message of a group) , these are needed so that if last
 		 * message in a group changes then previous contact Info objects can be removed from persistence cache otherwise after some time all contacts will be loaded in cache
 		 */
-		for (Entry<String, Pair<String, Boolean>> mapEntry : groupNamesMap.entrySet())
+		for (Entry<String, GroupDetails> mapEntry : groupNamesMap.entrySet())
 		{
 			String grpId = mapEntry.getKey();
-			String name = mapEntry.getValue().first;
-			boolean groupAlive = mapEntry.getValue().second;
+			GroupDetails groupDetails = mapEntry.getValue();
 			Pair<List<String>, Long> lastMsisdnsAndTimestamp = groupLastMsisdnsMap.get(grpId);
 			long timestamp = 0;
 			ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdnsConcurrentLinkedQueue = new ConcurrentLinkedQueue<PairModified<String, String>>();
@@ -480,8 +482,9 @@ class PersistenceCache extends ContactsCache
 					}
 				}
 			}
-			GroupDetails grpDetails = new GroupDetails(grpId, name, groupAlive, lastMsisdnsConcurrentLinkedQueue, timestamp);
-			groupPersistence.put(grpId, grpDetails);
+			groupDetails.setTimestamp(timestamp);
+			groupDetails.setLastMsisdns(lastMsisdnsConcurrentLinkedQueue);
+			groupPersistence.put(grpId, groupDetails);
 		}
 
 		// msisdnsToGetContactInfo is combination of one to one msisdns and group last msisdns to get contact info from users db
@@ -822,7 +825,9 @@ class PersistenceCache extends ContactsCache
 		{
 			GroupDetails grpDetails = groupPersistence.get(groupId);
 			if (null == grpDetails)
+			{
 				return false;
+			}
 			return grpDetails.isGroupAlive();
 		}
 		finally
@@ -847,6 +852,62 @@ class PersistenceCache extends ContactsCache
 			writeLock.unlock();
 		}
 
+	}
+	
+	boolean isGroupMute(String groupId)
+	{
+		readLock.lock();
+		try
+		{
+			GroupDetails grpDetails = groupPersistence.get(groupId);
+			if (null == grpDetails)
+			{
+				return false;
+			}
+			return grpDetails.isGroupMute();
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
+
+	void setGroupMute(String groupId, boolean mute)
+	{
+		writeLock.lock();
+		try
+		{
+			GroupDetails grpDetails = groupPersistence.get(groupId);
+			if (null != grpDetails)
+			{
+				grpDetails.setGroupMute(mute);
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+
+	}
+
+	public void insertGroup(String grpId, GroupDetails grpDetails)
+	{
+		writeLock.lock();
+		try
+		{
+			String groupName = grpDetails.getGroupName();
+			if (TextUtils.isEmpty(groupName) || groupName.equals(grpId))
+			{
+				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(grpId, false, false);
+				groupName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+				grpDetails.setGroupName(groupName);
+			}
+			groupPersistence.put(grpId, grpDetails);
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
 	}
 
 	/**
@@ -992,7 +1053,7 @@ class PersistenceCache extends ContactsCache
 		}
 	}
 
-	List<GroupDetails> getGroupDetails()
+	List<GroupDetails> getGroupDetailsList()
 	{
 		// traverse through groupPersistence
 		readLock.lock();
@@ -1005,6 +1066,19 @@ class PersistenceCache extends ContactsCache
 				groupsList.add(grpDetails);
 			}
 			return groupsList;
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
+
+	public GroupDetails getGroupDetails(String msisdn)
+	{
+		readLock.lock();
+		try
+		{
+			return groupPersistence.get(msisdn);
 		}
 		finally
 		{

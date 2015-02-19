@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="888"
-    android:versionName="3.3.5.ct.0.0.1" >
-
+    android:versionCode="1116"
+    android:versionName="3.7.8" >
+    
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="17" />
@@ -12,6 +12,7 @@
     <permission
         android:name="com.bsb.hike.ui.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
+
 
     <uses-permission android:name="com.bsb.hike.ui.permission.MAPS_RECEIVE" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
@@ -33,6 +34,44 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    
+    <!-- New Permissions Added -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>
+    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS"/>
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.BATTERY_STATS"/>
+    <uses-permission android:name="android.permission.GET_PACKAGE_SIZE"/>
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.READ_PROFILE"/>
+    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.NFC"/>
+    <uses-permission android:name="android.permission.READ_CALENDAR"/>
+    <uses-permission android:name="android.permission.USE_SIP"/>
+    <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
+    <uses-permission android:name="android.permission.WRITE_CALL_LOG"/>
+    <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"/>
+    <uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"/>
+    <uses-permission android:name="android.permission.WRITE_PROFILE"/>
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+    <uses-permission android:name="android.permission.FLASHLIGHT"/>
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+    <uses-permission android:name="android.permission.BODY_SENSORS"/>
+    <uses-permission android:name="android.permission.SET_WALLPAPER"/>
+    <uses-permission android:name="android.permission.TRANSMIT_IR"/>
+    <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS"/>
+    <uses-permission android:name="com.android.voicemail.permission.ADD_VOICEMAIL"/>
+    <uses-permission android:name="android.permission.SUBSCRIBED_FEEDS_READ"/>
+    <uses-permission android:name="android.permission.SUBSCRIBED_FEEDS_WRITE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+
     <!-- C2DM -->
     <permission
         android:name="com.bsb.hike.permission.C2D_MESSAGE"
@@ -56,7 +95,8 @@
         android:required="false" />
 
     <application
-        android:name="com.bsb.hike.HikeMessengerApp"
+        android:hardwareAccelerated="false"
+        android:name=".HikeMessengerApp"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:logo="@drawable/hike_logo_top_bar"
@@ -66,14 +106,17 @@
             android:required="false" />
 
         <service
-            android:name="com.bsb.hike.service.HikeService"
+            android:name=".service.HikeService"
             android:enabled="true" >
+            <intent-filter>
+                <action android:name="com.bsb.hike.service.ACTION_BIND"/>
+            </intent-filter>
         </service>
-        <service android:name="com.bsb.hike.service.UpgradeIntentService" />
-        <service android:name="com.bsb.hike.GCMIntentService" />
+        <service android:name=".service.UpgradeIntentService" />
+        <service android:name=".GCMIntentService" />
 
         <activity
-            android:name="com.bsb.hike.ui.HomeActivity"
+            android:name=".ui.HomeActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/app_name"
             android:launchMode="singleTop"
@@ -86,15 +129,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".chatthread.ChatThreadActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:configChanges="orientation|screenSize">
-             
-        </activity>
-        <activity
-            android:name="com.bsb.hike.ui.ComposeChatActivity"
+            android:name=".ui.ComposeChatActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_label"
             android:theme="@style/AppTheme.Home"
@@ -115,27 +150,30 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.AddFriendsActivity"
+            android:name=".ui.AddFriendsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.WelcomeActivity"
+            android:name=".ui.WelcomeActivity"
             android:label="@string/app_label"
             android:launchMode="singleTop"
             android:theme="@style/NoTitleBar" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.SignupActivity"
+            android:name=".ui.SignupActivity"
             android:label="@string/app_label"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan|stateAlwaysVisible" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.ChatThread"
+            android:name=".chatthread.ChatThreadActivity"
+            android:hardwareAccelerated="true"
             android:label="@string/app_label"
-            android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustResize" >
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:configChanges="orientation|screenSize"
+            android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.SENDTO" />
 
@@ -146,19 +184,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.HikePreferences"
+            android:name=".ui.HikePreferences"
             android:label="@string/preferences" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.HikeListActivity"
+            android:name=".ui.HikeListActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_label"
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.ProfileActivity"
+            android:name=".ui.ProfileActivity"
             android:windowSoftInputMode="stateHidden" >
-            <intent-filter android:label="@string/set_profile_pic">
+            <intent-filter android:label="@string/set_profile_pic" >
                 <action android:name="android.intent.action.ATTACH_DATA" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -167,51 +205,61 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.bsb.hike.cropimage.CropImage"
+            android:name=".cropimage.CropImage"
             android:theme="@style/NoTitleBar" />
-        <activity android:name="com.bsb.hike.ui.CreditsActivity" >
+        <activity android:name=".ui.CreditsActivity" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.WebViewActivity"
+            android:name=".ui.WebViewActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.Tutorial"
-            android:launchMode="singleTop" >
-        </activity>
-        <activity
-            android:name="com.bsb.hike.ui.ShareLocation"
+            android:name=".ui.ShareLocation"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.TellAFriend"
+            android:name=".ui.TellAFriend"
             android:launchMode="singleTop" >
         </activity>
-        <activity android:name="com.bsb.hike.ui.SettingsActivity" >
+        <activity android:name=".ui.SettingsActivity" >
+        </activity>
+        <activity android:name="com.bsb.hike.ui.ConnectedAppsActivity"
+            android:configChanges="orientation" >
+        </activity>
+        <activity android:name="com.bsb.hike.ui.HikeAuthActivity" 
+            android:configChanges="orientation"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:noHistory="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"  >
+            <intent-filter>
+			    <action android:name="com.bsb.hike.ui.HikeAuthActivity" />
+			    <category android:name="android.intent.category.DEFAULT" />
+			  </intent-filter>
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.TwitterAuthActivity"
+            android:name=".ui.TwitterAuthActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.StatusUpdate"
+            android:name=".ui.StatusUpdate"
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.SocialNetInviteActivity"
+            android:name=".ui.SocialNetInviteActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:windowSoftInputMode="adjustResize" >
         </activity>
-        <activity android:name="com.bsb.hike.ui.GalleryActivity" >
+        <activity android:name=".ui.GalleryActivity" >
         </activity>
-         <activity android:name="com.bsb.hike.ui.HikeSharedFilesActivity" >
+        <activity android:name=".ui.HikeSharedFilesActivity" >
         </activity>
-        
-        <activity android:name="com.bsb.hike.ui.GallerySelectionViewer" >
+        <activity android:name=".ui.GallerySelectionViewer" >
         </activity>
-        <activity android:name="com.bsb.hike.ui.CountrySelectActivity" >
+        <activity android:name=".ui.CountrySelectActivity" >
         </activity>
         <activity android:name="com.bsb.hike.ui.StickerShopActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >
@@ -220,115 +268,163 @@
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.FileSelectActivity"
+            android:name=".ui.FileSelectActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.SharedOtherFilesActivity"
+            android:name=".ui.SharedOtherFilesActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.CreateNewGroupActivity"
+            android:name=".ui.CreateNewGroupActivity"
             android:windowSoftInputMode="stateVisible" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.PeopleActivity" 
+            android:name=".ui.PeopleActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.TimelineActivity" 
+            android:name=".ui.TimelineActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
-         <activity
-            android:name="com.bsb.hike.ui.FtueCardsActivity"
+        <activity
+            android:name=".ui.FtueCardsActivity"
             android:label="@string/app_label"
             android:launchMode="singleTop"
             android:theme="@style/NoTitleBar" >
         </activity>
+          <activity
+            android:name="com.bsb.hike.ui.NUXInviteActivity"
+            android:screenOrientation="portrait"
+             android:launchMode="singleTop">
+        </activity> 
         <activity
-            android:name="com.bsb.hike.ui.PinHistoryActivity"
-            android:configChanges="orientation|screenSize|keyboard|keyboardHidden">            
-        </activity>         
+           	  android:name="com.bsb.hike.ui.NuxSendCustomMessageActivity"
+              android:launchMode="singleTop"
+              android:screenOrientation="portrait">
+        </activity>     
         <activity
-    		android:name="com.haibison.android.lockpattern.LockPatternActivity"
-    		android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
-    		android:screenOrientation="user"
-    		android:theme="@style/LockPatternTheme" />
-            <receiver android:name=".service.BootService" >
-                <intent-filter>
-                    <action android:name="android.intent.action.BOOT_COMPLETED" />
-                </intent-filter>
-                <intent-filter>
-                    <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
-                </intent-filter>
-                <intent-filter>
-                    <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
-                </intent-filter>
-            </receiver>
-            <receiver android:name="com.bsb.hike.service.AppUpdatedReceiver" >
-                <intent-filter>
-                    <action android:name="android.intent.action.PACKAGE_REPLACED" />
-
-                    <data android:scheme="package" />
-                </intent-filter>
-            </receiver>
-            <receiver android:name="com.bsb.hike.service.LocaleChangeReceiver" >
-                <intent-filter>
-                    <action android:name="android.intent.action.LOCALE_CHANGED" />
-                </intent-filter>
-            </receiver>
-            <receiver
-                android:name="com.google.android.gcm.GCMBroadcastReceiver"
-                android:permission="com.google.android.c2dm.permission.SEND" >
-                <intent-filter>
-                    <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                    <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-
-                    <category android:name="com.bsb.hike" />
-                </intent-filter>
-            </receiver>
-            <receiver
-                android:name="com.bsb.hike.service.SMSBroadcastReceiver"
-                android:enabled="true"
-                android:exported="true" >
-                <intent-filter android:priority="2147483647" >
-                    <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-                </intent-filter>
-            </receiver>
-            <receiver android:name="com.bsb.hike.service.TimeChangedReceiver" >
-                <intent-filter android:priority="999" >
-                    <action android:name="android.intent.action.TIME_SET" />
-                </intent-filter>
-            </receiver>
-            <receiver android:name="com.bsb.hike.notifications.NotificationDismissedReceiver" 
-                android:exported="false">
-            </receiver>
-
-         <activity
-            android:name="com.bsb.hike.ui.DeleteAccount"
-            android:windowSoftInputMode="stateHidden"            
-            android:label="@string/app_label"
-            android:launchMode="singleTop">
+            android:name=".ui.PinHistoryActivity"
+            android:configChanges="orientation|screenSize|keyboard|keyboardHidden" >
         </activity>
-            
-            <activity
-                android:name="com.facebook.LoginActivity"
-                android:label="@string/app_name"
-                android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity
+            android:name="com.haibison.android.lockpattern.LockPatternActivity"
+            android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
+            android:screenOrientation="user"
+            android:theme="@style/LockPatternTheme" />
 
-            <meta-data
-                android:name="com.facebook.sdk.ApplicationId"
-                android:value="@string/fb_app_id" />
-            <meta-data
-                android:name="com.google.android.maps.v2.API_KEY"
-                android:value="@string/unobfuscated_map_api" />
-            <meta-data
-                android:name="com.google.android.gms.version"
-                android:value="@integer/google_play_services_version" />
+        <receiver android:name=".service.BootService"
+             android:enabled="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".service.AppUpdatedReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".service.LocaleChangeReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.google.android.gcm.GCMBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+
+                <category android:name="com.bsb.hike" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".service.SMSBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter android:priority="2147483647" >
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".service.TimeChangedReceiver" >
+            <intent-filter android:priority="999" >
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".notifications.NotificationDismissedReceiver"
+            android:exported="false" >
+        </receiver>
+
+        <activity
+            android:name=".ui.DeleteAccount"
+            android:label="@string/app_label"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="com.facebook.LoginActivity"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/fb_app_id" />
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="@string/unobfuscated_map_api" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <receiver android:name=".service.SmsMessageStatusReceiver" />
+        <receiver android:name=".service.AlarmBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="com.bsb.hike.START_ALARM" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".voip.view.VoIPActivity"
+            android:theme="@style/TranslucentBlack"
+            android:launchMode="singleTask"
+            android:label="@string/app_name" >
+        </activity>
+        
+        <receiver android:name=".voip.IncomingCallListener">
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE"/>
+            </intent-filter>
+        </receiver>
+        
+        <service android:name=".voip.VoIPService" />
+        
+        <provider
+            android:name="com.bsb.hike.providers.HikeProvider"
+            android:authorities="com.bsb.hike.providers.HikeProvider"
+            android:exported="true">
+        </provider>
+	 <receiver
+            android:name=".service.ConnectionChangeReceiver"
+            android:label="NetworkConnection" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+        <service android:name=".service.SimpleWakefulService" >
+        </service>
+        
         <receiver
-            android:name=".service.AppTrackerReceiver"
+            android:name=".service.ReferralReceiver"
             android:exported="true" >
             <intent-filter>
                 <action android:name="com.android.vending.INSTALL_REFERRER" />

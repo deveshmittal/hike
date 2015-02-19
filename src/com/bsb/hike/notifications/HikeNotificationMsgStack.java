@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.text.SpannableString;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -24,7 +25,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -139,7 +139,16 @@ public class HikeNotificationMsgStack implements Listener
 		{
 			for (ConvMessage conv : argConvMessageList)
 			{
-				addConvMessage(conv);
+				if (conv.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || conv.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT)
+				{
+					addMessage(conv.getMsisdn(), conv.platformWebMessageMetadata.getNotifText());
+					mLastInsertedConvMessage = conv;
+					forceBlockNotificationSound = conv.isSilent();
+				}
+				else
+				{
+					addConvMessage(conv);					
+				}
 			}
 		}
 	}
@@ -155,7 +164,8 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		if (TextUtils.isEmpty(argMessage))
 		{
-			throw new IllegalArgumentException("argMessage cannot be null or empty");
+			Log.wtf("HikeNotification", "Notification message is empty, check packet, msisdn= "+argMsisdn);
+			return;
 		}
 		addPair(argMsisdn, argMessage);
 	}
@@ -172,17 +182,14 @@ public class HikeNotificationMsgStack implements Listener
 
 		// If message stack consists of any stealth messages, do not add new message, change
 		// stealth message string to notify multiple messages (add s to message"S")
-		if (argMsisdn.equals(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
+		if (argMsisdn.equals(HikeNotification.HIKE_STEALTH_MESSAGE_KEY) && mMessagesMap.containsKey(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
 		{
 
-			if (mMessagesMap.containsKey(argMsisdn))
-			{
-				LinkedList<String> stealthMessageList = mMessagesMap.get(argMsisdn);
+			LinkedList<String> stealthMessageList = mMessagesMap.get(argMsisdn);
 
-				// There should only be 1 item dedicated to stealth message
-				// hike - You have new notification(s)
-				stealthMessageList.set(0, mContext.getString(R.string.stealth_notification_messages));
-			}
+			// There should only be 1 item dedicated to stealth message
+			// hike - You have new notification(s)
+			stealthMessageList.set(0, mContext.getString(R.string.stealth_notification_messages));
 		}
 		else
 		{
@@ -216,12 +223,12 @@ public class HikeNotificationMsgStack implements Listener
 
 		if (mTickerText != null)
 		{
-			mTickerText.append("\n" + HikeNotificationUtils.getNameForMsisdn(mContext, argMsisdn) + " - " + argMessage);
+			mTickerText.append("\n" + HikeNotificationUtils.getNameForMsisdn(argMsisdn) + " - " + argMessage);
 		}
 		else
 		{
 			mTickerText = new StringBuilder();
-			mTickerText.append(HikeNotificationUtils.getNameForMsisdn(mContext, argMsisdn) + " - " + argMessage);
+			mTickerText.append(HikeNotificationUtils.getNameForMsisdn(argMsisdn) + " - " + argMessage);
 		}
 	}
 
@@ -371,7 +378,7 @@ public class HikeNotificationMsgStack implements Listener
 
 				String notificationMsgTitle = mContext.getString(R.string.app_name);
 
-				notificationMsgTitle = HikeNotificationUtils.getNameForMsisdn(mContext, msisdn);
+				notificationMsgTitle = HikeNotificationUtils.getNameForMsisdn(msisdn);
 
 				if (!isFromSingleMsisdn())
 				{
@@ -453,7 +460,7 @@ public class HikeNotificationMsgStack implements Listener
 			if (object instanceof Activity)
 			{
 				Activity activity = (Activity) object;
-				if ((activity instanceof ChatThread))
+				if ((activity instanceof ChatThreadActivity))
 				{
 					HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
 				}
@@ -572,7 +579,7 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		if (isFromSingleMsisdn())
 		{
-			return HikeNotificationUtils.getNameForMsisdn(mContext, lastAddedMsisdn);
+			return HikeNotificationUtils.getNameForMsisdn(lastAddedMsisdn);
 		}
 
 		if (getNewMessages() <= 1)

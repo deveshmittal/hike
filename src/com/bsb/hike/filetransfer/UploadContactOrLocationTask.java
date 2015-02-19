@@ -191,7 +191,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 
 		HttpContext httpContext = new BasicHttpContext();
 
-		HttpPut httpPut = new HttpPut(AccountUtils.fileTransferUploadBase + "/user/ft");
+		HttpPut httpPut = new HttpPut(AccountUtils.fileTransferBase + "/user/ft");
 
 		AccountUtils.addToken(httpPut);
 		httpPut.addHeader("Connection", "Keep-Alive");

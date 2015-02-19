@@ -28,13 +28,15 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -168,7 +170,7 @@ public class ChatThreadUtils
 			Logger.wtf(TAG, "Exception in Adding bulk messages : " + e.toString());
 		}
 
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, jsonObject);
+		HikeMqttManagerNew.getInstance().sendMessage(jsonObject, HikeMqttManagerNew.MQTT_QOS_ONE);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MSG_READ, msisdn);
 	}
 
@@ -180,10 +182,10 @@ public class ChatThreadUtils
 		editor.commit();
 	}
 	
-	protected static void uploadFile(Context context, String msisdn, String filePath, HikeFileType fileType, boolean isConvOnHike)
+	protected static void uploadFile(Context context, String msisdn, String filePath, HikeFileType fileType, boolean isConvOnHike, int attachmentType)
 	{
 		Logger.i(TAG, "upload file , filepath " + filePath + " filetype " + fileType);
-		initialiseFileTransfer(context, msisdn, filePath, null, fileType, null, false, -1, false, isConvOnHike);
+		initialiseFileTransfer(context, msisdn, filePath, null, fileType, null, false, -1, false, isConvOnHike, attachmentType);
 	}
 	
 	protected static void uploadFile(Context context, String msisdn, Uri uri, HikeFileType fileType, boolean isConvOnHike)
@@ -192,13 +194,13 @@ public class ChatThreadUtils
 		FileTransferManager.getInstance(context).uploadFile(uri, fileType, msisdn, isConvOnHike);
 	}
 
-	protected static void initiateFileTransferFromIntentData(Context context, String msisdn, String fileType, String filePath, boolean convOnHike)
+	protected static void initiateFileTransferFromIntentData(Context context, String msisdn, String fileType, String filePath, boolean convOnHike, int attachmentType)
 	{
-		initiateFileTransferFromIntentData(context, msisdn, fileType, filePath, null, false, -1, convOnHike);
+		initiateFileTransferFromIntentData(context, msisdn, fileType, filePath, null, false, -1, convOnHike, attachmentType);
 	}
 
 	protected static void initiateFileTransferFromIntentData(Context context, String msisdn, String fileType, String filePath, String fileKey, boolean isRecording,
-			long recordingDuration, boolean convOnHike)
+			long recordingDuration, boolean convOnHike, int attachmentType)
 	{
 		HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
 
@@ -210,12 +212,12 @@ public class ChatThreadUtils
 		}
 		else
 		{
-			initialiseFileTransfer(context, msisdn, filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true, convOnHike);
+			initialiseFileTransfer(context, msisdn, filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true, convOnHike, attachmentType);
 		}
 	}
 
 	protected static void initialiseFileTransfer(Context context, String msisdn, String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording,
-			long recordingDuration, boolean isForwardingFile, boolean convOnHike)
+			long recordingDuration, boolean isForwardingFile, boolean convOnHike, int attachmentType)
 	{
 		clearTempData(context);
 
@@ -232,7 +234,7 @@ public class ChatThreadUtils
 			Toast.makeText(context, R.string.max_file_size, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		FileTransferManager.getInstance(context).uploadFile(msisdn, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile, convOnHike, recordingDuration);
+		FileTransferManager.getInstance(context).uploadFile(msisdn, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile, convOnHike, recordingDuration, attachmentType);
 	}
 
 	protected static void onShareFile(Context context, String msisdn, Intent intent, boolean isConvOnHike)
@@ -245,6 +247,7 @@ public class ChatThreadUtils
 		}
 		String filePath = intent.getStringExtra(HikeConstants.Extras.FILE_PATH);
 		String fileType = intent.getStringExtra(HikeConstants.Extras.FILE_TYPE);
+		int attachmentType = FTAnalyticEvents.FILE_ATTACHEMENT;
 
 		boolean isRecording = false;
 		long recordingDuration = -1;
@@ -262,7 +265,7 @@ public class ChatThreadUtils
 		}
 		else
 		{
-			ChatThreadUtils.initiateFileTransferFromIntentData(context, msisdn, fileType, filePath, fileKey, isRecording, recordingDuration, isConvOnHike);
+			ChatThreadUtils.initiateFileTransferFromIntentData(context, msisdn, fileType, filePath, fileKey, isRecording, recordingDuration, isConvOnHike, attachmentType);
 		}
 	}
 
@@ -389,7 +392,7 @@ public class ChatThreadUtils
 		mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal(), msisdn);
 		if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle MR
+			HikeMqttManagerNew.getInstance().sendMessage(message.serializeDeliveryReportRead(), HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MSG_READ, msisdn);
@@ -443,7 +446,7 @@ public class ChatThreadUtils
 				e.printStackTrace();
 			}
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
 	}
 

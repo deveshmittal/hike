@@ -54,13 +54,16 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.voip.VoIPUtils;
 
 /**
  * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -1196,7 +1199,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 */
 	private void onCallClicked()
 	{
-		Utils.onCallClicked(activity, msisdn);
+		Utils.onCallClicked(activity.getApplicationContext(), msisdn, VoIPUtils.CallSource.CHAT_THREAD);
 	}
 
 	/**
@@ -1291,9 +1294,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 				bulkLabel = convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
 
-				if (isActivityVisible && Utils.isPlayTickSound(activity.getApplicationContext()))
+				if (isActivityVisible && SoundUtils.isTickSoundEnabled(activity.getApplicationContext()))
 				{
-					Utils.playSoundFromRaw(activity.getApplicationContext(), R.raw.received_message);
+					SoundUtils.playSoundFromRaw(activity.getApplicationContext(), R.raw.received_message);
 				}
 			}
 
@@ -2197,7 +2200,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			{
 				for (ConvMessage convMessage : unsentMessages)
 				{
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
+					HikeMqttManagerNew.getInstance().sendMessage(convMessage.serialize(), HikeMqttManagerNew.MQTT_QOS_ONE);
 					convMessage.setTimestamp(System.currentTimeMillis() / 1000);
 				}
 				mAdapter.notifyDataSetChanged();

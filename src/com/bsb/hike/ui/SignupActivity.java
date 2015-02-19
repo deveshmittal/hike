@@ -2,9 +2,14 @@ package com.bsb.hike.ui;
 
 import java.io.File;
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.Random;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,8 +74,12 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
+import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -105,6 +114,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private ViewGroup nameLayout;
 
+	private ViewGroup genderLayout;
+
 	private ViewGroup scanningContactsLayout;
 
 	private ViewGroup backupFoundLayout;
@@ -129,6 +140,12 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private ImageView mIconView;
 
+	private TextView birthdayText;
+
+	private TextView maleText;
+
+	private TextView femaleText;
+
 	private ImageView profilePicCamIcon;
 
 	private Handler mHandler;
@@ -136,18 +153,22 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	private boolean addressBookError = false;
 
 	private boolean msisdnErrorDuringSignup = false;
-	
-	public static final int RESTORING_BACKUP = 5;
 
-	public static final int BACKUP_FOUND = 4;
+	public static final int POST_SIGNUP = 8;
 
-	public static final int SCANNING_CONTACTS = 3;
+	public static final int RESTORING_BACKUP = 7;
 
-	public static final int NAME = 2;
+	public static final int BACKUP_FOUND = 6;
 
-	public static final int PIN = 1;
+	public static final int SCANNING_CONTACTS = 5;
 
-	public static final int NUMBER = 0;
+	public static final int GENDER = 4;
+
+	public static final int NAME = 3;
+
+	public static final int PIN = 2;
+
+	public static final int NUMBER = 1;
 
 	private String countryCode;
 
@@ -194,6 +215,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	private TextView postText;
 	
 	private ViewProperties sdCardProp;
+	
+	private boolean restoreInitialized = false;
 
 	private class ActivityState
 	{
@@ -214,6 +237,12 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		public long timeLeft = 0;
 
 		public boolean fbConnected = false;
+
+		public Boolean isFemale = null;
+
+		public Birthday birthday = null;
+		
+		public String restoreStatus = null;
 	}
 	
 	private class ViewProperties
@@ -242,6 +271,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		numLayout = (ViewGroup) findViewById(R.id.num_layout);
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
+		genderLayout = (ViewGroup) findViewById(R.id.gender_layout);
 		scanningContactsLayout = (ViewGroup) findViewById(R.id.scanning_contacts_layout);
 		backupFoundLayout = (ViewGroup) findViewById(R.id.backup_found_layout);
 		restoringBackupLayout = (ViewGroup) findViewById(R.id.restoring_backup_layout);
@@ -267,7 +297,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			mActivityState = new ActivityState();
 		}
 
-		mTask = SignupTask.startTask(this, mActivityState.userName, mActivityState.profileBitmap);
 		setupActionBar();
 		if (savedInstanceState != null)
 		{
@@ -299,19 +328,20 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				prepareLayoutForGettingName(savedInstanceState, false);
 				enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
 				break;
+			case GENDER:
+				prepareLayoutForGender(savedInstanceState);
+				break;
 			case SCANNING_CONTACTS:
 				prepareLayoutForScanning(savedInstanceState);
 				break;
 			case BACKUP_FOUND:
+				prepareLayoutForBackupFound(savedInstanceState);
+				break;
 			case RESTORING_BACKUP:
-				if (mTask.getStateValue() == null || mTask.getStateValue().state != State.RESTORING_BACKUP)
-				{
-					prepareLayoutForBackupFound(savedInstanceState);
-				}
-				else
-				{
-					prepareLayoutForRestoringAnimation(savedInstanceState);
-				}
+				prepareLayoutForRestoringAnimation(savedInstanceState,null);
+				break;
+			case POST_SIGNUP:
+				prepareLayoutForPostSignup(savedInstanceState);
 				break;
 			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
@@ -322,17 +352,22 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				showErrorMsg();
 			}
+			mTask = SignupTask.startTask(this, mActivityState.userName, mActivityState.isFemale, mActivityState.birthday, mActivityState.profileBitmap);
 		}
 		else
 		{
-			if (getIntent().getBooleanExtra(HikeConstants.Extras.MSISDN, false))
+			if (getIntent().hasExtra(HikeConstants.Extras.MSISDN))
 			{
-				viewFlipper.setDisplayedChild(NAME);
-				prepareLayoutForGettingName(savedInstanceState, false);
-			}
-			else
-			{
-				prepareLayoutForFetchingNumber();
+				if (getIntent().getBooleanExtra(HikeConstants.Extras.MSISDN, false))
+				{
+					viewFlipper.setDisplayedChild(NAME);
+					prepareLayoutForGettingName(savedInstanceState, false);
+				}
+				else
+				{
+					viewFlipper.setDisplayedChild(NUMBER);
+					prepareLayoutForFetchingNumber();
+				}
 			}
 
 			mTask = SignupTask.startTask(this);
@@ -349,11 +384,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		int displayedChild = viewFlipper.getDisplayedChild();
 		switch (displayedChild)
 		{
-		case SCANNING_CONTACTS:
-			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+		case NUMBER:
+		case PIN:
+		case NAME:
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 			break;
 		default:
-			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 			break;
 		}
 	}
@@ -399,7 +436,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			mActionBarTitle.setText(R.string.about_you);
 		}
-		else if (displayedChild == SCANNING_CONTACTS)
+		else if (displayedChild == GENDER)
+		{
+			mActionBarTitle.setText(R.string.tell_us_more);
+		}
+		else if (displayedChild == SCANNING_CONTACTS || displayedChild == POST_SIGNUP)
 		{
 			mActionBarTitle.setText("");
 		}
@@ -429,6 +470,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				 * Setting the app value as to if the user is Indian or not.
 				 */
 				String countryCode = accountPrefs.getString(HikeMessengerApp.COUNTRY_CODE, "");
+				boolean isIndianUser = countryCode.equals(HikeConstants.INDIA_COUNTRY_CODE);
 				boolean isSAUser = countryCode.equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE);
 
 				Editor accountEditor = accountPrefs.edit();
@@ -441,11 +483,12 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 				Editor editor = prefs.edit();
-				editor.putBoolean(HikeConstants.FREE_SMS_PREF, HikeMessengerApp.isIndianUser());
-				editor.putBoolean(HikeConstants.SSL_PREF, !(HikeMessengerApp.isIndianUser() || isSAUser));
+				editor.putBoolean(HikeConstants.FREE_SMS_PREF, isIndianUser);
+				editor.putBoolean(HikeConstants.SSL_PREF, !(isIndianUser || isSAUser));
 				editor.remove(HikeMessengerApp.TEMP_COUNTRY_CODE);
 				editor.commit();
 
+				HikeMessengerApp.setIndianUser(isIndianUser);
 				/*
 				 * Update the urls to use ssl or not.
 				 */
@@ -454,6 +497,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				mHandler.removeCallbacks(startWelcomeScreen);
 				mHandler.postDelayed(startWelcomeScreen, 2500);
 
+				SharedPreferences settings = getApplication().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+				Editor ed = settings.edit();
+				ed.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
+				ed.commit();
 			}
 			else if (mCurrentState != null && mCurrentState.value != null && mCurrentState.value.equals(HikeConstants.CHANGE_NUMBER))
 			{
@@ -465,7 +512,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			mActivityState = new ActivityState();
 		}
 	}
-
+	
 	Runnable startWelcomeScreen = new Runnable()
 	{
 		@Override
@@ -592,7 +639,19 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	{
 		if (viewFlipper.getDisplayedChild() == BACKUP_FOUND || viewFlipper.getDisplayedChild() == RESTORING_BACKUP)
 		{
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.BACKUP_RESTORE_SKIP);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 			mTask.addUserInput(null);
+			viewFlipper.setDisplayedChild(POST_SIGNUP);
+			prepareLayoutForPostSignup(null);
 			return;
 		}
 		if (invalidNum != null)
@@ -642,6 +701,22 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				toggleActionBarElementsEnable(true);
 				invalidNum.setVisibility(View.VISIBLE);
 			}
+			else if (viewFlipper.getDisplayedChild() == GENDER)
+			{
+				if (mActivityState.isFemale != null)
+				{
+					mTask.addGender(mActivityState.isFemale);
+					mTask.addUserInput(mActivityState.isFemale.toString());
+					viewFlipper.setDisplayedChild(SCANNING_CONTACTS);
+					prepareLayoutForScanning(null);
+				}
+				else
+				{
+					Toast toast = Toast.makeText(this, "please select your gender", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.CENTER, 0, 0);
+					toast.show();
+				}
+			}
 			else
 			{
 				final String input = enterEditText.getText().toString();
@@ -676,7 +751,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 							startLoading();
 							dialog.cancel();
-							if (Utils.densityMultiplier < 1.5)
+							if (Utils.scaledDensityMultiplier < 1.5)
 							{
 								Utils.hideSoftKeyboard(SignupActivity.this, enterEditText);
 							}
@@ -714,10 +789,17 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						Utils.hideSoftKeyboard(this, enterEditText);
 						mActivityState.userName = input;
 						mTask.addUserName(mActivityState.userName);
-						viewFlipper.setDisplayedChild(SCANNING_CONTACTS);
-						prepareLayoutForScanning(null);
+						viewFlipper.setDisplayedChild(GENDER);
+						prepareLayoutForGender(null);
 					}
 					mTask.addUserInput(input);
+					if (birthdayText != null && !TextUtils.isEmpty(birthdayText.getText().toString()))
+					{
+						Calendar calendar = Calendar.getInstance();
+						int currentYear = calendar.get(Calendar.YEAR);
+						mActivityState.birthday = new Birthday(0, 0, currentYear - Integer.valueOf(birthdayText.getText().toString()));
+						mTask.addBirthdate(mActivityState.birthday);
+					}
 				}
 			}
 		}
@@ -734,6 +816,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 		case R.id.name_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_name);
+			birthdayText = (TextView) layout.findViewById(R.id.birthday);
 			profilePicCamIcon = (ImageView) layout.findViewById(R.id.profile_cam);
 			break;
 		case R.id.num_layout:
@@ -749,6 +832,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			verifiedPin = layout.findViewById(R.id.verified_pin);
 			infoTxt.setVisibility(View.VISIBLE);
 			invalidPin.setVisibility(View.INVISIBLE);
+			break;
+		case R.id.gender_layout:
 			break;
 		}
 		infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
@@ -793,6 +878,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		countryPicker.setEnabled(true);
 		selectedCountryPicker.setEnabled(true);
 		enterEditText.setEnabled(true);
+		enterEditText.requestFocus();
 
 		Utils.setupCountryCodeData(this, countryCode, countryPicker, selectedCountryName, countriesArray, countriesMap, codesMap, languageMap);
 		TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
@@ -816,6 +902,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
 		loadingText.setText(R.string.verifying);
+		nextBtnContainer.setVisibility(View.VISIBLE);
 	}
 
 	public void onCountryPickerClick(View v)
@@ -830,6 +917,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		initializeViews(pinLayout);
 
 		callmeBtn.setVisibility(View.VISIBLE);
+		nextBtnContainer.setVisibility(View.VISIBLE);
 
 		enterEditText.setText("");
 		infoTxt.setText(R.string.enter_pin_signup);
@@ -953,6 +1041,20 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			fbBtn.setText(R.string.connected);
 		}
 		nextBtnContainer.setVisibility(View.VISIBLE);
+		setupActionBarTitle();
+	}
+
+	private void prepareLayoutForGender(Bundle savedInstanceState)
+	{
+		femaleText = (TextView) genderLayout.findViewById(R.id.female);
+		maleText = (TextView) genderLayout.findViewById(R.id.male);
+		if (savedInstanceState != null && savedInstanceState.containsKey(HikeConstants.Extras.GENDER))
+		{
+			mActivityState.isFemale = savedInstanceState.getBoolean(HikeConstants.Extras.GENDER);
+			selectGender(mActivityState.isFemale);
+		}
+		nextBtnContainer.setVisibility(View.VISIBLE);
+		setupActionBarTitle();
 	}
 
 	private void prepareLayoutForScanning(Bundle savedInstanceState)
@@ -978,15 +1080,20 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 	}
 	
-	private void prepareLayoutForRestoringAnimation(Bundle savedInstanceState)
+	private void prepareLayoutForRestoringAnimation(Bundle savedInstanceState, StateValue stateValue)
 	{
 		nextBtnContainer.setVisibility(View.GONE);
 		setupActionBarTitle();
 		String restoreStatus = null;
-		if (mTask.getStateValue() != null)
+		if (savedInstanceState != null && savedInstanceState.containsKey(HikeConstants.Extras.RESTORE_STATUS))
 		{
-			restoreStatus = mTask.getStateValue().value;
+			restoreStatus = savedInstanceState.getString(HikeConstants.Extras.RESTORE_STATUS);
 		}
+		else if (stateValue != null)
+		{
+			restoreStatus = stateValue.value;
+		}
+		mActivityState.restoreStatus = restoreStatus;
 		
 		if (TextUtils.isEmpty(restoreStatus))
 		{
@@ -994,7 +1101,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
 			title.setText(R.string.restoring___);
 			hint.setText(R.string.restoring____hint);
-			if (savedInstanceState == null)
+			if (savedInstanceState == null && stateValue == null)
 			{
 				onRestoreAnimation();
 			}
@@ -1036,6 +1143,16 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				@Override
 				public void onClick(View v)
 				{
+					JSONObject metadata = new JSONObject();
+					try
+					{
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.BACKUP_RESTORE_RETRY);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 					nextBtnContainer.setVisibility(View.GONE);
 					restoreProgress.setVisibility(View.VISIBLE);
 					restoreFail.setVisibility(View.INVISIBLE);
@@ -1052,6 +1169,12 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				onRestoreFailAnimation();
 			}
 		}
+	}
+
+	private void prepareLayoutForPostSignup(Bundle savedInstanceState)
+	{
+		nextBtnContainer.setVisibility(View.GONE);
+		setupActionBarTitle();
 	}
 	
 	private void preRestoreAnimation()
@@ -1119,6 +1242,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		
 		artProfile.setVisibility(View.INVISIBLE);
 		artProfile.startAnimation(profileAnimSet);
+		
+		// Starting up the dots animation
+		setupDotsAnimation(smileyOffset,smileyDuration,0);
 		
 		// Animation setup for restore and skip buttons
 		AlphaAnimation restoreAlphaAnimation = new AlphaAnimation(0.0f, 1.0f);
@@ -1197,7 +1323,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		
 		artProfile.setVisibility(View.INVISIBLE);
 		artProfile.startAnimation(profileAnimSet);
-		
+
+		// Starting up the dots animation
+		setupDotsAnimation(smileyOffset,smileyDuration,smileyDuration);
+
 		// Animation setup for restore and skip buttons
 		AlphaAnimation fadeOutAnimation = new AlphaAnimation(1.0f, 0.0f);
 		fadeOutAnimation.setDuration(restoreDuration);
@@ -1216,7 +1345,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			public void onAnimationEnd(Animation animation)
 			{
 				viewFlipper.setDisplayedChild(RESTORING_BACKUP);
-				prepareLayoutForRestoringAnimation(null);
+				restoreInitialized = false;
+				prepareLayoutForRestoringAnimation(null,null);
 			}
 		});
 		
@@ -1227,10 +1357,63 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		textView.setVisibility(View.INVISIBLE);
 		textView.startAnimation(fadeOutAnimation);
 	}
+	
+	private void setupDotsAnimation(long smileyOffset, long smileyDuration, long onsetTime)
+	{
+		long animationDuation = 50;
+		
+		final View dot0 = (View) backupFoundLayout.findViewById(R.id.dot_right);
+		final View dot1 = (View) backupFoundLayout.findViewById(R.id.dot_left);
+		final View dot2 = (View) backupFoundLayout.findViewById(R.id.dot_top);
+		
+		ShapeDrawable circle0 = new ShapeDrawable(new OvalShape());
+		circle0.getPaint().setColor(this.getResources().getColor(R.color.restoring_red));
+		dot0.setBackgroundDrawable(circle0);
+		ShapeDrawable circle1 = new ShapeDrawable(new OvalShape());
+		circle1.getPaint().setColor(this.getResources().getColor(R.color.restoring_orange));
+		dot1.setBackgroundDrawable(circle1);
+		ShapeDrawable circle2 = new ShapeDrawable(new OvalShape());
+		circle2.getPaint().setColor(this.getResources().getColor(R.color.restoring_green));
+		dot2.setBackgroundDrawable(circle2);
+		
+		AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+		dotIn.setDuration(animationDuation);
+		AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+		dotOut.setDuration(animationDuation);
+		dotOut.setStartOffset(animationDuation);
+		AnimationSet dot0Anim = new AnimationSet(true);
+		dot0Anim.addAnimation(dotIn);
+		dot0Anim.addAnimation(dotOut);
+		dot0Anim.setStartOffset(smileyOffset + smileyDuration - 50 - onsetTime);
+		dot0.startAnimation(dot0Anim);
+	
+		AlphaAnimation dot1In = new AlphaAnimation(0, 1);
+		dot1In.setDuration(animationDuation);
+		AlphaAnimation dot1Out = new AlphaAnimation(1, 0);
+		dot1Out.setDuration(animationDuation);
+		dot1Out.setStartOffset(animationDuation);
+		AnimationSet dot1Anim = new AnimationSet(true);
+		dot1Anim.addAnimation(dot1In);
+		dot1Anim.addAnimation(dot1Out);
+		dot1Anim.setStartOffset(smileyOffset + 2*smileyDuration - 50 - onsetTime);
+		dot1.startAnimation(dot1Anim);
+
+		
+		AlphaAnimation dot2In = new AlphaAnimation(0, 1);
+		dot2In.setDuration(animationDuation);
+		AlphaAnimation dot2Out = new AlphaAnimation(1, 0);
+		dot2Out.setDuration(animationDuation);
+		dot2Out.setStartOffset(animationDuation);
+		AnimationSet dot2Anim = new AnimationSet(true);
+		dot2Anim.addAnimation(dot2In);
+		dot2Anim.addAnimation(dot2Out);
+		dot2Anim.setStartOffset(smileyOffset + 3*smileyDuration - 50 - onsetTime);
+		dot2.startAnimation(dot2Anim);
+	}
 
 	private void initializeRestore()
 	{
-		finishPreRestoreAnimation();
+		restoreInitialized = true;
 		sdCardProp = new ViewProperties();
 		ImageView sdCard = (ImageView) backupFoundLayout.findViewById(R.id.sd_card);
 		int [] screenLocation = new int[2];
@@ -1239,6 +1422,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		sdCardProp.top = screenLocation[1];
 		sdCardProp.width = sdCard.getWidth();
 		sdCardProp.height = sdCard.getHeight();
+		finishPreRestoreAnimation();
 	}
 	private void onRestoreAnimation()
 	{
@@ -1281,7 +1465,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						
 						restoreProgress.setVisibility(View.VISIBLE);
 						setupOnRestoreProgress();
-						mTask.addUserInput("true");
 					}
 				});
 				sdCardAnimationSet.addAnimation(sdCardTranslateAnimation);
@@ -1296,6 +1479,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	
 	private void onRestoreSuccessAnimation()
 	{
+		long uiDelay = HikeConstants.BACKUP_RESTORE_UI_DELAY;
+		uiDelay = 0;
 		View restoreItems = (View) restoringBackupLayout.findViewById(R.id.restore_items);
 		ImageView restoreSuccess = (ImageView) restoringBackupLayout.findViewById(R.id.restore_success);
 		
@@ -1305,30 +1490,15 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		itemsRemove.addAnimation(fadeout);
 		itemsRemove.addAnimation(scaleDown);
 		itemsRemove.setInterpolator(new DecelerateInterpolator());
-		itemsRemove.setStartOffset(HikeConstants.BACKUP_RESTORE_UI_DELAY);
+		itemsRemove.setStartOffset(uiDelay);
 		itemsRemove.setDuration(400);
 		itemsRemove.setFillAfter(true);
 		
 		ScaleAnimation scaleUp = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
 		scaleUp.setInterpolator(new OvershootInterpolator());
-		scaleUp.setStartOffset(200 + HikeConstants.BACKUP_RESTORE_UI_DELAY);
+		scaleUp.setStartOffset(200 + uiDelay);
 		scaleUp.setDuration(400);
 		scaleUp.setFillAfter(true);
-		
-		scaleUp.setAnimationListener(new AnimationListener()
-		{
-			public void onAnimationStart(Animation animation)
-			{}
-			
-			public void onAnimationRepeat(Animation animation)
-			{}
-			
-			@Override
-			public void onAnimationEnd(Animation animation)
-			{
-				mTask.addUserInput(null);
-			}
-		});
 		
 		restoreItems.startAnimation(itemsRemove);
 		restoreSuccess.startAnimation(scaleUp);
@@ -1402,7 +1572,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				dotOut.setDuration(100);
 				dotOut.setStartOffset(200);
 				RotateAnimation dotStay = new RotateAnimation(0, 360);
-				dotStay.setDuration(400);
+				dotStay.setDuration(400 + 200);
 				dotStay.setStartOffset(300);
 				AnimationSet dot = new AnimationSet(true);
 				dot.addAnimation(dotIn);
@@ -1446,7 +1616,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				dotOut.setDuration(100);
 				dotOut.setStartOffset(200);
 				RotateAnimation dotStay = new RotateAnimation(0, 360);
-				dotStay.setDuration(200);
+				dotStay.setDuration(200 + 200);
 				dotStay.setStartOffset(300);
 				AnimationSet dot = new AnimationSet(true);
 				dot.addAnimation(dotIn);
@@ -1488,9 +1658,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
 				dotOut.setDuration(100);
 				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(0 + 200);
+				dotStay.setStartOffset(300);
 				AnimationSet dot = new AnimationSet(true);
 				dot.addAnimation(dotIn);
 				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
 				dot.setAnimationListener(this);
 				dot.setStartOffset(400);
 				dot2.startAnimation(dot);
@@ -1507,9 +1681,47 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		@Override
 		public void onClick(View v)
 		{
-			initializeRestore();
+			JSONObject metadata = new JSONObject();
+			try
+			{
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.BACKUP_RESTORE);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+			mTask.addUserInput("true");
 		}
 	};
+
+	public void onGenderClick(View v)
+	{
+		if (v.getId() == R.id.female)
+		{
+			if (mActivityState.isFemale != null && mActivityState.isFemale)
+			{
+				return;
+			}
+			mActivityState.isFemale = true;
+		}
+		else
+		{
+			if (mActivityState.isFemale != null && !mActivityState.isFemale)
+			{
+				return;
+			}
+			mActivityState.isFemale = false;
+		}
+
+		selectGender(mActivityState.isFemale);
+	}
+
+	private void selectGender(Boolean isFemale)
+	{
+		femaleText.setSelected(mActivityState.isFemale);
+		maleText.setSelected(!mActivityState.isFemale);
+	}
 
 	private void resetViewFlipper()
 	{
@@ -1528,10 +1740,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		mTask = SignupTask.restartTask(this);
 	}
 
-	private void restartTask(String userName)
+	private void restartTask(String userName, Boolean isFemale, Birthday birthday)
 	{
 		resetViewFlipper();
-		mTask = SignupTask.restartTask(this, userName, mActivityState.profileBitmap);
+		mTask = SignupTask.restartTask(this, userName, isFemale, birthday, mActivityState.profileBitmap);
 	}
 
 	private void showErrorMsg()
@@ -1583,7 +1795,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 							}
 						}, 100);
 					}
-					restartTask(mActivityState.userName);
+					restartTask(mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
 
 				}
 			}
@@ -1627,7 +1839,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		Session session = Session.getActiveSession();
 		Session.saveSession(session, outState);
 
-		outState.putInt(HikeConstants.Extras.SIGNUP_PART, viewFlipper.getDisplayedChild());
+		int displayedChild = viewFlipper.getDisplayedChild();
+		if (restoreInitialized)
+		{
+			if (displayedChild == BACKUP_FOUND || displayedChild == RESTORING_BACKUP)
+				displayedChild = RESTORING_BACKUP;
+		}
+		outState.putInt(HikeConstants.Extras.SIGNUP_PART, displayedChild);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout != null && loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, errorDialog != null);
 		if (enterEditText != null)
@@ -1641,12 +1859,22 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			outState.putString(HikeConstants.Extras.COUNTRY_CODE, countryPicker.getText().toString());
 		}
+		if (viewFlipper.getDisplayedChild() == GENDER && mActivityState.isFemale != null)
+		{
+			outState.putBoolean(HikeConstants.Extras.GENDER, mActivityState.isFemale);
+		}
+		outState.putString(HikeConstants.Extras.RESTORE_STATUS, mActivityState.restoreStatus);
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	public void onBackPressed()
 	{
+		SharedPreferences settings = getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (settings.getBoolean(HikeMessengerApp.RESTORING_BACKUP, false))
+		{
+			return;
+		}
 		if (viewFlipper.getDisplayedChild() == PIN)
 		{
 			if (countDownTimer != null)
@@ -1701,6 +1929,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		case MSISDN:
 			if (TextUtils.isEmpty(value))
 			{
+				viewFlipper.setDisplayedChild(NUMBER);
 				prepareLayoutForFetchingNumber();
 			}
 			else
@@ -1711,18 +1940,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 					String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
 					Utils.removeLargerProfileImageForMsisdn(msisdn);
 				}
-				if (value.equals(HikeConstants.DONE))
-				{
-					removeAnimation();
-				}
-				/* yay, got the actual MSISDN */
-				viewFlipper.setDisplayedChild(NAME);
-				prepareLayoutForGettingName(null, false);
-				if (value.equals(HikeConstants.DONE))
-				{
-					setAnimation();
-				}
-
 			}
 			break;
 		case PULLING_PIN:
@@ -1778,7 +1995,15 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		case NAME:
 			if (TextUtils.isEmpty(value))
 			{
+				viewFlipper.setDisplayedChild(NAME);
 				prepareLayoutForGettingName(null, true);
+			}
+			break;
+		case GENDER:
+			if (TextUtils.isEmpty(value))
+			{
+				viewFlipper.setDisplayedChild(GENDER);
+				prepareLayoutForGender(null);
 			}
 			break;
 		case SCANNING_CONTACTS:
@@ -1840,9 +2065,21 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				viewFlipper.setDisplayedChild(BACKUP_FOUND);
 				prepareLayoutForBackupFound(null);
 			}
+			setWindowSoftInputState();
 			break;
 		case RESTORING_BACKUP:
-			prepareLayoutForRestoringAnimation(null);
+			if (viewFlipper.getDisplayedChild() == BACKUP_FOUND)
+			{
+				initializeRestore();
+			}
+			else
+			{
+				if (viewFlipper.getDisplayedChild() != RESTORING_BACKUP)
+				{
+					viewFlipper.setDisplayedChild(RESTORING_BACKUP);
+				}
+				prepareLayoutForRestoringAnimation(null,stateValue);
+			}
 			break;
 		}
 		setListeners();
@@ -1854,8 +2091,22 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		if ((actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
 				&& !TextUtils.isEmpty(enterEditText.getText().toString().trim()) && (loadingLayout == null || loadingLayout.getVisibility() != View.VISIBLE))
 		{
+			if (viewFlipper.getDisplayedChild() == NAME)
+			{
+				if (enterEditText.isFocused())
+				{
+					birthdayText.requestFocus();
+				}
+				else
+				{
+					Utils.hideSoftKeyboard(this, enterEditText);
+				}
+			}
+			else
+			{
 				submitClicked();
 				Utils.hideSoftKeyboard(this, enterEditText);
+			}
 		}
 		return true;
 	}
@@ -1966,6 +2217,38 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 						String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
 						String fileName = Utils.getTempProfileImageFileName(accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, ""));
+
+						try
+						{
+							String gender = (String) user.getProperty("gender");
+
+							mActivityState.isFemale = "female".equalsIgnoreCase(gender);
+						}
+						catch (Exception e)
+						{
+							Logger.w(getClass().getSimpleName(), "Exception while fetching gender", e);
+						}
+						try
+						{
+							String birthdayString = user.getBirthday();
+							if (!TextUtils.isEmpty(birthdayString))
+							{
+								Date date = new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH).parse(user.getBirthday());
+								if (date.compareTo(Calendar.getInstance().getTime()) <= 0)
+								{
+									Calendar calendar = Calendar.getInstance();
+									calendar.setTime(date);
+									mActivityState.birthday = new Birthday(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR));
+									mTask.addBirthdate(mActivityState.birthday);
+									birthdayText.setText(String.valueOf(Calendar.getInstance().get(Calendar.YEAR) - mActivityState.birthday.year));
+								}
+							}
+
+						}
+						catch (Exception e)
+						{
+							Logger.w(getClass().getSimpleName(), "Exception while fetching birthday", e);
+						}
 
 						final File destFile = new File(directory, fileName);
 						downloadImage(destFile, Uri.parse(fbProfileUrl), new ImageDownloadResult()

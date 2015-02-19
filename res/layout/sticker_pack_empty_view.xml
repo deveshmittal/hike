@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:layout_marginLeft="@dimen/sticker_pack_empty_view_margin"
     android:layout_marginTop="10dp"
-    android:layout_marginBottom="18dp"
+    android:layout_marginBottom="10dp"
     android:gravity="center" >
 
     <ImageView
@@ -21,7 +21,7 @@
         android:layout_height="match_parent"
         android:layout_alignTop="@id/preview_image"
         android:layout_alignBottom="@id/preview_image"
-        android:layout_toRightOf="@+id/preview_image"
+        android:layout_toRightOf="@id/preview_image"
         android:paddingRight="@dimen/sticker_pack_empty_view_margin"
         android:gravity="center_vertical"
         android:orientation="vertical" >
@@ -48,7 +48,7 @@
             android:id="@+id/category_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/standerd_light_grey2"
+            android:textColor="@color/standard_light_grey2"
             android:textSize="12sp" />
         
         <com.bsb.hike.view.CustomFontTextView
@@ -65,7 +65,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/sticker_pack_free"
-            android:textColor="@color/standerd_light_grey2"
+            android:textColor="@color/standard_light_grey2"
             android:textSize="12sp" />
         
         <com.bsb.hike.view.CustomFontButton
@@ -73,8 +73,8 @@
             android:layout_width="150dp"
             android:layout_height="36dp"
             android:layout_gravity="center"
-             android:background="@drawable/download_btn_round"
-            android:layout_marginTop="20dp"
+            android:background="@drawable/download_btn_round"
+            android:layout_marginTop="16dp"
             android:textSize="12sp"
             android:text="@string/download_category"
             android:textColor="@color/white" />

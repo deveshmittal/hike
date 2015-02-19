@@ -55,6 +55,7 @@ import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontEditText;
 
@@ -1197,10 +1198,10 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 
 				bulkLabel = convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? groupConversation.getLabel() : null;
 
-				if (isActivityVisible && Utils.isPlayTickSound(activity.getApplicationContext()))
+				if (isActivityVisible && SoundUtils.isTickSoundEnabled(activity.getApplicationContext()))
 				{
 
-					Utils.playSoundFromRaw(activity.getApplicationContext(), R.raw.received_message);
+					SoundUtils.playSoundFromRaw(activity.getApplicationContext(), R.raw.received_message);
 				}
 
 			}

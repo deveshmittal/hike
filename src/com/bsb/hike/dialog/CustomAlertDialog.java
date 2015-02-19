@@ -1,6 +1,7 @@
 package com.bsb.hike.dialog;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -43,9 +44,24 @@ public class CustomAlertDialog extends HikeDialog
 
 	}
 
+	/**
+	 * Pass null to remove header
+	 * 
+	 * @param headerText
+	 */
 	public void setHeader(String headerText)
 	{
-		header.setText(headerText);
+		if (TextUtils.isEmpty(headerText))
+		{
+			header.setVisibility(View.GONE);
+			findViewById(R.id.div1).setVisibility(View.GONE);
+		}
+		else
+		{
+			header.setVisibility(View.VISIBLE);
+			findViewById(R.id.div1).setVisibility(View.VISIBLE);
+			header.setText(headerText);
+		}
 	}
 
 	public void setHeader(int headerTextResId)

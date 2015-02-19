@@ -16,7 +16,7 @@
 
         <RelativeLayout
             android:id="@+id/restore_items"
-            android:layout_width="252dp"
+            android:layout_width="232dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="12dp"
             android:gravity="center" >
@@ -101,14 +101,16 @@
                 android:textColor="@color/black_45"
                 android:textSize="15dp" />
 
-            <Button
+            <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/btn_retry"
-                android:layout_width="212dp"
+                android:layout_width="160dp"
                 android:layout_height="48dp"
                 android:layout_marginTop="24dp"
-                android:background="@color/blue_hike"
-                android:text="RETRY"
-                android:textColor="@color/white"
+                android:background="@drawable/signup_button"
+                android:text="@string/retry"
+                android:textColor="@drawable/signup_btn_text"
+                android:textSize="15sp"
+                android:textStyle="bold|italic"
                 android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>

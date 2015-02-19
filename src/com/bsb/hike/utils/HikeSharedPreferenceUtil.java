@@ -1,5 +1,7 @@
 package com.bsb.hike.utils;
 
+import java.util.HashMap;
+
 import com.bsb.hike.HikeMessengerApp;
 
 import android.app.Activity;
@@ -9,31 +11,51 @@ import android.content.SharedPreferences.Editor;
 
 public class HikeSharedPreferenceUtil
 {
-	private static final String PREF_NAME = HikeMessengerApp.ACCOUNT_SETTINGS;
+	private static final String DEFAULT_PREF_NAME = HikeMessengerApp.ACCOUNT_SETTINGS;
 
+	public static final String CONV_UNREAD_COUNT = "ConvUnreadCount";
+	
 	private SharedPreferences hikeSharedPreferences;
 
 	private Editor editor;
 
-	private static HikeSharedPreferenceUtil hikeSharedPreferenceUtil;
+	private static HashMap<String, HikeSharedPreferenceUtil> hikePrefsMap = new HashMap<String, HikeSharedPreferenceUtil>();
 
-	private static void initializeHikeSharedPref(Context context)
+	private static HikeSharedPreferenceUtil initializeHikeSharedPref(Context context, String argSharedPrefName)
 	{
+		HikeSharedPreferenceUtil hikeSharedPreferenceUtil = null;
 		if (context != null)
 		{
 			hikeSharedPreferenceUtil = new HikeSharedPreferenceUtil();
-			hikeSharedPreferenceUtil.hikeSharedPreferences = context.getSharedPreferences(PREF_NAME, Activity.MODE_PRIVATE | Context.MODE_MULTI_PROCESS);
+			hikeSharedPreferenceUtil.hikeSharedPreferences = context.getSharedPreferences(argSharedPrefName, Activity.MODE_PRIVATE | Context.MODE_MULTI_PROCESS);
 			hikeSharedPreferenceUtil.editor = hikeSharedPreferenceUtil.hikeSharedPreferences.edit();
+			hikePrefsMap.put(argSharedPrefName, hikeSharedPreferenceUtil);
 		}
+		return hikeSharedPreferenceUtil;
 	}
 
 	public static HikeSharedPreferenceUtil getInstance(Context context)
 	{
-		if (hikeSharedPreferenceUtil == null)
+		if (hikePrefsMap.containsKey(DEFAULT_PREF_NAME))
 		{
-			initializeHikeSharedPref(context.getApplicationContext());
+			return hikePrefsMap.get(DEFAULT_PREF_NAME);
 		}
-		return hikeSharedPreferenceUtil;
+		else
+		{
+			return initializeHikeSharedPref(context.getApplicationContext(), DEFAULT_PREF_NAME);
+		}
+	}
+
+	public static HikeSharedPreferenceUtil getInstance(Context context, String argSharedPrefName)
+	{
+		if (hikePrefsMap.containsKey(argSharedPrefName))
+		{
+			return hikePrefsMap.get(argSharedPrefName);
+		}
+		else
+		{
+			return initializeHikeSharedPref(context.getApplicationContext(), argSharedPrefName);
+		}
 	}
 
 	private HikeSharedPreferenceUtil()
@@ -109,9 +131,12 @@ public class HikeSharedPreferenceUtil
 
 	public synchronized void deleteAllData()
 	{
-
-		hikeSharedPreferenceUtil = null;
 		editor.clear();
 		editor.commit();
+	}
+
+	public SharedPreferences getPref()
+	{
+		return hikeSharedPreferences;
 	}
 }

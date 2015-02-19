@@ -1,14 +1,8 @@
 package com.bsb.hike.service;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
 import java.util.Calendar;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,37 +14,38 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.provider.ContactsContract;
-import android.telephony.TelephonyManager;
+import android.support.v4.content.LocalBroadcastManager;
 
-import com.bsb.hike.GCMIntentService;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.HikeAlarmManager;
+import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.platform.HikeSDKRequestHandler;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gcm.GCMRegistrar;
 
 public class HikeService extends Service
 {
@@ -81,7 +76,7 @@ public class HikeService extends Service
 				boolean contactsChanged = ContactManager.getInstance().syncUpdates(this.context);
 
 				HikeMessengerApp.syncingContacts = false;
-				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, new Boolean[] {manualSync, contactsChanged});
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, new Boolean[] { manualSync, contactsChanged });
 			}
 
 		}
@@ -98,8 +93,6 @@ public class HikeService extends Service
 	public static final int MSG_APP_MESSAGE_STATUS = 5;
 
 	public static final int MSG_APP_CONN_STATUS = 6;
-
-	public static final int MSG_APP_INVALID_TOKEN = 7;
 
 	protected Messenger mApp;
 
@@ -131,15 +124,23 @@ public class HikeService extends Service
 	public static final String POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION = "com.bsb.hike.POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION";
 
 	/************************************************************************/
+	/* SDK Request Ids */
+	/************************************************************************/
+
+	public static final int SDK_REQ_GET_USERS = -11;
+
+	public static final int SDK_REQ_GET_LOGGED_USER_INFO = -14;
+
+	public static final int SDK_REQ_AUTH_CLIENT = -15;
+
+	public static final int SDK_REQ_SEND_MESSAGE = -13;
+
+	/************************************************************************/
 	/* VARIABLES - other local variables */
 	/************************************************************************/
 
 	// receiver that triggers a contact sync
 	private ManualContactSyncTrigger manualContactSyncTrigger;
-
-	private RegisterToGCMTrigger registerToGCMTrigger;
-
-	private SendGCMIdToServerTrigger sendGCMIdToServerTrigger;
 
 	private PostDeviceDetails postDeviceDetails;
 
@@ -157,7 +158,13 @@ public class HikeService extends Service
 
 	private ContactsChanged mContactsChanged;
 
-	private Looper mContactHandlerLooper;
+	private StickerManager sm;
+
+	public static HikeSDKRequestHandler mHikeSDKRequestHandler;
+
+	private Messenger mSDKRequestMessenger;
+
+	private boolean isInitialized;
 
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
@@ -170,26 +177,42 @@ public class HikeService extends Service
 	{
 		super.onCreate();
 
+		// If user is not signed up. Do not initialize MQTT or serve any SDK requests. Instead, re-route to Welcome/Signup page.
+		// TODO : This is a fix to handle edge case when a request comes from SDK and user has not signed up yet. In future we must make a separate bound service for handling SDK
+		// related requests.
+		if (!Utils.isUserSignedUp(getApplicationContext(), true))
+		{
+			return;
+		}
+
+		initHikeService();
+	}
+
+	/**
+	 * Initialize HikeService variables, references and other components.
+	 */
+	private void initHikeService()
+	{
 		Logger.d("TestUpdate", "Service started");
 
-		if (sendGCMIdToServerTrigger == null)
+		HikeSharedPreferenceUtil mprefs = HikeSharedPreferenceUtil.getInstance(getApplicationContext());
+
+		if (!(mprefs.getData(HikeConstants.REGISTER_GCM_SIGNUP, -1) == (HikeConstants.REGISTEM_GCM_AFTER_SIGNUP)))
 		{
-			sendGCMIdToServerTrigger = new SendGCMIdToServerTrigger();
-			registerReceiver(sendGCMIdToServerTrigger, new IntentFilter(SEND_TO_SERVER_ACTION));
+			mprefs.saveData(HikeConstants.REGISTER_GCM_SIGNUP, HikeConstants.REGISTEM_GCM_AFTER_SIGNUP);
+			HikeAlarmManager.cancelAlarm(getApplicationContext(), HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD);
+
 		}
 
-		if (registerToGCMTrigger == null)
-		{
-			registerToGCMTrigger = new RegisterToGCMTrigger();
-			registerReceiver(registerToGCMTrigger, new IntentFilter(REGISTER_TO_GCM_ACTION));
-			sendBroadcast(new Intent(REGISTER_TO_GCM_ACTION));
-		}
-
+		// Repopulating the alarms on close // force close,System GC ,Device Reboot //other reason
+		HikeAlarmManager.repopulateAlarm(getApplicationContext());
+		
+		LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(REGISTER_TO_GCM_ACTION));
 		Logger.d("HikeService", "onCreate called");
 
 		// reset status variable to initial state
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
-		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
+		mMqttManager = HikeMqttManagerNew.getInstance();
 		mMqttManager.init();
 
 		/*
@@ -204,14 +227,9 @@ public class HikeService extends Service
 		 * Intent notificationIntent = new Intent(this, MessagesList.class); PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
-
-		HandlerThread contactHandlerThread = new HandlerThread("");
-		contactHandlerThread.start();
-		mContactHandlerLooper = contactHandlerThread.getLooper();
-		mContactsChangedHandler = new Handler(mContactHandlerLooper);
-		mContactsChanged = new ContactsChanged(this);
-		
-		//scheduleNextAccountBackup();
+		assignUtilityThread();
+		scheduleNextAnalyticsSendAlarm();
+		DBBackupRestore.getInstance(getApplicationContext()).scheduleNextAutoBackup();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
@@ -270,14 +288,50 @@ public class HikeService extends Service
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
+
+		setInitialized(true);
 	}
 
-	
-	
+	private void assignUtilityThread()
+	{
+		/**
+		 * Extract utility looper
+		 */
+		Looper mHikeUtilLooper = HikeHandlerUtil.getInstance().getLooper();
+
+		/**
+		 * Make SDK request handler with utility looper
+		 */
+		mHikeSDKRequestHandler = new HikeSDKRequestHandler(HikeService.this.getApplicationContext(), mHikeUtilLooper);
+
+		mSDKRequestMessenger = new Messenger(mHikeSDKRequestHandler);
+
+		/**
+		 * Make contact changed handler with utility looper
+		 */
+		mContactsChangedHandler = new Handler(mHikeUtilLooper);
+
+		mContactsChanged = new ContactsChanged(HikeService.this);
+
+	}
+
 	@Override
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
 		Logger.d("HikeService", "Start MQTT Thread.");
+
+		// In-case if service is already started, the onStart command calls this method. Proceed only if service is initialized.
+		//TODO remove this check ??
+		
+		if (!isInitialized())
+		{
+			initHikeService();
+		}
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED, null);
+
+		HikeService.this.sendBroadcast(new Intent(HikeService.SEND_RAI_TO_SERVER_ACTION));
+		
 		mMqttManager.connectOnMqttThread();
 		Logger.d("HikeService", "Intent is " + intent);
 		if (intent != null && intent.hasExtra(HikeConstants.Extras.SMS_MESSAGE))
@@ -307,18 +361,16 @@ public class HikeService extends Service
 		super.onDestroy();
 		Logger.i("HikeService", "onDestroy.  Shutting down service");
 
-		mMqttManager.destroyMqtt();
-		this.mMqttManager = null;
+		if (mMqttManager != null)
+		{
+			mMqttManager.destroyMqtt();
+			this.mMqttManager = null;
+		}
 		// inform the app that the app has successfully disconnected
 		if (contactsReceived != null)
 		{
 			getContentResolver().unregisterContentObserver(contactsReceived);
 			contactsReceived = null;
-		}
-
-		if (mContactHandlerLooper != null)
-		{
-			mContactHandlerLooper.quit();
 		}
 
 		if (manualContactSyncTrigger != null)
@@ -327,17 +379,6 @@ public class HikeService extends Service
 			manualContactSyncTrigger = null;
 		}
 
-		if (registerToGCMTrigger != null)
-		{
-			unregisterReceiver(registerToGCMTrigger);
-			registerToGCMTrigger = null;
-		}
-
-		if (sendGCMIdToServerTrigger != null)
-		{
-			unregisterReceiver(sendGCMIdToServerTrigger);
-			sendGCMIdToServerTrigger = null;
-		}
 
 		if (postDeviceDetails != null)
 		{
@@ -362,7 +403,7 @@ public class HikeService extends Service
 			unregisterReceiver(postSignupProfilePic);
 			postSignupProfilePic = null;
 		}
-
+		
 	}
 
 	/************************************************************************/
@@ -388,7 +429,37 @@ public class HikeService extends Service
 	@Override
 	public IBinder onBind(Intent intent)
 	{
-		return mMqttManager.getMessenger().getBinder();
+		if (mSDKRequestMessenger != null)
+		{
+			try
+			{
+				mSDKRequestMessenger.getBinder().linkToDeath(new IBinder.DeathRecipient()
+				{
+
+					@Override
+					public void binderDied()
+					{
+						Logger.e(HikeService.class.getCanonicalName(), "BINDER DEATH!!!!");
+					}
+				}, 0);
+			}
+			catch (RemoteException e)
+			{
+				e.printStackTrace();
+			}
+			return mSDKRequestMessenger.getBinder();
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	@Override
+	public boolean onUnbind(Intent intent)
+	{
+		Logger.d("HikeService - ONUNBIND", "" + intent.getAction());
+		return super.onUnbind(intent);
 	}
 
 	/************************************************************************/
@@ -408,18 +479,21 @@ public class HikeService extends Service
 		public void onChange(boolean selfChange)
 		{
 			Logger.d(getClass().getSimpleName(), "Contact content observer called");
-			if(HikeMessengerApp.syncingContacts)
-				Logger.d(getClass().getSimpleName(),"Contact Syncing already going on");
+			if (HikeMessengerApp.syncingContacts)
+				Logger.d(getClass().getSimpleName(), "Contact Syncing already going on");
 			else
 			{
-				mContactsChanged.manualSync = manualSync;
-				HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
-				long delay = manualSync ? 0L: HikeConstants.CONTACT_UPDATE_TIMEOUT;
-				HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, delay);
-				// Schedule the next manual sync to happed 24 hours from now.
-				scheduleNextManualContactSync();
-
-				manualSync = false;
+				if(mContactsChanged!=null)
+				{
+					mContactsChanged.manualSync = manualSync;
+					HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
+					long delay = manualSync ? 0L: HikeConstants.CONTACT_UPDATE_TIMEOUT;
+					HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, delay);
+					// Schedule the next manual sync to happed 24 hours from now.
+					scheduleNextManualContactSync();
+	
+					manualSync = false;
+				}
 			}
 		}
 	}
@@ -446,100 +520,6 @@ public class HikeService extends Service
 		}
 	}
 
-	private class RegisterToGCMTrigger extends BroadcastReceiver
-	{
-		@Override
-		public void onReceive(Context context, Intent intent)
-		{
-			Logger.d(getClass().getSimpleName(), "Registering for GCM");
-			try
-			{
-				GCMRegistrar.checkDevice(HikeService.this);
-				GCMRegistrar.checkManifest(HikeService.this);
-				final String regId = GCMRegistrar.getRegistrationId(HikeService.this);
-				if ("".equals(regId))
-				{
-					/*
-					 * Since we are registering again, we should clear this preference
-					 */
-					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-					editor.remove(HikeMessengerApp.GCM_ID_SENT);
-					editor.commit();
-
-					GCMRegistrar.register(HikeService.this, HikeConstants.APP_PUSH_ID);
-				}
-				else
-				{
-					sendBroadcast(new Intent(SEND_TO_SERVER_ACTION));
-				}
-			}
-			catch (UnsupportedOperationException e)
-			{
-				/*
-				 * User doesnt have google services
-				 */
-			}
-			catch (IllegalStateException e)
-			{
-				Logger.e("HikeService", "Exception during gcm registration : " , e);
-			}
-		}
-	}
-
-	private class SendGCMIdToServerTrigger extends BroadcastReceiver
-	{
-		@Override
-		public void onReceive(final Context context, Intent intent)
-		{
-			Logger.d(getClass().getSimpleName(), "Sending GCM ID");
-			final String regId = GCMRegistrar.getRegistrationId(context);
-			if ("".equals(regId))
-			{
-				sendBroadcast(new Intent(REGISTER_TO_GCM_ACTION));
-				Logger.d(getClass().getSimpleName(), "GCM id not found");
-				return;
-			}
-
-			final SharedPreferences prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-			if (prefs.getBoolean(HikeMessengerApp.GCM_ID_SENT, false))
-			{
-				Logger.d(getClass().getSimpleName(), "GCM id sent");
-				return;
-			}
-
-			Logger.d(getClass().getSimpleName(), "GCM id was not sent. Sending now");
-			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/device", RequestType.OTHER, new HikeHttpCallback()
-			{
-				public void onSuccess(JSONObject response)
-				{
-					Logger.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send successful");
-					Editor editor = prefs.edit();
-					editor.putBoolean(HikeMessengerApp.GCM_ID_SENT, true);
-					editor.commit();
-				}
-
-				public void onFailure()
-				{
-					Logger.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send unsuccessful");
-					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME, sendGCMIdToServer);
-				}
-			});
-			JSONObject request = new JSONObject();
-			try
-			{
-				request.put(GCMIntentService.DEV_TYPE, HikeConstants.ANDROID);
-				request.put(GCMIntentService.DEV_TOKEN, regId);
-			}
-			catch (JSONException e)
-			{
-				Logger.d(getClass().getSimpleName(), "Invalid JSON", e);
-			}
-			hikeHttpRequest.setJSONData(request);
-
-			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
-			Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
-		}
-	}
 
 	private class PostDeviceDetails extends BroadcastReceiver
 	{
@@ -555,39 +535,7 @@ public class HikeService extends Service
 			Logger.d("TestUpdate", "Sending device details to server");
 			Logger.d(getClass().getSimpleName(), "Sending device details to server");
 
-			String osVersion = Build.VERSION.RELEASE;
-			String devType = HikeConstants.ANDROID;
-			String os = HikeConstants.ANDROID;
-			String deviceVersion = Build.MANUFACTURER + " " + Build.MODEL;
-			String appVersion = "";
-			try
-			{
-				appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
-			}
-			catch (NameNotFoundException e)
-			{
-				Logger.e("AccountUtils", "Unable to get app version");
-			}
-
-			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-			String deviceKey = manager.getDeviceId();
-
-			JSONObject data = new JSONObject();
-			try
-			{
-				data.put(HikeConstants.DEV_TYPE, devType);
-				data.put(HikeConstants.APP_VERSION, appVersion);
-				data.put(HikeConstants.LogEvent.OS, os);
-				data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
-				data.put(HikeConstants.DEVICE_VERSION, deviceVersion);
-				data.put(HikeConstants.DEVICE_KEY, deviceKey);
-				Utils.addCommonDeviceDetails(data, context);
-			}
-			catch (JSONException e)
-			{
-				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
-			}
-
+			JSONObject data=Utils.getPostDeviceDetails(context);
 			Logger.d("TestUpdate", "Sending data: " + data.toString());
 
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/update", RequestType.OTHER, new HikeHttpCallback()
@@ -635,11 +583,7 @@ public class HikeService extends Service
 
 			// Send the device details again which includes the new app
 			// version
-			JSONObject obj = Utils.getDeviceDetails(context);
-			if (obj != null)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-			}
+			Utils.recordDeviceDetails(context);
 
 			Utils.requestAccountInfo(true, false);
 
@@ -670,14 +614,6 @@ public class HikeService extends Service
 		editor.commit();
 	}
 
-	private Runnable sendGCMIdToServer = new Runnable()
-	{
-		@Override
-		public void run()
-		{
-			sendBroadcast(new Intent(SEND_TO_SERVER_ACTION));
-		}
-	};
 
 	private Runnable sendDevDetailsToServer = new Runnable()
 	{
@@ -705,40 +641,6 @@ public class HikeService extends Service
 			sendBroadcast(new Intent(HikeService.POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION));
 		}
 	};
-	
-	private Runnable BackupAccountRunnable = new Runnable()
-	{
-		@Override
-		public void run()
-		{
-			DBBackupRestore.getInstance(HikeService.this).backupDB();
-			scheduleNextAccountBackup();
-		}
-	};
-	
-	private void scheduleNextAccountBackup()
-	{
-		long MaxBackupDelay = 24 * 60 * 60 * 1000; // 24 Hours
-		long lastBackup = DBBackupRestore.getInstance(HikeService.this).getLastBackupTime();
-
-		long scheduleTime = 0;
-		if ((System.currentTimeMillis() - lastBackup) > MaxBackupDelay)
-		{
-			scheduleTime = 0;
-		}
-		else
-		{
-			Calendar c = Calendar.getInstance();
-			c.add(Calendar.DAY_OF_MONTH, 1);
-			c.set(Calendar.HOUR_OF_DAY, 3);
-			c.set(Calendar.MINUTE, 0);
-			c.set(Calendar.SECOND, 0);
-			c.set(Calendar.MILLISECOND, 0);
-			scheduleTime = (c.getTimeInMillis() - System.currentTimeMillis());
-
-		}
-		postRunnableWithDelay(BackupAccountRunnable, scheduleTime);
-	}
 
 	private void scheduleNextManualContactSync()
 	{
@@ -775,11 +677,7 @@ public class HikeService extends Service
 		@Override
 		public void run()
 		{
-			JSONObject obj = Utils.getDeviceStats(getApplicationContext());
-			if (obj != null)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-			}
+			Utils.getDeviceStats(getApplicationContext());
 			scheduleNextUserStatsSending();
 		}
 	};
@@ -899,4 +797,29 @@ public class HikeService extends Service
 		}
 	}
 
+	public boolean isInitialized()
+	{
+		return isInitialized;
+	}
+
+	private void setInitialized(boolean isInitialized)
+	{
+		this.isInitialized = isInitialized;
+	}
+
+	/**
+	 * Used to schedule the alarm for sending analytics data to the server after the HikeService has been booted
+	 */
+	private void scheduleNextAnalyticsSendAlarm()
+	{
+		long nextAlarm = HAManager.getInstance().getWhenToSend(); 		
+		
+		// please do not remove the following logs, for QA testing
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(nextAlarm);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm date(service boot up) :" + cal.get(Calendar.DAY_OF_MONTH));
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm time(service boot up) :" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));
+		
+		HikeAlarmManager.setAlarm(getApplicationContext(), nextAlarm, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
+ 	}
 }

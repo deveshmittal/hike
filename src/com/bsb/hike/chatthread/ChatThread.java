@@ -79,6 +79,7 @@ import com.bsb.hike.dialog.CustomAlertDialog;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
+import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.media.AttachmentPicker;
 import com.bsb.hike.media.AudioRecordView;
@@ -117,6 +118,7 @@ import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
@@ -206,7 +208,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected MessagesAdapter mAdapter;
 
-	protected List<ConvMessage> messages;
+	protected ArrayList<ConvMessage> messages;
 
 	protected static HashMap<Long, ConvMessage> mMessageMap;
 
@@ -911,7 +913,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void imageCaptured(String imagePath)
 	{
-		ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, imagePath, HikeFileType.IMAGE, mConversation.isOnhike());
+		ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, imagePath, HikeFileType.IMAGE, mConversation.isOnhike(), FTAnalyticEvents.CAMERA_ATTACHEMENT);
 	}
 
 	@Override
@@ -927,10 +929,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (requestCode)
 		{
 		case AttachmentPicker.AUDIO:
-			ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, filePath, HikeFileType.AUDIO, mConversation.isOnhike());
+			ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, filePath, HikeFileType.AUDIO, mConversation.isOnhike(), FTAnalyticEvents.AUDIO_ATTACHEMENT);
 			break;
 		case AttachmentPicker.VIDEO:
-			ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, filePath, HikeFileType.VIDEO, mConversation.isOnhike());
+			ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, filePath, HikeFileType.VIDEO, mConversation.isOnhike(), FTAnalyticEvents.VIDEO_ATTACHEMENT);
 			break;
 		}
 
@@ -1063,7 +1065,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		Logger.i(TAG, "Audio Recorded " + filePath + "--" + duration);
 		ChatThreadUtils.initialiseFileTransfer(activity.getApplicationContext(), msisdn, filePath, null, HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE,
-				true, duration, false, mConversation.isOnhike());
+				true, duration, false, mConversation.isOnhike(), FTAnalyticEvents.AUDIO_ATTACHEMENT);
 	}
 
 	@Override
@@ -1394,6 +1396,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 							isRecording = true;
 							fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
 						}
+						
+						int attachmentType = FTAnalyticEvents.OTHER_ATTACHEMENT;
+						/*
+						 * Added to know the attachment type when selected from file.
+						 */
+						if (intent.hasExtra(FTAnalyticEvents.FT_ATTACHEMENT_TYPE))
+						{
+							attachmentType = FTAnalyticEvents.FILE_ATTACHEMENT;
+
+						}
 
 						HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
 
@@ -1404,7 +1416,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						else
 						{
 							ChatThreadUtils.initialiseFileTransfer(activity.getApplicationContext(), msisdn, filePath, fileKey, hikeFileType, fileType, isRecording,
-									recordingDuration, true, mConversation.isOnhike());
+									recordingDuration, true, mConversation.isOnhike(), attachmentType);
 						}
 					}
 					else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE)
@@ -1467,7 +1479,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			String fileType = intent.getStringExtra(HikeConstants.Extras.FILE_TYPE);
 			for (String filePath : filePaths)
 			{
-				ChatThreadUtils.initiateFileTransferFromIntentData(activity.getApplicationContext(), msisdn, fileType, filePath, mConversation.isOnhike());
+				ChatThreadUtils.initiateFileTransferFromIntentData(activity.getApplicationContext(), msisdn, fileType, filePath, mConversation.isOnhike(), FTAnalyticEvents.OTHER_ATTACHEMENT);
 			}
 			intent.removeExtra(HikeConstants.Extras.FILE_PATHS);
 		}
@@ -2106,9 +2118,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				handleSystemMessages();
 			}
 
-			if (isActivityVisible && Utils.isPlayTickSound(activity.getApplicationContext()))
+			if (isActivityVisible && SoundUtils.isTickSoundEnabled(activity.getApplicationContext()))
 			{
-				Utils.playSoundFromRaw(activity.getApplicationContext(), R.raw.received_message);
+				SoundUtils.playSoundFromRaw(activity.getApplicationContext(), R.raw.received_message);
 			}
 
 			sendUIMessage(MESSAGE_RECEIVED, message);
@@ -2487,9 +2499,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 		{
-			if (isActivityVisible && (!msg.isTickSoundPlayed()) && Utils.isPlayTickSound(activity.getApplicationContext()))
+			if (isActivityVisible && (!msg.isTickSoundPlayed()) && SoundUtils.isTickSoundEnabled(activity.getApplicationContext()))
 			{
-				Utils.playSoundFromRaw(activity.getApplicationContext(), R.raw.message_sent);
+				SoundUtils.playSoundFromRaw(activity.getApplicationContext(), R.raw.message_sent);
 			}
 			msg.setTickSoundPlayed(true);
 			msg.setState(ConvMessage.State.SENT_CONFIRMED);
@@ -2656,7 +2668,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			{
 				hikeFile.delete(activity.getApplicationContext());
 			}
-			FileTransferManager.getInstance(activity.getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent());
+			FileTransferManager.getInstance(activity.getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent(), hikeFile.getFileSize());
 			mAdapter.notifyDataSetChanged();
 		}
 	}

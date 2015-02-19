@@ -9,12 +9,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.SmsMessage;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -26,7 +28,24 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 		/*
 		 * no name setting, so don't bother pulling in SMS's yet or The user doesn't want us pulling in his SMS.
 		 */
-		if (!Utils.isUserAuthenticated(context) || !PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+
+		Logger.d("HikeMessageReceiver" , System.currentTimeMillis()+"");
+		Logger.d("HikeMessageReceiver", "message received");
+
+		// If the User is not authenticated and the GCMID is not sent to the server and the user is connected.
+
+		HikeSharedPreferenceUtil mprefs = HikeSharedPreferenceUtil.getInstance(context);
+		
+		if (Utils.isUserOnline(context) && (!Utils.isUserAuthenticated(context)) && !mprefs.getData(HikeMessengerApp.GCM_ID_SENT_PRELOAD, false) )
+		{
+
+			Intent in = new Intent(HikeService.REGISTER_TO_GCM_ACTION);
+			mprefs.saveData(HikeConstants.REGISTER_GCM_SIGNUP, HikeConstants.REGISTEM_GCM_BEFORE_SIGNUP);
+			LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(in);
+			return;
+		}
+
+		if (!Utils.isUserSignedUp(context, false) || !PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
 		{
 			return;
 		}
@@ -91,7 +110,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 
 	private void writeToNativeSMSDb(Context context, JSONObject msg) throws JSONException
 	{
-		ConvMessage convMessage = new ConvMessage(msg);
+		ConvMessage convMessage = new ConvMessage(msg, context);
 
 		ContentValues values = new ContentValues();
 		values.put(HikeConstants.SMSNative.NUMBER, convMessage.getMsisdn());

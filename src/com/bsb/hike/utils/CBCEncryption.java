@@ -22,7 +22,13 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class CBCEncryption
 {
-	private static final String defaultPassword = "gauravmittal1111";
+	/**
+	 * @author gauravmittal
+	 * 		CBCEncryption is a utility that provides the encryption and decryption of files.
+	 * 		The user can use its own key for doing this.
+	 * 		If no key is provided the default key is used.
+	 */
+	private static final String defaultPassword = "HikeHikeHikeHike";
 
 	private static final String salt = "03xy9z52twq8r4s1uv67";
 
@@ -42,12 +48,30 @@ public class CBCEncryption
 
 	private static byte[] ivBytes = { 'I', 'n', 'i', 't', 'i', 'a', 'l', 'i', 'z', 'e', 'V', 'e', 'c', 't', 'o', 'r' };
 
+	/**
+	 * Creates the encrypted file using the default password.
+	 * @param file
+	 * 		File which is to be encrypted.
+	 * @param encryptedFile
+	 * 		File where encrypted file is to be made.
+	 * @return The encrypted file.
+	 */
 	public static File encryptFile(File file, File encryptedFile) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, InvalidKeySpecException
 	{
 		return encryptFile(file, encryptedFile, defaultPassword);
 	}
 
+	/**
+	 * Creates the encrypted file using the password.
+	 * @param file
+	 * 		File which is to be encrypted.
+	 * @param encryptedFile
+	 * 		File where encrypted file is to be made.
+	 * @param password
+	 * 		The key to be used for encryption.
+	 * @return The encrypted file.
+	 */
 	public static File encryptFile(File file, File encryptedFile, String password) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, InvalidKeySpecException
 	{
@@ -70,7 +94,10 @@ public class CBCEncryption
 		}
 		// Flush and close streams.
 		cos.flush();
+		fos.flush();
+		fos.getFD().sync();
 		cos.close();
+		fos.close();
 		fis.close();
 
 		time = System.currentTimeMillis() - time;
@@ -78,12 +105,30 @@ public class CBCEncryption
 		return encryptedFile;
 	}
 
+	/**
+	 * Creates the decrypted file using the default password.
+	 * @param file
+	 * 		File which is to be decrypted.
+	 * @param decryptedFile
+	 * 		File where decrypted file is to be made.
+	 * @return The decrypted file.
+	 */
 	public static File decryptFile(File file, File decryptedFile) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, InvalidKeySpecException
 	{
 		return decryptFile(file, decryptedFile, defaultPassword);
 	}
 
+	/**
+	 * Creates the decrypted file using the password.
+	 * @param file
+	 * 		File which is to be decrypted.
+	 * @param decryptedFile
+	 * 		File where decrypted file is to be made.
+	 * @param password
+	 * 		The key to be used for decryption.
+	 * @return The decrypted file.
+	 */
 	public static File decryptFile(File file, File decryptedFile, String password) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, InvalidKeySpecException
 	{
@@ -100,6 +145,7 @@ public class CBCEncryption
 			fos.write(d, 0, b);
 		}
 		fos.flush();
+		fos.getFD().sync();
 		fos.close();
 		cis.close();
 

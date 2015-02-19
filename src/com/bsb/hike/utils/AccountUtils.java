@@ -42,8 +42,10 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -81,6 +83,14 @@ public class AccountUtils
 	public static final String PRODUCTION_HOST = "api.im.hike.in";
 
 	public static final String STAGING_HOST = "staging.im.hike.in";
+	
+	public static final String DEV_STAGING_HOST = "staging2.im.hike.in";
+	
+	public static final int _PRODUCTION_HOST = 0;
+
+	public static final int _STAGING_HOST = 1;
+
+	public static final int _DEV_STAGING_HOST = 2;
 
 	public static final int PRODUCTION_PORT = 80;
 
@@ -102,11 +112,13 @@ public class AccountUtils
 
 	public static String fileTransferHost = PRODUCTION_FT_HOST;
 
-	public static String fileTransferUploadBase = HTTP_STRING + fileTransferHost + ":" + Integer.toString(port) + "/v1";
+	public static String fileTransferBase = HTTP_STRING + fileTransferHost + ":" + Integer.toString(port) + "/v1";
 
 	public static final String FILE_TRANSFER_DOWNLOAD_BASE = "/user/ft/";
 
-	public static String fileTransferBaseDownloadUrl = base + FILE_TRANSFER_DOWNLOAD_BASE;
+	public static String fileTransferBaseDownloadUrl = fileTransferBase + FILE_TRANSFER_DOWNLOAD_BASE;
+	
+	public static String fastFileUploadUrl = fileTransferBase + FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 
 	public static String partialfileTransferBaseUrl = base + "/user/pft";
 
@@ -151,7 +163,29 @@ public class AccountUtils
 	public static String mUid = null;
 
 	private static String appVersion = null;
+	
+	public static final String SDK_AUTH_BASE_URL_STAGING = "http://stagingoauth.im.hike.in/o/oauth2/";
 
+	public static final String SDK_AUTH_BASE_URL_PROD = "http://oauth.hike.in/o/oauth2/";
+	
+	public static String SDK_AUTH_BASE = SDK_AUTH_BASE_URL_PROD;
+	
+	public static final String SDK_AUTH_PATH_AUTHORIZE = "authorize";
+	
+	public static final String SDK_AUTH_PARAM_RESPONSE_TYPE = "response_type";
+	
+	public static final String SDK_AUTH_PARAM_CLIENT_ID = "client_id";
+	
+	public static final String SDK_AUTH_PARAM_SCOPE = "scope";
+	
+	public static final String SDK_AUTH_PARAM_PACKAGE_NAME = "package_name";
+	
+	public static final String SDK_AUTH_PARAM_SHA1 = "sha1";
+
+	public static final String ANALYTICS_UPLOAD_BASE = "/logs/analytics";
+	
+	public static String analyticsUploadUrl = base + ANALYTICS_UPLOAD_BASE;
+	
 	public static void setToken(String token)
 	{
 		mToken = token;
@@ -165,6 +199,11 @@ public class AccountUtils
 	public static void setAppVersion(String version)
 	{
 		appVersion = version;
+	}
+
+	public static String getAppVersion()
+	{
+		return appVersion;
 	}
 
 	public static synchronized HttpClient createClient()
@@ -478,7 +517,7 @@ public class AccountUtils
 		int all_invitee_joined = obj.optInt(HikeConstants.ALL_INVITEE_JOINED_2);
 		String country_code = obj.optString("country_code");
 
-		Logger.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
+		Logger.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid + "backup_token: " + backupToken);
 		return new AccountUtils.AccountInfo(token, msisdn, uid, backupToken, smsCredits, all_invitee, all_invitee_joined, country_code);
 	}
 
@@ -526,13 +565,23 @@ public class AccountUtils
 		}
 		req.addHeader("Cookie", "user=" + mToken + "; UID=" + mUid);
 	}
+	
+	public static void addTokenForAuthReq(HttpRequestBase req) throws IllegalStateException
+	{
+		assertIfTokenNull();
+		if (TextUtils.isEmpty(mToken))
+		{
+			throw new IllegalStateException("Token is null");
+		}
+		req.addHeader(new BasicHeader("cookie", "uid="+mUid+";token="+mToken));
+	}
 
 	private static void assertIfTokenNull()
 	{
 		// Assert.assertTrue("Token is empty", !TextUtils.isEmpty(mToken));
 	}
 
-	public static void setProfile(String name) throws NetworkErrorException, IllegalStateException
+	public static JSONObject setProfile(String name, Birthday birthdate, boolean isFemale) throws NetworkErrorException, IllegalStateException
 	{
 		HttpPost httppost = new HttpPost(base + "/account/profile");
 		addToken(httppost);
@@ -541,6 +590,21 @@ public class AccountUtils
 		try
 		{
 			data.put("name", name);
+			data.put("gender", isFemale ? "f" : "m");
+			if (birthdate != null)
+			{
+				JSONObject bday = new JSONObject();
+				if(birthdate.day != 0)
+				{
+					bday.put("day", birthdate.day);
+				}
+				if(birthdate.month != 0)
+				{
+					bday.put("month", birthdate.month);
+				}
+				bday.put("year", birthdate.year);
+				data.put("dob", bday);
+			}
 			data.put("screen", "signup");
 
 			AbstractHttpEntity entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
@@ -551,14 +615,17 @@ public class AccountUtils
 			{
 				throw new NetworkErrorException("Unable to set name");
 			}
+			return obj;
 		}
 		catch (JSONException e)
 		{
 			Logger.wtf("AccountUtils", "Unable to encode name as JSON");
+			return null;
 		}
 		catch (UnsupportedEncodingException e)
 		{
 			Logger.wtf("AccountUtils", "Unable to encode name");
+			return null;
 		}
 	}
 
@@ -765,12 +832,13 @@ public class AccountUtils
 				entity = new FileEntity(new File(hikeHttpRequest.getFilePath()), "");
 				break;
 
-			case STATUS_UPDATE:
+			case STATUS_UPDATE:			
 			case SOCIAL_POST:
 			case OTHER:
 				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
 				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
 				break;
+				
 
 			case DELETE_STATUS:
 				requestBase = new HttpDelete(base + hikeHttpRequest.getPath());
@@ -778,6 +846,12 @@ public class AccountUtils
 
 			case HIKE_JOIN_TIME:
 				requestBase = new HttpGet(base + hikeHttpRequest.getPath());
+				break;
+
+			case PREACTIVATION:
+				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
+				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
+				break;
 			}
 			if (addToken)
 			{
@@ -795,6 +869,12 @@ public class AccountUtils
 			{
 				throw new NetworkErrorException("Unable to perform request");
 			}
+			if (requestType == RequestType.PREACTIVATION)
+			{
+				hikeHttpRequest.setResponse(obj);
+
+			}
+			else
 			/*
 			 * We need the response to save the id of the status.
 			 */
@@ -867,7 +947,7 @@ public class AccountUtils
 	public static int getBytesUploaded(String sessionId) throws ClientProtocolException, IOException
 	{
 		int val = 0;
-		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferUploadBase + "/user/pft/");
+		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferBase + "/user/pft/");
 		addToken(req);
 		req.addHeader("X-SESSION-ID", sessionId);
 		HttpClient httpclient = getClient(req);
@@ -891,7 +971,7 @@ public class AccountUtils
 
 	public static String crcValue(String fileKey) throws ClientProtocolException, IOException
 	{
-		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferUploadBase + "/user/ft/" + fileKey);
+		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferBase + "/user/ft/" + fileKey);
 		addToken(req);
 		HttpClient httpclient = getClient(req);
 		HttpResponse response = httpclient.execute(req);

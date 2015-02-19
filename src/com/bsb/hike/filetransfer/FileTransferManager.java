@@ -41,6 +41,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -53,13 +54,13 @@ import com.bsb.hike.utils.Utils.ExternalStorageState;
  */
 public class FileTransferManager extends BroadcastReceiver
 {
-	private Context context;
+	private final Context context;
 
-	private ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
+	private final ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
 
 	private String HIKE_TEMP_DIR_NAME = "hikeTmp";
 
-	private File HIKE_TEMP_DIR;
+	private final File HIKE_TEMP_DIR;
 
 	// Constant variables
 	private final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
@@ -78,13 +79,13 @@ public class FileTransferManager extends BroadcastReceiver
 	
 	private final int TASK_OVERFLOW_LIMIT = 90;
 
-	private ExecutorService pool;
+	private final ExecutorService pool;
 
-	public static FileTransferManager _instance = null;
+	private static volatile FileTransferManager _instance = null;
 
 	private SharedPreferences settings;
 
-	private Handler handler;
+	private final Handler handler;
 
 	public static String FT_CANCEL = "ft_cancel";
 
@@ -172,11 +173,6 @@ public class FileTransferManager extends BroadcastReceiver
 		public abstract int getMinChunkSize();
 	};
 
-	private FileTransferManager()
-	{
-		taskLimit = context.getResources().getInteger(R.integer.ft_limit);
-	}
-
 	private class MyThreadFactory implements ThreadFactory
 	{
 		private final AtomicInteger threadNumber = new AtomicInteger(1);
@@ -187,7 +183,7 @@ public class FileTransferManager extends BroadcastReceiver
 			int threadCount = threadNumber.getAndIncrement();
 			Thread t = new Thread(r);
 			// This approach reduces resource competition between the Runnable object's thread and the UI thread.
-			t.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+			t.setPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE + android.os.Process.THREAD_PRIORITY_BACKGROUND);
 			t.setName("FT Thread-" + threadCount);
 			Logger.d(getClass().getSimpleName(), "Running FT thread : " + t.getName());
 			return t;
@@ -234,6 +230,14 @@ public class FileTransferManager extends BroadcastReceiver
 				e.printStackTrace();
 			}
 
+			if(task._state == FTState.COMPLETED)
+			{
+				HikeFile hikefile = ((ConvMessage) task.userContext).getMetadata().getHikeFiles().get(0);
+				FTAnalyticEvents analyticEvent = FTAnalyticEvents.getAnalyticEvents(getAnalyticFile(hikefile.getFile(), task.msgId));
+				String network = analyticEvent.mNetwork + "/" + getNetworkTypeString();
+				analyticEvent.sendFTSuccessFailureEvent(network, hikefile.getFileSize(), FTAnalyticEvents.FT_SUCCESS);
+				deleteLogFile(task.msgId, hikefile.getFile());
+			}
 			if (task instanceof DownloadFileTask)
 				((DownloadFileTask) task).postExecute(result);
 			else if (task instanceof UploadFileTask)
@@ -319,7 +323,7 @@ public class FileTransferManager extends BroadcastReceiver
 	}
 
 	public void uploadFile(String msisdn, File sourceFile, String fileKey, String fileType, HikeFileType hikeFileType, boolean isRec, boolean isForwardMsg, boolean isRecipientOnHike,
-			long recordingDuration)
+			long recordingDuration, int attachement)
 	{
 		if(taskOverflowLimitAchieved())
 			return;
@@ -328,7 +332,7 @@ public class FileTransferManager extends BroadcastReceiver
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
 		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, msisdn, sourceFile, fileKey, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike,
-				recordingDuration);
+				recordingDuration, attachement);
 		// UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, convMessage, isRecipientOnHike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
@@ -336,7 +340,7 @@ public class FileTransferManager extends BroadcastReceiver
 	}
 	
 	public void uploadFile(ArrayList<ContactInfo> contactList, File sourceFile, String fileKey, String fileType, HikeFileType hikeFileType, boolean isRec, boolean isForwardMsg, boolean isRecipientOnHike,
-			long recordingDuration)
+			long recordingDuration, int attachement)
 	{
 		if(taskOverflowLimitAchieved())
 			return;
@@ -345,7 +349,7 @@ public class FileTransferManager extends BroadcastReceiver
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
 		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, contactList, sourceFile, fileKey, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike,
-				recordingDuration);
+				recordingDuration, attachement);
 		// UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, convMessage, isRecipientOnHike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
@@ -390,7 +394,7 @@ public class FileTransferManager extends BroadcastReceiver
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, picasaUri, hikeFileType, msisdn, isRecipientOnHike);
+		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, picasaUri, hikeFileType, msisdn, isRecipientOnHike, FTAnalyticEvents.OTHER_ATTACHEMENT);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
 		pool.execute(ft);
@@ -458,7 +462,7 @@ public class FileTransferManager extends BroadcastReceiver
 		_instance = null;
 	}
 
-	public void cancelTask(long msgId, File mFile, boolean sent)
+	public void cancelTask(long msgId, File mFile, boolean sent, int fileSize)
 	{
 		FileSavedState fss;
 		if (sent)
@@ -483,6 +487,10 @@ public class FileTransferManager extends BroadcastReceiver
 					tempDownloadedFile.delete();
 
 			}
+			FTAnalyticEvents analyticEvent = FTAnalyticEvents.getAnalyticEvents(getAnalyticFile(mFile, msgId));
+			String network = analyticEvent.mNetwork + "/" + getNetworkTypeString();
+			analyticEvent.sendFTSuccessFailureEvent(network, fileSize, FTAnalyticEvents.FT_FAILED);
+			deleteLogFile(msgId, mFile);
 		}
 	}
 
@@ -495,6 +503,7 @@ public class FileTransferManager extends BroadcastReceiver
 			task.setPausedProgress(task._bytesTransferred);
 			task.setState(FTState.PAUSED);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
+			task.analyticEvents.mPauseCount += 1;
 			Logger.d(getClass().getSimpleName(), "pausing the task....");
 		}
 	}
@@ -503,6 +512,15 @@ public class FileTransferManager extends BroadcastReceiver
 	public void deleteStateFile(long msgId, File mFile)
 	{
 		String fName = mFile.getName() + ".bin." + msgId;
+		File f = new File(HIKE_TEMP_DIR, fName);
+		if (f != null)
+			f.delete();
+	}
+
+	// this will be used when user deletes corresponding chat bubble
+	public void deleteLogFile(long msgId, File mFile)
+	{
+		String fName = mFile.getName() + ".log." + msgId;
 		File f = new File(HIKE_TEMP_DIR, fName);
 		if (f != null)
 			f.delete();
@@ -653,42 +671,23 @@ public class FileTransferManager extends BroadcastReceiver
 	// Fetches the type of internet connection the device is using
 	public NetworkType getNetworkType()
 	{
-		int networkType = -1;
-		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		// Contains all the information about current connection
-		NetworkInfo info = cm.getActiveNetworkInfo();
-		if (info != null)
-		{
-			if (!info.isConnected())
-				return NetworkType.NO_NETWORK;
-			// If device is connected via WiFi
-			if (info.getType() == ConnectivityManager.TYPE_WIFI)
-				return NetworkType.WIFI; // return 1024 * 1024;
-			else
-				networkType = info.getSubtype();
-		}
-
-		// There are following types of mobile networks
+		
+		int networkType = Utils.getNetworkType(context);
+		
 		switch (networkType)
 		{
-		case TelephonyManager.NETWORK_TYPE_HSUPA: // ~ 1-23 Mbps
-		case TelephonyManager.NETWORK_TYPE_LTE: // ~ 10+ Mbps // API level 11
-		case TelephonyManager.NETWORK_TYPE_HSPAP: // ~ 10-20 Mbps // API level 13
-		case TelephonyManager.NETWORK_TYPE_EVDO_B: // ~ 5 Mbps // API level 9
-			return NetworkType.FOUR_G;
-		case TelephonyManager.NETWORK_TYPE_EVDO_0: // ~ 400-1000 kbps
-		case TelephonyManager.NETWORK_TYPE_EVDO_A: // ~ 600-1400 kbps
-		case TelephonyManager.NETWORK_TYPE_HSDPA: // ~ 2-14 Mbps
-		case TelephonyManager.NETWORK_TYPE_HSPA: // ~ 700-1700 kbps
-		case TelephonyManager.NETWORK_TYPE_UMTS: // ~ 400-7000 kbps
-		case TelephonyManager.NETWORK_TYPE_EHRPD: // ~ 1-2 Mbps // API level 11
+		case -1 :
+			return NetworkType.NO_NETWORK;
+		case 0: 
+			return NetworkType.TWO_G;
+		case 1: 
+			return NetworkType.WIFI;
+		case 2: 
+			return NetworkType.TWO_G;
+		case 3: 
 			return NetworkType.THREE_G;
-		case TelephonyManager.NETWORK_TYPE_1xRTT: // ~ 50-100 kbps
-		case TelephonyManager.NETWORK_TYPE_CDMA: // ~ 14-64 kbps
-		case TelephonyManager.NETWORK_TYPE_EDGE: // ~ 50-100 kbps
-		case TelephonyManager.NETWORK_TYPE_GPRS: // ~ 100 kbps
-		case TelephonyManager.NETWORK_TYPE_IDEN: // ~25 kbps // API level 8
-		case TelephonyManager.NETWORK_TYPE_UNKNOWN:
+		case 4: 
+			return NetworkType.FOUR_G;
 		default:
 			return NetworkType.TWO_G;
 		}
@@ -843,18 +842,34 @@ public class FileTransferManager extends BroadcastReceiver
 		}
 	}
 	
-	public boolean canTransferFile()
+	public File getAnalyticFile(File file, long  msgId)
 	{
-		if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
+		return new File(FileTransferManager.getInstance(context).getHikeTempDir(), file.getName() + ".log." + msgId);
+	}
+
+	public String getNetworkTypeString()
+	{
+		String netTypeString = "n";
+		switch (getNetworkType())
 		{
-			Toast.makeText(context, R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-			return false;
+			case NO_NETWORK:
+				netTypeString = "n";
+				break;
+			case TWO_G:
+				netTypeString = "2g";
+				break;
+			case THREE_G:
+				netTypeString = "3g";
+				break;
+			case FOUR_G:
+				netTypeString = "4g";
+				break;
+			case WIFI:
+				netTypeString = "wifi";
+				break;
+			default:
+				break;
 		}
-		if (remainingTransfers() == 0)
-		{
-			Toast.makeText(context, context.getResources().getString(R.string.max_num_files_reached, getTaskLimit()), Toast.LENGTH_SHORT).show();
-			return false;
-		}
-		return true;
+		return netTypeString;
 	}
 }
