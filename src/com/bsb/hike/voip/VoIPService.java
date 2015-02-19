@@ -9,6 +9,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.Locale;
@@ -154,7 +155,7 @@ public class VoIPService extends Service {
 	
 	// Echo cancellation
 	private boolean resamplerEnabled = false;
-	private final boolean aecEnabled = true;
+	private final boolean aecEnabled = false;
 	private boolean useVADToReduceData = false;
 	SolicallWrapper solicallAec = null;
 	private boolean aecSpeakerSignal = false, aecMicSignal = false;
@@ -1311,7 +1312,7 @@ public class VoIPService extends Service {
 					if (mute == true)
 						continue;
 
-					Logger.d(VoIPConstants.TAG, "Recorded: " + retVal);
+//					Logger.d(VoIPConstants.TAG, "Recorded: " + Arrays.toString(recordedData).substring(0, 50));
 					
 					// Break input audio into smaller chunks
                 	while (index < retVal) {
