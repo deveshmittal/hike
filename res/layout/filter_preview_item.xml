@@ -13,11 +13,13 @@
         android:layout_weight="2"
         android:src="@drawable/ic_launcher" />
 
-    <TextView
+    <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/previewText"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:textColor="#FFFFFFFF"
-        android:layout_weight="1" />
+        android:textSize="@dimen/photos_filter_preview_font_size"
+        android:layout_weight="1"
+        android:textStyle="bold" />
 
 </com.bsb.hike.photos.views.FilterEffectItemLinearLayout>

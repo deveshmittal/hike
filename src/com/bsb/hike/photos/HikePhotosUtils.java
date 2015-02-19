@@ -102,23 +102,23 @@ public class HikePhotosUtils
 				if (effectfilters == null)
 				{
 					effectfilters = new FilterList();
-					effectfilters.addFilter("Original", FilterType.AMARO);
-					effectfilters.addFilter("Faded", FilterType.FADED);
-					effectfilters.addFilter("Polaroid", FilterType.POLAROID);
+					effectfilters.addFilter("ORIGINAL", FilterType.AMARO);
+					effectfilters.addFilter("FADED", FilterType.FADED);
+					effectfilters.addFilter("POLAROID", FilterType.POLAROID);
 					effectfilters.addFilter("BGR", FilterType.BGR);
-					effectfilters.addFilter("Sepia", FilterType.SEPIA);
-					effectfilters.addFilter("Grayscale", FilterType.GRAYSCALE);
+					effectfilters.addFilter("SEPIA", FilterType.SEPIA);
+					effectfilters.addFilter("GRAYSCALE", FilterType.GRAYSCALE);
 					effectfilters.addFilter("X PRO 2", FilterType.X_PRO_2);
-					effectfilters.addFilter("Willow", FilterType.WILLOW);
-					effectfilters.addFilter("Inversion", FilterType.INVERSION);
-					effectfilters.addFilter("Walden", FilterType.WALDEN);
-					effectfilters.addFilter("Toaster", FilterType.TOASTER);
-					effectfilters.addFilter("Sutro", FilterType.SUTRO);
-					effectfilters.addFilter("Sierra", FilterType.SIERRA);
-					effectfilters.addFilter("Rise", FilterType.RISE);
-					effectfilters.addFilter("Lo Fi", FilterType.LO_FI);
-					effectfilters.addFilter("Kelvin", FilterType.KELVIN);
-					effectfilters.addFilter("Inkwell", FilterType.INKWELL);
+					effectfilters.addFilter("WILLOW", FilterType.WILLOW);
+					effectfilters.addFilter("INVERSION", FilterType.INVERSION);
+					effectfilters.addFilter("WALDEN", FilterType.WALDEN);
+					effectfilters.addFilter("TOASTER", FilterType.TOASTER);
+					effectfilters.addFilter("SUTRO", FilterType.SUTRO);
+					effectfilters.addFilter("SIERRA", FilterType.SIERRA);
+					effectfilters.addFilter("RISE", FilterType.RISE);
+					effectfilters.addFilter("LO FI", FilterType.LO_FI);
+					effectfilters.addFilter("KELVIN", FilterType.KELVIN);
+					effectfilters.addFilter("INKWELL", FilterType.INKWELL);
 					// effectfilters.addFilter("Hudson", FilterType.HUDSON);
 					// effectfilters.addFilter("Hefe", FilterType.HEFE);
 					// effectfilters.addFilter("EarlyBird", FilterType.EARLYBIRD);

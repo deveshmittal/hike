@@ -35,7 +35,7 @@ class CanvasImageView extends ImageView implements OnTouchListener
 
 	private Path mPath;
 
-	private Paint mPaint, mBitmapPaint;
+	private Paint mPaint;
 
 	private ArrayList<PathPoints> paths = new ArrayList<PathPoints>();
 
@@ -77,19 +77,20 @@ class CanvasImageView extends ImageView implements OnTouchListener
 		setOnTouchListener(this);
 		setDrawingCacheEnabled(true);
 		buildDrawingCache(true);
-		mBitmapPaint = new Paint(Paint.DITHER_FLAG);
-		mPaint = new Paint();
-		mPaint.setAntiAlias(true);
-		mPaint.setDither(true);
-		mPaint.setStyle(Paint.Style.STROKE);
-		mPaint.setStrokeJoin(Paint.Join.ROUND);
-		mPaint.setStrokeCap(Paint.Cap.ROUND);
-		setStrokeWidth(HikePhotosUtils.dpToPx(getContext(), 30));
-		mPath = new Path();
+		this.mPaint = new Paint();
+		this.mPaint.setAntiAlias(true);
+		this.mPaint.setDither(true);
+		this.mPaint.setStyle(Paint.Style.STROKE);
+		this.mPaint.setStrokeJoin(Paint.Join.ROUND);
+		this.mPaint.setStrokeCap(Paint.Cap.ROUND);
+		this.brushWidth=HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH);
+		this.color=HikePhotosUtils.DoodleColors[0];
+		this.mPath = new Path();
+		this.drawEnabled=false;
 
 	}
 
-	public void refresh(Bitmap source)
+	public void getMeasure(Bitmap source)
 	{
 		if (mBitmap == null)
 		{
@@ -105,8 +106,7 @@ class CanvasImageView extends ImageView implements OnTouchListener
 	protected void onDraw(Canvas canvas)
 	{
 
-		if (mBitmap != null)
-		{
+		
 			for (PathPoints p : paths)
 			{
 				mPaint.setColor(p.getColor());
@@ -126,7 +126,7 @@ class CanvasImageView extends ImageView implements OnTouchListener
 				mPaint.setStrokeWidth(brushWidth);
 				canvas.drawPath(mPath, mPaint);
 			}
-		}
+		
 
 	}
 

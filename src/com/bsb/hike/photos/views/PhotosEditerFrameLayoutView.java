@@ -105,13 +105,12 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 
 	public void enableDoodling()
 	{
-		doodleLayer.refresh(imageOriginal);
 		doodleLayer.setDrawEnabled(true);
 	}
 
 	public void disableDoodling()
 	{
-
+		doodleLayer.setDrawEnabled(false);
 	}
 
 	public void setBrushColor(int Color)
@@ -121,7 +120,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 
 	public File saveImage()
 	{
-
+		doodleLayer.getMeasure(imageOriginal);
 		imageEdited = FlattenLayersToBitmap(imageOriginal, currentEffect);
 		File myDir = new File(Utils.getFileParent(HikeFileType.IMAGE, false));
 		myDir.mkdir();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/photos_doodle_size_bar_height"
     android:layout_gravity="center"
     android:orientation="horizontal" >
 
@@ -12,16 +12,16 @@
         android:layout_weight="1" >
 
         <ImageView
-            android:id="@+id/plusWidth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/minusWidth"
+            android:layout_width="@dimen/photos_doodle_plus_width"
+            android:layout_height="@dimen/photos_doodle_plus_height"
             android:layout_gravity="right"
-            android:src="@drawable/plus" />
+            android:src="@drawable/minus" />
     </FrameLayout>
 
     <FrameLayout
         android:layout_width="0dp"
-        android:layout_height="85dp"
+        android:layout_height="@dimen/photos_doodle_maximum_brush_width"
         android:layout_gravity="center_vertical"
         android:layout_weight="1" >
 
@@ -40,11 +40,11 @@
         android:layout_weight="1" >
 
         <ImageView
-            android:id="@+id/minusWidth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/plusWidth"
+            android:layout_width="@dimen/photos_doodle_plus_width"
+            android:layout_height="@dimen/photos_doodle_plus_height"
             android:layout_gravity="left"
-            android:src="@drawable/minus" />
+            android:src="@drawable/plus" />
     </FrameLayout>
 
 </LinearLayout>

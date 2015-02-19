@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -75,6 +76,7 @@ public final class PreviewFragment extends Fragment
 			inflated.setRingColor(0xFFFFD700);
 			handler.setDoodlePreview(inflated);
 			layout.addView(adjuster);
+			
 			break;
 		case Effects:
 			gridView.setPadding(0, HikePhotosUtils.dpToPx(getActivity(), 15), 0, 0);
@@ -84,6 +86,46 @@ public final class PreviewFragment extends Fragment
 		layout.addView(gridView);
 		return layout;
 	}
+	
+	@Override
+	public void onDetach()
+	{
+		// TODO Auto-generated method stub
+		super.onDetach();
+		Log.e("test","Detatched");
+	}
+
+	@Override
+	public void onHiddenChanged(boolean hidden)
+	{
+		// TODO Auto-generated method stub
+		super.onHiddenChanged(hidden);
+		Log.e("test","HiddenC");
+	}
+
+	@Override
+	public void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		
+			Log.e("test","removed");
+	}
+
+	@Override
+	public void onResume()
+	{
+		// TODO Auto-generated method stub
+		super.onResume();
+		Log.e("test","Resumed");
+	}
+
+	
+	
+		
+	
+	
+	
 
 	@Override
 	public void onSaveInstanceState(Bundle outState)
