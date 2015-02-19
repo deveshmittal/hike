@@ -2,6 +2,7 @@
 
 package com.bsb.hike.offline;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -62,6 +63,8 @@ public class FileTransferService extends IntentService {
 				OutputStream stream = socket.getOutputStream();
 				ContentResolver cr = context.getContentResolver();
 				//Hello this is a test dirty
+				File f = new File(fileUri);
+				Log.d(WiFiDirectActivity.TAG, ""+f.length());
 				InputStream is = null;
 				try {
 					is = new FileInputStream(fileUri);//cr.openInputStream(Uri.parse(fileUri));
@@ -71,6 +74,8 @@ public class FileTransferService extends IntentService {
 				byte[]  type  =  new byte[1];
 				type[0] =  (byte) intent.getExtras().getInt("fileType");
 				stream.write(type,0,type.length);
+				byte[] intToBArray = Utils.intToByteArray((int)f.length());
+				stream.write(intToBArray);
 				DeviceListFragment.copyFile(is, stream);
 				Log.d(WiFiDirectActivity.TAG, "Client: Data written");
 			} catch (IOException e) {

@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.util.TextUtils;
@@ -72,6 +73,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	private final int RESULT_OK = -1;
 	
     private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
+    private HashMap<WifiP2pDevice, String> peersStatus = new HashMap<WifiP2pDevice, String>();
     ProgressDialog progressDialog = null;
     View mContentView = null;
     private WifiP2pDevice device;
@@ -180,10 +182,10 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     	if(syncMsisdn == null)
     		syncMsisdn = new Object();
     	synchronized(syncMsisdn){
-    		
+    		Log.d("DeviceListFragment", peers.get(position).deviceAddress + "-----> " + peers.get(position).status );
     		if(FileTransferService.isOfflineFileTransferFinished == false)
     		{
-    			if(peers.get(position) == currentDevice)
+    			if(peers.get(position).deviceAddress.compareTo(currentDevice.deviceAddress)==0)
     			{
     				ContactInfo deviceContact = ContactManager.getInstance().getContact(peers_msisdn.get(position));
     		    	String phoneNumber = "";
@@ -297,16 +299,15 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         			phoneName = device.deviceName;
         		
         		contact_name.setText(phoneName);
+        		//v.findViewById(id)
             	ImageView avatarView =  (ImageView) v.findViewById(R.id.avatar);
         		iconLoader.loadImage(device.deviceName, true, avatarView, false, true, true);
+        		TextView deviceStatus =  (TextView) v.findViewById(R.id.last_message_timestamp);
+        		deviceStatus.setText(getDeviceStatus(device.status));
+        		TextView chatStatus = (TextView) v.findViewById(R.id.last_message);
+        		String stat =   peersStatus.get(device);
+        		deviceStatus.setText(stat);
         		
-        		/*
-                if (top != null) {
-                    top.setText(device.deviceName);
-                }
-                if (bottom != null) {
-                    bottom.setText(getDeviceStatus(device.status));
-                }*/
             }
 
             return v;
@@ -337,6 +338,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         synchronized(syncMsisdn){
 	        peers.clear();
 	        peers_msisdn.clear();
+	        peersStatus.clear();
 	        WifiP2pDevice device;
 	        for(int i=0; i<peerList.getDeviceList().size(); i++)
 	        {
@@ -348,6 +350,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        
 	        for(int i=0; i<peers.size(); i++){
 	        	peers_msisdn.add(peers.get(i).deviceName);
+	        	peersStatus.put(peers.get(i), "Available for File Transfer");
 	        }
 	        
 	        ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
@@ -376,6 +379,8 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     }
     public void clearPeers() {
         peers.clear();
+        peersStatus.clear();
+        peers_msisdn.clear();
         ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
     }
 
@@ -447,7 +452,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	 * A simple server socket that accepts connection and writes some data on
 	 * the stream.
 	 */
-	public static class ServerAsyncTask extends AsyncTask<Void, Void, String> {
+	public  class ServerAsyncTask extends AsyncTask<Void,Void, String> {
 
 		private final Context context;
 		byte type;
@@ -465,10 +470,18 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 				ServerSocket serverSocket = new ServerSocket(PORT);
                 Log.d(WiFiDirectActivity.TAG, "Server: Socket opened");
                 Socket client = serverSocket.accept();
-                Log.d(WiFiDirectActivity.TAG, "Server: connection done.. Receiving File");
+               
+                //Log.d(WiFiDirectActivity.TAG, "Server: connection done.. Receiving File");
+                //Toast.makeText(, text, duration)
+                //DeviceListFragment fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
+                publishProgress();
                 InputStream inputstream = client.getInputStream();
                 byte[] typeArr = new byte[1];
                 inputstream.read(typeArr, 0, typeArr.length);
+                byte[] intArray = new byte[4];
+                inputstream.read(intArray, 0, 4);
+                int size = Utils.byteArrayToInt(intArray);
+                Log.d(WiFiDirectActivity.TAG, ""+size);
                 type = typeArr[0];
                 File f = null;
                 File dirs = null;
@@ -557,6 +570,25 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 				
 			}
 
+		}
+		
+		@Override
+		protected void onProgressUpdate(Void... values) {
+			DeviceListFragment fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
+			
+			if(fragment!=null)
+            {
+            	for(WifiP2pDevice cpeer: fragment.peers)
+            	{
+            		if(cpeer.status==WifiP2pDevice.CONNECTED)
+            		{
+            		      //publishProgress(cpeer.deviceName);
+            			  peersStatus.put(cpeer, "Receiveing file .....");
+            			  ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+            		}
+            	}
+            }
+			super.onProgressUpdate(values);
 		}
 
 	}

@@ -408,7 +408,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
 		    			// check if even after 5 seconds it is still in invited state
 		    			// then call reset
 		    			latestInstance = fragment.getLatestPeerInstance(connectingToDevice.deviceAddress);
-		    			if(latestInstance.status == WifiP2pDevice.INVITED){
+		    			if((latestInstance != null) && (latestInstance.status == WifiP2pDevice.INVITED)){
 		    				connectingToDevice = null;
 		    				fragment = null;
 		    				this.destroy = true;

@@ -460,6 +460,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private HashSpanWatcher hashWatcher;
 	
 	private Intent fromIntent;
+	
 
 	@Override
 	protected void onPause()
@@ -732,8 +733,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		// we are getting the intent which has started our activity here.
 		// we fetch the boolean extra to check if the keyboard has to be
 		// expanded.
-
+		Editor offlineEditor = getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).edit();
 		fromIntent = getIntent();
+		String deviceAddress =   fromIntent.getStringExtra("OfflineDeviceName");
+		if(!TextUtils.isEmpty(deviceAddress))
+		{
+			offlineEditor.putString("OfflineDeviceAddress",deviceAddress );
+			offlineEditor.commit(); 
+		}
+			
 		if (fromIntent.getBooleanExtra(HikeConstants.Extras.SHOW_KEYBOARD, false))
 			showKeyboard = true;
 
@@ -5857,7 +5865,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					// If in offline file transfer mode send device address 
 					if(WiFiDirectActivity.isOfflineFileTransferOn)
 						{
-						    String  deviceAddress =  fromIntent.getStringExtra("OfflineDeviceName"); 
+						   
+						    String  deviceAddress =   getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
 						    imageIntent.putExtra("OfflineDeviceName",deviceAddress);
 						}
 					startActivity(imageIntent);
@@ -6524,7 +6533,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			    	     final String fPath = filePath;
 					     final int atType = attachementType;
 			        	  
-			  			  String deviceAddress =   fromIntent.getStringExtra("OfflineDeviceName");
+			  			  String deviceAddress =    getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
 			  			  initialiseOfflineFileTransfer(fPath , null , hikeFileType,null,false,-1,false,atType, deviceAddress, requestCode);
 			         }
 			
@@ -6545,7 +6554,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (requestCode == HikeConstants.SHARE_APK_CODE && resultCode == RESULT_OK)
 		{
-			String deviceAddress =   fromIntent.getStringExtra("OfflineDeviceName");
+			String deviceAddress =   getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
 			String filePath = data.getStringExtra(FileTransferService.EXTRAS_FILE_PATH);
 			initialiseOfflineFileTransfer(filePath, deviceAddress, requestCode);
 		}

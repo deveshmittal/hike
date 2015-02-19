@@ -587,6 +587,9 @@ public class HikeConstants
 	public static final int CONNECT_TIMEOUT = 6 * 1000;
 
 	public static final int SOCKET_TIMEOUT = 30 * 1000;
+	
+	/* Constant used to name the preference file which saves Offline WifiDirect Settings */
+	public static final String  OFFLINE_FILE_SETTINGS =  "offlineFileSettings";
 
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5 * 1000;
