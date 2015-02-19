@@ -48,7 +48,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView.FindListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -59,9 +58,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.platform.CardRenderer.ViewHolder;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.musicg.processor.IntensityProcessor;
 
 /**
  * A ListFragment that displays available peers on discovery and requests the
@@ -83,6 +80,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     private WifiP2pInfo info;
     public static Intent intent;
     private Object syncMsisdn;
+    private WifiP2pDevice currentDevice;
     List<String> peers_msisdn = new ArrayList<String>();
 
     @Override
@@ -138,7 +136,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 			switch(resultCode)
 			{
 				case RESULT_OK:
-					String client_mac_fixed = new String(device.deviceAddress).replace("99", "19");
+					String client_mac_fixed = new String(currentDevice.deviceAddress).replace("99", "19");
 					String clientIP = Utils.getIPFromMac(client_mac_fixed);
 			        Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
 			        Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);
@@ -182,7 +180,32 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     	if(syncMsisdn == null)
     		syncMsisdn = new Object();
     	synchronized(syncMsisdn){
-	        WifiP2pDevice currentDevice = peers.get(position);
+    		
+    		if(FileTransferService.isFileTransferFinished == false)
+    		{
+    			if(peers.get(position) == currentDevice)
+    			{
+    				ContactInfo deviceContact = ContactManager.getInstance().getContact(peers_msisdn.get(position));
+    		    	String phoneNumber = "";
+    		    	if(deviceContact == null)
+    		    		phoneNumber = peers_msisdn.get(position);
+    		    	else
+    		    		phoneNumber = deviceContact.getName();
+    				
+    		    	Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
+    	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
+    	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
+    	        	startActivity(intent);
+    	        	return;
+    			}
+    			else
+    			{
+    				Toast.makeText(getActivity(), "You are currently sending file to " + device.deviceAddress, Toast.LENGTH_LONG).show();
+    				return;
+    			}
+    		}
+    		
+	        currentDevice = peers.get(position);
 	    	ContactInfo deviceContact = ContactManager.getInstance().getContact(peers_msisdn.get(position));
 	    	String phoneNumber = "";
 	    	if(deviceContact == null)
@@ -441,7 +464,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 				ServerSocket serverSocket = new ServerSocket(PORT);
                 Log.d(WiFiDirectActivity.TAG, "Server: Socket opened");
                 Socket client = serverSocket.accept();
-                Log.d(WiFiDirectActivity.TAG, "Server: connection done");
+                Log.d(WiFiDirectActivity.TAG, "Server: connection done.. Receiving File");
                 InputStream inputstream = client.getInputStream();
                 byte[] typeArr = new byte[1];
                 inputstream.read(typeArr, 0, typeArr.length);
