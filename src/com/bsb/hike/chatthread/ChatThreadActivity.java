@@ -9,56 +9,64 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
+import com.bsb.hike.utils.Logger;
 
 public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 {
 
 	private ChatThread chatThread;
+	
+	private static final String TAG = "ChatThreadActivity";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
+		Logger.i(TAG, "OnCreate");
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 		super.onCreate(savedInstanceState);
 
-		if (filter())
+		if (filter(getIntent()))
 		{
-			init();
-			chatThread.onCreate(savedInstanceState);
+			init(getIntent());
+			chatThread.onCreate();
+		}
+		else
+		{
+			closeChatThread();
 		}
 	}
 
-	private boolean filter()
+	private boolean filter(Intent intent)
 	{
 		String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
-		if (HikeMessengerApp.isStealthMsisdn(msisdn))
+		if (HikeMessengerApp.isStealthMsisdn(msisdn)
+				&& HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF) != HikeConstants.STEALTH_ON)
 		{
-			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF) != HikeConstants.STEALTH_ON)
-			{
-				Intent intent = new Intent(this, HomeActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				this.startActivity(intent);
-				this.finish();
-				return false;
-			}
+			return false;
 		}
 		return true;
 	}
-
-	private void init()
+	
+	private void closeChatThread()
 	{
-		String whichChatThread = getIntent().getStringExtra(HikeConstants.Extras.WHICH_CHAT_THREAD);
+		Intent homeintent = IntentFactory.getHomeActivityIntent(this);
+		this.startActivity(homeintent);
+		this.finish();
+	}
+
+	private void init(Intent intent)
+	{
+		String whichChatThread = intent.getStringExtra(HikeConstants.Extras.WHICH_CHAT_THREAD);
 		if (HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD.equals(whichChatThread))
 		{
-			chatThread = new OneToOneChatThread(this, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
+			chatThread = new OneToOneChatThread(this, intent.getStringExtra(HikeConstants.Extras.MSISDN));
 		}
 		else if (HikeConstants.Extras.GROUP_CHAT_THREAD.equals(whichChatThread))
 		{
-			chatThread = new GroupChatThread(this, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
+			chatThread = new GroupChatThread(this, intent.getStringExtra(HikeConstants.Extras.MSISDN));
 		}
 		else
 		{
@@ -69,6 +77,7 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
+		Logger.i(TAG, "OnCreate Options Menu Called");
 		return chatThread.onCreateOptionsMenu(menu) ? true : super.onCreateOptionsMenu(menu);
 
 	}
@@ -91,7 +100,32 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	protected void onNewIntent(Intent intent)
 	{
 		super.onNewIntent(intent);
-		init();
+		
+		if(processNewIntent(intent))
+		{
+			init(intent);
+			chatThread.onNewIntent();
+		}
+	}
+	
+	private boolean processNewIntent(Intent intent)
+	{
+		/**
+		 * Exit condition #1. We are in the same Chat Thread.
+		 */
+		String oldMsisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+		String newMsisdn = intent.getStringExtra(HikeConstants.Extras.MSISDN);
+		
+		if(oldMsisdn.equals(newMsisdn))
+		{
+			return false;
+		}
+		
+		/**
+		 * Exit condition #2. We are in stealth chat without being in stealth mode
+		 */
+		return filter(intent);
+				
 	}
 
 	@Override
@@ -119,6 +153,7 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	@Override
 	protected void onDestroy()
 	{
+		Logger.i(TAG, "OnDestroy");
 		chatThread.onDestroy();
 		super.onDestroy();
 	}
@@ -126,6 +161,7 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	@Override
 	protected void onPause()
 	{
+		Logger.i(TAG, "OnPause");
 		chatThread.onPause();
 		super.onPause();
 	}
@@ -133,6 +169,7 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	@Override
 	protected void onResume()
 	{
+		Logger.i(TAG, "OnResume");
 		chatThread.onResume();
 		super.onResume();
 	}
@@ -140,13 +177,14 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	@Override
 	protected void onRestart()
 	{
+		Logger.i(TAG, "OnRestart");
 		chatThread.onRestart();
 		super.onRestart();
 	}
 	
 	@Override
 	protected void onStop()
-	{
+	{Logger.i(TAG, "OnStop");
 		chatThread.onStop();
 		super.onStop();
 	}
@@ -154,6 +192,7 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	@Override
 	public void onConfigurationChanged(Configuration newConfig)
 	{
+		Logger.i(TAG, "OnConfigchanged");
 		chatThread.onConfigurationChanged(newConfig);
 		super.onConfigurationChanged(newConfig);
 	}

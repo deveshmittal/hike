@@ -390,11 +390,18 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	public HikeActionBar mActionBar;
 
-	public void onCreate(Bundle arg0)
+	public void onCreate()
 	{
 		init();
 		setContentView();
 		fetchConversation(true);
+	}
+	
+	public void onNewIntent()
+	{
+		init();
+		setContentView();
+		fetchConversationOnNewIntent(true);
 	}
 
 	protected void init()
@@ -1091,6 +1098,21 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			setupConversation(fetchConversation());
 		}
 	}
+	
+	protected final void fetchConversationOnNewIntent(boolean async)
+	{
+		Logger.i(TAG, "Fetch Conversation called : isAync ? " + async);
+
+		if (async)
+		{
+			activity.getSupportLoaderManager().restartLoader(FETCH_CONV, null, this);
+		}
+
+		else
+		{
+			setupConversation(fetchConversation());
+		}
+	}
 
 	/**
 	 * This method calls {@link #fetchConversation(String)} in UI or non UI thread, depending upon async variable For non UI, it starts asyncloader, see {@link ConversationLoader}
@@ -1607,7 +1629,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void onLoaderReset(Loader<Object> arg0)
 	{
-
+		
 	}
 
 	private static class ConversationLoader extends AsyncTaskLoader<Object>
@@ -1817,6 +1839,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
+		/**
+		 * Something's not right with firstVisibleItem here. Need to verify it - Piyush
+		 */
 		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
 		{
 			int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
