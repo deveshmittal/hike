@@ -52,8 +52,8 @@ import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.SingleStickerDownloadTask;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
