@@ -1088,7 +1088,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		else
 		{
-			fetchConversation();
+			setupConversation(fetchConversation());
 		}
 	}
 
@@ -1575,14 +1575,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		ConversationLoader loader = (ConversationLoader) arg0;
 		if (loader.loaderId == FETCH_CONV)
 		{
-			if (arg1 == null)
-			{
-				fetchConversationFailed();
-			}
-			else
-			{
-				fetchConversationFinished((Conversation) arg1);
-			}
+			setupConversation((Conversation) arg1);
 		}
 		else if (loader.loaderId == LOAD_MORE_MESSAGES)
 		{
@@ -1592,6 +1585,22 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		else
 		{
 			throw new IllegalStateException("Expected data is either Conversation OR List<ConvMessages> , please check " + arg0.getClass().getCanonicalName());
+		}
+	}
+	
+	/**
+	 * This method is called after we've made db query. This checks whether we should show the conversation fetched or if it is null, we clear can take appropriate action 
+	 * @param conv
+	 */
+	protected void setupConversation(Conversation conv)
+	{
+		if (conv == null)
+		{
+			fetchConversationFailed();
+		}
+		else
+		{
+			fetchConversationFinished(conv);
 		}
 	}
 
