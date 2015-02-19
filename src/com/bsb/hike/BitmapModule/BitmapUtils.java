@@ -5,10 +5,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.drawable.BitmapDrawable;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.Utils;
 
@@ -96,6 +99,7 @@ public class BitmapUtils
 		}
 		fos.write(b);
 		fos.flush();
+		fos.getFD().sync();
 		fos.close();
 	}
 
@@ -151,4 +155,10 @@ public class BitmapUtils
 		}
 	}
 
+	public static Bitmap getBitmapFromResourceName(Context context ,String resName)
+	{
+		Resources resources = context.getResources();
+		int resourceId = resources.getIdentifier(resName, HikeConstants.DRAWABLE, context.getPackageName());
+		return HikeBitmapFactory.decodeBitmapFromResource(resources, resourceId, Bitmap.Config.ARGB_8888);
+	}
 }

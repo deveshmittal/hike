@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,12 +23,16 @@ import android.view.animation.TranslateAnimation;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -43,6 +49,7 @@ import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -66,6 +73,8 @@ public class ConversationsAdapter extends BaseAdapter
 	private Context context;
 
 	private ListView listView;
+	
+	private LayoutInflater inflater;
 
 	private enum ViewType
 	{
@@ -91,6 +100,8 @@ public class ConversationsAdapter extends BaseAdapter
 		ImageView avatar;
 		
 		View parent;
+		
+		ImageView muteIcon;
 	}
 
 	public ConversationsAdapter(Context context, List<Conversation> objects, ListView listView)
@@ -98,6 +109,7 @@ public class ConversationsAdapter extends BaseAdapter
 		this.context = context;
 		this.conversationList = objects;
 		this.listView = listView;
+		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconLoader = new IconLoader(context, mIconImageSize);
 		iconLoader.setImageFadeIn(false);
@@ -178,7 +190,6 @@ public class ConversationsAdapter extends BaseAdapter
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		final Conversation conversation = getItem(position);
 
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
@@ -199,6 +210,7 @@ public class ConversationsAdapter extends BaseAdapter
 				viewHolder.subText = (TextView) v.findViewById(R.id.last_message);
 				viewHolder.timeStamp = (TextView) v.findViewById(R.id.last_message_timestamp);
 				viewHolder.avatar = (ImageView) v.findViewById(R.id.avatar);
+				viewHolder.muteIcon = (ImageView) v.findViewById(R.id.mute_indicator);
 				break;
 			case STEALTH_FTUE_TIP_VIEW:
 			case RESET_STEALTH_TIP:
@@ -261,7 +273,7 @@ public class ConversationsAdapter extends BaseAdapter
 			if(!stealthFtueTipAnimated)
 			{
 				stealthFtueTipAnimated = true;
-				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.densityMultiplier, 0);
+				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.scaledDensityMultiplier, 0);
 				animation.setDuration(300);
 				parent.startAnimation(animation);
 			}
@@ -304,14 +316,24 @@ public class ConversationsAdapter extends BaseAdapter
 					notifyDataSetChanged();
 
 					Utils.cancelScheduledStealthReset(context);
-					Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+					
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RESET_STEALTH_CANCEL);				
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 				}
 			});
 			
 			if(!resetStealthTipAnimated)
 			{
 				resetStealthTipAnimated = true;
-				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.densityMultiplier, 0);
+				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.scaledDensityMultiplier, 0);
 				animation.setDuration(300);
 				parent.startAnimation(animation);
 			}
@@ -461,6 +483,8 @@ public class ConversationsAdapter extends BaseAdapter
 
 		updateViewsRelatedToAvatar(v, conversation);
 
+		updateViewsRelatedToMute(v, conversation);
+		
 		return v;
 	}
 
@@ -468,96 +492,134 @@ public class ConversationsAdapter extends BaseAdapter
 	{
 		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(context);
 		Conversation con = conversationList.get(position);
+		JSONObject metadata = new JSONObject();		
+		
 		if (con instanceof ConversationTip)
 		{
-			ConversationTip tip = (ConversationTip) con;
-			switch (tip.getTipType())
+			try
 			{
-			case ConversationTip.ATOMIC_FAVOURTITES_TIP:
-				context.startActivity(new Intent(context, PeopleActivity.class));
-				Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_FAVOURITES_TIP_CLICKED);
-				break;
-			case ConversationTip.ATOMIC_INVITE_TIP:
-				context.startActivity(new Intent(context, TellAFriend.class));
-				Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_INVITE_TIP_CLICKED);
-				break;
-			case ConversationTip.ATOMIC_PROFILE_PIC_TIP:
-				context.startActivity(new Intent(context, ProfileActivity.class));
-				Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_PROFILE_PIC_TIP_CLICKED);
-				break;
-			case ConversationTip.ATOMIC_STATUS_TIP:
-				context.startActivity(new Intent(context, StatusUpdate.class));
-				Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_STATUS_TIP_CLICKED);
-				break;
-			case ConversationTip.ATOMIC_HTTP_TIP:
-				String url = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HTTP_URL, null);
-				if(!TextUtils.isEmpty(url)){
-				Utils.startWebViewActivity(context, url, pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_MAIN, ""));
-				pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_HTTP_URL, "");
-				}
-				Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_HTTP_TIP_CLICKED);
-				break;
-			case ConversationTip.ATOMIC_APP_GENERIC_TIP:
-				onClickGenericAppTip(pref);
-				break;
+				ConversationTip tip = (ConversationTip) con;
+				switch (tip.getTipType())
+				{
+				case ConversationTip.ATOMIC_FAVOURTITES_TIP:
+					context.startActivity(new Intent(context, PeopleActivity.class));
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_FAVOURITES_TIP_CLICKED);				
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					break;
+				case ConversationTip.ATOMIC_INVITE_TIP:
+					context.startActivity(new Intent(context, TellAFriend.class));
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_INVITE_TIP_CLICKED);				
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					break;
+				case ConversationTip.ATOMIC_PROFILE_PIC_TIP:
+					context.startActivity(new Intent(context, ProfileActivity.class));
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_PROFILE_PIC_TIP_CLICKED);				
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					break;
+				case ConversationTip.ATOMIC_STATUS_TIP:
+					context.startActivity(new Intent(context, StatusUpdate.class));
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_STATUS_TIP_CLICKED);				
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					break;
+				case ConversationTip.ATOMIC_HTTP_TIP:
+					String url = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HTTP_URL, null);
+					if(!TextUtils.isEmpty(url)){
+					Utils.startWebViewActivity(context, url, pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_MAIN, ""));
+					pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_HTTP_URL, "");
+					}
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_HTTP_TIP_CLICKED);				
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					break;
+				case ConversationTip.ATOMIC_APP_GENERIC_TIP:
+					onClickGenericAppTip(pref);
+					break;
+				}			
+				conversationList.remove(position);
+				notifyDataSetChanged();
+				pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
 			}
-			conversationList.remove(position);
-			notifyDataSetChanged();
-			pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 		}
 
 	}
 	
-	private void onClickGenericAppTip(HikeSharedPreferenceUtil pref){
+	private void onClickGenericAppTip(HikeSharedPreferenceUtil pref)
+	{
 		int what = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC_WHAT, -1);
-		switch(what){
-		case HikeConstants.ATOMIC_APP_TIP_SETTINGS:
-			IntentFactory.openSetting(context);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_CLICKED);
-			break;
-		case HikeConstants.ATOMIC_APP_TIP_SETTINGS_NOTIF:
-			IntentFactory.openSettingNotification(context);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_NOTIF_CLICKED);
-			break;
-		case HikeConstants.ATOMIC_APP_TIP_SETTINGS_PRIVACY:
-			IntentFactory.openSettingPrivacy(context);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_PRIVACY_CLICKED);
-			break;
-		case HikeConstants.ATOMIC_APP_TIP_SETTINGS_SMS:
-			IntentFactory.openSettingSMS(context);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_SMS_CLICKED);
-			break;
-		case HikeConstants.ATOMIC_APP_TIP_SETTINGS_MEDIA:
-			IntentFactory.openSettingMedia(context);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_MEDIA_CLICKED);
-			break;
-		case HikeConstants.ATOMIC_APP_TIP_INVITE_FREE_SMS:
-			IntentFactory.openInviteSMS(context);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_FREE_SMS_CLICKED);
-			break;
-		case HikeConstants.ATOMIC_APP_TIP_INVITE_WATSAPP:
-			if(Utils.isPackageInstalled(context, HikeConstants.PACKAGE_WATSAPP)){
-				IntentFactory.openInviteWatsApp(context);
+
+		try
+		{
+			JSONObject metadata = new JSONObject();
+
+			switch (what)
+			{
+			case HikeConstants.ATOMIC_APP_TIP_SETTINGS:
+				IntentFactory.openSetting(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_NOTIF:
+				IntentFactory.openSettingNotification(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_NOTIF_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_PRIVACY:
+				IntentFactory.openSettingPrivacy(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_PRIVACY_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_SMS:
+				IntentFactory.openSettingSMS(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_SMS_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_MEDIA:
+				IntentFactory.openSettingMedia(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_MEDIA_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_INVITE_FREE_SMS:
+				IntentFactory.openInviteSMS(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_FREE_SMS_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_INVITE_WATSAPP:
+				if (Utils.isPackageInstalled(context, HikeConstants.PACKAGE_WATSAPP))
+				{
+					IntentFactory.openInviteWatsApp(context);
+				}
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_WHATSAPP_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_TIMELINE:
+				IntentFactory.openTimeLine(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_TIMELINE_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_HIKE_EXTRA:
+				IntentFactory.openHikeExtras(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_HIKE_REWARDS:
+				IntentFactory.openHikeRewards(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			default:
+				return;
 			}
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_WHATSAPP_CLICKED);
-			break;
-		case HikeConstants.ATOMIC_APP_TIP_TIMELINE:
-			IntentFactory.openTimeLine(context);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_TIMELINE_CLICKED);
-			break;
-		case HikeConstants.ATOMIC_APP_TIP_HIKE_EXTRA:
-			IntentFactory.openHikeExtras(context);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED);
-			break;
-		case HikeConstants.ATOMIC_APP_TIP_HIKE_REWARDS:
-			IntentFactory.openHikeRewards(context);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED);
-			break;
-		default:
-			return;
+		}
+
+		catch (JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 	}
-
+	
 	public void updateViewsRelatedToName(View parentView, Conversation conversation)
 	{
 		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
@@ -602,6 +664,39 @@ public class ConversationsAdapter extends BaseAdapter
 		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, false, isListFlinging, true);
 	}
 
+	public void updateViewsRelatedToMute(View parentView, Conversation conversation)
+	{
+		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
+
+		ImageView muteIcon = viewHolder.muteIcon;
+		if (conversation instanceof GroupConversation && muteIcon != null)
+		{
+			if (((GroupConversation) conversation).isMuted())
+			{
+				muteIcon.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				muteIcon.setVisibility(View.GONE);
+			}
+		}
+		else if (conversation.isBotConv() && muteIcon != null)
+		{
+			if (conversation.isMutedBotConv(false))
+			{
+				muteIcon.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				muteIcon.setVisibility(View.GONE);
+			}
+		}
+		else if (muteIcon != null)
+		{
+			muteIcon.setVisibility(View.GONE);
+		}
+	}
+
 	public void updateViewsRelatedToLastMessage(View parentView, ConvMessage message, Conversation conversation)
 	{
 		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
@@ -615,14 +710,13 @@ public class ConversationsAdapter extends BaseAdapter
 			return;
 		}
 
-		updateViewsRelatedToMessageState(parentView, message, conversation);
-
 		TextView messageView = viewHolder.subText;
-
-		CharSequence markedUp = getConversationText(conversation, message);
-
 		messageView.setVisibility(View.VISIBLE);
+		CharSequence markedUp = getConversationText(conversation, message);
 		messageView.setText(markedUp);
+		
+		updateViewsRelatedToMessageState(parentView, message, conversation);
+		
 		TextView tsView = viewHolder.timeStamp;
 		tsView.setText(message.getTimestampFormatted(true, context));
 	}
@@ -631,6 +725,12 @@ public class ConversationsAdapter extends BaseAdapter
 	{
 		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
 
+		if(viewHolder == null)
+		{
+			// TODO: Find the root cause for viewholder being null
+			Logger.w("nux","Viewholder is null");
+			return;
+		}
 		/*
 		 * If the viewholder's msisdn is different from the converstion's msisdn, it means that the viewholder is currently being used for a different conversation.
 		 * We don't need to do anything here then.
@@ -646,20 +746,61 @@ public class ConversationsAdapter extends BaseAdapter
 		TextView messageView = viewHolder.subText;
 
 		TextView unreadIndicator = viewHolder.unreadIndicator;
+		boolean isNuxLocked = NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_IS_ACTIVE && NUXManager.getInstance().isContactLocked(message.getMsisdn());
 		unreadIndicator.setVisibility(View.GONE);
 		imgStatus.setVisibility(View.GONE);
+		
+		if (!isNuxLocked && (message.getParticipantInfoState() == ParticipantInfoState.VOIP_CALL_SUMMARY ||
+				message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING ||
+						message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING))
+		{
+			String messageText = null;
+			int imageId = R.drawable.ic_voip_conv_miss;
+			if (message.getParticipantInfoState() == ParticipantInfoState.VOIP_CALL_SUMMARY)
+			{
+				boolean initiator = message.getMetadata().isVoipInitiator();
+				int duration = message.getMetadata().getDuration();
+				if (initiator)
+				{
+					messageText = context.getString(R.string.voip_call_summary_outgoing);
+					imageId = R.drawable.ic_voip_conv_out; 
+				}
+				else
+				{
+					messageText = context.getString(R.string.voip_call_summary_incoming);
+					imageId = R.drawable.ic_voip_conv_in;
+				}
+				messageText += String.format(" (%02d:%02d)", (duration / 60), (duration % 60));
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING)
+			{
+				messageText = context.getString(R.string.voip_missed_call_outgoing);
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING)
+			{
+				messageText = context.getString(R.string.voip_missed_call_incoming);
+			}
+			
+			messageView.setText(messageText);
+			imgStatus.setImageResource(imageId);
+			imgStatus.setVisibility(View.VISIBLE);
+			
+			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) messageView.getLayoutParams();
+			lp.setMargins((int) (5 * Utils.densityMultiplier), lp.topMargin, lp.rightMargin, lp.bottomMargin);
+			messageView.setLayoutParams(lp);
+		}
 		/*
 		 * If the message is a status message, we only show an indicator if the status of the message is unread.
 		 */
-		if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE || message.getState() == State.RECEIVED_UNREAD)
+		else if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE || message.getState() == State.RECEIVED_UNREAD)
 		{
-			int resId = message.getImageState();
-			if (resId > 0)
+			
+			if (message.isSent())
 			{
-				imgStatus.setImageResource(resId);
+				imgStatus.setImageResource(message.getImageState());
 				imgStatus.setVisibility(View.VISIBLE);
 			}
-			else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0)
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0 && !message.isSent())
 			{
 				unreadIndicator.setVisibility(View.VISIBLE);
 
@@ -667,14 +808,21 @@ public class ConversationsAdapter extends BaseAdapter
 
 				unreadIndicator.setText(Integer.toString(conversation.getUnreadCount()));
 			}
-			else
-			{
+			if(isNuxLocked)
+			{ 
+				imgStatus.setVisibility(View.VISIBLE);
+				imgStatus.setImageBitmap(NUXManager.getInstance().getNuxChatRewardPojo().getPendingChatIcon());
+				messageView.setText(NUXManager.getInstance().getNuxChatRewardPojo().getChatWaitingText());		
 			}
+			
+			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) messageView.getLayoutParams();
+			lp.setMargins(0, lp.topMargin, lp.rightMargin, lp.bottomMargin);
+			messageView.setLayoutParams(lp);
 		}
 
-		if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+		if (message.getState() == ConvMessage.State.RECEIVED_UNREAD || isNuxLocked)
 		{
-			/* set unread messages to BLUE */
+			/* set NUX waiting or unread messages to BLUE */
 			messageView.setTextColor(context.getResources().getColor(R.color.unread_message));
 		}
 		else
@@ -939,6 +1087,10 @@ public class ConversationsAdapter extends BaseAdapter
 				View view = listView.getChildAt(i);
 				int indexOfData = listView.getFirstVisiblePosition() + i;
 
+				if(indexOfData >= getCount())
+				{
+					return;
+				}
 				ViewType viewType = ViewType.values()[getItemViewType(indexOfData)];
 				/*
 				 * Since tips cannot have custom avatars, we simply skip these cases.

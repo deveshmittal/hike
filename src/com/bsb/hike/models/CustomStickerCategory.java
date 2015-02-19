@@ -49,7 +49,7 @@ public class CustomStickerCategory extends StickerCategory
 		loadStickers();
 	}
 
-	public List<Sticker> getStickerList(Context context)
+	public List<Sticker> getStickerList()
 	{
 
 		// right now only recent category is custom
@@ -164,8 +164,9 @@ public class CustomStickerCategory extends StickerCategory
 
 	public void addDefaultRecentSticker()
 	{
-		String[] recentSticker = { "002_lol.png", "003_teasing.png", "113_whereareyou.png", "069_hi.png", "074_sorry.png", "040_waah.png", "047_saale.png", "042_sahihai.png" };
-		String[] recentCat = { "expressions", "humanoid",  "expressions", "humanoid", "humanoid", "indian",  "indian", "indian"};
+
+		String[] recentSticker = { "002_lol.png", "003_teasing.png", "061_lovelips.png", "092_yo.png", "069_hi.png", "033_hawww.png", "047_saale.png", "042_sahihai.png" };
+		String[] recentCat = { "expressions", "humanoid",  "expressions", "expressions", "humanoid", "indian",  "indian", "indian"};
 
 		int count = recentSticker.length;
 		for (int i = 0; i < count; i++)

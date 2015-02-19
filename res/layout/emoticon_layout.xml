@@ -32,7 +32,6 @@
             android:id="@+id/emoticon_icon_indicator"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/divider"
             android:layout_alignWithParentIfMissing="true"
             android:layout_toLeftOf="@id/erase_key_image"
             android:background="#2d2f31" />

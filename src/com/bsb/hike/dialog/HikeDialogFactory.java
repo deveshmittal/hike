@@ -2,6 +2,7 @@ package com.bsb.hike.dialog;
 
 import java.util.ArrayList;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -13,6 +14,8 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -21,6 +24,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -28,6 +32,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -97,6 +102,10 @@ public class HikeDialogFactory
 	public static final int SHOW_H20_SMS_DIALOG = 28;
 	
 	public static final int SMS_SYNC_DIALOG = 29; 
+	
+	public static final int HIKE_UPGRADE_DIALOG = 30;
+	
+	public static final int VOIP_INTRO_DIALOG = 31;
 
 	public static HikeDialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -168,6 +177,12 @@ public class HikeDialogFactory
 			
 		case SMS_SYNC_DIALOG:
 			return showSMSSyncDialog(dialogId, context, listener, data);
+			
+		case HIKE_UPGRADE_DIALOG:
+			return showHikeUpgradeDialog(dialogId, context, data);
+			
+		case VOIP_INTRO_DIALOG:
+			return showVoipFtuePopUp(dialogId, context, listener, data);
 		}
 		return null;
 	}
@@ -861,6 +876,16 @@ public class HikeDialogFactory
 			}
 		};
 		
+		OnClickListener negativeListener = new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				listener.negativeClicked(deleteConfirmDialog);
+			}
+		};
+		
 		switch (dialogId)
 		{
 		case DELETE_FILES_DIALOG:
@@ -868,49 +893,49 @@ public class HikeDialogFactory
 			deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header);
 			deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
 			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
 			break;
 			
 		case DELETE_PINS_DIALOG:
 			deleteConfirmDialog.setBody(((int) data[0] == 1) ? context.getString(R.string.confirm_delete_pin) : context.getString(R.string.confirm_delete_pins, (int) data[0]));
 			deleteConfirmDialog.setHeader(R.string.confirm_delete_pin_header);
 			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
 			break;
 			
 		case DELETE_STATUS_DIALOG:
 			deleteConfirmDialog.setHeader(R.string.delete_status);
 			deleteConfirmDialog.setBody(R.string.delete_status_confirmation);
 			deleteConfirmDialog.setOkButton(R.string.ok, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.no);
+			deleteConfirmDialog.setCancelButton(R.string.no, negativeListener);
 			break;
 			
 		case DELETE_FROM_GROUP:
 			deleteConfirmDialog.setHeader(R.string.remove_from_group);
 			deleteConfirmDialog.setBody(context.getString(R.string.remove_confirm, (String) data[0]));
 			deleteConfirmDialog.setOkButton(R.string.yes, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.no);
+			deleteConfirmDialog.setCancelButton(R.string.no, negativeListener);
 			break;
 			
 		case DELETE_CHAT_DIALOG:
 			deleteConfirmDialog.setHeader(R.string.delete);
 			deleteConfirmDialog.setBody(context.getString(R.string.confirm_delete_chat_msg, (String) data[0]));
 			deleteConfirmDialog.setOkButton(R.string.yes, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.no);
+			deleteConfirmDialog.setCancelButton(R.string.no, negativeListener);
 			break;
 			
 		case DELETE_GROUP_DIALOG:
 			deleteConfirmDialog.setHeader(R.string.delete);
 			deleteConfirmDialog.setBody(context.getString(R.string.confirm_delete_group_msg, (String) data[0]));
 			deleteConfirmDialog.setOkButton(android.R.string.ok, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
 			break;
 			
 		case DELETE_ALL_CONVERSATIONS:
 			deleteConfirmDialog.setHeader(R.string.deleteconversations);
 			deleteConfirmDialog.setBody(R.string.delete_all_question);
 			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
 			break;
 			
 		case DELETE_MESSAGES_DIALOG:
@@ -921,7 +946,7 @@ public class HikeDialogFactory
 				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
 			}
 			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
 			break;
 		}
 		
@@ -1115,6 +1140,61 @@ public class HikeDialogFactory
 		});
 
 		dialog.show();
+		return dialog;
+	}
+	
+	/**
+	 * This dialog can be used whenever we show an upgrading hike dialog from HomeActivity.
+	 * 
+	 * @param context
+	 * @param data
+	 * @return
+	 */
+	private static HikeDialog showHikeUpgradeDialog(int dialogId, Context context, Object[] data)
+	{
+		final HikeDialog dialog = new HikeDialog(context, R.style.Theme_CustomDialog, dialogId);
+		dialog.setContentView(R.layout.app_update_popup);
+		dialog.setCancelable(false);
+
+		ImageView icon = (ImageView) dialog.findViewById(R.id.dialog_icon);
+		TextView titleTextView = (TextView) dialog.findViewById(R.id.dialog_header_tv);
+		TextView messageTextView = (TextView) dialog.findViewById(R.id.dialog_message_tv);
+
+		icon.setImageBitmap(HikeBitmapFactory.decodeResource(context.getResources(), R.drawable.art_sticker_mac));
+		titleTextView.setText(context.getResources().getString(R.string.sticker_shop));
+		messageTextView.setText(context.getResources().getString(R.string.hike_upgrade_string));
+
+		dialog.show();
+		return dialog;
+	}
+	
+	private static HikeDialog showVoipFtuePopUp(int dialogId, final Context context, final HikeDialogListener listener, Object... data)
+	{
+		final HikeDialog dialog = new HikeDialog(context, R.style.Theme_CustomDialog, dialogId);
+		dialog.setContentView(R.layout.voip_ftue_popup);
+		dialog.setCancelable(true);
+		TextView okBtn = (TextView) dialog.findViewById(R.id.awesomeButton);
+		View betaTag = (View) dialog.findViewById(R.id.beta_tag);
+		
+		okBtn.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				if (listener != null)
+				{
+					listener.neutralClicked(dialog);
+				}
+				dialog.dismiss();
+			}
+		});
+
+		RotateAnimation animation = new RotateAnimation(0.0f, 45.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		animation.setDuration(1);
+		animation.setFillAfter(true);
+		betaTag.startAnimation(animation);
+		dialog.show();
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_VOIP_INTRO_TIP, true);
 		return dialog;
 	}
 }

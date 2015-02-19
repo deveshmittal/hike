@@ -22,6 +22,7 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.animation.Animation;
@@ -46,7 +47,6 @@ import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -54,13 +54,16 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.voip.VoIPUtils;
 
 /**
  * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -71,73 +74,71 @@ import com.bsb.hike.utils.Utils;
 public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCallback, ViewStub.OnInflateListener
 {
 	private static final String TAG = "oneonechatthread";
-	
+
 	private ContactInfo mContactInfo;
-	
+
 	private LastSeenScheduler lastSeenScheduler;
-	
-	private FavoriteType mFavoriteType;
-	
+
 	private Dialog smsDialog;
-	
-	private boolean isOnline;
-	
+
 	private int mCredits;
-	
+
 	private boolean mBlockOverlay;
-	
+
 	private short modeOfChat = H2H_MODE;
-	
+
 	private static final int CONTACT_ADDED_OR_DELETED = 101;
-	
+
 	private static final int SHOW_SMS_SYNC_DIALOG = 102;
-	
+
 	private static final int SMS_SYNC_COMPLETE_OR_FAIL = 103;
-	
+
 	private static final int UPDATE_LAST_SEEN = 104;
-	
+
 	private static final int SEND_SMS_PREF_TOGGLED = 105;
-	
+
 	private static final int SMS_CREDIT_CHANGED = 106;
-	
+
 	private static final int REMOVE_UNDELIVERED_MESSAGES = 107;
-	
+
 	private static final int BULK_MESSAGE_RECEIVED = 108;
-	
+
 	private static final int USER_JOINED_OR_LEFT = 109;
-	
+
 	private static final int SCHEDULE_LAST_SEEN = 110;
-	
+
 	private static final int SCHEDULE_H20_TIP = 111;
-	
+
 	private static final int SCROLL_LIST_VIEW = 112;
-	
+
 	private static final int ADD_UNDELIVERED_MESSAGE = 114;
-	
-	private static short H2S_MODE = 0;  // Hike to SMS Mode
-	 
-	private static short H2H_MODE = 1;  // Hike to Hike Mode
-	
+
+	private static short H2S_MODE = 0; // Hike to SMS Mode
+
+	private static short H2H_MODE = 1; // Hike to Hike Mode
+
 	/* The waiting time in seconds before scheduling a H20 Tip */
 	private static final int DEFAULT_UNDELIVERED_WAIT_TIME = 30;
-	
+
+	private static final int DEFAULT_SMS_LENGTH = 140;
+
 	private View hikeToOfflineTipView;
-	
+
 	/**
 	 * this is set of all the currently visible messages which are stuck in tick and are not sms
 	 */
 	private LinkedHashMap<Long, ConvMessage> undeliveredMessages = new LinkedHashMap<Long, ConvMessage>();
 
 	/**
-	 * Since {@link #undeliveredMessages} is a LinkedList, this variable is used to keep track of the head of the list 
+	 * Since {@link #undeliveredMessages} is a LinkedList, this variable is used to keep track of the head of the list
 	 */
 	private ConvMessage firstPendingConvMessage = null;
-	
+
 	/**
 	 * We keep a flag which indicates whether we can schedule H20Tip or not
 	 */
 	private boolean shouldScheduleH20Tip = true;
-	
+
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -152,12 +153,13 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		Logger.i(TAG, "on create options menu " + menu.hashCode());
-		
+
 		if (mConversation != null)
-		{	mActionBar.onCreateOptionsMenu(menu, R.menu.one_one_chat_thread_menu, getOverFlowItems(), this, this);
+		{
+			mActionBar.onCreateOptionsMenu(menu, R.menu.one_one_chat_thread_menu, getOverFlowItems(), this, this);
 			return super.onCreateOptionsMenu(menu);
 		}
-		
+
 		return false;
 	}
 
@@ -196,7 +198,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			list.add(item);
 		}
-		
+
 		list.add(new OverFlowMenuItem(mConversation.isConvBlocked() ? getString(R.string.unblock_title) : getString(R.string.block_title), 0, 0, R.string.block_title));
 		return list;
 	}
@@ -205,25 +207,25 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected Conversation fetchConversation()
 	{
 		mConversation = mConversationDb.getConversation(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, Utils.isGroupConversation(msisdn));
-		
+
 		mContactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
-		
-		if(mConversation == null)
+
+		if (mConversation == null)
 		{
 			mConversation = new Conversation(msisdn, (mContactInfo != null) ? mContactInfo.getName() : null, mContactInfo.isOnhike());
 			mConversation.setMessages(HikeConversationsDatabase.getInstance().getConversationThread(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, mConversation, -1));
 		}
-		
+
 		ChatTheme chatTheme = mConversationDb.getChatThemeForMsisdn(msisdn);
 		Logger.d(TAG, "Calling setchattheme from createConversation");
 		mConversation.setTheme(chatTheme);
-		
+
 		mConversation.setConvBlocked(ContactManager.getInstance().isBlocked(msisdn));
 		mCredits = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
-		
+
 		return mConversation;
 	}
-	
+
 	@Override
 	protected int getContentView()
 	{
@@ -234,12 +236,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected void fetchConversationFinished(Conversation conversation)
 	{
 		showTips();
-		
+
 		super.fetchConversationFinished(conversation);
-		
-		//TODO : This is a basic working skeleton. This needs to be segragated into separate functions.
-		
-		mFavoriteType = mContactInfo.getFavoriteType();
 
 		if (mConversation.isOnhike())
 		{
@@ -250,46 +248,44 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			FetchHikeUser.fetchHikeUser(activity.getApplicationContext(), msisdn);
 		}
-		
-		if(shouldShowLastSeen())
+
+		if (ChatThreadUtils.shouldShowLastSeen(activity.getApplicationContext(), mContactInfo.getFavoriteType(), mConversation.isOnhike()))
 		{
-			
+
 			/*
 			 * Making sure nothing is already scheduled wrt last seen.
 			 */
-			isOnline = mContactInfo.getOffline() == 0; 
-			
 			resetLastSeenScheduler();
-			
+
 			LastSeenScheduler lastSeenScheduler = LastSeenScheduler.getInstance(activity.getApplicationContext());
 			lastSeenScheduler.start(mContactInfo.getMsisdn(), this);
 		}
-		
+
 		/**
 		 * If user is blocked
 		 */
-		
+
 		if (mConversation.isConvBlocked())
 		{
 			showBlockOverlay(getConvLabel());
 		}
-		
-		
+
 		// TODO : ShowStickerFTUE Tip and H20 Tip. H20 Tip is a part of one to one chatThread. Sticker Tip is a part of super class
-		
-		if(mConversation.isOnhike())
+
+		if (mConversation.isOnhike())
 		{
 			addAllUndeliverdMessages(messages);
 		}
-		
+
 	}
-	
+
 	private void showTips()
 	{
-		mTips = new ChatThreadTips(activity.getBaseContext(), activity.findViewById(R.id.chatThreadParentLayout), new int[] { ChatThreadTips.ATOMIC_ATTACHMENT_TIP, ChatThreadTips.ATOMIC_STICKER_TIP, ChatThreadTips.ATOMIC_CHAT_THEME_TIP, ChatThreadTips.STICKER_TIP}, sharedPreference);
+		mTips = new ChatThreadTips(activity.getBaseContext(), activity.findViewById(R.id.chatThreadParentLayout), new int[] { ChatThreadTips.ATOMIC_ATTACHMENT_TIP,
+				ChatThreadTips.ATOMIC_STICKER_TIP, ChatThreadTips.ATOMIC_CHAT_THEME_TIP, ChatThreadTips.STICKER_TIP }, sharedPreference);
 		mTips.showTip();
 	}
-	
+
 	private void resetLastSeenScheduler()
 	{
 		if (lastSeenScheduler != null)
@@ -299,19 +295,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 
-	private boolean shouldShowLastSeen()
-	{
-		if ((mFavoriteType == FavoriteType.FRIEND || mFavoriteType == FavoriteType.REQUEST_RECEIVED || mFavoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED)
-				&& mConversation.isOnhike())
-		{
-			return PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
-		}
-		return false;
-	}
-
 	protected void addUnkownContactBlockHeader()
 	{
-		if (mContactInfo != null && mContactInfo.isUnknownContact() && messages != null && messages.size() >0 )
+		if (mContactInfo != null && mContactInfo.isUnknownContact() && messages != null && messages.size() > 0)
 		{
 			ConvMessage cm = messages.get(0);
 			/**
@@ -338,14 +324,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	public void lastSeenFetched(String contMsisdn, int offline, long lastSeenTime)
 	{
-		Logger.d(TAG, " Got lastSeen Time for msisdn : " + contMsisdn + " LastSeenTime : " + lastSeenTime );
+		Logger.d(TAG, " Got lastSeen Time for msisdn : " + contMsisdn + " LastSeenTime : " + lastSeenTime);
 		updateLastSeen(contMsisdn, offline, lastSeenTime);
-	}
-
-	@Override
-	protected void onMessageReceived(Object object)
-	{
-		super.onMessageReceived(object);
 	}
 
 	@Override
@@ -353,33 +333,34 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.CONTACT_ADDED, HikePubSub.CONTACT_DELETED,
 				HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START,
-				HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.APP_FOREGROUNDED };
+				HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
+				HikePubSub.APP_FOREGROUNDED };
 		return oneToOneListeners;
 	}
 
 	@Override
-	protected void addMessage(ConvMessage convMessage, boolean scrollToLast)
+	protected void addMessage(ConvMessage convMessage)
 	{
 		/*
 		 * If we were showing the typing bubble, we remove it from the add the new message and add the typing bubble back again
 		 */
-		
+
 		TypingNotification typingNotification = removeTypingNotification();
-		
+
 		/**
 		 * Adding message to the adapter
 		 */
-		
+
 		mAdapter.addMessage(convMessage);
-		
+
 		if (convMessage.getTypingNotification() == null && typingNotification != null && convMessage.isSent())
 		{
 			mAdapter.addMessage(new ConvMessage(typingNotification));
 		}
-		
-		super.addMessage(convMessage, scrollToLast);
+
+		super.addMessage(convMessage);
 	}
-	
+
 	/**
 	 * This overrides {@link ChatThread}'s {@link #onTypingConversationNotificationReceived(Object)}
 	 */
@@ -387,18 +368,18 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected void onTypingConversationNotificationReceived(Object object)
 	{
 		TypingNotification typingNotification = (TypingNotification) object;
-		
-		if(typingNotification == null)
+
+		if (typingNotification == null)
 		{
 			return;
 		}
-		
+
 		if (msisdn.equals(typingNotification.getId()))
 		{
 			sendUIMessage(TYPING_CONVERSATION, typingNotification);
 		}
-		
-		if (shouldShowLastSeen() && mContactInfo.getOffline() != -1)
+
+		if (ChatThreadUtils.shouldShowLastSeen(activity.getApplicationContext(), mContactInfo.getFavoriteType(), mConversation.isOnhike()) && mContactInfo.getOffline() != -1)
 		{
 			/*
 			 * Publishing an online event for this number.
@@ -407,7 +388,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			HikeMessengerApp.getPubSub().publish(HikePubSub.LAST_SEEN_TIME_UPDATED, mContactInfo);
 		}
 	}
-	
+
 	/**
 	 * This overrides : {@link ChatThread}'s {@link #setTypingText(boolean, TypingNotification)}
 	 */
@@ -456,7 +437,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			uiHandler.sendEmptyMessage(REMOVE_UNDELIVERED_MESSAGES);
 		}
-		
+
 		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
 	}
 
@@ -472,7 +453,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				// TODO we could keep a map of msgId -> conversation objects
 				// somewhere to make this faster
 				ConvMessage msg = findMessageById(msgID);
-				
+
 				sendUIMessage(REMOVE_UNDELIVERED_MESSAGES, msg);
 			}
 			return true;
@@ -547,7 +528,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			if (mConversation.isOnhike())
 			{
 				ConvMessage msg = findMessageById(msgId);
-				if (!msg.isSMS())  //Since ConvMessage is not sent as SMS, hence add it to undeliveredMap
+				if (!msg.isSMS()) // Since ConvMessage is not sent as SMS, hence add it to undeliveredMap
 				{
 					sendUIMessage(ADD_UNDELIVERED_MESSAGE, msg);
 				}
@@ -556,40 +537,40 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		return false;
 	}
-	
+
 	/**
 	 * This method is used to update UI, when an unsaved contact is saved to phonebook while the chatThread is active
 	 */
 	private void onContactAddedOrDeleted(Object object, boolean isAdded)
 	{
 		ContactInfo contactInfo = (ContactInfo) object;
-		
+
 		/**
 		 * Returning here if contactInfo is null or we received this event in a different chatThread
 		 */
-		
-		if(contactInfo == null || (!msisdn.equals(contactInfo.getMsisdn())))
+
+		if (contactInfo == null || (!msisdn.equals(contactInfo.getMsisdn())))
 		{
 			return;
 		}
-		
+
 		String mContactName = isAdded ? contactInfo.getName() : contactInfo.getMsisdn();
 		mConversation.setContactName(mContactName);
 		mContactName = Utils.getFirstName(mContactName);
 		sendUIMessage(CONTACT_ADDED_OR_DELETED, new Pair<Boolean, String>(isAdded, mContactName));
 	}
-	
+
 	/**
 	 * Called on the UI Thread from the UI Handler, which is called from {@link OneToOneChatThread #onContactAddedOrDeleted(Object, boolean)}
 	 */
-	
+
 	private void contactAddedOrDeleted(Pair<Boolean, String> pair)
 	{
 		if (!pair.first)
 		{
 			setAvatar(R.drawable.ic_default_avatar);
 		}
-		
+
 		setLabel(pair.second);
 
 		if (messages != null && messages.size() > 0)
@@ -603,7 +584,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			}
 		}
 	}
-	
+
 	/**
 	 * Performs tasks on the UI thread.
 	 */
@@ -642,7 +623,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case USER_JOINED_OR_LEFT:
 			userJoinedOrLeft();
 			break;
-		case SCHEDULE_LAST_SEEN :
+		case SCHEDULE_LAST_SEEN:
 			scheduleLastSeen();
 			break;
 		case SCHEDULE_H20_TIP:
@@ -661,7 +642,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 	}
-	
+
 	/**
 	 * Method is called from the UI Thread to show the SMS Sync Dialog
 	 */
@@ -669,7 +650,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		smsDialog = HikeDialogFactory.showDialog(activity, HikeDialogFactory.SMS_SYNC_DIALOG, true);
 	}
-	
+
 	/**
 	 * Called on the UI Thread to dismiss SMS Sync Dialog
 	 */
@@ -682,15 +663,16 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		// TODO :
 		// dialogShowing = null;
 	}
-	
+
 	private void onSMSSyncStart()
 	{
 		// TODO :
 		// dialogShowing = DialogShowing.SMS_SYNCING_DIALOG;
 	}
-	
+
 	/**
 	 * Used to update last seen. This is called from the PubSub thread
+	 * 
 	 * @param object
 	 */
 	private void updateLastSeen(String contMsisdn, int offline, long lastSeenTime)
@@ -698,54 +680,56 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		/**
 		 * Proceeding only if the current chat thread is open and we should show the last seen
 		 */
-		if (msisdn.equals(contMsisdn) && shouldShowLastSeen())
+		if (msisdn.equals(contMsisdn) && ChatThreadUtils.shouldShowLastSeen(activity.getApplicationContext(), mContactInfo.getFavoriteType(), mConversation.isOnhike()))
 		{
 			/**
 			 * Fix for case where server and client values are out of sync
 			 */
-			
-			if(offline == 1 && lastSeenTime <= 0)
+
+			if (offline == 1 && lastSeenTime <= 0)
 			{
 				return;
 			}
-			
+
 			/**
 			 * Updating mContactInfo object
 			 */
 			mContactInfo.setOffline(offline);
 			mContactInfo.setLastSeenTime(lastSeenTime);
-			
+
 			String lastSeenString = Utils.getLastSeenTimeAsString(activity.getApplicationContext(), lastSeenTime, offline, false, true);
-			
-			isOnline = mContactInfo.getOffline() == 0;
-			
-			if(isH20TipShowing() && isOnline)
+
+			/**
+			 * mContactInfo.getOffline == 0 indicates user is online
+			 */
+			if (isH20TipShowing() && (mContactInfo.getOffline() == 0))
 			{
 				/**
 				 * If hike to offline tip is showing and server sends that the user is online, we do not update the last seen field until all pending messages are delivered
 				 */
 				return;
 			}
-			
+
 			sendUIMessage(UPDATE_LAST_SEEN, lastSeenString);
 		}
 	}
-	
+
 	/**
 	 * Called from the UI Thread
+	 * 
 	 * @param lastSeenString
 	 */
 	private void setLastSeen(String lastSeenString)
 	{
-		if(isOnline)
+		if (mContactInfo.getOffline() == 0) //User online ?
 		{
 			/**
 			 * If the user is online, we set this flag to true
 			 */
 			shouldScheduleH20Tip = true;
 		}
-		
-		if(lastSeenString == null)
+
+		if (lastSeenString == null)
 		{
 			setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 		}
@@ -754,7 +738,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			setLastSeenText(lastSeenString);
 		}
 	}
-	
+
 	private void setSMSCredits()
 	{
 		updateUIForHikeStatus();
@@ -764,15 +748,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			showSMSCounter();
 		}
 	}
-	
+
 	private void updateUIForHikeStatus()
 	{
 		if (mConversation.isOnhike())
 		{
 			/**
-			 * since this is a view stub, so can return null 
+			 * since this is a view stub, so can return null
 			 */
-			if(activity.findViewById(R.id.sms_toggle_button) != null)
+			if (activity.findViewById(R.id.sms_toggle_button) != null)
 			{
 				hideView(R.id.sms_toggle_button);
 			}
@@ -785,7 +769,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 	}
-	
+
 	private void nonZeroCredits()
 	{
 		Logger.d(TAG, "Non Zero credits");
@@ -808,13 +792,13 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			hideOverlay();
 		}
-		
+
 		if (mTips.isAnyTipOpen()) // Could be that we might have hidden a tip in Zero Credits case. To offset that, we show the hidden tip here
 		{
 			mTips.showHiddenTip();
 		}
 	}
-	
+
 	private void zeroCredits()
 	{
 		Logger.d(TAG, "Zero Credits");
@@ -829,7 +813,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		mComposeView.setHint(activity.getString(R.string.zero_sms_hint));
 		mComposeView.setEnabled(false);
-		
+
 		showView(R.id.info_layout);
 		hideView(R.id.emoticon_btn);
 
@@ -841,19 +825,19 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			mConversationDb.setOverlay(false, mConversation.getMsisdn());
 			String formatString = activity.getString(R.string.no_credits);
 			String label = getConvLabel();
-			
+
 			String formatted = String.format(formatString, label);
 			SpannableString str = new SpannableString(formatted);
-			
-			showOverlay(label, formatString , activity.getString(R.string.invite_now), str, R.drawable.ic_no_credits);
+
+			showOverlay(label, formatString, activity.getString(R.string.invite_now), str, R.drawable.ic_no_credits, R.string.invite_now);
 		}
-		
+
 		/**
 		 * If any tip is open, we hide it
 		 */
 		mTips.hideTip();
 	}
-	
+
 	private void updateChatMetadata()
 	{
 		TextView mMetadataNumChars = (TextView) activity.findViewById(R.id.sms_chat_metadata_num_chars);
@@ -934,22 +918,22 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	/**
 	 * This method is called to remove undelivered messages from the message adapter
+	 * 
 	 * @param convMessage
 	 */
 	private void removeUndeliveredMessages(Object obj)
 	{
-		if(obj != null)
+		if (obj != null)
 		{
 			removeFromUndeliveredMessage((ConvMessage) obj, true);
 		}
-		
+
 		else
 		{
 			removeAllFromUndeliveredMessages();
 		}
 	}
 
-	
 	/**
 	 * This overrides sendPoke from ChatThread
 	 */
@@ -957,7 +941,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected void sendPoke()
 	{
 		super.sendPoke();
-		
+
 		Utils.vibrateNudgeReceived(activity.getApplicationContext());
 	}
 
@@ -970,9 +954,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		super.setupActionBar();
 
 		setAvatar(R.drawable.ic_default_avatar);
-		
+
 		setLabel(getConvLabel());
-		
+
 		setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 
 	}
@@ -1064,20 +1048,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		mActionBarView.findViewById(R.id.contact_status).setVisibility(View.GONE);
 	}
-	
-	/**
-	 * This calls the super class method with it's own defaultResId
-	 */
-	@Override
-	protected void setAvatar(int defaultResId)
-	{
-		super.setAvatar(defaultResId);
-	}
-	
+
 	@Override
 	protected boolean updateUIAsPerTheme(ChatTheme theme)
 	{
-		if(super.updateUIAsPerTheme(theme))
+		if (super.updateUIAsPerTheme(theme))
 		{
 			/**
 			 * If the conv is not on hike, neither is the number an international one and the device OS is < v 4.4 Kitkat
@@ -1089,23 +1064,23 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		return false;
 	};
-	
+
 	/**
 	 * Used to setup FreeSMS - Hike SMS Toggle button for Versions below KitKat
 	 */
 	private void setupSMSToggleLayout(ChatTheme theme)
 	{
 		ViewStub viewStub = (ViewStub) activity.findViewById(R.id.sms_toggle_view_stub);
-		
+
 		/**
 		 * Inflating it only once when needed on demand.
 		 */
-		if(viewStub != null)
+		if (viewStub != null)
 		{
 			viewStub.setOnInflateListener(this);
 			viewStub.inflate();
 		}
-		
+
 		/**
 		 * ViewStub has been inflated
 		 */
@@ -1115,7 +1090,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 	}
-	
+
 	private void setUpSMSViews()
 	{
 		showView(R.id.sms_toggle_button);
@@ -1123,7 +1098,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		CheckBox smsToggle = (CheckBox) activity.findViewById(R.id.checkbox);
 		TextView hikeSmsText = (TextView) activity.findViewById(R.id.hike_text);
 		TextView regularSmsText = (TextView) activity.findViewById(R.id.sms_text);
-		
+
 		ChatTheme theme = getCurrentlTheme();
 
 		if (theme == ChatTheme.DEFAULT)
@@ -1154,7 +1129,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		regularSmsText.setVisibility(View.VISIBLE);
 		smsToggle.setOnCheckedChangeListener(mAdapter);
 	}
-	
+
 	/**
 	 * Returns the label for the current conversation
 	 * 
@@ -1164,11 +1139,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		String tempLabel = mConversation.getLabel();
 		tempLabel = Utils.getFirstName(tempLabel);
-		
+
 		return tempLabel;
 	}
-	
-	
+
 	@Override
 	public void itemClicked(OverFlowMenuItem item)
 	{
@@ -1194,13 +1168,13 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		return msisdn;
 	}
-	
+
 	@Override
 	protected String getBlockedUserLabel()
 	{
 		return getConvLabel();
 	}
-	
+
 	/**
 	 * Used to launch Profile Activity from one to one chat thread
 	 */
@@ -1210,24 +1184,24 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		/**
 		 * Do nothing if the user is blocked
 		 */
-		if(mConversation.isConvBlocked())
+		if (mConversation.isConvBlocked())
 		{
 			return;
 		}
-		
+
 		Intent profileIntent = IntentFactory.getSingleProfileIntent(activity.getApplicationContext(), mConversation.isOnhike(), msisdn);
-		
+
 		activity.startActivity(profileIntent);
 	}
-	
+
 	/**
 	 * On Call button clicked
 	 */
 	private void onCallClicked()
 	{
-		Utils.onCallClicked(activity, msisdn);
+		Utils.onCallClicked(activity.getApplicationContext(), msisdn, VoIPUtils.CallSource.CHAT_THREAD);
 	}
-	
+
 	/**
 	 * Performs actions relevant to One to One Chat Thread for clearing a conversation
 	 */
@@ -1238,7 +1212,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		hideH20Tip();
 		super.clearConversation();
 	}
-	
+
 	/**
 	 * Spawns a new thread to mark SMS messages as read.
 	 */
@@ -1248,31 +1222,31 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		String threadName = "setSMSRead";
 		Thread t = new Thread(new Runnable()
 		{
-			
+
 			@Override
 			public void run()
 			{
-				Logger.d(TAG, "Marking SMS as read for : " + msisdn );
-				
+				Logger.d(TAG, "Marking SMS as read for : " + msisdn);
+
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(HikeConstants.SMSNative.READ, 1);
-				
+
 				try
 				{
-					activity.getContentResolver().update(HikeConstants.SMSNative.INBOX_CONTENT_URI, contentValues, HikeConstants.SMSNative.NUMBER + "=?", new String[] { msisdn});
+					activity.getContentResolver().update(HikeConstants.SMSNative.INBOX_CONTENT_URI, contentValues, HikeConstants.SMSNative.NUMBER + "=?", new String[] { msisdn });
 				}
-				
+
 				catch (Exception e)
 				{
 					Logger.e(TAG, e.toString());
 				}
-				
+
 			}
 		}, threadName);
-		
+
 		t.start();
 	}
-	
+
 	/**
 	 * Overrides {@link ChatThread#onDestroy()}
 	 */
@@ -1282,15 +1256,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		super.onDestroy();
 
 		HikeSharedPreferenceUtil prefsUtil = HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext());
-		
+
 		if (mAdapter != null && mAdapter.shownSdrToolTip() && (!prefsUtil.getData(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false)))
 		{
 			prefsUtil.saveData(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, true);
 		}
-		
+
 		resetLastSeenScheduler();
 	}
-	
+
 	private void onBulkMessageReceived(Object object)
 	{
 		HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
@@ -1320,9 +1294,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 				bulkLabel = convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
 
-				if (isActivityVisible && Utils.isPlayTickSound(activity.getApplicationContext()))
+				if (isActivityVisible && SoundUtils.isTickSoundEnabled(activity.getApplicationContext()))
 				{
-					Utils.playSoundFromRaw(activity.getApplicationContext(), R.raw.received_message);
+					SoundUtils.playSoundFromRaw(activity.getApplicationContext(), R.raw.received_message);
 				}
 			}
 
@@ -1332,11 +1306,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 			if (ids != null && ids.length() > 0)
 			{
-				doBulkMqttPublish(ids);
+				ChatThreadUtils.doBulkMqttPublish(ids, msisdn);
 			}
 		}
 	}
-	
+
 	/**
 	 * Adds a complete list of messages at the end of the messages list and updates the UI at once
 	 * 
@@ -1383,7 +1357,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		}
 	}
-	
+
 	/**
 	 * pubSub Thread
 	 * 
@@ -1393,18 +1367,18 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private void onUserJoinedOrLeft(Object object, boolean isJoined)
 	{
 		String pubSubMsisdn = (String) object;
-		
+
 		/**
 		 * Proceeding only if we recived a pubSub for the given chat thread
 		 */
 		if (msisdn.equals(pubSubMsisdn))
 		{
 			mConversation.setOnhike(isJoined);
-			
+
 			uiHandler.sendEmptyMessage(USER_JOINED_OR_LEFT);
 		}
- 	}
-	
+	}
+
 	/**
 	 * Runs on the UI Thread
 	 */
@@ -1416,7 +1390,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		mAdapter.notifyDataSetChanged();
 	}
-	
+
 	/**
 	 * PubSub thread
 	 */
@@ -1426,15 +1400,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			return;
 		}
-		
-		if (!shouldShowLastSeen())
+
+		if (!ChatThreadUtils.shouldShowLastSeen(activity.getApplicationContext(), mContactInfo.getFavoriteType(), mConversation.isOnhike()))
 		{
 			return;
 		}
-		
+
 		uiHandler.sendEmptyMessage(SCHEDULE_LAST_SEEN);
 	}
-	
+
 	/**
 	 * UI Thread
 	 */
@@ -1444,15 +1418,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			lastSeenScheduler = LastSeenScheduler.getInstance(activity.getApplicationContext());
 		}
-		
+
 		else
 		{
 			lastSeenScheduler.stop(false);
 		}
-		
+
 		lastSeenScheduler.start(mContactInfo.getMsisdn(), this);
 	}
-	
+
 	@Override
 	protected void takeActionBasedOnIntent()
 	{
@@ -1471,7 +1445,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		}
 	}
-	
+
 	@Override
 	public void afterTextChanged(Editable s)
 	{
@@ -1488,19 +1462,18 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			if (!Utils.getSendSmsPref(activity.getApplicationContext()))
 			{
+				Toast.makeText(activity, R.string.zero_sms_hint, Toast.LENGTH_LONG).show();
 				return;
 			}
 		}
 
 		super.sendButtonClicked();
 	}
-	
-	
+
 	/**
-	 *  H20 TIP FUNCTIONS START HERE. 
-	 *  Unless explicitly stated, these functions are called on the UI Thread
+	 * H20 TIP FUNCTIONS START HERE. Unless explicitly stated, these functions are called on the UI Thread
 	 */
-	
+
 	/**
 	 * Utility function to insert a message to the undelivered map
 	 * 
@@ -1513,7 +1486,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		updateFirstPendingConvMessage();
 		scheduleH20Tip();
 	}
-	
+
 	/**
 	 * Run on UI Thread only
 	 * 
@@ -1526,7 +1499,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			removeFromUndeliveredMessage(convMessage, false);
 		}
 	}
-	
+
 	/**
 	 * Run on UI Thread only
 	 * 
@@ -1551,7 +1524,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			}
 		}
 	}
-	
+
 	private void removeAllFromUndeliveredMessages()
 	{
 		hideH20Tip();
@@ -1559,11 +1532,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		updateFirstPendingConvMessage();
 		shouldScheduleH20Tip = true;
 	}
-	
+
 	private void addAllUndeliverdMessages(List<ConvMessage> messages)
 	{
-		int i = messages.size() -1;
-		while(i >=0)
+		int i = messages.size() - 1;
+		while (i >= 0)
 		{
 			ConvMessage convMessage = messages.get(i);
 			if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
@@ -1574,7 +1547,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			{
 				break;
 			}
-			
+
 			i--;
 		}
 		if (firstPendingConvMessage == null)
@@ -1586,7 +1559,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			scheduleH20Tip();
 		}
 	}
-	
+
 	/**
 	 * Utility method for updating {@link #firstPendingConvMessage}
 	 */
@@ -1601,7 +1574,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			firstPendingConvMessage = undeliveredMessages.get(undeliveredMessages.keySet().iterator().next());
 		}
 	}
-	
+
 	/**
 	 * Used for scheduling the H20 Tip after sending a message
 	 * 
@@ -1615,18 +1588,16 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			return;
 		}
-		
-		
+
 		/**
-		 * If the OS is Kitkat or higher, we can't send a regular SMS, 
-		 * so if the user has 0 free SMS left or user ain't online, no point in showing the tip
+		 * If the OS is Kitkat or higher, we can't send a regular SMS, so if the user has 0 free SMS left or user ain't online, no point in showing the tip
 		 */
-		
-		if (Utils.isKitkatOrHigher() && (mCredits == 0  || (!Utils.isUserOnline(activity.getApplicationContext()))))
+
+		if (Utils.isKitkatOrHigher() && (mCredits == 0 || (!Utils.isUserOnline(activity.getApplicationContext()))))
 		{
 			return;
 		}
-		
+
 		/**
 		 * Removing any previously scheduled tips
 		 */
@@ -1634,23 +1605,23 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			uiHandler.removeMessages(SCHEDULE_H20_TIP);
 		}
-		
+
 		if (firstPendingConvMessage != null)
-		{	
+		{
 			long diff = (((long) System.currentTimeMillis() / 1000) - firstPendingConvMessage.getTimestamp());
-			
+
 			if (Utils.isUserOnline(activity.getApplicationContext()) && (diff < DEFAULT_UNDELIVERED_WAIT_TIME) && shouldScheduleH20Tip)
 			{
 				uiHandler.sendEmptyMessageDelayed(SCHEDULE_H20_TIP, (DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
 			}
-			
+
 			else if (!undeliveredMessages.isEmpty())
 			{
 				showH20Tip();
 			}
 		}
 	}
-	
+
 	/**
 	 * Called from {@link #handleUIMessage(Message)}
 	 */
@@ -1663,34 +1634,35 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			return;
 		}
-		
+
 		long diff = (((long) System.currentTimeMillis() / 1000) - firstPendingConvMessage.getTimestamp());
-		
+
 		if (Utils.isUserOnline(activity.getApplicationContext()) && (diff >= DEFAULT_UNDELIVERED_WAIT_TIME))
 		{
 			showH20Tip();
 		}
 	}
-	
+
 	/**
 	 * Returns whether the given message is delivered or not.
+	 * 
 	 * @param convMessage
 	 * @return
 	 */
 	private boolean isMessageUndelivered(ConvMessage convMessage)
 	{
 		boolean fileUploaded = true;
-		
+
 		if (convMessage.isFileTransferMessage())
 		{
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			fileUploaded = !TextUtils.isEmpty(hikeFile.getFileKey());
 		}
-		
+
 		return ((!convMessage.isSMS() && convMessage.getState().ordinal() < State.SENT_DELIVERED.ordinal()) || (convMessage.isSMS() && convMessage.getState().ordinal() < State.SENT_CONFIRMED
 				.ordinal())) && fileUploaded;
 	}
-	
+
 	private boolean isH20TipShowing()
 	{
 		if (hikeToOfflineTipView != null)
@@ -1699,7 +1671,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Get the msgId of {@link #firstPendingConvMessage}
 	 * 
@@ -1727,104 +1699,97 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			return;
 		}
-		
+
 		if (!HikeMqttPersistence.getInstance().isMessageSent(getFirstPendingConvMessageId()))
 		{
 			return;
 		}
 		
-		if (isOnline && mActionBarView != null)
+		//User online and actionBarView is not null
+		
+		if ((mContactInfo.getOffline() == 0) && mActionBarView != null)
 		{
 			mActionBarView.findViewById(R.id.contact_status).setVisibility(View.GONE);
 		}
-		
+
 		if (hikeToOfflineTipView == null)
 		{
 			hikeToOfflineTipView = LayoutInflater.from(activity.getApplicationContext()).inflate(R.layout.hike_to_offline_tip, null);
 		}
-		
+
 		hikeToOfflineTipView.clearAnimation();
-		
+
 		setupH20TipViews();
-		
+
 		LinearLayout tipContainer = (LinearLayout) activity.findViewById(R.id.tipContainerBottom);
-		
+
 		if (tipContainer.getChildCount() > 0)
 		{
 			tipContainer.removeAllViews();
 		}
-		
+
 		/**
 		 * Hide any other open FTUE Tips
 		 */
 		mTips.hideTip();
-		
+
 		tipContainer.addView(hikeToOfflineTipView);
 		hikeToOfflineTipView.setVisibility(View.VISIBLE);
-		
+
 		scrollListViewOnShowingH20Tip();
 		mAdapter.setH20TipShowing(true);
 		shouldScheduleH20Tip = false;
 	}
-	
+
 	/**
 	 * Utility methods for setting up H20Tip Views
 	 */
-	
+
 	private void setupH20TipViews()
 	{
-		setupH20TipViews(false);
-	}
-	
-	private void setupH20TipViews(boolean messagesSent)
-	{
-		setupH20TipViews(messagesSent, false);
-	}
-	
-	private void setupH20TipViews(boolean messagesSent, boolean isNativeSms)
-	{
-		if (modeOfChat == H2S_MODE) //Are we in SMS Mode now ?
+		if (modeOfChat == H2S_MODE) // Are we in SMS Mode now ?
 		{
 			((TextView) hikeToOfflineTipView.findViewById(R.id.tip_header)).setText(getResources().getString(R.string.selected_count, mAdapter.getSelectedCount()));
 			((TextView) hikeToOfflineTipView.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.hike_offline_mode_msg, getSelectedFreeSmsCount()));
 			((TextView) hikeToOfflineTipView.findViewById(R.id.send_button_text)).setText(R.string.send_uppercase);
 			hikeToOfflineTipView.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
 		}
-		
+
 		else
 		{
-			
+
 			/**
 			 * Only when the user has selected native sms as Always we show "Send Paid sms" in all other cases we show heading as "send free sms"
 			 */
-			
-			if (PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, false) && PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, false))
+
+			if (PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, false)
+					&& PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, false))
 			{
 				((TextView) hikeToOfflineTipView.findViewById(R.id.tip_header)).setText(R.string.send_paid_sms);
 			}
-			
+
 			else
 			{
 				((TextView) hikeToOfflineTipView.findViewById(R.id.tip_header)).setText(R.string.send_free_sms);
 			}
-			
+
 			((TextView) hikeToOfflineTipView.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.reciever_is_offline, getConvLabel()));
 			((TextView) hikeToOfflineTipView.findViewById(R.id.send_button_text)).setText(R.string.next_uppercase);
 			hikeToOfflineTipView.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
 			hikeToOfflineTipView.findViewById(R.id.close_tip).setVisibility(View.GONE);
-			
+
 			/**
 			 * If action mode is on and H20 Tip comes, so we are disabling NextButton to avoid interference
 			 */
-			if(mActionMode.whichActionModeIsOn() != -1)  
+			if (mActionMode.isActionModeOn())
 			{
 				setEnabledH20NextButton(false);
 			}
 		}
-		
+
 		hikeToOfflineTipView.findViewById(R.id.send_button).setOnClickListener(this);
 	}
-	
+
 	/**
 	 * Utility method to hide H20 Tip
 	 */
@@ -1921,37 +1886,52 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			uiHandler.sendEmptyMessage(SCROLL_LIST_VIEW);
 		}
 	}
-	
+
 	@Override
 	public void onClick(View v)
 	{
 		switch (v.getId())
 		{
 		case R.id.send_button:
-			onH20TipClicked();
+			if(modeOfChat == H2S_MODE)
+			{
+				h20SendClick();
+			}
+			else if(modeOfChat == H2H_MODE)
+			{
+				h20NextClick();
+			}
 			break;
 		default:
 			super.onClick(v);
 		}
 	}
-
+	
+	private void h20NextClick()
+	{
+		modeOfChat = H2S_MODE;
+		mAdapter.setH20Mode(true);
+		initializeH20Mode();
+		setupH20TipViews();
+	}
+	
 	/**
 	 * Overriding this here since we need to intercept clicks for H20 overlay
 	 */
 	@Override
-	public void onOverLayClick(ConvMessage convMessage)
+	public void onBlueOverLayClick(ConvMessage convMessage, View view)
 	{
 		if (modeOfChat == H2S_MODE)
 		{
 			clickedH20Message(convMessage);
 		}
-		
+
 		else
 		{
-			super.onOverLayClick(convMessage);
+			super.onBlueOverLayClick(convMessage, view);
 		}
 	}
-	
+
 	/**
 	 * Cater to a message click in H2S Mode
 	 * 
@@ -1971,9 +1951,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			setupH20TipViews();
 		}
 	}
-	
+
 	/**
-	 * Indicates whether we should honour the click on a message when in H2S Mode, i.e, when we clicked the H20 tip to select messages 
+	 * Indicates whether we should honour the click on a message when in H2S Mode, i.e, when we clicked the H20 tip to select messages
+	 * 
 	 * @param message
 	 * @return
 	 */
@@ -1983,15 +1964,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			return false;
 		}
-		
+
 		if (message.getState() != State.SENT_CONFIRMED || message.isSMS())
 		{
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Resets the {@link #modeOfChat to H2H Mode and clears selection in messages Adapter}
 	 */
@@ -2000,24 +1981,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		modeOfChat = H2H_MODE;
 		mAdapter.setH20Mode(false);
 		mAdapter.removeSelection();
+		setupH20TipViews();
 	}
-	
-	private void onH20TipClicked()
-	{
-		if (modeOfChat == H2S_MODE)
-		{
-			h20SendClick();
-		}
-		
-		else
-		{
-			modeOfChat = H2S_MODE;
-			mAdapter.setH20Mode(true);
-			initializeH20Mode();
-			setupH20TipViews(); 
-		}
-	}
-	
+
 	/**
 	 * Clicked the send button on H20Tip
 	 */
@@ -2067,18 +2033,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		}
 	}
-	
+
 	private void initializeH20Mode()
 	{
 		hikeToOfflineTipView.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
 		hikeToOfflineTipView.findViewById(R.id.close_tip).setVisibility(View.GONE);
-		
-		/**
-		 * Clearing any residual selected items
-		 */
-		
-		mAdapter.removeSelectedItems();
-		
+
 		for (Long msgid : undeliveredMessages.keySet())
 		{
 			ConvMessage convMsg = undeliveredMessages.get(msgid);
@@ -2088,14 +2048,13 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			}
 		}
 	}
-	
+
 	/**
-	 * We try to send messages are either Native SMS or Hike SMS based on which preferences are set.
-	 * If the preferences are not set, we show the SMS Dialog.
+	 * We try to send messages are either Native SMS or Hike SMS based on which preferences are set. If the preferences are not set, we show the SMS Dialog.
 	 * 
 	 * @param nativeOnly
 	 */
-	
+
 	private void showH20SMSDialog(boolean nativeOnly)
 	{
 		// Trying to send normal Hike SMS
@@ -2133,7 +2092,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			HikeDialogFactory.showDialog(activity, HikeDialogFactory.SHOW_H20_SMS_DIALOG, this, nativeOnly, getSelectedFreeSmsCount(), mCredits);
 		}
 	}
-	
+
 	@Override
 	public void positiveClicked(HikeDialog dialog)
 	{
@@ -2142,34 +2101,35 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case HikeDialogFactory.SHOW_H20_SMS_DIALOG:
 			smsDialogSendClick((H20Dialog) dialog);
 			break;
-			
+
 		case HikeDialogFactory.SMS_CLIENT_DIALOG:
 			dialog.dismiss();
 			onSMSClientDialogPositiveClick();
 			break;
-			
-		default :
+
+		default:
 			super.positiveClicked(dialog);
 		}
 	}
-	
+
 	@Override
 	public void negativeClicked(HikeDialog dialog)
 	{
-		switch(dialog.getId())
+		switch (dialog.getId())
 		{
 		case HikeDialogFactory.SMS_CLIENT_DIALOG:
 			dialog.dismiss();
 			Utils.setReceiveSmsSetting(activity.getApplicationContext(), false);
 			break;
-			
+
 		default:
 			super.negativeClicked(dialog);
 		}
 	}
-	
+
 	/**
 	 * To be shown when always/just once is pressed from H20 Dialog from {@link #showSMSDialog(boolean)}
+	 * 
 	 * @param dialog
 	 */
 	private void smsDialogSendClick(H20Dialog dialog)
@@ -2193,25 +2153,25 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages());
 			}
 		}
-		
+
 	}
-	
+
 	private void showSMSClientDialog(boolean showingNativeInfoDialog)
 	{
 		HikeDialogFactory.showDialog(activity, HikeDialogFactory.SMS_CLIENT_DIALOG, this, false, null, showingNativeInfoDialog);
 	}
-	
+
 	private void onSMSClientDialogPositiveClick()
 	{
 		Utils.setReceiveSmsSetting(activity.getApplicationContext(), true);
 		sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages());
-		
+
 		if (!activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false))
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_SMS_SYNC_DIALOG, null);
 		}
 	}
-	
+
 	/**
 	 * Methods to send Undelivered messages as SMS
 	 * 
@@ -2240,17 +2200,17 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			{
 				for (ConvMessage convMessage : unsentMessages)
 				{
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
+					HikeMqttManagerNew.getInstance().sendMessage(convMessage.serialize(), HikeMqttManagerNew.MQTT_QOS_ONE);
 					convMessage.setTimestamp(System.currentTimeMillis() / 1000);
 				}
 				mAdapter.notifyDataSetChanged();
 			}
 		}
 	}
-	
+
 	/**
-	 * Returns a list of all unsent selected messages.
-	 * Also alters their timestamps, since these messages might be potentially sent as SMS.
+	 * Returns a list of all unsent selected messages. Also alters their timestamps, since these messages might be potentially sent as SMS.
+	 * 
 	 * @return
 	 */
 	private List<ConvMessage> getAllUnsentSelectedMessages()
@@ -2287,7 +2247,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		return unsentMessages;
 	}
-	
+
 	/**
 	 * After sending messages as SMS, we close the tip and destroy H20 Mode
 	 * 
@@ -2298,7 +2258,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		destroyH20Mode();
 		hideH20Tip(true, isNativeSMS);
 	}
-	
+
 	/**
 	 * Overridding {@link ChatThread.#deleteMessage(ConvMessage, boolean)}
 	 */
@@ -2308,9 +2268,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		removeFromUndeliveredMessage(convMessage, false);
 		super.deleteMessage(convMessage, deleteMediaFromPhone);
 	}
-	
+
 	/**
 	 * Calculates the no. of SMSes based on message size
+	 * 
 	 * @return
 	 */
 	private int getSelectedFreeSmsCount()
@@ -2318,9 +2279,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		Collection<ConvMessage> selectedMessages = mAdapter.getSelectedMessagesMap().values();
 		int totalMsgLength = Utils.combineInOneSmsString(activity.getApplicationContext(), false, selectedMessages, true).length();
 
-		return (totalMsgLength / 140) + 1;
+		return (totalMsgLength / DEFAULT_SMS_LENGTH) + 1;
 	}
-	
+
 	/**
 	 * Used to enable/disable next button upon entering actionMode
 	 * 
@@ -2348,49 +2309,54 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			setEnabledH20NextButton(false);
 			break;
 		}
-		
+
 		super.initActionbarActionModeView(id, view);
 	}
-	
-	@Override
-	public void actionModeDestroyed(int id)
-	{
-		switch(id)
-		{
-		case MULTI_SELECT_ACTION_MODE:
-			setEnabledH20NextButton(true);
-			break;
-		}
-		
-		super.actionModeDestroyed(id);
-	}
-	
+
 	@Override
 	public boolean onBackPressed()
 	{
-		/**
-		 * Calling super class's method first
-		 */
-		if (!super.onBackPressed())
+		if (modeOfChat == H2S_MODE)
 		{
-			if (modeOfChat == H2S_MODE)
-			{
-				destroyH20Mode();
-				return true;
-			}
+			destroyH20Mode();
+			return true;
+		}
 
-			if (isH20TipShowing())
-			{
-				hideH20Tip();
-				return true;
-			}
-
+		else if (isH20TipShowing())
+		{
+			hideH20Tip();
+			return true;
+		}
+		return super.onBackPressed();
+	}
+	
+	@Override
+	protected void destroyActionMode()
+	{
+		super.destroyActionMode();
+		
+		if (isH20TipShowing())
+		{
+			setEnabledH20NextButton(true);
+		}
+	}
+	
+	@Override
+	public boolean onDoubleTap(MotionEvent e)
+	{
+		if (modeOfChat == H2S_MODE)  // Are we in H2S mode ? 
+		{
 			return false;
 		}
 
-		else
+		if (!mConversation.isOnhike() && mCredits <= 0)
 		{
-			return true;
+			if (!Utils.getSendSmsPref(activity.getApplicationContext()))
+			{
+				return false;
+			}
 		}
+		
+		return super.onDoubleTap(e);
 	}
 }

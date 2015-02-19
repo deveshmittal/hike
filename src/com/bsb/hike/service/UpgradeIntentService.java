@@ -11,6 +11,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.StickerManager;
 
 public class UpgradeIntentService extends IntentService
@@ -44,7 +45,6 @@ public class UpgradeIntentService extends IntentService
 			// fire the pubsub event to let the HomeActivity class know that the
 			// avatar
 			// upgrade is done and it can stop the spinner
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FINISHED_AVTAR_UPGRADE, null);
 		}
 
 		if (prefs.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1)
@@ -89,6 +89,9 @@ public class UpgradeIntentService extends IntentService
 			editor.commit();
 			StickerManager.getInstance().doInitialSetup();
 		}
+		
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.UPGRADING, false);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE, null);
 	}
 
 	public UpgradeIntentService()

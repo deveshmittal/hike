@@ -3,17 +3,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
+    android:id="@+id/ll_compose"
     android:orientation="vertical" >
 
     <include
         android:id="@+id/spinner"
         layout="@layout/spinner_center_screen"
         android:visibility="gone" />
-
-    <ViewStub android:id="@+id/tipLayoutViewStub" 
-	    android:layout_width="wrap_content" android:layout_height="wrap_content"
-	    android:layout="@layout/welcome_hike_tip" android:inflatedId="@+id/tipMultiForward"/>
-
+    
+	<FrameLayout
+       android:id="@+id/horizontal_friends_placeholder"
+       android:layout_height="wrap_content"
+       android:layout_width="match_parent">
+  	</FrameLayout>
+    
     <com.bsb.hike.view.TagEditText
         android:id="@+id/composeChatNewGroupTagET"
         android:layout_width="match_parent"

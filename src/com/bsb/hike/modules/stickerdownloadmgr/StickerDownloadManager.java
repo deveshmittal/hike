@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import android.content.Context;
 import android.os.Handler;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.NetworkHandler.NetworkType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
@@ -13,37 +14,40 @@ import com.bsb.hike.utils.Logger;
 
 public class StickerDownloadManager
 {
-	private Context context;
+	private final Context context;
 
-	RequestQueue queue;
+	private final RequestQueue queue;
 
-	public static StickerDownloadManager _instance = null;
+	private static volatile StickerDownloadManager _instance = null;
 
-	private Handler handler;
+	private final Handler handler;
 	
-	private NetworkHandler networkHandler;
+	private final NetworkHandler networkHandler;
 	
 	public static final String TAG = "StickerDownloadManager";
 
-	private StickerDownloadManager(Context ctx)
+	private StickerDownloadManager()
 	{
 		queue = new RequestQueue();
-		context = ctx;
+		context = HikeMessengerApp.getInstance().getApplicationContext();
 		handler = new Handler(context.getMainLooper());
-		networkHandler = new NetworkHandler(ctx, queue);
+		networkHandler = new NetworkHandler(context, queue);
 	}
 
-	public static StickerDownloadManager getInstance(Context context)
+	public static StickerDownloadManager getInstance()
 	{
 		if (_instance == null)
 		{
 			synchronized (StickerDownloadManager.class)
 			{
 				if (_instance == null)
-					_instance = new StickerDownloadManager(context.getApplicationContext());
+				{
+					_instance = new StickerDownloadManager();
+				}
 			}
 		}
 		return _instance;
+		
 	}
 
 	/*
@@ -76,10 +80,6 @@ public class StickerDownloadManager
 			Logger.d(TAG, "DownloadMultipleStickers task for catId : " + cat.getCategoryId() +  " already exists");
 			return;
 		}
-		if (queue.isTaskAlreadyExist(taskId))
-		{
-			return;
-		}
 		BaseStickerDownloadTask stickerCategoryTask = new MultiStickerDownloadTask(handler, context, taskId, cat, downloadType, source, callback);
 		Request request = new Request(stickerCategoryTask);
 		request.setPrioity(Request.PRIORITY_HIGH);
@@ -109,7 +109,9 @@ public class StickerDownloadManager
 		}
 		BaseStickerDownloadTask stickerCategoryTask = new StickerEDImageDownloadTask(handler, context, taskId, categoryId, callback);
 		Request request = new Request(stickerCategoryTask);
-		request.setPrioity(Request.PRIORITY_HIGHEST);
+		
+		// Setting priority between sticker shop task and enable_disable icon task
+		request.setPrioity(10);
 		queue.addTask(taskId, request);
 	}
 	
@@ -136,6 +138,7 @@ public class StickerDownloadManager
 		}
 		BaseStickerDownloadTask stickerCategoryTask = new StickerShopDownloadTask(handler, context, taskId, offset, callback);
 		Request request = new Request(stickerCategoryTask);
+		request.setPrioity(Request.PRIORITY_HIGHEST);
 		queue.addTask(taskId, request);
 	}
 	

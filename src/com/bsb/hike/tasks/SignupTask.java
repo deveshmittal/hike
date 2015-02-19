@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.accounts.NetworkErrorException;
@@ -89,7 +90,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED, BACKUP_AVAILABLE, RESTORING_BACKUP
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, GENDER, SCANNING_CONTACTS, PIN_VERIFIED, BACKUP_AVAILABLE, RESTORING_BACKUP
 	};
 
 	public class StateValue
@@ -111,7 +112,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	private SMSReceiver receiver;
 
-	private static SignupTask signupTask;
+	/**
+	 * Making this public for preactivation case.We don't want to show any notification while the user is
+	 *  signing up.So making this public to achieve the same
+	 */
+	public static SignupTask signupTask;
 
 	private OnSignupTaskProgressUpdate onSignupTaskProgressUpdate;
 
@@ -125,10 +130,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public static boolean isAlreadyFetchingNumber = false;
 
-	private String userName;
-	
-	private StateValue mStateValue;
+	private Birthday birthdate;
 
+	private Boolean isFemale;
+
+	private String userName;
+		
 	private static final String INDIA_ISO = "IN";
 
 	public static final String START_UPLOAD_PROFILE = "start";
@@ -180,23 +187,41 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		this.profilePicSmall = profilePic;
 	}
 
+	public void addBirthdate(Birthday birthdate)
+	{
+		this.birthdate = birthdate;
+	}
+
 	public void addUserName(String name)
 	{
 		this.userName = name;
 	}
 
+	
+	public void addGender(Boolean isFemale)
+	{
+		this.isFemale = isFemale;
+	}
+
+	@Override
+	protected void onPreExecute()
+	{
+		isRunning = true;
+		super.onPreExecute();
+	}
+	
 	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
 		deletePreviouslySavedProfileImages();
 		Logger.e("SignupTask", "FETCHING NUMBER? " + isAlreadyFetchingNumber);
 		isPinError = false;
-		isRunning = true;
 		SharedPreferences settings = this.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		boolean ab_scanned = settings.getBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, false);
 		boolean canPullInSms = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
 		String name = settings.getString(HikeMessengerApp.NAME_SETTING, null);
+		Boolean restored = settings.getBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false);
 
 		if (isCancelled())
 		{
@@ -408,7 +433,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		if(userName != null)
 		{
-			publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+			publishProgress(new StateValue(State.GENDER, ""));
+			if(isFemale != null)
+			{
+				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+			}
 		}
 
 		/* scan the addressbook */
@@ -448,7 +477,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				}
 				Logger.d("SignupTask", "about to insert addressbook");
 				ContactManager.getInstance().setAddressBookAndBlockList(addressbook, blockList);
-
 			}
 			catch (Exception e)
 			{
@@ -494,12 +522,24 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				
+				if (isFemale == null)
+				{
+					/*
+					 * publishing this will cause the the Activity to ask the user for a name and signal us
+					 */
+					publishProgress(new StateValue(State.GENDER, ""));
+					synchronized (this)
+					{
+						this.wait();
+					}
+				}
+				
 				if(getDisplayChild() != SignupActivity.SCANNING_CONTACTS)
 				{
 					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 				}
 				publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
-				AccountUtils.setProfile(userName);
+				AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
 			}
 			catch (InterruptedException e)
 			{
@@ -522,12 +562,23 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			this.data = null;
 			Editor editor = settings.edit();
 			editor.putString(HikeMessengerApp.NAME_SETTING, userName);
+			editor.putInt(HikeConstants.Extras.GENDER, isFemale ? 2 : 1);
+			if (birthdate != null)
+			{
+				editor.putInt(HikeMessengerApp.BIRTHDAY_DAY, birthdate.day);
+				editor.putInt(HikeMessengerApp.BIRTHDAY_MONTH, birthdate.month);
+				editor.putInt(HikeMessengerApp.BIRTHDAY_YEAR, birthdate.year);
+			}
 			/*
 			 * Setting these values as true for now. They will be reset on upgrades.
 			 */
 			editor.putBoolean(HikeMessengerApp.DEVICE_DETAILS_SENT, true);
 			editor.putBoolean(HikeMessengerApp.UPGRADE_RAI_SENT, true);
 			editor.commit();
+		}
+		else
+		{
+			userName = name;
 		}
 
 		/* set the name */
@@ -541,80 +592,123 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
-//		this.data = null;
-//		if (DBBackupRestore.getInstance(context).isBackupAvailable())
-//		{
-//			publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
-//			synchronized (this)
-//			{
-//				try
-//				{
-//					this.wait();
-//				}
-//				catch (InterruptedException e)
-//				{
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//					Logger.d("backup","Interrupted while waiting for user's choice on restore.");
-//				}
-//			}
-//		}
-//
-//		while (!TextUtils.isEmpty(this.data))
-//		{
-//			this.data = null;
-//			mStateValue = new StateValue(State.RESTORING_BACKUP,null);
-//			boolean status = DBBackupRestore.getInstance(context).restoreDB();
-//			if (status)
-//			{
-//				HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
-//				ContactManager.getInstance().init(context);
-//				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString());
-//			}
-//			else
-//			{
-//				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString());
-//			}
-//			publishProgress(mStateValue);
-//			synchronized (this)
-//			{
-//				try
-//				{
-//					this.wait();
-//				}
-//				catch (InterruptedException e)
-//				{
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//					Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
-//				}
-//			}
-//		}
-		Logger.d("SignupTask", "Publishing Token_Created");
-
-		/* tell the service to start listening for new messages */
-		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
-		isAlreadyFetchingNumber = false;
-
+		// Setting up preferences for new user.
+		Editor edit = settings.edit();
 		/*
 		 * We show these tips only to upgrading users
 		 */
-		settings.edit().putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true).commit();
+		edit.putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
+		
 		/*
 		 * We show this tip only to new signup users
 		 */
-		settings.edit().putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true).commit();
+		edit.putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true);
+		
 		/*
-		 * We need to show update available for hardcoded categories only to upgrading users.
+		 * We don't want to show red dot on overflow menu for new users
 		 */
+		edit.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, true);
+		edit.commit();
+		
+		if (!restored)
+		{
+			this.data = null;
+			try
+			{
+		
+				// If was already restoring backup, no need to check anything, make another attempt at it.
+				if (settings.getBoolean(HikeMessengerApp.RESTORING_BACKUP, false))
+				{
+					this.data = "true";
+				}
+				else if (DBBackupRestore.getInstance(context).isBackupAvailable())
+				{
+					publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
+					// After publishing 'backup available' the task waits for the user to make an input(Restore or Skip)
+					synchronized (this)
+					{
+						this.wait();
+					}
+				}
+					
+				
+				/*
+				 * The following while loop executes restore operation(if user has selected so)
+				 * As soon as the loop starts it resets itself, so it wont execute again unless its again
+				 * set by the user.
+				 */
+				while (!TextUtils.isEmpty(this.data))
+				{
+					this.data = null;
+					
+					boolean status = restore(settings);
+					
+					// A delay so that user is able to understand the UI animations.
+					synchronized (this)
+					{
+						this.wait(HikeConstants.BACKUP_RESTORE_UI_DELAY);
+					}
+					if (status)
+					{
+						publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString()));
+					}
+					else
+					{
+						publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString()));
+						// After publishing 'restore failed' the task waits for the user to again make an input(Restore or Skip)
+						synchronized (this)
+						{
+							this.wait();
+						}
+					}
+				}
+				this.data = null;
+				if (!isCancelled())
+				{
+					Editor editor = settings.edit();
+					editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+					editor.commit();
+				}
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+				Logger.e("SignupTask","Interrupted while waiting for user's choice on restore.");
+				return Boolean.FALSE;
+			}
+		}
+		Logger.d("SignupTask", "Publishing Token_Created");
+
+		/* tell the service to start listening for new messages */
+		isAlreadyFetchingNumber = false;
+
+		settings.edit().putBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, true).commit();
+		
 		return Boolean.TRUE;
 	}
 	
-	public StateValue getStateValue()
+	private boolean restore(SharedPreferences settings)
 	{
-		return mStateValue;
-	}
+		Editor editor = settings.edit();
+		editor.putBoolean(HikeMessengerApp.RESTORING_BACKUP, true);
+		editor.commit();
+		
+		publishProgress(new StateValue(State.RESTORING_BACKUP,null));
+		boolean status = DBBackupRestore.getInstance(context).restoreDB();
+		
+		if (status)
+		{
+			ContactManager.getInstance().init(context);
+			editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+			editor.commit();
+		}
 
+		editor.putBoolean(HikeMessengerApp.RESTORING_BACKUP, false);
+		editor.commit();
+		
+		return status;
+	}
+	
 	@Override
 	protected void onCancelled()
 	{
@@ -694,12 +788,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 
-	public static SignupTask startTask(Activity activity, String userName, Bitmap profilePicSmall)
+	public static SignupTask startTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
 	{
 		getSignupTask(activity);
 		if (!signupTask.isRunning())
 		{
+			signupTask.addGender(isFemale);
 			signupTask.addUserName(userName);
+			signupTask.addBirthdate(birthday);
 			signupTask.addProfilePicPath(null, profilePicSmall);
 			/*
 			 * if we are on signupActivity we should not anymore try to
@@ -721,13 +817,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 	
-	public static SignupTask restartTask(Activity activity, String userName, Bitmap profilePicSmall)
+	public static SignupTask restartTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
 	{
 		if (signupTask != null && signupTask.isRunning())
 		{
 			signupTask.cancelTask();
 		}
-		startTask(activity, userName, profilePicSmall);
+		startTask(activity, userName, isFemale, birthday, profilePicSmall);
 		return signupTask;
 	}
 	

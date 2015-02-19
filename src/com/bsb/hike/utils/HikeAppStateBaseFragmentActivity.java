@@ -3,6 +3,7 @@ package com.bsb.hike.utils;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -13,9 +14,13 @@ import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.ui.fragments.ImageViewerFragment;
+import com.bsb.hike.voip.view.CallIssuesPopup;
+import com.bsb.hike.voip.view.CallRatePopup;
+import com.bsb.hike.voip.view.IVoipCallListener;
 
-public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity implements Listener
+public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity implements Listener, IVoipCallListener
 {
 
 	private static final String TAG = "HikeAppState";
@@ -32,6 +37,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	protected void onResume()
 	{
 		HikeAppStateUtils.onResume(this);
+		HikeAlarmManager.cancelAlarm(HikeAppStateBaseFragmentActivity.this, HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION);
 		super.onResume();
 	}
 
@@ -163,12 +169,46 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		return getSupportFragmentManager().findFragmentByTag(tag) != null;
 	}
 	
-	public void updateActionBarColor(int backgroundDrawable){
+	public void updateActionBarColor(int backgroundDrawable)
+	{
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setBackgroundDrawable(getResources().getDrawable(backgroundDrawable));
 		// * Workaround to set actionbar background drawable multiple times. Refer SO.
 		// http://stackoverflow.com/questions/17076958/change-actionbar-color-programmatically-more-then-once/17198657#17198657
 		actionBar.setDisplayShowTitleEnabled(true);
 		actionBar.setDisplayShowTitleEnabled(false);
+	}
+
+	@Override
+	public void onVoipCallEnd(final Bundle bundle, final String tag) 
+	{
+		runOnUiThread(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				boolean isCallRateFragShowing = isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
+				boolean isCallIssuesFragShowing = isFragmentAdded(HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG);
+				if(tag.equals(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG) && !isCallRateFragShowing && !isCallIssuesFragShowing)
+				{
+					CallRatePopup callRatePopup = new CallRatePopup();
+					callRatePopup.setArguments(bundle);
+
+					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+					fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
+					fragmentTransaction.commitAllowingStateLoss();
+				}
+				else if(tag.equals(HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG) && !isCallIssuesFragShowing)
+				{
+					CallIssuesPopup callIssuesPopup = new CallIssuesPopup();
+					callIssuesPopup.setArguments(bundle);
+
+					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+					fragmentTransaction.add(callIssuesPopup, HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG);
+					fragmentTransaction.commitAllowingStateLoss();
+				}
+			}
+		});
 	}
 }
