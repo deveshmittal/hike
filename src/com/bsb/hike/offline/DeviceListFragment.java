@@ -199,7 +199,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        	WifiP2pConfig config = new WifiP2pConfig();
 	    		config.deviceAddress = currentDevice.deviceAddress;
 	    		config.wps.setup = WpsInfo.PBC;
-	    		/*if (progressDialog != null && progressDialog.isShowing()) {
+	    		if (progressDialog != null && progressDialog.isShowing()) {
 	    			progressDialog.dismiss();
 	    		}
 	    		progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
@@ -209,7 +209,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	                public void onCancel(DialogInterface dialog) {
 	                    Log.d("wifidirectdemo", "Hello cancelled");
 	                }
-	            });*/
+	            });
 	    		
 	    		((DeviceActionListener) getActivity()).connect(config, 0, currentDevice);
     	     }
@@ -219,6 +219,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
 	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
 	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
+	        	
 	        	startActivity(intent);
 	    	}
     	}
@@ -380,7 +381,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
         void showDetails(WifiP2pDevice device);
 
-        void cancelDisconnect();
+        void callDisconnect();
 
         void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice connectingToDevice);
 

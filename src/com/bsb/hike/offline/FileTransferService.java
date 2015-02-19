@@ -28,6 +28,7 @@ public class FileTransferService extends IntentService {
 	public static final String EXTRAS_FILE_PATH = "file_url";
 	public static final String EXTRAS_ADDRESS = "go_host";
 	public static final String EXTRAS_PORT = "go_port";
+	public static boolean  isOfflineFileTransferFinished =  true;
 
 	public FileTransferService(String name) {
 		super(name);
@@ -46,6 +47,7 @@ public class FileTransferService extends IntentService {
 
 		Context context = getApplicationContext();
 		if (intent.getAction().equals(ACTION_SEND_FILE)) {
+			isOfflineFileTransferFinished =  false;
 			String fileUri = intent.getExtras().getString(EXTRAS_FILE_PATH);
 			//fileUri =  "/storage/emulated/0/com.bsb.hike-1.apk";
 			String host = intent.getExtras().getString(EXTRAS_ADDRESS);
@@ -87,6 +89,7 @@ public class FileTransferService extends IntentService {
 						}
 					}
 				}
+				isOfflineFileTransferFinished =  true;
 			}
 
 		}

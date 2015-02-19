@@ -137,6 +137,8 @@ public class UploadFileTask extends FileTransferBase
 		_state = FTState.INITIALIZED;
 		this.mAttachementType = attachement;
 		createConvMessage();
+		stateFile = getStateFile((ConvMessage) userContext);
+		saveFileState(null);
 	}
 	
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, ArrayList<ContactInfo> contactList, File sourceFile,
@@ -152,9 +154,7 @@ public class UploadFileTask extends FileTransferBase
 		this.isForwardMsg = isForwardMsg;
 		this.isRecipientOnhike = isRecipientOnHike;
 		this.fileKey = fileKey;
-		_state = FTState.INITIALIZED;
-		this.mAttachementType = attachement;
-		createConvMessage();
+		
 	}
 
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Object convMessage,
@@ -194,6 +194,25 @@ public class UploadFileTask extends FileTransferBase
 		_state = FTState.INITIALIZED;
 		this.mAttachementType = attachement;
 		createConvMessage();
+	}
+	
+	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile,
+			String fileKey, String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration, int attachement , boolean Offline)
+	{
+		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType, token, uId);
+		this.msisdn = msisdn;
+		this.fileType = fileType;
+		this.isRecipientOnhike = isRecipientOnHike;
+		this.recordingDuration = recordingDuration;
+		this.isRecording = isRecording;
+		this.isForwardMsg = isForwardMsg;
+		this.isRecipientOnhike = isRecipientOnHike;
+		this.fileKey = fileKey;
+		_state = FTState.COMPLETED;
+		this.mAttachementType = attachement;
+		createConvMessage();
+		stateFile = getStateFile((ConvMessage) userContext);
+		saveFileState(null);
 	}
 
 	protected void setFutureTask(FutureTask<FTResult> fuTask)

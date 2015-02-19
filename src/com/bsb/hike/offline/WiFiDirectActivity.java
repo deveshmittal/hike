@@ -95,6 +95,10 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
         isOfflineFileTransferOn = true;
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
+        wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        if(wifiManager.isWifiEnabled() == false)
+        	wifiManager.setWifiEnabled(true);
+        
       
         /*
          * Setting device Name to msisdn
@@ -128,9 +132,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
 			e.printStackTrace();
 		}
         receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
-        wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        if(wifiManager.isWifiEnabled() == false)
-        	wifiManager.setWifiEnabled(true);
+        
         
     }
 
@@ -150,7 +152,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     
     @Override
     protected void onRestart() {
-    	disconnect();
+    	//disconnect();
     	DeviceListFragment.intent =  null;
     	// give time to disconnect
     	try {
@@ -181,6 +183,13 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
         return true;
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+    	// TODO Auto-generated method stub
+    	//if(!FileTransferService.isOfflineFileTransferFinished)
+    	new OnFileTransferCompleteTask().executeOnExecutor((AsyncTask.THREAD_POOL_EXECUTOR));
+    	super.onNewIntent(intent);
+    }
     /*
      * (non-Javadoc)
      * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
@@ -301,7 +310,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
      * request
      */
     @Override
-    public void cancelDisconnect() { 
+    public void callDisconnect() { 
         if (manager != null) 
         {
             final DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
@@ -338,10 +347,9 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     
     public void enableDiscovery()
     {
-    	if (!isWifiP2pEnabled) {
-            Toast.makeText(WiFiDirectActivity.this, R.string.p2p_off_warning,
+    	if (!wifiManager.isWifiEnabled()) {
+            Toast.makeText(WiFiDirectActivity.this, "Starting Wifi Please Wait",
                     Toast.LENGTH_SHORT).show();
-            return;
         }
         final DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
                 .findFragmentById(R.id.frag_list);
@@ -414,7 +422,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
 	    		}
 	    		catch (InterruptedException e) 
 				{
-					Logger.e(TAG, "Sleep failed in CheckInvitedStuckTask");
+	    			Logger.e(TAG, "Sleep failed in CheckInvitedStuckTask");
 					e.printStackTrace();
 				}
     		}
@@ -425,8 +433,32 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     		if(destroy)
     		{
     			//Toast.makeText(getApplicationContext(), "Got Stuck in Invited mode. Resetting..!!", Toast.LENGTH_SHORT).show();
-    			cancelDisconnect();
+    			callDisconnect();
     		}
     	}
+    }
+    
+    public class OnFileTransferCompleteTask  extends AsyncTask<Void, Void, Void>
+    {
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			while(!FileTransferService.isOfflineFileTransferFinished)
+	    	{
+				try {
+					//Wait for  recieving complete file 
+					Thread.sleep(1*1000);
+				} catch (InterruptedException e) {
+					Logger.e(TAG, "Sleep failed in OnFileTransferCompleteTask");
+					e.printStackTrace();
+				}
+	    	}
+			return null;
+		}
+		
+		@Override
+    	protected void onPostExecute(Void result) {
+    		callDisconnect();
+    	}	  
     }
 }
