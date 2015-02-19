@@ -3,13 +3,10 @@ package com.bsb.hike.ui;
 import java.io.File;
 import java.util.ArrayList;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -25,9 +22,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
@@ -36,8 +32,11 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.adapters.GalleryAdapter;
+import com.bsb.hike.chatthread.ChatThreadActivity;
+import com.bsb.hike.dialog.HikeDialog;
+import com.bsb.hike.dialog.HikeDialogFactory;
+import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -46,9 +45,8 @@ import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.CustomFontButton;
 
 public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnScrollListener, OnPageChangeListener, HikePubSub.Listener
 {
@@ -143,7 +141,10 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET));
 		intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
-
+		if(getIntent().getBooleanExtra(GalleryActivity.START_FOR_RESULT, false))
+		{
+			intent.putExtra(GalleryActivity.START_FOR_RESULT, true);
+		}
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		startActivity(intent);
@@ -250,35 +251,27 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 				
 				if (!smlDialogShown)
 				{
-					HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+					HikeDialogFactory.showDialog(GallerySelectionViewer.this, HikeDialogFactory.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialogListener()
 					{
 						@Override
-						public void onSucess(Dialog dialog)
+						public void negativeClicked(HikeDialog hikeDialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void positiveClicked(HikeDialog hikeDialog)
 						{
 							fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike, FTAnalyticEvents.GALLERY_ATTACHEMENT);
 							Utils.executeAsyncTask(fileTransferTask);
 							progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
-							dialog.dismiss();
+							hikeDialog.dismiss();
 						}
 
 						@Override
-						public void negativeClicked(Dialog dialog)
+						public void neutralClicked(HikeDialog hikeDialog)
 						{
-							// TODO Auto-generated method stub
-							
-						}
-
-						@Override
-						public void positiveClicked(Dialog dialog)
-						{
-							// TODO Auto-generated method stub
-							
-						}
-
-						@Override
-						public void neutralClicked(Dialog dialog)
-						{
-							// TODO Auto-generated method stub
 							
 						}
 					}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
@@ -310,32 +303,24 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 						File file = new File(galleryItem.getFilePath());
 						sizeOriginal += file.length();
 					}
-					HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+					
+					HikeDialogFactory.showDialog(GallerySelectionViewer.this, HikeDialogFactory.SHARE_IMAGE_QUALITY_DIALOG, new HikeDialogListener()
 					{
 						@Override
-						public void onSucess(Dialog dialog)
+						public void negativeClicked(HikeDialog hikeDialog)
 						{
-							dialog.dismiss();
-						}
-
-						@Override
-						public void negativeClicked(Dialog dialog)
-						{
-							// TODO Auto-generated method stub
 							
 						}
 
 						@Override
-						public void positiveClicked(Dialog dialog)
+						public void positiveClicked(HikeDialog hikeDialog)
 						{
-							// TODO Auto-generated method stub
-							
+							hikeDialog.dismiss();
 						}
 
 						@Override
-						public void neutralClicked(Dialog dialog)
+						public void neutralClicked(HikeDialog hikeDialog)
 						{
-							// TODO Auto-generated method stub
 							
 						}
 					}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
@@ -551,15 +536,29 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 				@Override
 				public void run()
 				{
-					Intent intent = new Intent(GallerySelectionViewer.this, ChatThread.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
-					startActivity(intent);
-
 					if (progressDialog != null)
 					{
 						progressDialog.dismiss();
 						progressDialog = null;
+					}
+					
+					/**
+					 * This flag indicates whether this was opened from chatThread or not
+					 */
+					boolean sendResult = getIntent().getBooleanExtra(GalleryActivity.START_FOR_RESULT, false);
+					
+					if (!sendResult)
+					{
+						String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+						Intent intent = IntentFactory.createChatThreadIntentFromMsisdn(GallerySelectionViewer.this, msisdn, false);
+						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						startActivity(intent);
+					}
+					
+					else
+					{
+						setResult(RESULT_OK);
+						finish();
 					}
 				}
 			});

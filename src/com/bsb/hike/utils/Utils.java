@@ -56,6 +56,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorDescription;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -64,9 +67,11 @@ import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ContentProviderOperation;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.OperationApplicationException;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -104,10 +109,18 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.RawContacts;
+import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.provider.ContactsContract.CommonDataKinds.Event;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
@@ -144,6 +157,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.bsb.hike.BitmapModule.BitmapUtils;
@@ -156,13 +170,18 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.TrafficsStatsFile;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.dialog.HikeDialog;
+import com.bsb.hike.dialog.HikeDialogFactory;
+import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.models.AccountData;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ContactInfoData;
@@ -187,10 +206,6 @@ import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
-import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.ComposeChatActivity;
-import com.bsb.hike.ui.HikeAuthActivity;
-import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
@@ -363,28 +378,6 @@ public class Utils
 			}
 		}
 		return mInFromLeft;
-	}
-
-	public static Intent createIntentFromContactInfo(final ContactInfo contactInfo, boolean openKeyBoard)
-	{
-		Intent intent = new Intent();
-
-		// If the contact info was made using a group conversation, then the
-		// Group ID is in the contact ID
-		intent.putExtra(HikeConstants.Extras.MSISDN, Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo.getId() : contactInfo.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
-		return intent;
-	}
-
-	public static Intent createIntentFromMsisdn(String msisdnOrGroupId, boolean openKeyBoard)
-	{
-		Intent intent = new Intent();
-
-		// If the contact info was made using a group conversation, then the
-		// Group ID is in the contact ID
-		intent.putExtra(HikeConstants.Extras.MSISDN, msisdnOrGroupId);
-		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
-		return intent;
 	}
 
 	/** Create a File for saving an image or video */
@@ -2586,79 +2579,6 @@ public class Utils
 		return !msisdn.startsWith("+91");
 	}
 
-	public static Dialog showSMSSyncDialog(final Context context, boolean syncConfirmation)
-	{
-		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.enable_sms_client_popup);
-
-		final View btnContainer = dialog.findViewById(R.id.button_container);
-
-		final ProgressBar syncProgress = (ProgressBar) dialog.findViewById(R.id.loading_progress);
-		TextView header = (TextView) dialog.findViewById(R.id.header);
-		final TextView info = (TextView) dialog.findViewById(R.id.body);
-		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
-		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
-		final View btnDivider = dialog.findViewById(R.id.sms_divider);
-
-		header.setText(R.string.import_sms);
-		info.setText(R.string.import_sms_info);
-		okBtn.setText(R.string.yes);
-		cancelBtn.setText(R.string.no);
-
-		setupSyncDialogLayout(syncConfirmation, btnContainer, syncProgress, info, btnDivider);
-
-		okBtn.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.SMS_SYNC_START, null);
-
-				executeSMSSyncStateResultTask(new SyncOldSMSTask(context));
-
-				setupSyncDialogLayout(false, btnContainer, syncProgress, info, btnDivider);
-
-				sendSMSSyncLogEvent(true);
-			}
-		});
-
-		cancelBtn.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				dialog.dismiss();
-
-				sendSMSSyncLogEvent(false);
-			}
-		});
-
-		dialog.setOnDismissListener(new OnDismissListener()
-		{
-
-			@Override
-			public void onDismiss(DialogInterface dialog)
-			{
-				Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-				editor.putBoolean(HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, true);
-				editor.commit();
-			}
-		});
-
-		dialog.show();
-		return dialog;
-	}
-
-	private static void setupSyncDialogLayout(boolean syncConfirmation, View btnContainer, ProgressBar syncProgress, TextView info, View btnDivider)
-	{
-		btnContainer.setVisibility(syncConfirmation ? View.VISIBLE : View.GONE);
-		syncProgress.setVisibility(syncConfirmation ? View.GONE : View.VISIBLE);
-		btnDivider.setVisibility(syncConfirmation ? View.VISIBLE : View.GONE);
-		info.setText(syncConfirmation ? R.string.import_sms_info : R.string.importing_sms_info);
-	}
-
 	public static int getResolutionId()
 	{
 		if(densityDpi > 480)
@@ -3423,21 +3343,9 @@ public class Utils
 		return !convMessage.isSent() && convMessage.getState() == State.RECEIVED_UNREAD && convMessage.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE;
 	}
 
-	public static Intent createIntentForConversation(Context context, Conversation conversation)
-	{
-		Intent intent = new Intent(context, ChatThread.class);
-		if (conversation.getContactName() != null)
-		{
-			intent.putExtra(HikeConstants.Extras.NAME, conversation.getContactName());
-		}
-		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		return intent;
-	}
-
 	public static void createShortcut(Activity activity, Conversation conv)
 	{
-		Intent shortcutIntent = Utils.createIntentForConversation(activity, conv);
+		Intent shortcutIntent = IntentFactory.createChatThreadIntentFromConversation(activity, conv);
 		Intent intent = new Intent();
 		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
 		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
@@ -3769,6 +3677,66 @@ public class Utils
 		}
 		context.startActivity(i);
 	}
+	
+	
+	public static void addToContacts(List<ContactInfoData> items, String name, Context context, Spinner accountSpinner)
+	{
+
+		AccountData accountData = (AccountData) accountSpinner.getSelectedItem();
+
+		ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+		int rawContactInsertIndex = ops.size();
+
+		ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI).withValue(RawContacts.ACCOUNT_TYPE, accountData.getType())
+				.withValue(RawContacts.ACCOUNT_NAME, accountData.getName()).build());
+
+		for (ContactInfoData contactInfoData : items)
+		{
+			switch (contactInfoData.getDataType())
+			{
+			case ADDRESS:
+				ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI).withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, StructuredPostal.CONTENT_ITEM_TYPE).withValue(StructuredPostal.DATA, contactInfoData.getData())
+						.withValue(StructuredPostal.TYPE, StructuredPostal.TYPE_CUSTOM).withValue(StructuredPostal.LABEL, contactInfoData.getDataSubType()).build());
+				break;
+			case EMAIL:
+				ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI).withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, Email.CONTENT_ITEM_TYPE).withValue(Email.DATA, contactInfoData.getData()).withValue(Email.TYPE, Email.TYPE_CUSTOM)
+						.withValue(Email.LABEL, contactInfoData.getDataSubType()).build());
+				break;
+			case EVENT:
+				ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI).withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, Event.CONTENT_ITEM_TYPE).withValue(Event.DATA, contactInfoData.getData()).withValue(Event.TYPE, Event.TYPE_CUSTOM)
+						.withValue(Event.LABEL, contactInfoData.getDataSubType()).build());
+				break;
+			case PHONE_NUMBER:
+				ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI).withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE).withValue(Phone.NUMBER, contactInfoData.getData()).withValue(Phone.TYPE, Phone.TYPE_CUSTOM)
+						.withValue(Phone.LABEL, contactInfoData.getDataSubType()).build());
+				break;
+			}
+		}
+		ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI).withValueBackReference(Data.RAW_CONTACT_ID, rawContactInsertIndex)
+				.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE).withValue(StructuredName.DISPLAY_NAME, name).build());
+		boolean contactSaveSuccessful;
+		try
+		{
+			context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+			contactSaveSuccessful = true;
+		}
+		catch (RemoteException e)
+		{
+			e.printStackTrace();
+			contactSaveSuccessful = false;
+		}
+		catch (OperationApplicationException e)
+		{
+			e.printStackTrace();
+			contactSaveSuccessful = false;
+		}
+		Toast.makeText(context.getApplicationContext(), contactSaveSuccessful ? R.string.contact_saved : R.string.contact_not_saved, Toast.LENGTH_SHORT).show();
+	}
+
 
 	public static int getNumColumnsForGallery(Resources resources, int sizeOfImage)
 	{
@@ -3861,7 +3829,7 @@ public class Utils
 
 	public static void startChatThread(Context context, ContactInfo contactInfo)
 	{
-		Intent intent = new Intent(context, ChatThread.class);
+		Intent intent = new Intent(context, ChatThreadActivity.class);
 		if (contactInfo.getName() != null)
 		{
 			intent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
@@ -3869,6 +3837,8 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		String whichChatThread = isGroupConversation(contactInfo.getMsisdn()) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD;
+		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, whichChatThread);
 		context.startActivity(intent);
 	}
 
@@ -3939,34 +3909,28 @@ public class Utils
 			return;
 		}
 
-		HikeDialog.showDialog(context, HikeDialog.FAVORITE_ADDED_DIALOG, new HikeDialog.HikeDialogListener()
+		HikeDialogFactory.showDialog(context, HikeDialogFactory.FAVORITE_ADDED_DIALOG, new HikeDialogListener()
 		{
 
 			@Override
-			public void positiveClicked(Dialog dialog)
+			public void positiveClicked(HikeDialog hikeDialog)
 			{
-				dialog.dismiss();
+				hikeDialog.dismiss();
 				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
 			}
 
 			@Override
-			public void neutralClicked(Dialog dialog)
+			public void neutralClicked(HikeDialog hikeDialog)
 			{
 			}
 
 			@Override
-			public void negativeClicked(Dialog dialog)
+			public void negativeClicked(HikeDialog hikeDialog)
 			{
-				dialog.dismiss();
+				hikeDialog.dismiss();
 				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
 			}
 
-			@Override
-			public void onSucess(Dialog dialog)
-			{
-				// TODO Auto-generated method stub
-
-			}
 		}, contactInfo.getFirstName());
 	}
 
@@ -4001,7 +3965,7 @@ public class Utils
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 	}
 
-	public static void addToContacts(Activity context, String msisdn)
+	public static void addToContacts(Context context, String msisdn)
 	{
 		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
 		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
@@ -4904,6 +4868,59 @@ public class Utils
 		return ctx.getResources().getConfiguration().orientation;
 	}
 	
+	public static List<AccountData> getAccountList(Context context)
+	{
+		Account[] a = AccountManager.get(context).getAccounts();
+		// Clear out any old data to prevent duplicates
+		List<AccountData> accounts = new ArrayList<AccountData>();
+
+		// Get account data from system
+		AuthenticatorDescription[] accountTypes = AccountManager.get(context).getAuthenticatorTypes();
+
+		// Populate tables
+		for (int i = 0; i < a.length; i++)
+		{
+			// The user may have multiple accounts with the same name, so we
+			// need to construct a
+			// meaningful display name for each.
+			String type = a[i].type;
+			/*
+			 * Only showing the user's google accounts
+			 */
+			if (!"com.google".equals(type))
+			{
+				continue;
+			}
+			String systemAccountType = type;
+			AuthenticatorDescription ad = getAuthenticatorDescription(systemAccountType, accountTypes);
+			AccountData data = new AccountData(a[i].name, ad, context);
+			accounts.add(data);
+		}
+
+		return accounts;
+	}
+	
+	/**
+	 * Obtain the AuthenticatorDescription for a given account type.
+	 * 
+	 * @param type
+	 *            The account type to locate.
+	 * @param dictionary
+	 *            An array of AuthenticatorDescriptions, as returned by AccountManager.
+	 * @return The description for the specified account type.
+	 */
+	private static AuthenticatorDescription getAuthenticatorDescription(String type, AuthenticatorDescription[] dictionary)
+	{
+		for (int i = 0; i < dictionary.length; i++)
+		{
+			if (dictionary[i].type.equals(type))
+			{
+				return dictionary[i];
+			}
+		}
+		// No match found
+		throw new RuntimeException("Unable to find matching authenticator");
+	}
 	/**
 	 * Fetches the network connection using connectivity manager
 	 * @param context
@@ -5085,7 +5102,7 @@ public class Utils
 		{
 			if (allowOpeningActivity)
 			{
-				IntentManager.openWelcomeActivity(appContext);
+				IntentFactory.openWelcomeActivity(appContext);
 			}
 			return false;
 		}
@@ -5094,7 +5111,7 @@ public class Utils
 		{
 			if (allowOpeningActivity)
 			{
-				IntentManager.openSignupActivity(appContext);
+				IntentFactory.openSignupActivity(appContext);
 			}
 			return false;
 		}

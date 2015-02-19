@@ -32,8 +32,10 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.GalleryAdapter;
 import com.bsb.hike.filetransfer.FileTransferManager;
+import com.bsb.hike.media.AttachmentPicker;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements OnScrollListener, OnItemClickListener, OnItemLongClickListener
@@ -60,6 +62,13 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 	private long previousEventTime;
 
 	private int velocity;
+	
+	public static final String START_FOR_RESULT = "startForResult";
+	
+	/**
+	 * This flag indicates whether this was opened for result or not, i.e. was it startActivityForResult
+	 */
+	private boolean sendResult;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -89,7 +98,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 		GalleryItem selectedBucket = data.getParcelable(HikeConstants.Extras.SELECTED_BUCKET);
 		msisdn = data.getString(HikeConstants.Extras.MSISDN);
-
+		sendResult = data.getBoolean(START_FOR_RESULT);
 		String sortBy;
 		if (selectedBucket != null)
 		{
@@ -311,10 +320,32 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
 		intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET));
-
-		startActivity(intent);
+		
+		if (!sendResult)
+		{
+			startActivity(intent);
+		}
+		else
+		{
+			intent.putExtra(START_FOR_RESULT, sendResult);
+			startActivityForResult(intent, AttachmentPicker.GALLERY);
+		}
 	}
 
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		switch (requestCode)
+		{
+		case AttachmentPicker.GALLERY:
+			Logger.d("GalleryActivity", "Inside onActivityResult : " + requestCode); 
+			setResult(RESULT_OK);
+			finish();
+			break;
+		default:
+			super.onActivityResult(requestCode, resultCode, data);
+		}
+	}
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
@@ -348,7 +379,11 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, galleryItem);
 			intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 			intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
-			startActivity(intent);
+			if (sendResult)
+			{
+				intent.putExtra(START_FOR_RESULT, sendResult);
+			}
+			startActivityForResult(intent, AttachmentPicker.GALLERY);
 		}
 		else
 		{

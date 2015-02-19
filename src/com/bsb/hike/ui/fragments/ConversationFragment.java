@@ -1,6 +1,7 @@
 package com.bsb.hike.ui.fragments;
 
 import com.bsb.hike.platform.HikePlatformConstants;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,7 +18,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -33,6 +33,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
@@ -66,6 +67,9 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.dialog.HikeDialog;
+import com.bsb.hike.dialog.HikeDialogFactory;
+import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -76,24 +80,29 @@ import com.bsb.hike.models.EmptyConversationContactItem;
 import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.tasks.EmailConversationsAsyncTask;
+import com.bsb.hike.ui.HikeFragmentable;
+import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentFactory;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.models.NUXChatReward;
 import com.bsb.hike.models.NUXTaskDetails;
 import com.bsb.hike.models.NuxSelectFriends;
-import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.HikeUser;
 import com.bsb.hike.service.HikeMqttManagerNew;
-import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.*;
 import com.bsb.hike.utils.*;
 import com.bsb.hike.view.HoloCircularProgress;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.*;
-import java.util.Map.Entry;
 
 public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener, HikeFragmentable, OnClickListener
 {
@@ -770,7 +779,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			} 
 			else 
 			{
-				Intent in = IntentManager.openNuxCustomMessage(getActivity());
+				Intent in = IntentFactory.openNuxCustomMessage(getActivity());
 				getActivity().startActivity(in);
 			}
 			break;
@@ -979,7 +988,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return;
 		}
 
-		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), conv);
+		Intent intent = IntentFactory.createChatThreadIntentFromConversation(getSherlockActivity(), conv);
 		startActivity(intent);
 
 		SharedPreferences prefs = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -1003,32 +1012,32 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			dialogStrings[2] = getString(R.string.confirm);
 			dialogStrings[3] = getString(R.string.cancel);
 
-			HikeDialog.showDialog(getActivity(), HikeDialog.RESET_STEALTH_DIALOG, new HikeDialog.HikeDialogListener()
+			HikeDialogFactory.showDialog(getActivity(), HikeDialogFactory.RESET_STEALTH_DIALOG, new HikeDialogListener()
 			{
 
 				@Override
-				public void positiveClicked(Dialog dialog)
+				public void positiveClicked(HikeDialog hikeDialog)
 				{
 					HikeAnalyticsEvent.sendStealthReset();
 					resetStealthMode();
-					dialog.dismiss();
+					hikeDialog.dismiss();
 				}
 
 				@Override
-				public void neutralClicked(Dialog dialog)
+				public void neutralClicked(HikeDialog hikeDialog)
 				{
 
 				}
 
 				@Override
-				public void negativeClicked(Dialog dialog)
+				public void negativeClicked(HikeDialog hikeDialog)
 				{
 					removeTipIfExists(ConversationTip.RESET_STEALTH_TIP);
 
 					Utils.cancelScheduledStealthReset(getActivity());
 
-					dialog.dismiss();
-
+					hikeDialog.dismiss();
+					
 					try
 					{
 						JSONObject metadata = new JSONObject();
@@ -1041,12 +1050,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 				}
 
-				@Override
-				public void onSucess(Dialog dialog)
-				{
-					// TODO Auto-generated method stub
-					
-				}
 			}, dialogStrings);
 		}
 	}
@@ -1197,52 +1200,58 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				else if (getString(R.string.delete_chat).equals(option))
 				{
-					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
-					deleteConfirmDialog.setHeader(R.string.delete);
-					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_chat_msg, conv.getLabel()));
-					
-					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					HikeDialogFactory.showDialog(getActivity(), HikeDialogFactory.DELETE_CHAT_DIALOG, new HikeDialogListener()
 					{
-
+						
 						@Override
-						public void onClick(View v)
+						public void positiveClicked(HikeDialog hikeDialog)
 						{
 							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
 							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
 							Utils.executeConvAsyncTask(task, conv);
-							deleteConfirmDialog.dismiss();
+							hikeDialog.dismiss();
                             if (conv.isBotConv())
                             {
                                 conv.analyticsForBots(HikePlatformConstants.BOT_DELETE_CHAT, AnalyticsConstants.CLICK_EVENT);
                             }
 						}
-					};
-
-					deleteConfirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
-					deleteConfirmDialog.setCancelButton(R.string.no);
-					deleteConfirmDialog.show();
+						
+						@Override
+						public void neutralClicked(HikeDialog hikeDialog)
+						{
+						}
+						
+						@Override
+						public void negativeClicked(HikeDialog hikeDialog)
+						{
+						}
+					}, conv.getLabel());
+					
 				}
 				else if (getString(R.string.delete_leave).equals(option))
 				{
-					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
-					deleteConfirmDialog.setHeader(R.string.delete);
-					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_group_msg, conv.getLabel()));
-					
-					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					HikeDialogFactory.showDialog(getActivity(), HikeDialogFactory.DELETE_GROUP_DIALOG, new HikeDialogListener()
 					{
-
+						
 						@Override
-						public void onClick(View v)
+						public void positiveClicked(HikeDialog hikeDialog)
 						{
 							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
 							deleteConversation(conv);
-							deleteConfirmDialog.dismiss();
+							hikeDialog.dismiss();
 						}
-					};
-
-					deleteConfirmDialog.setOkButton(android.R.string.ok, dialogOkClickListener);
-					deleteConfirmDialog.setCancelButton(R.string.cancel);
-					deleteConfirmDialog.show();
+						
+						@Override
+						public void neutralClicked(HikeDialog hikeDialog)
+						{
+						}
+						
+						@Override
+						public void negativeClicked(HikeDialog hikeDialog)
+						{
+						}
+					}, conv.getLabel());
+					
 				}
 				else if (getString(R.string.email_conversations).equals(option))
 				{
@@ -1383,25 +1392,28 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	}
 
 
-	protected void clearConversation(final Conversation conv) {
-		final CustomAlertDialog clearConfirmDialog = new CustomAlertDialog(this.getActivity());
-		clearConfirmDialog.setHeader(R.string.clear_conversation);
-		clearConfirmDialog.setBody(R.string.confirm_clear_conversation);
-		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+	protected void clearConversation(final Conversation conv)
+	{
+		HikeDialogFactory.showDialog(this.getActivity(), HikeDialogFactory.CLEAR_CONVERSATION_DIALOG, new HikeDialogListener()
 		{
 
 			@Override
-			public void onClick(View v)
+			public void positiveClicked(HikeDialog hikeDialog)
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_CONVERSATION, conv.getMsisdn());
-				clearConfirmDialog.dismiss();
+				hikeDialog.dismiss();
 			}
-		};
 
-		clearConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
-		clearConfirmDialog.setCancelButton(R.string.cancel);
-		clearConfirmDialog.show();
-		
+			@Override
+			public void neutralClicked(HikeDialog hikeDialog)
+			{
+			}
+
+			@Override
+			public void negativeClicked(HikeDialog hikeDialog)
+			{
+			}
+		}, null);
 	}
 
 	private void fetchConversations()
@@ -2927,14 +2939,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (!mAdapter.isEmpty())
 		{
 			Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
-			final CustomAlertDialog deleteDialog = new CustomAlertDialog(getActivity());
-			deleteDialog.setHeader(R.string.deleteconversations);
-			deleteDialog.setBody(R.string.delete_all_question);
-			OnClickListener deleteAllOkClickListener = new OnClickListener()
+			HikeDialogFactory.showDialog(getActivity(), HikeDialogFactory.DELETE_ALL_CONVERSATIONS, new HikeDialogListener()
 			{
 
 				@Override
-				public void onClick(View v)
+				public void positiveClicked(HikeDialog hikeDialog)
 				{
 					Conversation[] convs = new Conversation[mAdapter.getCount()];
 					for (int i = 0; i < convs.length; i++)
@@ -2947,14 +2956,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
 					task.execute(convs);
-					deleteDialog.dismiss();
+					hikeDialog.dismiss();
 				}
-			};
 
-			deleteDialog.setOkButton(R.string.delete, deleteAllOkClickListener);
-			deleteDialog.setCancelButton(R.string.cancel);
+				@Override
+				public void neutralClicked(HikeDialog hikeDialog)
+				{
+				}
 
-			deleteDialog.show();
+				@Override
+				public void negativeClicked(HikeDialog hikeDialog)
+				{
+				}
+			}, null);
 		}
 	}
 

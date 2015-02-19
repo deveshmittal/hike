@@ -40,6 +40,8 @@ public class GroupConversation extends Conversation
 	private LinkedList<String> readByParticipantsList;
 
 	private int groupMemberAliveCount;
+	
+	private ConvMessage impMessage;
 
 	public GroupConversation(String msisdn, String contactName, String groupOwner, boolean isGroupAlive)
 	{
@@ -299,5 +301,15 @@ public class GroupConversation extends Conversation
 	public LinkedList<String> getReadByList()
 	{
 		return readByParticipantsList;
+	}
+	
+	public ConvMessage getImpMessage()
+	{
+		return impMessage;
+	}
+	
+	public void setImpMessage(ConvMessage impMessage)
+	{
+		this.impMessage = impMessage;
 	}
 }

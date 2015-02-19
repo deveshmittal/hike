@@ -31,6 +31,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -44,7 +45,6 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
-import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.TimelineActivity;
@@ -384,9 +384,9 @@ public class ToastListener implements Listener
 
 						Activity activity = (currentActivity != null) ? currentActivity.get() : null;
 
-						if ((activity instanceof ChatThread))
+						if ((activity instanceof ChatThreadActivity))
 						{
-							String contactNumber = ((ChatThread) activity).getContactNumber();
+							String contactNumber = ((ChatThreadActivity) activity).getContactNumber();
 							if (filteredMsisdnList.get(0).equals(contactNumber))
 							{
 								Logger.e("HikeToOffline", "same chat thread open");
@@ -510,9 +510,9 @@ public class ToastListener implements Listener
 						}
 
 						Activity activity = (currentActivity != null) ? currentActivity.get() : null;
-						if ((activity instanceof ChatThread))
+						if ((activity instanceof ChatThreadActivity))
 						{
-							String contactNumber = ((ChatThread) activity).getContactNumber();
+							String contactNumber = ((ChatThreadActivity) activity).getContactNumber();
 							if (message.getMsisdn().equals(contactNumber))
 							{
 								continue;

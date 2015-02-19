@@ -38,7 +38,7 @@ import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
@@ -447,7 +447,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 				Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_INVITE);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
-				IntentManager.openInviteSMS(this);
+				IntentFactory.openInviteSMS(this);
 				break;
 			case WATSAPP:
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.WATS_APP_INVITE);
@@ -493,6 +493,6 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 
 	private void sendInviteViaWatsApp()
 	{
-		IntentManager.openInviteWatsApp(this);
+		IntentFactory.openInviteWatsApp(this);
 	}
 }

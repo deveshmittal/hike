@@ -49,7 +49,6 @@ import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
-import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -1525,7 +1524,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					}
 					
 					conv.setMsgID(msgId);
-					ChatThread.addtoMessageMap(conv);
+					com.bsb.hike.chatthread.ChatThread.addtoMessageMap(conv);
 
 					/*
 					 * msdId > 0 means that the conversation exists.
@@ -1640,7 +1639,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					assert (msgId >= 0);
 				}
 				conv.setMsgID(msgId);
-				ChatThread.addtoMessageMap(conv);
+				com.bsb.hike.chatthread.ChatThread.addtoMessageMap(conv);
 
 				/*
 				 * msdId > 0 means that the conversation exists.

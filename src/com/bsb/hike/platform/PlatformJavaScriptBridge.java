@@ -39,7 +39,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.platform.WebViewCardRenderer.WebViewHolder;
 import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
-import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -351,7 +351,7 @@ public class PlatformJavaScriptBridge
 				}
 			}
 
-			final Intent intent = IntentManager.getForwardIntentForConvMessage(mContext, message,
+			final Intent intent = IntentFactory.getForwardIntentForConvMessage(mContext, message,
 					PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
 			mWebView.post(new Runnable()
 			{
@@ -378,7 +378,7 @@ public class PlatformJavaScriptBridge
 	public void openFullPage(String title, String url)
 	{
 		Logger.i(tag, "open full page called with title " + title + " , and url = " + url);
-		final Intent intent = IntentManager.getWebViewActivityIntent(mContext, url, title);
+		final Intent intent = IntentFactory.getWebViewActivityIntent(mContext, url, title);
 		mWebView.post(new Runnable()
 		{
 			@Override

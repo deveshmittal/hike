@@ -933,7 +933,10 @@ public class UploadFileTask extends FileTransferBase
 				temp /= _totalSize;
 				progressPercentage = (int) temp;
 				if(_state != FTState.PAUSED)
-					LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
+
+				}
 			}
 		}
 
@@ -1308,7 +1311,9 @@ public class UploadFileTask extends FileTransferBase
 			removeTask();
 			this.pausedProgress = -1;
 			if(result != FTResult.PAUSED)
-				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+			{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
+			}
 		}
 
 		if (result != FTResult.PAUSED && result != FTResult.SUCCESS)

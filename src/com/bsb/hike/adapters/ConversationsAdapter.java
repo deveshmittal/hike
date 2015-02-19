@@ -9,8 +9,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.CountDownTimer;
 import android.text.Html;
 import android.text.TextUtils;
@@ -44,22 +42,16 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.ui.HikeListActivity;
-import com.bsb.hike.ui.HikePreferences;
-import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gms.internal.co;
-import com.google.android.gms.internal.ed;
 
 public class ConversationsAdapter extends BaseAdapter
 {
@@ -554,76 +546,80 @@ public class ConversationsAdapter extends BaseAdapter
 
 	}
 	
-	private void onClickGenericAppTip(HikeSharedPreferenceUtil pref){
+	private void onClickGenericAppTip(HikeSharedPreferenceUtil pref)
+	{
 		int what = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC_WHAT, -1);
-		
+
 		try
 		{
 			JSONObject metadata = new JSONObject();
-	
-			switch(what){
+
+			switch (what)
+			{
 			case HikeConstants.ATOMIC_APP_TIP_SETTINGS:
-				IntentManager.openSetting(context);
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_CLICKED);				
+				IntentFactory.openSetting(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_NOTIF:
-				IntentManager.openSettingNotification(context);
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_NOTIF_CLICKED);				
+				IntentFactory.openSettingNotification(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_NOTIF_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_PRIVACY:
-				IntentManager.openSettingPrivacy(context);
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_PRIVACY_CLICKED);				
+				IntentFactory.openSettingPrivacy(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_PRIVACY_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_SMS:
-				IntentManager.openSettingSMS(context);
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_SMS_CLICKED);				
+				IntentFactory.openSettingSMS(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_SMS_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_MEDIA:
-				IntentManager.openSettingMedia(context);
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_MEDIA_CLICKED);				
+				IntentFactory.openSettingMedia(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_MEDIA_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_INVITE_FREE_SMS:
-				IntentManager.openInviteSMS(context);
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_FREE_SMS_CLICKED);				
+				IntentFactory.openInviteSMS(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_FREE_SMS_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_INVITE_WATSAPP:
-				if(Utils.isPackageInstalled(context, HikeConstants.PACKAGE_WATSAPP)){
-					IntentManager.openInviteWatsApp(context);
+				if (Utils.isPackageInstalled(context, HikeConstants.PACKAGE_WATSAPP))
+				{
+					IntentFactory.openInviteWatsApp(context);
 				}
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_WHATSAPP_CLICKED);				
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_WHATSAPP_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_TIMELINE:
-				IntentManager.openTimeLine(context);
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_TIMELINE_CLICKED);				
+				IntentFactory.openTimeLine(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_TIMELINE_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_HIKE_EXTRA:
-				IntentManager.openHikeExtras(context);
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED);				
+				IntentFactory.openHikeExtras(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_HIKE_REWARDS:
-				IntentManager.openHikeRewards(context);
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED);				
+				IntentFactory.openHikeRewards(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			default:
 				return;
 			}
 		}
-		catch(JSONException e)
+
+		catch (JSONException e)
 		{
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 	}
-
+	
 	public void updateViewsRelatedToName(View parentView, Conversation conversation)
 	{
 		ViewHolder viewHolder = (ViewHolder) parentView.getTag();

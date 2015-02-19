@@ -5,7 +5,6 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -34,6 +33,10 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.dialog.CustomAlertDialog;
+import com.bsb.hike.dialog.HikeDialog;
+import com.bsb.hike.dialog.HikeDialogFactory;
+import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
@@ -47,7 +50,6 @@ import com.bsb.hike.tasks.RingtoneFetcherTask;
 import com.bsb.hike.tasks.RingtoneFetcherTask.RingtoneFetchListener;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.ui.utils.LockPattern;
-import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -415,38 +417,38 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (preference.getKey().equals(HikeConstants.UNLINK_PREF))
 		{
-			final CustomAlertDialog confirmDialog = new CustomAlertDialog(HikePreferences.this);
-			confirmDialog.setHeader(R.string.unlink_account);
-			confirmDialog.setBody(R.string.unlink_confirmation);
-			View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+			HikeDialogFactory.showDialog(HikePreferences.this, HikeDialogFactory.UNLINK_ACCOUNT_CONFIRMATION_DIALOG, new HikeDialogListener()
 			{
-
+				
 				@Override
-				public void onClick(View v)
+				public void positiveClicked(HikeDialog hikeDialog)
 				{
 					DeleteAccountTask task = new DeleteAccountTask(HikePreferences.this, false, getApplicationContext());
 					blockingTaskType = BlockingTaskType.UNLINKING_ACCOUNT;
 					setBlockingTask(task);
 					Utils.executeBoolResultAsyncTask(task);
-					confirmDialog.dismiss();
+					hikeDialog.dismiss();
 				}
-			};
-
-			confirmDialog.setOkButton(R.string.unlink_account, dialogOkClickListener);
-			confirmDialog.setCancelButton(R.string.cancel);
-			confirmDialog.show();
-
+				
+				@Override
+				public void neutralClicked(HikeDialog hikeDialog)
+				{
+				}
+				
+				@Override
+				public void negativeClicked(HikeDialog hikeDialog)
+				{
+				}
+			}, null);
 		}
+		
 		else if (preference.getKey().equals(HikeConstants.UNLINK_FB))
 		{
-			final CustomAlertDialog confirmDialog = new CustomAlertDialog(HikePreferences.this);
-			confirmDialog.setHeader(R.string.unlink_facebook);
-			confirmDialog.setBody(R.string.unlink_facebook_confirmation);
-			View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+			HikeDialogFactory.showDialog(HikePreferences.this, HikeDialogFactory.UNLINK_FB_DIALOG, new HikeDialogListener()
 			{
-
+				
 				@Override
-				public void onClick(View v)
+				public void positiveClicked(HikeDialog hikeDialog)
 				{
 					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 					editor.putBoolean(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, false);
@@ -459,38 +461,53 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					}
 					Toast.makeText(getApplicationContext(), R.string.social_unlink_success, Toast.LENGTH_SHORT).show();
 					getPreferenceScreen().removePreference(getPreferenceScreen().findPreference(HikeConstants.UNLINK_FB));
-					confirmDialog.dismiss();
+					
+					hikeDialog.dismiss();
 				}
-			};
-
-			confirmDialog.setOkButton(R.string.unlink, dialogOkClickListener);
-			confirmDialog.setCancelButton(R.string.cancel);
-			confirmDialog.show();
-
+				
+				@Override
+				public void neutralClicked(HikeDialog hikeDialog)
+				{
+					
+				}
+				
+				@Override
+				public void negativeClicked(HikeDialog hikeDialog)
+				{
+					
+				}
+			}, null);
 		}
+		
 		else if (preference.getKey().equals(HikeConstants.UNLINK_TWITTER))
 		{
-			final CustomAlertDialog confirmDialog = new CustomAlertDialog(HikePreferences.this);
-			confirmDialog.setHeader(R.string.unlink_twitter);
-			confirmDialog.setBody(R.string.unlink_twitter_confirmation);
-			View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+			
+			HikeDialogFactory.showDialog(HikePreferences.this, HikeDialogFactory.UNLINK_TWITTER_DIALOG, new HikeDialogListener()
 			{
-
+				
 				@Override
-				public void onClick(View v)
+				public void positiveClicked(HikeDialog hikeDialog)
 				{
 					UnlinkTwitterTask task = new UnlinkTwitterTask(HikePreferences.this, getApplicationContext());
 					blockingTaskType = BlockingTaskType.UNLINKING_TWITTER;
 					setBlockingTask(task);
 					Utils.executeBoolResultAsyncTask(task);
-					confirmDialog.dismiss();
+					hikeDialog.dismiss();
 				}
-			};
-
-			confirmDialog.setOkButton(R.string.unlink, dialogOkClickListener);
-			confirmDialog.setCancelButton(R.string.cancel);
-			confirmDialog.show();
-
+				
+				@Override
+				public void neutralClicked(HikeDialog hikeDialog)
+				{
+					
+				}
+				
+				@Override
+				public void negativeClicked(HikeDialog hikeDialog)
+				{
+					
+				}
+			}, null);
+			
 		}
 		else if (HikeConstants.BLOKED_LIST_PREF.equals(preference.getKey()))
 		{
@@ -641,12 +658,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				dialogStrings[1] = getString(R.string.initiate_reset_stealth_body);
 				dialogStrings[2] = getString(R.string.confirm);
 				dialogStrings[3] = getString(R.string.cancel);
-
-				HikeDialog.showDialog(this, HikeDialog.RESET_STEALTH_DIALOG, new HikeDialog.HikeDialogListener()
+				
+				HikeDialogFactory.showDialog(this, HikeDialogFactory.RESET_STEALTH_DIALOG, new HikeDialogListener()
 				{
 
 					@Override
-					public void positiveClicked(Dialog dialog)
+					public void positiveClicked(HikeDialog hikeDialog)
 					{
 						HikeSharedPreferenceUtil.getInstance(getApplicationContext()).saveData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, System.currentTimeMillis());
 
@@ -659,7 +676,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						startActivity(intent);
 
-						dialog.dismiss();
+						hikeDialog.dismiss();
 						
 						try
 						{
@@ -674,25 +691,20 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					}
 
 					@Override
-					public void neutralClicked(Dialog dialog)
+					public void neutralClicked(HikeDialog hikeDialog)
 					{
 
 					}
 
 					@Override
-					public void negativeClicked(Dialog dialog)
+					public void negativeClicked(HikeDialog hikeDialog)
 					{
-						dialog.dismiss();
+						hikeDialog.dismiss();
 					}
 
-					@Override
-					public void onSucess(Dialog dialog)
-					{
-						// TODO Auto-generated method stub
-						
-					}
 				}, dialogStrings);
 			}
+
 		}
 		else if(HikeConstants.CHANGE_STEALTH_PASSCODE.equals(preference.getKey()))
 		{

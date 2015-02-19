@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/overflowmenu"
     android:layout_width="56dp"
     android:layout_height="match_parent"
     android:background="@drawable/bg_overflow_menu_selector" >

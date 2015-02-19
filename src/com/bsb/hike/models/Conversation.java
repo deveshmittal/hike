@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.platform.HikePlatformConstants;
@@ -75,10 +76,40 @@ public class Conversation implements Comparable<Conversation>
 
 	private MetaData metaData;
 	
+	private ChatTheme theme;
+	
+	private boolean isConvBlocked;
+	
+	/**
+	 * @return the isConvBlocked
+	 */
+	public boolean isConvBlocked()
+	{
+		return isConvBlocked;
+	}
+	
 	private byte isBot = -1;
 	
 	private byte isMuted = -1;
 
+	/**
+	 * @param isConvBlocked the isConvBlocked to set
+	 */
+	public void setConvBlocked(boolean isConvBlocked)
+	{
+		this.isConvBlocked = isConvBlocked;
+	}
+
+	public void setTheme(ChatTheme theme)
+	{
+		this.theme = theme;
+	}
+	
+	public ChatTheme getTheme()
+	{
+		return theme;
+	}
+	
 	public String getLastPin()
 	{
 		return lastPin;
@@ -89,10 +120,22 @@ public class Conversation implements Comparable<Conversation>
 		this.lastPin = string;
 	}
 	
-
+	/**
+	 * Returns -1 if there is a JSON Exception while reading from metadata
+	 * 
+	 * @return
+	 */
 	public int getUnreadPinCount()
 	{
-		return unreadPinCount;
+		try
+		{
+			return metaData.getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+		}
+
+		catch (JSONException e)
+		{
+			return -1;
+		}
 	}
 
 	public void setUnreadPinCount(int unreadPinCount)
