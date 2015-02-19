@@ -42,7 +42,6 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.SocialNetInviteAdapter;
 import com.bsb.hike.models.SocialNetFriendInfo;
@@ -50,7 +49,7 @@ import com.bsb.hike.modules.httpmgr.HttpRequests;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
-import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -277,19 +276,16 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 				{
 					long cursor = -1;
 					IDs ids;
-					System.out.println("Listing followers's ids.");
 					do
 					{
 						ids = twitter.getFollowersIDs(twitter.getId(), cursor);
 						for (long id : ids.getIDs())
 						{
-							System.out.println(id);
 							User user = twitter.showUser(id);
 							SocialNetFriendInfo socialFriend = new SocialNetFriendInfo();
 							socialFriend.setId(user.getScreenName());
 							socialFriend.setName(user.getName());
 							socialFriend.setImageUrl(user.getMiniProfileImageURL());
-							System.out.println(user.getName());
 							list.add(new Pair<AtomicBoolean, SocialNetFriendInfo>(new AtomicBoolean(false), socialFriend));
 						}
 					}
@@ -505,7 +501,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 										data.put(HikeConstants.DATA, d);
 										data.put(HikeConstants.TIMESTAMP, System.currentTimeMillis() / 1000);
 										data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
-										HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, data);
+										HikeMqttManagerNew.getInstance().sendMessage(data, HikeMqttManagerNew.MQTT_QOS_ONE);
 										Logger.d("SocialNetInviteActivity", "fb packet" + data.toString());
 
 										// sendFacebookInviteIds(data);

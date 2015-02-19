@@ -31,7 +31,7 @@ public class StickerPreviewImageDownloadTask
 	{
 		this.categoryId = categoryId;
 	}
-	
+
 	public void execute()
 	{
 		if (!StickerManager.getInstance().isMinimumMemoryAvailable())
@@ -39,17 +39,17 @@ public class StickerPreviewImageDownloadTask
 			onFailure(new HttpException(REASON_CODE_OUT_OF_SPACE));
 			return;
 		}
-		
+
 		long requestId = getRequestId();
 		RequestToken requestToken = StickerPreviewImageDownloadRequest(requestId, categoryId, getRequestInterceptor(), getRequestListener());
-		
-		if(requestToken.isRequestRunning()) // duplicate check
+
+		if (requestToken.isRequestRunning()) // duplicate check
 		{
 			return;
 		}
 		requestToken.execute();
 	}
-	
+
 	private long getRequestId()
 	{
 		return (StickerRequestType.PREVIEW.getLabel() + "\\" + categoryId).hashCode();
@@ -59,7 +59,7 @@ public class StickerPreviewImageDownloadTask
 	{
 		return new IRequestInterceptor()
 		{
-			
+
 			@Override
 			public void intercept(Chain chain)
 			{
@@ -82,7 +82,7 @@ public class StickerPreviewImageDownloadTask
 						onFailure(null);
 						return;
 					}
-				}	
+				}
 				chain.proceed();
 			}
 		};

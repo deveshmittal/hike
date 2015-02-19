@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.httpmgr.RequestToken;
@@ -42,6 +43,7 @@ public class FetchLastSeenTask
 			Logger.w("LastSeenTask", "msisdn is null!");
 			return null;
 		}
+		HAManager.getInstance().recordLastSeenEvent(FetchLastSeenTask.class.getName(), "doInBackground", "Sending req", msisdn);
 
 		RequestToken requestToken = LastSeenRequest(msisdn, getRequestListener(), new LastSeenRetryPolicy());
 		requestToken.execute();
@@ -90,6 +92,8 @@ public class FetchLastSeenTask
 					ContactManager.getInstance().updateIsOffline(msisdn, offline);
 					ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, true);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.LAST_SEEN_TIME_UPDATED, contact);
+					HAManager.getInstance().recordLastSeenEvent(FetchLastSeenTask.class.getName(), "saveResult", "Updated CM", msisdn);
+					HAManager.getInstance().recordLastSeenEvent(FetchLastSeenTask.class.getName(), "onPostExecute", "reseult recv "+ result, msisdn);
 				}
 				catch (JSONException e)
 				{

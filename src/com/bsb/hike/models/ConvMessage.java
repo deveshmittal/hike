@@ -2,16 +2,22 @@ package com.bsb.hike.models;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
+import com.bsb.hike.platform.PlatformWebMessageMetadata;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +80,9 @@ public class ConvMessage
 	// private boolean showResumeButton = true;
 	public ContentLove contentLove;
 	public PlatformMessageMetadata platformMessageMetadata;
+
+	public PlatformWebMessageMetadata platformWebMessageMetadata;
+
 	public boolean isLovePresent(){
 		return contentLove!=null;
 	}
@@ -300,6 +309,7 @@ public class ConvMessage
 		this.unreadCount = other.unreadCount;
 		this.metadata = other.metadata;
 		this.platformMessageMetadata = other.platformMessageMetadata;
+		this.platformWebMessageMetadata = other.platformWebMessageMetadata;
 		this.contentLove = other.contentLove;
 		try {
 			this.readByArray = other.readByArray !=null? new JSONArray(other.readByArray.toString()) : null;
@@ -365,9 +375,21 @@ public class ConvMessage
 				platformMessageMetadata  = new PlatformMessageMetadata(data.optJSONObject(HikeConstants.METADATA), context);
                 platformMessageMetadata.addToThumbnailTable();
                 platformMessageMetadata.thumbnailMap.clear();
-			}else{
-			setMetadata(data.getJSONObject(HikeConstants.METADATA));
-		    }
+			}
+			else if (ConvMessagePacketKeys.WEB_CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE)))
+			{
+				this.messageType  = MESSAGE_TYPE.WEB_CONTENT;
+				platformWebMessageMetadata  = new PlatformWebMessageMetadata(data.optJSONObject(HikeConstants.METADATA));
+			}
+			else if (ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE)))
+			{
+				this.messageType  = MESSAGE_TYPE.FORWARD_WEB_CONTENT;
+				platformWebMessageMetadata  = new PlatformWebMessageMetadata(data.optJSONObject(HikeConstants.METADATA));
+			}
+			else
+			{
+				setMetadata(data.getJSONObject(HikeConstants.METADATA));
+			}
 		}
 		this.isStickerMessage = HikeConstants.STICKER.equals(obj.optString(HikeConstants.SUB_TYPE));
 		/**
@@ -592,7 +614,7 @@ public class ConvMessage
 	public String toString()
 	{
 		return "ConvMessage [mMessage=" + mMessage + ", mMsisdn=" + mMsisdn + ", mTimestamp=" + mTimestamp + ", mIsSent=" + mIsSent + ", mState="
-				+ mState + "]";
+				+ mState +", messageId="+msgID+"]";
 	}
 
 	@Override
@@ -716,6 +738,17 @@ public class ConvMessage
 					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.CONTENT_TYPE);
 					data.put(HikeConstants.METADATA, platformMessageMetadata.getJSON());
 					break;
+
+				case MESSAGE_TYPE.WEB_CONTENT:
+					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.WEB_CONTENT_TYPE);
+					data.put(HikeConstants.METADATA, platformWebMessageMetadata.getJSON());
+					break;
+
+				case MESSAGE_TYPE.FORWARD_WEB_CONTENT:
+					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE);
+					data.put(HikeConstants.METADATA, platformWebMessageMetadata.getJSON());
+					break;
+
 				}
 				
 				object.put(HikeConstants.TYPE, mInvite ? HikeConstants.MqttMessageTypes.INVITE : HikeConstants.MqttMessageTypes.MESSAGE);
@@ -920,6 +953,11 @@ public class ConvMessage
 	 */
 	public boolean isSilent()
 	{
+		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && platformWebMessageMetadata != null)
+		{
+			return platformWebMessageMetadata.isSilent();
+		}
+
 		// Do not play sound in case of bg change, participant joined, nuj/ruj, status updates
 		if ((getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) || (getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
 				|| (getParticipantInfoState() == ParticipantInfoState.USER_JOIN) || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))

@@ -55,7 +55,7 @@ public class SingleStickerDownloadTask
 
 		long requestId = getRequestId(); // for duplicate check
 		
-		RequestToken token = SingleStickerDownloadRequest(requestId, stickerId, categoryId, getInterceptor(), getRequestListener());
+		RequestToken token = SingleStickerDownloadRequest(requestId, stickerId, categoryId, getRequestListener());
 		
 		if(token.isRequestRunning()) // return if request is running
 		{
@@ -67,51 +67,6 @@ public class SingleStickerDownloadTask
 	private long getRequestId()
 	{
 		return (StickerRequestType.SINGLE.getLabel() + "\\" + categoryId + "\\" + stickerId).hashCode();
-	}
-
-	private IRequestInterceptor getInterceptor()
-	{
-		return new IRequestInterceptor()
-		{
-			@Override
-			public void intercept(Chain chain)
-			{
-				String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId);
-
-				if (dirPath == null)
-				{
-					Logger.e(TAG, "Sticker download failed directory does not exist");
-					onFailure(null);
-					return;
-				}
-
-				largeStickerPath = dirPath + HikeConstants.LARGE_STICKER_ROOT + "/" + stickerId;
-				smallStickerPath = dirPath + HikeConstants.SMALL_STICKER_ROOT + "/" + stickerId;
-
-				File largeDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
-				if (!largeDir.exists())
-				{
-					if (!largeDir.mkdirs())
-					{
-						Logger.e(TAG, "Sticker download failed directory not created");
-						onFailure(null);
-						return;
-					}
-				}
-				File smallDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
-				if (!smallDir.exists())
-				{
-					if (!smallDir.mkdirs())
-					{
-						Logger.e(TAG, "Sticker download failed directory not created");
-						onFailure(null);
-						return;
-					}
-				}
-				
-				chain.proceed();
-			}
-		};
 	}
 
 	private IRequestListener getRequestListener()
@@ -140,8 +95,42 @@ public class SingleStickerDownloadTask
 						onFailure(null);
 						return;
 					}
-
+					categoryId = response.getString(StickerManager.CATEGORY_ID); 
+					
 					String stickerData = data.getString(stickerId);
+					
+					String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId);
+
+					if (dirPath == null)
+					{
+						Logger.e(TAG, "Sticker download failed directory does not exist");
+						onFailure(null);
+						return;
+					}
+
+					largeStickerPath = dirPath + HikeConstants.LARGE_STICKER_ROOT + "/" + stickerId;
+					smallStickerPath = dirPath + HikeConstants.SMALL_STICKER_ROOT + "/" + stickerId;
+
+					File largeDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
+					if (!largeDir.exists())
+					{
+						if (!largeDir.mkdirs())
+						{
+							Logger.e(TAG, "Sticker download failed directory not created");
+							onFailure(null);
+							return;
+						}
+					}
+					File smallDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
+					if (!smallDir.exists())
+					{
+						if (!smallDir.mkdirs())
+						{
+							Logger.e(TAG, "Sticker download failed directory not created");
+							onFailure(null);
+							return;
+						}
+					}
 
 					Utils.saveBase64StringToFile(new File(largeStickerPath), stickerData);
 

@@ -121,15 +121,15 @@ public class UI {
             case Configuration.SCREENLAYOUT_SIZE_SMALL:
                 return SMALL;
             case Configuration.SCREENLAYOUT_SIZE_NORMAL:
-            	if(Utils.densityMultiplier >= 2)
+            	if(Utils.scaledDensityMultiplier >= 2)
             	{
                     return XLARGE;
             	}
-            	else if(Utils.densityMultiplier >= 1.5)
+            	else if(Utils.scaledDensityMultiplier >= 1.5)
             	{
                     return LARGE;
             	}
-            	else if(Utils.densityMultiplier >= 1)
+            	else if(Utils.scaledDensityMultiplier >= 1)
             	{
             		return NORMAL;
             	}

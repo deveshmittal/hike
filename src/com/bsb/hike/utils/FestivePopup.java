@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
@@ -21,6 +24,8 @@ import android.widget.RelativeLayout;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.ui.HomeActivity;
 
@@ -30,16 +35,17 @@ public class FestivePopup
 
 	public static SnowFallView snowFallView; 
 	
-	public static final int REPUBLIC_DAY_POPUP = 2;
+	public static final int VALENTINE_DAY_POPUP = 3;
 
-	public static SnowFallView startAndSetSnowFallView(final HomeActivity activity, final int popupType)
+	public static SnowFallView startAndSetSnowFallView(final HomeActivity activity, final int popupType, 
+			final boolean toShowAnimation)
 	{
 		if (activity == null)
 		{
 			return null;
 		}
 
-		if(popupType !=  REPUBLIC_DAY_POPUP)
+		if(popupType !=  VALENTINE_DAY_POPUP)
 		{
 			return null;
 		}
@@ -48,7 +54,7 @@ public class FestivePopup
 		AlphaAnimation alphaAnim = new AlphaAnimation(0.2f, 1f);
 		alphaAnim.setFillAfter(true);
 
-		if (((int) Utils.densityMultiplier * 100) >= 100)
+		if (toShowAnimation && ((int) Utils.densityMultiplier * 100) >= 100)
 		{
 			alphaAnim.setDuration(1400);
 			activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
@@ -114,6 +120,19 @@ public class FestivePopup
 			
 			@Override
 			public void onClick(View v) {
+				stopFestiveAnimAndPopup(activity);
+				
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FESTIVE_POPUP_WISH);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
+
 				new Handler().postDelayed(new Runnable()
 				{
 					@Override
@@ -122,8 +141,17 @@ public class FestivePopup
 						stopFestiveAnimAndPopup(activity);
 					}
 				}, 500);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FESTIVE_POPUP_WISH);
-				Intent intent = IntentManager.getForwardStickerIntent(activity, getStickerId(popupType), getCatId(popupType), false);
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.FESTIVE_POPUP_WISH);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);					
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
+				Intent intent = IntentManager.getForwardStickerIntent(activity, getStickerId(popupType), getCatId(popupType));
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				activity.startActivity(intent);
 			}
@@ -132,7 +160,16 @@ public class FestivePopup
 			
 			@Override
 			public void onClick(View v) {
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FESTIVE_POPUP_DISMISS);
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FESTIVE_POPUP_DISMISS);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 				stopFestiveAnimAndPopup(activity);
 			}
 		});
@@ -140,12 +177,12 @@ public class FestivePopup
 
 	private static String getStickerId(int popupType)
 	{
-		return "086_vandemataram.png";
+		return "023_cupidhikin.png";
 	}
 
 	private static String getCatId(int popupType)
 	{
-		return "humanoid";
+		return "festive";
 	}
 
 	private static void addMoveUpAnimation(View view)
@@ -167,7 +204,7 @@ public class FestivePopup
 		aa1.setDuration(350);
 		boxFallAnimSet.addAnimation(aa1);
 
-		Animation boxFallAnim = new TranslateAnimation(0, 0, -400 * Utils.densityMultiplier, 0);
+		Animation boxFallAnim = new TranslateAnimation(0, 0, -400 * Utils.scaledDensityMultiplier, 0);
 		boxFallAnim.setDuration(900);
 		boxFallAnimSet.addAnimation(boxFallAnim);
 
@@ -212,7 +249,7 @@ public class FestivePopup
 
 	public static boolean isPastFestiveDate(int type)
 	{
-		String republicDayDate = "2015-01-26";
+		String valentineDayDate = "2015-02-14";
 
 		Date currentDate, festiveDate;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -220,7 +257,7 @@ public class FestivePopup
 
 		try
 		{
-			festiveDate = sdf.parse(republicDayDate);
+			festiveDate = sdf.parse(valentineDayDate);
 			currentDate = sdf.parse(current);
 
 			if(currentDate.after(festiveDate))

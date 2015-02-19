@@ -30,6 +30,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -138,7 +139,7 @@ public class VoIPUtils {
 		message.put(HikeConstants.SUB_TYPE, subtype);
 		message.put(HikeConstants.DATA, data);
 		
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
+		HikeMqttManagerNew.getInstance().sendMessage(message, HikeMqttManagerNew.MQTT_QOS_ONE);
     }
 
     /**
@@ -215,7 +216,7 @@ public class VoIPUtils {
 			message.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING);
 			message.put(HikeConstants.DATA, data);
 			
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
+			HikeMqttManagerNew.getInstance().sendMessage(message, HikeMqttManagerNew.MQTT_QOS_ONE);
 			Logger.d(VoIPConstants.TAG, "Sent missed call notifier to partner.");
 			
 		} catch (JSONException e) {
@@ -315,7 +316,7 @@ public class VoIPUtils {
 		incrementActiveCallCount(context);
 		if(shouldShowCallRatePopupNow(context) && callListener!=null)
 		{
-			callListener.onVoipCallEnd(bundle);
+			callListener.onVoipCallEnd(bundle, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
 		}
 		setupCallRatePopupNextTime(context);
 	}
@@ -362,4 +363,19 @@ public class VoIPUtils {
 		int port = prefs.getInt(HikeConstants.VOIP_RELAY_SERVER_PORT, VoIPConstants.ICEServerPort);
 		return port;
 	}
+	
+	public static int getQualityTestAcceptablePacketLoss(Context context) {
+		
+		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		int apl = prefs.getInt(HikeConstants.VOIP_QUALITY_TEST_ACCEPTABLE_PACKET_LOSS, 20);
+		return apl;
+	}
+	
+	public static int getQualityTestSimulatedCallDuration(Context context) {
+		
+		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		int scd = prefs.getInt(HikeConstants.VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION, 2);
+		return scd;
+	}
+	
 }

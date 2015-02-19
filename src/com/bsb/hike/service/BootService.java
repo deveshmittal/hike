@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -29,7 +31,7 @@ public class BootService extends BroadcastReceiver
 		if (TextUtils.isEmpty(mprefs.getData(HikeMessengerApp.TOKEN_SETTING, null)))
 		{
 			return;
-		}
+		}		
 		
 		if(!Utils.isUserSignedUp(ctx.getApplicationContext(), false))
 		{
@@ -37,7 +39,6 @@ public class BootService extends BroadcastReceiver
 		}
 		
 		Intent startServiceIntent = new Intent(ctx, HikeService.class);
-		ctx.startService(startServiceIntent);
+		ctx.startService(startServiceIntent);		
 	}
-
 }

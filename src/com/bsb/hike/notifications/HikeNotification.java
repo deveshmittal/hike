@@ -27,6 +27,9 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.AnalyticsConstants.AppOpenSource;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -44,7 +47,6 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.voip.VoIPConstants;
 
 public class HikeNotification
 {
@@ -530,11 +532,11 @@ public class HikeNotification
 			avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
 		}
 
+		// Possibility to show big picture message
+		ConvMessage convMessage = hikeNotifMsgStack.getLastInsertedConvMessage();
+					
 		if (hikeNotifMsgStack.getSize() == 1)
 		{
-			// Possibility to show big picture message
-			ConvMessage convMessage = hikeNotifMsgStack.getLastInsertedConvMessage();
-
 			if (convMessage.isInvite())
 			{
 				return;
@@ -544,6 +546,9 @@ public class HikeNotification
 				Bitmap bigPictureImage = ToastListener.returnBigPicture(convMessage, context);
 				if (bigPictureImage != null)
 				{
+					HAManager.getInstance().setMetadatFieldsForSessionEvent(AnalyticsConstants.AppOpenSource.FROM_NOTIFICATION, convMessage.getMsisdn(), convMessage,
+							AnalyticsConstants.ConversationType.NORMAL);
+					
 					showNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 							hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 							hikeNotifMsgStack.getNotificationBigText(), convMessage.getMsisdn(), bigPictureImage, !convMessage.isStickerMessage(), false, false,
@@ -555,6 +560,9 @@ public class HikeNotification
 
 		if (hikeNotifMsgStack.getSize() == 1)
 		{
+			HAManager.getInstance().setMetadatFieldsForSessionEvent(AnalyticsConstants.AppOpenSource.FROM_NOTIFICATION, convMessage.getMsisdn(), convMessage,
+					AnalyticsConstants.ConversationType.NORMAL);
+			
 			showBigTextStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 					hikeNotifMsgStack.getNotificationBigText(), isSingleMsisdn ? hikeNotifMsgStack.lastAddedMsisdn : "bulk", hikeNotifMsgStack.getNotificationSubText(),
@@ -563,6 +571,9 @@ public class HikeNotification
 		}
 		else if (!hikeNotifMsgStack.isEmpty())
 		{
+			HAManager.getInstance().setMetadatFieldsForSessionEvent(AnalyticsConstants.AppOpenSource.FROM_NOTIFICATION, convMessage.getMsisdn(), convMessage,
+					AnalyticsConstants.ConversationType.NORMAL);
+			
 			showInboxStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 					hikeNotifMsgStack.getNotificationBigText(), isSingleMsisdn ? hikeNotifMsgStack.lastAddedMsisdn : "bulk", hikeNotifMsgStack.getNotificationSubText(),
@@ -1111,7 +1122,7 @@ public class HikeNotification
 			if (!shouldNotPlayNotification)
 			{
 				Logger.i("notif", "sound " + notifSound);
-				
+
 				if (!NOTIF_SOUND_OFF.equals(notifSound))
 				{
 					if (NOTIF_SOUND_HIKE.equals(notifSound))
@@ -1171,6 +1182,9 @@ public class HikeNotification
 
 	public void setNotificationIntentForBuilder(NotificationCompat.Builder mBuilder, Intent notificationIntent)
 	{
+		//Adding Extra to check While receiving that user has come via clicking Notification
+		notificationIntent.putExtra(AnalyticsConstants.APP_OPEN_SOURCE_EXTRA, AppOpenSource.FROM_NOTIFICATION);
+		
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		mBuilder.setContentIntent(contentIntent);
 	}
@@ -1243,5 +1257,5 @@ public class HikeNotification
 	{
 		HikeAlarmManager.cancelAlarm(context, HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION);
 	}
-
+	
 }

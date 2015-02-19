@@ -230,7 +230,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) tipView.getLayoutParams();
 			int screenWidth = getResources().getDisplayMetrics().widthPixels;
 			int buttonWidth = screenWidth / 4;
-			int marginRight = (int) ((buttonWidth / 2) - ((int) 22 * Utils.densityMultiplier));
+			int marginRight = (int) ((buttonWidth / 2) - ((int) 22 * Utils.scaledDensityMultiplier));
 			layoutParams.rightMargin = marginRight;
 
 			tipView.setLayoutParams(layoutParams);

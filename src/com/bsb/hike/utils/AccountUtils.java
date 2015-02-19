@@ -88,6 +88,14 @@ public class AccountUtils
 	public static final String PRODUCTION_HOST = "api.im.hike.in";
 
 	public static final String STAGING_HOST = "staging.im.hike.in";
+	
+	public static final String DEV_STAGING_HOST = "staging2.im.hike.in";
+	
+	public static final int _PRODUCTION_HOST = 0;
+
+	public static final int _STAGING_HOST = 1;
+
+	public static final int _DEV_STAGING_HOST = 2;
 
 	public static final int PRODUCTION_PORT = 80;
 
@@ -109,13 +117,13 @@ public class AccountUtils
 
 	public static String fileTransferHost = PRODUCTION_FT_HOST;
 
-	public static String fileTransferUploadBase = HTTP_STRING + fileTransferHost + ":" + Integer.toString(port) + "/v1";
+	public static String fileTransferBase = HTTP_STRING + fileTransferHost + ":" + Integer.toString(port) + "/v1";
 
 	public static final String FILE_TRANSFER_DOWNLOAD_BASE = "/user/ft/";
 
-	public static String fileTransferBaseDownloadUrl = base + FILE_TRANSFER_DOWNLOAD_BASE;
+	public static String fileTransferBaseDownloadUrl = fileTransferBase + FILE_TRANSFER_DOWNLOAD_BASE;
 	
-	public static String fastFileUploadUrl = base + FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
+	public static String fastFileUploadUrl = fileTransferBase + FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 
 	public static String partialfileTransferBaseUrl = base + "/user/pft";
 
@@ -179,6 +187,10 @@ public class AccountUtils
 	
 	public static final String SDK_AUTH_PARAM_SHA1 = "sha1";
 
+	public static final String ANALYTICS_UPLOAD_BASE = "/logs/analytics";
+	
+	public static String analyticsUploadUrl = base + ANALYTICS_UPLOAD_BASE;
+	
 	public static void setToken(String token)
 	{
 		mToken = token;
@@ -192,6 +204,11 @@ public class AccountUtils
 	public static void setAppVersion(String version)
 	{
 		appVersion = version;
+	}
+
+	public static String getAppVersion()
+	{
+		return appVersion;
 	}
 
 	public static synchronized HttpClient createClient()
@@ -421,7 +438,7 @@ public class AccountUtils
 	public static int getBytesUploaded(String sessionId) throws ClientProtocolException, IOException
 	{
 		int val = 0;
-		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferUploadBase + "/user/pft/");
+		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferBase + "/user/pft/");
 		addToken(req);
 		req.addHeader("X-SESSION-ID", sessionId);
 		HttpClient httpclient = getClient(req);

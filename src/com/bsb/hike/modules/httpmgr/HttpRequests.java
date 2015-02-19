@@ -58,7 +58,7 @@ import com.bsb.hike.utils.Utils;
 
 public class HttpRequests
 {
-	public static RequestToken SingleStickerDownloadRequest(long requestId, String stickerId, String categoryId, IRequestInterceptor interceptor, IRequestListener requestListener)
+	public static RequestToken SingleStickerDownloadRequest(long requestId, String stickerId, String categoryId, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(singleStickerDownloadBase() + "?catId=" + categoryId + "&stId=" + stickerId + "&resId=" + Utils.getResolutionId())
@@ -66,7 +66,6 @@ public class HttpRequests
 				.setRequestListener(requestListener)
 				.build();
 		
-		requestToken.getRequestInterceptors().addLast("sticker", interceptor);
 		return requestToken;
 	}
 
@@ -86,7 +85,7 @@ public class HttpRequests
 	public static RequestToken StickerShopDownloadRequest(long requestId, int offset, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(stickerShopDownloadUrl() + "?offset=" + offset)
+				.setUrl(stickerShopDownloadUrl() + "?offset=" + offset + "&resId=" + Utils.getResolutionId())
 				.setId(requestId)
 				.setRequestListener(requestListener)
 				.setRequestType(REQUEST_TYPE_SHORT)

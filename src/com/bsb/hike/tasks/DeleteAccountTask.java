@@ -23,6 +23,7 @@ import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
@@ -96,6 +97,14 @@ public class DeleteAccountTask implements ActivityCallableTask
 		appPrefEditor.clear();
 		editor.commit();
 		appPrefEditor.commit();
+
+		NUXManager.getInstance().shutDownNUX();
+		/**
+		 * Stopping hike service which will call destroy mqtt
+		 */
+		HikeMessengerApp app = HikeMessengerApp.getInstance();
+		app.setServiceAsDisconnected();
+		app.stopService(new Intent(ctx, HikeService.class));
 
 		/**
 		 * Unregister from GCM service

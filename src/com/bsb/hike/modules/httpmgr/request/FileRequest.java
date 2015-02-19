@@ -76,6 +76,8 @@ public class FileRequest extends Request<File>
 		{
 			if (fos != null)
 			{
+				fos.flush();
+				fos.getFD().sync();
 				fos.close();
 			}
 		}
