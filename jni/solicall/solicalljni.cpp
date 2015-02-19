@@ -40,18 +40,19 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_packageInit
 
 extern "C"
 JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_AECInit
-  (JNIEnv *env, jobject obj) {
+  (JNIEnv *env, jobject obj, jint CpuNR, jint CpuAEC, jshort AECMinOutputPercentageDuringEcho,
+			jshort AECTypeParam, jshort ComfortNoisePercent) {
 
     sSoliCallInit mySoliCallInit;
 
     // Advanced AEC
-    mySoliCallInit.iCPUPower = 2;
+    mySoliCallInit.iCPUPower = CpuAEC;
     mySoliCallInit.sBitsPerSample = (BYTES_PER_SAMPLE==1)?8:16;
     mySoliCallInit.iFrequency = SAMPLE_RATE;
     mySoliCallInit.sFrameSize = FRAME_MULTIPLIER;
     mySoliCallInit.sLookAheadSize = 0;
     mySoliCallInit.bDoNotChangeTheOutput = false;
-    mySoliCallInit.sAECTypeParam = 8;
+    mySoliCallInit.sAECTypeParam = AECTypeParam; // 8;
     mySoliCallInit.sDelaySize = 2;
     mySoliCallInit.sMaxAsyncSpeakerDelayAECParam = 50;
     mySoliCallInit.sMaxAsyncMicDelayAECParam = 50;
@@ -64,15 +65,15 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_AECInit
     mySoliCallInit.sAECMinTailType = -1;
     mySoliCallInit.iNumberOfSamplesInAECBurst = 2000;
     mySoliCallInit.iNumberOfSamplesInHighConfidenceAECBurst = 2000;
-    mySoliCallInit.sAECMinOutputPercentageDuringEcho = 100; // 25;
+    mySoliCallInit.sAECMinOutputPercentageDuringEcho = AECMinOutputPercentageDuringEcho; // 100; // 25;
 
     mySoliCallInit.sAecStartupAggressiveLevel = 10;
-    mySoliCallInit.sComfortNoisePercent = 100;
+    mySoliCallInit.sComfortNoisePercent = ComfortNoisePercent; // 100;
 
     // Initialize AEC
 	int iRes = SoliCallAECInit(CHANNEL_ID,&mySoliCallInit);
 
-    mySoliCallInit.iCPUPower = 2;
+    mySoliCallInit.iCPUPower = CpuNR;
     mySoliCallInit.sBitsPerSample = (BYTES_PER_SAMPLE==1)?8:16;
 	mySoliCallInit.iFrequency = SAMPLE_RATE;
 	mySoliCallInit.sFrameSize = FRAME_MULTIPLIER;

@@ -153,7 +153,7 @@ public class VoIPService extends Service {
 	private static final byte PP_PROTOCOL_BUFFER = 0x03;
 	
 	// Echo cancellation
-	private boolean resamplerEnabled = true;
+	private boolean resamplerEnabled = false;
 	private final boolean aecEnabled = true;
 	private boolean useVADToReduceData = false;
 	SolicallWrapper solicallAec = null;
@@ -217,17 +217,17 @@ public class VoIPService extends Service {
 		minBufSizeRecording = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		
 		if (aecEnabled) {
-			Logger.w(VoIPConstants.TAG, "minBufSizeRecording: " + minBufSizeRecording);
+			Logger.w(VoIPConstants.TAG, "Old minBufSizeRecording: " + minBufSizeRecording);
 			if (minBufSizeRecording < SolicallWrapper.SOLICALL_FRAME_SIZE * 2) {
-				Logger.w(VoIPConstants.TAG, "Rounding up.");
 				minBufSizeRecording = SolicallWrapper.SOLICALL_FRAME_SIZE * 2;
 			} else {
-				Logger.w(VoIPConstants.TAG, "Setting to a multiple.");
 				minBufSizeRecording = ((minBufSizeRecording + (SolicallWrapper.SOLICALL_FRAME_SIZE * 2) - 1) / (SolicallWrapper.SOLICALL_FRAME_SIZE * 2)) * SolicallWrapper.SOLICALL_FRAME_SIZE * 2;
-//				aecEnabled = false;
 			}
-			Logger.w(VoIPConstants.TAG, "new minBufSizeRecording: " + minBufSizeRecording);
+			Logger.w(VoIPConstants.TAG, "New minBufSizeRecording: " + minBufSizeRecording);
 		}
+		
+		// CPU Info
+		Logger.d(VoIPConstants.TAG, "CPU: " + VoIPUtils.getCPUInfo());
 	}
 
 	@Override
@@ -1144,6 +1144,8 @@ public class VoIPService extends Service {
 				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				byte[] compressedData = new byte[OpusWrapper.OPUS_FRAME_SIZE * 10];
 				int compressedDataLength = 0;
+				boolean lowBitrateTrigger = false;
+				
 				while (keepRunning == true) {
 					VoIPDataPacket dpencode = samplesToEncodeQueue.peek();
 					if (dpencode != null) {
@@ -1153,10 +1155,28 @@ public class VoIPService extends Service {
 						if (solicallAec != null && aecEnabled && aecMicSignal && aecSpeakerSignal) {
 							int ret = solicallAec.processMic(dpencode.getData());
 							
-							// If we don't detect voice, then send nothing
-							if (ret == 0 && useVADToReduceData) {
-//								Logger.d(VoIPConstants.TAG, "Not sending anything.");
-								continue;
+							if (useVADToReduceData) {
+								
+								/*
+								 * If the mic signal does not contain voice, we can handle the situation in three ways -
+								 * 1. Don't transmit anything. The other end will fill up the gap with silence. Downside - signal quality indicator will switch to weak. 
+								 * 2. Send a special "silent" packet. Downside - older builds will not support this, and fall back to (1).
+								 * 3. Lower the bitrate for non-voice packets. Downside - (1) and (2) will reduce the CPU usage, and lower bandwidth consumption even more. 
+								 */
+
+								// Approach (3)
+								if (ret == 0) {
+									if (!lowBitrateTrigger) {
+										Logger.w(VoIPConstants.TAG, "No voice.");
+										lowBitrateTrigger = true;
+										opusWrapper.setEncoderBitrate(OpusWrapper.OPUS_LOWEST_SUPPORTED_BITRATE);
+									}
+								} else if (lowBitrateTrigger) {
+									// Mic signal is reverting to voice
+									Logger.w(VoIPConstants.TAG, "Voice is back.");
+									lowBitrateTrigger = false;
+									opusWrapper.setEncoderBitrate(localBitrate);
+								}
 							}
 						} else
 							aecMicSignal = true;
@@ -1259,42 +1279,6 @@ public class VoIPService extends Service {
 				
 				int audioSource = VoIPUtils.getAudioSource();
 
-				/*
-				if (android.os.Build.VERSION.SDK_INT >= 16) {
-					// Attach noise suppressor
-					if (NoiseSuppressor.isAvailable()) {
-						NoiseSuppressor ns = NoiseSuppressor.create(recorder.getAudioSessionId());
-						if (ns != null) {
-							ns.setEnabled(true);
-							Logger.d(VoIPConstants.TAG, "Initial NS status: " + ns.getEnabled());
-						}
-					} else {
-						Logger.d(VoIPConstants.TAG, "Noise suppression not available.");
-					}
-					
-					// Attach echo cancellation
-					if (AcousticEchoCanceler.isAvailable()) {
-						AcousticEchoCanceler aec = AcousticEchoCanceler.create(recorder.getAudioSessionId());
-						if (aec != null) { 
-							Logger.d(VoIPConstants.TAG, "Initial AEC status: " + aec.getEnabled());
-							aec.setEnabled(true);
-						}
-					} else {
-						Logger.d(VoIPConstants.TAG, "Echo cancellation not available.");
-					}
-					
-					// Attach gain control
-					if (AutomaticGainControl.isAvailable()) {
-						AutomaticGainControl agc = AutomaticGainControl.create(recorder.getAudioSessionId());
-						if (agc != null) {
-							Logger.d(VoIPConstants.TAG, "Initial AGC status: " + agc.getEnabled());
-							agc.setEnabled(true);
-						}
-					} else {
-						Logger.d(VoIPConstants.TAG, "Automatic gain control not available.");
-					}
-				}
-				*/
 				// Start recording audio from the mic
 				try
 				{
@@ -1323,9 +1307,12 @@ public class VoIPService extends Service {
 					retVal = recorder.read(recordedData, 0, recordedData.length);
 					if (retVal != recordedData.length)
 						Logger.w(VoIPConstants.TAG, "Unexpected recorded data length. Expected: " + recordedData.length + ", Recorded: " + retVal);
+					
 					if (mute == true)
 						continue;
 
+					Logger.d(VoIPConstants.TAG, "Recorded: " + retVal);
+					
 					// Break input audio into smaller chunks
                 	while (index < retVal) {
                 		if (retVal - index < SolicallWrapper.SOLICALL_FRAME_SIZE * 2)
@@ -1491,7 +1478,7 @@ public class VoIPService extends Service {
 		                	synchronized (decodedBuffersQueue) {
 			                	decodedBuffersQueue.add(silentPacket);
 			                	decodedBuffersQueue.notify();
-			                	Logger.w(VoIPConstants.TAG, "Adding silence");
+			                	Logger.d(VoIPConstants.TAG, "Adding silence");
 							}
 						}
 

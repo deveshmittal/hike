@@ -1,5 +1,9 @@
 package com.bsb.hike.voip;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -13,7 +17,6 @@ import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -24,6 +27,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.TelephonyManager;
@@ -409,4 +413,23 @@ public class VoIPUtils {
 		return scd;
 	}
 	
+	public static String getCPUInfo() {
+	    StringBuffer sb = new StringBuffer();
+	    sb.append("abi: ").append(Build.CPU_ABI).append("\n");
+	    if (new File("/proc/cpuinfo").exists()) {
+	        try {
+	            BufferedReader br = new BufferedReader(new FileReader(new File("/proc/cpuinfo")));
+	            String aLine;
+	            while ((aLine = br.readLine()) != null) {
+	                sb.append(aLine + "\n");
+	            }
+	            if (br != null) {
+	                br.close();
+	            }
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        } 
+	    }
+	    return sb.toString();
+	}	
 }
