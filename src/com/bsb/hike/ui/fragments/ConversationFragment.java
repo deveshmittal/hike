@@ -110,7 +110,6 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.HikeTip.TipType;
-
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
@@ -310,9 +309,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			emptyView.setVisibility(View.GONE);
 		}
 		ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
-//		View searchEmptyView = getView().findViewById(R.id.search_empty_view);
-//		searchEmptyView.setVisibility(View.VISIBLE);
-//		friendsList.setEmptyView(searchEmptyView);
+		View searchEmptyView = getView().findViewById(R.id.searchEmptyView);
+		searchEmptyView.setVisibility(View.VISIBLE);
+		String emptyText = String.format(getActivity().getString(R.string.home_search_empty_text), searchText);
+		TextView emptyTextView = (TextView) searchEmptyView.findViewById(R.id.empty_search_txt);
+		emptyTextView.setText(emptyText);
+		friendsList.setEmptyView(searchEmptyView);
 	}
 
 	private void bindNuxViews(final View root)
@@ -860,7 +862,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			ViewGroup emptyHolder = (ViewGroup) getView().findViewById(R.id.emptyViewHolder);
 			emptyView = LayoutInflater.from(getActivity()).inflate(R.layout.conversation_empty_view2, emptyHolder);
 			// emptyHolder.addView(emptyView);
-			// getView().findViewById(R.id.search_empty_view).setVisibility(View.GONE);
+			getView().findViewById(R.id.searchEmptyView).setVisibility(View.GONE);
 			ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
 			friendsList.setEmptyView(emptyView);
 		}
@@ -1055,6 +1057,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	public void onSearchQueryChanged(String s)
 	{
 		searchText = s;
+		setEmptyState();
 		mAdapter.onQueryChanged(s);
 	}
 

@@ -1346,4 +1346,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="valentine_day">Happy Valentine\'s Day</string>
     <string name="terms_conditions_hint">Terms and Conditions</string>
 	<string name="terms_conditions_title">T &amp; C</string>
+	<string name="home_search_empty_text">Your search \'%1$s\' did not match any contacts.</string>
 </resources>
