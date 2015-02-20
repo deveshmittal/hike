@@ -48,6 +48,7 @@ import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.httpmgr.HttpManager;
+import com.bsb.hike.modules.httpmgr.HttpRequestConstants;
 import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
@@ -805,7 +806,8 @@ public void onTrimMemory(int level)
 		}
 
 		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), Utils.switchSSLOn(getApplicationContext()));
-
+		HttpRequestConstants.setUpBase();
+		
 		typingNotificationMap = new HashMap<String, TypingNotification>();
 
 		stealthMsisdn = new HashSet<String>();

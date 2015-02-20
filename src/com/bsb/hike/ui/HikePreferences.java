@@ -35,6 +35,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.DBBackupRestore;
+import com.bsb.hike.service.HikeMqttManagerNew;
+import com.bsb.hike.modules.httpmgr.HttpRequestConstants;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.BackupAccountTask;
 import com.bsb.hike.tasks.BackupAccountTask.BackupAccountListener;
@@ -770,6 +772,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		else if (HikeConstants.SSL_PREF.equals(preference.getKey()))
 		{
 			Utils.setupUri(this.getApplicationContext());
+			HttpRequestConstants.toggleSSL();
 			LocalBroadcastManager.getInstance(this.getApplicationContext()).sendBroadcast(new Intent(HikePubSub.SSL_PREFERENCE_CHANGED));
 		}
 		else if (HikeConstants.STATUS_BOOLEAN_PREF.equals(preference.getKey()))

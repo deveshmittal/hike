@@ -60,6 +60,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.httpmgr.HttpRequestConstants;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
@@ -1333,6 +1334,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 				}
 			}
 			Utils.setupUri(context); // TODO : this should be moved out from here to some other place
+			HttpRequestConstants.toggleSSL();
 		}
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
 		{

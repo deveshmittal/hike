@@ -1,5 +1,9 @@
 package com.bsb.hike.modules.httpmgr;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Utils;
+
 public class HttpRequestConstants
 {
 	private static boolean isProduction = true;
@@ -17,16 +21,32 @@ public class HttpRequestConstants
 	private static String BASE_URL = HTTP + PRODUCTION_API;
 	
 	private static final String BASE_V1 = "/v1";
-	
-	public static synchronized void toggleStaging(boolean production)
+
+	private static final String BASE_V2 = "/v2";
+
+	private static final String BASE_ACCOUNT = "/account";
+
+	private static final String BASE_USER = "/user";
+
+	private static final String BASE_STICKER = "/stickers";
+
+	private static final String BASE_INVITE = "/invite";
+
+	public static synchronized void setUpBase()
 	{
-		isProduction = production;
-		changeBaseUrl();
+		toggleStaging();
+		toggleSSL();
 	}
 	
-	public static synchronized void toggleSSL(boolean ssl)
+	public static synchronized void toggleStaging()
 	{
-		isSSL = ssl;
+		isProduction = HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.getInstance()).getData(HikeMessengerApp.PRODUCTION, true);
+		changeBaseUrl();
+	}
+
+	public static synchronized void toggleSSL()
+	{
+		isSSL = Utils.switchSSLOn(HikeMessengerApp.getInstance());
 		changeBaseUrl();
 	}
 	
