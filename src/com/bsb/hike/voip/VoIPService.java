@@ -36,9 +36,6 @@ import android.media.AudioTrack.OnPlaybackPositionUpdateListener;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.media.SoundPool;
-import android.media.audiofx.AcousticEchoCanceler;
-import android.media.audiofx.AutomaticGainControl;
-import android.media.audiofx.NoiseSuppressor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -56,14 +53,12 @@ import android.widget.Chronometer;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient.ConnectionMethods;
 import com.bsb.hike.voip.VoIPConstants.CallQuality;
 import com.bsb.hike.voip.VoIPDataPacket.PacketType;
@@ -919,7 +914,7 @@ public class VoIPService extends Service {
 							newQuality = CallQuality.EXCELLENT;
 						else if (qualityCounter >= idealPacketCount - VoIPConstants.QUALITY_WINDOW)
 							newQuality = CallQuality.GOOD;
-						else if (qualityCounter >= idealPacketCount - VoIPConstants.QUALITY_WINDOW)
+						else if (qualityCounter >= idealPacketCount - VoIPConstants.QUALITY_WINDOW * 2)
 							newQuality = CallQuality.FAIR;
 						else 
 							newQuality = CallQuality.WEAK;
@@ -2403,7 +2398,7 @@ public class VoIPService extends Service {
 		final int TOTAL_TEST_BYTES = (simulateBitrate * TOTAL_TEST_TIME) / 8;
 		final int TEST_PACKETS = TOTAL_TEST_TIME * 15;	// Assuming ~15 packets per second
 		final int TIME_TO_WAIT_FOR_PACKETS = 1;
-		final int ACCEPTABLE_LOSS_PCT = VoIPUtils.getQualityTestSimulatedCallDuration(getApplicationContext());
+		final int ACCEPTABLE_LOSS_PCT = VoIPUtils.getQualityTestAcceptablePacketLoss(getApplicationContext());
 
 		byte[] packetData = new byte[TOTAL_TEST_BYTES / TEST_PACKETS];
 		VoIPDataPacket dp = new VoIPDataPacket(PacketType.NETWORK_QUALITY);

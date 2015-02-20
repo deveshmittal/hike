@@ -225,6 +225,18 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			Logger.d(getClass().getSimpleName(), "helpContactPreference preference is null");
 		}
 
+		Preference termsConditionsPref = getPreferenceScreen().findPreference(HikeConstants.HELP_TNC_PREF);
+				
+		if (termsConditionsPref != null)
+		{
+			Logger.d(getClass().getSimpleName(), "termsConditionsPref is not null");
+			termsConditionsPref.setOnPreferenceClickListener(this);
+		}
+		else
+		{
+			Logger.d(getClass().getSimpleName(), "termsConditionsPref is null");
+		}
+		
 		Preference mutePreference = getPreferenceScreen().findPreference(HikeConstants.STATUS_BOOLEAN_PREF);
 		if (mutePreference != null)
 		{
@@ -518,6 +530,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			Logger.d(getClass().getSimpleName(), "FAQ preference selected");
 			Utils.startWebViewActivity(HikePreferences.this,HikeConstants.HELP_URL,getString(R.string.faq));
+		}
+		else if (HikeConstants.HELP_TNC_PREF.equals(preference.getKey()))
+		{
+			Logger.d(getClass().getSimpleName(), "T & C preference selected");
+			Utils.startWebViewActivity(HikePreferences.this, HikeConstants.T_AND_C_URL, getString(R.string.terms_conditions_title));
 		}
 		else if (HikeConstants.HELP_FEEDBACK_PREF.equals(preference.getKey()))
 		{

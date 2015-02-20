@@ -1346,5 +1346,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="valentine_day">Happy Valentine\'s Day</string>
     <string name="nux_expired">This activity has expired</string>
     <string name="nux_completed">You\'ve already completed this activity.</string>
-    
+    <string name="terms_conditions_hint">Terms and Conditions</string>
+	<string name="terms_conditions_title">T &amp; C</string>
 </resources>

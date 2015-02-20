@@ -1,5 +1,10 @@
 package com.bsb.hike.platform;
 
+import java.util.ArrayList;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.annotation.TargetApi;
@@ -11,7 +16,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -39,14 +43,11 @@ import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.platform.content.PlatformContent.EventCode;
 import com.bsb.hike.platform.content.PlatformContentListener;
 import com.bsb.hike.platform.content.PlatformContentModel;
+import com.bsb.hike.platform.content.PlatformRequestManager;
 import com.bsb.hike.platform.content.PlatformWebClient;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 /**
  * Created by shobhitmandloi on 14/01/15.
@@ -71,6 +72,9 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	BaseAdapter adapter;
 
 	private SparseArray<String> cardAlarms;
+	
+	// usually we have seen 3 cards will be inflated, so 3 holders will be initiated (just an optimizations)
+	ArrayList<WebViewHolder> holderList = new ArrayList<WebViewCardRenderer.WebViewHolder>(3);
 
 	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages, BaseAdapter adapter)
 	{
@@ -239,6 +243,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				Logger.i("HeightAnim", position + "set height given in card is =" + minHeight);
 				viewHolder.myBrowser.setLayoutParams(lp);
 			}
+			holderList.add(viewHolder);
 		}
 		else
 		{
@@ -404,7 +409,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			super.onPageFinished(view, url);
 			CookieManager.getInstance().setAcceptCookie(true);
-			Log.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
+			Logger.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
 			view.loadUrl("javascript:setData('"  + convMessage.getMsisdn() + "','"
 					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "','" + convMessage.isSent() +  "')");
 			String alarmData = convMessage.platformWebMessageMetadata.getAlarmData();
@@ -428,7 +433,13 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	public void onDestroy()
 	{
+		PlatformRequestManager.onDestroy();
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PLATFORM_CARD_ALARM, this);
+		for(WebViewHolder holder : holderList)
+		{
+			holder.platformJavaScriptBridge.onDestroy();
+		}
+		holderList.clear();
 	}
 
 	@Override

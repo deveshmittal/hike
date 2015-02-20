@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Calendar;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -12,6 +13,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
+
 import twitter4j.internal.http.HttpResponseCode;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.utils.AccountUtils;
@@ -216,7 +220,7 @@ public class AnalyticsSender
 				return;
 			}
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM ALARM ROUTE---");			
-			instance.sendAnalyticsData(false);
+			instance.sendAnalyticsData(true, false);
 		}
 	}
 	
@@ -239,6 +243,7 @@ public class AnalyticsSender
 			String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
 	
 			httpClient = new DefaultHttpClient();
+			httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + AccountUtils.getAppVersion());
 			
 			HttpPost postCall = new HttpPost(AccountUtils.analyticsUploadUrl);
 	
@@ -295,27 +300,36 @@ public class AnalyticsSender
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "http response :" + response.getStatusLine());
 				switch (response.getStatusLine().getStatusCode())
 				{
-				case HttpResponseCode.OK:
-				{
-					resetRetryParams();
+					case HttpResponseCode.OK:
+					{
+						resetRetryParams();
+	
+						new File(absolutePath).delete();
+	
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "deleted file :" + fileName);
+					}				
+					return wasUploadSuccessful;
 
-					new File(absolutePath).delete();
-
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "deleted file :" + fileName);
-				}				
-				return wasUploadSuccessful;
-
-				case HttpResponseCode.GATEWAY_TIMEOUT:
-				case HttpResponseCode.SERVICE_UNAVAILABLE:
-				case HttpResponseCode.INTERNAL_SERVER_ERROR:
-				case HttpResponseCode.NOT_FOUND:
+					case HttpResponseCode.GATEWAY_TIMEOUT:
+					case HttpResponseCode.SERVICE_UNAVAILABLE:
+					case HttpResponseCode.INTERNAL_SERVER_ERROR:
+					case HttpResponseCode.NOT_FOUND:
+					case HttpResponseCode.BAD_GATEWAY:
+					case HttpResponseCode.TOO_MANY_REQUESTS:
 
 					if (!retryUpload())
 					{
 						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Exiting upload process....");
 						wasUploadSuccessful = false;
-						return wasUploadSuccessful;
 					}
+					return wasUploadSuccessful;
+					
+					case HttpResponseCode.FORBIDDEN:
+					case HttpResponseCode.UNAUTHORIZED:
+					{
+						wasUploadSuccessful = true;
+					}
+					return wasUploadSuccessful;
 				}
 			}
 			else
@@ -325,8 +339,8 @@ public class AnalyticsSender
 				if(!retryUpload())
 				{
 					wasUploadSuccessful = false;
-					return wasUploadSuccessful;
 				}
+				return wasUploadSuccessful;
 			}
 		}
 	}		
@@ -354,7 +368,7 @@ class NetworkListener extends BroadcastReceiver
 				
 				if(instance.isSendAnalyticsDataWhenConnected())
 				{
-					instance.sendAnalyticsData(false);
+					instance.sendAnalyticsData(true, false);
 				}
 			}
 		}				
