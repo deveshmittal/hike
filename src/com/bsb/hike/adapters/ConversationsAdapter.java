@@ -1436,6 +1436,10 @@ public class ConversationsAdapter extends BaseAdapter
 		{
 			conversationsMsisdns.remove(conv.getMsisdn());
 		}
+		if (phoneBookContacts != null)
+		{
+			phoneBookContacts.add(conv);
+		}
 	}
 
 }
