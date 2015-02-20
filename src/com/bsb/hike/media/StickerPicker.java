@@ -275,18 +275,6 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	}
 
 	/**
-	 * Interface method. Check {@link ShareablePopup}
-	 */
-	@Override
-	public void releaseViewResources()
-	{
-		viewToDisplay = null;
-		stickerAdapter = null;
-		listener = null;
-		mContext = null;
-	}
-	
-	/**
 	 * Utility method to free up resources
 	 */
 	public void releaseResources()

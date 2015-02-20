@@ -234,16 +234,6 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 	}
 
 	/**
-	 * Interface method. Check {@link ShareablePopup}
-	 */
-	@Override
-	public void releaseViewResources()
-	{
-		mViewToDisplay = null;
-		mEmoPickerListener = null;
-	}
-
-	/**
 	 * Utility method to free up resources
 	 */
 	public void releaseReources()
