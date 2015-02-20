@@ -38,6 +38,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
@@ -49,6 +50,7 @@ import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -67,6 +69,8 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
@@ -482,6 +486,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time, ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setMetadata(metadata);
 		convMessage.setSMS(!isRecipientOnhike);
+		convMessage.setState(ConvMessage.State.RECEIVED_READ);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		return convMessage;
 	}
@@ -542,7 +547,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                 switch(type){
                 case 1:
                     f = new File(Environment.getExternalStorageDirectory() + "/"
-                            + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis() + ".apk");
+                            + "Hike/Media/hike Others" + "/wifip2pshared-" + System.currentTimeMillis() + ".apk");
                     dirs = new File(f.getParent());
                     if (!dirs.exists())
                         dirs.mkdirs();
@@ -550,7 +555,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                     break;
                 case 2:
                 	 f = new File(Environment.getExternalStorageDirectory() + "/"
-                             + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis() + ".jpg");
+                             + "Hike/Media/hike Images" + "/wifip2pshared-" + System.currentTimeMillis() + ".jpg");
                      dirs = new File(f.getParent());
                      if (!dirs.exists())
                          dirs.mkdirs();
@@ -558,7 +563,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                      break;
                 case 3:
                 	f = new File(Environment.getExternalStorageDirectory() + "/"
-                            + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis() + ".mp4");
+                            + "Hike/Media/hike Videos" + "/wifip2pshared-" + System.currentTimeMillis() + ".mp4");
                     dirs = new File(f.getParent());
                     if (!dirs.exists())
                         dirs.mkdirs();
@@ -566,7 +571,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                     break;
                 case 4:
                 	f = new File(Environment.getExternalStorageDirectory() + "/"
-                            + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis() + ".mp3");
+                            + "Hike/Media/hike Audio" + "/wifip2pshared-" + System.currentTimeMillis() + ".mp3");
                     dirs = new File(f.getParent());
                     if (!dirs.exists())
                         dirs.mkdirs();
@@ -630,7 +635,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 						try {
 							metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.IMAGE, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
 							convMessage = createConvMessage(f.getName(), metadata, peers_msisdn.get(0), false);
-							
+							HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
@@ -645,10 +650,35 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 				}
 				else if(type==3)
 				{
-					Intent intent = new Intent();
-					intent.setAction(Intent.ACTION_VIEW);
-					intent.setDataAndType(Uri.parse("file://" + result), "video/*");
-					context.startActivity(intent);
+					Bitmap thumbnail = null;
+					String thumbnailString = null;
+					String quality = null;
+					thumbnail = ThumbnailUtils.createVideoThumbnail(f.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
+					if(thumbnail != null)
+					{
+						int compressQuality = 75;
+						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
+						thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+						// thumbnail.recycle();
+						Logger.d(getClass().getSimpleName(), "Sent Thumbnail Size : " + tBytes.length);
+						JSONObject metadata = null;
+						ConvMessage convMessage = null;
+						try {
+							metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.IMAGE, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
+							convMessage = createConvMessage(f.getName(), metadata, peers_msisdn.get(0), false);
+							HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+					}
+					else
+					{
+						Intent intent = new Intent();
+						intent.setAction(Intent.ACTION_VIEW);
+						intent.setDataAndType(Uri.parse("file://" + result), "video/*");
+						context.startActivity(intent);
+					}
 				}
 				else if(type==4)
 				{
