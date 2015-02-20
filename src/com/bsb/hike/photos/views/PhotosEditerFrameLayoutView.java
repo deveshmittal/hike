@@ -3,7 +3,6 @@ package com.bsb.hike.photos.views;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Random;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -19,6 +18,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
+import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -171,6 +171,11 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 	{
 		doodleLayer.onClickUndo();
 
+	}
+	
+	public void setOnDoodlingStartListener(OnDoodleStateChangeListener listener)
+	{
+		doodleLayer.setOnDoodlingStartListener(listener);
 	}
 
 	private Bitmap FlattenLayersToBitmap(Bitmap src, ColorMatrixColorFilter filter)

@@ -4,20 +4,21 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:orientation="vertical"
-    android:padding="5dp" >
+    android:padding="@dimen/photos_filters_preview_padding" >
 
     <ImageView
         android:id="@+id/previewIcon"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2"
+        android:scaleType="centerCrop"
         android:src="@drawable/ic_launcher" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/previewText"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:textColor="#FFFFFFFF"
+        android:textColor="@color/photos_filters_font_color"
         android:textSize="@dimen/photos_filter_preview_font_size"
         android:layout_weight="1"
         android:textStyle="bold" />

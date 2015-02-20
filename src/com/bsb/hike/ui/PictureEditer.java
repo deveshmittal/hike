@@ -23,6 +23,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
+import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
 import com.bsb.hike.photos.views.DoodleEffectItemLinearLayout;
 import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
 import com.bsb.hike.photos.views.PhotosEditerFrameLayoutView;
@@ -77,6 +78,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		}
 		editView = (PhotosEditerFrameLayoutView) findViewById(R.id.editer);
 		editView.loadImageFromFile(filename);
+		editView.setOnDoodlingStartListener(clickHandler);
 		FragmentPagerAdapter adapter = new PhotoEditViewPagerAdapter(getSupportFragmentManager(), clickHandler);
 
 		ViewPager pager = (ViewPager) findViewById(R.id.pager);
@@ -114,27 +116,17 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.photos_action_bar, null);
-		// actionBarView.set
-		// View backContainer = actionBarView.findViewById(R.id.back);
-		//
-		// TextView title = (TextView) actionBarView.findViewById(R.id.title);
-		// View doneBtn = actionBarView.findViewById(R.id.done_container);
-		// TextView postText = (TextView) actionBarView.findViewById(R.id.post_btn);
-		// View imageSettingsBtn = actionBarView.findViewById(R.id.image_quality_settings_view);
-		//
-		// doneBtn.setVisibility(View.VISIBLE);
-		// postText.setText(R.string.send);
-		//
-		// title.setText(R.string.preview);
-		// imageSettingsBtn.setVisibility(View.GONE);
-		// backContainer.setOnClickListener(new OnClickListener()
-		// {
-		// @Override
-		// public void onClick(View v)
-		// {
-		// onBackPressed();
-		// }
-		// });
+		actionBarView.findViewById(R.id.back).setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				onBackPressed();
+			}
+		});
+
+		actionBarView.findViewById(R.id.done_container).setOnClickListener(clickHandler);
+
 		actionBar.setCustomView(actionBarView);
 	}
 
@@ -182,7 +174,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		}
 	}
 
-	public class EditorClickListener implements OnClickListener, OnPageChangeListener
+	public class EditorClickListener implements OnClickListener, OnPageChangeListener, OnDoodleStateChangeListener
 	{
 		private DoodleEffectItemLinearLayout doodlePreview;
 
@@ -190,11 +182,14 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 		private Context mContext;
 
+		private boolean doodleState;
+
 		public EditorClickListener(Context context)
 		{
 			// TODO Auto-generated constructor stub
 			mContext = context;
 			doodleWidth = HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH;
+			doodleState = false;
 		}
 
 		public void setDoodlePreview(DoodleEffectItemLinearLayout view)
@@ -243,7 +238,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				case R.id.undo:
 					editView.undoLastDoodleDraw();
 					break;
-				case R.id.save:
+				case R.id.done_container:
 					File savedImage = editView.saveImage();
 					Intent forwardIntent = IntentManager.getForwardImageIntent(mContext, savedImage);
 					startActivity(forwardIntent);
@@ -252,8 +247,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				}
 			}
 		}
-
-		
 
 		@Override
 		public void onPageScrollStateChanged(int arg0)
@@ -272,7 +265,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		@Override
 		public void onPageSelected(int arg0)
 		{
-			
+
 			// TODO Auto-generated method stub
 			switch (arg0)
 			{
@@ -282,10 +275,28 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				break;
 			case HikeConstants.HikePhotos.DOODLE_FRAGMENT_ID:
 				editView.enableDoodling();
-				undoButton.setVisibility(View.VISIBLE);
+				if (doodleState)
+				{
+					undoButton.setVisibility(View.VISIBLE);
+				}
 				break;
 			}
 
+		}
+
+		@Override
+		public void onDoodleStateChanged(boolean isCanvasEmpty)
+		{
+			// TODO Auto-generated method stub
+			doodleState=!isCanvasEmpty;
+			if(isCanvasEmpty)
+			{
+				undoButton.setVisibility(View.GONE);
+			}
+			else
+			{
+				undoButton.setVisibility(View.VISIBLE);
+			}
 		}
 
 	}

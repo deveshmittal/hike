@@ -28,7 +28,7 @@ import com.bsb.hike.photos.HikePhotosUtils;
  *         In Implementation one object handles text and another handles doodling
  *
  */
-class CanvasImageView extends ImageView implements OnTouchListener
+public class CanvasImageView extends ImageView implements OnTouchListener
 {
 
 	private Canvas mCanvas;
@@ -46,6 +46,8 @@ class CanvasImageView extends ImageView implements OnTouchListener
 	private int color, brushWidth;
 
 	private boolean drawEnabled;
+	
+	private OnDoodleStateChangeListener mDoodleStateChangeListener;
 
 	public CanvasImageView(Context context)
 	{
@@ -69,6 +71,11 @@ class CanvasImageView extends ImageView implements OnTouchListener
 	{
 		brushWidth = width;
 
+	}
+	
+	public void setOnDoodlingStartListener(OnDoodleStateChangeListener listener)
+	{
+		this.mDoodleStateChangeListener=listener;
 	}
 
 	private void init()
@@ -208,6 +215,8 @@ class CanvasImageView extends ImageView implements OnTouchListener
 	{
 		mPath.lineTo(mX, mY);
 		// commit the path to our offscreen
+		if(paths.size()==0 && mDoodleStateChangeListener!=null)
+			mDoodleStateChangeListener.onDoodleStateChanged(false);
 		paths.add(new PathPoints(mPath, color, brushWidth, false));
 
 		mPath = new Path();
@@ -252,12 +261,13 @@ class CanvasImageView extends ImageView implements OnTouchListener
 		{
 			undonePaths.add(paths.remove(paths.size() - 1));
 			invalidate();
+			
 		}
-		else
+		
+		if(paths.size()==0 && mDoodleStateChangeListener!=null)
 		{
-
+			mDoodleStateChangeListener.onDoodleStateChanged(true);
 		}
-		// toast the user
 	}
 
 	public void onClickRedo()
@@ -267,11 +277,7 @@ class CanvasImageView extends ImageView implements OnTouchListener
 			paths.add(undonePaths.remove(undonePaths.size() - 1));
 			invalidate();
 		}
-		else
-		{
-
-		}
-		// toast the user
+		
 	}
 
 	/**
@@ -383,5 +389,11 @@ class CanvasImageView extends ImageView implements OnTouchListener
 			this.y = y;
 		}
 
+	}
+	
+	public interface OnDoodleStateChangeListener
+	{
+		public void onDoodleStateChanged(boolean isCanvasEmpty);
+		
 	}
 }

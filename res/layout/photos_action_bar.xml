@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/done_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/photos_tabs_background"
@@ -12,32 +11,31 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:paddingTop="5dp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="16dp"
         android:src="@drawable/back_button" />
 
     <LinearLayout
-        android:id="@+id/done_btn"
+        android:id="@+id/done_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:paddingRight="16dp"
         android:gravity="center_vertical"
         android:orientation="horizontal" >
-
-        <ImageView
-            android:id="@+id/arrow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/check" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="10dp"
             android:text="Next"
-            android:textColor="#FFFFFFFF"
+            android:textColor="#229EE0"
             android:textSize="16sp" />
+        
+        <ImageView
+            android:id="@+id/next_btn"
+            android:layout_marginLeft="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/next_button" />
     </LinearLayout>
 
 </RelativeLayout>
