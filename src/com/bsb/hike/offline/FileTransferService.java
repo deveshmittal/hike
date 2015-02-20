@@ -49,7 +49,6 @@ public class FileTransferService extends IntentService {
 		if (intent.getAction().equals(ACTION_SEND_FILE)) {
 			isOfflineFileTransferFinished =  false;
 			String fileUri = intent.getExtras().getString(EXTRAS_FILE_PATH);
-			//fileUri =  "/storage/emulated/0/com.bsb.hike-1.apk";
 			String host = intent.getExtras().getString(EXTRAS_ADDRESS);
 			Socket socket = new Socket();
 			int port = intent.getExtras().getInt(EXTRAS_PORT);
@@ -62,12 +61,11 @@ public class FileTransferService extends IntentService {
 				Log.d(WiFiDirectActivity.TAG, "Client socket - " + socket.isConnected());
 				OutputStream stream = socket.getOutputStream();
 				ContentResolver cr = context.getContentResolver();
-				//Hello this is a test dirty
 				File f = new File(fileUri);
 				Log.d(WiFiDirectActivity.TAG, ""+f.length());
 				InputStream is = null;
 				try {
-					is = new FileInputStream(fileUri);//cr.openInputStream(Uri.parse(fileUri));
+					is = new FileInputStream(fileUri);
 				} catch (FileNotFoundException e) {
 					Log.d(WiFiDirectActivity.TAG, e.toString());
 				}
@@ -75,7 +73,8 @@ public class FileTransferService extends IntentService {
 				type[0] =  (byte) intent.getExtras().getInt("fileType");
 				stream.write(type,0,type.length);
 				byte[] intToBArray = Utils.intToByteArray((int)f.length());
-				stream.write(intToBArray);
+				int s = intToBArray.length;
+				stream.write(intToBArray, 0, s);
 				DeviceListFragment.copyFile(is, stream);
 				Log.d(WiFiDirectActivity.TAG, "Client: Data written");
 			} catch (IOException e) {
@@ -86,7 +85,6 @@ public class FileTransferService extends IntentService {
 						try {
 							socket.close();
 						} catch (IOException e) {
-							// Give up
 							e.printStackTrace();
 						}
 					}

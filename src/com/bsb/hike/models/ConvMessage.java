@@ -318,7 +318,7 @@ public class ConvMessage
 		}
 				
 	}
-
+	
 	public ConvMessage(JSONObject obj, Context context) throws JSONException
 	{
 		this.mMsisdn = obj.getString(obj.has(HikeConstants.TO) ? HikeConstants.TO : HikeConstants.FROM); /*

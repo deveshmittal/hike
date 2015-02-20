@@ -11,18 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Pattern;
 import java.util.Random;
 import java.util.Set;
-
-import com.bsb.hike.offline.DeviceListFragment.DeviceActionListener;
-import com.bsb.hike.offline.*;
-import com.bsb.hike.platform.CardComponent;
-import com.bsb.hike.platform.HikePlatformConstants;
-import com.bsb.hike.platform.PlatformMessageMetadata;
-import com.bsb.hike.platform.PlatformWebMessageMetadata;
-import com.bsb.hike.platform.content.PlatformContent;
-
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -78,7 +69,6 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -101,11 +91,11 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewStub;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManager.BadTokenException;
@@ -156,11 +146,10 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.adapters.AccountAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter;
+import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
-import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
-import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
@@ -194,7 +183,13 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.offline.FileTransferService;
+import com.bsb.hike.offline.WiFiDirectActivity;
+import com.bsb.hike.platform.CardComponent;
+import com.bsb.hike.platform.HikePlatformConstants;
+import com.bsb.hike.platform.PlatformMessageMetadata;
+import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -224,10 +219,7 @@ import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
-import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPUtils;
-import com.bsb.hike.voip.view.CallRatePopup;
-import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener
@@ -6529,13 +6521,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				else
 					initialiseFileTransfer(filePath, null, hikeFileType, null, false, -1, false, attachementType);
 				}
-			    else{
-			    	     final String fPath = filePath;
-					     final int atType = attachementType;
-			        	  
-			  			  String deviceAddress =    getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
-			  			  initialiseOfflineFileTransfer(fPath , null , hikeFileType,null,false,-1,false,atType, deviceAddress, requestCode);
-			         }
+			    else
+			    {
+		    	     final String fPath = filePath;
+				     final int atType = attachementType;
+		        	  
+		  			 String deviceAddress = getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
+		  			 initialiseOfflineFileTransfer(fPath , null , hikeFileType,null,false,-1,false,atType, deviceAddress, requestCode);
+			    }
 			
 		 }
 		else if (requestCode == HikeConstants.SHARE_LOCATION_CODE && resultCode == RESULT_OK)
