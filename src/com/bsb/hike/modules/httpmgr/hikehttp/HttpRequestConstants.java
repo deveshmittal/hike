@@ -1,4 +1,4 @@
-package com.bsb.hike.modules.httpmgr;
+package com.bsb.hike.modules.httpmgr.hikehttp;
 
 
 public class HttpRequestConstants

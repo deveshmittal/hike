@@ -12,25 +12,29 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.modules.httpmgr.HttpRequests;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests;
+import com.bsb.hike.modules.httpmgr.hikehttp.IHikeHTTPTask;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.utils.Logger;
 
-public class PostToSocialNetworkTask
+public class PostToSocialNetworkTask implements IHikeHTTPTask
 {
 	private boolean facebook;
 
 	private Context applicationCtx;
 
+	private RequestToken token;
+	
 	public PostToSocialNetworkTask(boolean facebook)
 	{
 		this.facebook = facebook;
 		this.applicationCtx = HikeMessengerApp.getInstance().getApplicationContext();
 	}
 
+	@Override
 	public void execute()
 	{
 		JSONObject data = new JSONObject();
@@ -38,7 +42,7 @@ public class PostToSocialNetworkTask
 		{
 			data.put(facebook ? HikeConstants.FACEBOOK_STATUS : HikeConstants.TWITTER_STATUS, true);
 			Logger.d(getClass().getSimpleName(), "JSON: " + data);
-			RequestToken token = HttpRequests.postToSocialNetworkRequest(data, getRequestListener());
+			token = HttpRequests.postToSocialNetworkRequest(data, getRequestListener());
 			token.execute();
 		}
 		catch (JSONException e)
@@ -47,6 +51,12 @@ public class PostToSocialNetworkTask
 		}
 	}
 
+	@Override
+	public void cancel()
+	{
+		token.cancel();
+	}
+	
 	public IRequestListener getRequestListener()
 	{
 		return new IRequestListener()

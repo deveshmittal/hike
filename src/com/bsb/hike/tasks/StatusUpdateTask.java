@@ -15,14 +15,15 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.modules.httpmgr.HttpRequests;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests;
+import com.bsb.hike.modules.httpmgr.hikehttp.IHikeHTTPTask;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.utils.Logger;
 
-public class StatusUpdateTask
+public class StatusUpdateTask implements IHikeHTTPTask
 {
 	private String status;
 
@@ -32,6 +33,8 @@ public class StatusUpdateTask
 
 	private int moodId;
 
+	private RequestToken token;
+	
 	public StatusUpdateTask(String status, int moodId, boolean facebook, boolean twitter)
 	{
 		this.status = status;
@@ -40,6 +43,7 @@ public class StatusUpdateTask
 		this.twitter = twitter;
 	}
 
+	@Override
 	public void execute()
 	{
 		JSONObject data = new JSONObject();
@@ -58,10 +62,16 @@ public class StatusUpdateTask
 		{
 			Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
 		}
-		RequestToken token = HttpRequests.postStatusRequest(data, getRequestListener());
+		token = HttpRequests.postStatusRequest(data, getRequestListener());
 		token.execute();
 	}
 
+	@Override
+	public void cancel()
+	{
+		token.cancel();
+	}
+	
 	public IRequestListener getRequestListener()
 	{
 		return new IRequestListener()

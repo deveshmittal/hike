@@ -1,6 +1,6 @@
 package com.bsb.hike.modules.signupmanager;
 
-import static com.bsb.hike.modules.httpmgr.HttpRequests.registerAccountRequest;
+import static com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests.registerAccountRequest;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;

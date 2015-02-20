@@ -1,7 +1,7 @@
 package com.bsb.hike.modules.stickerdownloadmgr;
 
-import static com.bsb.hike.modules.httpmgr.HttpRequests.StickerShopDownloadRequest;
 import static com.bsb.hike.modules.httpmgr.exception.HttpException.REASON_CODE_OUT_OF_SPACE;
+import static com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests.StickerShopDownloadRequest;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

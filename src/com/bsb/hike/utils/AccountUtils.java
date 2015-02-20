@@ -72,9 +72,9 @@ import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.modules.httpmgr.HttpRequests;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
 

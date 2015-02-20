@@ -1,6 +1,6 @@
 package com.bsb.hike.modules.signupmanager;
 
-import static com.bsb.hike.modules.httpmgr.HttpRequests.validateNumberRequest;
+import static com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests.validateNumberRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
