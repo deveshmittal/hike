@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerAdapter;
@@ -17,6 +16,7 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.ui.StickerShopActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
@@ -37,8 +37,6 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	
 	private StickerEmoticonIconPageIndicator mIconPageIndicator;
 	
-	private SherlockFragmentActivity mActivity;
-
 	private static final String TAG = "StickerPicker";
 
 	/**
@@ -47,11 +45,10 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 * @param activity
 	 * @param listener
 	 */
-	public StickerPicker(Context context, StickerPickerListener listener, SherlockFragmentActivity activity)
+	public StickerPicker(Context context, StickerPickerListener listener)
 	{
 		this.mContext = context;
 		this.listener = listener;
-		this.mActivity = activity;
 	}
 
 	/**
@@ -61,9 +58,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 * @param listener
 	 * @param popUpLayout
 	 */
-	public StickerPicker(int layoutResId, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout, SherlockFragmentActivity activity)
+	public StickerPicker(int layoutResId, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
 	{
-		this(context, listener, activity);
+		this(context, listener);
 		this.mLayoutResId = layoutResId;
 		this.popUpLayout = popUpLayout;
 	}
@@ -76,9 +73,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 * @param listener
 	 * @param popUpLayout
 	 */
-	public StickerPicker(View view, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout, SherlockFragmentActivity activity)
+	public StickerPicker(View view, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
 	{
-		this(context, listener, activity);
+		this(context, listener);
 		this.viewToDisplay = view;
 		this.popUpLayout = popUpLayout;
 		initViewComponents(viewToDisplay);
@@ -95,9 +92,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 * @param eatTouchEventViewIds
 	 */
 
-	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, int[] eatTouchEventViewIds, SherlockFragmentActivity activity)
+	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, int[] eatTouchEventViewIds)
 	{
-		this(context, listener, activity);
+		this(context, listener);
 		popUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, context.getApplicationContext(), eatTouchEventViewIds);
 	}
 
@@ -109,9 +106,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 *            this is your activity Or fragment root view which gets resized when keyboard toggles
 	 * @param firstTimeHeight
 	 */
-	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, SherlockFragmentActivity activity)
+	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight)
 	{
-		this(context, listener, mainView, firstTimeHeight, null, activity);
+		this(context, listener, mainView, firstTimeHeight, null);
 	}
 
 	public void showStickerPicker()
@@ -229,8 +226,8 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 		{
 			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
 		}
-		Intent i = new Intent(mContext, StickerShopActivity.class);
-		mActivity.startActivity(i);
+		Intent i = IntentFactory.getStickerShopIntent(mContext);
+		mContext.startActivity(i);
 	}
 
 	public void updateDimension(int width, int height)
@@ -283,16 +280,25 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	@Override
 	public void releaseViewResources()
 	{
-		// TODO Implement this.
 		viewToDisplay = null;
 		stickerAdapter = null;
-		mActivity = null;
+		listener = null;
+		mContext = null;
 	}
-
-	public void updateListener(StickerPickerListener mListener, SherlockFragmentActivity activity)
+	
+	/**
+	 * Utility method to free up resources
+	 */
+	public void releaseResources()
+	{
+		this.mContext = null;
+		this.listener = null;
+	}
+	
+	public void updateListener(StickerPickerListener mListener, Context context)
 	{
 		this.listener = mListener;
-		this.mActivity = activity;
+		this.mContext = context;
 	}
 	
 	public void updateStickerAdapter()
@@ -301,6 +307,19 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 		{
 			stickerAdapter.instantiateStickerList();
 			stickerAdapter.notifyDataSetChanged();
+		}
+	}
+	
+	public void setExitTasksEarly(boolean flag)
+	{
+		if (stickerAdapter != null)
+		{
+			stickerAdapter.getStickerLoader().setExitTasksEarly(flag);
+			stickerAdapter.getStickerOtherIconLoader().setExitTasksEarly(flag);
+			if (!flag)
+			{
+				stickerAdapter.notifyDataSetChanged();
+			}
 		}
 	}
 

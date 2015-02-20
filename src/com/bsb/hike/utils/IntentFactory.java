@@ -43,6 +43,7 @@ import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.ShareLocation;
 import com.bsb.hike.ui.SignupActivity;
+import com.bsb.hike.ui.StickerShopActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
@@ -489,6 +490,11 @@ public class IntentFactory
 		intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 
 		return intent;
+	}
+
+	public static Intent getStickerShopIntent(Context mContext)
+	{
+		return new Intent(mContext, StickerShopActivity.class);
 	}
 
 }

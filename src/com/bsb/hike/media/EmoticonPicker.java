@@ -239,13 +239,23 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 	@Override
 	public void releaseViewResources()
 	{
-		// TODO Auto-generated method stub
-
+		mViewToDisplay = null;
+		mEmoPickerListener = null;
 	}
 
-	public void updateListener(EmoticonPickerListener listener)
+	/**
+	 * Utility method to free up resources
+	 */
+	public void releaseReources()
+	{
+		this.mContext = null;
+		this.mEmoPickerListener = null;
+	}
+	
+	public void updateListener(EmoticonPickerListener listener, Context context)
 	{
 		this.mEmoPickerListener = listener;
+		this.mContext = context;
 	}
 
 	@Override

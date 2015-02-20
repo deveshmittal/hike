@@ -170,8 +170,8 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	protected void onResume()
 	{
 		Logger.i(TAG, "OnResume");
-		chatThread.onResume();
 		super.onResume();
+		chatThread.onResume();
 	}
 	
 	@Override
@@ -184,9 +184,18 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	
 	@Override
 	protected void onStop()
-	{Logger.i(TAG, "OnStop");
+	{
+		Logger.i(TAG, "OnStop");
 		chatThread.onStop();
 		super.onStop();
+	}
+	
+	@Override
+	protected void onStart()
+	{
+		Logger.i(TAG, "On Start");
+		chatThread.onStart();
+		super.onStart();
 	}
 	
 	@Override

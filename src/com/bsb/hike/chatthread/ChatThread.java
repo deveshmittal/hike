@@ -473,7 +473,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		mShareablePopupLayout.updateMainView(activity.findViewById(R.id.chatThreadParentLayout));
 		mStickerPicker.updateListener(this, activity);
-		mEmoticonPicker.updateListener(this);
+		mEmoticonPicker.updateListener(this, activity);
 	}
 
 	private void addOnClickListeners()
@@ -488,12 +488,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private void initStickerPicker()
 	{
-		mStickerPicker = new StickerPicker(activity.getBaseContext(), this, activity);
+		mStickerPicker = new StickerPicker(activity, this);
 	}
 
 	private void initEmoticonPicker()
 	{
-		mEmoticonPicker = new EmoticonPicker(activity.getBaseContext(), this);
+		mEmoticonPicker = new EmoticonPicker(activity, this);
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -1227,6 +1227,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		intentFilter.addAction(StickerManager.STICKERS_DOWNLOADED);
 
 		LocalBroadcastManager.getInstance(activity.getBaseContext()).registerReceiver(mBroadCastReceiver, intentFilter);
+		
+		/**
+		 * Adding PubSub, here since all the heavy work related to fetching of messages and setting up UI has been done already.
+		 */
+		addToPubSub();
 
 		takeActionBasedOnIntent();
 	}
@@ -1322,12 +1327,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		loadingMoreMessages = false;
 
 		updateUIAsPerTheme(mConversation.getTheme());// it has to be done after setting adapter
-
-		/**
-		 * Adding PubSub, here since all the heavy work related to fetching of messages and setting up UI has been done already.
-		 */
-		addToPubSub();
-
 	}
 
 	protected void takeActionBasedOnIntent()
@@ -2289,7 +2288,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		StickerManager.getInstance().saveCustomCategories();
 
 		releaseMessageMap();
-
+	}
+	
+	private void releaseStickerAndEmoticon()
+	{
+		mStickerPicker.releaseResources();
+		mEmoticonPicker.releaseReources();
 	}
 
 	/**
@@ -2299,8 +2303,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void onPause()
 	{
 		isActivityVisible = false;
+		
+		resumeImageLoaders(true);
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
+		
 	}
 
 	/**
@@ -2320,7 +2327,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * Pause any onGoing loaders for MessagesAdapter
 		 */
 
-		resumeImageLoaders();
+		resumeImageLoaders(false);
 
 		/**
 		 * Clear any pending notifications
@@ -2387,6 +2394,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void onStop()
 	{
 		saveDraft();
+		releaseStickerAndEmoticon();
+	}
+	
+	protected void onStart()
+	{
+		/**
+		 * We call this method to either re-init the stickerpicker and emoticon picker or update their listeners
+		 */
+		initShareablePopup();
 	}
 
 	protected void hideView(int viewId)
@@ -3224,6 +3240,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		if (mAdapter != null)
 		{
+			mAdapter.onDestroy();
 			mAdapter.resetPlayerIfRunning();
 		}
 	}
@@ -3238,14 +3255,22 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	}
 
-	private void resumeImageLoaders()
+	private void resumeImageLoaders(boolean flag)
 	{
 		if (mAdapter != null)
 		{
 			// mAdapter.getStickerLoader().setExitTasksEarly(false);
-			mAdapter.getIconImageLoader().setExitTasksEarly(false);
-			mAdapter.getHighQualityThumbLoader().setExitTasksEarly(false);
-			mAdapter.notifyDataSetChanged();
+			mAdapter.getIconImageLoader().setExitTasksEarly(flag);
+			mAdapter.getHighQualityThumbLoader().setExitTasksEarly(flag);
+			if (!flag)
+			{
+				mAdapter.notifyDataSetChanged();
+			}
+		}
+		
+		if (mStickerPicker != null)
+		{
+			mStickerPicker.setExitTasksEarly(flag);
 		}
 	}
 
