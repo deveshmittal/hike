@@ -79,7 +79,7 @@ public abstract class Request<T> implements IRequestFacade
 		this.priority = builder.priority;
 		this.requestType = builder.requestType;
 		this.retryPolicy = builder.retryPolicy;
-		this.requestListeners = builder.requestListeners;
+		addRequestListeners(builder.requestListeners);
 		this.responseOnUIThread = builder.responseOnUIThread;
 		this.asynchronous = builder.asynchronous;
 		ensureSaneDefaults();
@@ -373,6 +373,15 @@ public abstract class Request<T> implements IRequestFacade
 		this.isCancelled = isCancelled;
 	}
 
+	public void addRequestListeners(IRequestListener requestListener)
+	{
+		if (this.requestListeners == null)
+		{
+			this.requestListeners = new CopyOnWriteArrayList<IRequestListener>();
+		}
+		this.requestListeners.add(requestListener);
+	}
+	
 	/**
 	 * add list of listeners to existing list of request listeners
 	 * @param requestListeners
@@ -478,7 +487,7 @@ public abstract class Request<T> implements IRequestFacade
 
 		private IRetryPolicy retryPolicy = new DefaultRetryPolicy();
 
-		private CopyOnWriteArrayList<IRequestListener> requestListeners;
+		private IRequestListener requestListeners;
 
 		private boolean responseOnUIThread;
 
@@ -625,11 +634,7 @@ public abstract class Request<T> implements IRequestFacade
 		 */
 		public S setRequestListener(IRequestListener requestListener)
 		{
-			if (this.requestListeners == null)
-			{
-				this.requestListeners = new CopyOnWriteArrayList<IRequestListener>();
-			}
-			this.requestListeners.add(requestListener);
+			this.requestListeners = requestListener;
 			return self();
 		}
 
