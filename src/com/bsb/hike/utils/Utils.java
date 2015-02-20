@@ -181,7 +181,6 @@ import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.ConnectionChangeReceiver;
-import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
@@ -3288,18 +3287,6 @@ public class Utils
 		}
 	}
 	
-	public static void executeAuthSDKTask(AuthSDKAsyncTask argTask, HttpRequestBase... requests)
-	{
-		if (isHoneycombOrHigher())
-		{
-			argTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requests);
-		}
-		else
-		{
-			argTask.execute(requests);
-		}
-	}
-
 	public static void executeSignupTask(AsyncTask<Void, SignupTask.StateValue, Boolean> asyncTask)
 	{
 		if (isHoneycombOrHigher())

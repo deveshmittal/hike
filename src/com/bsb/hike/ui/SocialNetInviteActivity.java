@@ -42,14 +42,18 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.SocialNetInviteAdapter;
 import com.bsb.hike.models.SocialNetFriendInfo;
-import com.bsb.hike.modules.httpmgr.HttpRequests;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.service.HikeMqttManagerNew;
+import com.bsb.hike.tasks.SendTwitterInviteTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -64,7 +68,7 @@ import com.facebook.model.GraphUser;
 import com.facebook.widget.WebDialog;
 import com.facebook.widget.WebDialog.OnCompleteListener;
 
-public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
+public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener,Listener
 {
 	private ListView listView;
 
@@ -99,7 +103,11 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 	private TextView title;
 
 	private ImageView backIcon;
+	
+	private SendTwitterInviteTask mTwitterInviteTask;
 
+	private String[] pubSubListeners = { HikePubSub.SEND_TWITTER_INVITE_RESULT };
+	
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
@@ -137,7 +145,13 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 		{
 			Utils.executeStringResultTask(new GetTwitterFollowers());
 		}
+		mTwitterInviteTask = (SendTwitterInviteTask) getLastCustomNonConfigurationInstance();
+		if (mTwitterInviteTask != null)
+		{
+			mDialog = ProgressDialog.show(this, null, getString(R.string.posting_update_twitter));
+		}
 		setupActionBar();
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
 	private void init()
@@ -217,6 +231,14 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 		super.onSaveInstanceState(outState);
 	}
 
+	/* store the task so we can keep keep the progress dialog going */
+	@Override
+	public Object onRetainCustomNonConfigurationInstance()
+	{
+		Logger.d("SocialNetInviteActivity", "onRetainNonConfigurationinstance");
+		return mTwitterInviteTask;
+	}
+	
 	private void getFriends()
 	{
 		Session activeSession = Session.getActiveSession();
@@ -404,52 +426,15 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			sendRequestDialog(selectedFriendsIds);
 		else
 		{
-			JSONArray inviteesArray = new JSONArray();
-
-			for (String id : selectedFriends)
-			{
-				inviteesArray.put(id);
-			}
-			try
-			{
-				sendTwitterInvite(new JSONObject().put("invitees", inviteesArray));
-			}
-			catch (JSONException e)
-			{
-				Logger.e("SocialNetInviteActivity", "Creating a JSONObject payload for http Twitter Invite request", e);
-			}
+			sendTwitterInvite();
 		}
 	}
 
-	public void sendTwitterInvite(JSONObject data)
+	public void sendTwitterInvite()
 	{
-		IRequestListener requestListener = new IRequestListener()
-		{	
-			@Override
-			public void onRequestSuccess(com.bsb.hike.modules.httpmgr.response.Response result)
-			{
-				dismissLoadingDialog();
-				Toast.makeText(SocialNetInviteActivity.this, getString(R.string.posted_update), Toast.LENGTH_SHORT).show();
-				finish();
-			}
-			
-			@Override
-			public void onRequestProgressUpdate(float progress)
-			{				
-			}
-			
-			@Override
-			public void onRequestFailure(HttpException httpException)
-			{
-				dismissLoadingDialog();
-				Toast.makeText(SocialNetInviteActivity.this, R.string.posting_update_fail, Toast.LENGTH_SHORT).show();
-			}
-		};
-		
-		RequestToken token = HttpRequests.sendTwitterInviteRequest(data, requestListener);
-		token.execute();
+		mTwitterInviteTask = new SendTwitterInviteTask(selectedFriends);
+		mTwitterInviteTask.execute();
 		mDialog = ProgressDialog.show(this, null, getString(R.string.posting_update_twitter));
-		return;
 	}
 
 	private void sendRequestDialog(final String selectedUserIds)
@@ -607,11 +592,9 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 	@Override
 	protected void onDestroy()
 	{
-		if (mDialog != null)
-		{
-			mDialog.dismiss();
-			mDialog = null;
-		}
+		mTwitterInviteTask = null;
+		dismissLoadingDialog();
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		super.onDestroy();
 	}
 
@@ -621,6 +604,29 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 		{
 			mDialog.dismiss();
 			mDialog = null;
+		}
+	}
+	
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		super.onEventReceived(type, object);
+		if (HikePubSub.SEND_TWITTER_INVITE_RESULT.equals(type))
+		{
+			final boolean success = (Boolean) object;
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					mTwitterInviteTask = null;
+					dismissLoadingDialog();
+					if (success)
+					{
+						finish();
+					}
+				}
+			});
 		}
 	}
 }

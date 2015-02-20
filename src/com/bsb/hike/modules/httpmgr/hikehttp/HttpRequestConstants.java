@@ -1,4 +1,4 @@
-package com.bsb.hike.modules.httpmgr;
+package com.bsb.hike.modules.httpmgr.hikehttp;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.ui.HikePreferences;

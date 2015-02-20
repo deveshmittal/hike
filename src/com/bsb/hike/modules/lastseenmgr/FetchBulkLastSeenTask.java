@@ -1,6 +1,6 @@
 package com.bsb.hike.modules.lastseenmgr;
 
-import static com.bsb.hike.modules.httpmgr.HttpRequests.BulkLastSeenRequest;
+import static com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests.BulkLastSeenRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;

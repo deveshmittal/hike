@@ -1,7 +1,7 @@
 package com.bsb.hike.service;
 
-import static com.bsb.hike.modules.httpmgr.HttpRequests.sendDeviceDetailsRequest;
-import static com.bsb.hike.modules.httpmgr.HttpRequests.sendPreActivationRequest;
+import static com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests.sendDeviceDetailsRequest;
+import static com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests.sendPreActivationRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -1,6 +1,6 @@
 package com.bsb.hike.tasks;
 
-import static com.bsb.hike.modules.httpmgr.HttpRequests.profileImageLoaderRequest;
+import static com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests.profileImageLoaderRequest;
 
 import java.io.File;
 

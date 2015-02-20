@@ -1,6 +1,6 @@
 package com.bsb.hike.modules.signupmanager;
 
-import static com.bsb.hike.modules.httpmgr.HttpRequests.setProfileRequest;
+import static com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests.setProfileRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;

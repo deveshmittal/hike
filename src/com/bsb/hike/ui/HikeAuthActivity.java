@@ -52,7 +52,7 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
-import static com.bsb.hike.modules.httpmgr.HttpRequests.authSDKRequest;
+import static com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests.authSDKRequest;
 
 /**
  * This activity is responsible for displaying "connect-with-hike" dialog and providing data as per user action.

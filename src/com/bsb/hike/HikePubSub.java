@@ -251,6 +251,8 @@ public class HikePubSub implements Runnable
 	public static final String GAMING_PROTIP_DOWNLOADED = "gamingProtipDownloaded";
 
 	public static final String DISMISS_POSTING_DIALOG = "dismissPostingDialog";
+	
+	public static final String SEND_TWITTER_INVITE_RESULT = "sendTwitterInviteResult";
 
 	public static final String SHOW_IMAGE = "showImage";
 

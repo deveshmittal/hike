@@ -1,6 +1,6 @@
 package com.bsb.hike.tasks;
 
-import static com.bsb.hike.modules.httpmgr.HttpRequests.updateAddressBookRequest;
+import static com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests.updateAddressBookRequest;
 
 import java.util.List;
 import java.util.Map;
