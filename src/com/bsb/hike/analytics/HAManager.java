@@ -559,11 +559,12 @@ public class HAManager
 			so remove it before recording
 		 */
 		//HAManager.getInstance().record(AnalyticsConstants.SESSION_EVENT, AnalyticsConstants.BACKGROUND, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_SESSION);
+
+		dumpInMemoryEventsAndTryToUpload(false, false);
 		
 		fgSessionInstance.reset();
 		
 		return metadata; 
-//		dumpInMemoryEventsAndTryToUpload(false, false);
 	}
 
 	private JSONObject getMetaDataForSession( Session session, boolean sessionStart)
