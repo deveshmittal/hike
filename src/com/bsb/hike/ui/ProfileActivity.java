@@ -96,6 +96,7 @@ import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
+import com.bsb.hike.tasks.GetHikeJoinTimeTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
@@ -201,8 +202,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 														 * the task to download the picasa image
 														 */
 
-		public HikeHTTPTask getHikeJoinTimeTask;
-
 		public String destFilePath = null; /*
 											 * the bitmap before the user saves it
 											 */
@@ -291,10 +290,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 		if ((mActivityState != null) && (mActivityState.task != null))
 		{
 			mActivityState.task.setActivity(null);
-		}
-		if ((mActivityState != null) && (mActivityState.getHikeJoinTimeTask != null))
-		{
-			mActivityState.getHikeJoinTimeTask.cancel(true);
 		}
 		if (profileType == ProfileType.GROUP_INFO)
 		{
@@ -666,7 +661,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 		 */
 		if (contactInfo.isOnhike() && contactInfo.getHikeJoinTime() == 0)
 		{
-			getHikeJoinedTimeFromServer();
+			getHikeJoinTime();
 		}
 	}
 	
@@ -683,46 +678,14 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 		
 		if(contactInfo.isOnhike() && contactInfo.getHikeJoinTime() == 0)
 		{
-			getHikeJoinedTimeFromServer();
+			getHikeJoinTime();
 		}
 	}
 	
-	private void getHikeJoinedTimeFromServer()
+	private void getHikeJoinTime()
 	{
-		IRequestListener requestListener = new IRequestListener()
-		{
-			@Override
-			public void onRequestSuccess(Response result)
-			{
-				try
-				{
-					JSONObject response = (JSONObject) result.getBody().getContent();
-					Logger.d(getClass().getSimpleName(), "Hike join time request succeeded, Response: " + response);
-					JSONObject profile = response.getJSONObject(HikeConstants.PROFILE);
-					long hikeJoinTime = profile.optLong(HikeConstants.JOIN_TIME, 0);
-					hikeJoinTime = Utils.applyServerTimeOffset(ProfileActivity.this, hikeJoinTime);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_JOIN_TIME_OBTAINED, new Pair<String, Long>(mLocalMSISDN, hikeJoinTime));
-				}
-				catch (JSONException e)
-				{
-					e.printStackTrace();
-				}
-			}
-
-			@Override
-			public void onRequestProgressUpdate(float progress)
-			{
-			}
-
-			@Override
-			public void onRequestFailure(HttpException httpException)
-			{
-				Logger.e(getClass().getSimpleName(), "Hike join time request failed : " + httpException.getMessage());
-			}
-		};
-
-		RequestToken token = HttpRequests.getHikeJoinTimeRequest(mLocalMSISDN, requestListener);
-		token.execute();
+		GetHikeJoinTimeTask getHikeJoinTimeTask = new GetHikeJoinTimeTask(mLocalMSISDN);
+		getHikeJoinTimeTask.execute();
 	}
 	
 	private void updateProfileHeaderView()
@@ -1237,48 +1200,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 		{
 			getHikeJoinTime();
 		}
-	}
-
-	private void getHikeJoinTime()
-	{
-		IRequestListener requestListener = new IRequestListener()
-		{
-			@Override
-			public void onRequestSuccess(Response result)
-			{
-				try
-				{
-					JSONObject response = (JSONObject) result.getBody().getContent();
-					Logger.d(getClass().getSimpleName(), "Hike join time request succeeded, Response : " + response);
-					JSONObject profile = response.getJSONObject(HikeConstants.PROFILE);
-					long hikeJoinTime = profile.optLong(HikeConstants.JOIN_TIME, 0);
-
-					Editor editor = preferences.edit();
-					editor.putLong(HikeMessengerApp.USER_JOIN_TIME, hikeJoinTime);
-					editor.commit();
-
-					HikeMessengerApp.getPubSub().publish(HikePubSub.USER_JOIN_TIME_OBTAINED, new Pair<String, Long>(mLocalMSISDN, hikeJoinTime));
-				}
-				catch (JSONException e)
-				{
-					e.printStackTrace();
-				}
-			}
-
-			@Override
-			public void onRequestProgressUpdate(float progress)
-			{
-			}
-
-			@Override
-			public void onRequestFailure(HttpException httpException)
-			{
-				Logger.e(getClass().getSimpleName(), "Hike join time request failed : " + httpException.getMessage());
-			}
-		};
-
-		RequestToken token = HttpRequests.getHikeJoinTimeRequest(mLocalMSISDN, requestListener);
-		token.execute();
 	}
 
 	boolean reachedEnd;
