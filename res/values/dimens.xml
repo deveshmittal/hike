@@ -169,4 +169,5 @@
 	<dimen name="sticker_grid_horizontal_padding">8dp</dimen>
 	<dimen name="drag_shadow_height">8dp</dimen>
 	<dimen name="sticker_settings_tip_margin">18dp</dimen>
+	<dimen name="call_failed_fragment_height">250dp</dimen>
 </resources>

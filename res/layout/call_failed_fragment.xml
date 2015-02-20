@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/call_failed_fragment_height"
+    android:orientation="vertical"
+    android:background="@color/white" >
+	
+	<com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_centerHorizontal="true"
+        android:textSize="18dp"
+        android:textColor="@color/standard_black"
+        android:textStyle="italic" />
+			
+	<com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/subheading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/heading"
+        android:layout_marginTop="4dp"
+        android:layout_centerHorizontal="true"
+        android:text="@string/voip_call_failed_frag_subheader"
+        android:textSize="12dp"
+        android:textColor="@color/standard_light_grey2"
+        android:textStyle="italic" />
+		
+	<LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal"
+	    android:layout_below="@id/subheading"
+	    android:paddingLeft="24dp"
+	    android:paddingRight="24dp"
+	    android:layout_marginTop="24dp">
+	
+	    	<com.bsb.hike.view.CustomFontButton
+	    	    android:id="@+id/voice_clip"
+		        android:layout_width="0dp"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:drawablePadding="8dp"
+		        android:text="@string/voip_call_failed_voice_clip"
+		        android:textColor="@color/call_issues"
+		        android:drawableTop="@drawable/call_issues_echo_btn"
+		        android:textSize="12dp"
+		        android:textStyle="italic"
+		        android:tag="echoI"
+		        android:background="@null"
+		        android:scaleType="center" />
+		
+			<com.bsb.hike.view.CustomFontButton
+			    android:id="@+id/hike_message"
+		        android:layout_width="0dp"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:text="@string/voip_call_failed_message"
+		        android:drawableTop="@drawable/call_issues_noise_btn"
+		        android:drawablePadding="8dp"
+		        android:background="@null"
+		        android:textSize="12dp"
+		        android:textStyle="italic"
+		        android:textColor="@color/call_issues"
+		        android:tag="noiseI"
+		        android:layout_marginRight="24dp"
+		        android:layout_marginLeft="24dp"
+		        android:scaleType="center" />
+		
+			<com.bsb.hike.view.CustomFontButton
+			    android:id="@+id/call_again"
+		        android:layout_width="0dp"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:drawablePadding="8dp"
+		        android:text="@string/voip_call_failed_redial"
+		        android:drawableTop="@drawable/call_issues_hear_btn"
+		        android:textSize="12dp"
+		        android:textStyle="italic"
+		        android:textColor="@color/call_issues"
+		        android:tag="hearI"
+		        android:background="@null"
+		        android:scaleType="center" />	
+	</LinearLayout>
+		
+	<com.bsb.hike.view.CustomFontButton
+	    android:id="@+id/dismiss_button"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:text="@string/dismiss_upper_case"
+        android:textSize="13dp"
+        android:background="@null"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textColor="@color/call_rate_submit" />
+
+	<View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_above="@id/dismiss_button"
+        android:background="@color/list_divider" />
+</RelativeLayout>

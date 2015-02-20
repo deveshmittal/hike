@@ -37,6 +37,7 @@ public class VoIPConstants {
 	public static final String CALL_RATING = "rating";
 	public static final String CALL_NETWORK_TYPE = "network";
 	public static final String PARTNER_MSISDN = "pmsisdn";
+	public static final String CALL_FAILED_REASON = "callfailreason";
 
 	public static final class Analytics
 	{
@@ -84,6 +85,8 @@ public class VoIPConstants {
 		public static final int CALLER_BAD_NETWORK = 7;
 
 		public static final int CALLER_IN_NATIVE_CALL = 8;
+
+		public static final int PARTNER_ANSWER_TIMEOUT = 9;
 	}
 
 	public static final class Extras

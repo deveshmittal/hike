@@ -1,7 +1,6 @@
 package com.bsb.hike.voip.view;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +20,9 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ImageSpan;
@@ -41,12 +43,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.VoipProfilePicImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient;
@@ -54,9 +58,10 @@ import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPConstants.CallQuality;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPService.LocalBinder;
+import com.bsb.hike.voip.view.CallFailedFragment.CallFailedFragListener;
 import com.bsb.hike.voip.VoIPUtils;
 
-public class VoIPActivity extends Activity implements CallActions
+public class VoIPActivity extends HikeAppStateBaseFragmentActivity implements CallActions, CallFailedFragListener
 {
 	static final int PROXIMITY_SCREEN_OFF_WAKELOCK = 32;
 //	public static boolean isRunning = false;
@@ -95,6 +100,8 @@ public class VoIPActivity extends Activity implements CallActions
 
 	private boolean isCallActive;
 
+	private boolean showingCallFailedFragment;
+
 	private enum CallStatus
 	{
 		OUTGOING_CONNECTING, OUTGOING_RINGING, INCOMING_CALL, PARTNER_BUSY, ON_HOLD, ACTIVE, ENDED
@@ -106,7 +113,7 @@ public class VoIPActivity extends Activity implements CallActions
 
 		@Override
 		public void handleMessage(Message msg) {
-//			Logger.d(VoIPConstants.TAG, "VoIPActivity handler received: " + msg.what);
+			Logger.d(VoIPConstants.TAG, "VoIPActivity handler received: " + msg.what);
 			switch (msg.what) {
 			case MSG_SHUTDOWN_ACTIVITY:
 				Logger.d(VoIPConstants.TAG, "Shutting down..");
@@ -132,21 +139,21 @@ public class VoIPActivity extends Activity implements CallActions
 //				showMessage("Call was declined.");
 				break;
 			case MSG_CONNECTION_FAILURE:
-				showMessage("Unable to connect your call.");
+				showCallFailedFragment(VoIPConstants.ConnectionFailCodes.UDP_CONNECTION_FAIL);
 				break;
 			case MSG_CURRENT_BITRATE:
 //				int bitrate = voipService.getBitrate();
 //				showMessage("Bitrate: " + bitrate);
 				break;
 			case MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE:
-				showMessage("Unable to connect to network.");
+				showCallFailedFragment(VoIPConstants.ConnectionFailCodes.EXTERNAL_SOCKET_RETRIEVAL_FAILURE);
 				voipService.stop();
 				break;
 			case MSG_PARTNER_SOCKET_INFO_TIMEOUT:
-//				showMessage("Partner is not responding.");
+				showCallFailedFragment(VoIPConstants.ConnectionFailCodes.PARTNER_SOCKET_INFO_TIMEOUT);
 				break;
 			case MSG_PARTNER_ANSWER_TIMEOUT:
-//				showMessage("No response.");
+				showCallFailedFragment(VoIPConstants.ConnectionFailCodes.PARTNER_ANSWER_TIMEOUT);
 				break;
 			case MSG_RECONNECTING:
 				showMessage("Reconnecting your call...");
@@ -160,7 +167,7 @@ public class VoIPActivity extends Activity implements CallActions
 				Logger.d(VoIPConstants.TAG, "Updating call quality to: " + quality);
 				break;
 			case MSG_NETWORK_SUCKS:
-				showMessage("Network quality is poor.");
+				showCallFailedFragment(VoIPConstants.ConnectionFailCodes.CALLER_BAD_NETWORK);
 				break;
 			case MSG_UPDATE_HOLD_BUTTON:
 				boolean hold = voipService.getHold();
@@ -171,7 +178,7 @@ public class VoIPActivity extends Activity implements CallActions
 					showCallStatus(CallStatus.ACTIVE);
 				break;
 			case MSG_ALREADY_IN_CALL:
-				showMessage("Already in call. Please try again later.");
+				showCallFailedFragment(VoIPConstants.ConnectionFailCodes.CALLER_IN_NATIVE_CALL);
 				break;
 			default:
 				super.handleMessage(msg);
@@ -214,25 +221,24 @@ public class VoIPActivity extends Activity implements CallActions
 		holdButton = (ImageButton)findViewById(R.id.hold_btn);
 		speakerButton = (ImageButton)findViewById(R.id.speaker_btn);
 
-		Logger.d(VoIPConstants.TAG, "Binding to service..");
-		// Calling start service as well so an activity unbind doesn't cause the service to stop
-		startService(new Intent(getApplicationContext(), VoIPService.class));
-		Intent intent = new Intent(getApplicationContext(), VoIPService.class);
-		bindService(intent, myConnection, Context.BIND_AUTO_CREATE);
-
-		intent = getIntent();
+		Intent intent = getIntent();
 		if (intent != null) {
 			handleIntent(intent);
 		}
 
 		acquireWakeLock();
-//		isRunning = true;
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
 		initProximitySensor();
+
+		Logger.d(VoIPConstants.TAG, "Binding to service..");
+		// Calling start service as well so an activity unbind doesn't cause the service to stop
+		startService(new Intent(getApplicationContext(), VoIPService.class));
+		Intent intent = new Intent(getApplicationContext(), VoIPService.class);
+		bindService(intent, myConnection, Context.BIND_AUTO_CREATE);
 	}
 	
 	@Override
@@ -311,10 +317,7 @@ public class VoIPActivity extends Activity implements CallActions
 		
 		if (action.equals(VoIPConstants.PARTNER_REQUIRES_UPGRADE)) 
 		{
-			String message = intent.getStringExtra(VoIPConstants.Extras.MESSAGE);
-			if (message == null || message.isEmpty())
-				message = getString(R.string.voip_partner_upgrade);
-			showMessage(message);
+			showCallFailedFragment(VoIPConstants.ConnectionFailCodes.PARTNER_UPGRADE);
 			if (voipService != null)
 			{
 				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.PARTNER_UPGRADE);
@@ -324,10 +327,7 @@ public class VoIPActivity extends Activity implements CallActions
 		
 		if (action.equals(VoIPConstants.PARTNER_INCOMPATIBLE)) 
 		{
-			String message = intent.getStringExtra(VoIPConstants.Extras.MESSAGE);
-			if (message == null || message.isEmpty())
-				message = getString(R.string.voip_partner_incompat);
-			showMessage(message);
+			showCallFailedFragment(VoIPConstants.ConnectionFailCodes.PARTNER_INCOMPAT);
 			if (voipService != null)
 			{
 				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.PARTNER_INCOMPAT);
@@ -346,7 +346,7 @@ public class VoIPActivity extends Activity implements CallActions
 		
 		if (action.equals(VoIPConstants.PARTNER_IN_CALL)) 
 		{
-			showMessage(getString(R.string.voip_partner_is_busy));
+			showCallFailedFragment(VoIPConstants.ConnectionFailCodes.PARTNER_BUSY);
 			showCallStatus(CallStatus.PARTNER_BUSY);
 			if (voipService != null)
 			{
@@ -429,6 +429,11 @@ public class VoIPActivity extends Activity implements CallActions
 		if(callDuration!=null)
 		{
 			callDuration.stop();
+		}
+
+		if(showingCallFailedFragment)
+		{
+			return;
 		}
 
 		new Handler().postDelayed(new Runnable()
@@ -829,5 +834,40 @@ public class VoIPActivity extends Activity implements CallActions
 		}
 		signalContainer.startAnimation(anim);
 		signalContainer.setVisibility(View.VISIBLE);
+	}
+
+	private void showCallFailedFragment(int callFailCode)
+	{
+		showingCallFailedFragment = true;
+		if(!isFragmentAdded(HikeConstants.VOIP_CALL_FAILED_FRAGMENT_TAG))
+		{
+			findViewById(R.id.activity_overlay).setVisibility(View.VISIBLE);
+			Bundle bundle = new Bundle();
+			bundle.putString(VoIPConstants.PARTNER_MSISDN, voipService.getPartnerClient().getPhoneNumber());
+			bundle.putInt(VoIPConstants.CALL_FAILED_REASON, callFailCode);
+
+			CallFailedFragment callFailedFragment = new CallFailedFragment();
+			callFailedFragment.setArguments(bundle);
+
+			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+			fragmentTransaction.setCustomAnimations(R.anim.call_failed_frag_slide_in, R.anim.call_failed_frag_slide_out);
+			fragmentTransaction.add(R.id.call_failed_frag_container, callFailedFragment, HikeConstants.VOIP_CALL_FAILED_FRAGMENT_TAG);
+			fragmentTransaction.commitAllowingStateLoss();
+		}
+	}
+
+	@Override
+	public void removeCallFailedFragment()
+	{
+		showingCallFailedFragment = false;
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.VOIP_CALL_FAILED_FRAGMENT_TAG);
+		if(fragment!=null)
+		{
+			findViewById(R.id.activity_overlay).setVisibility(View.GONE);
+			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+			fragmentTransaction.setCustomAnimations(R.anim.call_failed_frag_slide_in, R.anim.call_failed_frag_slide_out);
+			fragmentTransaction.remove(fragment);
+			fragmentTransaction.commitAllowingStateLoss();
+		}
 	}
 }

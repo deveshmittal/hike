@@ -188,4 +188,18 @@
 		    android:layout_width="match_parent"
 		    android:layout_height="wrap_content"
 		    android:visibility="gone" />
+
+		<FrameLayout
+			android:id="@+id/activity_overlay"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:background="@color/black_60"
+			android:visibility="gone" />
+
+		<FrameLayout
+		    android:id="@+id/call_failed_frag_container"
+		    android:layout_alignParentBottom="true"
+		    android:layout_width="match_parent"
+		    android:layout_height="@dimen/call_failed_fragment_height">
+		</FrameLayout>
 </RelativeLayout>
