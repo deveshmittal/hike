@@ -715,12 +715,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void stickerClicked()
 	{
 		mTips.setStickerStipSeen();
-		mShareablePopupLayout.showPopup(mStickerPicker);
+		mShareablePopupLayout.togglePopup(mStickerPicker);
 	}
 
 	protected void emoticonClicked()
 	{
-		mShareablePopupLayout.showPopup(mEmoticonPicker);
+		mShareablePopupLayout.togglePopup(mEmoticonPicker);
 	}
 
 	protected void showThemePicker()
