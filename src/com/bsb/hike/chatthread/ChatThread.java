@@ -131,7 +131,7 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, CaptureImageListener,
 		PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener,
-		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, OnSoftKeyboardListener
+		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener
 {
 	private static final String TAG = "chatthread";
 
@@ -1214,8 +1214,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 
 		mComposeView.setOnKeyListener(this);
-
-		((CustomLinearLayout) activity.findViewById(R.id.chat_layout)).setOnSoftKeyboardListener(this);
 
 		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
 
@@ -3676,15 +3674,4 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		return false;
 	}
 
-	@Override
-	public void onShown()
-	{
-		Logger.d(TAG, "Keyboard shown");
-		uiHandler.sendEmptyMessage(SCROLL_TO_END);
-	}
-
-	@Override
-	public void onHidden()
-	{
-	}
 }
