@@ -11,15 +11,23 @@ public class HttpRequestConstants
 	private static boolean isSSL = false;
 	
 	private static final String HTTP = "http://";
-	
+
+	//TODO change it to https
 	private static final String HTTPS = "https://";
+
+	private static final String PRODUCTION_API = "ft.im.hike.in";
 	
-	private static final String PRODUCTION_API = "api.im.hike.in";
-	
+	//TODO change it to above
+	//private static final String PRODUCTION_API = "54.169.191.93";
+
 	private static final String STAGING_API = "staging.im.hike.in";
+		
+	public static final int STAGING_PORT = 80;
 	
+	public static final int PORT = STAGING_PORT;
+
 	private static String BASE_URL = HTTP + PRODUCTION_API;
-	
+
 	private static final String BASE_V1 = "/v1";
 
 	private static final String BASE_V2 = "/v2";
