@@ -33,11 +33,13 @@ import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.stickerSignupUpg
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.unlinkAccountBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.updateAddressbookBaseUrl;
 import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.validateNumberBaseUrl;
+import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.authSDKBaseUrl;
 import static com.bsb.hike.modules.httpmgr.request.PriorityConstants.PRIORITY_HIGH;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_LONG;
 import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.json.JSONObject;
 
@@ -54,6 +56,7 @@ import com.bsb.hike.modules.httpmgr.request.requestbody.FileBody;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
 import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Utils;
 
 public class HttpRequests
@@ -569,6 +572,29 @@ public class HttpRequests
 				.post(body)
 				.build();
 		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
+		return requestToken;
+	}
+	
+	public static RequestToken authSDKRequest(String urlParamString, IRequestListener requestListener)
+	{
+		ArrayList<Header> headerList = new ArrayList<Header>(1);
+		headerList.add(new Header("Content-type", "text/plain"));
+		if(authSDKBaseUrl().contains(HttpRequestConstants.BASE_SDK_STAGING))
+		{
+			headerList.add(new Header("cookie", "uid=UZtZkaEMFSBRwmys;token=EeEKpHJzesU="));
+		}
+		else
+		{
+			headerList.add(new Header("cookie", "uid="+AccountUtils.mUid +";token="+AccountUtils.mToken));
+		}
+			
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(authSDKBaseUrl() + "authorize" + "?" + urlParamString)
+				.setRequestType(Request.REQUEST_TYPE_SHORT)
+				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
+				.setHeaders(headerList)
+				.build();
 		return requestToken;
 	}
 }

@@ -47,6 +47,12 @@ public class HttpRequestConstants
 	private static final String BASE_STICKER = "/stickers";
 
 	private static final String BASE_INVITE = "/invite";
+	
+	private static final String BASE_SDK_PROD = "oauth.hike.in/o/oauth2/";
+	
+	public static final String BASE_SDK_STAGING = "stagingoauth.im.hike.in/o/oauth2/";
+	
+	private static String BASE_SDK = HTTP + BASE_SDK_PROD;
 
 	public static synchronized void setUpBase()
 	{
@@ -71,6 +77,10 @@ public class HttpRequestConstants
 		BASE_URL = "";
 		BASE_URL += (isSSL) ? HTTPS : HTTP;
 		BASE_URL += (isProduction) ? PRODUCTION_API : STAGING_API;
+		
+		BASE_SDK = "";
+		BASE_SDK += (isSSL) ? HTTPS : HTTP;
+		BASE_SDK += (isProduction) ? BASE_SDK_PROD : BASE_SDK_STAGING;
 	}
 
 	/*********************************************************************************************************************************************/
@@ -238,5 +248,10 @@ public class HttpRequestConstants
 	public static String signUpPinCallBaseUrl()
 	{
 		return BASE_URL + BASE_V1 + "/pin-call";
+	}
+	
+	public static String authSDKBaseUrl()
+	{
+		return BASE_SDK;
 	}
 }
