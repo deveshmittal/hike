@@ -41,6 +41,7 @@ import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.tasks.PostToSocialNetworkTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
@@ -69,7 +70,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 	private SharedPreferences settings;
 
 	private String[] pubSubListeners = { HikePubSub.SOCIAL_AUTH_COMPLETED, HikePubSub.DISMISS_POSTING_DIALOG };
-
+	
 	private ProgressDialog progressDialog;
 
 	boolean pickFriendsWhenSessionOpened;
@@ -337,83 +338,9 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 
 	private void postToSocialNetwork(final boolean facebook)
 	{
-		IRequestListener requestListener = new IRequestListener()
-		{		
-			@Override
-			public void onRequestSuccess(Response result)
-			{
-				JSONObject response = (JSONObject) result.getBody().getContent();
-				HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_POSTING_DIALOG, null);
-				parseResponse(response, facebook);
-			}
-			
-			@Override
-			public void onRequestProgressUpdate(float progress)
-			{
-			}
-			
-			@Override
-			public void onRequestFailure(HttpException httpException)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_POSTING_DIALOG, null);
-				Toast.makeText(getApplicationContext(), R.string.posting_update_fail, Toast.LENGTH_SHORT).show();	
-			}
-		};
-		
-		JSONObject data = new JSONObject();
-		try
-		{
-			data.put(facebook ? HikeConstants.FACEBOOK_STATUS : HikeConstants.TWITTER_STATUS, true);
-			
-			Logger.d(getClass().getSimpleName(), "JSON: " + data);
-
-			progressDialog = ProgressDialog.show(this, null, getString(facebook ? R.string.posting_update_facebook : R.string.posting_update_twitter));
-
-			RequestToken token = HttpRequests.postToSocialNetworkRequest(data, requestListener);
-			token.execute();
-		}
-		catch (JSONException e)
-		{
-			Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
-		}
-	}
-
-	private void parseResponse(JSONObject response, boolean facebook)
-	{
-		String responseString = response.optString(facebook ? HikeConstants.FACEBOOK_STATUS : HikeConstants.TWITTER_STATUS);
-
-		if (TextUtils.isEmpty(responseString))
-		{
-			return;
-		}
-
-		if (HikeConstants.SocialPostResponse.SUCCESS.equals(responseString))
-		{
-			Toast.makeText(getApplicationContext(), R.string.posted_update, Toast.LENGTH_SHORT).show();
-		}
-		else if (HikeConstants.SocialPostResponse.FAILURE.equals(responseString))
-		{
-			Toast.makeText(getApplicationContext(), R.string.posting_update_fail, Toast.LENGTH_SHORT).show();
-		}
-		else
-		{
-			Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-			if (facebook)
-			{
-				editor.remove(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE);
-				editor.remove(HikeMessengerApp.FACEBOOK_TOKEN);
-				editor.remove(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES);
-				editor.remove(HikeMessengerApp.FACEBOOK_USER_ID);
-			}
-			else
-			{
-				editor.remove(HikeMessengerApp.TWITTER_AUTH_COMPLETE);
-				editor.remove(HikeMessengerApp.TWITTER_TOKEN);
-				editor.remove(HikeMessengerApp.TWITTER_TOKEN_SECRET);
-			}
-			editor.commit();
-			onItemClick(null, null, facebook ? 1 : 2, 0);
-		}
+		PostToSocialNetworkTask task = new PostToSocialNetworkTask(facebook);
+		task.execute();
+		progressDialog = ProgressDialog.show(this, null, getString(facebook ? R.string.posting_update_facebook : R.string.posting_update_twitter));
 	}
 
 	private void setupActionBar()
