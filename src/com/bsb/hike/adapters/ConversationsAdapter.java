@@ -653,32 +653,37 @@ public class ConversationsAdapter extends BaseAdapter
 				try
 				{
 					String name = info.getContactName();
-					if (name == null)
-					{
-						name = "";
-					}
 					boolean found = false;
-					int startIndex = 0;
-					name = name.toLowerCase();
-					if (name.startsWith(textToBeFiltered))
-					{
-						found = true;
-						convSpanStartIndexes.put(info.getMsisdn(), startIndex);
-					}
-					else if (name.contains(" " + textToBeFiltered))
-					{
-						found = true;
-						startIndex = name.indexOf(" " + textToBeFiltered) + 1;
-						convSpanStartIndexes.put(info.getMsisdn(), startIndex);
-					}
-					else if (info.getMsisdn().contains(textToBeFiltered))
+					if (textToBeFiltered.equals("group") && Utils.isGroupConversation(info.getMsisdn()))
 					{
 						found = true;
 					}
-					else if (textToBeFiltered.equals("group") && Utils.isGroupConversation(info.getMsisdn()))
+					else if (TextUtils.isEmpty(name))
 					{
-						found = true;
+						if (info.getMsisdn().contains(textToBeFiltered))
+						{
+							found = true;
+							int startIndex = info.getMsisdn().indexOf(textToBeFiltered);
+							convSpanStartIndexes.put(info.getMsisdn(), startIndex);
+						}
 					}
+					else
+					{
+						name = name.toLowerCase();
+						int startIndex = 0;
+						if (name.startsWith(textToBeFiltered))
+						{
+							found = true;
+							convSpanStartIndexes.put(info.getMsisdn(), startIndex);
+						}
+						else if (name.contains(" " + textToBeFiltered))
+						{
+							found = true;
+							startIndex = name.indexOf(" " + textToBeFiltered) + 1;
+							convSpanStartIndexes.put(info.getMsisdn(), startIndex);
+						}
+					}
+
 					if(found)
 					{
 						listToUpdate.add(info);
