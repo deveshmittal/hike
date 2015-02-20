@@ -11,10 +11,10 @@ import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import com.bsb.hike.utils.Logger;
 
 public class PlatformWebClient extends WebViewClient
 {
@@ -23,7 +23,7 @@ public class PlatformWebClient extends WebViewClient
 	@Override
 	public WebResourceResponse shouldInterceptRequest(WebView view, String url)
 	{
-		Log.d("Call from webview", "" + url);
+		Logger.d("Call from webview", "" + url);
 		if (url.startsWith("http") || (!url.startsWith(PlatformContentConstants.CONTENT_FONTPATH_BASE)))
 		{
 			return super.shouldInterceptRequest(view, url);

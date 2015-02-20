@@ -1,5 +1,10 @@
 package com.bsb.hike.platform;
 
+import java.util.ArrayList;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.annotation.TargetApi;
@@ -11,7 +16,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -44,10 +48,6 @@ import com.bsb.hike.platform.content.PlatformWebClient;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 /**
  * Created by shobhitmandloi on 14/01/15.
@@ -409,7 +409,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			super.onPageFinished(view, url);
 			CookieManager.getInstance().setAcceptCookie(true);
-			Log.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
+			Logger.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
 			view.loadUrl("javascript:setData('"  + convMessage.getMsisdn() + "','"
 					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "','" + convMessage.isSent() +  "')");
 			String alarmData = convMessage.platformWebMessageMetadata.getAlarmData();
