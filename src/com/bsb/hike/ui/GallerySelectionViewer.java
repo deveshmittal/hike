@@ -40,6 +40,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.adapters.GalleryAdapter;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.offline.FileTransferService;
@@ -322,6 +323,14 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 						
 							 serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
 							 startService(serviceIntent);
+							 //initialiseOfflineFileTransfer(filePath , null , HikeFileType.IMAGE,null,false,-1,false,FTAnalyticEvents.GALLERY_ATTACHEMENT, deviceAddress, HikeConstants.IMAGE_TRANSFER_CODE);
+							 File file = new File(filePath);
+							 Boolean onHike  = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
+							 String msisdn  = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+							 FileTransferManager.getInstance(getApplicationContext()).uploadOfflineFile(msisdn, file, null, null, HikeFileType.IMAGE, false, false,
+										onHike, -1, FTAnalyticEvents.GALLERY_ATTACHEMENT);
+							 
+								//FileTransferManager.getInstance(getApplicationContext()).uploadOfflineFile(getIntent().getStringExtra(HikeConstants.Extras.MSISDN), file, null, HikeFileType.IMAGE,null,false,-1,false,FTAnalyticEvents.GALLERY_ATTACHEMENT,HikeConstants.IMAGE_TRANSFER_CODE);
 							 	
 						}
 						

@@ -60,14 +60,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.HikeConstants.ImageQuality;
-import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
@@ -539,6 +538,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 						}
                 	}
                 }).start();
+                
                 switch(type){
                 case 1:
                     f = new File(Environment.getExternalStorageDirectory() + "/"
@@ -659,7 +659,11 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 				}
 				
 			}
-
+			if(!server_running)
+			{
+				new ServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				server_running = true;
+			}
 		}
 		
 		@Override
