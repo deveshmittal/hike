@@ -486,6 +486,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time, ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setMetadata(metadata);
 		convMessage.setSMS(!isRecipientOnhike);
+		convMessage.setIsSent(false);
 		convMessage.setState(ConvMessage.State.RECEIVED_READ);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		return convMessage;
@@ -521,7 +522,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                 //Log.d(WiFiDirectActivity.TAG, "Server: connection done.. Receiving File");
                 //Toast.makeText(, text, duration)
                 //DeviceListFragment fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
-                
+                FileTransferService.isOfflineFileTransferFinished = false;
                 InputStream inputstream = client.getInputStream();
                 byte[] typeArr = new byte[1];
                 inputstream.read(typeArr, 0, typeArr.length);
@@ -628,8 +629,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
 						thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
 						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
-						// thumbnail.recycle();
-						Logger.d(getClass().getSimpleName(), "Sent Thumbnail Size : " + tBytes.length);
+						Logger.d(getClass().getSimpleName(), "Thumbnail Size : " + tBytes.length);
 						JSONObject metadata = null;
 						ConvMessage convMessage = null;
 						try {
@@ -660,12 +660,11 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
 						thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
 						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
-						// thumbnail.recycle();
-						Logger.d(getClass().getSimpleName(), "Sent Thumbnail Size : " + tBytes.length);
+						Logger.d(getClass().getSimpleName(), "Thumbnail Size : " + tBytes.length);
 						JSONObject metadata = null;
 						ConvMessage convMessage = null;
 						try {
-							metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.IMAGE, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
+							metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.VIDEO, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
 							convMessage = createConvMessage(f.getName(), metadata, peers_msisdn.get(0), false);
 							HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
 						} catch (JSONException e) {
@@ -689,6 +688,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 				}
 				
 			}
+			FileTransferService.isOfflineFileTransferFinished = true;
 			if(!server_running)
 			{
 				new ServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

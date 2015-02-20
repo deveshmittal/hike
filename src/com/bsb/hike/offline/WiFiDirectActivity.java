@@ -326,7 +326,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
                 	
                     @Override
                     public void onSuccess() {
-                        Toast.makeText(WiFiDirectActivity.this, "Aborting connection",
+                        Toast.makeText(WiFiDirectActivity.this, "Aborting connection. It will take some time to recover.",
                                 Toast.LENGTH_SHORT).show();
                     }
 
@@ -444,7 +444,6 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
 			while(!FileTransferService.isOfflineFileTransferFinished)
 	    	{
 				try {
-					//Wait for  recieving complete file 
 					Thread.sleep(1*1000);
 				} catch (InterruptedException e) {
 					Logger.e(TAG, "Sleep failed in OnFileTransferCompleteTask");
