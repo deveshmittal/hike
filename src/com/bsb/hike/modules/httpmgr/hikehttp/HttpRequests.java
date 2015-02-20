@@ -358,6 +358,7 @@ public class HttpRequests
 				.setUrl(sendTwitterInviteBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
 				.setRequestListener(requestListener)
+				.setResponseOnUIThread(true)
 				.post(body)
 				.build();
 		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
