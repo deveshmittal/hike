@@ -81,6 +81,7 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.modules.httpmgr.HttpRequestConstants;
 import com.bsb.hike.modules.httpmgr.HttpRequests;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
@@ -497,6 +498,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				 * Update the urls to use ssl or not.
 				 */
 				Utils.setupUri(this.getApplicationContext());
+				HttpRequestConstants.toggleSSL();
 
 				mHandler.removeCallbacks(startWelcomeScreen);
 				mHandler.postDelayed(startWelcomeScreen, 2500);

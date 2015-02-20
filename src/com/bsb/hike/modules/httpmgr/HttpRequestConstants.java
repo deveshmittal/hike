@@ -1,5 +1,10 @@
 package com.bsb.hike.modules.httpmgr;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.ui.HikePreferences;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Utils;
+
 
 public class HttpRequestConstants
 {
@@ -39,15 +44,21 @@ public class HttpRequestConstants
 
 	private static final String BASE_INVITE = "/invite";
 
-	public static synchronized void toggleStaging(boolean production)
+	public static synchronized void setUpBase()
 	{
-		isProduction = production;
+		toggleStaging();
+		toggleSSL();
+	}
+	
+	public static synchronized void toggleStaging()
+	{
+		isProduction = HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.getInstance()).getData(HikeMessengerApp.PRODUCTION, true);
 		changeBaseUrl();
 	}
 
-	public static synchronized void toggleSSL(boolean ssl)
+	public static synchronized void toggleSSL()
 	{
-		isSSL = ssl;
+		isSSL = Utils.switchSSLOn(HikeMessengerApp.getInstance());
 		changeBaseUrl();
 	}
 
