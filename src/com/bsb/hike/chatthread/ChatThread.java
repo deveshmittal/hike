@@ -13,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -121,8 +120,6 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.CustomLinearLayout;
-import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
 /**
  * 
@@ -1186,9 +1183,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mMessageMap = new HashMap<Long, ConvMessage>();
 		addtoMessageMap(0, messages.size());
 
-		mAdapter = new MessagesAdapter(activity, messages, mConversation, this, this);
-
-		initListView(); // set adapter and add clicks etc
+		initListViewAndAdapter(); // init adapter, listView and add clicks etc
 		setupActionBar(); // Setup the action bar
 		currentTheme = mConversation.getTheme();
 		updateUIAsPerTheme(currentTheme);// it has to be done after setting adapter
@@ -1290,9 +1285,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		sendMessage(convMessage);
 	}
 
-	private void initListView()
+	private void initListViewAndAdapter()
 	{
 		mConversationsView = (ListView) activity.findViewById(R.id.conversations_list);
+		mAdapter = new MessagesAdapter(activity, messages, mConversation, this, mConversationsView, activity);
 		mConversationsView.setAdapter(mAdapter);
 		if (mConversation.getUnreadCount() > 0)
 		{
@@ -3599,11 +3595,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mActionMode.finish();
 			return false;
 		}
-	}
-
-	public Activity getChatThreadActivity()
-	{
-		return activity;
 	}
 
 	@Override

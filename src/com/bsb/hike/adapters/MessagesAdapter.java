@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -38,7 +39,6 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -55,22 +55,24 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.dialog.ContactDialog;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
-import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.analytics.HAManager;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -96,7 +98,6 @@ import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.platform.CardRenderer;
 import com.bsb.hike.platform.WebViewCardRenderer;
-import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ProfileActivity;
@@ -110,22 +111,6 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.HoloCircularProgress;
-import org.json.JSONArray;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import com.bsb.hike.voip.VoIPConstants;
 
 
 public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener, OnCheckedChangeListener
@@ -287,8 +272,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private ArrayList<ConvMessage> convMessages;
 
 	private Context context;
-
-	private com.bsb.hike.chatthread.ChatThread mChatThread;
+	
+	private ListView mListView;
+	
+	private Activity mActivity;
 
 	private TextView smsToggleSubtext;
 
@@ -337,7 +324,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	
 	private OnClickListener mOnClickListener;
 
-	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, com.bsb.hike.chatthread.ChatThread chatThread, OnClickListener listener)
+	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, OnClickListener listener, ListView mListView, Activity activity)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		// this.largeStickerLoader = new StickerLoader(context);
@@ -346,7 +333,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;
-		this.mChatThread = chatThread;
+		this.mListView = mListView;
+		this.mActivity = activity;
 		this.mOnClickListener = listener;
 		this.voiceMessagePlayer = new VoiceMessagePlayer();
 		this.preferences = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -3569,7 +3557,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		public void playMessage(HikeFile hikeFile)
 		{
-			Utils.blockOrientationChange(mChatThread.getChatThreadActivity());
+			Utils.blockOrientationChange(mActivity);
 
 			playerState = VoiceMessagePlayerState.PLAYING;
 			fileKey = hikeFile.getFileKey();
@@ -3609,7 +3597,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		public void pausePlayer()
 		{
-			Utils.unblockOrientationChange(mChatThread.getChatThreadActivity());
+			Utils.unblockOrientationChange(mActivity);
 			if (mediaPlayer == null)
 			{
 				return;
@@ -3626,7 +3614,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				return;
 			}
-			Utils.blockOrientationChange(mChatThread.getChatThreadActivity());
+			Utils.blockOrientationChange(mActivity);
 			playerState = VoiceMessagePlayerState.PLAYING;
 			mediaPlayer.start();
 			handler.post(updateTimer);
@@ -3635,7 +3623,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		public void resetPlayer()
 		{
-			Utils.unblockOrientationChange(mChatThread.getChatThreadActivity());
+			Utils.unblockOrientationChange(mActivity);
 			playerState = VoiceMessagePlayerState.STOPPED;
 
 			setTimer();
@@ -3935,7 +3923,32 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		if (notify && !isListFlinging)
 		{
-			//chatThread.notifyFileThumbnailDataSetChanged();
+			notifyFileThumbnailDataSetChanged();
+		}
+	}
+	
+	/**
+	 * We depend on the Listflinging state to downlaod the HD thumbnail of the image. We call this function when the listView stops flinging. We iterate the visible items and call
+	 * getview just to make sure imageloader loads thumbnail properly
+	 */
+	private void notifyFileThumbnailDataSetChanged()
+	{
+		int start = mListView.getFirstVisiblePosition();
+		int last = mListView.getLastVisiblePosition();
+		for (int i = start, j = last; i <= j; i++)
+		{
+			Object object = mListView.getItemAtPosition(i);
+			if (object instanceof ConvMessage)
+			{
+				ConvMessage convMessage = (ConvMessage) object;
+				if (convMessage.isFileTransferMessage())
+				{
+					View view = mListView.getChildAt(i - start);
+					// this method call will take care of thumbnail loading when listview stops flinging.
+					getView(i, view, mListView);
+					break;
+				}
+			}
 		}
 	}
 
