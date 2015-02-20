@@ -8,6 +8,9 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.dialog.HikeDialog;
+import com.bsb.hike.dialog.HikeDialogFactory;
+import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 
@@ -48,12 +51,10 @@ public class CaptureImageParser
 			if (capturedFilepath != null)
 			{
 				File imageFile = new File(capturedFilepath);
-				String filePath;
 
 				if (imageFile != null && imageFile.exists())
 				{
-					filePath = imageFile.getAbsolutePath();
-					listener.imageCaptured(filePath);
+					showSMODialog(context, imageFile, listener);
 				}
 
 			}
@@ -68,5 +69,29 @@ public class CaptureImageParser
 			// result cancelled
 			listener.imageCaptureFailed();
 		}
+	}
+	
+	public static void showSMODialog(Context context, final File file, final CaptureImageListener listener)
+	{
+		HikeDialogFactory.showDialog(context, HikeDialogFactory.SHARE_IMAGE_QUALITY_DIALOG, new HikeDialogListener()
+		{
+
+			@Override
+			public void positiveClicked(HikeDialog hikeDialog)
+			{
+				listener.imageCaptured(file.getAbsolutePath());
+				hikeDialog.dismiss();
+			}
+
+			@Override
+			public void neutralClicked(HikeDialog hikeDialog)
+			{
+			}
+
+			@Override
+			public void negativeClicked(HikeDialog hikeDialog)
+			{
+			}
+		}, new Long[] { (long) 1, file.length() }); // 1 since count of images is 1.
 	}
 }
