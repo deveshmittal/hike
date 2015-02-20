@@ -185,8 +185,6 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
 
     @Override
     protected void onNewIntent(Intent intent) {
-    	// TODO Auto-generated method stub
-    	//if(!FileTransferService.isOfflineFileTransferFinished)
     	new OnFileTransferCompleteTask().executeOnExecutor((AsyncTask.THREAD_POOL_EXECUTOR));
     	super.onNewIntent(intent);
     }
