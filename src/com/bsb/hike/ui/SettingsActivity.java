@@ -364,6 +364,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 			drawable = HikeMessengerApp.getLruCache().getDefaultAvatar(contactInfo.getMsisdn(), false);
 		}
+		profileImgView.setImageDrawable(drawable);
 		
 		ImageViewerInfo imageViewerInfo = new ImageViewerInfo(contactInfo.getMsisdn() + ProfileActivity.PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(
 				contactInfo.getMsisdn()));
