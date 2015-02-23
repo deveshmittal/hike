@@ -489,20 +489,6 @@ public class HttpRequests
 		return requestToken;
 	}
 	
-	public static RequestToken editProfileAvatarRequest(String filePath, IRequestListener requestListener)
-	{
-		File file = new File(filePath);
-		FileBody body = new FileBody("application/json", file);
-		RequestToken requestToken = new JSONObjectRequest.Builder()
-				.setUrl(editProfileAvatarBaseUrl())
-				.setRequestType(Request.REQUEST_TYPE_LONG)
-				.setRequestListener(requestListener)
-				.post(body)
-				.build();
-		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
-		return requestToken;
-	}
-	
 	public static RequestToken editProfileNameRequest(JSONObject json, IRequestListener requestListener)
 	{
 		JsonBody body = new JsonBody(json);
@@ -518,7 +504,7 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken editProfileNameRequest(JSONObject json, IRequestListener requestListener, String groupId)
+	public static RequestToken editGroupProfileNameRequest(JSONObject json, IRequestListener requestListener, String groupId)
 	{
 		JsonBody body = new JsonBody(json);
 
@@ -533,7 +519,21 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken editProfileAvatarRequest(String filePath, IRequestListener requestListener, String groupId)
+	public static RequestToken editProfileAvatarRequest(String filePath, IRequestListener requestListener)
+	{
+		File file = new File(filePath);
+		FileBody body = new FileBody("application/json", file);
+		RequestToken requestToken = new JSONObjectRequest.Builder()
+				.setUrl(editProfileAvatarBaseUrl())
+				.setRequestType(Request.REQUEST_TYPE_LONG)
+				.setRequestListener(requestListener)
+				.post(body)
+				.build();
+		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
+		return requestToken;
+	}
+	
+	public static RequestToken editGroupProfileAvatarRequest(String filePath, IRequestListener requestListener, String groupId)
 	{
 		File file = new File(filePath);
 		FileBody body = new FileBody("application/json", file);
