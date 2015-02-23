@@ -15,6 +15,7 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -47,6 +48,12 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 	public static final String FOLDERS_REQUIRED_KEY = "fold_req";
 
 	public static final String PENDING_INTENT_KEY = "pen_intent";
+
+	public static final String ACTION_BAR_TYPE_KEY = "action_bar";
+
+	public static final int PHOTOS_EDITOR_ACTION_BAR_TYPE = 1;
+
+	private int actionBarType;
 
 	private List<GalleryItem> galleryItemList;
 
@@ -113,7 +120,18 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 		else
 		{
-			foldersRequired = true;//default hike settings
+			foldersRequired = true;// default hike settings
+		}
+
+		if (data.containsKey(ACTION_BAR_TYPE_KEY))
+		{
+			actionBarType = data.getInt(ACTION_BAR_TYPE_KEY);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+		}
+		else
+		{
+			actionBarType = 0;// default hike settings
 		}
 
 		String sortBy;
@@ -204,7 +222,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		gridView.setOnScrollListener(this);
 		gridView.setOnItemClickListener(this);
 
-		if (isInsideAlbum)
+		if (isInsideAlbum && !disableMultiSelect)
 		{
 			gridView.setOnItemLongClickListener(this);
 		}
@@ -267,32 +285,48 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 	private void setupActionBar(String titleString)
 	{
 		ActionBar actionBar = getSupportActionBar();
+		View actionBarView;
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
-		View actionBarView = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
-
-		View backContainer = actionBarView.findViewById(R.id.back);
-
-		TextView title = (TextView) actionBarView.findViewById(R.id.title);
-		title.setText(titleString == null ? getString(R.string.gallery) : titleString);
-
-		if (isInsideAlbum)
+		switch (actionBarType)
 		{
-			TextView subText = (TextView) actionBarView.findViewById(R.id.subtext);
-			subText.setVisibility(View.VISIBLE);
-			subText.setText(R.string.tap_hold_multi_select);
-		}
-
-		backContainer.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
+		case PHOTOS_EDITOR_ACTION_BAR_TYPE:
+			actionBarView = LayoutInflater.from(this).inflate(R.layout.photos_action_bar, null);
+			actionBarView.findViewById(R.id.back).setOnClickListener(new OnClickListener()
 			{
-				finish();
-			}
-		});
+				@Override
+				public void onClick(View v)
+				{
+					onBackPressed();
+				}
+			});
+			actionBarView.findViewById(R.id.done_container).setVisibility(View.INVISIBLE);
+			break;
+		default:
+			actionBarView = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
 
+			View backContainer = actionBarView.findViewById(R.id.back);
+
+			TextView title = (TextView) actionBarView.findViewById(R.id.title);
+			title.setText(titleString == null ? getString(R.string.gallery) : titleString);
+
+			if (isInsideAlbum)
+			{
+				TextView subText = (TextView) actionBarView.findViewById(R.id.subtext);
+				subText.setVisibility(View.VISIBLE);
+				subText.setText(R.string.tap_hold_multi_select);
+			}
+
+			backContainer.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					finish();
+				}
+			});
+		}
 		actionBar.setCustomView(actionBarView);
 	}
 

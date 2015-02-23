@@ -28,6 +28,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
+import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
 
 //public static int[] BasicMenuIcons={R.drawable.effects_effect,R.drawable.effects_color,R.drawable.effects_frame,R.drawable.effects_text,R.drawable.effects_options};
 
@@ -44,7 +46,8 @@ public class HikePhotosUtils
 	{
 		Effects, Doodle, Border, Text, Quality
 	}
-
+	
+	
 	//array cpntaining colors hex codes for colors provided in doodling
 	public static int[] DoodleColors = { 0xFFFF4040, 0xFFA8FA72, 0xFF72A8FA, 0xFFFA72A8, 0xFFFFFFFF, 0xFFECFA72, 0xFFF9B074, 0xFF5A0949, 0xFF000000 };
 
@@ -74,6 +77,29 @@ public class HikePhotosUtils
 	public static class FilterTools
 	{
 
+		private static FilterType selectedFilter = FilterType.AMARO;
+		private static FilterEffectItemLinearLayout prev;
+		
+		public static void setCurrentFilterItem(FilterEffectItemLinearLayout item)
+		{
+			prev=item;
+		}
+		
+		public static FilterEffectItemLinearLayout getCurrentFilterItem()
+		{
+			return prev;
+		}
+		
+		public static FilterType getSelectedFilter()
+		{
+			return selectedFilter;
+		}
+		
+		public static void setSelectedFilter(FilterType type)
+		{
+			selectedFilter=type;
+		}
+		
 		public enum FilterType
 		{
 			BRIGHTNESS, CONTRAST, SATURATION, HUE, SEPIA, GRAYSCALE, POLAROID, FADED, BGR, INVERSION, X_PRO_2, WILLOW, WALDEN, VALENCIA, TOASTER, SUTRO, SIERRA, RISE, NASHVILLE, MAYFAIR, LO_FI, KELVIN, INKWELL, HUDSON, HEFE, EARLYBIRD, BRANNAN, AMARO, E1977
@@ -102,7 +128,6 @@ public class HikePhotosUtils
 				if (effectfilters == null)
 				{
 					effectfilters = new FilterList();
-					effectfilters.addFilter("ORIGINAL", FilterType.AMARO);
 					effectfilters.addFilter("FADED", FilterType.FADED);
 					effectfilters.addFilter("POLAROID", FilterType.POLAROID);
 					effectfilters.addFilter("BGR", FilterType.BGR);

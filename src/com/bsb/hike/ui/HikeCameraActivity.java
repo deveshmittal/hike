@@ -187,7 +187,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			Intent intent = new Intent();
 			intent.setClass(HikeCameraActivity.this, PictureEditer.class);
 			PendingIntent pendingIntent = PendingIntent.getActivity(HikeCameraActivity.this, 0, intent, 0);
-			Intent galleryPickerIntent = IntentManager.getHikeGalleryPickerIntent(HikeCameraActivity.this, false,false, pendingIntent);
+			Intent galleryPickerIntent = IntentManager.getHikeGalleryPickerIntent(HikeCameraActivity.this, false,false,GalleryActivity.PHOTOS_EDITOR_ACTION_BAR_TYPE, pendingIntent);
 			startActivityForResult(galleryPickerIntent, GALLERY_PICKER_REQUEST);
 			break;
 		case R.id.btnflip:

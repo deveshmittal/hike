@@ -204,8 +204,15 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 			if (v.getClass() == FilterEffectItemLinearLayout.class)
 			{
+				FilterEffectItemLinearLayout prev = HikePhotosUtils.FilterTools.getCurrentFilterItem();
 				FilterEffectItemLinearLayout me = (FilterEffectItemLinearLayout) v;
 				editView.applyFilter(me.getFilter());
+				me.select();
+				if (prev != null && prev.getFilter() != me.getFilter())
+				{
+					prev.unSelect();
+				}
+
 			}
 
 			else if (v.getClass() == DoodleEffectItemLinearLayout.class)
@@ -287,8 +294,8 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		public void onDoodleStateChanged(boolean isCanvasEmpty)
 		{
 			// TODO Auto-generated method stub
-			doodleState=!isCanvasEmpty;
-			if(isCanvasEmpty)
+			doodleState = !isCanvasEmpty;
+			if (isCanvasEmpty)
 			{
 				undoButton.setVisibility(View.GONE);
 			}

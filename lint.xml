@@ -4,4 +4,8 @@
     <issue id="Proguard">
         <ignore path="proguard.cfg" />
     </issue>
+    <issue id="ResourceAsColor">
+        <ignore path="src/com/bsb/hike/photos/views/FilterEffectItemLinearLayout.java" />
+        <ignore path="src/com/bsb/hike/ui/PictureEditer.java" />
+    </issue>
 </lint>

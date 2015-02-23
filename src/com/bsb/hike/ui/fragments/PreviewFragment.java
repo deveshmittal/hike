@@ -1,6 +1,5 @@
 package com.bsb.hike.ui.fragments;
 
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -19,6 +18,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterList;
+import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
 import com.bsb.hike.photos.views.DoodleEffectItemLinearLayout;
 import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
@@ -54,18 +54,18 @@ public final class PreviewFragment extends Fragment
 	{
 
 		LinearLayout layout = (LinearLayout) LayoutInflater.from(getActivity()).inflate(R.layout.photos_pager_layout, container, false);
-		
+
 		TwoWayGridView gridView = (TwoWayGridView) layout.findViewById(R.id.HorizontalGridView);
 		gridView.setColumnWidth(GridView.AUTO_FIT);
 		gridView.setRowHeight(GridView.AUTO_FIT);
 		gridView.setAdapter(new ImageAdapter(getActivity(), myType, handler));
-		
+
 		ViewStub adjuster = (ViewStub) layout.findViewById(R.id.sizeBarStub);
 		switch (myType)
 		{
 		case Doodle:
 			layout.setWeightSum(HikeConstants.HikePhotos.PHOTOS_PAGER_DOODLE_WEIGHT_SUM);
-			RelativeLayout sizeBar=(RelativeLayout)adjuster.inflate();
+			RelativeLayout sizeBar = (RelativeLayout) adjuster.inflate();
 			sizeBar.findViewById(R.id.plusWidth).setOnClickListener(handler);
 			sizeBar.findViewById(R.id.minusWidth).setOnClickListener(handler);
 			ViewStub stub = (ViewStub) sizeBar.findViewById(R.id.viewStubPreview);
@@ -74,22 +74,19 @@ public final class PreviewFragment extends Fragment
 			inflated.setBrushColor(HikePhotosUtils.DoodleColors[0]);
 			inflated.refresh();
 			inflated.setPadding(0, 0, 0, 0);
-			
+
 			inflated.invalidate();
 			handler.setDoodlePreview(inflated);
-			
+
 			break;
 		case Effects:
 			layout.setWeightSum(HikeConstants.HikePhotos.PHOTOS_PAGER_FILTER_WEIGHT_SUM);
 			adjuster.setVisibility(View.GONE);
 			break;
 		}
-		layout.invalidate(); 
+		layout.invalidate();
 		return layout;
 	}
-	
-
-	
 
 	@Override
 	public void onSaveInstanceState(Bundle outState)
