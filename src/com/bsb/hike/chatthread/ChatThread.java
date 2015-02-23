@@ -66,6 +66,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
@@ -108,6 +109,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
@@ -1508,6 +1510,18 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						 */
 						intent.removeExtra(StickerManager.FWD_CATEGORY_ID);
 					}
+					
+					else if (msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.CONTENT)
+					{
+						// as we will be changing msisdn and hike status while inserting in DB
+						ConvMessage convMessage = Utils.makeConvMessage(msisdn, mConversation.isOnhike());
+						convMessage.setMessageType(MESSAGE_TYPE.CONTENT);
+						convMessage.platformMessageMetadata = new PlatformMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA), activity.getApplicationContext());
+						convMessage.platformMessageMetadata.addThumbnailsToMetadata();
+						convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
+
+						sendMessage(convMessage);
+					}
 				}
 				
 				if (mActionMode != null && mActionMode.isActionModeOn())
@@ -1840,6 +1854,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			// Sticker message is a non text message.
 			selectedNonTextMsgs = ChatThreadUtils.incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
 		}
+		
+		else if (message.getMessageType() == MESSAGE_TYPE.CONTENT || message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+        {
+            // Content card is a non text message.
+            selectedNonTextMsgs = ChatThreadUtils.incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
+        }
+
 	}
 
 	private void hideShowActionModeMenus(int actionModeId)
@@ -3573,6 +3594,18 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					else if (message.getMetadata() != null && message.getMetadata().isPokeMessage())
 					{
 						multiMsgFwdObject.put(HikeConstants.Extras.POKE, true);
+					}
+					else if (message.getMessageType() == MESSAGE_TYPE.CONTENT)
+					{
+						multiMsgFwdObject.put(MESSAGE_TYPE.MESSAGE_TYPE, MESSAGE_TYPE.CONTENT);
+						if (message.platformMessageMetadata != null)
+						{
+							multiMsgFwdObject.put(HikeConstants.METADATA, message.platformMessageMetadata.JSONtoString());
+							if (message.contentLove != null)
+							{
+								multiMsgFwdObject.put(HikeConstants.ConvMessagePacketKeys.LOVE_ID, message.contentLove.loveId);
+							}
+						}
 					}
 					else
 					{
