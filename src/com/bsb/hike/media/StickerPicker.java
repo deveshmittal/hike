@@ -247,7 +247,10 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 		public void onPageSelected(int pageNum)
 		{
 			StickerCategory category = stickerAdapter.getStickerCategory(pageNum);
-			if (category.getState() == StickerCategory.DONE)
+			/**
+			 * If the category has been downloaded/updated from the sticker pallete/shop/settings page and the user has now seen it's done state, so we reset it.
+			 */
+			if (category.getState() == StickerCategory.DONE || category.getState() == StickerCategory.DONE_SHOP_SETTINGS)
 			{
 				category.setState(StickerCategory.NONE);
 			}
