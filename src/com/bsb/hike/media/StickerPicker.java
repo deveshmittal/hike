@@ -246,7 +246,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 		@Override
 		public void onPageSelected(int pageNum)
 		{
-			StickerCategory category = stickerAdapter.getStickerCategory(pageNum);
+			StickerCategory category = stickerAdapter.getCategoryForIndex(pageNum);
 			/**
 			 * If the category has been downloaded/updated from the sticker pallete/shop/settings page and the user has now seen it's done state, so we reset it.
 			 */
