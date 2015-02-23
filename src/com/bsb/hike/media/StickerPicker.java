@@ -10,6 +10,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
@@ -21,6 +22,8 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
 public class StickerPicker implements OnClickListener, ShareablePopup, StickerPickerListener
@@ -186,6 +189,16 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	@Override
 	public View getView()
 	{
+		/**
+		 * Exit condition : If there is no external storage, we return null here. 
+		 * Null check is handled where we call getView().
+		 */
+		if ((Utils.getExternalStorageState() == ExternalStorageState.NONE))
+		{
+			Toast.makeText(mContext, R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+			return null;
+		}
+		
 		if (viewToDisplay == null)
 		{
 			initView();

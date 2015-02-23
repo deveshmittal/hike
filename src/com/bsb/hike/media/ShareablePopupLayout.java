@@ -74,6 +74,14 @@ public class ShareablePopupLayout
 	{
 		View popupView = popup.getView();
 		
+		/** Exit condition
+		 *  We simply return here.
+		 */
+		if (popupView == null) 
+		{
+			return;
+		}
+		
 		/**
 		 * If we're already showing a view, let's say stickers and sticker icon was tapped again, then we should dismiss the view.
 		 */
@@ -104,6 +112,15 @@ public class ShareablePopupLayout
 	public void showPopup(ShareablePopup popup)
 	{
 		View popupView = popup.getView();
+		
+		/**
+		 * Exit condition
+		 * We simply return here.
+		 */
+		if (popupView == null)
+		{
+			return;
+		}
 		
 		addPopupView(popupView);
 
