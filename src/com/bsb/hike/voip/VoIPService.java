@@ -155,8 +155,8 @@ public class VoIPService extends Service {
 	
 	// Echo cancellation
 	private boolean resamplerEnabled = false;
-	private final boolean aecEnabled = false;
-	private boolean useVADToReduceData = false;
+	private final boolean aecEnabled = true;
+	private boolean useVADToReduceData = true;
 	SolicallWrapper solicallAec = null;
 	private boolean aecSpeakerSignal = false, aecMicSignal = false;
 	private int audiotrackFramesWritten = 0;
@@ -560,7 +560,7 @@ public class VoIPService extends Service {
 	@SuppressLint("InlinedApi") private void setAudioModeInCall() {
 		if (android.os.Build.VERSION.SDK_INT >= 11)
 			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);	
-		audioManager.setParameters("noise_suppression=on");
+//		audioManager.setParameters("noise_suppression=on");
 	}
 	
 	private void saveCurrentAudioSettings() {
@@ -1245,13 +1245,13 @@ public class VoIPService extends Service {
 		}
 
 		Logger.d(VoIPConstants.TAG, "Starting audio record / playback.");
-		startRecording();
-		startPlayBack();
 		if (partnerTimeoutThread != null)
 			partnerTimeoutThread.interrupt();
 		stopRingtone();
 		stopFromSoundPool(ringtoneStreamID);
 		playFromSoundPool(SOUND_ACCEPT, false);
+		startRecording();
+		startPlayBack();
 		sendHandlerMessage(VoIPActivity.MSG_AUDIO_START);
 		audioStarted = true;
 		
