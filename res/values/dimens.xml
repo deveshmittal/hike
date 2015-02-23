@@ -179,5 +179,7 @@
 	<dimen name="photos_filter_preview_font_size">10sp</dimen>
 	<dimen name="photos_doodle_preview_width">75dp</dimen>
 	<dimen name="photos_doodle_preview_padding">16dp</dimen>
+	<dimen name="photos_action_bar_left_right_padding">16dp</dimen>
+	<dimen name="photos_action_internal_padding">8dp</dimen>
 	
 </resources>

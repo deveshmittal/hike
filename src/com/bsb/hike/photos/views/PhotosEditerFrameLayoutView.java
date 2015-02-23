@@ -76,8 +76,10 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 	public Bitmap getScaledImageOriginal()
 	{
 		if (scaledImageOriginal == null)
+		{
 			scaledImageOriginal = Bitmap.createScaledBitmap(imageOriginal, HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_WIDTH),
 					HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_HEIGHT), false);
+		}
 		return scaledImageOriginal;
 	}
 
@@ -89,6 +91,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 	public void applyFilter(FilterType filter)
 	{
 		currentEffect = effectLayer.applyEffect(filter, HikeConstants.HikePhotos.DEFAULT_FILTER_APPLY_PERCENTAGE);
+		effectLayer.invalidate();
 	}
 
 	/**
@@ -172,7 +175,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 		doodleLayer.onClickUndo();
 
 	}
-	
+
 	public void setOnDoodlingStartListener(OnDoodleStateChangeListener listener)
 	{
 		doodleLayer.setOnDoodlingStartListener(listener);

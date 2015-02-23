@@ -275,6 +275,17 @@ public class IntentManager
 		intent.putExtras(b);
 		return intent;
 	}
+	
+	public static Intent getHikeGalleryPickerIntent(Context context, boolean allowMultiSelect,boolean categorizeByFolders, PendingIntent argIntent)
+	{
+		Intent intent = new Intent(context, GalleryActivity.class);
+		Bundle b = new Bundle();
+		b.putParcelable(GalleryActivity.PENDING_INTENT_KEY, argIntent);
+		b.putBoolean(GalleryActivity.DISABLE_MULTI_SELECT_KEY, !allowMultiSelect);
+		b.putBoolean(GalleryActivity.FOLDERS_REQUIRED_KEY, categorizeByFolders);
+		intent.putExtras(b);
+		return intent;
+	}
 
 	public static void openConnectedApps(Context appContext)
 	{

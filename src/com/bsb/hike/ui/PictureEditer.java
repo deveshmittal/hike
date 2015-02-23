@@ -204,7 +204,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 			if (v.getClass() == FilterEffectItemLinearLayout.class)
 			{
-				editView.disableDoodling();
 				FilterEffectItemLinearLayout me = (FilterEffectItemLinearLayout) v;
 				editView.applyFilter(me.getFilter());
 			}

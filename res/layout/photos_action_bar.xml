@@ -4,14 +4,15 @@
     android:layout_height="match_parent"
     android:background="@color/photos_tabs_background"
     android:gravity="center_vertical"
-     >
+    android:paddingLeft="@dimen/photos_action_bar_left_right_padding"
+    android:paddingRight="@dimen/photos_action_bar_left_right_padding" >
 
     <ImageView
         android:id="@+id/back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:layout_marginLeft="16dp"
+        android:layout_marginTop="5dp "
         android:src="@drawable/back_button" />
 
     <LinearLayout
@@ -19,22 +20,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:paddingRight="16dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        >
 
         <com.bsb.hike.view.CustomFontTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Next"
-            android:textColor="#229EE0"
+            android:textColor="@color/photos_action_bar_font"
             android:textSize="16sp" />
-        
+
         <ImageView
             android:id="@+id/next_btn"
-            android:layout_marginLeft="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/photos_action_internal_padding"
             android:src="@drawable/next_button" />
     </LinearLayout>
 

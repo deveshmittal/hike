@@ -6,7 +6,6 @@
     android:gravity="center"
     android:orientation="vertical"
     android:paddingTop="@dimen/photos_filters_preview_padding"
-    android:paddingBottom="@dimen/photos_filters_preview_padding"
      >
 
     <ViewStub

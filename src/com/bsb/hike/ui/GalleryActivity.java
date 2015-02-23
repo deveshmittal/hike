@@ -44,6 +44,8 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 	public static final String DISABLE_MULTI_SELECT_KEY = "en_mul_sel";
 
+	public static final String FOLDERS_REQUIRED_KEY = "fold_req";
+
 	public static final String PENDING_INTENT_KEY = "pen_intent";
 
 	private List<GalleryItem> galleryItemList;
@@ -53,6 +55,8 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 	private boolean isInsideAlbum;
 
 	private String msisdn;
+
+	private boolean foldersRequired;
 
 	private boolean multiSelectMode;
 
@@ -103,6 +107,15 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		disableMultiSelect = data.getBoolean(DISABLE_MULTI_SELECT_KEY);
 		pendingIntent = data.getParcelable(PENDING_INTENT_KEY);
 
+		if (data.containsKey(FOLDERS_REQUIRED_KEY))
+		{
+			foldersRequired = data.getBoolean(FOLDERS_REQUIRED_KEY);
+		}
+		else
+		{
+			foldersRequired = true;//default hike settings
+		}
+
 		String sortBy;
 		if (selectedBucket != null)
 		{
@@ -134,13 +147,24 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 			sortBy = MediaStore.Images.Media.DATE_MODIFIED + " DESC";
 		}
+
 		else
 		{
-			selection = "1) GROUP BY (" + MediaStore.Images.Media.BUCKET_ID;
+			if (foldersRequired)
+			{
+				selection = "1) GROUP BY (" + MediaStore.Images.Media.BUCKET_ID;
 
-			isInsideAlbum = false;
+				sortBy = MediaStore.Images.Media.DATE_ADDED + " DESC";
 
-			sortBy = MediaStore.Images.Media.DATE_ADDED + " DESC";
+				isInsideAlbum = false;
+			}
+			else
+			{
+				isInsideAlbum = true;
+
+				sortBy = MediaStore.Images.Media.DATE_MODIFIED + " DESC";
+			}
+
 		}
 
 		Cursor cursor = getContentResolver().query(uri, projection, selection, args, sortBy);
