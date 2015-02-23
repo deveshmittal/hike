@@ -145,6 +145,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 	private int lastSavedGender;
 
 	private SharedPreferences preferences;
+	
+	private IRequestListener deleteStatusRequestListener;
 
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_GROUP,
 			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
@@ -198,6 +200,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 	{
 		public EditProfileTask editProfileTask; /* the task to update the global profile */
 
+		public RequestToken deleteStatusToken;
+		
 		public DownloadImageTask downloadPicasaImageTask; /*
 														 * the task to download the picasa image
 														 */
@@ -211,6 +215,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 		public boolean groupEditDialogShowing = false;
 
 		public String edittedGroupName = null;
+		
+		public String statusId;
 	}
 
 	public File selectedFileIcon;
@@ -288,6 +294,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 			groupEditDialog = null;
 		}
 		mActivityState.destFilePath = null;
+		if( mActivityState != null && mActivityState.deleteStatusToken !=null)
+		{
+			mActivityState.deleteStatusToken.removeListener(deleteStatusRequestListener);
+		}
 		if (profileType == ProfileType.GROUP_INFO)
 		{
 			HikeMessengerApp.getPubSub().removeListeners(this, groupInfoPubSubListeners);
@@ -328,6 +338,15 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 			{
 				/* we're currently executing a task, so show the progress dialog */
 				mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));
+			}
+			if (mActivityState.deleteStatusToken != null)
+			{
+				/* we're currently executing a task, so show the progress dialog */
+				if (mActivityState.deleteStatusToken.isRequestRunning())
+				{
+					mActivityState.deleteStatusToken.addRequestListener(getRequestListener());
+				}
+				mDialog = ProgressDialog.show(this, null, getString(R.string.deleting_status));
 			}
 		}
 		else
@@ -2668,7 +2687,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				showDeleteStatusConfirmationDialog(statusMessage.getMappedId());
+				mActivityState.statusId = statusMessage.getMappedId();
+				showDeleteStatusConfirmationDialog();
 			}
 		});
 
@@ -2677,7 +2697,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 		return true;
 	}
 
-	private void showDeleteStatusConfirmationDialog(final String statusId)
+	private void showDeleteStatusConfirmationDialog()
 	{
 		final CustomAlertDialog confirmDialog = new CustomAlertDialog(this);
 		confirmDialog.setHeader(R.string.delete_status);
@@ -2688,7 +2708,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 			@Override
 			public void onClick(View v)
 			{
-				deleteStatus(statusId);
+				deleteStatus();
 				confirmDialog.dismiss();
 			}
 		};
@@ -2698,16 +2718,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 		confirmDialog.show();
 	}
 
-	private void deleteStatus(final String statusId)
+	private IRequestListener getRequestListener()
 	{
-		IRequestListener requestListener = new IRequestListener()
+		deleteStatusRequestListener = new IRequestListener()
 		{
 			@Override
 			public void onRequestSuccess(Response result)
 			{
 				Logger.d(TAG, " delete status request succeeded ");
 				dismissLoadingDialog();
-				HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_STATUS, statusId);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_STATUS, mActivityState.statusId);
 				for (int i = 0; i < profileItems.size(); i++)
 				{
 					ProfileItem profileItem = profileAdapter.getItem(i);
@@ -2718,12 +2738,14 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 						continue;
 					}
 
-					if (statusId.equals(message.getMappedId()))
+					if (mActivityState.statusId.equals(message.getMappedId()))
 					{
 						profileItems.remove(i);
 						break;
 					}
 				}
+				mActivityState.deleteStatusToken = null;
+				mActivityState.statusId = null;
 				profileAdapter.notifyDataSetChanged();
 			}
 
@@ -2736,12 +2758,19 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements L
 			public void onRequestFailure(HttpException httpException)
 			{
 				Logger.e(TAG, " delete status request failed : " + httpException.getMessage());
+				mActivityState.deleteStatusToken = null;
+				mActivityState.statusId = null;
 				dismissLoadingDialog();
 				showErrorToast(R.string.delete_status_error, Toast.LENGTH_LONG);
 			}
 		};
-		RequestToken token = HttpRequests.deleteStatusRequest(statusId, requestListener);
-		token.execute();
+		return deleteStatusRequestListener;
+	}
+	
+	private void deleteStatus()
+	{
+		mActivityState.deleteStatusToken = HttpRequests.deleteStatusRequest(mActivityState.statusId, getRequestListener());
+		mActivityState.deleteStatusToken.execute();
 		mDialog = ProgressDialog.show(this, null, getString(R.string.deleting_status));
 	}
 
