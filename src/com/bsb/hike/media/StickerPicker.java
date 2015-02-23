@@ -8,13 +8,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
-import com.bsb.hike.ui.StickerShopActivity;
+import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
@@ -166,15 +168,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 
 		shopIcon.setOnClickListener(this);
 
-		if (HikeSharedPreferenceUtil.getInstance(mContext).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))
-		{
-			// The shop icon would be blue unless the user clicks on it once
-			view.findViewById(R.id.shop_icon_badge).setVisibility(View.VISIBLE);
-		}
-		else
-		{
-			view.findViewById(R.id.shop_icon_badge).setVisibility(View.GONE);
-		}
+		handleStickerIntro(view);		
 
 		mViewPager.setVisibility(View.VISIBLE);
 
@@ -216,16 +210,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 
 	private void shopIconClicked()
 	{
-		if (!HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false)) // The shop icon would be blue unless the user clicks
-		// on it once
-		{
-			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
-		}
-		if (HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false)) // The shop icon would be blue unless the user clicks
-		// on it once
-		{
-			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
-		}
+		setStickerIntroPrefs();
 		Intent i = IntentFactory.getStickerShopIntent(mContext);
 		mContext.startActivity(i);
 	}
@@ -328,6 +313,63 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 		if (listener != null)
 		{
 			listener.stickerSelected(sticker, source);
+		}
+	}
+	
+	/**
+	 * This method is used to handle any sort of animations on sticker shop icon or showing the red badges or in future any FTUE related changes to Sticker shop Icon
+	 * @param view
+	 */
+	private void handleStickerIntro(View view)
+	{
+		if (HikeSharedPreferenceUtil.getInstance(mContext).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))
+		{
+			// show sticker shop badge on shop icon
+			view.findViewById(R.id.shop_icon_badge).setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			view.findViewById(R.id.shop_icon_badge).setVisibility(View.GONE);
+		}
+		
+		
+		if(!HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
+		{
+			View animatedBackground = view.findViewById(R.id.animated_backgroud);
+			
+			animatedBackground.setVisibility(View.VISIBLE);
+			Animation anim = AnimationUtils.loadAnimation(mContext, R.anim.scale_out_from_mid);
+			animatedBackground.startAnimation(anim);
+
+			view.findViewById(R.id.shop_icon).setAnimation(HikeAnimationFactory.getStickerShopIconAnimation(mContext));
+		}
+	}
+	
+	/**
+	 * Used to set preferences related to Sticker Views.
+	 */
+	
+	private void setStickerIntroPrefs()
+	{
+		if (!HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false)) // The shop icon would be blue unless the
+																																			// user clicks
+		// on it once
+		{
+			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
+
+			View animatedBackground = viewToDisplay.findViewById(R.id.animated_backgroud);
+			animatedBackground.setVisibility(View.GONE);
+			animatedBackground.clearAnimation();
+			viewToDisplay.findViewById(R.id.shop_icon).clearAnimation();
+
+		}
+
+		if (HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false)) // The shop icon would be blue unless the
+																																			// user clicks
+		// on it once
+		{
+			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
+			viewToDisplay.findViewById(R.id.shop_icon_badge).setVisibility(View.GONE);
 		}
 	}
 }
