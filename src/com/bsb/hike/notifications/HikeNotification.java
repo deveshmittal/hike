@@ -1121,7 +1121,7 @@ public class HikeNotification
 			
 			if (!shouldNotPlayNotification && !Utils.isUserInAnyTypeOfCall(context))
 			{
-				String notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
+				String notifSound = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
 				Logger.i("notif", "sound " + notifSound);
 				if (!NOTIF_SOUND_OFF.equals(notifSound))
 				{
@@ -1153,7 +1153,7 @@ public class HikeNotification
 				}
 			}
 			
-			int ledColor = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_DEFAULT_WHITE_COLOR);
+			int ledColor = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_DEFAULT_WHITE_COLOR);
 		
 			//Check if Previously any boolean Key was present for this Led
 			if(preferenceManager.contains(HikeConstants.LED_PREF))
@@ -1164,7 +1164,7 @@ public class HikeNotification
 				//removing previous Key
 				preferenceManager.edit().remove(HikeConstants.LED_PREF).commit();
 				
-				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, ledColor);
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, ledColor);
 			}
 			if(ledColor != HikeConstants.LED_NONE_COLOR)
 			{
@@ -1219,7 +1219,7 @@ public class HikeNotification
 	}
 	public long getNextRetryNotificationTime()
 	{
-		long nextRetryTime = System.currentTimeMillis() + HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.RETRY_NOTIFICATION_COOL_OFF_TIME, HikeConstants.DEFAULT_RETRY_NOTIF_TIME);
+		long nextRetryTime = System.currentTimeMillis() + HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.RETRY_NOTIFICATION_COOL_OFF_TIME, HikeConstants.DEFAULT_RETRY_NOTIF_TIME);
 		
 		/*
 		 * We have a sleep state from 12am - 8am. If the timer is finished in this time frame then 
@@ -1264,7 +1264,7 @@ public class HikeNotification
 		}
 		else
 		{
-			notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.NOTIFICATION_TONE_URI, NOTIF_SOUND_HIKE);
+			notifSound = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.NOTIFICATION_TONE_URI, NOTIF_SOUND_HIKE);
 			SoundUtils.playSound(context, Uri.parse(notifSound));
 		}
 	}
@@ -1281,7 +1281,7 @@ public class HikeNotification
 		}
 		else
 		{
-			notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.NOTIFICATION_TONE_URI, NOTIF_SOUND_HIKE);
+			notifSound = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.NOTIFICATION_TONE_URI, NOTIF_SOUND_HIKE);
 			mBuilder.setSound(Uri.parse(notifSound));
 		}
 	}

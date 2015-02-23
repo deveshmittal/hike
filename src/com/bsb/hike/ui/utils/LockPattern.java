@@ -54,8 +54,8 @@ public class LockPattern
 			if (resultCode == activity.RESULT_OK)
 			{
 				String encryptedPattern = String.valueOf(data.getCharArrayExtra(LockPatternActivity.EXTRA_PATTERN));
-				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_ENCRYPTED_PATTERN, encryptedPattern);
-				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, true);
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_ENCRYPTED_PATTERN, encryptedPattern);
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, true);
 				DBBackupRestore.getInstance(activity).updatePrefs();
 				//only firing this event if this is not the password reset flow
 				if (!isReset)
@@ -88,12 +88,12 @@ public class LockPattern
 			switch (resultCode)
 			{
 			case Activity.RESULT_OK:
-				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON);
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
 				HikeAnalyticsEvent.sendStealthEnabled(true);
 				break;
 			case Activity.RESULT_CANCELED:
-				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, false);
 				
 				try
@@ -167,7 +167,7 @@ public class LockPattern
 	public static void confirmPattern(Activity activity, boolean isResetPassword)
 	{
 		Intent i = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null, activity, LockPatternActivity.class);
-		String encryptedPattern = HikeSharedPreferenceUtil.getInstance(activity).getData(HikeMessengerApp.STEALTH_ENCRYPTED_PATTERN, "");
+		String encryptedPattern = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_ENCRYPTED_PATTERN, "");
 		i.putExtra(LockPatternActivity.EXTRA_PATTERN, encryptedPattern.toCharArray());
 		i.putExtra(LockPatternActivity.EXTRA_THEME, getThemeForLockPatternActivity());
 		i.putExtra(Settings.Security.METADATA_AUTO_SAVE_PATTERN, true);

@@ -2995,7 +2995,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
 			{
-				int stealthMode = HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+				int stealthMode = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 				if (stealthMode != HikeConstants.STEALTH_ON)
 				{
 					return;

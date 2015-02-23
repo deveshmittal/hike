@@ -1162,7 +1162,7 @@ public class UploadFileTask extends FileTransferBase
 			client = new DefaultHttpClient();
 			client.getParams().setParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, bufferSize);
 			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
-			long so_timeout = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.Extras.FT_UPLOAD_SO_TIMEOUT, 180 * 1000l);
+			long so_timeout = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.FT_UPLOAD_SO_TIMEOUT, 180 * 1000l);
 			client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, (int) so_timeout);
 			client.getParams().setParameter(CoreConnectionPNames.TCP_NODELAY, true);
 			client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + AccountUtils.getAppVersion());

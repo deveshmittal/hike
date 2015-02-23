@@ -148,7 +148,7 @@ public class HikeProvider extends ContentProvider
 						if (selectionArgs[0].equals(HikeConstants.SELF_HIKE_ID))
 						{
 							// self avatar request
-							ContactInfo contactInfo = Utils.getUserContactInfo(HikeSharedPreferenceUtil.getInstance(getContext(), HikeMessengerApp.ACCOUNT_SETTINGS).getPref());
+							ContactInfo contactInfo = Utils.getUserContactInfo(HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.ACCOUNT_SETTINGS).getPref());
 							c = ContactManager
 									.getInstance()
 									.getReadableDatabase()
@@ -190,7 +190,7 @@ public class HikeProvider extends ContentProvider
 						if (selectionArgs[0].equals(HikeConstants.SELF_HIKE_ID))
 						{
 							// self avatar request
-							ContactInfo contactInfo = Utils.getUserContactInfo(HikeSharedPreferenceUtil.getInstance(getContext(), HikeMessengerApp.ACCOUNT_SETTINGS).getPref());
+							ContactInfo contactInfo = Utils.getUserContactInfo(HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.ACCOUNT_SETTINGS).getPref());
 							c = ContactManager
 									.getInstance()
 									.getReadableDatabase()
