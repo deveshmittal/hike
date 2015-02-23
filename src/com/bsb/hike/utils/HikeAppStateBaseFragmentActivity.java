@@ -3,7 +3,6 @@ package com.bsb.hike.utils;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -137,7 +136,16 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 
 					Bundle arguments = (Bundle) object;
 
-					ImageViewerFragment imageViewerFragment = new ImageViewerFragment();
+					ImageViewerFragment imageViewerFragment = null;
+					
+					if(arguments.containsKey(HikeConstants.CAN_EDIT_DP))
+					{
+						imageViewerFragment = new ImageViewerFragment(true);	
+					}
+					else
+					{
+						imageViewerFragment = new ImageViewerFragment();
+					}
 					imageViewerFragment.setArguments(arguments);
 
 					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();

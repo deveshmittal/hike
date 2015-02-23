@@ -2,6 +2,7 @@ package com.bsb.hike.ui.fragments;
 
 import java.io.File;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -18,23 +19,23 @@ import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.adapters.ProfileAdapter;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.smartImageLoader.ImageWorker;
-import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.ProfileImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
-public class ImageViewerFragment extends SherlockFragment implements LoaderCallbacks<Boolean>, OnClickListener
+public class ImageViewerFragment extends SherlockFragment implements LoaderCallbacks<Boolean>, OnClickListener, Listener
 {
 
 	ImageView imageView;
@@ -60,7 +61,29 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 	private int imageSize;
 
 	private String TAG = "ImageViewerFragment";
+	
+	private DisplayPictureEditListener mProfilePhotoEditListener;
+	
+	private String[] profilePicPubSubListeners = { HikePubSub.ICON_CHANGED};
+	
+	private boolean isViewEditable = false;
 
+	/**
+	 * Default constructor
+	 */
+	public ImageViewerFragment() 
+	{
+	}
+	
+	/**
+	 * Used to check if the imageview is editable from the acitivty or not
+	 * @param isEditable true if editable, false otherwise
+	 */
+	public ImageViewerFragment(boolean isEditable)
+	{
+		this.isViewEditable = isEditable;
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -68,6 +91,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		setHasOptionsMenu(true);
 		iconLoader = new IconLoader(getActivity(), 180);
 		imageSize = this.getActivity().getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
+		HikeMessengerApp.getPubSub().addListeners(this, profilePicPubSubListeners);
 	}
 
 	@Override
@@ -93,13 +117,23 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 
 		basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
 
+		showImage();
+	}
+
+	private void showImage() 
+	{
 		hasCustomImage = true;
+		
 		key = mappedId;
+		
 		if (!isStatusImage)
 		{
 			int idx = key.lastIndexOf(ProfileActivity.PROFILE_PIC_SUFFIX);
+			
 			if (idx > 0)
+			{
 				key = new String(key.substring(0, idx));
+			}
 			hasCustomImage = ContactManager.getInstance().hasIcon(key);
 		}
 
@@ -173,13 +207,13 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 				mDialog = ProgressDialog.show(getActivity(), null, getResources().getString(R.string.downloading_image));
 				mDialog.setCancelable(true);
 			}
+			imageView.setBackgroundResource(0);				
 		}
 		else
 		{
-			imageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(key, false));
+			imageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(key, false));				
 			imageView.setImageResource(Utils.isGroupConversation(mappedId) ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
 		}
-
 	}
 
 	@Override
@@ -187,12 +221,25 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 	{
 		super.onDestroy();
 		dismissProgressDialog();
+		HikeMessengerApp.getPubSub().removeListeners(this, profilePicPubSubListeners);
 	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-	{
-		menu.clear();
+	{				
+		if(isViewEditable)
+		{
+			// we are using the ProfileActivity's menu for now
+			menu.findItem(R.id.new_update).setVisible(false);
+			
+			menu.findItem(R.id.overflow_menu).setVisible(false);
+			
+			menu.findItem(R.id.edit_dp).setVisible(true);
+		}	
+		else
+		{
+			menu.clear();
+		}
 	}
 
 	@Override
@@ -238,9 +285,43 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 	}
 
 	@Override
+	public boolean onOptionsItemSelected(MenuItem item) 
+	{
+		switch(item.getItemId())
+		{
+			case R.id.edit_dp:
+				if(mProfilePhotoEditListener != null)
+				{
+					mProfilePhotoEditListener.onDisplayPictureEditClicked();
+				}
+			break;
+		}
+		return true;
+	}
+
+	@Override
 	public void onLoaderReset(Loader<Boolean> arg0)
 	{
 		dismissProgressDialog();
+	}
+
+	@Override
+	public void onAttach(Activity activity) 
+	{
+		super.onAttach(activity);
+		
+		if(isViewEditable)
+		{
+			// activity should implement DisplayPictureEditListener interface
+			try 
+			{
+	            mProfilePhotoEditListener = (DisplayPictureEditListener) activity;            
+	        }
+			catch (ClassCastException e) 
+			{
+	            throw new ClassCastException(activity.toString() + " must implement DisplayPictureEditListener");
+	        }
+		}
 	}
 
 	private void dismissProgressDialog()
@@ -264,4 +345,31 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		}
 		getActivity().onBackPressed();
 	}
+	
+	public interface DisplayPictureEditListener
+	{
+		public void onDisplayPictureEditClicked();
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object) 
+	{
+		if (HikePubSub.ICON_CHANGED.equals(type))
+		{
+			ContactInfo contactInfo = Utils.getUserContactInfo(getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0));
+
+			if (contactInfo.getMsisdn().equals((String) object))
+			{
+				getActivity().runOnUiThread(new Runnable()
+				{
+					
+					@Override
+					public void run() 
+					{
+						showImage();						
+					}
+				});
+			}
+		}		
+	}	
 }
