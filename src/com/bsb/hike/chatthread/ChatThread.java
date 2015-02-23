@@ -602,9 +602,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			showOverflowMenu();
 			break;
 		case R.id.sticker_btn:
+			setEmoticonButtonSelected(false);
+			setStickerButtonSelected(!v.isSelected());
 			stickerClicked();
 			break;
 		case R.id.emoticon_btn:
+			setStickerButtonSelected(false);
+			setEmoticonButtonSelected(!v.isSelected());
 			emoticonClicked();
 			break;
 		case R.id.send_message:
@@ -713,6 +717,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		mTips.setStickerStipSeen();
 		mShareablePopupLayout.togglePopup(mStickerPicker);
+	}
+	
+	private void setStickerButtonSelected(boolean selected)
+	{
+		activity.findViewById(R.id.sticker_btn).setSelected(selected);
+	}
+	
+	private void setEmoticonButtonSelected(boolean selected)
+	{
+		activity.findViewById(R.id.emoticon_btn).setSelected(selected);
 	}
 
 	protected void emoticonClicked()
@@ -846,7 +860,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
 		{
-			mShareablePopupLayout.dismiss();
+			dismissShareablePopup();
 			return true;
 		}
 
@@ -862,6 +876,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 
 		return false;
+	}
+	
+	private void dismissShareablePopup()
+	{
+		if(activity.findViewById(R.id.sticker_btn).isSelected())
+		{
+			setStickerButtonSelected(false);
+		}
+		if(activity.findViewById(R.id.emoticon_btn).isSelected())
+		{
+			setEmoticonButtonSelected(false);
+		}
+		
+		mShareablePopupLayout.dismiss();
 	}
 
 	private void actionBarBackPressed()
