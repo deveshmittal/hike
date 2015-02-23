@@ -1,17 +1,20 @@
 package com.bsb.hike.chatthread;
 
 import android.content.Context;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.HikeTip.TipType;
 
@@ -157,7 +160,8 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		 */
 		if (filterTips(STICKER_TIP))
 		{
-			// TODO
+			tipId = STICKER_TIP;
+			setupStickerFTUETip();
 		}
 	}
 
@@ -179,7 +183,55 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 			tipView.setOnTouchListener(this);
 		}
 	}
+	
+	/**
+	 * Used to set up pulsating dot views
+	 */
+	private void setupStickerFTUETip()
+	{
+		ViewStub pulsatingDot = (ViewStub) mainView.findViewById(R.id.pulsatingDotViewStub);
+		
+		if(pulsatingDot != null)
+		{
+			pulsatingDot.setOnInflateListener(new ViewStub.OnInflateListener()
+			{
 
+				@Override
+				public void onInflate(ViewStub stub, View inflated)
+				{
+					tipView = inflated;
+					startPulsatingDotAnimation(tipView);
+				}
+			});
+			
+			pulsatingDot.inflate();
+		}
+	}
+	
+	/**
+	 * Used to start pulsating dot animation for stickers
+	 * 
+	 * @param view
+	 */
+	private void startPulsatingDotAnimation(View view)
+	{
+		new Handler().postDelayed(getPulsatingRunnable(view, R.id.ring1), 0);
+		new Handler().postDelayed(getPulsatingRunnable(view, R.id.ring2), 1500);
+	}
+
+	private Runnable getPulsatingRunnable(final View view, final int viewId)
+	{
+		return new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				ImageView ringView = (ImageView) view.findViewById(viewId);
+				ringView.startAnimation(HikeAnimationFactory.getPulsatingDotAnimation(0));
+			}
+		};
+	}	
+	
 	public boolean filterTips(int whichTip)
 	{
 		return isPresentInArray(whichTip) && !(seenTip(whichTip));
@@ -198,7 +250,7 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		case PIN_TIP:
 			return mPrefs.getData(HikeMessengerApp.SHOWN_PIN_TIP, false);
 		case STICKER_TIP:
-			// TODO
+			return mPrefs.getData(HikeMessengerApp.SHOWN_EMOTICON_TIP, false);
 		default:
 			return false;
 		}
@@ -304,12 +356,6 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		return true;
 	}
 
-	public void setStickerStipSeen()
-	{
-		//Simply save data to prefs and remove pulsating dot animation.
-		// TODO
-	}
-
 	/**
 	 * Function to mark the tip as seen
 	 * @param whichTip
@@ -325,6 +371,11 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 			{
 			case PIN_TIP:
 				mPrefs.saveData(HikeMessengerApp.SHOWN_PIN_TIP, true);
+				closeTip();
+				break;
+				
+			case STICKER_TIP:
+				mPrefs.saveData(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
 				closeTip();
 				break;
 

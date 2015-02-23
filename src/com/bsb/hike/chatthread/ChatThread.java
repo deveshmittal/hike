@@ -178,6 +178,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static final int MULTI_SELECT_ACTION_MODE = 22;
 
 	protected static final int SCROLL_TO_END = 23;
+	
+	protected static final int STICKER_FTUE_TIP = 24;
 
 	protected ChatThreadActivity activity;
 
@@ -337,6 +339,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case SCROLL_TO_END:
 			mConversationsView.setSelection(messages.size() - 1);
+			break;
+		case STICKER_FTUE_TIP:
+			mTips.showStickerFtueTip();
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
@@ -715,7 +720,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void stickerClicked()
 	{
-		mTips.setStickerStipSeen();
+		if (mTips.isGivenTipShowing(ChatThreadTips.STICKER_TIP))
+		{
+			mTips.setTipSeen(ChatThreadTips.STICKER_TIP);
+		}
+		
 		mShareablePopupLayout.togglePopup(mStickerPicker);
 	}
 	
@@ -2139,6 +2148,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HikePubSub.STICKER_CATEGORY_MAP_UPDATED:
 			uiHandler.sendEmptyMessage(STICKER_CATEGORY_MAP_UPDATED);
 			break;
+		case HikePubSub.STICKER_FTUE_TIP:
+			uiHandler.sendEmptyMessage(STICKER_FTUE_TIP);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -2263,7 +2275,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
 				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.MESSAGE_FAILED,
 				HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.STICKER_CATEGORY_MAP_UPDATED,
-				HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.BULK_MESSAGE_RECEIVED };
+				HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.STICKER_FTUE_TIP };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
