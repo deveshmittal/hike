@@ -89,6 +89,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.MULTI_MESSAGE_SENT, this);
 		mPubSub.addListener(HikePubSub.MULTI_FILE_UPLOADED, this);
 		mPubSub.addListener(HikePubSub.HIKE_SDK_MESSAGE, this);
+		mPubSub.addListener(HikePubSub.CONVERSATION_TS_UPDATED, this);		
 	}
 
 	@Override
@@ -411,6 +412,13 @@ public class DbConversationListener implements Listener
 			
 		}else if(HikePubSub.HIKE_SDK_MESSAGE.equals(type)){
 			handleHikeSdkMessage(object);
+		}
+		else if (HikePubSub.CONVERSATION_TS_UPDATED.equals(type))
+		{
+			Pair<String, Long> p = (Pair<String, Long>) object;
+			String msisdn = p.first;
+			long timestamp = p.second;
+			boolean isUpdated = mConversationDb.updateTimestamp(msisdn, timestamp);
 		}
 	}
 
