@@ -221,7 +221,8 @@ public class AccountUtils
 		 * set the connection timeout to 6 seconds, and the waiting for data timeout to 30 seconds
 		 */
 		HttpConnectionParams.setConnectionTimeout(params, HikeConstants.CONNECT_TIMEOUT);
-		HttpConnectionParams.setSoTimeout(params, HikeConstants.SOCKET_TIMEOUT);
+		long so_timeout = HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.getInstance().getApplicationContext()).getData(HikeConstants.Extras.GENERAL_SO_TIMEOUT, 180 * 1000l);
+		HttpConnectionParams.setSoTimeout(params, (int) so_timeout);
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		if (ssl)
@@ -255,6 +256,12 @@ public class AccountUtils
 
 		mClient = httpClient;
 		return httpClient;
+	}
+
+	public static void setSocketTimeout(int timeout)
+	{
+		if(mClient != null)
+			mClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
 	}
 
 	public static HttpClient getClient(HttpRequestBase request)

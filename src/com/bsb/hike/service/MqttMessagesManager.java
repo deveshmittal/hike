@@ -1425,6 +1425,17 @@ public class MqttMessagesManager
 			boolean enableDetailedHttpLogging = data.getBoolean(HikeConstants.ENABLE_DETAILED_HTTP_LOGGING);
 			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.DETAILED_HTTP_LOGGING_ENABLED, enableDetailedHttpLogging);
 		}
+		if(data.has(HikeConstants.Extras.FT_UPLOAD_SO_TIMEOUT))
+		{
+			long timeout = data.getLong(HikeConstants.Extras.FT_UPLOAD_SO_TIMEOUT);
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.Extras.FT_UPLOAD_SO_TIMEOUT, timeout);
+		}
+		if(data.has(HikeConstants.Extras.GENERAL_SO_TIMEOUT))
+		{
+			long timeout = data.getLong(HikeConstants.Extras.GENERAL_SO_TIMEOUT);
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.Extras.GENERAL_SO_TIMEOUT, timeout);
+			AccountUtils.setSocketTimeout((int) timeout);
+		}
 		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
