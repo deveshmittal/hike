@@ -210,6 +210,7 @@ public class AccountUtils
 	{
 		if (mClient != null)
 		{
+			Logger.d("AccountUtils", "Socket timeout when http client already created = " + mClient.getParams().getIntParameter(CoreConnectionPNames.SO_TIMEOUT, 0));
 			return mClient;
 		}
 		Logger.d("SSL", "Initialising the HTTP CLIENT");
@@ -222,6 +223,7 @@ public class AccountUtils
 		 */
 		HttpConnectionParams.setConnectionTimeout(params, HikeConstants.CONNECT_TIMEOUT);
 		long so_timeout = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.GENERAL_SO_TIMEOUT, 180 * 1000l);
+		Logger.d("AccountUtils", "Socket timeout while creating client = " + so_timeout);
 		HttpConnectionParams.setSoTimeout(params, (int) so_timeout);
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
