@@ -108,15 +108,6 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		}
 	}
 
-	public void resetAtomicTipKeys(String requiredKey)
-	{
-		String key = mPrefs.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
-		if (key.equals(requiredKey))
-		{
-			mPrefs.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
-		}
-	}
-
 	private void setAtomicTipContent(View view)
 	{
 		((TextView) view.findViewById(R.id.tip_header)).setText(mPrefs.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_CHAT, ""));
@@ -125,7 +116,7 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		view.findViewById(R.id.close_tip).setOnClickListener(this);
 	}
 
-	public int whichAtomicTipToShow()
+	private int whichAtomicTipToShow()
 	{
 		String key = mPrefs.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
 		switch (key)
@@ -168,7 +159,7 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 	/**
 	 * Utility method to show the Pin FTUE tip. If any other tip is showing, pin tip takes priority over it.
 	 */
-	public void showPinFtueTip()
+	private void showPinFtueTip()
 	{
 		/**
 		 * Proceed only if the calling class had passed in the Pin Tip in the list
@@ -232,7 +223,7 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		};
 	}	
 	
-	public boolean filterTips(int whichTip)
+	private boolean filterTips(int whichTip)
 	{
 		return isPresentInArray(whichTip) && !(seenTip(whichTip));
 	}
@@ -287,7 +278,7 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 	 */
 	public void hideTip()
 	{
-		if (tipView != null && tipView.getVisibility() == View.VISIBLE)
+		if (tipView != null && tipView.getVisibility() == View.VISIBLE && shouldHideTip())
 		{
 			tipView.setVisibility(View.INVISIBLE);
 		}
@@ -295,10 +286,20 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 
 	public void hideTip(int whichTip)
 	{
-		if (tipId == whichTip && tipView != null && tipView.getVisibility() == View.VISIBLE)
+		if (tipId == whichTip && tipView != null && tipView.getVisibility() == View.VISIBLE && shouldHideTip())
 		{
 			tipView.setVisibility(View.INVISIBLE);
 		}
+	}
+	
+	/**
+	 * There could be certain tips which do not interfere with any UI components. Hence if such a tip is showing we should not hide it.
+	 * eg : Sticker_tip. This method is future safe, if let's say we need to show pulsating dots on VoIP buttons or Pin buttons.
+	 * @return
+	 */
+	private boolean shouldHideTip()
+	{
+		return tipId != STICKER_TIP;
 	}
 
 	public void showHiddenTip()
