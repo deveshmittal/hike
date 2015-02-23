@@ -2,7 +2,6 @@ package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -14,11 +13,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.ImageSpan;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,8 +34,8 @@ import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
 import com.bsb.hike.ui.HomeActivity;
@@ -59,8 +54,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	{
 		public void listFetched();
 	}
-
-	private static final String TAG = "FreindsAdapter";
 
 	public static final int FRIEND_INDEX = 0;
 

@@ -1,17 +1,13 @@
 package com.bsb.hike.filetransfer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -19,9 +15,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
 
-import javax.net.ssl.HttpsURLConnection;
-
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -65,13 +58,12 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.MultipleConvMessage;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -93,17 +85,11 @@ public class UploadFileTask extends FileTransferBase
 
 	private boolean isRecipientOnhike;
 
-	private boolean isRecording;
-
 	private File selectedFile = null;
 
 	private long recordingDuration = -1;
 
-	private boolean isForwardMsg;
-
 	private FutureTask<FTResult> futureTask;
-
-	private int num = 0;
 
 	private static String BOUNDARY = "----------V2ymHFg03ehbqgZCaKO6jy";
 
@@ -131,8 +117,6 @@ public class UploadFileTask extends FileTransferBase
 		this.fileType = fileType;
 		this.isRecipientOnhike = isRecipientOnHike;
 		this.recordingDuration = recordingDuration;
-		this.isRecording = isRecording;
-		this.isForwardMsg = isForwardMsg;
 		this.isRecipientOnhike = isRecipientOnHike;
 		this.fileKey = fileKey;
 		_state = FTState.INITIALIZED;
@@ -149,8 +133,6 @@ public class UploadFileTask extends FileTransferBase
 		this.fileType = fileType;
 		this.isRecipientOnhike = isRecipientOnHike;
 		this.recordingDuration = recordingDuration;
-		this.isRecording = isRecording;
-		this.isForwardMsg = isForwardMsg;
 		this.isRecipientOnhike = isRecipientOnHike;
 		this.fileKey = fileKey;
 		_state = FTState.INITIALIZED;
@@ -572,7 +554,6 @@ public class UploadFileTask extends FileTransferBase
 		}catch(Exception e){
 			Logger.e(getClass().getSimpleName(), "Exception", e);
 			_state = FTState.ERROR;
-			HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 			stateFile = getStateFile((ConvMessage) userContext);
 			saveFileKeyState(fileKey);
 			fileKey = null;
@@ -1144,7 +1125,7 @@ public class UploadFileTask extends FileTransferBase
 	/*
 	 * this function was created to notify the UI but is not required for now. Not deleted if required again
 	 */
-	private boolean shouldSendProgress()
+	/*private boolean shouldSendProgress()
 	{
 		int x = progressPercentage / 10;
 		if (x < num)
@@ -1153,7 +1134,7 @@ public class UploadFileTask extends FileTransferBase
 		// num++;
 		num = x + 1;
 		return true;
-	}
+	}*/
 
 	private String send(String contentRange, byte[] fileBytes)
 	{
@@ -1231,77 +1212,6 @@ public class UploadFileTask extends FileTransferBase
 		return res;
 	}
 
-	private FTResult closeStreams(ByteArrayOutputStream bos, InputStream is, HttpURLConnection hc)
-	{
-		try
-		{
-			if (bos != null)
-				bos.close();
-		}
-		catch (Exception e2)
-		{
-			e2.printStackTrace();
-		}
-		try
-		{
-			if (is != null)
-				is.close();
-		}
-		catch (Exception e2)
-		{
-			e2.printStackTrace();
-		}
-		try
-		{
-			if (hc != null)
-				hc.disconnect();
-		}
-		catch (Exception e2)
-		{
-			e2.printStackTrace();
-		}
-		return FTResult.SUCCESS;
-	}
-
-	private byte[] getPostBytes(byte[] fileBytes)
-	{
-		// ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		byte[] postBytes = null;
-		String boundaryMesssage = getBoundaryMessage();
-		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
-		postBytes = new byte[boundaryMesssage.length() + fileBytes.length + boundary.length()];
-		System.arraycopy(boundaryMesssage.getBytes(), 0, postBytes, 0, boundaryMesssage.length());
-		System.arraycopy(fileBytes, 0, postBytes, boundaryMesssage.length(), fileBytes.length);
-		System.arraycopy(boundary.getBytes(), 0, postBytes, boundaryMesssage.length() + fileBytes.length, boundary.length());
-		// try
-		// {
-		// bos.write(getBoundaryMessage(contentRange).getBytes());
-		// bos.write(fileBytes);
-		// bos.write(("\r\n--" + BOUNDARY + "--\r\n").getBytes());
-		// postBytes = bos.toByteArray();
-		// bos.flush();
-		// bos.close();
-		// }
-		// catch (IOException e)
-		// {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// finally
-		// {
-		// if (bos != null)
-		// try
-		// {
-		// bos.close();
-		// }
-		// catch (IOException e)
-		// {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// }
-		return postBytes;
-	}
 
 	private void error()
 	{

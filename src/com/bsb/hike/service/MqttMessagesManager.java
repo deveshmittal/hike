@@ -1,28 +1,39 @@
 package com.bsb.hike.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.analytics.AnalyticsSender;
-import com.bsb.hike.analytics.AnalyticsStore;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -48,7 +59,6 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
-import com.bsb.hike.notifications.HikeNotificationUtils;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HomeActivity;
@@ -58,28 +68,12 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.FestivePopup;
-import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import com.bsb.hike.voip.VoIPClient;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
@@ -1420,6 +1414,11 @@ public class MqttMessagesManager
 			int freq = data.getInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY);
 			HAManager.getInstance().setAnalyticsSendFrequency(freq);
 		}
+		if(data.has(AnalyticsConstants.ANALYTICS_IN_MEMORY_SIZE))
+		{
+			int size = data.getInt(AnalyticsConstants.ANALYTICS_IN_MEMORY_SIZE);
+			HAManager.getInstance().setMaxInMemoryEventsSize(size);
+		}
 		if(data.has(HikeConstants.ENABLE_DETAILED_HTTP_LOGGING))
 		{
 			boolean enableDetailedHttpLogging = data.getBoolean(HikeConstants.ENABLE_DETAILED_HTTP_LOGGING);
@@ -1500,7 +1499,7 @@ public class MqttMessagesManager
 		{		
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM DEMAND PACKET ROUTE---");
 
-			HAManager.getInstance().sendAnalyticsData(true);
+			HAManager.getInstance().sendAnalyticsData(true, true);
 		}
 	}
 
@@ -2003,15 +2002,18 @@ public class MqttMessagesManager
 				lastNotifPacket = hash;
 				String body = data.optString(HikeConstants.BODY);
 				String destination = data.optString("u");
-
+				
 				if (data.optBoolean(HikeConstants.PUSH, true) && !TextUtils.isEmpty(destination) && !TextUtils.isEmpty(body))
 				{
-					Logger.i("mqttMessageManager", "Play Notification packet from Server " + data.toString());
-					// chat thread -- by default silent is true, so no sound
-					boolean silent = data.optBoolean(HikeConstants.SILENT, true);
-					
-					// open respective chat thread
-					HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
+					if(!Utils.isConversationMuted(destination) && !ContactManager.getInstance().isBlocked(destination))
+					{
+						Logger.i("mqttMessageManager", "Play Notification packet from Server " + data.toString());
+						// chat thread -- by default silent is true, so no sound
+						boolean silent = data.optBoolean(HikeConstants.SILENT, true);
+
+						// open respective chat thread
+						HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
+					}
 				}
 			}
 			else
@@ -2278,110 +2280,9 @@ public class MqttMessagesManager
 			saveGCEnd(jsonObj);
 		} 
 		else if (HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0.equals(type) ||
-				HikeConstants.MqttMessageTypes.MESSAGE_VOIP_1.equals(type)) {
-
-//			Log.d(VoIPConstants.TAG, "Received VoIP Message");
-
-			// VoIP checks
-			if (jsonObj.has(HikeConstants.SUB_TYPE)) {
-				
-				String subType = jsonObj.getString(HikeConstants.SUB_TYPE); 
-//				Log.d(VoIPConstants.TAG, "VoIP Message subtype: " + subType);
-
-				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO)) {
-
-					/**
-					 * Socket information is the same as a request for call initiation. 
-					 * The calling party sends its socket information to the callee, and
-					 * the callee at that point should start its voip service (and not the 
-					 * activity) so it can reply with its own socket information. 
-					 * 
-					 * The callee does not start its activity since in case we are unable
-					 * to establish a connection, the user will see a call screen popup and
-					 * disappear. 
-					 */
-					Log.d(VoIPConstants.TAG, "Receiving socket info..");
-					JSONObject metadataJSON = jsonObj.getJSONObject(HikeConstants.DATA).getJSONObject(HikeConstants.METADATA);
-					
-					// Check for currently active voip call
-					if (VoIPService.isConnected() && 
-							metadataJSON.getInt("callId") != VoIPService.getCallId() &&
-							metadataJSON.getBoolean("reconnecting") != true) {
-						Log.w(VoIPConstants.TAG, "We are already in a Hike call.");
-						VoIPUtils.sendMessage(jsonObj.getString(HikeConstants.FROM), 
-								HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
-								HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
-					}
-						
-					// Check if the initiator (us) has already hung up
-					if (metadataJSON.getBoolean("initiator") == false && 
-							VoIPService.isConnected() == false &&
-							metadataJSON.getInt("callId") != VoIPService.getCallId()) {
-						Log.w(VoIPConstants.TAG, "Receiving a reply for a terminated call.");
-						return;		
-					}
-					
-					Intent i = new Intent(context.getApplicationContext(), VoIPService.class);
-					i.putExtra("action", "setpartnerinfo");
-					i.putExtra("msisdn", jsonObj.getString(HikeConstants.FROM));
-					i.putExtra("internalIP", metadataJSON.getString("internalIP"));
-					i.putExtra("internalPort", metadataJSON.getInt("internalPort"));
-					i.putExtra("externalIP", metadataJSON.getString("externalIP"));
-					i.putExtra("externalPort", metadataJSON.getInt("externalPort"));
-					i.putExtra("relay", metadataJSON.getString("relay"));
-					i.putExtra("relayport", metadataJSON.getInt("relayport"));
-					i.putExtra("reconnecting", metadataJSON.getBoolean("reconnecting"));
-					i.putExtra("initiator", metadataJSON.getBoolean("initiator"));
-					i.putExtra("callId", metadataJSON.getInt("callId"));
-					context.startService(i);
-//					Log.w(VoIPConstants.TAG, "Intent passed to service.");
-					return;
-				}
-				
-				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING)) {
-					Logger.d(VoIPConstants.TAG, "Adding a missed call to our chat history.");
-					VoIPClient clientPartner = new VoIPClient();
-					clientPartner.setPhoneNumber(jsonObj.getString(HikeConstants.FROM));
-					clientPartner.setInitiator(true);
-					VoIPUtils.resetNotificationStatus();
-					VoIPUtils.addMessageToChatThread(context, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, jsonObj.getJSONObject(HikeConstants.DATA).getLong(HikeConstants.TIMESTAMP));
-				}
-				
-				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_UPGRADABLE)) {
-					String message = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.HIKE_MESSAGE);
-					Intent i = new Intent(context, VoIPActivity.class);
-					i.putExtra("action", VoIPConstants.PARTNER_REQUIRES_UPGRADE);
-					i.putExtra("message", message);
-					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-					context.startActivity(i);
-				}
-				
-				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_NOT_UPGRADABLE)) {
-					String message = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.HIKE_MESSAGE);
-					Intent i = new Intent(context, VoIPActivity.class);
-					i.putExtra("action", VoIPConstants.PARTNER_INCOMPATIBLE);
-					i.putExtra("message", message);
-					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-					context.startActivity(i);
-				}
-				
-				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_HAS_BLOCKED_YOU)) {
-					String message = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.HIKE_MESSAGE);
-					Intent i = new Intent(context, VoIPActivity.class);
-					i.putExtra("action", VoIPConstants.PARTNER_HAS_BLOCKED_YOU);
-					i.putExtra("message", message);
-					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-					context.startActivity(i);
-				}
-				
-				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL)) {
-					Intent i = new Intent(context, VoIPActivity.class);
-					i.putExtra("action", VoIPConstants.PARTNER_IN_CALL);
-					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-					context.startActivity(i);
-				}
-				
-			}
+				HikeConstants.MqttMessageTypes.MESSAGE_VOIP_1.equals(type)) 
+		{
+			handleVOIPPacket(jsonObj);
 		}
 		else if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type)) // Message
 		// received
@@ -3123,6 +3024,11 @@ public class MqttMessagesManager
 				{
 					savePopup(json);
 				}
+				else if (HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0.equals(type) ||
+						HikeConstants.MqttMessageTypes.MESSAGE_VOIP_1.equals(type)) 
+				{
+					handleVOIPPacket(json);
+				}
 				else
 				{
 					Logger.e("gcmMqttMessage", "Unexpected type received via GCM mqtt equivalent messages");
@@ -3137,6 +3043,114 @@ public class MqttMessagesManager
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	private void handleVOIPPacket(JSONObject jsonObj) throws JSONException
+	{
+
+//		Log.d(VoIPConstants.TAG, "Received VoIP Message");
+
+		// VoIP checks
+		if (jsonObj.has(HikeConstants.SUB_TYPE)) {
+			
+			String subType = jsonObj.getString(HikeConstants.SUB_TYPE); 
+//			Log.d(VoIPConstants.TAG, "VoIP Message subtype: " + subType);
+
+			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO)) {
+
+				/**
+				 * Socket information is the same as a request for call initiation. 
+				 * The calling party sends its socket information to the callee, and
+				 * the callee at that point should start its voip service (and not the 
+				 * activity) so it can reply with its own socket information. 
+				 * 
+				 * The callee does not start its activity since in case we are unable
+				 * to establish a connection, the user will see a call screen popup and
+				 * disappear. 
+				 */
+				Log.d(VoIPConstants.TAG, "Receiving socket info..");
+				JSONObject metadataJSON = jsonObj.getJSONObject(HikeConstants.DATA).getJSONObject(HikeConstants.METADATA);
+				
+				// Check for currently active voip call
+				if (VoIPService.isConnected() && 
+						metadataJSON.getInt("callId") != VoIPService.getCallId() &&
+						metadataJSON.getBoolean("reconnecting") != true) {
+					Log.w(VoIPConstants.TAG, "We are already in a Hike call.");
+					VoIPUtils.sendMessage(jsonObj.getString(HikeConstants.FROM), 
+							HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
+							HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
+				}
+					
+				// Check if the initiator (us) has already hung up
+				if (metadataJSON.getBoolean("initiator") == false && 
+						VoIPService.isConnected() == false &&
+						metadataJSON.getInt("callId") != VoIPService.getCallId()) {
+					Log.w(VoIPConstants.TAG, "Receiving a reply for a terminated call.");
+					return;		
+				}
+				
+				Intent i = new Intent(context.getApplicationContext(), VoIPService.class);
+				i.putExtra("action", "setpartnerinfo");
+				i.putExtra("msisdn", jsonObj.getString(HikeConstants.FROM));
+				i.putExtra("internalIP", metadataJSON.getString("internalIP"));
+				i.putExtra("internalPort", metadataJSON.getInt("internalPort"));
+				i.putExtra("externalIP", metadataJSON.getString("externalIP"));
+				i.putExtra("externalPort", metadataJSON.getInt("externalPort"));
+				i.putExtra("relay", metadataJSON.getString("relay"));
+				i.putExtra("relayport", metadataJSON.getInt("relayport"));
+				i.putExtra("reconnecting", metadataJSON.getBoolean("reconnecting"));
+				i.putExtra("initiator", metadataJSON.getBoolean("initiator"));
+				i.putExtra("callId", metadataJSON.getInt("callId"));
+				context.startService(i);
+//				Log.w(VoIPConstants.TAG, "Intent passed to service.");
+				return;
+			}
+			
+			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING)) {
+				Logger.d(VoIPConstants.TAG, "Adding a missed call to our chat history.");
+				VoIPClient clientPartner = new VoIPClient();
+				clientPartner.setPhoneNumber(jsonObj.getString(HikeConstants.FROM));
+				clientPartner.setInitiator(true);
+				VoIPUtils.resetNotificationStatus();
+				VoIPUtils.addMessageToChatThread(context, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, jsonObj.getJSONObject(HikeConstants.DATA).getLong(HikeConstants.TIMESTAMP));
+			}
+			
+			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_UPGRADABLE)) {
+				String message = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.HIKE_MESSAGE);
+				Intent i = new Intent(context, VoIPActivity.class);
+				i.putExtra("action", VoIPConstants.PARTNER_REQUIRES_UPGRADE);
+				i.putExtra("message", message);
+				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(i);
+			}
+			
+			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_NOT_UPGRADABLE)) {
+				String message = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.HIKE_MESSAGE);
+				Intent i = new Intent(context, VoIPActivity.class);
+				i.putExtra("action", VoIPConstants.PARTNER_INCOMPATIBLE);
+				i.putExtra("message", message);
+				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(i);
+			}
+			
+			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_HAS_BLOCKED_YOU)) {
+				String message = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.HIKE_MESSAGE);
+				Intent i = new Intent(context, VoIPActivity.class);
+				i.putExtra("action", VoIPConstants.PARTNER_HAS_BLOCKED_YOU);
+				i.putExtra("message", message);
+				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(i);
+			}
+			
+			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL)) {
+				Intent i = new Intent(context, VoIPActivity.class);
+				i.putExtra("action", VoIPConstants.PARTNER_IN_CALL);
+				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(i);
+			}
+			
+		}
+	
 	}
 	
 }

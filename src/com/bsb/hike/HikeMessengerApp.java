@@ -20,6 +20,8 @@ import org.acra.sender.HttpSender;
 import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
 import org.acra.util.HttpRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
@@ -35,12 +37,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import org.json.JSONException;
-import org.json.JSONObject;
-import android.os.Message;
-import android.os.Messenger;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Pair;
@@ -53,7 +50,6 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.platform.HikePlatformConstants;
-import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.MqttMessagesManager;
 import com.bsb.hike.service.RegisterToGCMTrigger;
@@ -467,8 +463,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static boolean isIndianUser;
 
-	private static Messenger mMessenger;
-
 	private static Map<String, TypingNotification> typingNotificationMap;
 
 	private static Set<String> stealthMsisdn;
@@ -502,32 +496,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	RegisterToGCMTrigger mmRegisterToGCMTrigger = null;
 
 	SendGCMIdToServerTrigger mmGcmIdToServerTrigger = null;
-
-	class IncomingHandler extends Handler
-	{
-		@Override
-		public void handleMessage(Message msg)
-		{
-			Logger.d("HikeMessengerApp", "In handleMessage " + msg.what);
-			switch (msg.what)
-			{
-			case HikeService.MSG_APP_MESSAGE_STATUS:
-				boolean success = msg.arg1 != 0;
-				Long msgId = (Long) msg.obj;
-				Logger.d("HikeMessengerApp", "received msg status msgId:" + msgId + " state: " + success);
-				// TODO handle this where we are saving all the mqtt messages
-				String event = success ? HikePubSub.SERVER_RECEIVED_MSG : HikePubSub.MESSAGE_FAILED;
-				mPubSubInstance.publish(event, msgId);
-				break;
-			case HikeService.MSG_APP_CONN_STATUS:
-				Logger.d("HikeMessengerApp", "received connection status " + msg.arg1);
-				int s = msg.arg1;
-				MQTTConnectionStatus status = MQTTConnectionStatus.values()[s];
-				mPubSubInstance.publish(HikePubSub.CONNECTION_STATUS, status);
-				break;
-			}
-		}
-	}
 
 	static
 	{
@@ -813,8 +781,6 @@ public void onTrimMemory(int level)
 		stealthMsisdn = new HashSet<String>();
 
 		initialiseListeners();
-
-		mMessenger = new Messenger(new IncomingHandler());
 
 		if (token != null)
 		{
@@ -1112,7 +1078,7 @@ public void onTrimMemory(int level)
 		}
 		if (toastListener == null)
 		{
-			toastListener = toastListener = ToastListener.getInstance(getApplicationContext());
+			toastListener = ToastListener.getInstance(getApplicationContext());
 		}
 		if (activityTimeLogger == null)
 		{

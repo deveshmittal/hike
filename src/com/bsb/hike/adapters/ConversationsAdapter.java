@@ -9,8 +9,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.CountDownTimer;
 import android.text.Html;
 import android.text.TextUtils;
@@ -44,12 +42,8 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.ui.HikeListActivity;
-import com.bsb.hike.ui.HikePreferences;
-import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -58,8 +52,6 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gms.internal.co;
-import com.google.android.gms.internal.ed;
 
 public class ConversationsAdapter extends BaseAdapter
 {

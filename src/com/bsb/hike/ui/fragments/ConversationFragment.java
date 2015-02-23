@@ -1,6 +1,5 @@
 package com.bsb.hike.ui.fragments;
 
-import com.bsb.hike.platform.HikePlatformConstants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,9 +33,9 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.ViewStub.OnInflateListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
@@ -76,24 +75,28 @@ import com.bsb.hike.models.EmptyConversationContactItem;
 import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.models.NUXChatReward;
 import com.bsb.hike.models.NUXTaskDetails;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.HikeUser;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
-import com.bsb.hike.ui.*;
-import com.bsb.hike.utils.*;
+import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikeFragmentable;
+import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.CustomAlertDialog;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
+import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.HoloCircularProgress;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.*;
-import java.util.Map.Entry;
 
 public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener, HikeFragmentable, OnClickListener
 {
@@ -299,11 +302,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		fillNuxFooterElements();
 		
 	}
-/**
+/**	
  * Changing footer state on Activity Created
  */
 	private void changeFooterState()
 	{
+		
+		footercontroller.post(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				getListView().setPadding(0, 0, 0, footercontroller.getHeight());
+				
+			}
+		});
 		Logger.d("footer","changeFooterState");
 		if (!NUXManager.getInstance().isReminderReceived())
 		{
@@ -327,7 +341,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 //						llInviteOptions.removeOnLayoutChangeListener(this);
 //					}
 //				});
-				
+					
 				
 
 				llInviteOptions.post(new Runnable()
@@ -624,11 +638,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 				//Will remove after testing
 				
-				if (mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
-				{
-					
-				}
-				else
+				if(mmNuxManager.getCurrentState() == NUXConstants.NUX_SKIPPED || mmNuxManager.getCurrentState() == NUXConstants.NUX_IS_ACTIVE)
 				{
 					chatProgress.setText(String.format(mmReward.getStatusText(), mmNuxManager.getCountUnlockedContacts(), mmDetails.getMin()));
 					progressNux.setProgress(NUXManager.getInstance().getCountUnlockedContacts() / mmDetails.getMin());
@@ -695,6 +705,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		case R.id.tv_chatStatus:
 
 		//On click of TAP To Claim and View Details	
+			
+			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED||mmNuxManager.getCurrentState()==NUXConstants.NUX_NEW)
+			{
+				Toast.makeText(getActivity(), getActivity().getString(R.string.nux_expired), Toast.LENGTH_SHORT).show();
+				break;
+			}
 			
 			if (NUXManager.getInstance().getCurrentState() == NUXConstants.COMPLETED)
 			{
@@ -763,20 +779,24 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				e.printStackTrace();
 			}
 
-			if(mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED||mmNuxManager.getCurrentState()==NUXConstants.NUX_NEW) 
 			{
-				butRemind.setEnabled(false);
-				butInviteMore.setEnabled(false);
-			} 
-			else 
+				Toast.makeText(getActivity(),  getActivity().getString(R.string.nux_expired), Toast.LENGTH_SHORT).show();
+				break;
+				
+			}
+		
+			if( mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
 			{
+				Toast.makeText(getActivity(),  getActivity().getString(R.string.nux_completed), Toast.LENGTH_SHORT).show();
+				break;
+			}
 				Intent in = IntentManager.openNuxCustomMessage(getActivity());
 				getActivity().startActivity(in);
-			}
 			break;
 		case R.id.but_inviteMore:
 
-			
+				
 			try
 			{
 				JSONObject metaData = new JSONObject();
@@ -789,15 +809,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				e.printStackTrace();
 			}
 
-			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED || mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
+			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED||mmNuxManager.getCurrentState()==NUXConstants.NUX_NEW) 
 			{
-				butRemind.setEnabled(false);
-				butInviteMore.setEnabled(false);
+				Toast.makeText(getActivity(),  getActivity().getString(R.string.nux_expired), Toast.LENGTH_SHORT).show();
+				break;
+				
 			} 
-			else 
+			if( mmNuxManager.getCurrentState() == NUXConstants.COMPLETED)
 			{
-				NUXManager.getInstance().startNuxSelector(getActivity());
+				Toast.makeText(getActivity(),  getActivity().getString(R.string.nux_completed), Toast.LENGTH_SHORT).show();
+				break;
 			}
+				NUXManager.getInstance().startNuxSelector(getActivity());
 			break;
 
 		}
@@ -892,10 +915,23 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			ViewStub mmStub = (ViewStub) parent.findViewById(R.id.nux_footer);
 			mmStub.setLayoutResource(R.layout.nux_footer);
-			mmStub.inflate();
-			footerState.setEnumState(footerState.CLOSED);
-			bindNuxViews(parent);
 			
+			mmStub.setOnInflateListener(new OnInflateListener()
+			{
+				
+				@Override
+				public void onInflate(ViewStub stub, View inflated)
+				{
+					
+					footerState.setEnumState(footerState.CLOSED);
+					bindNuxViews(parent);
+				}
+			});
+			
+			mmStub.inflate();
+			
+			
+		
 		}
 		mConversationsComparator = new Conversation.ConversationComparator();
 		fetchConversations();
@@ -3216,6 +3252,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				llNuxFooter.setVisibility(View.GONE);
 				llInviteOptions.setVisibility(View.GONE);
 				llChatReward.setVisibility(View.GONE);
+				getListView().setPadding(0, 0, 0, 0);
 			}
 		}
 	}

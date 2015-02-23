@@ -197,7 +197,7 @@ public class NUXManager
 	 * @param msisdn
 	 * @param message
 	 */
-	public void sendMessage(HashSet<String> msisdn, String message)
+	public void sendMessage(ArrayList<String> msisdn, String message)
 	{
 		ConvMessage convMessage = null;
 
