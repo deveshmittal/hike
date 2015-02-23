@@ -164,10 +164,6 @@ public class VoIPService extends Service {
 	private int miscCounter = 0;
 	private VoIPDataPacket silentPacket;
 
-	// VoIP version support
-	private final int VOIP_VERSION_SUPPORT = 2;
-	private int sessionVersion = 0;
-	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return myBinder;
@@ -2273,7 +2269,6 @@ public class VoIPService extends Service {
 			socketData.put("callId", getCallId());
 			socketData.put("initiator", clientSelf.isInitiator());
 			socketData.put("reconnecting", reconnecting);
-			socketData.put("version", VOIP_VERSION_SUPPORT);
 			
 			JSONObject data = new JSONObject();
 			data.put(HikeConstants.MESSAGE_ID, new Random().nextInt(10000));
