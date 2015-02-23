@@ -346,6 +346,7 @@ public class HAManager
 	 */
 	public void setFileMaxSize(long size)
 	{
+		size *= 1024;	// convert into bytes
 		Editor edit = getPrefs().edit(); 
 		edit.putLong(AnalyticsConstants.ANALYTICS_FILESIZE, size);
 		edit.commit();
@@ -354,7 +355,7 @@ public class HAManager
 	
 	/**
 	 * Used to set the maximum analytics size on the client
-	 * @param size
+	 * @param size in kilobytes
 	 */
 	public void setAnalyticsMaxSizeOnClient(long size)
 	{
