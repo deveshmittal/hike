@@ -2,7 +2,9 @@ package com.bsb.hike.dialog;
 
 import java.util.ArrayList;
 
-import android.app.Dialog;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -14,9 +16,9 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -32,18 +34,21 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.AccountAdapter;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.AccountData;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontTextView;
 
@@ -1052,11 +1057,15 @@ public class HikeDialogFactory
 					break;
 					
 				case R.id.btn_always:
+					HAManager.getInstance().record(HikeConstants.LogEvent.SMS_POPUP_ALWAYS_CLICKED, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT);
+					
 					Utils.setSendUndeliveredAlwaysAsSmsSetting(context, true, !sendHike.isChecked());
 					listener.positiveClicked(dialog);
 					break;
 					
 				case R.id.btn_just_once:
+					HAManager.getInstance().record(HikeConstants.LogEvent.SMS_POPUP_JUST_ONCE_CLICKED, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT);
+					
 					listener.positiveClicked(dialog);
 					break;
 				}

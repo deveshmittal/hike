@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.content.ContentValues;
@@ -40,6 +42,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.dialog.H20Dialog;
@@ -2127,6 +2131,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private void smsDialogSendClick(H20Dialog dialog)
 	{
 		boolean isHikeSMSChecked = dialog.isHikeSMSChecked();
+		
+		if (!isHikeSMSChecked)
+		{
+			HAManager.getInstance().record(HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT);
+		}
 
 		if (isHikeSMSChecked)
 		{

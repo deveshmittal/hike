@@ -730,4 +730,29 @@ public class HAManager
 		}
 	}
 	
+	/**
+	 * records the analytics event to the file
+	 * 
+	 * @param whichEvent
+	 *            Event String which is to be recorded
+	 * @param type
+	 *            event type
+	 * @param eventContext
+	 *            context of the event
+	 */
+	public void record(String whichEvent, String eventType, String eventContext)
+	{
+		try
+		{
+
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, whichEvent);
+			record(eventType, eventContext, metadata);
+		}
+
+		catch (JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+	}
 }
