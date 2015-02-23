@@ -1344,4 +1344,11 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="video_compress">VIDEO COMPRESSION</string>
     <string name="send_compress_video">Send Compressed Video</string>
     <string name="valentine_day">Happy Valentine\'s Day</string>
+    <string name="remove_photo">Delete Photo</string>
+    <string name="profile_photo">Profile Photo</string>
+    <string name="confirm_remove_photo">Are you sure you want to remove the photo?</string>
+    <string name="check_delete_from_timeline">Delete from favorites\' timeline</string>
+    <string name="edit_photo">Edit Photo</string>
+    <string name="deleting_dp">Deleting picture...</string>
+    <string name="delete_dp_error">Could not delete your profile picture. Please check your network connection and try again later.</string>
 </resources>

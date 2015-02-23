@@ -18,18 +18,17 @@ import org.json.JSONObject;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.Gravity;
@@ -63,7 +62,6 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.SubMenu;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -88,19 +86,17 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
-import com.bsb.hike.models.ProfileItem.ProfileContactItem.contactType;
-import com.bsb.hike.models.ProfileItem.ProfileSharedContent;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.ui.fragments.ImageViewerFragment.DisplayPictureEditListener;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
@@ -112,11 +108,9 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.voip.VoIPUtils;
-import com.bsb.hike.voip.view.CallRatePopup;
-import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
-		View.OnClickListener
+		View.OnClickListener, DisplayPictureEditListener
 {
 	private TextView mName;
 	
@@ -1875,6 +1869,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		arguments.putString(HikeConstants.Extras.MAPPED_ID, mappedId);
 		arguments.putString(HikeConstants.Extras.URL, url);
 		arguments.putBoolean(HikeConstants.Extras.IS_STATUS_IMAGE, imageViewerInfo.isStatusMessage);
+		arguments.putBoolean(HikeConstants.CAN_EDIT_DP, true);
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_IMAGE, arguments);
 	}
@@ -1936,14 +1931,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		if (profileType == ProfileType.USER_PROFILE || profileType == ProfileType.GROUP_INFO)
 		{
-			/*
-			 * The wants to change their profile picture. Open a dialog to allow them pick Camera or Gallery
-			 */
-			final CharSequence[] items = getResources().getStringArray(R.array.profile_pic_dialog);
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(R.string.choose_picture);
-			builder.setItems(items, this);
-			mDialog = builder.show();
+			showProfileImageEditDialog(null);
 		}
 		else if (profileType == ProfileType.CONTACT_INFO_TIMELINE)
 		{
@@ -2894,22 +2882,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			public void onSuccess(JSONObject response)
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_STATUS, statusId);
-				for (int i = 0; i < profileItems.size(); i++)
-				{
-					ProfileItem profileItem = profileAdapter.getItem(i);
-					StatusMessage message = ((ProfileStatusItem) profileItem).getStatusMessage();
-
-					if (message == null)
-					{
-						continue;
-					}
-
-					if (statusId.equals(message.getMappedId()))
-					{
-						profileItems.remove(i);
-						break;
-					}
-				}
+				
+				iterateAndDeleteDPStatusFromOwnTimeline(statusId);
+				
 				profileAdapter.notifyDataSetChanged();
 			}
 
@@ -3134,5 +3109,184 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		intent.putExtra(HikeConstants.Extras.CONTACT_INFO_TIMELINE, mLocalMSISDN);
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, contactInfo.isOnhike());
 		startActivity(intent);
+	}
+		
+	/**
+	 * Used to display a confirmation dialog asking user if he wants to delete DP from his favorites timeline as well
+	 */
+	private void showRemovePhotoConfirmDialog()
+	{
+		final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(ProfileActivity.this);
+		deleteConfirmDialog.setHeader(R.string.remove_photo);
+		deleteConfirmDialog.setBody(R.string.confirm_remove_photo);
+		
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{					
+				// if checkbox is selected, delete the profile status update from own and favorites timeline
+				if(deleteConfirmDialog.isChecked())
+				{
+					ContactInfo contactInfo = Utils.getUserContactInfo(preferences);
+					StatusMessageType[] smType = {StatusMessageType.PROFILE_PIC};
+					StatusMessage lastsm = HikeConversationsDatabase.getInstance().getLastStatusMessage(smType, contactInfo);
+					deleteDisplayPicture(lastsm.getMappedId());
+				}
+				else
+				{
+					deleteDisplayPicture(null);
+				}
+				deleteConfirmDialog.dismiss();				
+			}
+		};
+		deleteConfirmDialog.setCheckBox(R.string.check_delete_from_timeline);
+		deleteConfirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
+		deleteConfirmDialog.setCancelButton(R.string.no);
+		deleteConfirmDialog.show();
+	}
+	
+	@Override
+	public void onClick(DialogInterface dialog, int item) 
+	{
+		super.onClick(dialog, item);
+		
+		switch(item)
+		{
+			case HikeConstants.REMOVE_PROFILE_PICTURE:
+			{
+				showRemovePhotoConfirmDialog();				
+			}
+			break;
+		}
+	}
+	
+	/**
+	 * Used to submit a request to the server to delete the display picture
+	 * @param id statusId of the status message about the display picture
+	 * status update from the timeline as well
+	 * While calling this method pass statusid to delete related post,
+	 * pass null to delete just the profile picture
+	 */
+	public void deleteDisplayPicture(final String id)
+	{
+		String statusId;
+		
+		if(id == null)
+		{	
+			statusId = "";
+		}
+		else 
+		{
+			statusId = HikeConstants.HTTP_STATUS_ID + id;
+		}
+		
+		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/avatar" + statusId, RequestType.DELETE_DP, new HikeHttpCallback()
+		{
+			@Override
+			public void onSuccess(JSONObject response)
+			{
+				Logger.d("ProfileActivity", "delete dp request succeeded!");
+				
+				// clear the profile thumbnail from lru cache and db
+				HikeMessengerApp.getLruCache().deleteIconForMSISDN(mLocalMSISDN);
+				
+				if(id != null)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_STATUS, id);
+					ContactInfo contactInfo = Utils.getUserContactInfo(preferences);
+					StatusMessageType[] smType = {StatusMessageType.PROFILE_PIC};
+					StatusMessage lastsm = HikeConversationsDatabase.getInstance().getLastStatusMessage(smType, contactInfo);
+					
+					if(id.equals(lastsm.getMappedId()))
+					{
+						iterateAndDeleteDPStatusFromOwnTimeline(id);
+					}
+				}
+
+				if(profileAdapter != null)
+				{
+					profileAdapter.notifyDataSetChanged();
+				}
+				HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, mLocalMSISDN);
+			}
+			@Override
+			public void onFailure() 
+			{
+				Logger.d("ProfileActivity", "delete dp request failed!");
+			}
+		});
+		mActivityState.task = new HikeHTTPTask(this, R.string.delete_dp_error);
+		Utils.executeHttpTask(mActivityState.task, hikeHttpRequest);
+		mDialog = ProgressDialog.show(this, null, getString(R.string.deleting_dp));		
+	}
+	
+	/**
+	 * Used to delete the status update from the user's timeline locally
+	 * @param statusId mappedId of the status to be deleted
+	 */
+	public void iterateAndDeleteDPStatusFromOwnTimeline(String statusId)
+	{
+		if(profileItems == null || profileAdapter == null)
+			return;
+		
+		for (int i=0; i<profileItems.size(); i++)
+		{
+			ProfileItem profileItem = profileAdapter.getItem(i);
+			StatusMessage message = ((ProfileStatusItem) profileItem).getStatusMessage();
+
+			if (message == null)
+			{
+				continue;
+			}
+
+			if (statusId.equals(message.getMappedId()))
+			{
+				profileItems.remove(i);
+				break;
+			}
+		}
+	}
+
+	@Override
+	public void onDisplayPictureEditClicked() 
+	{
+		showProfileImageEditDialog(null);		
+	}
+	
+	public void onClickProfileImage(View v)
+	{
+		showProfileImageEditDialog(null);
+	}
+	
+	/**
+	 * Used to show a dialog to the user to modify his/her current profile image
+	 * @param msisdn of the user
+	 */
+	public void showProfileImageEditDialog(View v)
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
+		builder.setTitle(R.string.profile_photo);
+
+		final CharSequence[] items = getResources().getStringArray(R.array.profile_pic_dialog);
+		
+		// Show Remove Photo item only if user has a profile photo other than default
+		ContactInfo contactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE));
+
+		if(ContactManager.getInstance().hasIcon(contactInfo.getMsisdn()))
+		{
+			CharSequence[] moreItems = new CharSequence[items.length + 1]; // adding one item to the existing list
+			
+			for(int i=0; i<items.length; i++)
+				moreItems[i] = items[i];
+			
+			moreItems[moreItems.length-1] = getResources().getString(R.string.remove_photo);
+			builder.setItems(moreItems, ProfileActivity.this);
+		}
+		else
+		{
+			builder.setItems(items, ProfileActivity.this);			
+		}
+		builder.show();		
 	}
 }
