@@ -1398,7 +1398,7 @@ public class MqttMessagesManager
 				deleteBot((String) botsTobeAdded.get(i));
 			}
 		}
-		if(data.optBoolean(HikeConstants.GET_BULK_LAST_SEEN))
+		if(data.has(HikeConstants.GET_BULK_LAST_SEEN))
 		{
 			boolean blsPref = data.optBoolean(HikeConstants.GET_BULK_LAST_SEEN);
 			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.BULK_LAST_SEEN_PREF, blsPref);

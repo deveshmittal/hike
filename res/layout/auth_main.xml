@@ -179,7 +179,6 @@
                             android:layout_height="@dimen/auth_permission_icon"
                             android:layout_marginRight="12dp"
                             style="@style/RoundedStyle"
-                            android:scaleType="centerInside"
                             android:src="@drawable/ic_signup_nouser" />
                     </LinearLayout>
 
@@ -225,11 +224,12 @@
                         android:layout_weight="1"
                         android:gravity="right" >
 
-                        <ImageView
+                        <com.bsb.hike.view.RoundedImageView
                             android:id="@+id/auth_contacts_avatar"
                             android:layout_width="@dimen/auth_permission_icon"
                             android:layout_height="@dimen/auth_permission_icon"
                             android:layout_marginRight="12dp"
+                            style="@style/RoundedStyle"
                             android:scaleType="centerInside"
                             android:src="@drawable/ic_signup_nouser" />
                     </LinearLayout>

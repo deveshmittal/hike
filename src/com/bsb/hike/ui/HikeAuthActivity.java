@@ -343,7 +343,7 @@ public class HikeAuthActivity extends Activity
 			auth_app_will_setup_acc.setText(String.format(getApplicationContext().getString(R.string.auth_will_setup_acc), mAppName));
 
 			// Set user avatar
-			profileImageLoader.loadImage(userContactId, ((ImageView) findViewById(R.id.auth_user_avatar)), false, false, true);
+			profileImageLoader.loadImage(userContactId, ((ImageView) findViewById(R.id.auth_user_avatar)), false, true, true);
 
 			// Set default contact avatar
 			profileImageLoader.loadImage("nullround", ((ImageView) findViewById(R.id.auth_contacts_avatar)), false, false, true);
