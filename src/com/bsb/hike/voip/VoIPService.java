@@ -758,11 +758,16 @@ public class VoIPService extends Service {
 		setSpeaker(true);
 		playFromSoundPool(SOUND_DECLINE, false);
 		
-		if (opusWrapper != null)
+		if (opusWrapper != null) {
 			opusWrapper.destroy();
+			opusWrapper = null;
+			
+		}
 
-		if (solicallAec != null)
+		if (solicallAec != null) {
 			solicallAec.destroy();
+			solicallAec = null;
+		}
 		
 		setCallid(0);
 		
