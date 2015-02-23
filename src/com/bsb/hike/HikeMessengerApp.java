@@ -960,7 +960,10 @@ public void onTrimMemory(int level)
 		Utils.makeNoMediaFile(folder);
 
 		folder = new File(root + HikeConstants.IMAGE_ROOT + HikeConstants.SENT_ROOT);
-		Utils.makeNoMediaFile(folder);
+		/*
+		 * Fixed issue where sent media directory is getting visible in Gallery.
+		 */
+		Utils.makeNoMediaFile(folder, true);
 
 		folder = new File(root + HikeConstants.VIDEO_ROOT + HikeConstants.SENT_ROOT);
 		Utils.makeNoMediaFile(folder);

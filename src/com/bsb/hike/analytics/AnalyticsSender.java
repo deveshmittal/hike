@@ -220,7 +220,7 @@ public class AnalyticsSender
 				return;
 			}
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM ALARM ROUTE---");			
-			instance.sendAnalyticsData(false);
+			instance.sendAnalyticsData(true, false);
 		}
 	}
 	
@@ -368,7 +368,7 @@ class NetworkListener extends BroadcastReceiver
 				
 				if(instance.isSendAnalyticsDataWhenConnected())
 				{
-					instance.sendAnalyticsData(false);
+					instance.sendAnalyticsData(true, false);
 				}
 			}
 		}				
