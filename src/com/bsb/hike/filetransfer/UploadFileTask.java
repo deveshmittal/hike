@@ -412,6 +412,13 @@ public class UploadFileTask extends FileTransferBase
 						{
 							if(info.isCompRequired)
 							{
+								/*
+								 * Changes done to avoid the creation of multiple compressed file. Here I'm using message id as unique id of file.
+								 */
+								String destFileName = "Vid_" + msgId + ".mp4";
+								info.destFile = Utils.getOutputMediaFile(HikeFileType.VIDEO, destFileName, true);
+								if(info.destFile.exists())
+									info.destFile.delete();
 								hikeFile.setVideoEditedInfo(info);
 								HikeVideoCompressor instance = new HikeVideoCompressor();
 								compFile = instance.compressVideo(hikeFile);
@@ -1235,10 +1242,6 @@ public class UploadFileTask extends FileTransferBase
 					Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
 				}
 			});
-		}
-		if (selectedFile != null && hikeFileType != HikeFileType.AUDIO_RECORDING)
-		{
-			context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(selectedFile)));
 		}
 	}
 	

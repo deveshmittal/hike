@@ -103,6 +103,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 {
 	private static final String SELECT_ALL_MSISDN="all";
 	
+	private final String HORIZONTAL_FRIEND_FRAGMENT = "horizontalFriendFragment";
+	
 	private static int MIN_MEMBERS_GROUP_CHAT = 2;
 
 	private static final int CREATE_GROUP_MODE = 1;
@@ -169,7 +171,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private boolean nuxIncentiveMode;
 
-	 private HorizontalFriendsFragment newFragment =null;
+	 private HorizontalFriendsFragment newFragment;
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -209,21 +211,25 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		setContentView(R.layout.compose_chat);
 
-		if (savedInstanceState == null && nuxIncentiveMode)
-		{
-
+		if (nuxIncentiveMode)
+		{ 
 			FragmentManager fm = getSupportFragmentManager();
-			newFragment = (HorizontalFriendsFragment) fm.findFragmentByTag("chatFragment");
-			if (newFragment == null)
-			{
-				newFragment = new HorizontalFriendsFragment();
-			}
+			newFragment = (HorizontalFriendsFragment) fm.findFragmentByTag(HORIZONTAL_FRIEND_FRAGMENT);
 			FragmentTransaction ft = fm.beginTransaction();
 			ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-			ft.add(R.id.horizontal_friends_placeholder, newFragment, "chatFragment").commit();
+			
+			if(newFragment == null) 
+			{
+				Logger.d("UmangX","creating Frag");
+				newFragment = new HorizontalFriendsFragment();
+				ft.add(R.id.horizontal_friends_placeholder, newFragment, HORIZONTAL_FRIEND_FRAGMENT).commit();
+			} 
+			else 
+			{
+				ft.attach(newFragment).commit();
+			}
 			setListnerToRootView();
-
-		}
+		} 
 		Object object = getLastCustomNonConfigurationInstance();
 
 		if (object instanceof InitiateMultiFileTransferTask)
