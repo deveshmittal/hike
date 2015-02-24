@@ -23,6 +23,7 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupConversation;
@@ -378,7 +379,15 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.image.setTag(imageViewerInf);
 			if (profilePreview == null)
 			{
-				profileImageLoader.loadImage(mapedId, viewHolder.image, isListFlinging);
+				if(mContactInfo.hasCustomPhoto())
+				{
+					profileImageLoader.loadImage(mapedId, viewHolder.image, isListFlinging);
+				}
+				else
+				{
+					viewHolder.image.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactInfo.getMsisdn(), false));
+					viewHolder.image.setImageResource(R.drawable.ic_default_avatar_hires);
+				}
 			}
 			else
 			{
