@@ -2280,4 +2280,5 @@ public class HikeConstants
 	
 	public static final String REARRANGE_CHAT = "rearrange_chat";
 	
+	public static final String CONTENT_ID = "content_id";
 }
