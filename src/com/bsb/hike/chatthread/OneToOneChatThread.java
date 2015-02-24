@@ -9,8 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.content.ContentValues;
@@ -255,6 +253,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 			LastSeenScheduler lastSeenScheduler = LastSeenScheduler.getInstance(activity.getApplicationContext());
 			lastSeenScheduler.start(mContactInfo.getMsisdn(), this);
+			
+			HAManager.getInstance().recordLastSeenEvent(OneToOneChatThread.class.getName(), "createConversation", null, msisdn);
 		}
 
 		/**
@@ -321,6 +321,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	public void lastSeenFetched(String contMsisdn, int offline, long lastSeenTime)
 	{
 		Logger.d(TAG, " Got lastSeen Time for msisdn : " + contMsisdn + " LastSeenTime : " + lastSeenTime);
+		HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "lastSeenFetched", "going to update UI", contMsisdn);
 		updateLastSeen(contMsisdn, offline, lastSeenTime);
 	}
 
@@ -488,6 +489,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		case HikePubSub.LAST_SEEN_TIME_UPDATED:
 			ContactInfo contactInfo = (ContactInfo) object;
+			HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "recv pubsub LAST_SEEN_TIME_UPDATED", "going update UI", contactInfo.getMsisdn());
 			updateLastSeen(contactInfo.getMsisdn(), contactInfo.getOffline(), contactInfo.getLastSeenTime());
 			break;
 		case HikePubSub.SEND_SMS_PREF_TOGGLED:
@@ -727,6 +729,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		if (lastSeenString == null)
 		{
+			HAManager.getInstance().recordLastSeenEvent(OneToOneChatThread.class.getName(), "updateLastSeen", "lastSeen null so setLastSeenTextBasedOnHikeValue", msisdn);
 			setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 		}
 		else
@@ -1035,6 +1038,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				mLabelView.setVisibility(View.VISIBLE);
 			}
 		}
+		
+		HAManager.getInstance().recordLastSeenEvent(OneToOneChatThread.class.getName(), "setLastSeenText", "Updated UI for LastSeen", msisdn);
 	}
 
 	/**
@@ -1403,6 +1408,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 		uiHandler.sendEmptyMessage(SCHEDULE_LAST_SEEN);
+		HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "onEventRecv", "recv pubsub APP_FOREGROUNDED", msisdn);
+
 	}
 
 	/**
