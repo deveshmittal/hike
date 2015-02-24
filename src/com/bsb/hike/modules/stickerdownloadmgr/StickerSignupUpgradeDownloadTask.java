@@ -12,8 +12,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
-import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
-import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -49,9 +47,8 @@ public class StickerSignupUpgradeDownloadTask
 			return;
 		}
 
-		IRequestBody body = new JsonBody(postObject);
 		long requestId = getRequestId();
-		RequestToken requestToken = StickerSignupUpgradeRequest(requestId, body, getRequestListener());
+		RequestToken requestToken = StickerSignupUpgradeRequest(requestId, postObject, getRequestListener());
 		
 		if(requestToken.isRequestRunning())
 		{

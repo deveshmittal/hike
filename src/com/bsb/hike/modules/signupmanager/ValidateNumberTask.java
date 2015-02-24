@@ -8,8 +8,6 @@ import org.json.JSONObject;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
-import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
-import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.utils.Logger;
 
@@ -26,9 +24,7 @@ public class ValidateNumberTask
 	
 	public String execute()
 	{
-		JSONObject postObject = getPostObject();
-		IRequestBody body = new JsonBody(postObject);
-		RequestToken requestToken = validateNumberRequest(body, getRequestListener());
+		RequestToken requestToken = validateNumberRequest(getPostObject(), getRequestListener());
 		requestToken.execute();
 		return resultMsisdn;
 	}

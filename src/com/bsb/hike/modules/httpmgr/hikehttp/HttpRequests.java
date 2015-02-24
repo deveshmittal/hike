@@ -74,8 +74,9 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken StickerSignupUpgradeRequest(long requestId, IRequestBody body, IRequestListener requestListener)
+	public static RequestToken StickerSignupUpgradeRequest(long requestId, JSONObject json, IRequestListener requestListener)
 	{
+		IRequestBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(stickerSignupUpgradeUrl())
 				.setId(requestId)
@@ -238,8 +239,9 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken registerAccountRequest(IRequestBody body, IRequestListener requestListener)
+	public static RequestToken registerAccountRequest(JSONObject json, IRequestListener requestListener)
 	{
+		IRequestBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(registerAccountBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
@@ -304,8 +306,9 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken validateNumberRequest(IRequestBody body, IRequestListener requestListener)
+	public static RequestToken validateNumberRequest(JSONObject json, IRequestListener requestListener)
 	{
+		IRequestBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(validateNumberBaseUrl() + "?digits=4")
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
@@ -317,8 +320,9 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken setProfileRequest(IRequestBody body, IRequestListener requestListener)
+	public static RequestToken setProfileRequest(JSONObject json, IRequestListener requestListener)
 	{
+		IRequestBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(setProfileUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
@@ -369,8 +373,9 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken postAddressBookRequest(IRequestBody body, IRequestListener requestListener)
+	public static RequestToken postAddressBookRequest(JSONObject json, IRequestListener requestListener)
 	{
+		IRequestBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(postAddressbookBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_LONG)
@@ -382,8 +387,9 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken updateAddressBookRequest(IRequestBody body, IRequestListener requestListener)
+	public static RequestToken updateAddressBookRequest(JSONObject json, IRequestListener requestListener)
 	{
+		IRequestBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(updateAddressbookBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
@@ -394,8 +400,9 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken sendDeviceDetailsRequest(IRequestBody body, IRequestListener requestListener)
+	public static RequestToken sendDeviceDetailsRequest(JSONObject json, IRequestListener requestListener)
 	{
+		IRequestBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(sendDeviceDetailBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
@@ -406,8 +413,9 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken sendPreActivationRequest(IRequestBody body, IRequestListener requestListener)
+	public static RequestToken sendPreActivationRequest(JSONObject json, IRequestListener requestListener)
 	{
+		IRequestBody body = new JsonBody(json);
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(preActivationBaseUrl())
 				.setRequestType(Request.REQUEST_TYPE_SHORT)
