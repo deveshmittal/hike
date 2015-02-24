@@ -29,8 +29,11 @@ import android.os.Message;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -298,7 +301,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void setSearchEmptyState()
 	{
-		if(emptyView != null)
+		if (emptyView != null)
 		{
 			emptyView.setVisibility(View.GONE);
 		}
@@ -307,7 +310,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		searchEmptyView.setVisibility(View.VISIBLE);
 		String emptyText = String.format(getActivity().getString(R.string.home_search_empty_text), searchText);
 		TextView emptyTextView = (TextView) searchEmptyView.findViewById(R.id.empty_search_txt);
-		emptyTextView.setText(emptyText);
+		if (!TextUtils.isEmpty(searchText))
+		{
+			SpannableString spanEmptyText = new SpannableString(emptyText);
+			int start = spanEmptyText.toString().indexOf(searchText) - 1;
+			int end = start + searchText.length() + 2;
+			spanEmptyText.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.standard_light_grey2)), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			emptyTextView.setText(spanEmptyText, TextView.BufferType.SPANNABLE);
+		}
+		else
+		{
+			emptyTextView.setText(emptyText);
+		}
 		friendsList.setEmptyView(searchEmptyView);
 	}
 
@@ -1046,7 +1060,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	public void setupSearch()
 	{
 		searchMode = true;
-		setEmptyState();
 		mAdapter.setupSearch();
 	}
 
