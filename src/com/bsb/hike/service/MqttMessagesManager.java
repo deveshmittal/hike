@@ -1,28 +1,39 @@
 package com.bsb.hike.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.analytics.AnalyticsSender;
-import com.bsb.hike.analytics.AnalyticsStore;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -48,7 +59,6 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
-import com.bsb.hike.notifications.HikeNotificationUtils;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HomeActivity;
@@ -58,28 +68,12 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.FestivePopup;
-import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import com.bsb.hike.voip.VoIPClient;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
@@ -1332,12 +1326,12 @@ public class MqttMessagesManager
 		// watsapp invite message
 		if (data.has(HikeConstants.WATSAPP_INVITE_ENABLED))
 		{
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.WATSAPP_INVITE_ENABLED, data.getBoolean(HikeConstants.WATSAPP_INVITE_ENABLED));
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.WATSAPP_INVITE_ENABLED, data.getBoolean(HikeConstants.WATSAPP_INVITE_ENABLED));
 		}
 		if (data.has(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY))
 		{
 			String message = data.getString(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY);
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, message);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, message);
 		}
 
 		/*
@@ -1420,10 +1414,26 @@ public class MqttMessagesManager
 			int freq = data.getInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY);
 			HAManager.getInstance().setAnalyticsSendFrequency(freq);
 		}
+		if(data.has(AnalyticsConstants.ANALYTICS_IN_MEMORY_SIZE))
+		{
+			int size = data.getInt(AnalyticsConstants.ANALYTICS_IN_MEMORY_SIZE);
+			HAManager.getInstance().setMaxInMemoryEventsSize(size);
+		}
 		if(data.has(HikeConstants.ENABLE_DETAILED_HTTP_LOGGING))
 		{
 			boolean enableDetailedHttpLogging = data.getBoolean(HikeConstants.ENABLE_DETAILED_HTTP_LOGGING);
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.DETAILED_HTTP_LOGGING_ENABLED, enableDetailedHttpLogging);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.DETAILED_HTTP_LOGGING_ENABLED, enableDetailedHttpLogging);
+		}
+		if(data.has(HikeConstants.Extras.FT_UPLOAD_SO_TIMEOUT))
+		{
+			long timeout = data.getLong(HikeConstants.Extras.FT_UPLOAD_SO_TIMEOUT);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.Extras.FT_UPLOAD_SO_TIMEOUT, timeout);
+		}
+		if(data.has(HikeConstants.Extras.GENERAL_SO_TIMEOUT))
+		{
+			long timeout = data.getLong(HikeConstants.Extras.GENERAL_SO_TIMEOUT);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.Extras.GENERAL_SO_TIMEOUT, timeout);
+			AccountUtils.setSocketTimeout((int) timeout);
 		}
 		
 		editor.commit();
@@ -1470,7 +1480,7 @@ public class MqttMessagesManager
 			Editor editor = settings.edit();
 			editor.putBoolean(HikeMessengerApp.GCM_ID_SENT, false);
 			editor.commit();
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REGISTER_GCM_SIGNUP, HikeConstants.REGISTEM_GCM_AFTER_SIGNUP);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.REGISTER_GCM_SIGNUP, HikeConstants.REGISTEM_GCM_AFTER_SIGNUP);
 			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikeService.SEND_TO_SERVER_ACTION));
 		}
 		if (data.optBoolean(HikeConstants.DEFAULT_SMS_CLIENT_TUTORIAL))
@@ -1489,7 +1499,7 @@ public class MqttMessagesManager
 		{		
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM DEMAND PACKET ROUTE---");
 
-			HAManager.getInstance().sendAnalyticsData(true);
+			HAManager.getInstance().sendAnalyticsData(true, true);
 		}
 	}
 
@@ -1634,10 +1644,10 @@ public class MqttMessagesManager
 			/*
 			 * reseting sticker shop update time so that next time we fetch a fresh sicker shop
 			 */
-			HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.LAST_STICKER_SHOP_UPDATE_TIME, 0l);
+			HikeSharedPreferenceUtil.getInstance().saveData(StickerManager.LAST_STICKER_SHOP_UPDATE_TIME, 0l);
 			if(showBadge)
 			{
-				HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, true);
+				HikeSharedPreferenceUtil.getInstance().saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, true);
 			}
 		}
 		
@@ -1966,7 +1976,7 @@ public class MqttMessagesManager
 		}
 		else if(subType.equals(HikeConstants.VALENTINE_DAY_POPUP))
 		{
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.VALENTINE_DAY_POPUP);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.VALENTINE_DAY_POPUP);
 		}
 		else if(HikeConstants.PLAY_NOTIFICATION.equals(subType))
 		{
@@ -2839,7 +2849,7 @@ public class MqttMessagesManager
 		String body = data.optString(HikeConstants.BODY);
 		if (!TextUtils.isEmpty(header) && !TextUtils.isEmpty(body))
 		{
-			HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(context);
+			HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance();
 			pref.saveData("last" + subType, data.getString(HikeConstants.MESSAGE_ID));
 			String[] keys = getPopUpTypeAndShowNotification(subType, (data.optBoolean(HikeConstants.PUSH, true) ? body : null));
 			if (keys != null)
@@ -2922,7 +2932,7 @@ public class MqttMessagesManager
 	private boolean isDuplicateOrWrongPacket(String key, JSONObject jsonObject)
 	{
 		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
-		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance(context).getData(key, "").equals(id);
+		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance().getData(key, "").equals(id);
 	}
 	
 	private void saveNuxPacket(JSONObject jsonObject)

@@ -1,9 +1,9 @@
 package com.bsb.hike;
 
-import com.bsb.hike.models.StatusMessage.StatusMessageType;
-
 import android.net.Uri;
 import android.os.Environment;
+
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 
 public class HikeConstants
 {
@@ -1390,6 +1390,10 @@ public class HikeConstants
 		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
 		
 		public static final String NUX_INCENTIVE_MODE = "showNuxIncentiveMode";
+
+		public static final String GENERAL_SO_TIMEOUT = "sto";
+
+		public static final String FT_UPLOAD_SO_TIMEOUT = "ftsto";
 	}
 
 	public static final class LogEvent

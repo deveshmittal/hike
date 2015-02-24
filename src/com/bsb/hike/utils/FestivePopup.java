@@ -244,7 +244,7 @@ public class FestivePopup
 			activity.showActionBarAfterFestivePopup();
 		}
 
-		HikeSharedPreferenceUtil.getInstance(activity).removeData(HikeConstants.SHOW_FESTIVE_POPUP);
+		HikeSharedPreferenceUtil.getInstance().removeData(HikeConstants.SHOW_FESTIVE_POPUP);
 	}
 
 	public static boolean isPastFestiveDate(int type)

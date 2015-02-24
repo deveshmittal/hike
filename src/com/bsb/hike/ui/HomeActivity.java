@@ -60,13 +60,11 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.tasks.SendLogsTask;
@@ -186,7 +184,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		// If it's 1, it means we need to show a progress dialog and then wait
 		// for the
 		// pub sub thread event to cancel the dialog once the upgrade is done.
-		if ((HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeConstants.UPGRADING, false)))
+		if ((HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.UPGRADING, false)))
 		{
 			progDialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.HIKE_UPGRADE_DIALOG, null);
 			showingProgress = true;
@@ -195,7 +193,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (!showingProgress)
 		{
-			if (Utils.isVoipActivated(HomeActivity.this) && !HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWN_VOIP_INTRO_TIP, false))
+			if (Utils.isVoipActivated(HomeActivity.this) && !HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOWN_VOIP_INTRO_TIP, false))
 			{
 				dialogShowing = DialogShowing.VOIP_FTUE_POPUP;
 			}
@@ -283,7 +281,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			if(FestivePopup.isPastFestiveDate(festivePopupType))
 			{
-				HikeSharedPreferenceUtil.getInstance(this).removeData(HikeConstants.SHOW_FESTIVE_POPUP);
+				HikeSharedPreferenceUtil.getInstance().removeData(HikeConstants.SHOW_FESTIVE_POPUP);
 			}
 			else if(dialogShowing == null)
 			{
@@ -1800,23 +1798,23 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void hikeLogoClicked()
 	{
-		if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
+		if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STEALTH_UNREAD_TIP, null);
 		}
-		if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false))
+		if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false))
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STEALTH_INFO_TIP, null);
 		}
-		if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, false))
+		if (!HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, false))
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_WELCOME_HIKE_TIP, null);
 		}
-		if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, false))
+		if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, false))
 		{
 			return;
 		}
-		if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+		if (!HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 		{
 			if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_TIP_2)
 			{
@@ -1849,14 +1847,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
 				tipTypeShowing = null;
 			}
-			final int stealthType = HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			final int stealthType = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 			if (stealthType == HikeConstants.STEALTH_OFF)
 			{
 				LockPattern.confirmPattern(HomeActivity.this, false);
 			}
 			else
 			{
-				HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
 				
 				try
