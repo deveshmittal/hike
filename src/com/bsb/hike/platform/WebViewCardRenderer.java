@@ -277,7 +277,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 					else
 					{
 						showConnErrState(viewHolder);
-						cardErrorAnalytics(reason);
+						cardErrorAnalytics(reason, convMessage);
 					}
 				}
 
@@ -304,14 +304,15 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	}
 
-	private void cardErrorAnalytics(EventCode reason)
+	private void cardErrorAnalytics(EventCode reason, ConvMessage convMessage)
 	{
 		JSONObject json = new JSONObject();
 		try
 		{
 			json.put(HikePlatformConstants.ERROR_CODE, reason.toString());
 			json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.BOT_ERROR);
-			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+			json.put(AnalyticsConstants.CONTENT_ID, convMessage.getContentId());
+			HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, json);
 		}
 		catch (JSONException e)
 		{
@@ -337,7 +338,8 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			platformJSON.put(HikePlatformConstants.CARD_TYPE, message.webMetadata.getAppName());
 			platformJSON.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_LOADED);
 			platformJSON.put(HikePlatformConstants.CARD_STATE, state);
-			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.VIEW_EVENT, platformJSON, AnalyticsConstants.EVENT_TAG_PLATFORM);
+			platformJSON.put(AnalyticsConstants.CONTENT_ID, message.getContentId());
+			HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.VIEW_EVENT, platformJSON);
 		}
 		catch (JSONException e)
 		{

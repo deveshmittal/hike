@@ -2288,7 +2288,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 								json.put(HikePlatformConstants.CARD_TYPE, convMessage.webMetadata.getAppName());
 								json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
 								json.put(AnalyticsConstants.TO, mContactNumber);
-								HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+								json.put(AnalyticsConstants.CONTENT_ID, convMessage.getContentId());
+								HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 							}
 							catch (JSONException e)
 							{
@@ -5131,7 +5132,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_DELETE);
 				json.put(AnalyticsConstants.ORIGIN, origin);
 				json.put(AnalyticsConstants.CHAT_MSISDN, mContactNumber);
-				HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+				json.put(AnalyticsConstants.CONTENT_ID, convMessage.getContentId());
+				HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 			}
 			catch (JSONException e)
 			{
