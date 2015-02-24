@@ -758,11 +758,16 @@ public class VoIPService extends Service {
 		setSpeaker(true);
 		playFromSoundPool(SOUND_DECLINE, false);
 		
-		if (opusWrapper != null)
+		if (opusWrapper != null) {
 			opusWrapper.destroy();
+			opusWrapper = null;
+			
+		}
 
-		if (solicallAec != null)
+		if (solicallAec != null) {
 			solicallAec.destroy();
+			solicallAec = null;
+		}
 		
 		setCallid(0);
 		
@@ -1408,7 +1413,7 @@ public class VoIPService extends Service {
 						index = 0;
 						long timer = System.currentTimeMillis();
 						while (index < dp.getLength()) {
-							size = Math.min(minBufSizePlayback / 2, dp.getLength() - index);
+							size = Math.min(minBufSizePlayback, dp.getLength() - index);
 							audioTrack.write(dp.getData(), index, size);
 							index += size; 
 						}
