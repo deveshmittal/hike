@@ -972,7 +972,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 */
 	private void setLastSeenTextBasedOnHikeValue(boolean isConvOnHike)
 	{
-		if (isConvOnHike)
+		if (isConvOnHike || Utils.isBot(msisdn))
 		{
 			hideLastSeenText();
 		}
