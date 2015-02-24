@@ -1276,6 +1276,8 @@ public class HikeConstants
 
 		public static final String SHOW_KEYBOARD = "ShowKeyboard";
 
+		public static final String SHOW_RECORDING_DIALOG = "showRecordingDialog";
+
 		public static final String IS_HOME_POPUP_SHOWING = "isHomePopupShowing";
 
 		public static final String LAST_UPDATE_PACKET_ID = "lastUpdatePacketId";

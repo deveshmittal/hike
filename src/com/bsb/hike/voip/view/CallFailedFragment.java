@@ -6,8 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -15,8 +15,10 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPConstants;
+import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPUtils;
 
 public class CallFailedFragment extends SherlockFragment
@@ -85,7 +87,7 @@ public class CallFailedFragment extends SherlockFragment
 			@Override
 			public void onClick(View v) {
 				Intent intent = IntentManager.getChatThreadIntent(getSherlockActivity(), msisdn);
-				intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
+				intent.putExtra(HikeConstants.Extras.SHOW_RECORDING_DIALOG, true);
 				startActivity(intent);
 				getSherlockActivity().finish();
 			}

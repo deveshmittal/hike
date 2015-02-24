@@ -113,6 +113,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -2049,6 +2050,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		mConversation = null;
+
+		if (intent.getBooleanExtra(HikeConstants.Extras.SHOW_KEYBOARD, false))
+		{
+			showKeyboard = true;
+		}
+
+		if(intent.getBooleanExtra(HikeConstants.Extras.SHOW_RECORDING_DIALOG, false))
+		{
+			recordingDialogClicked();
+		}
 
 		if ((dataURI != null) && ("smsto".equals(dataURI.getScheme()) || "sms".equals(dataURI.getScheme())))
 		{
