@@ -60,7 +60,9 @@ public class CallFailedFragment extends SherlockFragment
 			public void onClick(View v) {
 				if(enableRedial)
 				{
-					Utils.onCallClicked(getSherlockActivity(), msisdn, VoIPUtils.CallSource.CALL_FAILED_FRAG);
+					Intent intent = IntentManager.getVoipCallIntent(getSherlockActivity(), msisdn, VoIPUtils.CallSource.CALL_FAILED_FRAG);
+					intent.putExtra(VoIPConstants.Extras.REDIALLING, true);
+					getSherlockActivity().startService(intent);
 				}
 				else
 				{

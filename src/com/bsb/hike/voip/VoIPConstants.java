@@ -141,6 +141,8 @@ public class VoIPConstants {
 		public static final String INITIATOR = "initiator";
 
 		public static final String CALL_ID = "callId";
+
+		public static final String REDIALLING = "redialling";
 	}
 
 	

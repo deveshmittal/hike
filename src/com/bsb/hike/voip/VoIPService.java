@@ -375,6 +375,7 @@ public class VoIPService extends Service {
 			
 			// Show activity
 			Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
+			i.putExtra(VoIPConstants.Extras.REDIALLING, intent.getBooleanExtra(VoIPConstants.Extras.REDIALLING, false));
 			i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(i);
 			
