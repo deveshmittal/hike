@@ -378,7 +378,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.image.setTag(imageViewerInf);
 			if (profilePreview == null)
 			{
-				profileImageLoader.loadImage(contmsisdn, viewHolder.image, isListFlinging);
+				profileImageLoader.loadImage(mapedId, viewHolder.image, isListFlinging);
 			}
 			else
 			{
