@@ -79,14 +79,11 @@ public class VoIPActivity extends HikeAppStateBaseFragmentActivity implements Ca
 	{
 		if(!isFragmentAdded(HikeConstants.VOIP_CALL_FAILED_FRAGMENT_TAG))
 		{
-			findViewById(R.id.activity_overlay).setVisibility(View.VISIBLE);
-
 			CallFailedFragment callFailedFragment = new CallFailedFragment();
 			callFailedFragment.setArguments(bundle);
 
 			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-			fragmentTransaction.setCustomAnimations(R.anim.call_failed_frag_slide_in, R.anim.call_failed_frag_slide_out);
-			fragmentTransaction.add(R.id.call_failed_frag_container, callFailedFragment, HikeConstants.VOIP_CALL_FAILED_FRAGMENT_TAG);
+			fragmentTransaction.add(R.id.parent_layout, callFailedFragment, HikeConstants.VOIP_CALL_FAILED_FRAGMENT_TAG);
 			fragmentTransaction.commitAllowingStateLoss();
 		}
 	}
@@ -97,9 +94,7 @@ public class VoIPActivity extends HikeAppStateBaseFragmentActivity implements Ca
 		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.VOIP_CALL_FAILED_FRAGMENT_TAG);
 		if(fragment!=null)
 		{
-			findViewById(R.id.activity_overlay).setVisibility(View.GONE);
 			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-			fragmentTransaction.setCustomAnimations(R.anim.call_failed_frag_slide_in, R.anim.call_failed_frag_slide_out);
 			fragmentTransaction.remove(fragment);
 			fragmentTransaction.commitAllowingStateLoss();
 		}

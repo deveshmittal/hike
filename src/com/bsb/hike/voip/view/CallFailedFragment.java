@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Animation.AnimationListener;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -30,6 +33,7 @@ public class CallFailedFragment extends SherlockFragment
 		View view = inflater.inflate(R.layout.call_failed_fragment, null);
 
 		initViews(view);
+		slideInContainer(view);
 
 		return view;
 	}
@@ -61,7 +65,7 @@ public class CallFailedFragment extends SherlockFragment
 					getSherlockActivity().finish();
 					Utils.startNativeCall(getSherlockActivity(), msisdn);
 				}
-				((CallFailedFragListener)getSherlockActivity()).removeCallFailedFragment();
+				slideOutContainer();
 			}
 		});
 
@@ -133,9 +137,36 @@ public class CallFailedFragment extends SherlockFragment
 			case VoIPConstants.ConnectionFailCodes.CALLER_BAD_NETWORK:		view.setText(getString(R.string.voip_caller_poor_network));
 																			break;
 
-			default:														((CallFailedFragListener)getSherlockActivity()).removeCallFailedFragment();
+			default:														slideOutContainer();
 		}
 
 		return enableRedial;
+	}
+
+	private void slideInContainer(View view)
+	{
+		Animation anim = AnimationUtils.loadAnimation(getSherlockActivity(), R.anim.call_failed_frag_slide_in);
+		view.findViewById(R.id.container).startAnimation(anim);
+	}
+
+	private void slideOutContainer()
+	{
+		Animation anim = AnimationUtils.loadAnimation(getSherlockActivity(), R.anim.call_failed_frag_slide_out);
+		anim.setAnimationListener(new AnimationListener() {
+
+			@Override
+			public void onAnimationStart(Animation animation) {
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				((CallFailedFragListener)getSherlockActivity()).removeCallFailedFragment();
+			}
+		});
+		getView().findViewById(R.id.container).startAnimation(anim);
 	}
 }

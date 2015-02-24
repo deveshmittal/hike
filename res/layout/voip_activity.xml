@@ -1,26 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parent_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black">
-    
-    	<FrameLayout
-		    android:id="@+id/parent_layout"
-			android:layout_width="match_parent"
-		    android:layout_height="match_parent"
-		    android:background="@color/black" />
-
-		<FrameLayout
-			android:id="@+id/activity_overlay"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:background="@color/black_60"
-			android:visibility="gone" />
-
-		<FrameLayout
-		    android:id="@+id/call_failed_frag_container"
-		    android:layout_gravity="bottom"
-		    android:layout_width="match_parent"
-		    android:layout_height="@dimen/call_failed_fragment_height">
-		</FrameLayout>
 </FrameLayout>
