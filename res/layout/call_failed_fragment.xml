@@ -18,9 +18,9 @@
 	        android:id="@+id/heading"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:layout_marginTop="20dp"
+	        android:layout_marginTop="38dp"
 	        android:layout_centerHorizontal="true"
-	        android:textSize="18dp"
+	        android:textSize="20dp"
 	        android:textColor="@color/standard_black"
 	        android:textStyle="italic" />
 
@@ -29,10 +29,10 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_below="@id/heading"
-	        android:layout_marginTop="4dp"
+	        android:layout_marginTop="6dp"
 	        android:layout_centerHorizontal="true"
 	        android:text="@string/voip_call_failed_frag_subheader"
-	        android:textSize="12dp"
+	        android:textSize="14dp"
 	        android:textColor="@color/standard_light_grey2"
 	        android:textStyle="italic" />
 
@@ -43,7 +43,7 @@
 		    android:layout_below="@id/subheading"
 		    android:paddingLeft="24dp"
 		    android:paddingRight="24dp"
-		    android:layout_marginTop="24dp">
+		    android:layout_marginTop="42dp">
 
 		    	<com.bsb.hike.view.CustomFontButton
 		    	    android:id="@+id/voice_clip"
@@ -52,9 +52,9 @@
 			        android:layout_weight="1"
 			        android:drawablePadding="8dp"
 			        android:text="@string/voip_call_failed_voice_clip"
-			        android:textColor="@color/call_issues"
-			        android:drawableTop="@drawable/call_issues_echo_btn"
-			        android:textSize="12dp"
+			        android:textColor="@color/standard_light_grey2"
+			        android:drawableTop="@drawable/ic_fallback_voice"
+			        android:textSize="14dp"
 			        android:textStyle="italic"
 			        android:background="@null"
 			        android:scaleType="center" />
@@ -65,12 +65,12 @@
 			        android:layout_height="wrap_content"
 			        android:layout_weight="1"
 			        android:text="@string/voip_call_failed_message"
-			        android:drawableTop="@drawable/call_issues_noise_btn"
+			        android:drawableTop="@drawable/ic_fallback_message"
 			        android:drawablePadding="8dp"
 			        android:background="@null"
-			        android:textSize="12dp"
+			        android:textSize="14dp"
 			        android:textStyle="italic"
-			        android:textColor="@color/call_issues"
+			        android:textColor="@color/standard_light_grey2"
 			        android:layout_marginRight="24dp"
 			        android:layout_marginLeft="24dp"
 			        android:scaleType="center" />
@@ -82,10 +82,10 @@
 			        android:layout_weight="1"
 			        android:drawablePadding="8dp"
 			        android:text="@string/voip_call_failed_redial"
-			        android:drawableTop="@drawable/call_issues_hear_btn"
-			        android:textSize="12dp"
+			        android:drawableTop="@drawable/ic_fallback_redial"
+			        android:textSize="14dp"
 			        android:textStyle="italic"
-			        android:textColor="@color/call_issues"
+			        android:textColor="@color/standard_light_grey2"
 			        android:background="@null"
 			        android:scaleType="center" />
 		</LinearLayout>
