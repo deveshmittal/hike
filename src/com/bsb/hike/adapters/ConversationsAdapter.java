@@ -93,7 +93,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private Map<String, Integer> convSpanStartIndexes;
 
-	private Integer searchQueryLength;
+	private String refinedSearchText;
 
 	private Context context;
 
@@ -549,7 +549,7 @@ public class ConversationsAdapter extends BaseAdapter
 	{
 		isSearchModeOn = false;
 		conversationsMsisdns = null;
-		searchQueryLength = 0;
+		refinedSearchText = null;
 		/*
 		 * Purposely returning conversation list on the UI thread on collapse to avoid showing ftue empty state. 
 		 */
@@ -611,8 +611,8 @@ public class ConversationsAdapter extends BaseAdapter
 
 	public void onQueryChanged(String s)
 	{
-		searchQueryLength = s.trim().length();
-		contactFilter.filter(s);
+		refinedSearchText = s.toLowerCase().trim();
+		contactFilter.filter(refinedSearchText);
 	}
 
 	private class ContactFilter extends Filter
@@ -623,10 +623,10 @@ public class ConversationsAdapter extends BaseAdapter
 			FilterResults results = new FilterResults();
 			convSpanStartIndexes.clear();
 
-			if (!TextUtils.isEmpty(constraint))
+			String textToBeFiltered = constraint.toString();
+			if (!TextUtils.isEmpty(textToBeFiltered))
 			{
 
-				String textToBeFiltered = constraint.toString().toLowerCase().trim();
 				Logger.d("gaurav","constraint: " + constraint + ", text: " + textToBeFiltered + ",");
 
 				List<Conversation> filteredConversationsList = new ArrayList<Conversation>();
@@ -875,7 +875,8 @@ public class ConversationsAdapter extends BaseAdapter
 		if(startSpanIndex!=null)
 		{
 			SpannableString spanName = new SpannableString(name);
-			spanName.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.blue_color_span)), startSpanIndex, startSpanIndex+searchQueryLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			spanName.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.blue_color_span)), startSpanIndex, startSpanIndex + refinedSearchText.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			contactView.setText(spanName, TextView.BufferType.SPANNABLE);
 		}
 		else
