@@ -56,6 +56,7 @@ import com.bsb.hike.voip.VoIPUtils;
 import com.bsb.hike.voip.VoIPConstants.CallQuality;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPService.LocalBinder;
+import com.bsb.hike.voip.view.CallFailedFragment.CallFailedFragListener;
 
 public class VoipCallFragment extends SherlockFragment implements CallActions
 {
@@ -829,6 +830,9 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		Bundle bundle = new Bundle();
 		bundle.putString(VoIPConstants.PARTNER_MSISDN, voipService.getPartnerClient().getPhoneNumber());
 		bundle.putInt(VoIPConstants.CALL_FAILED_REASON, callFailCode);
-		((CallFragmentListener)getSherlockActivity()).showCallFailedFragment(bundle);
+		if(getSherlockActivity() != null)
+		{
+			((CallFragmentListener)getSherlockActivity()).showCallFailedFragment(bundle);
+		}
 	}
 }
