@@ -112,11 +112,16 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.platform.CardComponent;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
+import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
@@ -185,6 +190,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static final int SCROLL_TO_END = 23;
 	
 	protected static final int STICKER_FTUE_TIP = 24;
+
+    protected static final int MULTI_MSG_DB_INSERTED = 25;
 
 	protected ChatThreadActivity activity;
 
@@ -306,6 +313,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			setTypingText(true, (TypingNotification) msg.obj);
 			break;
 		case FILE_MESSAGE_CREATED:
+        case MULTI_MSG_DB_INSERTED:
 			addMessage((ConvMessage) msg.obj);
 			break;
 		case DELETE_MESSAGE:
@@ -600,7 +608,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		int width = getResources().getDimensionPixelSize(R.dimen.overflow_menu_width);
 		int rightMargin = width + getResources().getDimensionPixelSize(R.dimen.overflow_menu_right_margin);
-		mActionBar.showOverflowMenu(width, LayoutParams.WRAP_CONTENT, -rightMargin, -(int) (0.5 * Utils.densityMultiplier), activity.findViewById(R.id.attachment_anchor));
+		mActionBar.showOverflowMenu(width, LayoutParams.WRAP_CONTENT, -rightMargin, -(int) (0.5 * Utils.scaledDensityMultiplier), activity.findViewById(R.id.attachment_anchor));
 	}
 
 	@Override
@@ -796,9 +804,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 
 		initAttachmentPicker(mConversation.isOnhike());
-		int width = (int) (Utils.densityMultiplier * 270);
-		int xOffset = -(int) (276 * Utils.densityMultiplier);
-		int yOffset = -(int) (0.5 * Utils.densityMultiplier);
+		int width = (int) (Utils.scaledDensityMultiplier * 270);
+		int xOffset = -(int) (276 * Utils.scaledDensityMultiplier);
+		int yOffset = -(int) (0.5 * Utils.scaledDensityMultiplier);
 		attachmentPicker.show(width, LayoutParams.WRAP_CONTENT, xOffset, yOffset, activity.findViewById(R.id.attachment_anchor));
 	}
 
@@ -1343,7 +1351,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mConversationsView = (ListView) activity.findViewById(R.id.conversations_list);
 		mAdapter = new MessagesAdapter(activity, messages, mConversation, this, mConversationsView, activity);
 		mConversationsView.setAdapter(mAdapter);
-		if (mConversation.getUnreadCount() > 0)
+		if (mConversation.getUnreadCount() > 0 && !messages.isEmpty())
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
 			if (message.getTypingNotification() != null)
@@ -1524,18 +1532,46 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						 */
 						intent.removeExtra(StickerManager.FWD_CATEGORY_ID);
 					}
-					
-					else if (msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.CONTENT)
-					{
-						// as we will be changing msisdn and hike status while inserting in DB
-						ConvMessage convMessage = Utils.makeConvMessage(msisdn, mConversation.isOnhike());
-						convMessage.setMessageType(MESSAGE_TYPE.CONTENT);
-						convMessage.platformMessageMetadata = new PlatformMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA), activity.getApplicationContext());
-						convMessage.platformMessageMetadata.addThumbnailsToMetadata();
-						convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
 
+                    else if(msgExtrasJson.optInt(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE) == HikeConstants.MESSAGE_TYPE.CONTENT){
+                        // as we will be changing msisdn and hike status while inserting in DB
+                        ConvMessage convMessage = Utils.makeConvMessage(msisdn, mConversation.isOnhike());
+                        convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.CONTENT);
+                        convMessage.platformMessageMetadata = new PlatformMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA), activity.getApplicationContext());
+                        convMessage.platformMessageMetadata.addThumbnailsToMetadata();
+                        convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
+
+                        sendMessage(convMessage);
+
+                    }
+
+					else if(msgExtrasJson.optInt(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE) == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || msgExtrasJson.optInt(
+							HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE) == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT){
+						// as we will be changing msisdn and hike status while inserting in DB
+						ConvMessage convMessage = Utils.makeConvMessage(msisdn,msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE), mConversation.isOnhike());
+						convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT);
+						convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
+						JSONObject json = new JSONObject();
+						try
+						{
+							json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+							json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
+							json.put(AnalyticsConstants.TO, msisdn);
+							HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+						}
+						catch (JSONException e)
+						{
+							e.printStackTrace();
+						}
+						catch (NullPointerException e)
+						{
+							e.printStackTrace();
+						}
 						sendMessage(convMessage);
+
 					}
+
+
 				}
 				
 				if (mActionMode != null && mActionMode.isActionModeOn())
@@ -1914,7 +1950,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			/*
 			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
 			 */
-			if (messages.size() <= startIndex || messages.get(startIndex) == null)
+			/* messageid -1:
+             * Algo is message id can not be -1 here, -1 means message has been added in UI and not been inserted in DB which is being done on pubsub thread. It will happen for new
+             * added messages. Once message is succesfully inserted in DB, messageID will be updated and will be reflected here.
+             * Bug was : There is data race between  this async task and pubsub, it was happening that message id is -1 when async task is just started, so async task fetches data from DB and results in duplicate sent messages
+             */
+			if (messages.size() <= startIndex || messages.get(startIndex) == null || messages.get(startIndex).getMsgID()==-1)
 			{
 				return;
 			}
@@ -2186,13 +2227,39 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HikePubSub.STICKER_FTUE_TIP:
 			uiHandler.sendEmptyMessage(STICKER_FTUE_TIP);
 			break;
+        case HikePubSub.MULTI_MESSAGE_DB_INSERTED:
+            onMultiMessageDbInserted(object);
+            break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
 		}
 	}
 
-	/**
+	private void onMultiMessageDbInserted(Object object)
+	{
+		List<Pair<ContactInfo, ConvMessage>> pairList = (List<Pair<ContactInfo, ConvMessage>>) object;
+		for (final Pair<ContactInfo, ConvMessage> pair : pairList)
+		{
+			ContactInfo conInfo = pair.first;
+			String newMsisdn = conInfo.getMsisdn();
+
+			if (msisdn.equals(newMsisdn))
+			{
+
+				if (isActivityVisible && SoundUtils.isTickSoundEnabled(activity.getApplicationContext()))
+				{
+					SoundUtils.playSoundFromRaw(activity.getApplicationContext(), R.raw.message_sent);
+				}
+
+				sendUIMessage(MULTI_MSG_DB_INSERTED, pair.second);
+
+				break;
+			}
+		}
+	}
+
+    /**
 	 * Handles message received events in chatThread
 	 * 
 	 * @param object
@@ -2310,7 +2377,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
 				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.MESSAGE_FAILED,
 				HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.STICKER_CATEGORY_MAP_UPDATED,
-				HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.STICKER_FTUE_TIP };
+				HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.MULTI_MESSAGE_DB_INSERTED};
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -2782,13 +2849,49 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			// @GM cancelTask has been changed
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+            String key = hikeFile.getFileKey();
 			File file = hikeFile.getFile();
 			if (deleteMediaFromPhone && hikeFile != null)
 			{
 				hikeFile.delete(activity.getApplicationContext());
 			}
+            HikeConversationsDatabase.getInstance().reduceRefCount(key);
 			FileTransferManager.getInstance(activity.getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent(), hikeFile.getFileSize());
 			mAdapter.notifyDataSetChanged();
+
+		}
+
+		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT)
+		{
+			int numberOfMediaComponents = convMessage.platformMessageMetadata.mediaComponents.size();
+			for (int i = 0; i < numberOfMediaComponents; i++)
+			{
+				CardComponent.MediaComponent mediaComponent = convMessage.platformMessageMetadata.mediaComponents.get(i);
+				HikeConversationsDatabase.getInstance().reduceRefCount(mediaComponent.getKey());
+			}
+		}
+
+		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT || convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
+		{
+			String origin = Utils.conversationType(msisdn);
+			JSONObject json = new JSONObject();
+			try
+			{
+				json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+				json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_DELETE);
+				json.put(AnalyticsConstants.ORIGIN, origin);
+				json.put(AnalyticsConstants.CHAT_MSISDN, msisdn);
+				HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			catch (NullPointerException e)
+			{
+				e.printStackTrace();
+			}
+
 		}
 	}
 
@@ -3618,9 +3721,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					{
 						multiMsgFwdObject.put(HikeConstants.Extras.POKE, true);
 					}
-					else if (message.getMessageType() == MESSAGE_TYPE.CONTENT)
+					
+					else if (message.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT)
 					{
-						multiMsgFwdObject.put(MESSAGE_TYPE.MESSAGE_TYPE, MESSAGE_TYPE.CONTENT);
+						multiMsgFwdObject.put(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE, HikeConstants.MESSAGE_TYPE.CONTENT);
 						if (message.platformMessageMetadata != null)
 						{
 							multiMsgFwdObject.put(HikeConstants.METADATA, message.platformMessageMetadata.JSONtoString());
@@ -3630,6 +3734,18 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 							}
 						}
 					}
+					
+					else if (message.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || message.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT)
+					{
+						multiMsgFwdObject.put(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE, HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT);
+						multiMsgFwdObject.put(HikeConstants.HIKE_MESSAGE, message.getMessage());
+						if (message.platformWebMessageMetadata != null)
+						{
+							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
+
+						}
+					}
+					
 					else
 					{
 						msg = message.getMessage();

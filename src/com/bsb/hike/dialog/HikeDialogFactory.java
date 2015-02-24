@@ -571,8 +571,8 @@ public class HikeDialogFactory
 			int dialogHeight = (int) (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? ((3 * screenHeight) / 4)
 					: FrameLayout.LayoutParams.MATCH_PARENT);
 			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(dialogWidth, dialogHeight);
-			lp.topMargin = (int) (5 * Utils.densityMultiplier);
-			lp.bottomMargin = (int) (5 * Utils.densityMultiplier);
+			lp.topMargin = (int) (5 * Utils.scaledDensityMultiplier);
+			lp.bottomMargin = (int) (5 * Utils.scaledDensityMultiplier);
 
 			parent.setLayoutParams(lp);
 

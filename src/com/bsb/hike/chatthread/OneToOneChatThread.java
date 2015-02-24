@@ -159,6 +159,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		if (mConversation != null)
 		{
 			mActionBar.onCreateOptionsMenu(menu, R.menu.one_one_chat_thread_menu, getOverFlowItems(), this, this);
+			if(shouldShowCallIcon())
+			{
+				menu.findItem(R.id.voip_call).setVisible(true);
+			}
 			return super.onCreateOptionsMenu(menu);
 		}
 
@@ -171,9 +175,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		Logger.i(TAG, "menu item click" + item.getItemId());
 		switch (item.getItemId())
 		{
-		case R.id.chat_bg:
-			showThemePicker();
-			return true;
+			case R.id.voip_call:
+				onCallClicked();
+				return true;
 		}
 		return mActionBar.onOptionsItemSelected(item) ? true : super.onOptionsItemSelected(item);
 	}
@@ -187,7 +191,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		List<OverFlowMenuItem> list = new ArrayList<OverFlowMenuItem>();
 		list.add(new OverFlowMenuItem(getString(R.string.view_profile), 0, 0, R.string.view_profile));
-		list.add(new OverFlowMenuItem(getString(R.string.call), 0, 0, R.string.call));
+		list.add(new OverFlowMenuItem(getString(R.string.chat_theme), 0, 0, R.string.chat_theme));
 		for (OverFlowMenuItem item : super.getOverFlowMenuItems())
 		{
 			list.add(item);
@@ -293,7 +297,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	protected void addUnkownContactBlockHeader()
 	{
-		if (mContactInfo != null && mContactInfo.isUnknownContact() && messages != null && messages.size() > 0)
+		if (mContactInfo != null && mContactInfo.isUnknownContact() && messages != null && messages.size() > 0 && !Utils.isBot(msisdn))
 		{
 			ConvMessage cm = messages.get(0);
 			/**
@@ -967,7 +971,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 */
 	private void setLastSeenTextBasedOnHikeValue(boolean isConvOnHike)
 	{
-		if (isConvOnHike)
+		if (isConvOnHike || Utils.isBot(msisdn))
 		{
 			hideLastSeenText();
 		}
@@ -1155,8 +1159,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case R.string.view_profile:
 			openProfileScreen();
 			break;
-		case R.string.call:
-			onCallClicked();
+		case R.string.chat_theme:
+			showThemePicker();
 			break;
 		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
@@ -2369,5 +2373,16 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		
 		return super.onDoubleTap(e);
+	}
+
+	/*
+	 *  Show call icon in chat thread only if:
+	 *  1. When voip is activated for self.
+	 *  2. Partner is on hike.
+	 *  3. Partner not a bot.
+	 */
+	private boolean shouldShowCallIcon()
+	{
+		return Utils.isVoipActivated(activity.getApplicationContext()) && mConversation.isOnhike() && !HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn);
 	}
 }
