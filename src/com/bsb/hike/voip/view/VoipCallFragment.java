@@ -538,6 +538,7 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		showHikeCallText();
 		setAvatar();
 		setContactDetails();
+		hideActiveCallButtons();
 		showCallActionsView();
 		showCallStatus(CallStatus.INCOMING_CALL);
 	}
@@ -614,6 +615,14 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		holdButton.startAnimation(anim);
 		speakerButton.startAnimation(anim);
 		hangupButton.startAnimation(anim);
+	}
+
+	private void hideActiveCallButtons()
+	{
+		View hangupButton = getView().findViewById(R.id.hang_up_btn);
+		hangupButton.setVisibility(View.GONE);
+
+		getView().findViewById(R.id.active_call_group).setVisibility(View.GONE);
 	}
 
 	private void activateActiveCallButtons()
