@@ -1279,7 +1279,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		mConversationsView = (ListView) activity.findViewById(R.id.conversations_list);
 		mConversationsView.setAdapter(mAdapter);
-		if (mConversation.getUnreadCount() > 0)
+		if (mConversation.getUnreadCount() > 0 && !messages.isEmpty())
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
 			if (message.getTypingNotification() != null)
