@@ -87,10 +87,6 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private List<Conversation> phoneBookContacts;
 
-	private List<Conversation> filteredConversationList;
-
-	private List<Conversation> filteredphoneBookContacts;
-
 	private List<Conversation> completeList;
 
 	private Set<Conversation> stealthConversations;
@@ -109,7 +105,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	public Set<String> conversationsMsisdns;
 
-	private boolean isSearchMode = false;
+	private boolean isSearchModeOn = false;
 
 	private enum ViewType
 	{
@@ -152,8 +148,6 @@ public class ConversationsAdapter extends BaseAdapter
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 		itemsToAnimat = new SparseBooleanArray();
 		contactFilter = new ContactFilter();
-		filteredConversationList = new ArrayList<Conversation>();
-		filteredphoneBookContacts = new ArrayList<Conversation>();
 		conversationList = new ArrayList<Conversation>();
 		convSpanStartIndexes = new HashMap<String, Integer>();
 	}
@@ -535,7 +529,7 @@ public class ConversationsAdapter extends BaseAdapter
 	 */
 	public void setupSearch()
 	{
-		isSearchMode = true;
+		isSearchModeOn = true;
 		conversationList.clear();
 		conversationsMsisdns = new HashSet<String>();
 		for(Conversation conv : completeList)
@@ -553,7 +547,7 @@ public class ConversationsAdapter extends BaseAdapter
 	 */
 	public void removeSearch()
 	{
-		isSearchMode = false;
+		isSearchModeOn = false;
 		conversationsMsisdns = null;
 		searchQueryLength = 0;
 		/*
@@ -639,7 +633,9 @@ public class ConversationsAdapter extends BaseAdapter
 			}
 			else
 			{
-				results.values = makeOriginalList();
+				List<List<Conversation>> resultList = new ArrayList<List<Conversation>>();
+				resultList.add(getOriginalList());
+				results.values = resultList;
 			}
 			results.count = 1;
 			return results;
@@ -702,35 +698,23 @@ public class ConversationsAdapter extends BaseAdapter
 		{
 			List<List<Conversation>> resultList = (List<List<Conversation>>) results.values;
 
-			filteredConversationList.clear();
-			filteredConversationList.addAll(resultList.get(0));
+			List<Conversation> filteredSearchList = new ArrayList<Conversation>();
+			filteredSearchList.addAll(resultList.get(0));
 
-			filteredphoneBookContacts.clear();
-
-			// makeOriginalList returns only conversationList.
 			if(phoneBookContacts!=null && !phoneBookContacts.isEmpty() && resultList.size() > 1)
 			{
-				filteredphoneBookContacts.addAll(resultList.get(1));
+				filteredSearchList.addAll(resultList.get(1));
 			}
-
-			makeCompleteList();
+			completeList.clear();
+			completeList.addAll(filteredSearchList);
 
 			notifyDataSetChanged();
 		}
 	}
 
-	protected List<List<Conversation>> makeOriginalList()
+	protected List<Conversation> getOriginalList()
 	{
-		List<List<Conversation>> resultList = new ArrayList<List<Conversation>>();
-		resultList.add(conversationList);
-		return resultList;
-	}
-
-	public void makeCompleteList()
-	{
-		completeList.clear();
-		completeList.addAll(filteredConversationList);
-		completeList.addAll(filteredphoneBookContacts);
+		return conversationList;
 	}
 
 	private void resetAtomicPopUpKey(int position)
@@ -1371,8 +1355,14 @@ public class ConversationsAdapter extends BaseAdapter
 
 	public void addToLists(Conversation conv)
 	{
-		completeList.add(conv);
-		conversationList.add(conv);
+		if (!isSearchModeOn)
+		{
+			completeList.add(conv);
+		}
+		else
+		{
+			conversationList.add(conv);
+		}
 		if(conversationsMsisdns!=null)
 		{
 			conversationsMsisdns.add(conv.getMsisdn());
@@ -1385,18 +1375,9 @@ public class ConversationsAdapter extends BaseAdapter
 
 	public void addToLists(Set<Conversation> list)
 	{
-		completeList.addAll(list);
-		conversationList.addAll(list);
-		if(conversationsMsisdns!=null)
+		for (Conversation conv : list)
 		{
-			for(Conversation conv : list)
-			{
-				conversationsMsisdns.add(conv.getMsisdn());
-			}
-		}
-		if(phoneBookContacts!=null)
-		{
-			phoneBookContacts.removeAll(list);
+			addToLists(conv);
 		}
 	}
 
