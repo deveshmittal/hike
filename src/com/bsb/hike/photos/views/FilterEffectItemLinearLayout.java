@@ -4,8 +4,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
 
+import com.bsb.hike.R;
 import com.bsb.hike.photos.HikeEffectsFactory;
 import com.bsb.hike.photos.HikeEffectsFactory.OnPreviewReadyListener;
+import com.bsb.hike.photos.HikePhotosListener;
+import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 
 /**
@@ -33,10 +36,32 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 
 	}
 
+	public void select()
+	{
+		HikePhotosUtils.FilterTools.setSelectedFilter(this.filter);
+		this.setForegroundColor(R.color.white);
+		HikePhotosUtils.FilterTools.setCurrentFilterItem(this);
+	}
+	
+	public void unSelect()
+	{
+		this.setForegroundColor(R.color.photos_filters_font_color);
+	}
+
 	public void setFilter(Context context, FilterType type)
 	{
 		this.filter = type;
 		initiateThumbnailCreation();
+
+		if (type == HikePhotosUtils.FilterTools.getSelectedFilter())
+		{
+			this.setForegroundColor(R.color.photos_filters_selected_font_color);
+			HikePhotosUtils.FilterTools.setCurrentFilterItem(this);
+		}
+		else
+		{
+			this.setForegroundColor(R.color.photos_filters_font_color);
+		}
 
 	}
 

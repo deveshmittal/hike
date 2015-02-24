@@ -3,7 +3,6 @@ package com.bsb.hike.photos.views;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Random;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -19,6 +18,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
+import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -76,8 +76,10 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 	public Bitmap getScaledImageOriginal()
 	{
 		if (scaledImageOriginal == null)
+		{
 			scaledImageOriginal = Bitmap.createScaledBitmap(imageOriginal, HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_WIDTH),
 					HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_HEIGHT), false);
+		}
 		return scaledImageOriginal;
 	}
 
@@ -89,6 +91,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 	public void applyFilter(FilterType filter)
 	{
 		currentEffect = effectLayer.applyEffect(filter, HikeConstants.HikePhotos.DEFAULT_FILTER_APPLY_PERCENTAGE);
+		effectLayer.invalidate();
 	}
 
 	/**
@@ -110,13 +113,12 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 
 	public void enableDoodling()
 	{
-		doodleLayer.refresh(imageOriginal);
 		doodleLayer.setDrawEnabled(true);
 	}
 
 	public void disableDoodling()
 	{
-
+		doodleLayer.setDrawEnabled(false);
 	}
 
 	public void setBrushColor(int Color)
@@ -126,7 +128,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 
 	public File saveImage()
 	{
-
+		doodleLayer.getMeasure(imageOriginal);
 		imageEdited = FlattenLayersToBitmap(imageOriginal, currentEffect);
 		File myDir = new File(Utils.getFileParent(HikeFileType.IMAGE, false));
 		myDir.mkdir();
@@ -177,6 +179,11 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 	{
 		doodleLayer.onClickUndo();
 
+	}
+
+	public void setOnDoodlingStartListener(OnDoodleStateChangeListener listener)
+	{
+		doodleLayer.setOnDoodlingStartListener(listener);
 	}
 
 	private Bitmap FlattenLayersToBitmap(Bitmap src, ColorMatrixColorFilter filter)

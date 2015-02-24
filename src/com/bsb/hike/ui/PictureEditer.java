@@ -10,16 +10,20 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
+import android.widget.ImageView;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
+import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
 import com.bsb.hike.photos.views.DoodleEffectItemLinearLayout;
 import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
 import com.bsb.hike.photos.views.PhotosEditerFrameLayoutView;
@@ -34,9 +38,11 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 	PhotosEditerFrameLayoutView editView;
 
-	private int menuIcons[] = { R.drawable.filters, R.drawable.doodle };
+	private int menuIcons[] = { R.drawable.filters, R.drawable.doodle_icon };
 
 	private EditorClickListener clickHandler;
+
+	private ImageView undoButton;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -44,8 +50,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
 
 		super.onCreate(savedInstanceState);
-
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -74,6 +78,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		}
 		editView = (PhotosEditerFrameLayoutView) findViewById(R.id.editer);
 		editView.loadImageFromFile(filename);
+		editView.setOnDoodlingStartListener(clickHandler);
 		FragmentPagerAdapter adapter = new PhotoEditViewPagerAdapter(getSupportFragmentManager(), clickHandler);
 
 		ViewPager pager = (ViewPager) findViewById(R.id.pager);
@@ -82,12 +87,47 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		TabPageIndicator indicator = (TabPageIndicator) findViewById(R.id.indicator);
 		indicator.setViewPager(pager);
 
-		findViewById(R.id.done_btn).setOnClickListener(clickHandler);
-
-		findViewById(R.id.back).setOnClickListener(clickHandler);
+		undoButton = (ImageView) findViewById(R.id.undo);
+		undoButton.setOnClickListener(clickHandler);
 
 		TabPageIndicator tabs = (TabPageIndicator) findViewById(R.id.indicator);
+		tabs.setOnPageChangeListener(clickHandler);
+		setupActionBar();
 
+	}
+
+	@Override
+	protected void onResume()
+	{
+		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
+		super.onResume();
+	}
+
+	@Override
+	protected void onPause()
+	{
+		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
+		super.onPause();
+	}
+
+	private void setupActionBar()
+	{
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.photos_action_bar, null);
+		actionBarView.findViewById(R.id.back).setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				onBackPressed();
+			}
+		});
+
+		actionBarView.findViewById(R.id.done_container).setOnClickListener(clickHandler);
+
+		actionBar.setCustomView(actionBarView);
 	}
 
 	public class PhotoEditViewPagerAdapter extends FragmentPagerAdapter implements IconPagerAdapter
@@ -134,7 +174,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		}
 	}
 
-	public class EditorClickListener implements OnClickListener
+	public class EditorClickListener implements OnClickListener, OnPageChangeListener, OnDoodleStateChangeListener
 	{
 		private DoodleEffectItemLinearLayout doodlePreview;
 
@@ -142,21 +182,19 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 		private Context mContext;
 
+		private boolean doodleState;
+
 		public EditorClickListener(Context context)
 		{
 			// TODO Auto-generated constructor stub
 			mContext = context;
 			doodleWidth = HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH;
+			doodleState = false;
 		}
 
 		public void setDoodlePreview(DoodleEffectItemLinearLayout view)
 		{
 			doodlePreview = view;
-		}
-
-		public void clearDoodleScreen()
-		{
-
 		}
 
 		@Override
@@ -166,16 +204,21 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 			if (v.getClass() == FilterEffectItemLinearLayout.class)
 			{
-				editView.disableDoodling();
+				FilterEffectItemLinearLayout prev = HikePhotosUtils.FilterTools.getCurrentFilterItem();
 				FilterEffectItemLinearLayout me = (FilterEffectItemLinearLayout) v;
 				editView.applyFilter(me.getFilter());
+				me.select();
+				if (prev != null && prev.getFilter() != me.getFilter())
+				{
+					prev.unSelect();
+				}
+
 			}
 
 			else if (v.getClass() == DoodleEffectItemLinearLayout.class)
 			{
 				DoodleEffectItemLinearLayout me = (DoodleEffectItemLinearLayout) v;
 				editView.setBrushColor(me.getBrushColor());
-				editView.enableDoodling();
 				doodlePreview.setBrushColor(me.getBrushColor());
 				doodlePreview.refresh();
 
@@ -198,24 +241,70 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 					doodlePreview.refresh();
 					editView.setBrushWidth(HikePhotosUtils.dpToPx(mContext, doodleWidth));
 					break;
-				case R.id.back:
+				case R.id.undo:
 					editView.undoLastDoodleDraw();
 					break;
-				case R.id.done_btn:
+				case R.id.done_container:
 					File savedImage = editView.saveImage();
 					Intent forwardIntent = IntentManager.getForwardImageIntent(mContext, savedImage);
 					startActivity(forwardIntent);
 					break;
+
 				}
+			}
+		}
+
+		@Override
+		public void onPageScrollStateChanged(int arg0)
+		{
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onPageScrolled(int arg0, float arg1, int arg2)
+		{
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onPageSelected(int arg0)
+		{
+
+			// TODO Auto-generated method stub
+			switch (arg0)
+			{
+			case HikeConstants.HikePhotos.FILTER_FRAGMENT_ID:
+				editView.disableDoodling();
+				undoButton.setVisibility(View.GONE);
+				break;
+			case HikeConstants.HikePhotos.DOODLE_FRAGMENT_ID:
+				editView.enableDoodling();
+				if (doodleState)
+				{
+					undoButton.setVisibility(View.VISIBLE);
+				}
+				break;
+			}
+
+		}
+
+		@Override
+		public void onDoodleStateChanged(boolean isCanvasEmpty)
+		{
+			// TODO Auto-generated method stub
+			doodleState = !isCanvasEmpty;
+			if (isCanvasEmpty)
+			{
+				undoButton.setVisibility(View.GONE);
+			}
+			else
+			{
+				undoButton.setVisibility(View.VISIBLE);
 			}
 		}
 
 	}
 
-	@Override
-	protected void onPause()
-	{
-		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
-		super.onPause();
-	}
 }

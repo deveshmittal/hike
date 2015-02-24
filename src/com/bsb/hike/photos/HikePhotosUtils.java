@@ -28,6 +28,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
+import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
 
 //public static int[] BasicMenuIcons={R.drawable.effects_effect,R.drawable.effects_color,R.drawable.effects_frame,R.drawable.effects_text,R.drawable.effects_options};
 
@@ -44,7 +46,8 @@ public class HikePhotosUtils
 	{
 		Effects, Doodle, Border, Text, Quality
 	}
-
+	
+	
 	//array cpntaining colors hex codes for colors provided in doodling
 	public static int[] DoodleColors = { 0xFFFF4040, 0xFFA8FA72, 0xFF72A8FA, 0xFFFA72A8, 0xFFFFFFFF, 0xFFECFA72, 0xFFF9B074, 0xFF5A0949, 0xFF000000 };
 
@@ -74,6 +77,29 @@ public class HikePhotosUtils
 	public static class FilterTools
 	{
 
+		private static FilterType selectedFilter = FilterType.AMARO;
+		private static FilterEffectItemLinearLayout prev;
+		
+		public static void setCurrentFilterItem(FilterEffectItemLinearLayout item)
+		{
+			prev=item;
+		}
+		
+		public static FilterEffectItemLinearLayout getCurrentFilterItem()
+		{
+			return prev;
+		}
+		
+		public static FilterType getSelectedFilter()
+		{
+			return selectedFilter;
+		}
+		
+		public static void setSelectedFilter(FilterType type)
+		{
+			selectedFilter=type;
+		}
+		
 		public enum FilterType
 		{
 			BRIGHTNESS, CONTRAST, SATURATION, HUE, SEPIA, GRAYSCALE, POLAROID, FADED, BGR, INVERSION, X_PRO_2, WILLOW, WALDEN, VALENCIA, TOASTER, SUTRO, SIERRA, RISE, NASHVILLE, MAYFAIR, LO_FI, KELVIN, INKWELL, HUDSON, HEFE, EARLYBIRD, BRANNAN, AMARO, E1977
@@ -102,23 +128,22 @@ public class HikePhotosUtils
 				if (effectfilters == null)
 				{
 					effectfilters = new FilterList();
-					effectfilters.addFilter("Original", FilterType.AMARO);
-					effectfilters.addFilter("Faded", FilterType.FADED);
-					effectfilters.addFilter("Polaroid", FilterType.POLAROID);
+					effectfilters.addFilter("FADED", FilterType.FADED);
+					effectfilters.addFilter("POLAROID", FilterType.POLAROID);
 					effectfilters.addFilter("BGR", FilterType.BGR);
-					effectfilters.addFilter("Sepia", FilterType.SEPIA);
-					effectfilters.addFilter("Grayscale", FilterType.GRAYSCALE);
+					effectfilters.addFilter("SEPIA", FilterType.SEPIA);
+					effectfilters.addFilter("GRAYSCALE", FilterType.GRAYSCALE);
 					effectfilters.addFilter("X PRO 2", FilterType.X_PRO_2);
-					effectfilters.addFilter("Willow", FilterType.WILLOW);
-					effectfilters.addFilter("Inversion", FilterType.INVERSION);
-					effectfilters.addFilter("Walden", FilterType.WALDEN);
-					effectfilters.addFilter("Toaster", FilterType.TOASTER);
-					effectfilters.addFilter("Sutro", FilterType.SUTRO);
-					effectfilters.addFilter("Sierra", FilterType.SIERRA);
-					effectfilters.addFilter("Rise", FilterType.RISE);
-					effectfilters.addFilter("Lo Fi", FilterType.LO_FI);
-					effectfilters.addFilter("Kelvin", FilterType.KELVIN);
-					effectfilters.addFilter("Inkwell", FilterType.INKWELL);
+					effectfilters.addFilter("WILLOW", FilterType.WILLOW);
+					effectfilters.addFilter("INVERSION", FilterType.INVERSION);
+					effectfilters.addFilter("WALDEN", FilterType.WALDEN);
+					effectfilters.addFilter("TOASTER", FilterType.TOASTER);
+					effectfilters.addFilter("SUTRO", FilterType.SUTRO);
+					effectfilters.addFilter("SIERRA", FilterType.SIERRA);
+					effectfilters.addFilter("RISE", FilterType.RISE);
+					effectfilters.addFilter("LO FI", FilterType.LO_FI);
+					effectfilters.addFilter("KELVIN", FilterType.KELVIN);
+					effectfilters.addFilter("INKWELL", FilterType.INKWELL);
 					// effectfilters.addFilter("Hudson", FilterType.HUDSON);
 					// effectfilters.addFilter("Hefe", FilterType.HEFE);
 					// effectfilters.addFilter("EarlyBird", FilterType.EARLYBIRD);

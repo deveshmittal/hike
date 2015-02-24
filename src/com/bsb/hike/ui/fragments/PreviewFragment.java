@@ -4,7 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,15 +12,17 @@ import android.view.ViewStub;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterList;
+import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
 import com.bsb.hike.photos.views.DoodleEffectItemLinearLayout;
 import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
 import com.bsb.hike.ui.PictureEditer.EditorClickListener;
-import com.jess.ui.TwoWayAbsListView;
 import com.jess.ui.TwoWayGridView;
 
 public final class PreviewFragment extends Fragment
@@ -51,37 +53,38 @@ public final class PreviewFragment extends Fragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 
-		LinearLayout layout = new LinearLayout(getActivity());
-		layout.setOrientation(LinearLayout.VERTICAL);
-		layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-		layout.setGravity(Gravity.CENTER);
+		LinearLayout layout = (LinearLayout) LayoutInflater.from(getActivity()).inflate(R.layout.photos_pager_layout, container, false);
 
-		TwoWayGridView gridView = new TwoWayGridView(getActivity());
-		gridView.setLayoutParams(new TwoWayAbsListView.LayoutParams(TwoWayAbsListView.LayoutParams.MATCH_PARENT, TwoWayAbsListView.LayoutParams.WRAP_CONTENT));
-		gridView.setGravity(Gravity.CENTER);
+		TwoWayGridView gridView = (TwoWayGridView) layout.findViewById(R.id.HorizontalGridView);
 		gridView.setColumnWidth(GridView.AUTO_FIT);
 		gridView.setRowHeight(GridView.AUTO_FIT);
-		gridView.setStretchMode(0);
 		gridView.setAdapter(new ImageAdapter(getActivity(), myType, handler));
 
+		ViewStub adjuster = (ViewStub) layout.findViewById(R.id.sizeBarStub);
 		switch (myType)
 		{
 		case Doodle:
-			LinearLayout adjuster = (LinearLayout) LayoutInflater.from(getActivity()).inflate(R.layout.doodle_brush_size, container, false);
-			adjuster.findViewById(R.id.plusWidth).setOnClickListener(handler);
-			adjuster.findViewById(R.id.minusWidth).setOnClickListener(handler);
-			ViewStub stub = (ViewStub) adjuster.findViewById(R.id.viewStub1);
+			layout.setWeightSum(HikeConstants.HikePhotos.PHOTOS_PAGER_DOODLE_WEIGHT_SUM);
+			RelativeLayout sizeBar = (RelativeLayout) adjuster.inflate();
+			sizeBar.findViewById(R.id.plusWidth).setOnClickListener(handler);
+			sizeBar.findViewById(R.id.minusWidth).setOnClickListener(handler);
+			ViewStub stub = (ViewStub) sizeBar.findViewById(R.id.viewStubPreview);
 			DoodleEffectItemLinearLayout inflated = (DoodleEffectItemLinearLayout) stub.inflate();
-			inflated.setRingColor(0xFFFFD700);
+			inflated.setRingColor(HikeConstants.HikePhotos.DOODLE_SELECTED_RING_COLOR);
+			inflated.setBrushColor(HikePhotosUtils.DoodleColors[0]);
+			inflated.refresh();
+			inflated.setPadding(0, 0, 0, 0);
+
+			inflated.invalidate();
 			handler.setDoodlePreview(inflated);
-			layout.addView(adjuster);
+
 			break;
 		case Effects:
-			gridView.setPadding(0, HikePhotosUtils.dpToPx(getActivity(), 15), 0, 0);
+			layout.setWeightSum(HikeConstants.HikePhotos.PHOTOS_PAGER_FILTER_WEIGHT_SUM);
+			adjuster.setVisibility(View.GONE);
 			break;
 		}
-
-		layout.addView(gridView);
+		layout.invalidate();
 		return layout;
 	}
 

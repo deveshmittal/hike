@@ -1300,7 +1300,7 @@ public class HikeConstants
 		public static final String MULTIPLE_MSG_OBJECT = "multipleMsgObject";
 
 		public static final String SELECTED_BUCKET = "selectedBucket";
-		
+
 		public static final String GALLERY_SELECTIONS = "gallerySelections";
 
 		public static final String FILE_PATHS = "filePaths";
@@ -2305,34 +2305,43 @@ public class HikeConstants
 
 		public static final String FILENAME = "FilePath";
 
-		public static final int MAX_BRUSH_WIDTH = 80;
-		
-		public static final int Min_BRUSH_WIDTH = 10;
+		public static final int MAX_BRUSH_WIDTH = 50;
 
-		public static final int PREVIEW_THUMBNAIL_WIDTH = 80;
+		public static final int Min_BRUSH_WIDTH = 8;
 
-		public static final int PREVIEW_THUMBNAIL_HEIGHT = 80;
+		public static final int PREVIEW_THUMBNAIL_WIDTH = 76;
+
+		public static final int PREVIEW_THUMBNAIL_HEIGHT = 76;
 
 		public static final int DELTA_BRUSH_WIDTH = 10;
 
 		public static final int FILTER_FRAGMENT_ID = 0;
-		
-		public static final int DOODLE_FRAGMENT_ID = 1;
-		
-		public static final int DEFAULT_BRUSH_WIDTH = 30;
-		
-		public static final int DEFAULT_BRUSH_COLOR = 0xFF000000;
-		
-		public static final int DEFAULT_RING_COLOR = 0xFFFFFFFF;
-		
-		public static final String EMPTY_TAB_TITLE = "";
-		
-		public static final float TOUCH_TOLERANCE = 0;
-		
-		public static final int DEFAULT_FILTER_APPLY_PERCENTAGE = 100;
-		
-		
 
+		public static final int DOODLE_FRAGMENT_ID = 1;
+
+		public static final int DEFAULT_BRUSH_WIDTH = 38;
+
+		public static final int DEFAULT_BRUSH_COLOR = 0xFF000000;
+
+		public static final int DEFAULT_RING_COLOR = 0xFFFFFFFF;
+
+		public static final String EMPTY_TAB_TITLE = "";
+
+		public static final float TOUCH_TOLERANCE = 0;
+
+		public static final int DEFAULT_FILTER_APPLY_PERCENTAGE = 100;
+
+		public static final int DOODLE_PREVIEW_COLORS_BAR_HEIGHT = 70;
+
+		public static final int DOODLE_SELECTED_RING_COLOR = 0x0019191A;
+		
+		public static final int PHOTOS_PAGER_PADDING = 11;
+		
+		public static final int PHOTOS_PAGER_FILTER_WEIGHT_SUM = 5147;
+		
+		public static final int PHOTOS_PAGER_DOODLE_WEIGHT_SUM = 10000;
+		
+		
 	}
 
 }
