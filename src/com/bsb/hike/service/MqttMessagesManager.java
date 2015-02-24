@@ -2002,6 +2002,10 @@ public class MqttMessagesManager
 
 						// open respective chat thread
 						HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
+						if(data.optBoolean(HikeConstants.REARRANGE_CHAT,false))
+						{
+							HikeMessengerApp.getPubSub().publish(HikePubSub.CONVERSATION_TS_UPDATED, System.currentTimeMillis() / 1000);
+						}
 					}
 				}
 			}

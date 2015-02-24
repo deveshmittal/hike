@@ -97,6 +97,7 @@ public class PlatformAlarmManager implements HikePlatformConstants
 				ms.arg1 = count + dbUnreadCount; // db + extra unread
 				ms.obj = msisdn;
 				HikeMessengerApp.getPubSub().publish(HikePubSub.CONV_UNREAD_COUNT_MODIFIED, ms);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CONVERSATION_TS_UPDATED, System.currentTimeMillis() / 1000);
 			}
 		}
 	}
