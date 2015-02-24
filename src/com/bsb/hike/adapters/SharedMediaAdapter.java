@@ -101,7 +101,7 @@ public class SharedMediaAdapter extends PagerAdapter implements OnClickListener
 
 		if(sharedMediaItem.exactFilePathFileExists())
 		{
-			sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(true), galleryImageView, false);
+			sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(true), galleryImageView);
 		}
 		else
 		{
