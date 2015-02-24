@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.bsb.hike.platform.CardComponent;
+import com.bsb.hike.platform.PlatformMessageMetadata;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1456,6 +1458,19 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						 */
 						intent.removeExtra(StickerManager.FWD_CATEGORY_ID);
 					}
+
+                    else if(msgExtrasJson.optInt(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE) == HikeConstants.MESSAGE_TYPE.CONTENT){
+                        // as we will be changing msisdn and hike status while inserting in DB
+                        ConvMessage convMessage = Utils.makeConvMessage(msisdn, mConversation.isOnhike());
+                        convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.CONTENT);
+                        convMessage.platformMessageMetadata = new PlatformMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA), activity.getApplicationContext());
+                        convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
+
+                        sendMessage(convMessage);
+
+                    }
+
+
 				}
 				
 				if (mActionMode != null && mActionMode.isActionModeOn())
@@ -2663,14 +2678,25 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			// @GM cancelTask has been changed
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+            String key = hikeFile.getFileKey();
 			File file = hikeFile.getFile();
 			if (deleteMediaFromPhone && hikeFile != null)
 			{
 				hikeFile.delete(activity.getApplicationContext());
 			}
+            HikeConversationsDatabase.getInstance().reduceRefCount(key);
 			FileTransferManager.getInstance(activity.getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent(), hikeFile.getFileSize());
 			mAdapter.notifyDataSetChanged();
+
 		}
+
+        if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT){
+            int numberOfMediaComponents = convMessage.platformMessageMetadata.mediaComponents.size();
+            for (int i = 0; i < numberOfMediaComponents; i++){
+                CardComponent.MediaComponent mediaComponent = convMessage.platformMessageMetadata.mediaComponents.get(i);
+                HikeConversationsDatabase.getInstance().reduceRefCount(mediaComponent.getKey());
+            }
+        }
 	}
 
 	private void onMessageFailed(Object object)
