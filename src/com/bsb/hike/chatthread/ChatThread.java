@@ -184,6 +184,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected static final int SCROLL_TO_END = 23;
 
+    protected static final int MULTI_MSG_DB_INSERTED = 24;
+
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -304,6 +306,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			setTypingText(true, (TypingNotification) msg.obj);
 			break;
 		case FILE_MESSAGE_CREATED:
+        case MULTI_MSG_DB_INSERTED:
 			addMessage((ConvMessage) msg.obj);
 			break;
 		case DELETE_MESSAGE:
@@ -1464,6 +1467,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
                         ConvMessage convMessage = Utils.makeConvMessage(msisdn, mConversation.isOnhike());
                         convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.CONTENT);
                         convMessage.platformMessageMetadata = new PlatformMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA), activity.getApplicationContext());
+                        convMessage.platformMessageMetadata.addThumbnailsToMetadata();
                         convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
 
                         sendMessage(convMessage);
@@ -2099,13 +2103,40 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HikePubSub.STICKER_CATEGORY_MAP_UPDATED:
 			uiHandler.sendEmptyMessage(STICKER_CATEGORY_MAP_UPDATED);
 			break;
+
+        case HikePubSub.MULTI_MESSAGE_DB_INSERTED:
+            onMultiMessageDbInserted(object);
+
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
 		}
 	}
 
-	/**
+	private void onMultiMessageDbInserted(Object object)
+	{
+		List<Pair<ContactInfo, ConvMessage>> pairList = (List<Pair<ContactInfo, ConvMessage>>) object;
+		for (final Pair<ContactInfo, ConvMessage> pair : pairList)
+		{
+			ContactInfo conInfo = pair.first;
+			String newMsisdn = conInfo.getMsisdn();
+
+			if (msisdn.equals(newMsisdn))
+			{
+
+				if (isActivityVisible && SoundUtils.isTickSoundEnabled(activity.getApplicationContext()))
+				{
+					SoundUtils.playSoundFromRaw(activity.getApplicationContext(), R.raw.message_sent);
+				}
+
+				sendUIMessage(MULTI_MSG_DB_INSERTED, pair.second);
+
+				break;
+			}
+		}
+	}
+
+    /**
 	 * Handles message received events in chatThread
 	 * 
 	 * @param object
@@ -2223,7 +2254,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
 				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.MESSAGE_FAILED,
 				HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.STICKER_CATEGORY_MAP_UPDATED,
-				HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.BULK_MESSAGE_RECEIVED };
+				HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.MULTI_MESSAGE_DB_INSERTED};
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
