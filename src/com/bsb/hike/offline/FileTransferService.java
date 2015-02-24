@@ -2,6 +2,7 @@
 
 package com.bsb.hike.offline;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 import android.app.IntentService;
 import android.content.ContentResolver;
@@ -29,6 +31,7 @@ public class FileTransferService extends IntentService {
 	public static final String EXTRAS_FILE_PATH = "file_url";
 	public static final String EXTRAS_ADDRESS = "go_host";
 	public static final String EXTRAS_PORT = "go_port";
+	public static final String ACTION_SEND_TEXT = "SEND_TEXT";
 	public static boolean  isOfflineFileTransferFinished =  true;
 	public FileTransferService(String name) {
 		super(name);
@@ -56,6 +59,8 @@ public class FileTransferService extends IntentService {
 			try {
 				Log.d(WiFiDirectActivity.TAG, "Opening client socket - ");
 				socket.bind(null);
+				if(host == null)
+					host = "0.0.0.0";
 				socket.connect((new InetSocketAddress(host, port)), SOCKET_TIMEOUT);
 
 				Log.d(WiFiDirectActivity.TAG, "Client socket - " + socket.isConnected());
@@ -92,6 +97,48 @@ public class FileTransferService extends IntentService {
 				isOfflineFileTransferFinished =  true;
 			}
 
+		}
+		else  
+		{
+			isOfflineFileTransferFinished =  false;
+			String message = intent.getExtras().getString("message");
+			String host = intent.getExtras().getString(EXTRAS_ADDRESS);
+			Socket socket = new Socket();
+			int port = intent.getExtras().getInt(EXTRAS_PORT);
+
+			try {
+				Log.d(WiFiDirectActivity.TAG, "Opening client socket - ");
+				socket.bind(null);
+				socket.connect((new InetSocketAddress(host, port)), SOCKET_TIMEOUT);
+
+				Log.d(WiFiDirectActivity.TAG, "Client socket - " + socket.isConnected());
+				OutputStream stream = socket.getOutputStream();
+				ContentResolver cr = context.getContentResolver();
+				
+				InputStream is = null;
+				is = new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8));
+				byte[]  type  =  new byte[1];
+				type[0] =  (byte) intent.getExtras().getInt("fileType");
+				stream.write(type,0,type.length);
+				byte[] intToBArray = Utils.intToByteArray((int)message.length());
+				int s = intToBArray.length;
+				stream.write(intToBArray, 0, s);
+				DeviceListFragment.copyFile(is, stream);
+				Log.d(WiFiDirectActivity.TAG, "Client: Data written");
+			} catch (IOException e) {
+				Log.e(WiFiDirectActivity.TAG, e.getMessage());
+			} finally {
+				if (socket != null) {
+					if (socket.isConnected()) {
+						try {
+							socket.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				isOfflineFileTransferFinished =  true;
+			}
 		}
 	}
 }

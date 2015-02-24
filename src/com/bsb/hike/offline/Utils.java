@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -72,6 +73,9 @@ public class Utils {
 					if(iface.matches(".*" +p2pInt+ ".*")){
 						if (inetAddress instanceof Inet4Address) { // fix for Galaxy Nexus. IPv4 is easy to use :-)
 							return getDottedDecimalIP(inetAddress.getAddress());
+						}
+						if (inetAddress instanceof Inet6Address){
+							return inetAddress.getHostAddress();
 						}
 					}
 				}

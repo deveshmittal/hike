@@ -1894,30 +1894,77 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	private void sendMessage(ConvMessage convMessage,boolean playPinAnim)
 	{
-		addMessage(convMessage,playPinAnim);
-
-		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
-		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-		{
-			JSONObject metadata = new JSONObject();
-
-			try
-			{
-				if (convMessage.getHashMessage()==HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE)
-				{
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_POSTED_VIA_ICON);
+        if(WiFiDirectActivity.isOfflineFileTransferOn)
+        {
+        	if(convMessage.isStickerMessage())
+        	{
+        		try {
+					String filePath = (String) convMessage.getMetadata().getJSON().get(StickerManager.STICKER_PATH);
+					String deviceAddress = getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
+					addMessage(convMessage,playPinAnim);
+					HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
+					String localIP = com.bsb.hike.offline.Utils.getLocalIPAddress();
+					localIP = localIP.substring(0, localIP.length()-5);
+					String IP_SERVER = com.bsb.hike.offline.DeviceListFragment.IP_SERVER;
+					int PORT = com.bsb.hike.offline.DeviceListFragment.PORT;
+					Log.d(WiFiDirectActivity.TAG,"localip " + localIP);
+					
+					// Trick to find the ip in the file /proc/net/arp
+					String client_mac_fixed = new String(deviceAddress).replace("99", "19");
+					String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
+			        Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
+			        Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);
+			        
+					Intent serviceIntent = new Intent(getApplicationContext(), FileTransferService.class);
+					serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
+					serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filePath);
+					serviceIntent.putExtra("fileType", 2);
+				    if(localIP.equals(IP_SERVER)){
+							serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
+					}else{
+							serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
+					}
+					serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
+					startService(serviceIntent);
+					} catch (JSONException e) {
+					e.printStackTrace();
 				}
-				else
-				{
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_POSTED_VIA_HASH_PIN);
-				}
-				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
-			}
-			catch(JSONException e)
+        	}
+        	else
+        	{
+        		addMessage(convMessage,playPinAnim);
+        		String  deviceAddress = getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
+        		//mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
+				HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
+        		sendOfflineText(deviceAddress, convMessage.getMessage());
+        	}
+        }
+        else
+        {
+        	addMessage(convMessage,playPinAnim);
+			mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
-				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				JSONObject metadata = new JSONObject();
+	
+				try
+				{
+					if (convMessage.getHashMessage()==HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE)
+					{
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_POSTED_VIA_ICON);
+					}
+					else
+					{
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_POSTED_VIA_HASH_PIN);
+					}
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 			}
-		}
+        }
 	}
 
 	public void onSendClick(View v)
@@ -1940,8 +1987,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		String message = mComposeView.getText().toString();
-
-
 		ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, message, isConversationOnHike());
 		if (showingImpMessagePinCreate)
 		{
@@ -6480,55 +6525,54 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				default:
 					break;
 			}
-				if(!WiFiDirectActivity.isOfflineFileTransferOn)
+			if(!WiFiDirectActivity.isOfflineFileTransferOn)
+			{
+				if (selectedFile != null && requestCode == HikeConstants.IMAGE_CAPTURE_CODE)
 				{
-					if (selectedFile != null && requestCode == HikeConstants.IMAGE_CAPTURE_CODE)
-					{
-					
-							
-								final String fPath = filePath;
-									final int atType = attachementType;
-									
-									HikeDialog.showDialog(ChatThread.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, new HikeDialog.HikeDialogListener()
-									{
-										@Override
-										public void onSucess(Dialog dialog)
-										{
-											initialiseFileTransfer(fPath, null, hikeFileType, null, false, -1, false, atType);
-											dialog.dismiss();
-										}
-					
-										@Override
-										public void negativeClicked(Dialog dialog)
-										{
-					
-										}
-					
-										@Override
-										public void positiveClicked(Dialog dialog)
-										{
-					
-										}
-					
-										@Override
-										public void neutralClicked(Dialog dialog)
-										{
-					
-										}
-									}, (Object[]) new Long[] { (long) 1, selectedFile.length() });
+				
+						
+							final String fPath = filePath;
+								final int atType = attachementType;
 								
-				   }
+								HikeDialog.showDialog(ChatThread.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, new HikeDialog.HikeDialogListener()
+								{
+									@Override
+									public void onSucess(Dialog dialog)
+									{
+										initialiseFileTransfer(fPath, null, hikeFileType, null, false, -1, false, atType);
+										dialog.dismiss();
+									}
+				
+									@Override
+									public void negativeClicked(Dialog dialog)
+									{
+				
+									}
+				
+									@Override
+									public void positiveClicked(Dialog dialog)
+									{
+				
+									}
+				
+									@Override
+									public void neutralClicked(Dialog dialog)
+									{
+				
+									}
+								}, (Object[]) new Long[] { (long) 1, selectedFile.length() });
+							
+			   }
 				else
 					initialiseFileTransfer(filePath, null, hikeFileType, null, false, -1, false, attachementType);
-				}
-			    else
-			    {
-		    	     final String fPath = filePath;
-				     final int atType = attachementType;
-		        	  
-		  			 String deviceAddress = getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
-		  			 initialiseOfflineFileTransfer(fPath , null , hikeFileType,null,false,-1,false,atType, deviceAddress, requestCode);
-			    }
+			}
+		    else
+		    {
+	    	     final String fPath = filePath;
+			     final int atType = attachementType;
+	  			 String deviceAddress = getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
+	  			 initialiseOfflineFileTransfer(fPath , null , hikeFileType,null,false,-1,false,atType, deviceAddress, requestCode);
+		    }
 			
 		 }
 		else if (requestCode == HikeConstants.SHARE_LOCATION_CODE && resultCode == RESULT_OK)
@@ -6549,7 +6593,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			String deviceAddress =   getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
 			String filePath = data.getStringExtra(FileTransferService.EXTRAS_FILE_PATH);
-			initialiseOfflineFileTransfer(filePath, deviceAddress, requestCode);
+			//initialiseOfflineFileTransfer(filePath, deviceAddress, requestCode);
+			initialiseOfflineFileTransfer(filePath, null, HikeFileType.APK, null, false, (long)-1, false, -1, deviceAddress, requestCode);
 		}
 		else if (resultCode == RESULT_CANCELED)
 		{
@@ -6877,6 +6922,35 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		startService(serviceIntent);
 	}
 	
+	private void sendOfflineText(String deviceAddress,  String message)
+	{
+		String localIP = com.bsb.hike.offline.Utils.getLocalIPAddress();
+		String IP_SERVER = com.bsb.hike.offline.DeviceListFragment.IP_SERVER;
+		int PORT = com.bsb.hike.offline.DeviceListFragment.PORT;
+		Log.d(WiFiDirectActivity.TAG,"localip " + localIP);
+		
+		// Trick to find the ip in the file /proc/net/arp
+		String client_mac_fixed = new String(deviceAddress).replace("99", "19");
+		String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
+        Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
+        Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);
+        
+		Intent serviceIntent = new Intent(getApplicationContext(), FileTransferService.class);
+		// 5 for text
+		serviceIntent.putExtra("fileType", 5);	
+        serviceIntent.putExtra("message", message);
+        
+        if(localIP.equals(IP_SERVER)){
+			serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
+		}else{
+			serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
+		}
+		serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
+		serviceIntent.setAction(FileTransferService.ACTION_SEND_TEXT);
+		startService(serviceIntent);
+		
+	
+	}
 	private void initialiseOfflineFileTransfer(String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration,
 			boolean isForwardingFile, int attachementType,  String deviceAddress, int fType)
 	{
@@ -6903,6 +6977,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					serviceIntent.putExtra("fileType", 1);
 			        break;
 				case HikeConstants.IMAGE_CAPTURE_CODE:
+					serviceIntent.putExtra("fileType", 2);
+			        break;
+				case HikeConstants.IMAGE_TRANSFER_CODE:
 					serviceIntent.putExtra("fileType", 2);
 			        break;
 				case HikeConstants.VIDEO_TRANSFER_CODE:
@@ -7533,6 +7610,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			metadata.put(StickerManager.CATEGORY_ID, categoryId);
 
 			metadata.put(StickerManager.STICKER_ID, sticker.getStickerId());
+			
+			metadata.put(StickerManager.STICKER_PATH, sticker.getStickerPath(getApplicationContext()));
 			
 			if(!source.equalsIgnoreCase(StickerManager.FROM_OTHER))
 			{

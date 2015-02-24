@@ -481,7 +481,6 @@ public class MqttMessagesManager
 	private void saveMessage(JSONObject jsonObj) throws JSONException
 	{
 		ConvMessage convMessage = messagePreProcess(jsonObj);
-
 		/*
 		 * adding message in db if not duplicate. In case of duplicate message we don't do further processing and return
 		 */

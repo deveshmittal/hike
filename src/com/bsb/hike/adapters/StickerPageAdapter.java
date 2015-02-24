@@ -25,6 +25,7 @@ import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.utils.RecyclingImageView;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
@@ -291,6 +292,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		{
 		case StickerPageAdapterItem.STICKER:
 			Sticker sticker = item.getSticker();
+            Logger.d("WifiDirectSticker", sticker.getSmallStickerPath() + " -->>  " +  sticker.getStickerPath(activity));
 			String source = category.isCustom() ? StickerManager.FROM_RECENT : StickerManager.FROM_OTHER;
 			((ChatThread) activity).sendSticker(sticker, source);
 

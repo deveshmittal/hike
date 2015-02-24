@@ -285,6 +285,8 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     public void onBackPressed() 
     {
     	isOfflineFileTransferOn = false;
+    	new OnFileTransferCompleteTask().executeOnExecutor((AsyncTask.THREAD_POOL_EXECUTOR));
+    	
     	super.onBackPressed();
     }
 
@@ -373,7 +375,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
             }
         });
     }
-    
+  
     /*
      * This Async task resets the Wifi settings if device gets blocked in
      * Invited status

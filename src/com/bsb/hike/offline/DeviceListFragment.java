@@ -17,12 +17,15 @@
 package com.bsb.hike.offline;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,16 +72,17 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -103,8 +107,12 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     public static Intent intent;
     private Object syncMsisdn;
     private WifiP2pDevice currentDevice;
+    private WifiP2pDevice connectedDevice = null;
     private static int currentSizeReceived = 0;
     List<String> peers_msisdn = new ArrayList<String>();
+    private static  int numOfIterations = 0;
+    private int size = 0;
+    
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -399,9 +407,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     	return latestInstance;
     }
     public void clearPeers() {
-        peers.clear();
-        peersStatus.clear();
-        peers_msisdn.clear();
+        //peers.clear();
+        //peersStatus.clear();
+        //peers_msisdn.clear();
         ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
     }
 
@@ -486,7 +494,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time, ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setMetadata(metadata);
 		convMessage.setSMS(!isRecipientOnhike);
-		convMessage.setIsSent(false);
+		//convMessage.setIsSent(false);
 		convMessage.setState(ConvMessage.State.RECEIVED_READ);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		return convMessage;
@@ -500,10 +508,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
 		private final Context context;
 		byte type;
-		private int size = 0;
-		private int numOfIterations = 0;
 		private File f = null;
         private File dirs = null;
+        private Thread publishProgressThread;
 		/**
 		 * @param context
 		 */
@@ -531,20 +538,25 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                 size = com.bsb.hike.offline.Utils.byteArrayToInt(intArray);
                 Log.d(WiFiDirectActivity.TAG, ""+size);
                 currentSizeReceived = 0;
-                numOfIterations = size/1024;
+                numOfIterations = size/1024 + ((size%1024!=0)?1:0);
                 type = typeArr[0];
-                (new Thread() {
-                	public void run()
-                	{
-                		publishProgress();
-                		try {
-							Thread.sleep(1*1000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-                	}
-                }).start();
-                
+                if(publishProgressThread == null)
+	                	publishProgressThread = (new Thread() {
+	                	public void run()
+	                	{
+	                		while(!this.interrupted())
+	                		{
+		                		publishProgress();
+		                		try {
+									Thread.sleep(1*1000);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+	                		}
+	                	}
+	                });
+                if(!(publishProgressThread.isAlive()))
+                	publishProgressThread.start();
                 switch(type){
                 case 1:
                     f = new File(Environment.getExternalStorageDirectory() + "/"
@@ -578,12 +590,23 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                         dirs.mkdirs();
                     f.createNewFile();
                     break;
+                case 5:
+                	byte[] msg  =  new byte[size];
+                	inputstream.read(msg,0,size);
+                	serverSocket.close();
+                	server_running = false;
+                	path = (new String(msg));
+                	break;
                 }
-                Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
-                copyFile(inputstream, new FileOutputStream(f));
-                serverSocket.close();
-                server_running = false;
-                path =  f.getAbsolutePath();
+                
+                if(type!=5)
+                {
+	                Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
+	                copyFile(inputstream, new FileOutputStream(f));
+	                serverSocket.close();
+	                server_running = false;
+	                path =  f.getAbsolutePath();
+                }
 			} catch (IOException e) {
 				Log.e(WiFiDirectActivity.TAG, e.getMessage());
 			}
@@ -597,7 +620,15 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		@Override
 		protected void onPostExecute(String result) {
 			if (result != null) {
-				//statusText.setText("File copied - " + result);
+
+	            for(WifiP2pDevice cpeer: peers)
+            	{
+            		if(cpeer.status==WifiP2pDevice.CONNECTED)
+            		{
+            			connectedDevice  = cpeer;  
+            		}
+            	}
+				
 				if(type==1)
 				{
 					Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -608,10 +639,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 				}
 				else if(type==2)
 				{
-					/*Intent intent = new Intent();
-					intent.setAction(Intent.ACTION_VIEW);
-					intent.setDataAndType(Uri.parse("file://" + result), "image/*");
-					context.startActivity(intent);*/
+					 
 					Bitmap thumbnail = null;
 					String thumbnailString = null;
 					String quality = null;
@@ -634,7 +662,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 						ConvMessage convMessage = null;
 						try {
 							metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.IMAGE, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
-							convMessage = createConvMessage(f.getName(), metadata, peers_msisdn.get(0), false);
+							convMessage = createConvMessage(f.getName(), metadata, connectedDevice.deviceName, false);
 							HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
 						} catch (JSONException e) {
 							e.printStackTrace();
@@ -665,8 +693,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 						ConvMessage convMessage = null;
 						try {
 							metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.VIDEO, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
-							convMessage = createConvMessage(f.getName(), metadata, peers_msisdn.get(0), false);
+							convMessage = createConvMessage(f.getName(), metadata, connectedDevice.deviceName, false);
 							HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
+							
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
@@ -686,34 +715,51 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 					intent.setDataAndType(Uri.parse("file://" + result), "audio/*");
 					context.startActivity(intent);
 				}
+				else if(type==5)
+				{
+					ConvMessage convMessage =  new ConvMessage(result,connectedDevice.deviceName,System.currentTimeMillis()/1000,ConvMessage.State.RECEIVED_UNREAD);
+					if(convMessage.getMessage().compareTo("Nudge!")==0)
+					{
+						try {
+							JSONObject md = ((convMessage.getMetadata() != null) ? convMessage.getMetadata().getJSON() : new JSONObject());
+							convMessage.setMappedMsgID(System.currentTimeMillis());
+							md.put(HikeConstants.POKE, true);
+							convMessage.setMetadata(md);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+					}
+					HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+				}
 				
 			}
 			FileTransferService.isOfflineFileTransferFinished = true;
+			publishProgressThread.interrupt();
+			peersStatus.put(connectedDevice, "Available for file transfer");
+			((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
 			if(!server_running)
 			{
 				new ServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				server_running = true;
 			}
+			
 		}
 		
 		@Override
 		protected void onProgressUpdate(Void... values) {
-			DeviceListFragment fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
-			
-			if(fragment!=null)
-            {
-            	for(WifiP2pDevice cpeer: fragment.peers)
-            	{
-            		if(cpeer.status==WifiP2pDevice.CONNECTED)
-            		{
-            			int percentage = 0;
-        				if(numOfIterations != 0)
-        					percentage = currentSizeReceived/numOfIterations;
-        				peersStatus.put(cpeer, "Receiveing file " + percentage + "%");
-        				((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-            		}
-            	}
-            }
+        		Double percentage = 0.0;
+        			if(numOfIterations != 0)
+        				percentage = (currentSizeReceived/(double)numOfIterations);
+        			else
+        				percentage = 100.0;
+        			if((percentage*100)>=100)
+        				percentage = 1.0;
+        			percentage *= 100.0;
+        			DecimalFormat df = new DecimalFormat("#.##");
+        			percentage =  Double.valueOf(df.format(percentage));
+        			peersStatus.put(connectedDevice, "Receiveing file " + (percentage)+ "%");
+    				((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
 			super.onProgressUpdate(values);
 		}
 
