@@ -107,7 +107,6 @@ public class VoIPActivity extends Activity implements CallActions
 
 		@Override
 		public void handleMessage(Message msg) {
-//			Logger.d(VoIPConstants.TAG, "VoIPActivity handler received: " + msg.what);
 			switch (msg.what) {
 			case MSG_SHUTDOWN_ACTIVITY:
 				Logger.d(VoIPConstants.TAG, "Shutting down..");
@@ -115,7 +114,6 @@ public class VoIPActivity extends Activity implements CallActions
 				break;
 			case CONNECTION_ESTABLISHED_FIRST_TIME:
 				showCallStatus(CallStatus.OUTGOING_RINGING);
-//				showMessage("Connection established (" + voipService.getConnectionMethod() + ")");
 				break;
 			case MSG_AUDIO_START:
 				isCallActive = true;
@@ -124,44 +122,38 @@ public class VoIPActivity extends Activity implements CallActions
 				activateActiveCallButtons();
 				break;
 			case MSG_ENCRYPTION_INITIALIZED:
-//				showMessage("Encryption initialized.");
 				break;
 			case MSG_INCOMING_CALL_DECLINED:
-				// VoIPUtils.addMessageToChatThread(VoIPActivity.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
 				break;
 			case MSG_OUTGOING_CALL_DECLINED:
 //				showMessage("Call was declined.");
 				break;
 			case MSG_CONNECTION_FAILURE:
-				showMessage("Unable to connect your call.");
+				showMessage(getString(R.string.voip_unable_to_connect_call));
 				break;
 			case MSG_CURRENT_BITRATE:
 //				int bitrate = voipService.getBitrate();
 //				showMessage("Bitrate: " + bitrate);
 				break;
 			case MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE:
-				showMessage("Unable to connect to network.");
+				showMessage(getString(R.string.voip_unable_to_connect_to_network));
 				voipService.stop();
 				break;
 			case MSG_PARTNER_SOCKET_INFO_TIMEOUT:
-//				showMessage("Partner is not responding.");
 				break;
 			case MSG_PARTNER_ANSWER_TIMEOUT:
-//				showMessage("No response.");
 				break;
 			case MSG_RECONNECTING:
-				showMessage("Reconnecting your call...");
+				showMessage(getString(R.string.voip_reconnecting_call));
 				break;
 			case MSG_RECONNECTED:
-//				showMessage("Reconnected!");
 				break;
 			case MSG_UPDATE_QUALITY:
 				CallQuality quality = voipService.getQuality();
 				showSignalStrength(quality);
-//				Logger.d(VoIPConstants.TAG, "Updating call quality to: " + quality);
 				break;
 			case MSG_NETWORK_SUCKS:
-				showMessage("Network quality is poor.");
+				showMessage(getString(R.string.voip_poor_network_quality));
 				break;
 			case MSG_UPDATE_HOLD_BUTTON:
 				boolean hold = voipService.getHold();
@@ -172,7 +164,7 @@ public class VoIPActivity extends Activity implements CallActions
 					showCallStatus(CallStatus.ACTIVE);
 				break;
 			case MSG_ALREADY_IN_CALL:
-				showMessage("Already in call. Please try again later.");
+				showMessage(getString(R.string.voip_already_in_call));
 				break;
 			case MSG_PHONE_NOT_SUPPORTED:
 				showMessage(getString(R.string.voip_phone_unsupported));
