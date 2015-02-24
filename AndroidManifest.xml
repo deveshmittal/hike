@@ -305,6 +305,11 @@
             android:configChanges="orientation|screenSize|keyboard|keyboardHidden" >
         </activity>
         <activity
+            android:name=".voip.view.CallRateActivity"
+            android:theme="@style/TranslucentBlack"
+            android:launchMode="singleTop" >
+        </activity>
+        <activity
             android:name="com.haibison.android.lockpattern.LockPatternActivity"
             android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
             android:screenOrientation="user"
