@@ -8,17 +8,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerAdapter;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
-import com.bsb.hike.ui.StickerShopActivity;
+import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
 public class StickerPicker implements OnClickListener, ShareablePopup, StickerPickerListener
@@ -37,8 +45,6 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	
 	private StickerEmoticonIconPageIndicator mIconPageIndicator;
 	
-	private SherlockFragmentActivity mActivity;
-
 	private static final String TAG = "StickerPicker";
 
 	/**
@@ -47,11 +53,10 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 * @param activity
 	 * @param listener
 	 */
-	public StickerPicker(Context context, StickerPickerListener listener, SherlockFragmentActivity activity)
+	public StickerPicker(Context context, StickerPickerListener listener)
 	{
 		this.mContext = context;
 		this.listener = listener;
-		this.mActivity = activity;
 	}
 
 	/**
@@ -61,9 +66,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 * @param listener
 	 * @param popUpLayout
 	 */
-	public StickerPicker(int layoutResId, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout, SherlockFragmentActivity activity)
+	public StickerPicker(int layoutResId, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
 	{
-		this(context, listener, activity);
+		this(context, listener);
 		this.mLayoutResId = layoutResId;
 		this.popUpLayout = popUpLayout;
 	}
@@ -76,9 +81,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 * @param listener
 	 * @param popUpLayout
 	 */
-	public StickerPicker(View view, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout, SherlockFragmentActivity activity)
+	public StickerPicker(View view, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
 	{
-		this(context, listener, activity);
+		this(context, listener);
 		this.viewToDisplay = view;
 		this.popUpLayout = popUpLayout;
 		initViewComponents(viewToDisplay);
@@ -95,9 +100,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 * @param eatTouchEventViewIds
 	 */
 
-	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, int[] eatTouchEventViewIds, SherlockFragmentActivity activity)
+	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, int[] eatTouchEventViewIds)
 	{
-		this(context, listener, activity);
+		this(context, listener);
 		popUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, context.getApplicationContext(), eatTouchEventViewIds);
 	}
 
@@ -109,9 +114,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 *            this is your activity Or fragment root view which gets resized when keyboard toggles
 	 * @param firstTimeHeight
 	 */
-	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, SherlockFragmentActivity activity)
+	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight)
 	{
-		this(context, listener, mainView, firstTimeHeight, null, activity);
+		this(context, listener, mainView, firstTimeHeight, null);
 	}
 
 	public void showStickerPicker()
@@ -169,15 +174,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 
 		shopIcon.setOnClickListener(this);
 
-		if (HikeSharedPreferenceUtil.getInstance(mContext).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))
-		{
-			// The shop icon would be blue unless the user clicks on it once
-			view.findViewById(R.id.shop_icon_badge).setVisibility(View.VISIBLE);
-		}
-		else
-		{
-			view.findViewById(R.id.shop_icon_badge).setVisibility(View.GONE);
-		}
+		handleStickerIntro(view);		
 
 		mViewPager.setVisibility(View.VISIBLE);
 
@@ -195,6 +192,16 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	@Override
 	public View getView()
 	{
+		/**
+		 * Exit condition : If there is no external storage, we return null here. 
+		 * Null check is handled where we call getView().
+		 */
+		if ((Utils.getExternalStorageState() == ExternalStorageState.NONE))
+		{
+			Toast.makeText(mContext, R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+			return null;
+		}
+		
 		if (viewToDisplay == null)
 		{
 			initView();
@@ -219,18 +226,11 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 
 	private void shopIconClicked()
 	{
-		if (!HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false)) // The shop icon would be blue unless the user clicks
-		// on it once
-		{
-			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
-		}
-		if (HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false)) // The shop icon would be blue unless the user clicks
-		// on it once
-		{
-			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
-		}
-		Intent i = new Intent(mContext, StickerShopActivity.class);
-		mActivity.startActivity(i);
+		setStickerIntroPrefs();
+		HAManager.getInstance().record(HikeConstants.LogEvent.STKR_SHOP_BTN_CLICKED, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT);
+		
+		Intent i = IntentFactory.getStickerShopIntent(mContext);
+		mContext.startActivity(i);
 	}
 
 	public void updateDimension(int width, int height)
@@ -249,8 +249,11 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 		@Override
 		public void onPageSelected(int pageNum)
 		{
-			StickerCategory category = stickerAdapter.getStickerCategory(pageNum);
-			if (category.getState() == StickerCategory.DONE)
+			StickerCategory category = stickerAdapter.getCategoryForIndex(pageNum);
+			/**
+			 * If the category has been downloaded/updated from the sticker pallete/shop/settings page and the user has now seen it's done state, so we reset it.
+			 */
+			if (category.getState() == StickerCategory.DONE || category.getState() == StickerCategory.DONE_SHOP_SETTINGS)
 			{
 				category.setState(StickerCategory.NONE);
 			}
@@ -278,21 +281,18 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	}
 
 	/**
-	 * Interface method. Check {@link ShareablePopup}
+	 * Utility method to free up resources
 	 */
-	@Override
-	public void releaseViewResources()
+	public void releaseResources()
 	{
-		// TODO Implement this.
-		viewToDisplay = null;
-		stickerAdapter = null;
-		mActivity = null;
+		this.mContext = null;
+		this.listener = null;
 	}
-
-	public void updateListener(StickerPickerListener mListener, SherlockFragmentActivity activity)
+	
+	public void updateListener(StickerPickerListener mListener, Context context)
 	{
 		this.listener = mListener;
-		this.mActivity = activity;
+		this.mContext = context;
 	}
 	
 	public void updateStickerAdapter()
@@ -301,6 +301,19 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 		{
 			stickerAdapter.instantiateStickerList();
 			stickerAdapter.notifyDataSetChanged();
+		}
+	}
+	
+	public void setExitTasksEarly(boolean flag)
+	{
+		if (stickerAdapter != null)
+		{
+			stickerAdapter.getStickerLoader().setExitTasksEarly(flag);
+			stickerAdapter.getStickerOtherIconLoader().setExitTasksEarly(flag);
+			if (!flag)
+			{
+				stickerAdapter.notifyDataSetChanged();
+			}
 		}
 	}
 
@@ -318,6 +331,63 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 		if (listener != null)
 		{
 			listener.stickerSelected(sticker, source);
+		}
+	}
+	
+	/**
+	 * This method is used to handle any sort of animations on sticker shop icon or showing the red badges or in future any FTUE related changes to Sticker shop Icon
+	 * @param view
+	 */
+	private void handleStickerIntro(View view)
+	{
+		if (HikeSharedPreferenceUtil.getInstance(mContext).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))
+		{
+			// show sticker shop badge on shop icon
+			view.findViewById(R.id.shop_icon_badge).setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			view.findViewById(R.id.shop_icon_badge).setVisibility(View.GONE);
+		}
+		
+		
+		if(!HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
+		{
+			View animatedBackground = view.findViewById(R.id.animated_backgroud);
+			
+			animatedBackground.setVisibility(View.VISIBLE);
+			Animation anim = AnimationUtils.loadAnimation(mContext, R.anim.scale_out_from_mid);
+			animatedBackground.startAnimation(anim);
+
+			view.findViewById(R.id.shop_icon).setAnimation(HikeAnimationFactory.getStickerShopIconAnimation(mContext));
+		}
+	}
+	
+	/**
+	 * Used to set preferences related to Sticker Views.
+	 */
+	
+	private void setStickerIntroPrefs()
+	{
+		if (!HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false)) // The shop icon would be blue unless the
+																																			// user clicks
+		// on it once
+		{
+			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
+
+			View animatedBackground = viewToDisplay.findViewById(R.id.animated_backgroud);
+			animatedBackground.setVisibility(View.GONE);
+			animatedBackground.clearAnimation();
+			viewToDisplay.findViewById(R.id.shop_icon).clearAnimation();
+
+		}
+
+		if (HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false)) // The shop icon would be blue unless the
+																																			// user clicks
+		// on it once
+		{
+			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
+			viewToDisplay.findViewById(R.id.shop_icon_badge).setVisibility(View.GONE);
 		}
 	}
 }

@@ -13,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -67,12 +66,16 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.adapters.MessagesAdapter;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.chatthread.HikeActionMode.ActionModeListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.dialog.CustomAlertDialog;
@@ -109,10 +112,16 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.platform.CardComponent;
+import com.bsb.hike.platform.HikePlatformConstants;
+import com.bsb.hike.platform.PlatformMessageMetadata;
+import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
@@ -121,8 +130,6 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.CustomLinearLayout;
-import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
 /**
  * 
@@ -131,7 +138,7 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, CaptureImageListener,
 		PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener,
-		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, OnSoftKeyboardListener
+		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener
 {
 	private static final String TAG = "chatthread";
 
@@ -181,6 +188,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static final int MULTI_SELECT_ACTION_MODE = 22;
 
 	protected static final int SCROLL_TO_END = 23;
+	
+	protected static final int STICKER_FTUE_TIP = 24;
+
+    protected static final int MULTI_MSG_DB_INSERTED = 25;
 
 	protected ChatThreadActivity activity;
 
@@ -302,6 +313,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			setTypingText(true, (TypingNotification) msg.obj);
 			break;
 		case FILE_MESSAGE_CREATED:
+        case MULTI_MSG_DB_INSERTED:
 			addMessage((ConvMessage) msg.obj);
 			break;
 		case DELETE_MESSAGE:
@@ -340,6 +352,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case SCROLL_TO_END:
 			mConversationsView.setSelection(messages.size() - 1);
+			break;
+		case STICKER_FTUE_TIP:
+			mTips.showStickerFtueTip();
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
@@ -390,11 +405,18 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	public HikeActionBar mActionBar;
 
-	public void onCreate(Bundle arg0)
+	public void onCreate()
 	{
 		init();
 		setContentView();
 		fetchConversation(true);
+	}
+	
+	public void onNewIntent()
+	{
+		init();
+		setContentView();
+		fetchConversationOnNewIntent(true);
 	}
 
 	protected void init()
@@ -466,7 +488,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		mShareablePopupLayout.updateMainView(activity.findViewById(R.id.chatThreadParentLayout));
 		mStickerPicker.updateListener(this, activity);
-		mEmoticonPicker.updateListener(this);
+		mEmoticonPicker.updateListener(this, activity);
 	}
 
 	private void addOnClickListeners()
@@ -481,12 +503,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private void initStickerPicker()
 	{
-		mStickerPicker = new StickerPicker(activity.getBaseContext(), this, activity);
+		mStickerPicker = new StickerPicker(activity, this);
 	}
 
 	private void initEmoticonPicker()
 	{
-		mEmoticonPicker = new EmoticonPicker(activity.getBaseContext(), this);
+		mEmoticonPicker = new EmoticonPicker(activity, this);
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -518,7 +540,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (requestCode)
 		{
 		case AttachmentPicker.CAMERA:
-			CaptureImageParser.parseCameraResult(activity.getApplicationContext(), resultCode, data, this);
+			CaptureImageParser.parseCameraResult(activity, resultCode, data, this);
 			break;
 		case AttachmentPicker.AUDIO:
 		case AttachmentPicker.VIDEO:
@@ -586,7 +608,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		int width = getResources().getDimensionPixelSize(R.dimen.overflow_menu_width);
 		int rightMargin = width + getResources().getDimensionPixelSize(R.dimen.overflow_menu_right_margin);
-		mActionBar.showOverflowMenu(width, LayoutParams.WRAP_CONTENT, -rightMargin, -(int) (0.5 * Utils.densityMultiplier), activity.findViewById(R.id.attachment_anchor));
+		mActionBar.showOverflowMenu(width, LayoutParams.WRAP_CONTENT, -rightMargin, -(int) (0.5 * Utils.scaledDensityMultiplier), activity.findViewById(R.id.attachment_anchor));
 	}
 
 	@Override
@@ -598,9 +620,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			showOverflowMenu();
 			break;
 		case R.id.sticker_btn:
+			setEmoticonButtonSelected(false);
+			setStickerButtonSelected(!v.isSelected());
 			stickerClicked();
 			break;
 		case R.id.emoticon_btn:
+			setStickerButtonSelected(false);
+			setEmoticonButtonSelected(!v.isSelected());
 			emoticonClicked();
 			break;
 		case R.id.send_message:
@@ -707,13 +733,38 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void stickerClicked()
 	{
-		mTips.setStickerStipSeen();
-		mShareablePopupLayout.showPopup(mStickerPicker);
+		if (mTips.isGivenTipShowing(ChatThreadTips.STICKER_TIP))
+		{
+			mTips.setTipSeen(ChatThreadTips.STICKER_TIP);
+			recordFirstTimeStickerClick();
+		}
+		
+		mShareablePopupLayout.togglePopup(mStickerPicker);
+	}
+	
+	private void recordFirstTimeStickerClick()
+	{
+		if (!HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).getData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, false))
+		{
+			HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).saveData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, true);
+
+			HAManager.getInstance().record(HikeConstants.LogEvent.STICKER_BTN_CLICKED, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH);
+		}
+	}
+	
+	private void setStickerButtonSelected(boolean selected)
+	{
+		activity.findViewById(R.id.sticker_btn).setSelected(selected);
+	}
+	
+	private void setEmoticonButtonSelected(boolean selected)
+	{
+		activity.findViewById(R.id.emoticon_btn).setSelected(selected);
 	}
 
 	protected void emoticonClicked()
 	{
-		mShareablePopupLayout.showPopup(mEmoticonPicker);
+		mShareablePopupLayout.togglePopup(mEmoticonPicker);
 	}
 
 	protected void showThemePicker()
@@ -753,9 +804,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 
 		initAttachmentPicker(mConversation.isOnhike());
-		int width = (int) (Utils.densityMultiplier * 270);
-		int xOffset = -(int) (276 * Utils.densityMultiplier);
-		int yOffset = -(int) (0.5 * Utils.densityMultiplier);
+		int width = (int) (Utils.scaledDensityMultiplier * 270);
+		int xOffset = -(int) (276 * Utils.scaledDensityMultiplier);
+		int yOffset = -(int) (0.5 * Utils.scaledDensityMultiplier);
 		attachmentPicker.show(width, LayoutParams.WRAP_CONTENT, xOffset, yOffset, activity.findViewById(R.id.attachment_anchor));
 	}
 
@@ -842,7 +893,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
 		{
-			mShareablePopupLayout.dismiss();
+			dismissShareablePopup();
 			return true;
 		}
 
@@ -858,6 +909,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 
 		return false;
+	}
+	
+	private void dismissShareablePopup()
+	{
+		if(activity.findViewById(R.id.sticker_btn).isSelected())
+		{
+			setStickerButtonSelected(false);
+		}
+		if(activity.findViewById(R.id.emoticon_btn).isSelected())
+		{
+			setEmoticonButtonSelected(false);
+		}
+		
+		mShareablePopupLayout.dismiss();
 	}
 
 	private void actionBarBackPressed()
@@ -1088,7 +1153,22 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		else
 		{
-			fetchConversation();
+			setupConversation(fetchConversation());
+		}
+	}
+	
+	protected final void fetchConversationOnNewIntent(boolean async)
+	{
+		Logger.i(TAG, "Fetch Conversation called : isAync ? " + async);
+
+		if (async)
+		{
+			activity.getSupportLoaderManager().restartLoader(FETCH_CONV, null, this);
+		}
+
+		else
+		{
+			setupConversation(fetchConversation());
 		}
 	}
 
@@ -1164,9 +1244,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mMessageMap = new HashMap<Long, ConvMessage>();
 		addtoMessageMap(0, messages.size());
 
-		mAdapter = new MessagesAdapter(activity, messages, mConversation, this, this);
-
-		initListView(); // set adapter and add clicks etc
+		initListViewAndAdapter(); // init adapter, listView and add clicks etc
 		setupActionBar(); // Setup the action bar
 		currentTheme = mConversation.getTheme();
 		updateUIAsPerTheme(currentTheme);// it has to be done after setting adapter
@@ -1193,8 +1271,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		mComposeView.setOnKeyListener(this);
 
-		((CustomLinearLayout) activity.findViewById(R.id.chat_layout)).setOnSoftKeyboardListener(this);
-
 		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
 
 		// Register broadcasts
@@ -1205,6 +1281,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		intentFilter.addAction(StickerManager.STICKERS_DOWNLOADED);
 
 		LocalBroadcastManager.getInstance(activity.getBaseContext()).registerReceiver(mBroadCastReceiver, intentFilter);
+		
+		/**
+		 * Adding PubSub, here since all the heavy work related to fetching of messages and setting up UI has been done already.
+		 */
+		addToPubSub();
 
 		takeActionBasedOnIntent();
 	}
@@ -1265,11 +1346,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		sendMessage(convMessage);
 	}
 
-	private void initListView()
+	private void initListViewAndAdapter()
 	{
 		mConversationsView = (ListView) activity.findViewById(R.id.conversations_list);
+		mAdapter = new MessagesAdapter(activity, messages, mConversation, this, mConversationsView, activity);
 		mConversationsView.setAdapter(mAdapter);
-		if (mConversation.getUnreadCount() > 0)
+		if (mConversation.getUnreadCount() > 0 && !messages.isEmpty())
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
 			if (message.getTypingNotification() != null)
@@ -1300,12 +1382,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		loadingMoreMessages = false;
 
 		updateUIAsPerTheme(mConversation.getTheme());// it has to be done after setting adapter
-
-		/**
-		 * Adding PubSub, here since all the heavy work related to fetching of messages and setting up UI has been done already.
-		 */
-		addToPubSub();
-
 	}
 
 	protected void takeActionBasedOnIntent()
@@ -1456,6 +1532,46 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						 */
 						intent.removeExtra(StickerManager.FWD_CATEGORY_ID);
 					}
+
+                    else if(msgExtrasJson.optInt(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE) == HikeConstants.MESSAGE_TYPE.CONTENT){
+                        // as we will be changing msisdn and hike status while inserting in DB
+                        ConvMessage convMessage = Utils.makeConvMessage(msisdn, mConversation.isOnhike());
+                        convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.CONTENT);
+                        convMessage.platformMessageMetadata = new PlatformMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA), activity.getApplicationContext());
+                        convMessage.platformMessageMetadata.addThumbnailsToMetadata();
+                        convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
+
+                        sendMessage(convMessage);
+
+                    }
+
+					else if(msgExtrasJson.optInt(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE) == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || msgExtrasJson.optInt(
+							HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE) == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT){
+						// as we will be changing msisdn and hike status while inserting in DB
+						ConvMessage convMessage = Utils.makeConvMessage(msisdn,msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE), mConversation.isOnhike());
+						convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT);
+						convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
+						JSONObject json = new JSONObject();
+						try
+						{
+							json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+							json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
+							json.put(AnalyticsConstants.TO, msisdn);
+							HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+						}
+						catch (JSONException e)
+						{
+							e.printStackTrace();
+						}
+						catch (NullPointerException e)
+						{
+							e.printStackTrace();
+						}
+						sendMessage(convMessage);
+
+					}
+
+
 				}
 				
 				if (mActionMode != null && mActionMode.isActionModeOn())
@@ -1575,14 +1691,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		ConversationLoader loader = (ConversationLoader) arg0;
 		if (loader.loaderId == FETCH_CONV)
 		{
-			if (arg1 == null)
-			{
-				fetchConversationFailed();
-			}
-			else
-			{
-				fetchConversationFinished((Conversation) arg1);
-			}
+			setupConversation((Conversation) arg1);
 		}
 		else if (loader.loaderId == LOAD_MORE_MESSAGES)
 		{
@@ -1594,11 +1703,27 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			throw new IllegalStateException("Expected data is either Conversation OR List<ConvMessages> , please check " + arg0.getClass().getCanonicalName());
 		}
 	}
+	
+	/**
+	 * This method is called after we've made db query. This checks whether we should show the conversation fetched or if it is null, we clear can take appropriate action 
+	 * @param conv
+	 */
+	protected void setupConversation(Conversation conv)
+	{
+		if (conv == null)
+		{
+			fetchConversationFailed();
+		}
+		else
+		{
+			fetchConversationFinished(conv);
+		}
+	}
 
 	@Override
 	public void onLoaderReset(Loader<Object> arg0)
 	{
-
+		
 	}
 
 	private static class ConversationLoader extends AsyncTaskLoader<Object>
@@ -1779,6 +1904,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			// Sticker message is a non text message.
 			selectedNonTextMsgs = ChatThreadUtils.incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
 		}
+		
+		else if (message.getMessageType() == MESSAGE_TYPE.CONTENT || message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+        {
+            // Content card is a non text message.
+            selectedNonTextMsgs = ChatThreadUtils.incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
+        }
+
 	}
 
 	private void hideShowActionModeMenus(int actionModeId)
@@ -1808,6 +1940,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
+		/**
+		 * Something's not right with firstVisibleItem here. Need to verify it - Piyush
+		 */
 		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
 		{
 			int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
@@ -1815,7 +1950,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			/*
 			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
 			 */
-			if (messages.size() <= startIndex || messages.get(startIndex) == null)
+			/* messageid -1:
+             * Algo is message id can not be -1 here, -1 means message has been added in UI and not been inserted in DB which is being done on pubsub thread. It will happen for new
+             * added messages. Once message is succesfully inserted in DB, messageID will be updated and will be reflected here.
+             * Bug was : There is data race between  this async task and pubsub, it was happening that message id is -1 when async task is just started, so async task fetches data from DB and results in duplicate sent messages
+             */
+			if (messages.size() <= startIndex || messages.get(startIndex) == null || messages.get(startIndex).getMsgID()==-1)
 			{
 				return;
 			}
@@ -2084,13 +2224,42 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HikePubSub.STICKER_CATEGORY_MAP_UPDATED:
 			uiHandler.sendEmptyMessage(STICKER_CATEGORY_MAP_UPDATED);
 			break;
+		case HikePubSub.STICKER_FTUE_TIP:
+			uiHandler.sendEmptyMessage(STICKER_FTUE_TIP);
+			break;
+        case HikePubSub.MULTI_MESSAGE_DB_INSERTED:
+            onMultiMessageDbInserted(object);
+            break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
 		}
 	}
 
-	/**
+	private void onMultiMessageDbInserted(Object object)
+	{
+		List<Pair<ContactInfo, ConvMessage>> pairList = (List<Pair<ContactInfo, ConvMessage>>) object;
+		for (final Pair<ContactInfo, ConvMessage> pair : pairList)
+		{
+			ContactInfo conInfo = pair.first;
+			String newMsisdn = conInfo.getMsisdn();
+
+			if (msisdn.equals(newMsisdn))
+			{
+
+				if (isActivityVisible && SoundUtils.isTickSoundEnabled(activity.getApplicationContext()))
+				{
+					SoundUtils.playSoundFromRaw(activity.getApplicationContext(), R.raw.message_sent);
+				}
+
+				sendUIMessage(MULTI_MSG_DB_INSERTED, pair.second);
+
+				break;
+			}
+		}
+	}
+
+    /**
 	 * Handles message received events in chatThread
 	 * 
 	 * @param object
@@ -2208,7 +2377,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
 				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.MESSAGE_FAILED,
 				HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.STICKER_CATEGORY_MAP_UPDATED,
-				HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.BULK_MESSAGE_RECEIVED };
+				HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.MULTI_MESSAGE_DB_INSERTED};
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -2255,7 +2424,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		StickerManager.getInstance().saveCustomCategories();
 
 		releaseMessageMap();
-
+	}
+	
+	private void releaseStickerAndEmoticon()
+	{
+		mStickerPicker.releaseResources();
+		mEmoticonPicker.releaseReources();
 	}
 
 	/**
@@ -2265,8 +2439,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void onPause()
 	{
 		isActivityVisible = false;
+		
+		resumeImageLoaders(true);
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
+		
 	}
 
 	/**
@@ -2286,7 +2463,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * Pause any onGoing loaders for MessagesAdapter
 		 */
 
-		resumeImageLoaders();
+		resumeImageLoaders(false);
 
 		/**
 		 * Clear any pending notifications
@@ -2353,6 +2530,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void onStop()
 	{
 		saveDraft();
+		releaseStickerAndEmoticon();
+	}
+	
+	protected void onStart()
+	{
+		/**
+		 * We call this method to either re-init the stickerpicker and emoticon picker or update their listeners
+		 */
+		initShareablePopup();
 	}
 
 	protected void hideView(int viewId)
@@ -2663,13 +2849,49 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			// @GM cancelTask has been changed
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+            String key = hikeFile.getFileKey();
 			File file = hikeFile.getFile();
 			if (deleteMediaFromPhone && hikeFile != null)
 			{
 				hikeFile.delete(activity.getApplicationContext());
 			}
+            HikeConversationsDatabase.getInstance().reduceRefCount(key);
 			FileTransferManager.getInstance(activity.getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent(), hikeFile.getFileSize());
 			mAdapter.notifyDataSetChanged();
+
+		}
+
+		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT)
+		{
+			int numberOfMediaComponents = convMessage.platformMessageMetadata.mediaComponents.size();
+			for (int i = 0; i < numberOfMediaComponents; i++)
+			{
+				CardComponent.MediaComponent mediaComponent = convMessage.platformMessageMetadata.mediaComponents.get(i);
+				HikeConversationsDatabase.getInstance().reduceRefCount(mediaComponent.getKey());
+			}
+		}
+
+		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT || convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
+		{
+			String origin = Utils.conversationType(msisdn);
+			JSONObject json = new JSONObject();
+			try
+			{
+				json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+				json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_DELETE);
+				json.put(AnalyticsConstants.ORIGIN, origin);
+				json.put(AnalyticsConstants.CHAT_MSISDN, msisdn);
+				HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			catch (NullPointerException e)
+			{
+				e.printStackTrace();
+			}
+
 		}
 	}
 
@@ -3089,8 +3311,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	private void emailChat()
 	{
-		EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(activity, null);
-		Utils.executeConvAsyncTask(emailTask, mConversation);
+		if (messages != null && messages.size() > 0)
+		{
+			EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(activity, null);
+			Utils.executeConvAsyncTask(emailTask, mConversation);
+		}
+		
+		else
+		{
+			Toast.makeText(activity, R.string.empty_email, Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	/**
@@ -3190,6 +3420,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		if (mAdapter != null)
 		{
+			mAdapter.onDestroy();
 			mAdapter.resetPlayerIfRunning();
 		}
 	}
@@ -3204,14 +3435,22 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	}
 
-	private void resumeImageLoaders()
+	private void resumeImageLoaders(boolean flag)
 	{
 		if (mAdapter != null)
 		{
 			// mAdapter.getStickerLoader().setExitTasksEarly(false);
-			mAdapter.getIconImageLoader().setExitTasksEarly(false);
-			mAdapter.getHighQualityThumbLoader().setExitTasksEarly(false);
-			mAdapter.notifyDataSetChanged();
+			mAdapter.getIconImageLoader().setExitTasksEarly(flag);
+			mAdapter.getHighQualityThumbLoader().setExitTasksEarly(flag);
+			if (!flag)
+			{
+				mAdapter.notifyDataSetChanged();
+			}
+		}
+		
+		if (mStickerPicker != null)
+		{
+			mStickerPicker.setExitTasksEarly(flag);
 		}
 	}
 
@@ -3451,7 +3690,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case R.id.forward_msgs:
 			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			Collections.sort(selectedMsgIds);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.FORWARD_MSG);
+			recordForwardEvent();
+			
 			Intent intent = IntentFactory.getComposeChatActivityIntent(activity);
 			String msg;
 			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
@@ -3481,6 +3721,31 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					{
 						multiMsgFwdObject.put(HikeConstants.Extras.POKE, true);
 					}
+					
+					else if (message.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT)
+					{
+						multiMsgFwdObject.put(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE, HikeConstants.MESSAGE_TYPE.CONTENT);
+						if (message.platformMessageMetadata != null)
+						{
+							multiMsgFwdObject.put(HikeConstants.METADATA, message.platformMessageMetadata.JSONtoString());
+							if (message.contentLove != null)
+							{
+								multiMsgFwdObject.put(HikeConstants.ConvMessagePacketKeys.LOVE_ID, message.contentLove.loveId);
+							}
+						}
+					}
+					
+					else if (message.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || message.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT)
+					{
+						multiMsgFwdObject.put(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE, HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT);
+						multiMsgFwdObject.put(HikeConstants.HIKE_MESSAGE, message.getMessage());
+						if (message.platformWebMessageMetadata != null)
+						{
+							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
+
+						}
+					}
+					
 					else
 					{
 						msg = message.getMessage();
@@ -3497,6 +3762,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, msisdn);
 			activity.startActivity(intent);
+			mActionMode.finish();
 			return true;
 
 		case R.id.copy_msgs:
@@ -3542,11 +3808,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mActionMode.finish();
 			return false;
 		}
-	}
-
-	public Activity getChatThreadActivity()
-	{
-		return activity;
 	}
 
 	@Override
@@ -3617,15 +3878,21 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		return false;
 	}
 
-	@Override
-	public void onShown()
+	/**
+	 * Called from {@link #onActionModeMenuItemClicked(MenuItem)}
+	 */
+	private void recordForwardEvent()
 	{
-		Logger.d(TAG, "Keyboard shown");
-		uiHandler.sendEmptyMessage(SCROLL_TO_END);
-	}
-
-	@Override
-	public void onHidden()
-	{
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FORWARD_MSG);
+			metadata.put(HikeConstants.MSISDN, msisdn);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+		}
+		catch (JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
 	}
 }

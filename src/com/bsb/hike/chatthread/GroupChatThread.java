@@ -37,6 +37,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ConvMessage;
@@ -137,12 +139,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		}
 
 		return false;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu)
-	{
-		return super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
@@ -488,14 +484,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		activity.startActivity(intent);
 		Utils.resetPinUnreadCount(mConversation);
 
-		if (viaMenu)
-		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU);
-		}
-		else
-		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK);
-		}
+		HAManager.getInstance().record(viaMenu ? HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU : HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK, AnalyticsConstants.UI_EVENT,
+				AnalyticsConstants.CLICK_EVENT);
 	}
 
 	private void addUnreadCountMessage()
@@ -919,6 +909,11 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		{
 			addMessage(convMessage, true);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
+
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			{
+				recordPinMessage(convMessage.getHashMessage() == HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE);
+			}
 		}
 	}
 
@@ -1406,5 +1401,11 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		{
 			return super.onDoubleTap(e);
 		}
+	}
+	
+	private void recordPinMessage(boolean viaPinIcon)
+	{
+		HAManager.getInstance().record(viaPinIcon ? HikeConstants.LogEvent.PIN_POSTED_VIA_ICON : HikeConstants.LogEvent.PIN_POSTED_VIA_HASH_PIN, AnalyticsConstants.UI_EVENT,
+				AnalyticsConstants.CLICK_EVENT);
 	}
 }

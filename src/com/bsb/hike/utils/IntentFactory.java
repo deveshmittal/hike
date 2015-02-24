@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Message;
 import android.provider.ContactsContract.Contacts;
 import android.provider.MediaStore;
@@ -43,6 +44,7 @@ import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.ShareLocation;
 import com.bsb.hike.ui.SignupActivity;
+import com.bsb.hike.ui.StickerShopActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
@@ -221,14 +223,20 @@ public class IntentFactory
 	public static Intent getImageCaptureIntent(Context context)
 	{
 		/*
-		 * Cannot send a file because of an android issue http://stackoverflow.com/questions/10494839 /verifiyandsetparameter -error-when-trying-to-record-video
+		 * Storing images in DCIM folder of the camera
 		 */
-		File selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, true);
-		if (selectedFile == null)
+		File selectedDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
+		if (!selectedDir.exists())
 		{
-			Toast.makeText(context, R.string.no_external_storage, Toast.LENGTH_LONG).show();
-			return null;
+			if (!selectedDir.mkdirs())
+			{
+				Logger.d("ImageCapture", "failed to create directory");
+				return null;
+			}
 		}
+		String fileName = Utils.getOriginalFile(HikeFileType.IMAGE, null);
+		File selectedFile = new File(selectedDir.getPath() + File.separator + fileName);
+		
 		Intent pickIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		pickIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFile));
 		/*
@@ -489,6 +497,11 @@ public class IntentFactory
 		intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 
 		return intent;
+	}
+
+	public static Intent getStickerShopIntent(Context mContext)
+	{
+		return new Intent(mContext, StickerShopActivity.class);
 	}
 
 }
