@@ -1093,12 +1093,15 @@ public class HikeBitmapFactory
 		
 		return calculateInSampleSize(options, reqWidth, reqHeight);
 	}
-
 	public static BitmapDrawable getDefaultAvatar(Resources res, String msisdn, boolean hiRes)
 	{
 		boolean isGroupConversation = Utils.isGroupConversation(msisdn);
 		int index = BitmapUtils.iconHash(msisdn) % (HikeConstants.DEFAULT_AVATAR_KEYS.length);
-		
+		return getDefaultAvatarAtIndex(res, index, isGroupConversation, hiRes);
+	
+	}
+	public static BitmapDrawable getDefaultAvatarAtIndex(Resources res, int index, boolean isGroupConversation, boolean hiRes)
+	{
 		int defaultAvatarResId = HikeConstants.DEFAULT_AVATARS[index]; 
 		
 		Drawable layers[] = new Drawable[2];

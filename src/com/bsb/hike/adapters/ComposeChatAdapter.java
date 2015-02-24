@@ -22,6 +22,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.models.StatusMessage;
@@ -311,9 +313,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			 */
 			if (viewType == ViewType.NEW_CONTACT)
 			{
-				holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
-				holder.userImage.setBackgroundResource(R.drawable.avatar_01_rounded);
-				holder.userImage.setImageResource(R.drawable.ic_default_avatar);
+				holder.userImage.setImageDrawable(HikeMessengerApp.getLruCache().getDefaultAvatar(1));
 			}
 			else
 			{

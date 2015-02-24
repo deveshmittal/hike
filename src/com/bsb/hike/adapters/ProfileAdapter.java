@@ -789,7 +789,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 	private void setAvatar(String msisdn, ImageView avatarView)
 	{
-		iconLoader.loadImage(msisdn, avatarView, true);
+		iconLoader.loadImage(msisdn, avatarView, false, true, true);
 	}
 
 	private class ViewHolder
