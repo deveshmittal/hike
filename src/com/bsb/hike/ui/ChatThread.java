@@ -1650,7 +1650,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
             json.put(AnalyticsConstants.EVENT_KEY, key);
             json.put(AnalyticsConstants.ORIGIN, origin);
             json.put(AnalyticsConstants.CHAT_MSISDN, mContactNumber);
-            HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, subType, json, AnalyticsConstants.EVENT_TAG_BOTS);
+            HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.UI_EVENT, subType, json);
         }
         catch (JSONException e)
         {
