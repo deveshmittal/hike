@@ -9,8 +9,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.platform.CardComponent;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
+import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentFactory;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.SoundUtils;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -114,15 +128,6 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
-import com.bsb.hike.utils.ChatTheme;
-import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.IntentFactory;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.PairModified;
-import com.bsb.hike.utils.SmileyParser;
-import com.bsb.hike.utils.SoundUtils;
-import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
@@ -1474,6 +1479,32 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
                     }
 
+					else if(msgExtrasJson.optInt(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE) == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || msgExtrasJson.optInt(
+							HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE) == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT){
+						// as we will be changing msisdn and hike status while inserting in DB
+						ConvMessage convMessage = Utils.makeConvMessage(msisdn,msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE), mConversation.isOnhike());
+						convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT);
+						convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
+						JSONObject json = new JSONObject();
+						try
+						{
+							json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+							json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
+							json.put(AnalyticsConstants.TO, msisdn);
+							HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+						}
+						catch (JSONException e)
+						{
+							e.printStackTrace();
+						}
+						catch (NullPointerException e)
+						{
+							e.printStackTrace();
+						}
+						sendMessage(convMessage);
+
+					}
+
 
 				}
 				
@@ -1796,6 +1827,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		else if (message.isStickerMessage())
 		{
 			// Sticker message is a non text message.
+			selectedNonTextMsgs = ChatThreadUtils.incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
+		}
+
+		else if (message.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT || message.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
+		{
+			// Content card is a non text message.
 			selectedNonTextMsgs = ChatThreadUtils.incrementDecrementMsgsCount(selectedNonTextMsgs, isMsgSelected);
 		}
 	}
@@ -2721,13 +2758,38 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		}
 
-        if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT){
-            int numberOfMediaComponents = convMessage.platformMessageMetadata.mediaComponents.size();
-            for (int i = 0; i < numberOfMediaComponents; i++){
-                CardComponent.MediaComponent mediaComponent = convMessage.platformMessageMetadata.mediaComponents.get(i);
-                HikeConversationsDatabase.getInstance().reduceRefCount(mediaComponent.getKey());
-            }
-        }
+		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT)
+		{
+			int numberOfMediaComponents = convMessage.platformMessageMetadata.mediaComponents.size();
+			for (int i = 0; i < numberOfMediaComponents; i++)
+			{
+				CardComponent.MediaComponent mediaComponent = convMessage.platformMessageMetadata.mediaComponents.get(i);
+				HikeConversationsDatabase.getInstance().reduceRefCount(mediaComponent.getKey());
+			}
+		}
+
+		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT || convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
+		{
+			String origin = Utils.conversationType(msisdn);
+			JSONObject json = new JSONObject();
+			try
+			{
+				json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+				json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_DELETE);
+				json.put(AnalyticsConstants.ORIGIN, origin);
+				json.put(AnalyticsConstants.CHAT_MSISDN, msisdn);
+				HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			catch (NullPointerException e)
+			{
+				e.printStackTrace();
+			}
+
+		}
 	}
 
 	private void onMessageFailed(Object object)
@@ -3537,6 +3599,28 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					else if (message.getMetadata() != null && message.getMetadata().isPokeMessage())
 					{
 						multiMsgFwdObject.put(HikeConstants.Extras.POKE, true);
+					}
+					else if (message.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT)
+					{
+						multiMsgFwdObject.put(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE, HikeConstants.MESSAGE_TYPE.CONTENT);
+						if (message.platformMessageMetadata != null)
+						{
+							multiMsgFwdObject.put(HikeConstants.METADATA, message.platformMessageMetadata.JSONtoString());
+							if (message.contentLove != null)
+							{
+								multiMsgFwdObject.put(HikeConstants.ConvMessagePacketKeys.LOVE_ID, message.contentLove.loveId);
+							}
+						}
+					}
+					else if (message.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || message.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT)
+					{
+						multiMsgFwdObject.put(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE, HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT);
+						multiMsgFwdObject.put(HikeConstants.HIKE_MESSAGE, message.getMessage());
+						if (message.platformWebMessageMetadata != null)
+						{
+							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
+
+						}
 					}
 					else
 					{
