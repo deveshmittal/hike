@@ -201,6 +201,8 @@ public class CameraFragment extends SherlockFragment
 		}
 	};
 
+	private String flashMode;
+
 	/**
 	 * Call this (or override getHost()) to supply the CameraHost used for most of the detailed interaction with the camera.
 	 * 
@@ -217,11 +219,14 @@ public class CameraFragment extends SherlockFragment
 	 */
 	public void takePicture()
 	{
-		takePicture(true, true);
-		// PictureTransaction xact=new PictureTransaction(getHost());
-		// xact.mirrorFFC(false);
-		// xact.useSingleShotMode(true);
-		// takePicture(xact);
+		// takePicture(true, true);
+		PictureTransaction xact = new PictureTransaction(getHost());
+		xact.mirrorFFC(false);
+		xact.useSingleShotMode(true);
+		xact.needBitmap(true);
+		xact.needByteArray(true);
+		xact.flashMode(flashMode);
+		takePicture(xact);
 	}
 
 	/**
@@ -372,7 +377,8 @@ public class CameraFragment extends SherlockFragment
 
 	public void setFlashMode(String mode)
 	{
-		cameraView.setFlashMode(mode);
+//		cameraView.setFlashMode(mode);
+		flashMode = mode;
 	}
 
 }

@@ -225,7 +225,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			{
 				btnFlash.setTag(FLASH_ON);
 				btnFlash.setImageDrawable(getResources().getDrawable(R.drawable.flashon));
-				cameraFragment.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+				cameraFragment.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
 			}
 			else if (tag.equals(FLASH_ON))
 			{

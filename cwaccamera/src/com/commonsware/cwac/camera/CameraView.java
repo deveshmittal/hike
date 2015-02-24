@@ -173,10 +173,13 @@ public class CameraView extends ViewGroup implements AutoFocusCallback
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
 	{
-		final int width = resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec);
-		final int height = resolveSize(getSuggestedMinimumHeight(), heightMeasureSpec);
-		setMeasuredDimension(width, height);
-
+		int width = resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec);
+		int height = resolveSize(getSuggestedMinimumHeight(), heightMeasureSpec);
+		int size = width > height ? height : width;
+	    setMeasuredDimension(size, size);
+	    
+	    width = height = size;
+		
 		if (width > 0 && height > 0)
 		{
 			if (camera != null)
