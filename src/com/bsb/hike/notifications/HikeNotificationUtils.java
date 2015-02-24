@@ -1,5 +1,7 @@
 package com.bsb.hike.notifications;
 
+import org.json.JSONException;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
@@ -19,6 +21,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 
 public class HikeNotificationUtils
@@ -58,7 +61,14 @@ public class HikeNotificationUtils
 		{
 			if (convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
 			{
-				message = String.format(context.getString(convMsg.getMetadata().isOldUser() ? R.string.user_back_on_hike : R.string.joined_hike_new), contactInfo.getFirstName());
+				//FOUND this where the notiifcation Text is set
+				try {
+					message = String.format(convMsg.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).optString("Txt"), contactInfo.getFirstName());
+				} catch (JSONException e) {
+					Logger.d("UmangH","Not Found data");
+				}
+				Logger.d("UmangH",convMsg.getMetadata().getJSON().toString());
+				
 			}
 			else
 			{
@@ -75,6 +85,7 @@ public class HikeNotificationUtils
 			message = SmileyParser.getInstance().replaceEmojiWithCharacter(message, "*");
 		}
 
+		//FOUND this is where notification Title is set
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo.getName())) ? contactInfo.getName() : msisdn;
 		// For showing the name of the contact that sent the message in a group
 		// chat
@@ -108,6 +119,16 @@ public class HikeNotificationUtils
 				message = key + HikeConstants.SEPARATOR + message;
 			}
 			key = ContactManager.getInstance().getName(convMsg.getMsisdn());
+		}
+		else if(convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
+		{
+			try {
+				key = String.format(convMsg.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).getString("Ttl"), key);
+				Logger.d("UmangH", "not : " + convMsg.getMetadata().getJSON().toString());
+				Logger.d("UmangH", "Title : " + key);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 		}
 
 		return new Pair<String, String>(message, key);

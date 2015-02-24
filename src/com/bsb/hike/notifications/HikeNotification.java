@@ -540,6 +540,8 @@ public class HikeNotification
 			{
 				return;
 			}
+			
+			//FOUND enter code here for notification
 			else if (convMessage.isStickerMessage())
 			{
 				Bitmap bigPictureImage = ToastListener.returnBigPicture(convMessage, context);

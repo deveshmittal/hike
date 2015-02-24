@@ -924,6 +924,8 @@ public class Utils
 
 	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
 	{
+		if(!info.contains(textToHighight))
+			return info;
 		SpannableStringBuilder ssb = new SpannableStringBuilder(info);
 		ssb.setSpan(new StyleSpan(Typeface.BOLD), info.indexOf(textToHighight), info.indexOf(textToHighight) + textToHighight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return ssb;

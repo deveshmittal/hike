@@ -88,7 +88,7 @@ import com.bsb.hike.voip.view.VoIPActivity;
 public class MqttMessagesManager
 {
 
-	private static final String UJFile = "uj_file";
+	public static final String UJFile = "uj_file";
 
 	private final HikeConversationsDatabase convDb;
 
@@ -236,14 +236,60 @@ public class MqttMessagesManager
 		mEditor.commit();
 		this.pubSub.publish(HikePubSub.SMS_CREDIT_CHANGED, credits);
 	}
+	
+	class UserJoinPacket{
 
+		String notificationText;
+		String notificationTitle;
+		int notificationType;
+		boolean persistChat;
+		
+		public UserJoinPacket(String text, String title, int type, boolean persist)
+		{
+			this.notificationText = text;
+			this.notificationTitle = title;
+			this.notificationType = type;
+			this.persistChat = persist;
+		}
+	}
+	
+	private UserJoinPacket parseNujRuj(JSONObject data, String userType, boolean store) throws JSONException
+	{
+
+		boolean isNewUser = userType.equals(HikeConstants.NEW_USER);
+		
+		String notificationText = data.optString(userType + "Txt", context.getString(isNewUser ? R.string.joined_hike_new : R.string.user_back_on_hike));
+		String notificationTitle = data.optString("Ttl", context.getString(R.string.start_thread1));
+		int notificationType = data.optInt("Typ", context.getResources().getInteger(isNewUser ? R.integer.default_nuj_push_type : R.integer.default_ruj_push_type));
+		boolean persistChat = data.optBoolean("Cht",false);
+		
+		return new UserJoinPacket(notificationText, notificationTitle, notificationType, persistChat);
+	}
+
+	
+	
 	private void saveUserJoinedOrLeft(JSONObject jsonObj) throws JSONException
 	{
 		String type = jsonObj.optString(HikeConstants.TYPE);
-		String msisdn = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN);
+		JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+		String msisdn = data.getString(HikeConstants.MSISDN);
 		boolean joined = HikeConstants.MqttMessageTypes.USER_JOINED.equals(type);
+		String userType = jsonObj.optString(HikeConstants.SUB_TYPE, HikeConstants.NEW_USER);
 		long joinTime = 0;
+		
+		UserJoinPacket ujp = parseNujRuj(data, userType, false);
+		
+		boolean isNewUser = userType.equals(HikeConstants.NEW_USER);
+		
+		String notificationText = data.optString("Txt", context.getString(isNewUser ? R.string.joined_hike_new : R.string.user_back_on_hike));
+		String notificationTitle = data.optString("Ttl", context.getString(R.string.start_thread1));
+		int notificationType = data.optInt("Typ", context.getResources().getInteger(isNewUser ? R.integer.default_nuj_push_type : R.integer.default_ruj_push_type));
+		boolean persistChat = data.optBoolean("Cht",false);
+	
+		//by default the chat shall not persist
+		
 		SharedPreferences settings = context.getSharedPreferences(UJFile, Context.MODE_PRIVATE);
+		// FOUND : store the push details from AC packet in this shared preference
 		if (joined)
 		{
 			joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
@@ -292,7 +338,15 @@ public class MqttMessagesManager
 				
 				if (convMessage != null && !isBulkMessage)
 				{
-					this.pubSub.publish(HikePubSub.USER_JOINED_NOTIFICATION, convMessage);
+					if(persistChat)
+					{
+						saveStatusMsg(jsonObj, msisdn);
+					}
+					else
+					{
+						this.pubSub.publish(HikePubSub.USER_JOINED_NOTIFICATION, convMessage);
+					}
+					//FOUND : here is where the pub sub is fired to send a notification
 				}
 			}
 		}

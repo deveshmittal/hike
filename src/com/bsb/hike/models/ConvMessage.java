@@ -415,7 +415,7 @@ public class ConvMessage
 		/**
 		 * This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.
 		 */
-//		this.shouldShowPush = obj.getJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.PUSH, true);
+		this.shouldShowPush = obj.getJSONObject(HikeConstants.DATA).optInt("Typ", 2) >= 1;
 
 		this.mMessage = "";
 		this.mTimestamp = System.currentTimeMillis() / 1000;
@@ -449,7 +449,9 @@ public class ConvMessage
 				{
 					name = Utils.getFirstName(conversation.getLabel());
 				}
-				this.mMessage = String.format(context.getString(metadata.isOldUser() ? R.string.user_back_on_hike : R.string.joined_hike_new), name);
+				this.mMessage = String.format(metadata.getJSON().getJSONObject(HikeConstants.DATA).optString("Txt"), name);
+				Logger.d("UmangH","in : "+metadata.getJSON().toString());
+				
 			}
 			break;
 		case USER_OPT_IN:
@@ -950,14 +952,25 @@ public class ConvMessage
 	 */
 	public boolean isSilent()
 	{
+		
+		int push = 2;
+		try {
+			push = metadata.getJSON().getJSONObject(HikeConstants.DATA).getInt("Typ");
+		} catch (JSONException e) {
+			Logger.d("UmangH", "Error in json " + e);
+		}
+		
 		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && platformWebMessageMetadata != null)
 		{
 			return platformWebMessageMetadata.isSilent();
 		}
-
-		// Do not play sound in case of bg change, participant joined, nuj/ruj, status updates
+		// Do not play sound in case of bg change, status updates
 		if ((getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) || (getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
-				|| (getParticipantInfoState() == ParticipantInfoState.USER_JOIN) || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+				 || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+		{
+			return true;
+		}
+		else if( push == 1 )
 		{
 			return true;
 		}
