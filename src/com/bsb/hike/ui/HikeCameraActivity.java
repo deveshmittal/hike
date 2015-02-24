@@ -2,6 +2,8 @@ package com.bsb.hike.ui;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -25,6 +27,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
+import com.commonsware.cwac.camera.PictureTransaction;
 
 public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener
 {
@@ -291,5 +294,21 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				// Access selected file
 			}
 		}
+	}
+
+	public Bitmap processSquareBitmap(Bitmap srcBmp)
+	{
+		if (containerView != null)
+		{
+			System.out.println("X: " + containerView.getX() + " Y: " + containerView.getY() + "Width: " + containerView.getWidth() + containerView.getHeight());
+			Rect r = new Rect();
+			containerView.getGlobalVisibleRect(r);
+			int side = srcBmp.getWidth() < srcBmp.getHeight() ? srcBmp.getWidth() : srcBmp.getHeight();
+			int diff = (r.top * srcBmp.getHeight()) / containerView.getHeight();
+			System.out.println("rX: " + r.left + " Y: " + r.top + "Width: " + side + containerView.getHeight());
+			Bitmap dstBmp = Bitmap.createBitmap(srcBmp, 0, diff, side, side);
+			return dstBmp;
+		}
+		return null;
 	}
 }

@@ -247,7 +247,10 @@ public class HikeCameraHost implements CameraHost
 	@Override
 	public void saveImage(PictureTransaction xact, Bitmap bitmap)
 	{
-		// no-op
+		if (bitmap != null)
+		{
+			mListener.onComplete(bitmap);
+		}
 	}
 
 	@Override
@@ -372,7 +375,7 @@ public class HikeCameraHost implements CameraHost
 		return (1.0f);
 	}
 
-	protected File getPhotoPath()
+	public File getPhotoPath()
 	{
 		File dir = getPhotoDirectory();
 

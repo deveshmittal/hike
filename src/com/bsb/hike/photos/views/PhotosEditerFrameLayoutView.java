@@ -102,6 +102,11 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 		imageOriginal = BitmapFactory.decodeFile(FilePath);
 		effectLayer.handleImage(new BitmapDrawable(imageOriginal));
 	}
+	
+	public void loadImageFromBitmap(Bitmap bmp)
+	{
+		effectLayer.handleImage(new BitmapDrawable(bmp));
+	}
 
 	public void enableDoodling()
 	{

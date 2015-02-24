@@ -1,21 +1,29 @@
 package com.bsb.hike.ui.fragments;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.io.File;
-import java.io.IOException;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.photos.HikeCameraHost;
 import com.bsb.hike.photos.HikePhotosListener;
+import com.bsb.hike.photos.views.PhotosEditerFrameLayoutView;
 import com.bsb.hike.ui.HikeCameraActivity;
 import com.bsb.hike.ui.PictureEditer;
+import com.bsb.hike.ui.PictureEditer.PhotoEditViewPagerAdapter;
 import com.bsb.hike.utils.Logger;
-import com.commonsware.cwac.camera.CameraHost;
 import com.commonsware.cwac.camera.CameraView;
 import com.commonsware.cwac.camera.PictureTransaction;
 import com.commonsware.cwac.camera.ZoomTransaction;
@@ -139,11 +147,57 @@ public class CameraFragment extends SherlockFragment
 				public void run()
 				{
 					Logger.d("CameraFragment", "Saved Image: " + (f != null ? f.getAbsolutePath() : "null"));
-					Intent i = new Intent(getActivity(), PictureEditer.class);
-					i.putExtra("FilePath", f.getAbsolutePath());
-					getActivity().startActivity(i);
 				}
 			});
+		}
+
+		@Override
+		public void onComplete(final Bitmap bmp)
+		{
+			getActivity().runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					if (getActivity() instanceof HikeCameraActivity)
+					{
+						Bitmap bimp = ((HikeCameraActivity) getActivity()).processSquareBitmap(bmp);
+
+						OutputStream outStream = null;
+
+						File file = getHost().getPhotoPath();
+						try
+						{
+							// make a new bitmap from your file
+							outStream = new FileOutputStream(file);
+							bimp.compress(Bitmap.CompressFormat.JPEG, 90, outStream);
+							outStream.flush();
+							outStream.close();
+						}
+						catch (Exception e)
+						{
+							e.printStackTrace();
+						}
+						Log.e("file", "" + file);
+
+						final String filePath = file.getAbsolutePath();
+
+						new Handler().postDelayed(new Runnable()
+						{
+
+							@Override
+							public void run()
+							{
+								Intent i = new Intent(getActivity(), PictureEditer.class);
+								i.putExtra("FilePath", filePath);
+								getActivity().startActivity(i);
+							}
+						}, 2000);
+
+					}
+				}
+			});
+
 		}
 	};
 
@@ -163,7 +217,11 @@ public class CameraFragment extends SherlockFragment
 	 */
 	public void takePicture()
 	{
-		takePicture(false, true);
+		takePicture(true, true);
+		// PictureTransaction xact=new PictureTransaction(getHost());
+		// xact.mirrorFFC(false);
+		// xact.useSingleShotMode(true);
+		// takePicture(xact);
 	}
 
 	/**
