@@ -560,7 +560,8 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private class FetchPhoneBookContactsTask extends AsyncTask<Void, Void, Void>
 	{
-		List<Conversation> otherConversations = new ArrayList<Conversation>();
+		List<Conversation> hikeContacts = new ArrayList<Conversation>();
+		List<Conversation> nonHikeContacts = new ArrayList<Conversation>();
 
 		@Override
 		protected Void doInBackground(Void... arg0)
@@ -586,7 +587,14 @@ public class ConversationsAdapter extends BaseAdapter
 				ConvMessage message = new ConvMessage(msg, contact.getMsisdn(), 0, State.RECEIVED_READ);
 				messagesList.add(message);
 				conv.setMessages(messagesList);
-				otherConversations.add(conv);
+				if (contact.isOnhike())
+				{
+					hikeContacts.add(conv);
+				}
+				else
+				{
+					nonHikeContacts.add(conv);
+				}
 			}
 			return null;
 		}
@@ -594,7 +602,9 @@ public class ConversationsAdapter extends BaseAdapter
 		@Override
 		protected void onPostExecute(Void result)
 		{
-			phoneBookContacts = otherConversations;
+			phoneBookContacts = new ArrayList<Conversation>();
+			phoneBookContacts.addAll(hikeContacts);
+			phoneBookContacts.addAll(nonHikeContacts);
 			super.onPostExecute(result);
 		}
 	}
