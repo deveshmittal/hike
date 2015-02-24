@@ -1316,7 +1316,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="call_rate_subheading">We\'d love to know how the quality of your last call was</string>
     <string name="call_rate_not_now">NOT NOW</string>
     <string name="call_rate_submit">SUBMIT</string>
-    <string name="happy_republic_day">Happy Republic Day</string>
     <string name="mute">Mute</string>
     <string name="unmute">Unmute</string>
     <string name="card_loading">LOADING</string>
@@ -1346,6 +1345,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="valentine_day">Happy Valentine\'s Day</string>
     <string name="nux_expired">This activity has expired</string>
     <string name="nux_completed">You\'ve already completed this activity.</string>
+    <string name="holi">Happy Holi</string>
     <string name="terms_conditions_hint">Terms and Conditions</string>
 	<string name="terms_conditions_title">T &amp; C</string>
 </resources>

@@ -9,8 +9,8 @@
 	    android:layout_width="@dimen/festive_popup_width"
 	    android:layout_height="@dimen/festive_popup_height"
 	    android:layout_gravity="center"
-	    android:background="@drawable/valentine_day_popup_bg"
-	    android:visibility="gone" >
+	    android:background="#0f8fe1"
+	    android:visibility="visible" >
 	
 	    <LinearLayout
 	        android:id="@+id/button_container"
@@ -51,8 +51,8 @@
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:layout_marginLeft="3.5dp"
-	            android:layout_marginTop="12dp"
-	            android:text="@string/valentine_day"
+	            android:layout_marginTop="6dp"
+	            android:text="@string/holi"
 	            android:textColor="@color/white"
 	            android:textSize="20dp"
 	            android:textStyle="bold|italic" />
@@ -61,7 +61,7 @@
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:layout_marginLeft="2dp"
-	            android:layout_marginTop="1dp"
+	            android:layout_marginTop="3dp"
 	            android:text="@string/send_sticker_joy"
 	            android:textColor="@color/white"
 	            android:textSize="14dp" />
@@ -70,9 +70,10 @@
 	            android:id="@+id/sticker_popup_image"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:layout_marginTop="12dp"
-	            android:visibility="invisible"
-	            android:src="@drawable/cupidhikin" />
+	            android:layout_marginTop="24dp"
+	            android:src="@drawable/holi"
+	            android:visibility="visible" />
+
 	    </LinearLayout>
 
 	    <ImageButton

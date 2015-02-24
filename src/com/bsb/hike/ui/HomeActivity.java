@@ -276,8 +276,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void setupFestivePopup()
 	{
-		final int festivePopupType = accountPrefs.getInt(HikeConstants.SHOW_FESTIVE_POPUP, -1);
-		if (festivePopupType == FestivePopup.VALENTINE_DAY_POPUP)
+		final int festivePopupType = 4;//accountPrefs.getInt(HikeConstants.SHOW_FESTIVE_POPUP, -1);
+		if (festivePopupType == FestivePopup.HOLI_POPUP)
 		{
 			if(FestivePopup.isPastFestiveDate(festivePopupType))
 			{
