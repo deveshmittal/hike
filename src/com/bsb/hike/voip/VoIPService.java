@@ -1413,7 +1413,7 @@ public class VoIPService extends Service {
 						index = 0;
 						long timer = System.currentTimeMillis();
 						while (index < dp.getLength()) {
-							size = Math.min(minBufSizePlayback / 2, dp.getLength() - index);
+							size = Math.min(minBufSizePlayback, dp.getLength() - index);
 							audioTrack.write(dp.getData(), index, size);
 							index += size; 
 						}
