@@ -190,7 +190,8 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			Intent intent = new Intent();
 			intent.setClass(HikeCameraActivity.this, PictureEditer.class);
 			PendingIntent pendingIntent = PendingIntent.getActivity(HikeCameraActivity.this, 0, intent, 0);
-			Intent galleryPickerIntent = IntentManager.getHikeGalleryPickerIntent(HikeCameraActivity.this, false,false,GalleryActivity.PHOTOS_EDITOR_ACTION_BAR_TYPE, pendingIntent);
+			Intent galleryPickerIntent = IntentManager.getHikeGalleryPickerIntent(HikeCameraActivity.this, false, false, GalleryActivity.PHOTOS_EDITOR_ACTION_BAR_TYPE,
+					pendingIntent);
 			startActivityForResult(galleryPickerIntent, GALLERY_PICKER_REQUEST);
 			break;
 		case R.id.btnflip:
@@ -200,7 +201,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 			if (isUsingFFC)
 			{
-				//TODO Temporary fix . Change UI
+				// TODO Temporary fix . Change UI
 				return;
 			}
 
@@ -305,8 +306,14 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			containerView.getGlobalVisibleRect(r);
 			int side = srcBmp.getWidth() < srcBmp.getHeight() ? srcBmp.getWidth() : srcBmp.getHeight();
 			int diff = (r.top * srcBmp.getHeight()) / containerView.getHeight();
+
+			if (side == srcBmp.getHeight())
+			{
+				side -= diff;
+			}
+
 			System.out.println("rX: " + r.left + " Y: " + r.top + "Width: " + side + containerView.getHeight());
-			Bitmap dstBmp = Bitmap.createBitmap(srcBmp, 0, diff, side, side);
+			Bitmap dstBmp = Bitmap.createBitmap(srcBmp, (srcBmp.getWidth() / 2) - (side / 2), diff, side, side);
 			return dstBmp;
 		}
 		return null;
