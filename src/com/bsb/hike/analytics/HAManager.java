@@ -723,7 +723,7 @@ public class HAManager
 
 	public void recordLastSeenEvent(String screen, String api, String msg, String toUser)
 	{
-		if(!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.DETAILED_HTTP_LOGGING_ENABLED, false))
+		if(!HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.DETAILED_HTTP_LOGGING_ENABLED, false))
 		{	
 			return;
 		}

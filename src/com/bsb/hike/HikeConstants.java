@@ -1390,6 +1390,10 @@ public class HikeConstants
 		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
 		
 		public static final String NUX_INCENTIVE_MODE = "showNuxIncentiveMode";
+
+		public static final String GENERAL_SO_TIMEOUT = "sto";
+
+		public static final String FT_UPLOAD_SO_TIMEOUT = "ftsto";
 	}
 
 	public static final class LogEvent

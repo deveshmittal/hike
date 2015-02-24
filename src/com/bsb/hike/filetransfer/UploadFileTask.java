@@ -66,6 +66,7 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.video.HikeVideoCompressor;
@@ -1142,7 +1143,9 @@ public class UploadFileTask extends FileTransferBase
 			client = new DefaultHttpClient();
 			client.getParams().setParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, bufferSize);
 			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
-			client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60 * 1000);
+			long so_timeout = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.FT_UPLOAD_SO_TIMEOUT, 180 * 1000l);
+			Logger.d("UploadFileTask", "Socket timeout = " + so_timeout);
+			client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, (int) so_timeout);
 			client.getParams().setParameter(CoreConnectionPNames.TCP_NODELAY, true);
 			client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + AccountUtils.getAppVersion());
 		}
