@@ -79,6 +79,7 @@ import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.ContentLove;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
@@ -86,6 +87,7 @@ import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.LastSeenScheduler;
@@ -100,6 +102,8 @@ import com.bsb.hike.view.TagEditText.TagEditorListener;
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener, OnScrollListener
 {
 	private static final String SELECT_ALL_MSISDN="all";
+	
+	private final String HORIZONTAL_FRIEND_FRAGMENT = "horizontalFriendFragment";
 	
 	private static int MIN_MEMBERS_GROUP_CHAT = 2;
 
@@ -167,7 +171,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private boolean nuxIncentiveMode;
 
-	 private HorizontalFriendsFragment newFragment =null;
+	 private HorizontalFriendsFragment newFragment;
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -207,21 +211,25 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		setContentView(R.layout.compose_chat);
 
-		if (savedInstanceState == null && nuxIncentiveMode)
-		{
-
+		if (nuxIncentiveMode)
+		{ 
 			FragmentManager fm = getSupportFragmentManager();
-			newFragment = (HorizontalFriendsFragment) fm.findFragmentByTag("chatFragment");
-			if (newFragment == null)
-			{
-				newFragment = new HorizontalFriendsFragment();
-			}
+			newFragment = (HorizontalFriendsFragment) fm.findFragmentByTag(HORIZONTAL_FRIEND_FRAGMENT);
 			FragmentTransaction ft = fm.beginTransaction();
 			ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-			ft.add(R.id.horizontal_friends_placeholder, newFragment, "chatFragment").commit();
+			
+			if(newFragment == null) 
+			{
+				Logger.d("UmangX","creating Frag");
+				newFragment = new HorizontalFriendsFragment();
+				ft.add(R.id.horizontal_friends_placeholder, newFragment, HORIZONTAL_FRIEND_FRAGMENT).commit();
+			} 
+			else 
+			{
+				ft.attach(newFragment).commit();
+			}
 			setListnerToRootView();
-
-		}
+		} 
 		Object object = getLastCustomNonConfigurationInstance();
 
 		if (object instanceof InitiateMultiFileTransferTask)
@@ -1245,6 +1253,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			try
 			{
 				JSONArray multipleMsgFwdArray = new JSONArray(jsonString);
+				JSONObject platformAnalyticsJson = new JSONObject();
+				StringBuilder platformCards = new StringBuilder();
 				int msgCount = multipleMsgFwdArray.length();
 				for (int i = 0; i < msgCount; i++)
 				{
@@ -1364,6 +1374,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 						convMessage.platformWebMessageMetadata =  new PlatformWebMessageMetadata(PlatformContent.getForwardCardData(metadata));
 
+						try
+						{
+							platformCards.append( TextUtils.isEmpty(platformCards) ? convMessage.platformWebMessageMetadata.getAppName() : "," + convMessage.platformWebMessageMetadata.getAppName());
+						}
+						catch (NullPointerException e)
+						{
+							e.printStackTrace();
+						}
 						convMessage.setMessage(msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE));
 						multipleMessageList.add(convMessage);
 					}
@@ -1371,6 +1389,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 					 */
 				}
+				platformAnalyticsJson.put(HikePlatformConstants.CARD_TYPE, platformCards);
 				if(!fileTransferList.isEmpty()){
 					prefileTransferTask = new PreFileTransferAsycntask(fileTransferList,intent);
 					Utils.executeAsyncTask(prefileTransferTask);
@@ -1391,7 +1410,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
 					sendMessage(convMessage);
 				}else{
-					sendMultiMessages(multipleMessageList,arrayList,false);
+					sendMultiMessages(multipleMessageList,arrayList,platformAnalyticsJson,false);
 					if(fileTransferList.isEmpty()){
 						// if it is >0 then onpost execute of PreFileTransferAsycntask will start intent
 						startActivity(intent);
@@ -1516,8 +1535,23 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		return toReturn;
 	}
 
-	private void sendMultiMessages(ArrayList<ConvMessage> multipleMessageList, ArrayList<ContactInfo> arrayList,boolean createChatThread)
+	private void sendMultiMessages(ArrayList<ConvMessage> multipleMessageList, ArrayList<ContactInfo> arrayList, JSONObject platformAnalyticsJson, boolean createChatThread)
 	{
+		try
+		{
+			StringBuilder contactList = new StringBuilder();
+			for (ContactInfo contactInfo : arrayList)
+			{
+				contactList.append(TextUtils.isEmpty(contactList) ? contactInfo.getMsisdn() : "," + contactInfo.getMsisdn());
+			}
+			platformAnalyticsJson.put(AnalyticsConstants.TO, contactList);
+			platformAnalyticsJson.put(HikeConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
+			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, platformAnalyticsJson, AnalyticsConstants.EVENT_TAG_PLATFORM);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
 		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000, createChatThread, null);
 		mPubSub.publish(HikePubSub.MULTI_MESSAGE_SENT, multiMessages);
 	}

@@ -1,9 +1,9 @@
 package com.bsb.hike;
 
-import com.bsb.hike.models.StatusMessage.StatusMessageType;
-
 import android.net.Uri;
 import android.os.Environment;
+
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 
 public class HikeConstants
 {
@@ -496,6 +496,8 @@ public class HikeConstants
 	public static final String BACKUP_PREF = "backupAccount";
 
     public static final String NUX_BOT = "+hike5+";
+    
+    public static final String CRICKET_BOT = "+hikecricket+";
 
     public static final String NUX = "nux";
 
@@ -516,6 +518,8 @@ public class HikeConstants
 	public static final String HELP_FAQS_PREF = "helpFaqs";
 
 	public static final String HELP_FEEDBACK_PREF = "helpFeedback";
+	
+	public static final String HELP_TNC_PREF = "helpTnc";
 
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
 	
@@ -987,7 +991,7 @@ public class HikeConstants
 	
 	public static final String SHOW_FESTIVE_POPUP = "showFestivePopup";
 
-	public static final String REPUBLIC_DAY_POPUP = "indiarepublic";
+	public static final String VALENTINE_DAY_POPUP = "valentine";
 
 	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
 
@@ -1982,7 +1986,7 @@ public class HikeConstants
 
 		public static final String DELETE_MULTIPLE_BOTS = "dbot";
 
-		public static final String GCM_ECHO = "gcmecho";
+		public static final String PACKET_ECHO = "pecho";
 
 		public static final String VOIP_SOCKET_INFO = "ve";
 		
@@ -2269,6 +2273,12 @@ public class HikeConstants
 	public static final String OFF = "off";
 
 	public static final String ENABLE_DETAILED_HTTP_LOGGING = "edhl";
-
-
+	
+	public static final String ERROR_MESSAGE = "em";
+	
+	public static final String EXCEPTION_MESSAGE = "exm";
+	
+	public static final String REARRANGE_CHAT = "rearrange_chat";
+	
+	public static final String CONTENT_ID = "content_id";
 }

@@ -5,7 +5,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 public interface DBConstants
 {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 35;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 36;
 
 	public static final int USERS_DATABASE_VERSION = 15;
 
@@ -243,6 +243,17 @@ public interface DBConstants
 		public static final String CHANNEL_ID = "channel_id";
 		public static final String TIMESTAMP = "timestamp";
 		public static final String METADATA = "metadata";
+		
+		//ALARM TABLE->id,time,willWakeCpu,time,intent
+		
+		public static final String ALARM_MGR_TABLE = "HikeAlaMge";
+
+		public static final String TIME = "time";
+
+		public static final String WILL_WAKE_CPU = "willwakecpu";
+
+		public static final String INTENT = "intent";
+
 		// CONTENT TABLE ENDS HERE
 		// APP DATA TABLE
 		
@@ -269,11 +280,5 @@ public interface DBConstants
 
 	public static final String STICKER_SHOP_TABLE = "stickerShopTable";
 	
-	public static final String ALARM_MGR_TABLE="HikeAlaMge";
-	
-	public static final String TIME="time";
-	
-	public static final String WILL_WAKE_CPU="willwakecpu";
-	
-	public static final String INTENT="intent";
+	public static final String MESSAGE_TABLE_CONTENT_INDEX = "messageContentIndex";
 }

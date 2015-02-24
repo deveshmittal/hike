@@ -45,7 +45,6 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
-import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.Utils;
 
 public class HikeNotification
@@ -1115,25 +1114,31 @@ public class HikeNotification
 		
 		AudioManager manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 		
-		if (!forceNotPlaySound)
+		if (!forceNotPlaySound && !manager.isMusicActive())
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-			
-			if (!shouldNotPlayNotification && !Utils.isUserInAnyTypeOfCall(context))
+			String notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
+			if (!shouldNotPlayNotification)
 			{
-				String notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
 				Logger.i("notif", "sound " + notifSound);
+
 				if (!NOTIF_SOUND_OFF.equals(notifSound))
 				{
-					if (manager.isMusicActive() || manager.isWiredHeadsetOn())
+					if (NOTIF_SOUND_HIKE.equals(notifSound))
 					{
-						playSoundViaPlayer(notifSound);
+						mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
+					}
+					else if (NOTIF_SOUND_DEFAULT.equals(notifSound))
+					{
+						mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
 					}
 					else
 					{
-						playSoundViaBuilder(mBuilder, notifSound);
+						notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.NOTIFICATION_TONE_URI, NOTIF_SOUND_HIKE);
+						mBuilder.setSound(Uri.parse(notifSound));
 					}
 				}
+
 				if (!VIB_OFF.equals(vibrate))
 				{
 					if (VIB_DEF.equals(vibrate))
@@ -1252,38 +1257,4 @@ public class HikeNotification
 		HikeAlarmManager.cancelAlarm(context, HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION);
 	}
 	
-	private void playSoundViaPlayer(String notifSound)
-	{
-		if (NOTIF_SOUND_HIKE.equals(notifSound))
-		{
-			SoundUtils.playSoundFromRaw(context, R.raw.hike_jingle_15);
-		}
-		else if (NOTIF_SOUND_DEFAULT.equals(notifSound))
-		{
-			SoundUtils.playDefaultNotificationSound(context);
-		}
-		else
-		{
-			notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.NOTIFICATION_TONE_URI, NOTIF_SOUND_HIKE);
-			SoundUtils.playSound(context, Uri.parse(notifSound));
-		}
-	}
-
-	private void playSoundViaBuilder(NotificationCompat.Builder mBuilder, String notifSound)
-	{
-		if (NOTIF_SOUND_HIKE.equals(notifSound))
-		{
-			mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
-		}
-		else if (NOTIF_SOUND_DEFAULT.equals(notifSound))
-		{
-			mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
-		}
-		else
-		{
-			notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.NOTIFICATION_TONE_URI, NOTIF_SOUND_HIKE);
-			mBuilder.setSound(Uri.parse(notifSound));
-		}
-	}
-
 }

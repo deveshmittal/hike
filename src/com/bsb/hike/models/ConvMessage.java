@@ -1,26 +1,23 @@
 package com.bsb.hike.models;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class ConvMessage
 {
@@ -64,7 +61,19 @@ public class ConvMessage
 	private boolean isTickSoundPlayed = false;
 	
 	private int  hashMessage= HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE;
+	
+	private int contentId;
 
+	public int getContentId()
+	{
+		return contentId;
+	}
+	
+	public void setContentId(int contentId)
+	{
+		this.contentId = contentId;
+	}
+	
 	public int getHashMessage()
 	{
 		return hashMessage;
@@ -264,11 +273,15 @@ public class ConvMessage
 	}
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS, int type)
 	{
-		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type);
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type,0);
+	}
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS, int type,int contentId)
+	{
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type,contentId);
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS,
-			ParticipantInfoState participantInfoState, int type)
+			ParticipantInfoState participantInfoState, int type,int contentId)
 	{
 		assert (msisdn != null);
 		this.mMsisdn = msisdn;
@@ -362,6 +375,7 @@ public class ConvMessage
 			md.put(HikeConstants.POKE, true);
 			data.put(HikeConstants.METADATA, md);
 		}
+		setContentId(data.optInt(HikeConstants.CONTENT_ID));
 		if (data.has(HikeConstants.METADATA))
 		{
 			JSONObject mdata = data.getJSONObject(HikeConstants.METADATA);
@@ -953,6 +967,11 @@ public class ConvMessage
 	 */
 	public boolean isSilent()
 	{
+		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && platformWebMessageMetadata != null)
+		{
+			return platformWebMessageMetadata.isSilent();
+		}
+
 		// Do not play sound in case of bg change, participant joined, nuj/ruj, status updates
 		if ((getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) || (getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
 				|| (getParticipantInfoState() == ParticipantInfoState.USER_JOIN) || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))

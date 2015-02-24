@@ -1,7 +1,6 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -74,7 +73,6 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -93,9 +91,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.media.AudioManager;
 import android.media.ExifInterface;
-import android.media.MediaPlayer;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.TrafficStats;
@@ -146,8 +141,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeConstants.ImageQuality;
@@ -156,11 +150,12 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.TrafficsStatsFile;
 import com.bsb.hike.cropimage.CropImage;
-import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
@@ -175,21 +170,17 @@ import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.ConnectionChangeReceiver;
-import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.service.HikeMqttManagerNew;
-import com.bsb.hike.service.HikeService;
+import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.ComposeChatActivity;
-import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -201,9 +192,6 @@ import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPUtils;
-import com.bsb.hike.voip.view.VoIPActivity;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -1670,12 +1658,12 @@ public class Utils
 		}
 
 		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
-		AccountUtils.fileTransferUploadBase = httpString + AccountUtils.fileTransferHost + ":" + Integer.toString(AccountUtils.port) + "/v1";
+		AccountUtils.fileTransferBase = httpString + AccountUtils.fileTransferHost + ":" + Integer.toString(AccountUtils.port) + "/v1";
 		 
 		CheckForUpdateTask.UPDATE_CHECK_URL = httpString + (isProductionServer ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL);
 		 
-		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
-		AccountUtils.fastFileUploadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
+		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.fileTransferBase + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
+		AccountUtils.fastFileUploadUrl = AccountUtils.fileTransferBase + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
 
@@ -1687,7 +1675,7 @@ public class Utils
 		AccountUtils.h2oTutorialUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.H2O_TUTORIAL_PRODUCTION_BASE : AccountUtils.H2O_TUTORIAL_STAGING_BASE);
 		Logger.d("SSL", "Base: " + AccountUtils.base);
 		Logger.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
-		Logger.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferUploadBase);
+		Logger.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferBase);
 		Logger.d("SSL", "UpdateCheck: " + CheckForUpdateTask.UPDATE_CHECK_URL);
 		Logger.d("SSL", "FTDloadBase: " + AccountUtils.fileTransferBaseDownloadUrl);
 		Logger.d("SSL", "FTViewBase: " + AccountUtils.fileTransferBaseViewUrl);
@@ -3783,6 +3771,15 @@ public class Utils
 
 	public static void makeNoMediaFile(File root)
 	{
+		makeNoMediaFile(root, false);
+	}
+
+	/*
+	 * Whenever creating a nomedia file in any dirctory and if images/videos are already present in 
+	 * that directory then we need to do re-scan to make them invisible from gallery.
+	 */
+	public static void makeNoMediaFile(File root, boolean reScan)
+	{
 		if (root == null)
 		{
 			return;
@@ -3795,13 +3792,50 @@ public class Utils
 		File file = new File(root, ".nomedia");
 		if (!file.exists())
 		{
+			FileOutputStream dest = null;
 			try
 			{
-				file.createNewFile();
+				dest = new FileOutputStream(file);
+				/*
+				 * File content could be blank (for backwards compatibility), or have one or more of the following values separated by a newline:
+				 * image|sound|video
+				 * Reference - https://code.google.com/p/android/issues/detail?id=35879
+				 */
+				String data = "";
+				dest.write(data.getBytes(), 0, data.getBytes().length);
 			}
 			catch (IOException e)
 			{
-				Logger.d("NoMedia", "failed to make nomedia file");
+				Logger.d("NoMedia", "Failed to make nomedia file");
+			}
+			finally
+			{
+				try
+				{
+					if(dest != null)
+					{
+						dest.flush();
+						dest.getFD().sync();
+						dest.close();
+					}
+				}
+				catch (IOException e)
+				{
+					Logger.d("NoMedia", "Failed to make nomedia file");
+				}
+			}
+			if(reScan)
+			{
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+				{
+					HikeMessengerApp.getInstance().getApplicationContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" +
+							root)));
+				}
+				else
+				{
+					HikeMessengerApp.getInstance().getApplicationContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" +
+							root)));
+				}
 			}
 		}
 	}
@@ -5235,4 +5269,22 @@ public class Utils
 	    return viewToBitmap(view);
 	}
 	
+	public static boolean isConversationMuted(String msisdn)
+	{
+		if ((Utils.isGroupConversation(msisdn)))
+		{
+			if (HikeConversationsDatabase.getInstance().isGroupMuted(msisdn))
+			{
+				return true;
+			}
+		}
+		else if (Utils.isBot(msisdn))
+		{
+			if (HikeConversationsDatabase.getInstance().isBotMuted(msisdn))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 }

@@ -79,6 +79,8 @@ public class Conversation implements Comparable<Conversation>
 	
 	private byte isMuted = -1;
 
+	private long cTimeStamp;
+	
 	public String getLastPin()
 	{
 		return lastPin;
@@ -120,16 +122,17 @@ public class Conversation implements Comparable<Conversation>
 		return TextUtils.isEmpty(contactName) ? msisdn : contactName;
 	}
 
-	public Conversation(String msisdn)
+	public Conversation(String msisdn, long timeStamp)
 	{
 		this(msisdn, null, false);
+		setTimestamp(timeStamp);
 	}
 
 	public Conversation(String msisdn, String contactName, boolean onhike)
 	{
 		this(msisdn, contactName, onhike, false);
 	}
-
+	
 	public Conversation(String msisdn, String contactName, boolean onhike, boolean isStealth)
 	{
 		this.msisdn = msisdn;
@@ -138,6 +141,17 @@ public class Conversation implements Comparable<Conversation>
 		this.isStealth = isStealth;
 		this.messages = new ArrayList<ConvMessage>();
 	}
+
+	public long getTimestamp()
+	{
+		return cTimeStamp;
+	}
+	
+	public void setTimestamp(long timeStamp)
+	{
+		this.cTimeStamp = timeStamp;
+	}
+	
 
 	public boolean isOnhike()
 	{
@@ -153,6 +167,7 @@ public class Conversation implements Comparable<Conversation>
 	public void addMessage(ConvMessage message)
 	{
 		this.messages.add(message);
+		setTimestamp(message.getTimestamp());
 	}
 
 	/**
@@ -185,13 +200,13 @@ public class Conversation implements Comparable<Conversation>
 			return 0;
 		}
 
-		long ts = messages.isEmpty() ? 0 : messages.get(messages.size() - 1).getTimestamp();
+		long ts = getTimestamp();
 		if (rhs == null)
 		{
 			return 1;
 		}
 
-		long rhsTs = rhs.messages.isEmpty() ? 0 : rhs.messages.get(rhs.messages.size() - 1).getTimestamp();
+		long rhsTs = rhs.getTimestamp();
 
 		if (rhsTs != ts)
 		{
@@ -474,8 +489,8 @@ public class Conversation implements Comparable<Conversation>
             json.put(AnalyticsConstants.EVENT_KEY, key);
             json.put(AnalyticsConstants.ORIGIN, HikePlatformConstants.CONVERSATION_FRAGMENT);
             json.put(AnalyticsConstants.UNREAD_COUNT, getUnreadCount());
-            json.put(HikeConstants.MSISDN, getMsisdn());
-            HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.UI_EVENT, subType, json);
+            json.put(AnalyticsConstants.CHAT_MSISDN, getMsisdn());
+            HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, subType, json, AnalyticsConstants.EVENT_TAG_BOTS);
         } catch (JSONException e) {
             e.printStackTrace();
         }

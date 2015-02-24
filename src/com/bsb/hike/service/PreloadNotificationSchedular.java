@@ -8,9 +8,9 @@ import android.content.Context;
 
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.notifications.ToastListener;
-import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 public class PreloadNotificationSchedular
 {
@@ -145,10 +145,10 @@ public class PreloadNotificationSchedular
 		String text = mprefs.getData(NOTIFICATION_TITLE, null);
 		
 		/*
-		 * Signup==null is for the case when the user is signing up and the notification should not be shown.
+		 *Adding an check that weather the user has signed up or not.
 		 * 
 		 */
-		if (title != null && text != null && mmListener != null&&SignupTask.signupTask==null)
+		if (title != null && text != null && mmListener != null&&!Utils.isUserSignedUp(context, false))
 		{
 
 			mmListener.notifyUser(text, title);

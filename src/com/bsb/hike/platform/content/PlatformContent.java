@@ -1,14 +1,12 @@
 package com.bsb.hike.platform.content;
 
-import android.util.Log;
 
-import com.bsb.hike.AppConfig;
+import java.io.File;
+
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
-
-import java.io.File;
 
 public class PlatformContent
 {
@@ -100,25 +98,6 @@ public class PlatformContent
 						+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
 			}
 			isInitialized = true;
-
-			if (AppConfig.ALLOW_STAGING_TOGGLE)
-			{
-				// For testing purposes. We delete Content folder from saved location when hike messenger is re-started
-				File contentDir = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR);
-				
-//				if (contentDir != null)
-//				{
-//					try
-//					{
-//						Logger.d("PlatformContent", "Deleting old content");
-//						Utils.deleteFile(contentDir); 
-//					}
-//					catch (NullPointerException npe)
-//					{
-//						npe.printStackTrace();
-//					}
-//				}
-			}
 		}
 
 		Logger.d("PlatformContent", "Content Dir : " + PlatformContentConstants.PLATFORM_CONTENT_DIR);
@@ -132,7 +111,7 @@ public class PlatformContent
 		}
 		else
 		{
-			Log.e("PlatformContent", "Incorrect content data");
+			Logger.e("PlatformContent", "Incorrect content data");
 			listener.onEventOccured(EventCode.INVALID_DATA);
 			return null;
 		}

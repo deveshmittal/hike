@@ -9,9 +9,9 @@ import org.json.JSONObject;
 import android.content.Context;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.service.HikeMqttManagerNew;
 
 public class HikeAnalyticsEvent
 {
@@ -106,7 +106,7 @@ public class HikeAnalyticsEvent
 		}
 	}
 
-    public static void analyticsForBots(String type, String subType, JSONObject json)
+    public static void analyticsForPlatformAndBots(String type, String subType, JSONObject json, String tag)
     {
         try
         {

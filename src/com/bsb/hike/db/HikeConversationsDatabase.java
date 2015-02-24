@@ -1,8 +1,24 @@
 package com.bsb.hike.db;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -13,16 +29,16 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
 import android.util.SparseArray;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -33,7 +49,6 @@ import com.bsb.hike.models.CustomStickerCategory;
 import com.bsb.hike.models.FileListItem;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
@@ -56,24 +71,6 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBConstants, HIKE_CONV_DB
 {
@@ -127,8 +124,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ DBConstants.MESSAGE_HASH + " TEXT DEFAULT NULL, " // Used for duplication checks.
 				+ DBConstants.MESSAGE_TYPE + " INTEGER" + " INTEGER DEFAULT -1, " // The type of the message.
 				+ DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER DEFAULT -1" // love id applicable to few messages like content
+				+ DBConstants.HIKE_CONTENT.CONTENT_ID + " INTEGER DEFAULT -1" // love id applicable to few messages like content
 				+ " ) ";
 
+		db.execSQL(sql);
+		sql = DBConstants.CREATE_INDEX + DBConstants.MESSAGE_TABLE_CONTENT_INDEX + " ON " + DBConstants.MESSAGES_TABLE +" ( "+DBConstants.HIKE_CONTENT.CONTENT_ID +" ) ";
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CONVERSATION_INDEX + " ON " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.CONV_ID + " , " + DBConstants.TIMESTAMP
 				+ " DESC" + " )";
@@ -243,62 +243,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		sql = getStickerShopTableCreateQuery();
 		db.execSQL(sql);
 		
-		sql = CREATE_TABLE + DBConstants.ALARM_MGR_TABLE + "(" + _ID + " INTEGER PRIMARY KEY, " + TIME + " TEXT, " + DBConstants.WILL_WAKE_CPU + " INTEGER, " + DBConstants.INTENT
-				+ " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
-		db.execSQL(sql);
-
 		sql = CREATE_TABLE + DBConstants.BOT_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.NAME + " TEXT, " + DBConstants.CONVERSATION_METADATA + " TEXT, "+ DBConstants.IS_MUTE + " INTEGER DEFAULT 0)";
 		db.execSQL(sql);
-	}
-
-	public void insertIntoAlarmManagerDB(long time, int requestCode, boolean WillWakeCPU, Intent intent)
-	{
-		ContentValues cv = new ContentValues();
-		cv.put(DBConstants._ID, requestCode);
-		cv.put(DBConstants.TIME, time + "");
-		cv.put(DBConstants.WILL_WAKE_CPU, WillWakeCPU);
-		cv.put(DBConstants.INTENT, intent.toUri(0));
-
-		mDb.insertWithOnConflict(DBConstants.ALARM_MGR_TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
-	}
-
-	public void deleteFromAlarmManagerDB(int requestCode)
-	{
-		mDb.delete(DBConstants.ALARM_MGR_TABLE, DBConstants._ID + "=" + requestCode, null);
-	}
-
-	public void rePopulateAlarmWhenClosed()
-	{
-		Logger.d("Alarm Manager", "rePopulating all Alarms");
-		String selectQuery = "SELECT  * FROM " + DBConstants.ALARM_MGR_TABLE;
-
-		Cursor cursor = mDb.rawQuery(selectQuery, null);
-		try
-		{
-			if (cursor.moveToFirst())
-			{
-				do
-				{
-					Logger.d("Alarm Manager", "rePopulating all Alarms");
-					int requestCode = cursor.getInt(cursor.getColumnIndex(DBConstants._ID));
-					long time = Long.parseLong(cursor.getString(cursor.getColumnIndex(DBConstants.TIME)));
-					int willWakeCpu = cursor.getInt(cursor.getColumnIndex(DBConstants.WILL_WAKE_CPU));
-					String intent = cursor.getString(cursor.getColumnIndex(DBConstants.INTENT));
-					Uri asd = Uri.parse(intent);
-
-					Intent intentAlarm = Intent.getIntent(asd.toString());
-
-					HikeAlarmManager.setAlarmwithIntentPersistance(HikeMessengerApp.getInstance(), time, requestCode, (willWakeCpu != 0), intentAlarm, false);
-
-				}
-				while (cursor.moveToNext());
-			}
-		}
-		catch (URISyntaxException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 	}
 	public void deleteAll()
 	{
@@ -717,17 +664,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 		}
 
-		if (oldVersion < 34)
-		{
-			String sql2 = CREATE_TABLE + DBConstants.ALARM_MGR_TABLE + "(" + _ID + " INTEGER PRIMARY KEY, " + TIME + " TEXT, " + DBConstants.WILL_WAKE_CPU + " INTEGER, "
-					+ DBConstants.INTENT + " TEXT," + HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")";
-			db.execSQL(sql2);
-		}
 
 		if (oldVersion < 35)
 		{
 			String alter = "ALTER TABLE " + DBConstants.BOT_TABLE + " ADD COLUMN " + DBConstants.IS_MUTE + " INTEGER DEFAULT 0";
 			db.execSQL(alter);
+		}
+		
+		if(oldVersion < 36)
+		{
+			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.HIKE_CONTENT.CONTENT_ID + " INTEGER DEFAULT -1"; // love id applicable to few
+			db.execSQL(alter);																																			// messages like content
 		}
 	}
 
@@ -1402,6 +1349,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		final int typeColumn = 9;
 		final int msgMsisdnColumn = 10;
 		final int msisdnColumn = 11;
+		final int contentIdColumn = 12;
 
 		insertStatement.clearBindings();
 		insertStatement.bindString(messageColumn, conv.getMessage());
@@ -1433,6 +1381,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 		insertStatement.bindLong(typeColumn, conv.getMessageType());
 		insertStatement.bindString(msgMsisdnColumn, conv.getMsisdn());
+		insertStatement.bindLong(contentIdColumn, conv.getContentId());
 	}
 
 	public boolean wasMessageReceived(ConvMessage conv)
@@ -1524,7 +1473,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			long msgId = -1;
 
 			int unreadMessageCount = 0;
-			int unreadPinMessageCount = 0;
 
             Map<String, Pair<List<String>, Long>> map = new HashMap<String, Pair<List<String>, Long>>();
 			long timeStamp = System.currentTimeMillis() / 1000;
@@ -2202,7 +2150,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			/* TODO this should be ORDER BY timestamp */
 			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
 					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.IS_HIKE_MESSAGE, DBConstants.READ_BY,
-					DBConstants.MESSAGE_TYPE }, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + " DESC", limitStr);
+					DBConstants.MESSAGE_TYPE,DBConstants.HIKE_CONTENT.CONTENT_ID}, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + " DESC", limitStr);
 
 			List<ConvMessage> elements = getMessagesFromDB(c, conversation);
 			Collections.reverse(elements);
@@ -2801,7 +2749,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				}
 				else
 				{
-					conv = new Conversation(msisdn);
+					conv = new Conversation(msisdn, timestamp);
 					ContactInfo contact = ContactManager.getInstance().getContact(conv.getMsisdn());
 					ContactManager.getInstance().updateContactRecency(msisdn, timestamp, false);
 					if (null == contact)
@@ -2946,7 +2894,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			
 			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
 					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.IS_HIKE_MESSAGE, DBConstants.READ_BY,
-					DBConstants.MESSAGE_TYPE }, DBConstants.MESSAGE_ID + " =?", new String[] { Long.toString(msgId) }, null, null, null, null);
+					DBConstants.MESSAGE_TYPE,DBConstants.HIKE_CONTENT.CONTENT_ID}, DBConstants.MESSAGE_ID + " =?", new String[] { Long.toString(msgId) }, null, null, null, null);
 			List<ConvMessage> elements = getMessagesFromDB(c, conversation);
 			return elements.size() > 0 ? elements.get(elements.size() - 1) : null;
 			}
@@ -5030,7 +4978,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			/* TODO this should be ORDER BY timestamp */
 			String query = "SELECT " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + "," + DBConstants.TIMESTAMP + "," + DBConstants.MESSAGE_ID + ","
 					+ DBConstants.MAPPED_MSG_ID + "," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.IS_HIKE_MESSAGE + ","
-					+ DBConstants.READ_BY + "," + DBConstants.MESSAGE_TYPE + " FROM " + DBConstants.MESSAGES_TABLE + " where " + selection + " order by " + DBConstants.MESSAGE_ID
+					+ DBConstants.READ_BY + "," + DBConstants.MESSAGE_TYPE + ","+DBConstants.HIKE_CONTENT.CONTENT_ID+ "FROM " + DBConstants.MESSAGES_TABLE + " where " + selection + " order by " + DBConstants.MESSAGE_ID
 					+ " DESC LIMIT " + limitStr + " OFFSET " + startFrom;
 			c = mDb.rawQuery(query, new String[] { msisdn });
 
@@ -5348,6 +5296,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		final int readByColumn = c.getColumnIndex(DBConstants.READ_BY);
 		final int typeColumn = c.getColumnIndex(DBConstants.MESSAGE_TYPE);
 		final int loveIdColumn = c.getColumnIndex(DBConstants.HIKE_CONV_DB.LOVE_ID_REL);
+		final int contentIdColumn = c.getColumnIndex(DBConstants.HIKE_CONTENT.CONTENT_ID);
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
 		SparseArray<ConvMessage> contentMessages = new SparseArray<ConvMessage>();
 		StringBuilder loveIds = new StringBuilder("(");
@@ -5357,7 +5306,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			boolean isHikeMessage = hikeMessage == -1 ? conversation.isOnhike() : (hikeMessage == 0 ? false : true);
 
 			ConvMessage message = new ConvMessage(c.getString(msgColumn), conversation.getMsisdn(), c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)),
-					c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn), !isHikeMessage, c.getInt(typeColumn));
+					c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn), !isHikeMessage, c.getInt(typeColumn),c.getInt(contentIdColumn));
 			//if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT){
 //				int loveId = c.getInt(loveIdColumn);
 //				// DEFAULT value of love id is -1
@@ -6230,6 +6179,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 		return rowId < 0 ? false : true;
 	}
+	
+	
 
 	/**
 	 * Used to persist the changes made to the {@link StickerCategory#isUpdateAvailable()} flag
@@ -6495,5 +6446,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 			}
 		}
+	}
+	
+	public void updateTimestamp(String msisdn, long timestamp)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.TIMESTAMP, timestamp);
+
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
+	}
+	
+	public boolean isContentMessageExist(String msisdn,String contentId)
+	{
+		String where = DBConstants.CONV_ID + "=? and" + DBConstants.HIKE_CONTENT.CONTENT_ID + "=?";
+		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, where, new String[] { msisdn, contentId }, null, null, null);
+		try
+		{
+			return c.moveToFirst();
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+
 	}
 }

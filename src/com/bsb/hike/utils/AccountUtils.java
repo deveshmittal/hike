@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.nio.CharBuffer;
 import java.security.KeyStore;
@@ -45,7 +43,6 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -112,13 +109,13 @@ public class AccountUtils
 
 	public static String fileTransferHost = PRODUCTION_FT_HOST;
 
-	public static String fileTransferUploadBase = HTTP_STRING + fileTransferHost + ":" + Integer.toString(port) + "/v1";
+	public static String fileTransferBase = HTTP_STRING + fileTransferHost + ":" + Integer.toString(port) + "/v1";
 
 	public static final String FILE_TRANSFER_DOWNLOAD_BASE = "/user/ft/";
 
-	public static String fileTransferBaseDownloadUrl = base + FILE_TRANSFER_DOWNLOAD_BASE;
+	public static String fileTransferBaseDownloadUrl = fileTransferBase + FILE_TRANSFER_DOWNLOAD_BASE;
 	
-	public static String fastFileUploadUrl = base + FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
+	public static String fastFileUploadUrl = fileTransferBase + FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 
 	public static String partialfileTransferBaseUrl = base + "/user/pft";
 
@@ -199,6 +196,11 @@ public class AccountUtils
 	public static void setAppVersion(String version)
 	{
 		appVersion = version;
+	}
+
+	public static String getAppVersion()
+	{
+		return appVersion;
 	}
 
 	public static synchronized HttpClient createClient()
@@ -942,7 +944,7 @@ public class AccountUtils
 	public static int getBytesUploaded(String sessionId) throws ClientProtocolException, IOException
 	{
 		int val = 0;
-		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferUploadBase + "/user/pft/");
+		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferBase + "/user/pft/");
 		addToken(req);
 		req.addHeader("X-SESSION-ID", sessionId);
 		HttpClient httpclient = getClient(req);
@@ -966,7 +968,7 @@ public class AccountUtils
 
 	public static String crcValue(String fileKey) throws ClientProtocolException, IOException
 	{
-		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferUploadBase + "/user/ft/" + fileKey);
+		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferBase + "/user/ft/" + fileKey);
 		addToken(req);
 		HttpClient httpclient = getClient(req);
 		HttpResponse response = httpclient.execute(req);

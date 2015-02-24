@@ -52,8 +52,8 @@ import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.SingleStickerDownloadTask;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
@@ -252,6 +252,12 @@ public class StickerManager
 		if(!settings.getBoolean(StickerManager.RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED, false)){
 			updateRecentStickerFile(settings);
 		}
+
+		if(!settings.getBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, false))
+		{
+			updateStickerFolderNames();
+			settings.edit().putBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, true).commit();
+		}
 		
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
 		setupStickerCategoryList(settings);
@@ -284,12 +290,6 @@ public class StickerManager
 		{
 			removeLegacyGreenDots();
 			settings.edit().putBoolean(StickerManager.REMOVE_LEGACY_GREEN_DOTS, true).commit();
-		}
-		
-		if(!settings.getBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, false))
-		{
-			updateStickerFolderNames();
-			settings.edit().putBoolean(StickerManager.STICKER_FOLDER_NAMES_UPGRADE_DONE, true).commit();
 		}
 	}
 
@@ -440,6 +440,8 @@ public class StickerManager
 		{
 			if(updateAvailable != null)
 			{
+				// Update Available will be true only if total count received is greater than existing sticker count
+				updateAvailable = (totalStickerCount > category.getTotalStickers());
 				category.setUpdateAvailable(updateAvailable);
 			}
 			if(totalStickerCount != -1)
@@ -451,6 +453,15 @@ public class StickerManager
 				category.setCategorySize(categorySize);
 			}
 		}
+		
+		/**
+		 * Not setting update available flag for invisible category
+		 */
+		if (category == null && updateAvailable != null)  
+		{
+			updateAvailable = false;
+		}
+		
 		HikeConversationsDatabase.getInstance().updateStickerCategoryData(categoryId, updateAvailable, totalStickerCount, categorySize);
 	}
 
@@ -1647,9 +1658,27 @@ public class StickerManager
 		// renaming large/small folders for all categories
 		for (File categoryRoot : files)
 		{
+			// if categoryRoot(eg. humanoid/love etc.) file is not a directory we should not do anything.
+			if(categoryRoot == null || !categoryRoot.isDirectory())
+			{
+				continue;
+			}
+			
 			File[] categoryAssetFiles = categoryRoot.listFiles();
+			
+			if(categoryAssetFiles == null)
+			{
+				continue;
+			}
+			
 			for (File categoryAssetFile : categoryAssetFiles)
 			{
+				// if categoryAssetFile(eg. large/small/other) is not a directory we should not do anything.
+				if(categoryAssetFile == null || !categoryAssetFile.isDirectory())
+				{
+					continue;
+				}
+				
 				if (categoryAssetFile.getName().equals(HikeConstants.OLD_LARGE_STICKER_FOLDER_NAME))
 				{
 					Logger.d("StickerManager", "changing large file name for : " + categoryRoot.getName() + "category");

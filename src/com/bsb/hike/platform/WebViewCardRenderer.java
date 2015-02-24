@@ -1,5 +1,10 @@
 package com.bsb.hike.platform;
 
+import java.util.ArrayList;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.annotation.TargetApi;
@@ -11,7 +16,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -34,19 +38,16 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.platform.content.PlatformContent.EventCode;
 import com.bsb.hike.platform.content.PlatformContentListener;
 import com.bsb.hike.platform.content.PlatformContentModel;
+import com.bsb.hike.platform.content.PlatformRequestManager;
 import com.bsb.hike.platform.content.PlatformWebClient;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 /**
  * Created by shobhitmandloi on 14/01/15.
@@ -71,6 +72,9 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	BaseAdapter adapter;
 
 	private SparseArray<String> cardAlarms;
+	
+	// usually we have seen 3 cards will be inflated, so 3 holders will be initiated (just an optimizations)
+	ArrayList<WebViewHolder> holderList = new ArrayList<WebViewCardRenderer.WebViewHolder>(3);
 
 	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages, BaseAdapter adapter)
 	{
@@ -147,7 +151,6 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		holder.myBrowser.setWebViewClient(holder.webViewClient);
 		holder.myBrowser.getSettings().setDomStorageEnabled(true);
 		holder.platformJavaScriptBridge.allowUniversalAccess();
-		holder.platformJavaScriptBridge.allowDebugging();
 		holder.myBrowser.getSettings().setJavaScriptEnabled(true);
 
 	}
@@ -240,6 +243,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				Logger.i("HeightAnim", position + "set height given in card is =" + minHeight);
 				viewHolder.myBrowser.setLayoutParams(lp);
 			}
+			holderList.add(viewHolder);
 		}
 		else
 		{
@@ -265,30 +269,20 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				public void onEventOccured(EventCode reason)
 				{
 					Logger.e(tag, "on failure called " + reason);
-					JSONObject json = new JSONObject();
-					try
-					{
-						json.put(HikePlatformConstants.ERROR_CODE, reason.toString());
-						json.put(HikeConstants.EVENT_KEY, HikePlatformConstants.BOT_ERROR);
-						HAManager.getInstance()
-								.record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.ERROR_EVENT, HAManager.EventPriority.HIGH, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
-					}
-					catch (JSONException e)
-					{
-						e.printStackTrace();
-					}
-					catch (NullPointerException e)
-					{
-						e.printStackTrace();
-					}
+
 					if (reason == EventCode.DOWNLOADING)
 					{
-						// Do nothing
+						//do nothing
 						return;
+					}
+					else if (reason == EventCode.LOADED)
+					{
+						cardLoadAnalytics(convMessage);
 					}
 					else
 					{
 						showConnErrState(viewHolder);
+						cardErrorAnalytics(reason);
 					}
 				}
 
@@ -313,6 +307,55 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 		return view;
 
+	}
+
+	private void cardErrorAnalytics(EventCode reason)
+	{
+		JSONObject json = new JSONObject();
+		try
+		{
+			json.put(HikePlatformConstants.ERROR_CODE, reason.toString());
+			json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.BOT_ERROR);
+			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NullPointerException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private static void cardLoadAnalytics(ConvMessage message)
+	{
+		JSONObject platformJSON = new JSONObject();
+
+		try
+		{
+			String state = message.platformWebMessageMetadata.getLayoutId();
+			state = state.substring(0,state.length() - 5);
+			String origin = Utils.conversationType(message.getMsisdn());
+			platformJSON.put(AnalyticsConstants.CHAT_MSISDN, message.getMsisdn());
+			platformJSON.put(AnalyticsConstants.ORIGIN, origin);
+			platformJSON.put(HikePlatformConstants.CARD_TYPE, message.platformWebMessageMetadata.getAppName());
+			platformJSON.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_LOADED);
+			platformJSON.put(HikePlatformConstants.CARD_STATE, state);
+			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.VIEW_EVENT, platformJSON, AnalyticsConstants.EVENT_TAG_PLATFORM);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NullPointerException npe)
+		{
+			npe.printStackTrace();
+		}
+		catch (IndexOutOfBoundsException ie)
+		{
+			ie.printStackTrace();
+		}
 	}
 
 	private void orientationChangeHandling(CustomWebView web)
@@ -366,7 +409,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			super.onPageFinished(view, url);
 			CookieManager.getInstance().setAcceptCookie(true);
-			Log.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
+			Logger.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
 			view.loadUrl("javascript:setData('"  + convMessage.getMsisdn() + "','"
 					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "','" + convMessage.isSent() +  "')");
 			String alarmData = convMessage.platformWebMessageMetadata.getAlarmData();
@@ -390,7 +433,13 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	public void onDestroy()
 	{
+		PlatformRequestManager.onDestroy();
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PLATFORM_CARD_ALARM, this);
+		for(WebViewHolder holder : holderList)
+		{
+			holder.platformJavaScriptBridge.onDestroy();
+		}
+		holderList.clear();
 	}
 
 	@Override

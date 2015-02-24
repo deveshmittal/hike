@@ -4,29 +4,21 @@ package com.bsb.hike.models;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.bsb.hike.HikeConstants;
-import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.analytics.AnalyticsSender;
-import com.bsb.hike.analytics.HAManager;
-import com.bsb.hike.analytics.HAManager.EventPriority;
-import com.bsb.hike.db.DBBackupRestore;
-import com.bsb.hike.notifications.HikeNotification;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.Utils;
-
-import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.AnalyticsSender;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.DBBackupRestore;
-import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeContentDatabase;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.platform.PlatformAlarmManager;
 import com.bsb.hike.service.PreloadNotificationSchedular;
-import com.bsb.hike.service.SimpleWakefulService;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -70,11 +62,14 @@ public class HikeAlarmManager
 	public static final int PLATFORM_ALARMS = 4570;
 
 	public static final int REQUESTCODE_DEFAULT = 0;
-
+	
+	public static final int REQUESTCODE_REPOPULATE_ALARM_DATABASE=4570;
+	
 	// ******************************************************//
+	
 	public static final String INTENT_EXTRA = "intent_extra";
 
-	public static final String LOG_TAG = "HikeAlarmManager";
+	public static final String TAG = "HikeAlarmManager";
 
 	/**
 	 * 
@@ -90,7 +85,7 @@ public class HikeAlarmManager
 	public static void setAlarm(Context context, long time, int requestCode, boolean WillWakeCPU)
 	{
 		Intent in = new Intent();
-		setAlarmwithIntent(context, time, requestCode, WillWakeCPU, in);
+		setAlarmWithIntent(context, time, requestCode, WillWakeCPU, in);
 	}
 
 	/**
@@ -105,8 +100,7 @@ public class HikeAlarmManager
 	 * @see <a href = "http://developer.android.com/reference/android/app/AlarmManager.html#set(int, long, android.app.PendingIntent)"> setAlarm </a>
 	 */
 
-	@SuppressLint("NewApi")
-	public static void setAlarmwithIntent(Context context, long time, int requestCode, boolean WillWakeCPU, Intent intent)
+	public static void setAlarmWithIntent(Context context, long time, int requestCode, boolean WillWakeCPU, Intent intent)
 	{
 
 		AlarmManager mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -142,7 +136,7 @@ public class HikeAlarmManager
 	 * 
 	 * @see <a href = "http://developer.android.com/reference/android/app/AlarmManager.html#setInexactRepeating(int, long, long, android.app.PendingIntent)"> setInExactAlarm </a>
 	 */
-	public static void setInexact(int requestCode, Context context, long triggerAtMillis, long intervalMillis, boolean WillWakeCPU)
+	public static void setInExact(int requestCode, Context context, long triggerAtMillis, long intervalMillis, boolean WillWakeCPU)
 	{
 
 		AlarmManager mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -205,7 +199,7 @@ public class HikeAlarmManager
 		intent.putExtra(ALARM_TIME, time);
 
 		if (persistance)
-			HikeConversationsDatabase.getInstance().insertIntoAlarmManagerDB(time, requestCode, WillWakeCPU, intent);
+			HikeContentDatabase.getInstance(context).insertIntoAlarmManagerDB(time, requestCode, WillWakeCPU, intent);
 		
 		PendingIntent mPendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -241,7 +235,7 @@ public class HikeAlarmManager
 
 		if (mPendingIntent != null)
 		{
-			HikeConversationsDatabase.getInstance().deleteFromAlarmManagerDB(requestCode);
+			HikeContentDatabase.getInstance(context).deleteFromAlarmManagerDB(requestCode);
 			mAlarmManager.cancel(mPendingIntent);
 		}
 	}
@@ -258,8 +252,7 @@ public class HikeAlarmManager
 	{
 
 		int requestCode = intent.getIntExtra(HikeAlarmManager.INTENT_EXTRA, HikeAlarmManager.REQUESTCODE_DEFAULT);
-		
-		HikeConversationsDatabase.getInstance().deleteFromAlarmManagerDB(requestCode);
+		HikeContentDatabase.getInstance(context).deleteFromAlarmManagerDB(requestCode);
 		switch (requestCode)
 		{
 		case HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD:
@@ -267,7 +260,7 @@ public class HikeAlarmManager
 			break;
 		case HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION:
 			int retryCount  = intent.getExtras().getInt(HikeConstants.RETRY_COUNT, 0);
-			Logger.i(LOG_TAG, "processTasks called with request Code "+requestCode+ "time = "+System.currentTimeMillis() +" retryCount = "+retryCount);
+			Logger.i(TAG, "processTasks called with request Code "+requestCode+ "time = "+System.currentTimeMillis() +" retryCount = "+retryCount);
 			
 			try
 			{
@@ -307,9 +300,9 @@ public class HikeAlarmManager
 	// TODO:calling this function form a background thread
 	*/
 	
-	public static void repopulateAlarm()
+	public static void repopulateAlarm(Context context)
 	{
-		HikeConversationsDatabase.getInstance().rePopulateAlarmWhenClosed();
+		HikeContentDatabase.getInstance(context).rePopulateAlarmWhenClosed();
 	}
 
 	/*
@@ -323,14 +316,27 @@ public class HikeAlarmManager
 	{
 		int requestCode = intent.getIntExtra(HikeAlarmManager.INTENT_EXTRA, HikeAlarmManager.REQUESTCODE_DEFAULT);
 
-		HikeConversationsDatabase.getInstance().deleteFromAlarmManagerDB(requestCode);
+		HikeContentDatabase.getInstance(context).deleteFromAlarmManagerDB(requestCode);
 
 		switch (requestCode)
 		{
+		case HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS:
+			AnalyticsSender.getInstance(context).startUploadAndScheduleNextAlarm();
+			break;
+		case HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD:
+			PreloadNotificationSchedular.run(context);
+			break;
+		case HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION:
+			processTasks(intent, context);
+			break;
+		case HikeAlarmManager.REQUESTCODE_PERIODIC_BACKUP:
+			processTasks(intent, context);
+			break;
 		default:
 			PlatformAlarmManager.processTasks(intent, context);
 			break;
 		}
 
 	}
+
 }

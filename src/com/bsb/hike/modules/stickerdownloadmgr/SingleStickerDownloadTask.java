@@ -2,14 +2,12 @@ package com.bsb.hike.modules.stickerdownloadmgr;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
-import android.support.v4.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.STResult;
