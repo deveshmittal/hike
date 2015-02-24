@@ -1976,7 +1976,7 @@ public class MqttMessagesManager
 		}
 		else if(subType.equals(HikeConstants.HOLI_POPUP))
 		{
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.HOLI_POPUP);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.HOLI_POPUP);
 		}
 		else if(HikeConstants.PLAY_NOTIFICATION.equals(subType))
 		{
