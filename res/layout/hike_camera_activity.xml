@@ -13,20 +13,26 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3.5" >
+        android:layout_weight="@integer/photos_editor_canvas_weight" >
 
         <FrameLayout
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
         </FrameLayout>
+
+        <ImageView
+            android:id="@+id/containerImageView"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_alignParentBottom="true"
-        android:layout_weight="0.5"
+        android:layout_weight="@integer/photos_editor_tabs_weight"
         android:background="#0A0A0A"
         android:gravity="center" >
 
@@ -44,7 +50,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="@integer/photos_editor_pager_weight"
         android:background="#19191A"
         android:gravity="center" >
 

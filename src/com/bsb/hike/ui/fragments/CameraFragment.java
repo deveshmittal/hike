@@ -141,14 +141,14 @@ public class CameraFragment extends SherlockFragment
 		@Override
 		public void onComplete(final File f)
 		{
-			getActivity().runOnUiThread(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					Logger.d("CameraFragment", "Saved Image: " + (f != null ? f.getAbsolutePath() : "null"));
-				}
-			});
+			// getActivity().runOnUiThread(new Runnable()
+			// {
+			// @Override
+			// public void run()
+			// {
+			// Logger.d("CameraFragment", "Saved Image: " + (f != null ? f.getAbsolutePath() : "null"));
+			// }
+			// });
 		}
 
 		@Override
@@ -192,7 +192,7 @@ public class CameraFragment extends SherlockFragment
 								i.putExtra("FilePath", filePath);
 								getActivity().startActivity(i);
 							}
-						}, 2000);
+						}, 100);
 
 					}
 				}

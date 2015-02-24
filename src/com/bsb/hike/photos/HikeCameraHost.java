@@ -69,6 +69,8 @@ public class HikeCameraHost implements CameraHost
 
 	private HikePhotosListener mListener;
 
+	public Size previewSize;
+
 	public static HikeCameraHost getInstance(boolean useFFC)
 	{
 		cameraHost = new HikeCameraHost(HikeMessengerApp.getInstance().getApplicationContext());
@@ -193,7 +195,7 @@ public class HikeCameraHost implements CameraHost
 		List<Size> sizes = parameters.getSupportedPictureSizes();
 		for (Size size : sizes)
 		{
-			Log.d("CameraSize", "h: " + size.height + " w: " + size.width);
+			Log.d("CameraHost", "getPictureSize h: " + size.height + " w: " + size.width);
 		}
 		return (CameraUtils.getLargestPictureSize(this, parameters));
 	}
@@ -204,7 +206,7 @@ public class HikeCameraHost implements CameraHost
 		List<Size> sizes = parameters.getSupportedPictureSizes();
 		for (Size size : sizes)
 		{
-			Log.d("PreviewSize", "h: " + size.height + " w: " + size.width);
+			Log.d("CameraHost", "getPreviewSize h: " + size.height + " w: " + size.width);
 		}
 		return (CameraUtils.getBestAspectPreviewSize(displayOrientation, width, height, parameters));
 	}
@@ -213,14 +215,18 @@ public class HikeCameraHost implements CameraHost
 	@Override
 	public Camera.Size getPreferredPreviewSizeForVideo(int displayOrientation, int width, int height, Camera.Parameters parameters, Camera.Size deviceHint)
 	{
+		Log.d("CameraHost", "getPreferredPreviewSizeForVideo");
+
 		if (deviceHint != null)
 		{
+			previewSize = deviceHint;
 			return (deviceHint);
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
 		{
-			return (parameters.getPreferredPreviewSizeForVideo());
+			previewSize = parameters.getPreferredPreviewSizeForVideo();
+			return previewSize;
 		}
 
 		return (null);

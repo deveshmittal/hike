@@ -19,6 +19,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorListenerAdapter;
@@ -27,7 +28,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
-import com.commonsware.cwac.camera.PictureTransaction;
 
 public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener
 {
@@ -165,6 +165,12 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 	{
 		super.onResume();
 		orientationListener.enable();
+
+		containerView.setVisibility(View.VISIBLE);
+
+		ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.containerImageView);
+
+		iv.setVisibility(View.GONE);
 	}
 
 	@Override
@@ -301,19 +307,25 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 	{
 		if (containerView != null)
 		{
-			System.out.println("X: " + containerView.getX() + " Y: " + containerView.getY() + "Width: " + containerView.getWidth() + containerView.getHeight());
 			Rect r = new Rect();
+
 			containerView.getGlobalVisibleRect(r);
-			int side = srcBmp.getWidth() < srcBmp.getHeight() ? srcBmp.getWidth() : srcBmp.getHeight();
-			int diff = (r.top * srcBmp.getHeight()) / containerView.getHeight();
 
-			if (side == srcBmp.getHeight())
-			{
-				side -= diff;
-			}
+			int heightDiff = cameraFragment.getHost().previewSize.width - containerView.getHeight();
 
-			System.out.println("rX: " + r.left + " Y: " + r.top + "Width: " + side + containerView.getHeight());
-			Bitmap dstBmp = Bitmap.createBitmap(srcBmp, (srcBmp.getWidth() / 2) - (side / 2), diff, side, side);
+			int bmpHeightDiff = (srcBmp.getHeight() * heightDiff) / cameraFragment.getHost().previewSize.width;
+
+			Bitmap dstBmp = Bitmap.createBitmap(srcBmp, srcBmp.getWidth() / 2 - ((srcBmp.getHeight() - bmpHeightDiff) / 2), bmpHeightDiff / 2,
+					(srcBmp.getHeight() - bmpHeightDiff), srcBmp.getHeight() - bmpHeightDiff);
+
+			containerView.setVisibility(View.GONE);
+
+			ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.containerImageView);
+
+			iv.setImageBitmap(dstBmp);
+
+			iv.setVisibility(View.VISIBLE);
+
 			return dstBmp;
 		}
 		return null;
