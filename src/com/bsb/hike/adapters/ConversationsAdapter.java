@@ -530,7 +530,9 @@ public class ConversationsAdapter extends BaseAdapter
 	public void setupSearch()
 	{
 		isSearchModeOn = true;
+		// conversationList will contain all the conversations to be used in search mode 
 		conversationList.clear();
+		// conversationsMsisdns will contain the conversations so that they are not added again when getting contacts list 
 		conversationsMsisdns = new HashSet<String>();
 		for(Conversation conv : completeList)
 		{
@@ -626,9 +628,6 @@ public class ConversationsAdapter extends BaseAdapter
 			String textToBeFiltered = constraint.toString();
 			if (!TextUtils.isEmpty(textToBeFiltered))
 			{
-
-				Logger.d("gaurav","constraint: " + constraint + ", text: " + textToBeFiltered + ",");
-
 				List<Conversation> filteredConversationsList = new ArrayList<Conversation>();
 				List<Conversation> filteredphoneBookContacts = new ArrayList<Conversation>();
 
@@ -715,9 +714,9 @@ public class ConversationsAdapter extends BaseAdapter
 			{
 				filteredSearchList.addAll(resultList.get(1));
 			}
+
 			completeList.clear();
 			completeList.addAll(filteredSearchList);
-
 			notifyDataSetChanged();
 		}
 	}
