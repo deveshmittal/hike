@@ -1912,6 +1912,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private void h20NextClick()
 	{
+		HAManager.getInstance().record(HikeConstants.LogEvent.FIRST_OFFLINE_TIP_CLICKED, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT);
 		modeOfChat = H2S_MODE;
 		mAdapter.setH20Mode(true);
 		initializeH20Mode();
@@ -1992,6 +1993,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 */
 	private void h20SendClick()
 	{
+		HAManager.getInstance().record(HikeConstants.LogEvent.SECOND_OFFLINE_TIP_CLICKED, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT);
+		
 		HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
 
 		if (firstPendingConvMessage != null && !selectedMessagesMap.isEmpty())

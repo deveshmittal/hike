@@ -73,6 +73,9 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.adapters.MessagesAdapter;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.chatthread.HikeActionMode.ActionModeListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.dialog.CustomAlertDialog;
@@ -725,9 +728,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (mTips.isGivenTipShowing(ChatThreadTips.STICKER_TIP))
 		{
 			mTips.setTipSeen(ChatThreadTips.STICKER_TIP);
+			recordFirstTimeStickerClick();
 		}
 		
 		mShareablePopupLayout.togglePopup(mStickerPicker);
+	}
+	
+	private void recordFirstTimeStickerClick()
+	{
+		if (!HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).getData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, false))
+		{
+			HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).saveData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, true);
+
+			HAManager.getInstance().record(HikeConstants.LogEvent.STICKER_BTN_CLICKED, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH);
+		}
 	}
 	
 	private void setStickerButtonSelected(boolean selected)
@@ -3573,7 +3587,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case R.id.forward_msgs:
 			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			Collections.sort(selectedMsgIds);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.FORWARD_MSG);
+			recordForwardEvent();
+			
 			Intent intent = IntentFactory.getComposeChatActivityIntent(activity);
 			String msg;
 			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
@@ -3746,4 +3761,21 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		return false;
 	}
 
+	/**
+	 * Called from {@link #onActionModeMenuItemClicked(MenuItem)}
+	 */
+	private void recordForwardEvent()
+	{
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FORWARD_MSG);
+			metadata.put(HikeConstants.MSISDN, msisdn);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+		}
+		catch (JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+	}
 }
