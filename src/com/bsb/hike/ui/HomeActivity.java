@@ -503,7 +503,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				if(mainFragment!=null)
 		        {
-					mainFragment.setSearchMode(true);
 					mainFragment.setupSearch();
 		        }
 				toggleMenuItems(menu, false);
@@ -517,7 +516,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				if(mainFragment!=null)
 		        {
 					mainFragment.removeSearch();
-					mainFragment.setSearchMode(false);
 		        }
 				toggleMenuItems(menu, true);
 				setupActionBar();

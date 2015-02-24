@@ -296,12 +296,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		return parent;
 	}
 
-	public void setSearchMode(boolean val)
-	{
-		searchMode = val;
-		setEmptyState();
-	}
-
 	private void setSearchEmptyState()
 	{
 		if(emptyView != null)
@@ -1051,6 +1045,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	public void setupSearch()
 	{
+		searchMode = true;
+		setEmptyState();
 		mAdapter.setupSearch();
 	}
 
@@ -1064,6 +1060,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	public void removeSearch()
 	{
 		searchText = null;
+		searchMode = false;
+		setEmptyState();
 		mAdapter.removeSearch();
 	}
 
