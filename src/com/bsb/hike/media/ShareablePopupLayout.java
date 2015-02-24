@@ -87,11 +87,7 @@ public class ShareablePopupLayout
 		 */
 		if (prevVisibleView != popupView || !mKeyboardPopupLayout.isShowing())
 		{
-			addPopupView(popupView);
-
-			swapViews(popupView);
-
-			showKeyboardPopup();
+			showPopup(popup);
 		}
 		
 		else
