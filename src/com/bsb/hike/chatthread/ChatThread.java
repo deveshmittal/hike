@@ -1871,7 +1871,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			/*
 			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
 			 */
-			if (messages.size() <= startIndex || messages.get(startIndex) == null)
+			/* messageid -1:
+             * Algo is message id can not be -1 here, -1 means message has been added in UI and not been inserted in DB which is being done on pubsub thread. It will happen for new
+             * added messages. Once message is succesfully inserted in DB, messageID will be updated and will be reflected here.
+             * Bug was : There is data race between  this async task and pubsub, it was happening that message id is -1 when async task is just started, so async task fetches data from DB and results in duplicate sent messages
+             */
+			if (messages.size() <= startIndex || messages.get(startIndex) == null || messages.get(startIndex).getMsgID()==-1)
 			{
 				return;
 			}
