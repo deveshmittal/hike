@@ -18,11 +18,13 @@ package com.bsb.hike.offline;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import android.app.Activity;
-import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -40,14 +42,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.offline.DeviceListFragment.DeviceActionListener;
-import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.Logger;
 
 /**
@@ -72,7 +71,11 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     public static boolean isOfflineFileTransferOn = false;
     private final int MAXTRIES = 5;
     private WifiManager wifiManager;
-    private WifiP2pDevice connectingToDevice;
+    private ProgressDialog enablingWifi = null;
+    // remember connection details for re-connection
+    private WifiP2pDevice connectingToDevice = null;
+    private WifiP2pConfig connectingDeviceConfig = null;
+    private int tries;
     /**
      * @param isWifiP2pEnabled the isWifiP2pEnabled to set
      */
@@ -224,44 +227,32 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     }
 	
     @Override
-    public void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice connectingToDevice) {
+    public void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice ConnectingToDevice) {
     	if(numOfTries >= MAXTRIES)
     	{
     		Toast.makeText(WiFiDirectActivity.this, "Connect failed. Retry.",
                     Toast.LENGTH_SHORT).show();
     		return;
     	}
-    	this.connectingToDevice = connectingToDevice;
+    	this.connectingToDevice = ConnectingToDevice;
+    	this.connectingDeviceConfig = config;
+    	this.tries = numOfTries;
     	(new CheckInvitedStuckTask(connectingToDevice)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         manager.connect(channel, config, new ActionListener() {
 
             @Override
             public void onSuccess() {
+            	// In case of successful connection remove all these information
+            	clearData();
                 // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
             }
 
-            @Override
+			@Override
             public void onFailure(int reason) {
                 Toast.makeText(WiFiDirectActivity.this, "Connect failed. Retry.",
                         Toast.LENGTH_SHORT).show();
             }
         });
-        
-        /*// check after 5 seconds if connection is established
-        try {
-			Thread.sleep(5*1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-        
-        DeviceListFragment fragList = (DeviceListFragment) getFragmentManager()
-                .findFragmentById(R.id.frag_list);
-        if(!(fragList.getDevice().status == WifiP2pDevice.CONNECTED))
-        {
-        	cancelDisconnect();
-        	connect(config, numOfTries+1);
-        }*/
-        
     }
 
     @Override
@@ -285,8 +276,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     public void onBackPressed() 
     {
     	isOfflineFileTransferOn = false;
-    	new OnFileTransferCompleteTask().executeOnExecutor((AsyncTask.THREAD_POOL_EXECUTOR));
-    	
+    	new OnFileTransferCompleteTask().executeOnExecutor((AsyncTask.THREAD_POOL_EXECUTOR));    	
     	super.onBackPressed();
     }
 
@@ -318,12 +308,13 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
             if (fragment.getDevice() == null
                     || fragment.getDevice().status == WifiP2pDevice.CONNECTED) 
             {
+            	clearData();
                 disconnect();
             }
             else if (fragment.getDevice().status == WifiP2pDevice.AVAILABLE
                     || fragment.getDevice().status == WifiP2pDevice.INVITED) 
             {
-
+            	clearData();
                 manager.cancelConnect(channel, new ActionListener() {
                 	
                     @Override
@@ -345,6 +336,13 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
 
     }
     
+    public void clearData()
+    {
+    	connectingToDevice = null;
+    	connectingDeviceConfig = null;
+    	tries = 0;
+    }
+    
     public void enableDiscovery()
     {
     	if (!wifiManager.isWifiEnabled()) {
@@ -359,19 +357,55 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
         	
             @Override
             public void onSuccess() {
+            	if(enablingWifi != null && enablingWifi.isShowing())
+            		enablingWifi.dismiss();
                 Toast.makeText(WiFiDirectActivity.this, "Discovery Initiated",
                         Toast.LENGTH_SHORT).show();
+                if (connectingToDevice != null)
+                {
+                	// this means previous attempt of connection did not succeed
+                	List<String> peerList = fragment.getLatestPeers();
+                	if(peerList.size() == 0)
+                		Toast.makeText(getApplicationContext(), "Device List empty", Toast.LENGTH_SHORT).show();
+                	else
+                	{
+                		if(peerList.contains(connectingToDevice))
+                			connect(connectingDeviceConfig, ++tries, connectingToDevice);
+                		else
+                			Toast.makeText(getApplicationContext(), "Device not present in peer List", Toast.LENGTH_SHORT).show();
+                	}
+                }
             }
 
             @Override
             public void onFailure(int reasonCode) {
-                Toast.makeText(WiFiDirectActivity.this, "Discovery Failed : " + reasonCode,
-                        Toast.LENGTH_SHORT).show();
+                //Toast.makeText(WiFiDirectActivity.this, "Discovery Failed : " + reasonCode,
+                //        Toast.LENGTH_SHORT).show();
                 String err=new String();
                 if(reasonCode==WifiP2pManager.BUSY) err="BUSY";
                 if(reasonCode==WifiP2pManager.ERROR)err="ERROR";
                 if(reasonCode==WifiP2pManager.P2P_UNSUPPORTED) err="P2P_UNSUPPORTED";
                 Log.e(TAG,"FAIL - couldnt start to discover peers code: "+err);
+                if(enablingWifi == null || enablingWifi.isShowing() == false)
+                {
+                	try
+                	{
+                		enablingWifi = ProgressDialog.show(getApplication(), "Press back to cancel", "Restarting Discovery", true,
+                			true, new DialogInterface.OnCancelListener() {
+
+		                    @Override
+		                    public void onCancel(DialogInterface dialog) {
+		                        
+		                    }
+		                });
+                	}
+                	catch (Exception e)
+                	{
+                		e.printStackTrace();
+                	}
+                	
+                }
+                enableDiscovery();
             }
         });
     }
@@ -408,7 +442,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
 		    			// check if even after 5 seconds it is still in invited state
 		    			// then call reset
 		    			latestInstance = fragment.getLatestPeerInstance(connectingToDevice.deviceAddress);
-		    			if((latestInstance != null) && (latestInstance.status == WifiP2pDevice.INVITED)){
+		    			if((latestInstance != null) && (latestInstance.status == WifiP2pDevice.INVITED)) {
 		    				connectingToDevice = null;
 		    				fragment = null;
 		    				this.destroy = true;
