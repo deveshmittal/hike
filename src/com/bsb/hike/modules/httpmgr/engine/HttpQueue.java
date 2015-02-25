@@ -11,16 +11,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import android.util.Pair;
 
+import com.bsb.hike.modules.httpmgr.log.LogFull;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.RequestCall;
-import com.bsb.hike.utils.Logger;
 
 public class HttpQueue
 {
-
 	private static final long serialVersionUID = 1L;
-
-	private static String TAG = "HTTP_QUEUE";
 
 	private PriorityQueue<RequestCall> shortQueue;
 
@@ -50,10 +47,12 @@ public class HttpQueue
 	{
 		if (request.getRequestType() == REQUEST_TYPE_LONG)
 		{
+			LogFull.d(request.getRequest().toString() + " is added to long queue");
 			longQueue.add(request);
 		}
 		else
 		{
+			LogFull.d(request.getRequest().toString() + " is added to short queue");
 			shortQueue.add(request);
 		}
 	}
@@ -69,10 +68,12 @@ public class HttpQueue
 		if (executer == HttpEngine.LONG_EXECUTER)
 		{
 			numLongRunningCalls.incrementAndGet();
+			LogFull.d("incrementing number of long running calls, current number of long running calls  : " + numLongRunningCalls.get());
 		}
 		else
 		{
 			numShortRunningCalls.incrementAndGet();
+			LogFull.d("incrementing number of short running calls, current number of short running calls  : " + numShortRunningCalls.get());
 		}
 	}
 
@@ -87,10 +88,12 @@ public class HttpQueue
 		if (executer == HttpEngine.LONG_EXECUTER)
 		{
 			numLongRunningCalls.decrementAndGet();
+			LogFull.d("decrementing number of long running calls, current number of long running calls  : " + numLongRunningCalls.get());
 		}
 		else
 		{
 			numShortRunningCalls.decrementAndGet();
+			LogFull.d("decrementing number of short running calls, current number of long running calls  : " + numShortRunningCalls.get());
 		}
 	}
 
@@ -126,12 +129,13 @@ public class HttpQueue
 						nextCall = call;
 						executer = HttpEngine.SHORT_EXECUTER;
 					}
+					LogFull.d("next call for short executer from short queue : " + call.getRequest().toString());
 
 				}
 				else
 				{
 					// no tasks to execute
-					Logger.i(TAG, "no tasks to execute");
+					LogFull.i("no tasks to execute");
 					break;
 				}
 			}
@@ -145,6 +149,7 @@ public class HttpQueue
 					{
 						nextCall = call;
 						executer = HttpEngine.LONG_EXECUTER;
+						LogFull.d("next call for long executer from long queue : " + call.getRequest().toString());
 					}
 				}
 				else
@@ -158,12 +163,13 @@ public class HttpQueue
 						{
 							nextCall = call;
 							executer = HttpEngine.LONG_EXECUTER;
+							LogFull.d("next call from long executer from short queue : " + call.getRequest().toString());
 						}
 					}
 					else
 					{
 						// no tasks to execute
-						Logger.i(TAG, "no tasks to execute");
+						LogFull.i("no tasks to execute");
 						break;
 					}
 				}
@@ -181,23 +187,27 @@ public class HttpQueue
 	 */
 	boolean spaceAvailable(int requestType)
 	{
-		int longSize = numLongRunningCalls.get();
-		int shortSize = numShortRunningCalls.get();
+		int longRunningSize = numLongRunningCalls.get();
+		int shortRunningSize = numShortRunningCalls.get();
 
+		LogFull.d("long runng size : " + longRunningSize + " short running size : " + shortRunningSize);
 		if (requestType == Request.REQUEST_TYPE_LONG)
 		{
-			if (numLongRunningCalls.get() < MAX_QUEUE_SIZE)
+			if (longRunningSize < MAX_QUEUE_SIZE)
 			{
+				LogFull.d("space available");
 				return true;
 			}
 		}
 		else
 		{
-			if (numShortRunningCalls.get() < MAX_QUEUE_SIZE)
+			if (shortRunningSize < MAX_QUEUE_SIZE)
 			{
+				LogFull.d("space available");
 				return true;
 			}
 		}
+		LogFull.i("space not available");
 		return false;
 	}
 
@@ -206,12 +216,14 @@ public class HttpQueue
 	 */
 	void shutdown()
 	{
+		LogFull.d("shutdown started");
 		longQueue.clear();
 		shortQueue.clear();
 		longQueue = null;
 		shortQueue = null;
 		numLongRunningCalls = null;
 		numShortRunningCalls = null;
+		LogFull.d("shutdown completed");
 	}
 
 	public void solveStarvation(RequestCall call)

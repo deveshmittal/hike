@@ -3,6 +3,9 @@ package com.bsb.hike.modules.httpmgr.client;
 import java.util.concurrent.TimeUnit;
 
 import com.bsb.hike.modules.httpmgr.Header;
+import com.bsb.hike.modules.httpmgr.log.HttpLogger;
+import com.bsb.hike.modules.httpmgr.log.HttpLogger.Tree;
+import com.bsb.hike.modules.httpmgr.log.LogFull;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.modules.httpmgr.response.Response;

@@ -10,10 +10,10 @@ import java.util.concurrent.TimeUnit;
 import android.util.Pair;
 
 import com.bsb.hike.modules.httpmgr.Utils;
+import com.bsb.hike.modules.httpmgr.log.LogFull;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.RequestCall;
 import com.bsb.hike.modules.httpmgr.response.ResponseCall;
-import com.bsb.hike.utils.Logger;
 import com.squareup.okhttp.internal.Util;
 
 /**
@@ -23,8 +23,6 @@ import com.squareup.okhttp.internal.Util;
  */
 public class HttpEngine
 {
-	private static String TAG = "HTTP_ENGINE";
-
 	static short LONG_EXECUTER = 0x0;
 
 	static short SHORT_EXECUTER = 0x1;
@@ -42,6 +40,8 @@ public class HttpEngine
 	 */
 	public HttpEngine()
 	{
+		LogFull.i("starting http engine");
+		
 		// executer used for serving short requests
 		shortRequestExecuter = new HttpExecuter(this, SHORT_EXECUTER, CORE_POOL_SIZE, Utils.threadFactory("short-thread", false), Utils.rejectedExecutionHandler());
 
@@ -53,7 +53,8 @@ public class HttpEngine
 
 		// underlying queue used for storing submitted and running request
 		queue = new HttpQueue();
-
+		
+		LogFull.i("http engine started");
 	}
 
 	public void submit(RequestCall request, long delay)
@@ -94,6 +95,7 @@ public class HttpEngine
 	{
 		if (request.isCancelled())
 		{
+			LogFull.i("submitting with delay but request is cancelled");
 			return;
 		}
 
@@ -101,10 +103,12 @@ public class HttpEngine
 
 		if (request.getRequestType() == Request.REQUEST_TYPE_LONG)
 		{
+			LogFull.d("scheduling on short executer " + request.getRequest().toString() + " on long executer after delay : " + delay);
 			future = shortRequestExecuter.schedule(request, delay, TimeUnit.MILLISECONDS);
 		}
 		else
 		{
+			LogFull.d("scheduling on long executer  " + request.getRequest().toString() + " on long executer after delay : " + delay);
 			future = longRequestExecuter.schedule(request, delay, TimeUnit.MILLISECONDS);
 		}
 		request.setFuture(future);
@@ -118,6 +122,7 @@ public class HttpEngine
 	 */
 	public void submit(ResponseCall response)
 	{
+		LogFull.d("submitting response to response executer");
 		responseExecuter.submit(response);
 	}
 
@@ -128,6 +133,7 @@ public class HttpEngine
 	 */
 	synchronized void fetchNextTask(short executerType)
 	{
+		LogFull.d("fetching next task for executer : " + executerType);
 		submitNext(executerType);
 	}
 
@@ -138,6 +144,7 @@ public class HttpEngine
 	 */
 	synchronized void incrementRunningTasksSize(short executer)
 	{
+		LogFull.d("Incrementing running task size for executer : "  + executer);
 		queue.incrementRunningTasksSize(executer);
 	}
 
@@ -148,6 +155,7 @@ public class HttpEngine
 	 */
 	synchronized void decrementRunningTasksSize(short executer)
 	{
+		LogFull.d("Decrementing running task size for executer : "  + executer);
 		queue.decrementRunningTasksSize(executer);
 	}
 
@@ -167,17 +175,19 @@ public class HttpEngine
 			short executer = result.second;
 			if (executer == LONG_EXECUTER)
 			{
+				LogFull.d("submitting next request to long executer " + call.getRequest().toString());
 				future = longRequestExecuter.submit(call);
 			}
 			else
 			{
+				LogFull.d("submitting next request to short executer " + call.getRequest().toString());
 				future = shortRequestExecuter.submit(call);
 			}
 			call.setFuture(future);
 		}
 		else
 		{
-			Logger.i(TAG, "nothing to submit to executers");
+			LogFull.i("nothing to submit to executers");
 		}
 	}
 
@@ -191,6 +201,7 @@ public class HttpEngine
 	 */
 	public void shutDown()
 	{
+		LogFull.d("shutdown started");
 		shortRequestExecuter.shutdown();
 		longRequestExecuter.shutdown();
 		responseExecuter.shutdown();
@@ -200,5 +211,6 @@ public class HttpEngine
 		longRequestExecuter = null;
 		responseExecuter = null;
 		queue = null;
+		LogFull.d("shutdown completed");
 	}
 }
