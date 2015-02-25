@@ -40,7 +40,7 @@ public class CallFailedFragment extends SherlockFragment
 		return view;
 	}
 
-	private void initViews(View view)
+	private void initViews(final View view)
 	{
 		final String msisdn = getArguments().getString(VoIPConstants.PARTNER_MSISDN);
 		int callFailedCode = getArguments().getInt(VoIPConstants.CALL_FAILED_REASON);
@@ -69,7 +69,7 @@ public class CallFailedFragment extends SherlockFragment
 					getSherlockActivity().finish();
 					Utils.startNativeCall(getSherlockActivity(), msisdn);
 				}
-				slideOutContainer();
+				slideOutContainer(view);
 			}
 		});
 
@@ -123,25 +123,32 @@ public class CallFailedFragment extends SherlockFragment
 		{
 			case VoIPConstants.ConnectionFailCodes.PARTNER_SOCKET_INFO_TIMEOUT:
 			case VoIPConstants.ConnectionFailCodes.PARTNER_BUSY:
-			case VoIPConstants.ConnectionFailCodes.CALLER_IN_NATIVE_CALL:   view.setText(getString(R.string.voip_not_reachable));
-																			break;
+			case VoIPConstants.ConnectionFailCodes.PARTNER_ANSWER_TIMEOUT:
+			case VoIPConstants.ConnectionFailCodes.CALLER_IN_NATIVE_CALL:
+				view.setText(getString(R.string.voip_not_reachable));
+				break;
 
-			case VoIPConstants.ConnectionFailCodes.PARTNER_INCOMPAT:		view.setText(getString(R.string.voip_incompat_platform));
-																			enableRedial = false;
-																			break;
+			case VoIPConstants.ConnectionFailCodes.PARTNER_INCOMPAT:
+				view.setText(getString(R.string.voip_incompat_platform));
+				enableRedial = false;
+				break;
 
-			case VoIPConstants.ConnectionFailCodes.PARTNER_UPGRADE:			view.setText(getString(R.string.voip_older_app));
-																			enableRedial = false;
-																			break;
+			case VoIPConstants.ConnectionFailCodes.PARTNER_UPGRADE:
+				view.setText(getString(R.string.voip_older_app));
+				enableRedial = false;
+				break;
 
 			case VoIPConstants.ConnectionFailCodes.EXTERNAL_SOCKET_RETRIEVAL_FAILURE:
-			case VoIPConstants.ConnectionFailCodes.UDP_CONNECTION_FAIL:		view.setText(getString(R.string.voip_conn_failure));
-																			break;
+			case VoIPConstants.ConnectionFailCodes.UDP_CONNECTION_FAIL:
+				view.setText(getString(R.string.voip_conn_failure));
+				break;
 
-			case VoIPConstants.ConnectionFailCodes.CALLER_BAD_NETWORK:		view.setText(getString(R.string.voip_caller_poor_network));
-																			break;
+			case VoIPConstants.ConnectionFailCodes.CALLER_BAD_NETWORK:
+				view.setText(getString(R.string.voip_caller_poor_network));
+				break;
 
-			default:														slideOutContainer();
+			default:
+				((CallFailedFragListener)getSherlockActivity()).removeCallFailedFragment();
 		}
 
 		return enableRedial;
@@ -153,7 +160,7 @@ public class CallFailedFragment extends SherlockFragment
 		view.findViewById(R.id.container).startAnimation(anim);
 	}
 
-	private void slideOutContainer()
+	private void slideOutContainer(View view)
 	{
 		Animation anim = AnimationUtils.loadAnimation(getSherlockActivity(), R.anim.call_failed_frag_slide_out);
 		anim.setAnimationListener(new AnimationListener() {
@@ -171,6 +178,6 @@ public class CallFailedFragment extends SherlockFragment
 				((CallFailedFragListener)getSherlockActivity()).removeCallFailedFragment();
 			}
 		});
-		getView().findViewById(R.id.container).startAnimation(anim);
+		view.findViewById(R.id.container).startAnimation(anim);
 	}
 }
