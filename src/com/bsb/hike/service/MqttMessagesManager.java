@@ -57,6 +57,11 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests;
+import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
+import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -1907,7 +1912,7 @@ public class MqttMessagesManager
 	private void saveRequestDP(JSONObject jsonObj) throws JSONException
 	{
 		final String groupId = jsonObj.getString(HikeConstants.TO);
-		uploadGroupProfileImage(groupId, true);
+		uploadGroupProfileImage(groupId);
 	}
 
 	private void savePopup(JSONObject jsonObj) throws JSONException
@@ -2468,7 +2473,7 @@ public class MqttMessagesManager
 		Logger.d("create bot", "It takes " + String.valueOf(System.currentTimeMillis() - startTime) + "msecs");
 	}
 
-	private void uploadGroupProfileImage(final String groupId, final boolean retryOnce)
+	private void uploadGroupProfileImage(final String groupId)
 	{
 		String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
 		String fileName = Utils.getTempProfileImageFileName(groupId);
@@ -2478,34 +2483,31 @@ public class MqttMessagesManager
 		{
 			return;
 		}
-
-		String path = "/group/" + groupId + "/avatar";
-
-		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(path, RequestType.PROFILE_PIC, new HikeHttpCallback()
+		
+		IRequestListener requestListener = new IRequestListener()
 		{
-			public void onFailure()
-			{
-				if (retryOnce)
-				{
-					uploadGroupProfileImage(groupId, false);
-				}
-				else
-				{
-					Utils.removeTempProfileImage(groupId);
-					HikeMessengerApp.getLruCache().deleteIconForMSISDN(groupId);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, groupId);
-				}
-			}
-
-			public void onSuccess(JSONObject response)
+			@Override
+			public void onRequestSuccess(Response result)
 			{
 				Utils.renameTempProfileImage(groupId);
 			}
-		});
-		hikeHttpRequest.setFilePath(groupImageFile.getPath());
-
-		HikeHTTPTask task = new HikeHTTPTask(null, 0);
-		Utils.executeHttpTask(task, hikeHttpRequest);
+			
+			@Override
+			public void onRequestProgressUpdate(float progress)
+			{				
+			}
+			
+			@Override
+			public void onRequestFailure(HttpException httpException)
+			{
+				Utils.removeTempProfileImage(groupId);
+				HikeMessengerApp.getLruCache().deleteIconForMSISDN(groupId);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, groupId);
+			}
+		};
+		
+		RequestToken requestToken = HttpRequests.editGroupProfileAvatarRequest(groupImageFile.getPath(), requestListener, groupId);
+		requestToken.execute();
 	}
 
 	private void handleSendNativeInviteKey(boolean sendNativeInvite, boolean showFreeSmsPopup, String header, String body, Editor editor)
