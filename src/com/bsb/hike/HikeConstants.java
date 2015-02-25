@@ -2261,6 +2261,8 @@ public class HikeConstants
 	
 	public static final int LED_DEFAULT_WHITE_COLOR = 0xffffffff;
 	
+	public static final String GET_BULK_LAST_SEEN = "bls"; 
+	
 	public static final int LED_NONE_COLOR = -2; /**
 													Any Change In this Value Should be double checked 
 													as this may coincide with any other color value
