@@ -76,6 +76,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 			PictureEditer.this.finish();
 			return;
 		}
+		
 		editView = (PhotosEditerFrameLayoutView) findViewById(R.id.editer);
 		editView.loadImageFromFile(filename);
 		editView.setOnDoodlingStartListener(clickHandler);
@@ -186,7 +187,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 		public EditorClickListener(Context context)
 		{
-			// TODO Auto-generated constructor stub
 			mContext = context;
 			doodleWidth = HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH;
 			doodleState = false;
@@ -200,8 +200,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		@Override
 		public void onClick(View v)
 		{
-			// TODO Auto-generated method stub
-
 			if (v.getClass() == FilterEffectItemLinearLayout.class)
 			{
 				FilterEffectItemLinearLayout prev = HikePhotosUtils.FilterTools.getCurrentFilterItem();
@@ -245,6 +243,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 					editView.undoLastDoodleDraw();
 					break;
 				case R.id.done_container:
+					// Change fragment
 					File savedImage = editView.saveImage();
 					Intent forwardIntent = IntentManager.getForwardImageIntent(mContext, savedImage);
 					startActivity(forwardIntent);
@@ -257,22 +256,20 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		@Override
 		public void onPageScrollStateChanged(int arg0)
 		{
-			// TODO Auto-generated method stub
+			// Do nothing
 
 		}
 
 		@Override
 		public void onPageScrolled(int arg0, float arg1, int arg2)
 		{
-			// TODO Auto-generated method stub
-
+			// Do nothing
 		}
 
 		@Override
 		public void onPageSelected(int arg0)
 		{
 
-			// TODO Auto-generated method stub
 			switch (arg0)
 			{
 			case HikeConstants.HikePhotos.FILTER_FRAGMENT_ID:
@@ -293,7 +290,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		@Override
 		public void onDoodleStateChanged(boolean isCanvasEmpty)
 		{
-			// TODO Auto-generated method stub
 			doodleState = !isCanvasEmpty;
 			if (isCanvasEmpty)
 			{

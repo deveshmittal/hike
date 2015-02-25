@@ -26,6 +26,7 @@ import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.commonsware.cwac.camera.CameraHost;
@@ -59,11 +60,11 @@ public class HikeCameraHost implements CameraHost
 
 	private boolean useFrontFacingCamera = true;
 
-	private boolean scanSavedImage = true;
+	private boolean scanSavedImage = false;
 
 	private boolean useFullBleedPreview = true;
 
-	private boolean useSingleShotMode = false;
+	private boolean useSingleShotMode = true;
 
 	private File mLastPhotoFile;
 
@@ -260,53 +261,70 @@ public class HikeCameraHost implements CameraHost
 	}
 
 	@Override
-	public void saveImage(PictureTransaction xact, byte[] image)
+	public void saveImage(PictureTransaction xact, final byte[] image)
 	{
-		File photo = getPhotoPath();
 
-		if (photo.exists())
+		Runnable saveImageRunnable = new Runnable()
 		{
-			photo.delete();
-		}
 
-		FileOutputStream fos = null;
-		try
-		{
-			fos = new FileOutputStream(photo.getPath());
-			BufferedOutputStream bos = new BufferedOutputStream(fos);
-
-			bos.write(image);
-			bos.flush();
-			fos.getFD().sync();
-			bos.close();
-
-			if (scanSavedImage())
+			@Override
+			public void run()
 			{
-				MediaScannerConnection.scanFile(ctxt, new String[] { photo.getPath() }, SCAN_TYPES, null);
-			}
-		}
-		catch (java.io.IOException e)
-		{
-			handleException(e);
-		}
-		finally
-		{
-			if (fos != null)
-			{
+				File defaultPicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
+				if (!defaultPicDir.exists())
+				{
+					defaultPicDir.mkdirs();
+				}
+
+				File photo = new File(defaultPicDir, getPhotoFilename());
+
+				if (photo.exists())
+				{
+					photo.delete();
+				}
+
+				FileOutputStream fos = null;
 				try
 				{
-					fos.flush();
-					fos.close();
-					mLastPhotoFile = photo;
-					mListener.onComplete(mLastPhotoFile);
+					fos = new FileOutputStream(photo.getPath());
+					BufferedOutputStream bos = new BufferedOutputStream(fos);
+
+					bos.write(image);
+					bos.flush();
+					fos.getFD().sync();
+					bos.close();
+
+					// if (scanSavedImage())
+					// {
+					// MediaScannerConnection.scanFile(ctxt, new String[] { photo.getPath() }, SCAN_TYPES, null);
+					// }
 				}
-				catch (IOException e)
+				catch (java.io.IOException e)
 				{
-					e.printStackTrace();
+					handleException(e);
+				}
+				finally
+				{
+					if (fos != null)
+					{
+						try
+						{
+							fos.flush();
+							fos.close();
+							mLastPhotoFile = photo;
+							// mListener.onComplete(mLastPhotoFile);
+						}
+						catch (IOException e)
+						{
+							e.printStackTrace();
+						}
+					}
 				}
 			}
-		}
+		};
 
+		HikeHandlerUtil.getInstance().postRunnableWithDelay(saveImageRunnable, 0);
 	}
 
 	public void setOnImageSavedListener(HikePhotosListener argListener)

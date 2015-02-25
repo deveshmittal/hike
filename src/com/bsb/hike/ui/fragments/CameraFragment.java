@@ -141,14 +141,7 @@ public class CameraFragment extends SherlockFragment
 		@Override
 		public void onComplete(final File f)
 		{
-			// getActivity().runOnUiThread(new Runnable()
-			// {
-			// @Override
-			// public void run()
-			// {
-			// Logger.d("CameraFragment", "Saved Image: " + (f != null ? f.getAbsolutePath() : "null"));
-			// }
-			// });
+
 		}
 
 		@Override
@@ -220,13 +213,35 @@ public class CameraFragment extends SherlockFragment
 	public void takePicture()
 	{
 		// takePicture(true, true);
-		PictureTransaction xact = new PictureTransaction(getHost());
+		final PictureTransaction xact = new PictureTransaction(getHost());
 		xact.mirrorFFC(false);
 		xact.useSingleShotMode(true);
 		xact.needBitmap(true);
 		xact.needByteArray(true);
 		xact.flashMode(flashMode);
-		takePicture(xact);
+
+		try
+		{
+			takePicture(xact);
+		}
+		catch (IllegalStateException ise)
+		{
+			new Handler().postDelayed(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						takePicture(xact);
+					}
+					catch (IllegalStateException ise2)
+					{
+						// Do nothing
+					}
+				}
+			}, 500);
+		}
 	}
 
 	/**
@@ -377,7 +392,7 @@ public class CameraFragment extends SherlockFragment
 
 	public void setFlashMode(String mode)
 	{
-//		cameraView.setFlashMode(mode);
+		// cameraView.setFlashMode(mode);
 		flashMode = mode;
 	}
 

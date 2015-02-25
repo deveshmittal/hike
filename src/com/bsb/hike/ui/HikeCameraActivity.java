@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,6 +22,7 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
@@ -28,6 +30,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
+import com.google.android.gms.internal.cm;
 
 public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener
 {
@@ -158,15 +161,31 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				}
 			}
 		});
+
+		setupActionBar();
+	}
+
+	private void setupActionBar()
+	{
+		findViewById(R.id.back).setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				onBackPressed();
+			}
+		});
+
+		findViewById(R.id.done_container).setVisibility(View.GONE);
+
 	}
 
 	@Override
 	protected void onResume()
 	{
 		super.onResume();
-		orientationListener.enable();
 
-		containerView.setVisibility(View.VISIBLE);
+		orientationListener.enable();
 
 		ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.containerImageView);
 
@@ -190,6 +209,24 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		{
 		case R.id.btntakepic:
 			cameraFragment.takePicture();
+			final View snapOverlay = findViewById(R.id.snapOverlay);
+			ObjectAnimator invisToVis = ObjectAnimator.ofFloat(snapOverlay, "alpha", 0f, 0.8f);
+			invisToVis.setDuration(200);
+			invisToVis.setInterpolator(deceleratorInterp);
+			invisToVis.addListener(new AnimatorListenerAdapter()
+			{
+				@Override
+				public void onAnimationEnd(Animator animation)
+				{
+					ObjectAnimator visToInvis = ObjectAnimator.ofFloat(snapOverlay, "alpha", 0.8f, 0f);
+					visToInvis.setDuration(150);
+					visToInvis.setInterpolator(deceleratorInterp);
+					visToInvis.start();
+				}
+			});
+
+			invisToVis.start();
+			snapOverlay.setVisibility(View.VISIBLE);
 			break;
 		case R.id.btngallery:
 			// Open gallery
@@ -204,12 +241,6 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			flipCamera(v);
 			break;
 		case R.id.btntoggleflash:
-
-			if (isUsingFFC)
-			{
-				// TODO Temporary fix . Change UI
-				return;
-			}
 
 			ImageButton btnFlash = (ImageButton) v;
 
@@ -307,18 +338,28 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 	{
 		if (containerView != null)
 		{
+
+			View preview = HikeCameraActivity.this.findViewById(R.id.previewWindow);
+
+			// float x = preview.getX();
+			//
+			// float y = preview.getY();
+
 			Rect r = new Rect();
 
-			containerView.getGlobalVisibleRect(r);
+			preview.getGlobalVisibleRect(r);
 
-			int heightDiff = cameraFragment.getHost().previewSize.width - containerView.getHeight();
+			// int heightDiff = cameraFragment.getHost().previewSize.width - containerView.getHeight();
+			//
+			// int bmpHeightDiff = (srcBmp.getHeight() * heightDiff) / cameraFragment.getHost().previewSize.width;
 
-			int bmpHeightDiff = (srcBmp.getHeight() * heightDiff) / cameraFragment.getHost().previewSize.width;
+			int bmpY = (int) (srcBmp.getHeight() * r.top / containerView.getHeight());
 
-			Bitmap dstBmp = Bitmap.createBitmap(srcBmp, srcBmp.getWidth() / 2 - ((srcBmp.getHeight() - bmpHeightDiff) / 2), bmpHeightDiff / 2,
-					(srcBmp.getHeight() - bmpHeightDiff), srcBmp.getHeight() - bmpHeightDiff);
+			int widthBmp = (bmpY * preview.getWidth()) / r.top;
 
-			containerView.setVisibility(View.GONE);
+			widthBmp = widthBmp > srcBmp.getWidth() ? srcBmp.getWidth() : widthBmp;
+
+			Bitmap dstBmp = Bitmap.createBitmap(srcBmp, srcBmp.getWidth() / 2 - (widthBmp / 2), bmpY, widthBmp, widthBmp);
 
 			ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.containerImageView);
 
