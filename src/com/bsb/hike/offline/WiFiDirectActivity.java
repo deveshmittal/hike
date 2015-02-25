@@ -18,6 +18,7 @@ package com.bsb.hike.offline;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -29,10 +30,12 @@ import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
+import android.net.wifi.p2p.WifiP2pManager.GroupInfoListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -57,7 +60,7 @@ import com.bsb.hike.utils.Logger;
  * The application should also register a BroadcastReceiver for notification of
  * WiFi state related events.
  */
-public class WiFiDirectActivity extends Activity implements ChannelListener, DeviceActionListener {
+public class WiFiDirectActivity extends Activity implements ChannelListener, DeviceActionListener{
 
     public static final String TAG = "wifidirectdemo";
     private WifiP2pManager manager;
@@ -460,4 +463,6 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     		callDisconnect();
     	}	  
     }
+
+	
 }

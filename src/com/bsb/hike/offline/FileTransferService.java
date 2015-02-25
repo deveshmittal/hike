@@ -116,7 +116,7 @@ public class FileTransferService extends IntentService {
 				ContentResolver cr = context.getContentResolver();
 				
 				InputStream is = null;
-				is = new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8));
+				is = new ByteArrayInputStream(message.getBytes());
 				byte[]  type  =  new byte[1];
 				type[0] =  (byte) intent.getExtras().getInt("fileType");
 				stream.write(type,0,type.length);
