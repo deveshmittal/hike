@@ -509,4 +509,17 @@ public class ClientOptions
 			
 		}
 	}
+	
+	/**
+	 * Returns clientoption with default values set
+	 * 
+	 * @return
+	 */
+	static ClientOptions getDefaultClientOptions()
+	{
+		ClientOptions defaultClientOptions = new ClientOptions.Builder().setConnectTimeout(Defaults.CONNECT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+				.setReadTimeout(Defaults.CONNECT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS).setWriteTimeout(Defaults.WRITE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+				.setSocketFactory(Defaults.SOCKET_FACTORY).setSslSocketFactory(Defaults.SSL_SOCKET_FACTORY).build();
+		return defaultClientOptions;
+	}
 }
