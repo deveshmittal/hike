@@ -121,6 +121,21 @@ public abstract class Request<T> implements IRequestFacade
 			responseInteceptors = new Pipeline<IResponseInterceptor>();
 		}
 	}
+
+	public void finish()
+	{
+		this.method = null;
+		this.url = null;
+		this.headers = null;
+		this.body = null;
+		this.retryPolicy = null;
+		this.requestListeners = null;
+		this.requestInteceptors = null;
+		this.responseInteceptors = null;
+		this.requestCancellationListener = null;
+		this.progressListener = null;
+		this.future = null;
+	}
 	
 	public abstract T parseResponse(InputStream in) throws Throwable;
 

@@ -103,4 +103,14 @@ public class RequestRunner
 			}
 		}
 	}
+	
+	public void shutdown()
+	{
+		engine.shutDown();
+		engine = null;
+		defaultClient = null;
+		requestMap.clear();
+		requestMap = null;
+		requestListenerNotifier.shutdown();
+	}
 }

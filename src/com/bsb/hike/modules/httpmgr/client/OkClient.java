@@ -1,8 +1,10 @@
 package com.bsb.hike.modules.httpmgr.client;
 
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import com.bsb.hike.modules.httpmgr.Header;
+import com.bsb.hike.modules.httpmgr.Utils;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.modules.httpmgr.response.Response;
@@ -204,12 +206,21 @@ public class OkClient implements IClient
 		responseBuilder.setStatusCode(response.code());
 		responseBuilder.setReason(response.message());
 		com.squareup.okhttp.ResponseBody responseBody = response.body();
-		T bodyContent = request.parseResponse(responseBody.byteStream());
-		ResponseBody<T> body = ResponseBody.create(responseBody.toString(), (int) responseBody.contentLength(), bodyContent);
-		responseBuilder.setBody(body);
-		Response res = responseBuilder.build();
-		res.getResponseInterceptors().addAll(request.getResponseInterceptors());
-		return res;
+		
+		InputStream stream = responseBody.byteStream();
+		try
+		{
+			T bodyContent = request.parseResponse(stream);
+			ResponseBody<T> body = ResponseBody.create(responseBody.toString(), (int) responseBody.contentLength(), bodyContent);
+			responseBuilder.setBody(body);
+			Response res = responseBuilder.build();
+			res.getResponseInterceptors().addAll(request.getResponseInterceptors());
+			return res;
+		}
+		finally
+		{
+			Utils.closeQuietly(stream);
+		}
 	}
 
 	/**
