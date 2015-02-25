@@ -20,7 +20,7 @@ import com.bsb.hike.modules.httpmgr.response.ResponseBody;
  * @author anubhavgupta @ sidharth
  * 
  */
-public class UrlConnectionClient extends OkClient
+public class UrlConnectionClient implements IClient
 {
 	private static final int CHUNK_SIZE = 4096;
 
@@ -111,5 +111,11 @@ public class UrlConnectionClient extends OkClient
 		Response response = new Response.Builder().setUrl(connection.getURL().toString()).setStatusCode(status).setReason(reason).setHeaders(headers).setBody(responseBody).build();
 		response.getResponseInterceptors().addAll(request.getResponseInterceptors());
 		return response;
+	}
+
+	@Override
+	public IClient clone(ClientOptions options)
+	{
+		throw new IllegalStateException("can't clone UrlCOnnectionClient");
 	}
 }
