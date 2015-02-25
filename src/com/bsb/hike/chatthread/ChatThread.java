@@ -1019,7 +1019,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						position *= (-1);
 						position -= 1;
 					}
-					return (indexList.get(position) - messageViewBacklash);
+					return applyBackLash(indexList.get(position));
 				}
 			}
 			boolean found = false;
@@ -1043,7 +1043,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 			if (position >=0 && position < indexList.size())
 			{
-				return (indexList.get(position) - messageViewBacklash);
+				return applyBackLash(indexList.get(position));
 			}
 			else
 			{
@@ -1096,7 +1096,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						position *= (-1);
 						position -= 2;
 					}
-					return (indexList.get(position) - messageViewBacklash);
+					return applyBackLash(indexList.get(position));
 				}
 			}
 			boolean found = false;
@@ -1128,7 +1128,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 			if (position >=0 && position < indexList.size())
 			{
-				return (indexList.get(position) - messageViewBacklash);
+				return applyBackLash(indexList.get(position));
 			}
 			else
 			{
@@ -1143,7 +1143,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			{
 				from ^= to ^= from ^= to;
 			}
-			for (; from >= to; from++)
+			for (; from <= to; from++)
 			{
 				if (doesMessageHaveText(messages.get(from), searchText))
 				{
@@ -1209,6 +1209,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 		}
 
+		private int applyBackLash(int position)
+		{
+			if (position >= messageViewBacklash)
+				position -= messageViewBacklash;
+			
+			return position;
+		}
 		private int loadMessages()
 		{
 			List<ConvMessage> msgList = loadMoreMessages(loadMessageCount);
