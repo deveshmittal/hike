@@ -62,6 +62,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
@@ -1826,6 +1827,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 				if ((this.profileType == ProfileType.USER_PROFILE) || (this.profileType == ProfileType.GROUP_INFO))
 				{
+					Utils.compressAndCopyImage(mActivityState.destFilePath, mActivityState.destFilePath, ProfileActivity.this, ImageQuality.QUALITY_MEDIUM);
 					saveChanges();
 				}
 				break;
