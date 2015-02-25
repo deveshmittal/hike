@@ -8,6 +8,7 @@ import android.content.Context;
 
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.notifications.ToastListener;
+import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -148,7 +149,7 @@ public class PreloadNotificationSchedular
 		 *Adding an check that weather the user has signed up or not.
 		 * 
 		 */
-		if (title != null && text != null && mmListener != null&&!Utils.isUserSignedUp(context, false))
+		if (title != null && text != null && mmListener != null&&!Utils.isUserSignedUp(context, false)&&SignupTask.signupTask==null)
 		{
 
 			mmListener.notifyUser(text, title);
