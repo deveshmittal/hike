@@ -82,4 +82,14 @@ public class RequestProcessor
 		}
 		return false;
 	}
+	
+	public void shutdown()
+	{
+		requestMap.clear();
+		requestMap = null;
+		requestRunner.shutdown();
+		requestRunner = null;
+		requestListenerNotifier.shutdown();
+		requestListenerNotifier = null;
+	}
 }
