@@ -9,6 +9,10 @@ import java.util.concurrent.TimeUnit;
 
 import android.os.Build;
 
+import com.bsb.hike.modules.httpmgr.log.LogFull;
+import com.bsb.hike.utils.Logger;
+
+
 /**
  * 
  * @author anubhavgupta
@@ -16,7 +20,6 @@ import android.os.Build;
  */
 public class HttpExecuter extends ScheduledThreadPoolExecutor
 {
-
 	private HttpEngine engine;
 
 	short executerType;

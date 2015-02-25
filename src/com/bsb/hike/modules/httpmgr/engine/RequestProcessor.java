@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.bsb.hike.modules.httpmgr.client.ClientOptions;
+import com.bsb.hike.modules.httpmgr.log.LogFull;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.listener.IProgressListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListener;
@@ -42,17 +43,20 @@ public class RequestProcessor
 		long requestId = request.getId();
 		if (requestMap.containsKey(requestId))
 		{
+			LogFull.i(request.toString() + " already exists");
 			Request<?> req = requestMap.get(requestId);
 			req.addRequestListeners(request.getRequestListeners());
 		}
 		else
 		{
+			LogFull.d("adding " + request.toString() + " to request map");
 			requestMap.put(requestId, request);
 			IRequestCancellationListener listener = new IRequestCancellationListener()
 			{
 				@Override
 				public void onCancel()
 				{
+					LogFull.i("on cancel called for " + request.toString() + "  removing from request map");
 					requestListenerNotifier.notifyListenersOfRequestCancellation(request);
 					requestMap.remove(request.getId());
 				}
@@ -78,8 +82,10 @@ public class RequestProcessor
 		long requestId = request.getId();
 		if (requestMap.containsKey(requestId))
 		{
+			LogFull.d(request.toString() + " is already running ");
 			return true;
 		}
+		LogFull.d(request.toString() + " is not already running ");
 		return false;
 	}
 	

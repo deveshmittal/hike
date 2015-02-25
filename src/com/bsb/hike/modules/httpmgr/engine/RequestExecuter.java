@@ -21,6 +21,8 @@ import com.bsb.hike.modules.httpmgr.DefaultHeaders;
 import com.bsb.hike.modules.httpmgr.client.IClient;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
+import com.bsb.hike.modules.httpmgr.log.LogFull;
+import com.bsb.hike.modules.httpmgr.log.LogHttp;
 import com.bsb.hike.modules.httpmgr.network.NetworkChecker;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.RequestCall;
@@ -60,6 +62,7 @@ public class RequestExecuter
 	 */
 	private void preProcess()
 	{
+		LogFull.d("Pre-processing started for " + request.toString());
 		RequestFacade requestFacade = new RequestFacade(request);
 		Iterator<IRequestInterceptor> iterator = requestFacade.getRequestInterceptors().iterator();
 		RequestInterceptorChain chain = new RequestInterceptorChain(iterator, requestFacade);
@@ -110,11 +113,13 @@ public class RequestExecuter
 		}
 		try
 		{
+			LogFull.d("retrying " + request.toString() + "sleeping for delay : " + delay);
 			Thread.sleep(delay);
 			processRequest();
 		}
 		catch (InterruptedException e)
 		{
+			LogFull.e(e, "excetion : ");
 			e.printStackTrace();
 		}
 	}
@@ -163,10 +168,13 @@ public class RequestExecuter
 	 */
 	public void processRequest()
 	{
+		LogFull.d(request.toString() +  " processing started");
+		
 		if (!NetworkChecker.isNetworkAvailable())
 		{
 			if (!request.isCancelled())
 			{
+				LogFull.e("no network");
 				listener.onResponse(null, new HttpException(REASON_CODE_NO_NETWORK));
 				return;
 			}
@@ -176,6 +184,7 @@ public class RequestExecuter
 		{
 			if (request.isCancelled())
 			{
+				LogFull.i(request.toString() + "is already cancelled");
 				return;
 			}
 
@@ -191,6 +200,7 @@ public class RequestExecuter
 				throw new IOException();
 			}
 
+			LogFull.d(request.toString() + " completed");
 			// positive response 
 			listener.onResponse(response, null);
 		}
@@ -242,6 +252,7 @@ public class RequestExecuter
 	 */
 	private void handleException(Throwable ex, int reasonCode)
 	{
+		LogFull.e(ex, "exception occured for " + request.toString());
 		listener.onResponse(null, new HttpException(reasonCode, ex));
 	}
 
@@ -259,15 +270,18 @@ public class RequestExecuter
 			retryPolicy.retry(httpException);
 			if (retryPolicy.getRetryCount() >= 0)
 			{
+				LogFull.i("retring " + request.toString());
 				execute(false, retryPolicy.getRetryDelay());
 			}
 			else
 			{
+				LogFull.i("max retry count reached for " + request.toString());
 				listener.onResponse(null, httpException);
 			}
 		}
 		else
 		{
+			LogFull.i("no retry policy retuning for " + request.toString());
 			listener.onResponse(null, httpException);
 		}
 	}
@@ -297,6 +311,10 @@ public class RequestExecuter
 			{
 				RequestInterceptorChain chain = new RequestInterceptorChain(iterator, requestFacade);
 				iterator.next().intercept(chain);
+			}
+			else
+			{
+				LogFull.d("Pre-processing completed for " + request.toString());
 			}
 		}
 	}

@@ -482,6 +482,13 @@ public abstract class Request<T> implements IRequestFacade
 			this.progressListener.onProgressUpdate(f);
 		}
 	}
+	
+	@Override
+	public String toString()
+	{
+		String s = "\nRequest{\n" + "\t\turl : " + getUrl() + "\n" + "\t\tid : " + getId() + "\n" + "}";
+		return s;
+	}
 
 	protected static abstract class Init<S extends Init<S>>
 	{

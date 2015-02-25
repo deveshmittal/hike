@@ -17,6 +17,8 @@
 
 package com.squareup.okhttp.internal.http;
 
+import com.bsb.hike.modules.httpmgr.Utils;
+import com.bsb.hike.modules.httpmgr.log.LogHttp;
 import com.squareup.okhttp.Address;
 import com.squareup.okhttp.CertificatePinner;
 import com.squareup.okhttp.Connection;
@@ -34,6 +36,7 @@ import com.squareup.okhttp.internal.Internal;
 import com.squareup.okhttp.internal.InternalCache;
 import com.squareup.okhttp.internal.Util;
 import com.squareup.okhttp.internal.Version;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.CookieHandler;
@@ -45,10 +48,12 @@ import java.security.cert.CertificateException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocketFactory;
+
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;
@@ -57,7 +62,6 @@ import okio.Okio;
 import okio.Sink;
 import okio.Source;
 import okio.Timeout;
-
 import static com.squareup.okhttp.internal.Util.closeQuietly;
 import static com.squareup.okhttp.internal.Util.getDefaultPort;
 import static com.squareup.okhttp.internal.Util.getEffectivePort;
@@ -216,6 +220,7 @@ public final class HttpEngine {
     if (transport != null) throw new IllegalStateException();
 
     Request request = networkRequest(userRequest);
+    LogHttp.i("Request : " + Utils.requestToString(userRequest));
 
     InternalCache responseCache = Internal.instance.internalCache(client);
     Response cacheCandidate = responseCache != null
@@ -564,10 +569,12 @@ public final class HttpEngine {
    */
   private Response unzip(final Response response) throws IOException {
     if (!transparentGzip || !"gzip".equalsIgnoreCase(userResponse.header("Content-Encoding"))) {
+      LogHttp.i("Response : " + Utils.responseToString(response));
       return response;
     }
 
     if (response.body() == null) {
+      LogHttp.i("Response : " + Utils.responseToString(response));
       return response;
     }
 
@@ -576,10 +583,12 @@ public final class HttpEngine {
         .removeAll("Content-Encoding")
         .removeAll("Content-Length")
         .build();
-    return response.newBuilder()
+    Response newResponse = response.newBuilder()
         .headers(strippedHeaders)
         .body(new RealResponseBody(strippedHeaders, Okio.buffer(responseBody)))
         .build();
+    LogHttp.i("Response : " + Utils.responseToString(newResponse));
+    return newResponse;
   }
 
   /**

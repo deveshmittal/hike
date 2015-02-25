@@ -1,13 +1,15 @@
 package com.bsb.hike.modules.httpmgr;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import com.bsb.hike.modules.httpmgr.client.ClientOptions;
 import com.bsb.hike.modules.httpmgr.engine.HttpEngine;
 import com.bsb.hike.modules.httpmgr.engine.RequestListenerNotifier;
 import com.bsb.hike.modules.httpmgr.engine.RequestProcessor;
+import com.bsb.hike.modules.httpmgr.log.HttpLogger;
+import com.bsb.hike.modules.httpmgr.log.LogFull;
+import com.bsb.hike.modules.httpmgr.log.LogHttp;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 
@@ -25,9 +27,23 @@ public class HttpManager
 	
 	private HttpManager(ClientOptions options)
 	{
+		if(HttpLogger.DEBUG)
+		{
+			boolean t = true;
+			if (t)
+			{
+				HttpLogger.plant(new LogFull("Http"));
+				HttpLogger.plant(new LogHttp("Http"));
+			}
+			else
+			{
+				HttpLogger.plant(new LogHttp("Http"));
+			}
+		}
 		HttpEngine engine = new HttpEngine();
 		RequestListenerNotifier notifier = new RequestListenerNotifier(engine);
 		requestProcessor = new RequestProcessor(options, engine, notifier);
+		
 	}
 
 	static HttpManager getInstance()
