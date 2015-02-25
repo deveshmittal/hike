@@ -10,7 +10,7 @@
 	    android:layout_height="@dimen/festive_popup_height"
 	    android:layout_gravity="center"
 	    android:background="#0f8fe1"
-	    android:visibility="visible" >
+	    android:visibility="gone" >
 	
 	    <LinearLayout
 	        android:id="@+id/button_container"
@@ -74,7 +74,7 @@
 	            android:paddingBottom="10dp"
 	            android:paddingTop="10dp"
 	            android:src="@drawable/holi"
-	            android:visibility="visible" />
+	            android:visibility="invisible" />
 
 	    </LinearLayout>
 
