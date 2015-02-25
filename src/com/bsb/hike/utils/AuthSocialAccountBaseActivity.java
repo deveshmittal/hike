@@ -22,7 +22,6 @@ import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
-import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.view.TwitterOAuthView;
 import com.bsb.hike.view.TwitterOAuthView.Result;
 import com.bsb.hike.view.TwitterOAuthView.TwitterAuthListener;

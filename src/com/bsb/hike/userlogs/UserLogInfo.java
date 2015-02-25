@@ -31,7 +31,6 @@ import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
-import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
