@@ -252,6 +252,10 @@ public class HikePubSub implements Runnable
 
 	public static final String DISMISS_POSTING_DIALOG = "dismissPostingDialog";
 	
+	public static final String DISMISS_EDIT_PROFILE_DIALOG = "dismissEditProfileDialog";
+	
+	public static final String UPDATE_PROFILE_FAILED = "updateProfileFailed";
+	
 	public static final String SEND_TWITTER_INVITE_RESULT = "sendTwitterInviteResult";
 
 	public static final String SHOW_IMAGE = "showImage";

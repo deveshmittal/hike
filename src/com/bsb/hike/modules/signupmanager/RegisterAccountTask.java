@@ -20,8 +20,6 @@ import com.bsb.hike.models.AccountInfo;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
-import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
-import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -47,13 +45,9 @@ public class RegisterAccountTask
 
 	public AccountInfo execute()
 	{
-
-		JSONObject postObject = getPostObject();
-		IRequestBody body = new JsonBody(postObject);
-		RequestToken requestToken = registerAccountRequest(body, getRequestListener());
+		RequestToken requestToken = registerAccountRequest(getPostObject(), getRequestListener());
 		requestToken.execute();
 		return resultAccountInfo;
-
 	}
 
 	private IRequestListener getRequestListener()

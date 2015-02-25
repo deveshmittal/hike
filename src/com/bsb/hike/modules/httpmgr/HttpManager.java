@@ -23,8 +23,8 @@ public class HttpManager
 {
 	private static volatile HttpManager _instance;
 
-	private RequestProcessor requestProcessor;
-
+	private static RequestProcessor requestProcessor;
+	
 	private HttpManager(ClientOptions options)
 	{
 		if(HttpLogger.DEBUG)
@@ -113,6 +113,11 @@ public class HttpManager
 		request.cancel();
 	}
 	
+	public <T> void addRequestListener(Request<T> request, IRequestListener listener)
+	{
+		request.addRequestListeners(listener);
+	}
+	
 	/**
 	 * Removes particular listener from list of listeners for a request
 	 * 
@@ -146,5 +151,12 @@ public class HttpManager
 	public <T> boolean isRequestRunning(Request<T> request)
 	{
 		return requestProcessor.isRequestRunning(request);
+	}
+	
+	public static void shutdown()
+	{
+		requestProcessor.shutdown();
+		requestProcessor = null;
+		_instance = null;
 	}
 }

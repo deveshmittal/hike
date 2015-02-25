@@ -12,8 +12,6 @@ import com.bsb.hike.modules.contactmgr.ContactUtils;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
-import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
-import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
 import com.bsb.hike.modules.httpmgr.response.Response;
 
 public class PostAddressBookTask
@@ -30,17 +28,13 @@ public class PostAddressBookTask
 	public JSONObject execute()
 	{
 		JSONObject postObject = getPostObject();
-		if(postObject == null)
+		if (postObject == null)
 		{
 			return null;
 		}
-		
-		IRequestBody body = new JsonBody(postObject);
-		RequestToken requestToken = postAddressBookRequest(body, getRequestListener());
+		RequestToken requestToken = postAddressBookRequest(postObject, getRequestListener());
 		requestToken.execute();
 		return resultObject;
-		
-		
 	}
 	
 	private IRequestListener getRequestListener()

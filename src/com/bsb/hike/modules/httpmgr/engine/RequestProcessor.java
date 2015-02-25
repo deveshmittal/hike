@@ -88,4 +88,14 @@ public class RequestProcessor
 		LogFull.d(request.toString() + " is not already running ");
 		return false;
 	}
+	
+	public void shutdown()
+	{
+		requestMap.clear();
+		requestMap = null;
+		requestRunner.shutdown();
+		requestRunner = null;
+		requestListenerNotifier.shutdown();
+		requestListenerNotifier = null;
+	}
 }

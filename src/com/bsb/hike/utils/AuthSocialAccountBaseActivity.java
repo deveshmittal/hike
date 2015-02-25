@@ -22,7 +22,6 @@ import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
-import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.view.TwitterOAuthView;
 import com.bsb.hike.view.TwitterOAuthView.Result;
 import com.bsb.hike.view.TwitterOAuthView.TwitterAuthListener;
@@ -42,6 +41,8 @@ public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseFrag
 
 	private boolean shouldPost;
 
+	private RequestToken requestToken;
+	
 	protected TwitterOAuthView twitterOAuthView;
 
 	protected boolean facebookAuthPopupShowing;
@@ -83,7 +84,7 @@ public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseFrag
 	{
 		super.onResume();
 		Object o = getLastCustomNonConfigurationInstance();
-		if (o instanceof HikeHTTPTask)
+		if (o instanceof RequestToken)
 		{
 			dialog = ProgressDialog.show(this, null, getString(R.string.saving_social));
 		}
@@ -109,12 +110,17 @@ public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseFrag
 			dialog.dismiss();
 			dialog = null;
 		}
+		requestToken = null;
 		super.onDestroy();
 	}
 
 	@Override
 	public Object onRetainCustomNonConfigurationInstance()
 	{
+		if(requestToken != null)
+		{
+			return requestToken;
+		}
 		return super.onRetainNonConfigurationInstance();
 	}
 
@@ -187,27 +193,10 @@ public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseFrag
 		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED, true);
 	}
 
-	private void sendCredentialsToServer(String id, String token, long expires, final boolean facebook)
+	private IRequestListener getSendCredentialsToServerRequestListener(final boolean facebook)
 	{
-		JSONObject request = new JSONObject();
-		try
-		{
-			request.put(HikeConstants.ID, id);
-			request.put(HikeConstants.TOKEN, token);
-			if (expires != -1)
-			{
-				request.put(HikeConstants.EXPIRES, expires);
-			}
-			request.put(HikeConstants.POST, shouldPost);
-		}
-		catch (JSONException e)
-		{
-			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
-		}
-		Logger.d(getClass().getSimpleName(), "Request: " + request.toString());
-		
-		IRequestListener requestListener = new IRequestListener()
-		{		
+		return new IRequestListener()
+		{	
 			@Override
 			public void onRequestSuccess(com.bsb.hike.modules.httpmgr.response.Response result)
 			{
@@ -226,12 +215,13 @@ public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseFrag
 					editor.putBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, true);
 				}
 				editor.commit();
+				requestToken = null;
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_COMPLETED, facebook);
 			}
 			
 			@Override
 			public void onRequestProgressUpdate(float progress)
-			{
+			{				
 			}
 			
 			@Override
@@ -260,11 +250,31 @@ public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseFrag
 					editor.remove(HikeMessengerApp.TWITTER_AUTH_COMPLETE);
 				}
 				editor.commit();
+				requestToken = null;
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED, facebook);
 			}
 		};
-		
-		RequestToken requestToken = HttpRequests.sendSocialCredentialsRequest(facebook ? "fb" : "twitter", request, requestListener);
+	}
+	
+	private void sendCredentialsToServer(String id, String token, long expires, final boolean facebook)
+	{
+		JSONObject request = new JSONObject();
+		try
+		{
+			request.put(HikeConstants.ID, id);
+			request.put(HikeConstants.TOKEN, token);
+			if (expires != -1)
+			{
+				request.put(HikeConstants.EXPIRES, expires);
+			}
+			request.put(HikeConstants.POST, shouldPost);
+		}
+		catch (JSONException e)
+		{
+			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
+		}
+		Logger.d(getClass().getSimpleName(), "Request: " + request.toString());
+		requestToken = HttpRequests.sendSocialCredentialsRequest(facebook ? "fb" : "twitter", request, getSendCredentialsToServerRequestListener(facebook));
 		requestToken.execute();
 		
 		if (!this.isFinishing())

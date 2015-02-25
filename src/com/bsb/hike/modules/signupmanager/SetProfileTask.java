@@ -11,8 +11,6 @@ import com.bsb.hike.models.Birthday;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
-import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
-import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.utils.Utils;
 
@@ -41,8 +39,7 @@ public class SetProfileTask
 			return null;
 		}
 		
-		IRequestBody body = new JsonBody(postObject);
-		RequestToken requestToken = setProfileRequest(body, getRequestListener());
+		RequestToken requestToken = setProfileRequest(postObject, getRequestListener());
 		requestToken.execute();
 		
 		if(resultObject == null)

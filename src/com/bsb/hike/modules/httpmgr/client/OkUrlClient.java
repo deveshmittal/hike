@@ -15,17 +15,17 @@ import com.squareup.okhttp.OkUrlFactory;
  */
 public class OkUrlClient extends UrlConnectionClient
 {
-
 	private final OkUrlFactory okUrlFactory;
 
 	public OkUrlClient()
 	{
-		this(generateClient(getDefaultClientOptions()));
+		this(ClientOptions.getDefaultClientOptions());
 	}
 
 	public OkUrlClient(ClientOptions clientOptions)
 	{
-		this(generateClient(clientOptions));
+		OkHttpClient okHttpCLient = OkClient.generateClient(clientOptions);
+		this.okUrlFactory = new OkUrlFactory(okHttpCLient);
 	}
 
 	public OkUrlClient(OkHttpClient client)
@@ -39,11 +39,12 @@ public class OkUrlClient extends UrlConnectionClient
 		return okUrlFactory.open(new URL(request.getUrl()));
 	}
 	
+	@Override
 	/**
 	 * Clones the OkUrlClient with given client option parameters
 	 */
 	public OkUrlClient clone(ClientOptions clientOptions)
 	{
-		return new OkUrlClient(setClientParameters(okUrlFactory.client().clone(), clientOptions));
+		return new OkUrlClient(OkClient.setClientParameters(okUrlFactory.client().clone(), clientOptions));
 	}
 }

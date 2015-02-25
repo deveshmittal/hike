@@ -78,6 +78,9 @@ public class RequestListenerNotifier
 		{
 			listener.onRequestSuccess(response);
 		}
+		
+		request.finish();
+		response.finish();
 	}
 
 	/**
@@ -143,6 +146,8 @@ public class RequestListenerNotifier
 		{
 			listener.onRequestFailure(ex);
 		}
+		
+		request.finish();
 	}
 
 	/**
@@ -197,5 +202,11 @@ public class RequestListenerNotifier
 			}
 		};
 		return call;
+	}
+	
+	public void shutdown()
+	{
+		engine = null;
+		uiExecuter = null;
 	}
 }

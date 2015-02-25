@@ -93,6 +93,15 @@ public class Response implements IResponseFacade
 		return this.responseInterceptors;
 	}
 
+	public void finish()
+	{
+		this.url = null;
+		this.reason = null;
+		this.headers = null;
+		this.body = null;
+		this.responseInterceptors = null;
+	}
+	
 	public static class Builder
 	{
 		private String url;

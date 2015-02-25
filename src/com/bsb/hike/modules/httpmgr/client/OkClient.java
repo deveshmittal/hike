@@ -1,11 +1,10 @@
 package com.bsb.hike.modules.httpmgr.client;
 
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import com.bsb.hike.modules.httpmgr.Header;
-import com.bsb.hike.modules.httpmgr.log.HttpLogger;
-import com.bsb.hike.modules.httpmgr.log.HttpLogger.Tree;
-import com.bsb.hike.modules.httpmgr.log.LogFull;
+import com.bsb.hike.modules.httpmgr.Utils;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.modules.httpmgr.response.Response;
@@ -51,7 +50,7 @@ public class OkClient implements IClient
 	 */
 	static OkHttpClient generateClient(ClientOptions clientOptions)
 	{
-		clientOptions = clientOptions != null ? clientOptions : getDefaultClientOptions();
+		clientOptions = clientOptions != null ? clientOptions : ClientOptions.getDefaultClientOptions();
 		OkHttpClient client = new OkHttpClient();
 		return setClientParameters(client, clientOptions);
 	}
@@ -143,22 +142,9 @@ public class OkClient implements IClient
 		return client;
 	}
 
-	/**
-	 * Returns clientoption with default values set
-	 * 
-	 * @return
-	 */
-	static ClientOptions getDefaultClientOptions()
-	{
-		ClientOptions defaultClientOptions = new ClientOptions.Builder().setConnectTimeout(Defaults.CONNECT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
-				.setReadTimeout(Defaults.CONNECT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS).setWriteTimeout(Defaults.WRITE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
-				.setSocketFactory(Defaults.SOCKET_FACTORY).setSslSocketFactory(Defaults.SSL_SOCKET_FACTORY).build();
-		return defaultClientOptions;
-	}
-
 	public OkClient()
 	{
-		client = generateClient(getDefaultClientOptions());
+		client = generateClient(ClientOptions.getDefaultClientOptions());
 	}
 
 	public OkClient(ClientOptions clientOptions)
@@ -220,12 +206,21 @@ public class OkClient implements IClient
 		responseBuilder.setStatusCode(response.code());
 		responseBuilder.setReason(response.message());
 		com.squareup.okhttp.ResponseBody responseBody = response.body();
-		T bodyContent = request.parseResponse(responseBody.byteStream());
-		ResponseBody<T> body = ResponseBody.create(responseBody.toString(), (int) responseBody.contentLength(), bodyContent);
-		responseBuilder.setBody(body);
-		Response res = responseBuilder.build();
-		res.getResponseInterceptors().addAll(request.getResponseInterceptors());
-		return res;
+		
+		InputStream stream = responseBody.byteStream();
+		try
+		{
+			T bodyContent = request.parseResponse(stream);
+			ResponseBody<T> body = ResponseBody.create(responseBody.toString(), (int) responseBody.contentLength(), bodyContent);
+			responseBuilder.setBody(body);
+			Response res = responseBuilder.build();
+			res.getResponseInterceptors().addAll(request.getResponseInterceptors());
+			return res;
+		}
+		finally
+		{
+			Utils.closeQuietly(stream);
+		}
 	}
 
 	/**

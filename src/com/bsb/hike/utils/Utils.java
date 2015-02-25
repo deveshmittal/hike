@@ -706,6 +706,11 @@ public class Utils
 		return (!TextUtils.isEmpty(text) && android.util.Patterns.EMAIL_ADDRESS.matcher(text).matches());
 	}
 
+	public static boolean isValidEmail(String text)
+	{
+		return (!TextUtils.isEmpty(text) && android.util.Patterns.EMAIL_ADDRESS.matcher(text).matches());
+	}
+	
 	public static void logEvent(Context context, String event)
 	{
 		logEvent(context, event, 1);

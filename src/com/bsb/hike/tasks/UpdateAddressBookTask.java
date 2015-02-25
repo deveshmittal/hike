@@ -44,16 +44,13 @@ public class UpdateAddressBookTask
 	public List<ContactInfo> execute()
 	{
 		JSONObject postObject = getPostObject();
-		if(postObject == null)
+		if (postObject == null)
 		{
 			return null;
 		}
-		
-		IRequestBody body = new JsonBody(postObject);
-		RequestToken requestToken = updateAddressBookRequest(body, getRequestListener());
+		RequestToken requestToken = updateAddressBookRequest(postObject, getRequestListener());
 		requestToken.execute();
 		return ContactUtils.getContactList(resultObject, new_contacts_by_id);
-		
 	}
 	
 	private IRequestListener getRequestListener()

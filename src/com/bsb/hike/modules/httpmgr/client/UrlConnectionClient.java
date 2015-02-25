@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.bsb.hike.modules.httpmgr.Header;
+import com.bsb.hike.modules.httpmgr.Utils;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 import com.bsb.hike.modules.httpmgr.response.Response;
@@ -20,7 +21,7 @@ import com.bsb.hike.modules.httpmgr.response.ResponseBody;
  * @author anubhavgupta @ sidharth
  * 
  */
-public class UrlConnectionClient extends OkClient
+public class UrlConnectionClient implements IClient
 {
 	private static final int CHUNK_SIZE = 4096;
 
@@ -95,21 +96,35 @@ public class UrlConnectionClient extends OkClient
 
 		String mimeType = connection.getContentType();
 		int length = connection.getContentLength();
-		InputStream stream;
-		if (status >= 400)
+		InputStream stream = null;
+		try
 		{
-			stream = connection.getErrorStream();
+			if (status >= 400)
+			{
+				stream = connection.getErrorStream();
+			}
+			else
+			{
+				stream = connection.getInputStream();
+			}
+
+			T bodyContent = request.parseResponse(stream);
+
+			ResponseBody<T> responseBody = ResponseBody.create(mimeType, length, bodyContent);
+			Response response = new Response.Builder().setUrl(connection.getURL().toString()).setStatusCode(status).setReason(reason).setHeaders(headers).setBody(responseBody)
+					.build();
+			response.getResponseInterceptors().addAll(request.getResponseInterceptors());
+			return response;
 		}
-		else
+		finally
 		{
-			stream = connection.getInputStream();
+			Utils.closeQuietly(stream);
 		}
+	}
 
-		T bodyContent = request.parseResponse(stream);
-
-		ResponseBody<T> responseBody = ResponseBody.create(mimeType, length, bodyContent);
-		Response response = new Response.Builder().setUrl(connection.getURL().toString()).setStatusCode(status).setReason(reason).setHeaders(headers).setBody(responseBody).build();
-		response.getResponseInterceptors().addAll(request.getResponseInterceptors());
-		return response;
+	@Override
+	public IClient clone(ClientOptions options)
+	{
+		throw new IllegalStateException("can't clone UrlCOnnectionClient");
 	}
 }

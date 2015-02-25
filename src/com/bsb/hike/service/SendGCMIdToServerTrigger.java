@@ -147,8 +147,7 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 				{
 					Logger.d(getClass().getSimpleName(), "Invalid JSON", e);
 				}
-				IRequestBody body = new JsonBody(requestBody);
-				requestToken = sendDeviceDetailsRequest(body, getRequestListener());
+				requestToken = sendDeviceDetailsRequest(requestBody, getRequestListener());
 				requestToken.execute();
 			}
 			break;
@@ -169,8 +168,7 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 				{
 					e.printStackTrace();
 				}
-				IRequestBody body = new JsonBody(requestBody);
-				requestToken = sendPreActivationRequest(body, getRequestListener());
+				requestToken = sendPreActivationRequest(requestBody, getRequestListener());
 				requestToken.execute();
 			}
 			break;
