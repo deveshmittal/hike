@@ -27,6 +27,9 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -469,5 +472,10 @@ public class ChatThreadUtils
 				HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
 			}
 		}
+	}
+	
+	protected static void recordStickerFTUEClick()
+	{
+		HAManager.getInstance().record(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH);
 	}
 }

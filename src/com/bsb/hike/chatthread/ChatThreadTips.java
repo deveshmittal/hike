@@ -1,19 +1,30 @@
 package com.bsb.hike.chatthread;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
+import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.HikeTip.TipType;
+import com.bsb.hike.utils.Logger;
 
 /**
  * This class is a helper class which contains exhaustive set of tips which can be shown in the chat thread. The tips include Atomic tips which are server triggered as well FTUE
@@ -105,15 +116,6 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		}
 	}
 
-	public void resetAtomicTipKeys(String requiredKey)
-	{
-		String key = mPrefs.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
-		if (key.equals(requiredKey))
-		{
-			mPrefs.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
-		}
-	}
-
 	private void setAtomicTipContent(View view)
 	{
 		((TextView) view.findViewById(R.id.tip_header)).setText(mPrefs.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_CHAT, ""));
@@ -122,7 +124,7 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		view.findViewById(R.id.close_tip).setOnClickListener(this);
 	}
 
-	public int whichAtomicTipToShow()
+	private int whichAtomicTipToShow()
 	{
 		String key = mPrefs.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
 		switch (key)
@@ -157,14 +159,15 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		 */
 		if (filterTips(STICKER_TIP))
 		{
-			// TODO
+			tipId = STICKER_TIP;
+			setupStickerFTUETip();
 		}
 	}
 
 	/**
 	 * Utility method to show the Pin FTUE tip. If any other tip is showing, pin tip takes priority over it.
 	 */
-	public void showPinFtueTip()
+	private void showPinFtueTip()
 	{
 		/**
 		 * Proceed only if the calling class had passed in the Pin Tip in the list
@@ -179,8 +182,56 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 			tipView.setOnTouchListener(this);
 		}
 	}
+	
+	/**
+	 * Used to set up pulsating dot views
+	 */
+	private void setupStickerFTUETip()
+	{
+		ViewStub pulsatingDot = (ViewStub) mainView.findViewById(R.id.pulsatingDotViewStub);
+		
+		if(pulsatingDot != null)
+		{
+			pulsatingDot.setOnInflateListener(new ViewStub.OnInflateListener()
+			{
 
-	public boolean filterTips(int whichTip)
+				@Override
+				public void onInflate(ViewStub stub, View inflated)
+				{
+					tipView = inflated;
+					startPulsatingDotAnimation(tipView);
+				}
+			});
+			
+			pulsatingDot.inflate();
+		}
+	}
+	
+	/**
+	 * Used to start pulsating dot animation for stickers
+	 * 
+	 * @param view
+	 */
+	private void startPulsatingDotAnimation(View view)
+	{
+		new Handler().postDelayed(getPulsatingRunnable(view, R.id.ring1), 0);
+		new Handler().postDelayed(getPulsatingRunnable(view, R.id.ring2), 1500);
+	}
+
+	private Runnable getPulsatingRunnable(final View view, final int viewId)
+	{
+		return new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				ImageView ringView = (ImageView) view.findViewById(viewId);
+				ringView.startAnimation(HikeAnimationFactory.getPulsatingDotAnimation(0));
+			}
+		};
+	}	
+	
+	private boolean filterTips(int whichTip)
 	{
 		return isPresentInArray(whichTip) && !(seenTip(whichTip));
 	}
@@ -198,7 +249,7 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		case PIN_TIP:
 			return mPrefs.getData(HikeMessengerApp.SHOWN_PIN_TIP, false);
 		case STICKER_TIP:
-			// TODO
+			return mPrefs.getData(HikeMessengerApp.SHOWN_EMOTICON_TIP, false);
 		default:
 			return false;
 		}
@@ -235,7 +286,7 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 	 */
 	public void hideTip()
 	{
-		if (tipView != null && tipView.getVisibility() == View.VISIBLE)
+		if (tipView != null && tipView.getVisibility() == View.VISIBLE && shouldHideTip())
 		{
 			tipView.setVisibility(View.INVISIBLE);
 		}
@@ -243,10 +294,20 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 
 	public void hideTip(int whichTip)
 	{
-		if (tipId == whichTip && tipView != null && tipView.getVisibility() == View.VISIBLE)
+		if (tipId == whichTip && tipView != null && tipView.getVisibility() == View.VISIBLE && shouldHideTip())
 		{
 			tipView.setVisibility(View.INVISIBLE);
 		}
+	}
+	
+	/**
+	 * There could be certain tips which do not interfere with any UI components. Hence if such a tip is showing we should not hide it.
+	 * eg : Sticker_tip. This method is future safe, if let's say we need to show pulsating dots on VoIP buttons or Pin buttons.
+	 * @return
+	 */
+	private boolean shouldHideTip()
+	{
+		return tipId != STICKER_TIP;
 	}
 
 	public void showHiddenTip()
@@ -304,12 +365,6 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		return true;
 	}
 
-	public void setStickerStipSeen()
-	{
-		//Simply save data to prefs and remove pulsating dot animation.
-		// TODO
-	}
-
 	/**
 	 * Function to mark the tip as seen
 	 * @param whichTip
@@ -327,11 +382,23 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 				mPrefs.saveData(HikeMessengerApp.SHOWN_PIN_TIP, true);
 				closeTip();
 				break;
+				
+			case STICKER_TIP:
+				mPrefs.saveData(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
+				closeTip();
+				break;
 
 			case ATOMIC_ATTACHMENT_TIP:
 			case ATOMIC_CHAT_THEME_TIP:
 			case ATOMIC_STICKER_TIP:
 				mPrefs.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
+				/**
+				 * Recording click on sticker tip
+				 */
+				if (whichTip == ATOMIC_STICKER_TIP)   
+				{
+					ChatThreadUtils.recordStickerFTUEClick();
+				}
 				closeTip();
 				break;
 

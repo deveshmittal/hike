@@ -8,6 +8,4 @@ public interface ShareablePopup
 
 	public int getViewId();
 
-	public void releaseViewResources();
-
 }

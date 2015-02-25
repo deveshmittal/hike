@@ -24,8 +24,15 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_below="@id/divider"
-            android:background="#555555"
-            android:orientation="vertical" >
+            android:background="@drawable/sticker_shop_selector" >
+            
+            <View
+                android:id="@+id/animated_backgroud"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:layout_gravity="center"
+                android:background="@drawable/sticker_shop_icon_bg"
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/shop_icon_image"
@@ -44,6 +51,7 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_red_sticker_shop_badge"
                 android:visibility="gone" />
+            
         </FrameLayout>
 
         <com.bsb.hike.view.StickerEmoticonIconPageIndicator

@@ -1,7 +1,5 @@
 package com.bsb.hike.media;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -13,7 +11,7 @@ import com.bsb.hike.utils.Logger;
 
 /**
  * This class is used when we have to share KeyBoardPopup layout with other views. It's an aggregator class, and has the KeyBoard popup layout object, as well as a list of
- * {@link ShareablePopup} interfaces. The class uses intelligence in the {@link #showPopup(ShareablePopup)} to display the views.
+ * {@link ShareablePopup} interfaces. The class uses intelligence in the {@link #showPopup(ShareablePopup)} and {@link #togglePopup(ShareablePopup)} to display the views.
  * 
  * @author piyush
  */
@@ -67,15 +65,59 @@ public class ShareablePopupLayout
 
 
 	/**
-	 * Utility method used for displaying the Popups using the Keyboard Popup layout. Appropriate comments have been added in the code flow for easily readability
+	 * This method dismisses a popup if already showing, else it displays it 
 	 * 
 	 * @param popup
 	 */
 
+	public void togglePopup(ShareablePopup popup)
+	{
+		View popupView = popup.getView();
+		
+		/** Exit condition
+		 *  We simply return here.
+		 */
+		if (popupView == null) 
+		{
+			return;
+		}
+		
+		/**
+		 * If we're already showing a view, let's say stickers and sticker icon was tapped again, then we should dismiss the view.
+		 */
+		if (prevVisibleView != popupView || !mKeyboardPopupLayout.isShowing())
+		{
+			showPopup(popup);
+		}
+		
+		else
+		{
+			if (mKeyboardPopupLayout.isShowing())
+			{
+				dismiss();
+			}
+		}
+	}
+	
+	/**
+	 * Utility method used for displaying the Popups using the Keyboard Popup layout. Appropriate comments have been added in the code flow for easily readability
+	 * 
+	 * @param popup
+	 */
+	
 	public void showPopup(ShareablePopup popup)
 	{
 		View popupView = popup.getView();
-
+		
+		/**
+		 * Exit condition
+		 * We simply return here.
+		 */
+		if (popupView == null)
+		{
+			return;
+		}
+		
 		addPopupView(popupView);
 
 		swapViews(popupView);

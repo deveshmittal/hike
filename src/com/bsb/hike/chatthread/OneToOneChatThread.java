@@ -40,6 +40,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.dialog.H20Dialog;
@@ -157,18 +159,14 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		if (mConversation != null)
 		{
 			mActionBar.onCreateOptionsMenu(menu, R.menu.one_one_chat_thread_menu, getOverFlowItems(), this, this);
+			if(shouldShowCallIcon())
+			{
+				menu.findItem(R.id.voip_call).setVisible(true);
+			}
 			return super.onCreateOptionsMenu(menu);
 		}
 
 		return false;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu)
-	{
-		super.onPrepareOptionsMenu(menu);
-		Logger.i(TAG, "on prepare options menu");
-		return true;
 	}
 
 	@Override
@@ -177,9 +175,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		Logger.i(TAG, "menu item click" + item.getItemId());
 		switch (item.getItemId())
 		{
-		case R.id.chat_bg:
-			showThemePicker();
-			return true;
+			case R.id.voip_call:
+				onCallClicked();
+				return true;
 		}
 		return mActionBar.onOptionsItemSelected(item) ? true : super.onOptionsItemSelected(item);
 	}
@@ -193,7 +191,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		List<OverFlowMenuItem> list = new ArrayList<OverFlowMenuItem>();
 		list.add(new OverFlowMenuItem(getString(R.string.view_profile), 0, 0, R.string.view_profile));
-		list.add(new OverFlowMenuItem(getString(R.string.call), 0, 0, R.string.call));
+		list.add(new OverFlowMenuItem(getString(R.string.chat_theme), 0, 0, R.string.chat_theme));
 		for (OverFlowMenuItem item : super.getOverFlowMenuItems())
 		{
 			list.add(item);
@@ -259,6 +257,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 			LastSeenScheduler lastSeenScheduler = LastSeenScheduler.getInstance(activity.getApplicationContext());
 			lastSeenScheduler.start(mContactInfo.getMsisdn(), this);
+			
+			HAManager.getInstance().recordLastSeenEvent(OneToOneChatThread.class.getName(), "createConversation", null, msisdn);
 		}
 
 		/**
@@ -297,7 +297,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	protected void addUnkownContactBlockHeader()
 	{
-		if (mContactInfo != null && mContactInfo.isUnknownContact() && messages != null && messages.size() > 0)
+		if (mContactInfo != null && mContactInfo.isUnknownContact() && messages != null && messages.size() > 0 && !Utils.isBot(msisdn))
 		{
 			ConvMessage cm = messages.get(0);
 			/**
@@ -325,6 +325,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	public void lastSeenFetched(String contMsisdn, int offline, long lastSeenTime)
 	{
 		Logger.d(TAG, " Got lastSeen Time for msisdn : " + contMsisdn + " LastSeenTime : " + lastSeenTime);
+		HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "lastSeenFetched", "going to update UI", contMsisdn);
 		updateLastSeen(contMsisdn, offline, lastSeenTime);
 	}
 
@@ -492,6 +493,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		case HikePubSub.LAST_SEEN_TIME_UPDATED:
 			ContactInfo contactInfo = (ContactInfo) object;
+			HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "recv pubsub LAST_SEEN_TIME_UPDATED", "going update UI", contactInfo.getMsisdn());
 			updateLastSeen(contactInfo.getMsisdn(), contactInfo.getOffline(), contactInfo.getLastSeenTime());
 			break;
 		case HikePubSub.SEND_SMS_PREF_TOGGLED:
@@ -731,6 +733,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		if (lastSeenString == null)
 		{
+			HAManager.getInstance().recordLastSeenEvent(OneToOneChatThread.class.getName(), "updateLastSeen", "lastSeen null so setLastSeenTextBasedOnHikeValue", msisdn);
 			setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 		}
 		else
@@ -968,7 +971,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 */
 	private void setLastSeenTextBasedOnHikeValue(boolean isConvOnHike)
 	{
-		if (isConvOnHike)
+		if (isConvOnHike || Utils.isBot(msisdn))
 		{
 			hideLastSeenText();
 		}
@@ -1039,6 +1042,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				mLabelView.setVisibility(View.VISIBLE);
 			}
 		}
+		
+		HAManager.getInstance().recordLastSeenEvent(OneToOneChatThread.class.getName(), "setLastSeenText", "Updated UI for LastSeen", msisdn);
 	}
 
 	/**
@@ -1154,8 +1159,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case R.string.view_profile:
 			openProfileScreen();
 			break;
-		case R.string.call:
-			onCallClicked();
+		case R.string.chat_theme:
+			showThemePicker();
 			break;
 		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
@@ -1407,6 +1412,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 		uiHandler.sendEmptyMessage(SCHEDULE_LAST_SEEN);
+		HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "onEventRecv", "recv pubsub APP_FOREGROUNDED", msisdn);
+
 	}
 
 	/**
@@ -1909,6 +1916,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private void h20NextClick()
 	{
+		HAManager.getInstance().record(HikeConstants.LogEvent.FIRST_OFFLINE_TIP_CLICKED, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT);
 		modeOfChat = H2S_MODE;
 		mAdapter.setH20Mode(true);
 		initializeH20Mode();
@@ -1989,6 +1997,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 */
 	private void h20SendClick()
 	{
+		HAManager.getInstance().record(HikeConstants.LogEvent.SECOND_OFFLINE_TIP_CLICKED, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT);
+		
 		HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
 
 		if (firstPendingConvMessage != null && !selectedMessagesMap.isEmpty())
@@ -2135,6 +2145,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private void smsDialogSendClick(H20Dialog dialog)
 	{
 		boolean isHikeSMSChecked = dialog.isHikeSMSChecked();
+		
+		if (!isHikeSMSChecked)
+		{
+			HAManager.getInstance().record(HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT);
+		}
 
 		if (isHikeSMSChecked)
 		{
@@ -2358,5 +2373,16 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		
 		return super.onDoubleTap(e);
+	}
+
+	/*
+	 *  Show call icon in chat thread only if:
+	 *  1. When voip is activated for self.
+	 *  2. Partner is on hike.
+	 *  3. Partner not a bot.
+	 */
+	private boolean shouldShowCallIcon()
+	{
+		return Utils.isVoipActivated(activity.getApplicationContext()) && mConversation.isOnhike() && !HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn);
 	}
 }
