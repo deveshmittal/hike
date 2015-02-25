@@ -27,6 +27,7 @@ import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
 import com.bsb.hike.photos.views.DoodleEffectItemLinearLayout;
 import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
 import com.bsb.hike.photos.views.PhotosEditerFrameLayoutView;
+import com.bsb.hike.ui.fragments.PhotoActionsFragment;
 import com.bsb.hike.ui.fragments.PreviewFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
@@ -76,7 +77,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 			PictureEditer.this.finish();
 			return;
 		}
-		
+
 		editView = (PhotosEditerFrameLayoutView) findViewById(R.id.editer);
 		editView.loadImageFromFile(filename);
 		editView.setOnDoodlingStartListener(clickHandler);
@@ -93,8 +94,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 		TabPageIndicator tabs = (TabPageIndicator) findViewById(R.id.indicator);
 		tabs.setOnPageChangeListener(clickHandler);
-		setupActionBar();
-
 	}
 
 	@Override
@@ -102,6 +101,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 	{
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
 		super.onResume();
+		setupActionBar();
 	}
 
 	@Override
@@ -127,7 +127,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		});
 
 		actionBarView.findViewById(R.id.done_container).setOnClickListener(clickHandler);
-
+		
 		actionBar.setCustomView(actionBarView);
 	}
 
@@ -244,9 +244,11 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 					break;
 				case R.id.done_container:
 					// Change fragment
-					File savedImage = editView.saveImage();
-					Intent forwardIntent = IntentManager.getForwardImageIntent(mContext, savedImage);
-					startActivity(forwardIntent);
+					getSupportFragmentManager().beginTransaction().replace(R.id.overlayFrame, new PhotoActionsFragment()).commit();
+					getSupportActionBar().getCustomView().findViewById(R.id.done_container).setVisibility(View.INVISIBLE);
+					// File savedImage = editView.saveImage();
+					// Intent forwardIntent = IntentManager.getForwardImageIntent(mContext, savedImage);
+					// startActivity(forwardIntent);
 					break;
 
 				}

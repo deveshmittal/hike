@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <View
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="@integer/photos_editor_canvas_weight"
+        android:background="#CC000000" >
+    </View>
+
+    <ListView
+        android:id="@+id/actionsListView"
+        android:layout_width="match_parent"
+        android:background="@color/photos_tabs_background" 
+        android:scrollbars="none"
+        android:divider="#33FFFFFF"
+        android:dividerHeight="0.5dp"
+        android:layout_height="0dp"
+        android:layout_weight="3107" >
+    </ListView>
+
+</LinearLayout>
