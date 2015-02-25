@@ -136,7 +136,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		profileImageLoader.setHiResDefaultAvatar(true);
 		this.iconLoader = new IconLoader(context, mIconImageSize);
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
-		hasCustomPhoto = getHasCustomPhoto(mContactInfo); 
+		hasCustomPhoto = getHasCustomPhoto(); 
 	}
 	
 	@Override
@@ -909,14 +909,21 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	}
 	
 
-	private boolean getHasCustomPhoto(ContactInfo contactInfo)
+	private boolean getHasCustomPhoto()
 	{
 		// basically for the case of unknown number contactInfo object doesn't have the hasIcon information
-		return contactInfo.hasCustomPhoto() || ContactManager.getInstance().hasIcon(contactInfo.getMsisdn());
+		if(mContactInfo != null)
+		{
+			return this.mContactInfo.hasCustomPhoto() || ContactManager.getInstance().hasIcon(this.mContactInfo.getMsisdn());	
+		}
+		else 
+		{
+			return false;
+		}
 	}
 	
 	public void updateHasCustomPhoto()
 	{
-		this.hasCustomPhoto = ContactManager.getInstance().hasIcon(this.mContactInfo.getMsisdn());
+		this.hasCustomPhoto = getHasCustomPhoto();
 	}
 }
