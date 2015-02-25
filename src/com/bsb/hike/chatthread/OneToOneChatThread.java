@@ -1143,7 +1143,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected String getConvLabel()
 	{
 		String tempLabel = mConversation.getLabel();
-		tempLabel = Utils.getFirstName(tempLabel);
+		tempLabel = Utils.getFirstNameAndSurname(tempLabel);
 
 		return tempLabel;
 	}
