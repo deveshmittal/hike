@@ -2220,6 +2220,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						}
 						else
 						{
+							profileAdapter.updateHasCustomPhoto();
 							profileAdapter.notifyDataSetChanged();
 						}
 					}
