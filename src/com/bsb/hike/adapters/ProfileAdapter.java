@@ -89,6 +89,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 	private int mIconImageSize;
 	
+	private boolean hasCustomPhoto;
+	
 	private static final int SHOW_CONTACTS_STATUS = 0;
 	
 	private static final int NOT_A_FRIEND = 1;
@@ -134,9 +136,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		profileImageLoader.setHiResDefaultAvatar(true);
 		this.iconLoader = new IconLoader(context, mIconImageSize);
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
+		hasCustomPhoto = getHasCustomPhoto(mContactInfo); 
 	}
 	
-
 	@Override
 	public int getItemViewType(int position)
 	{
@@ -379,7 +381,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.image.setTag(imageViewerInf);
 			if (profilePreview == null)
 			{
-				if(mContactInfo.hasCustomPhoto())
+				if(hasCustomPhoto)
 				{
 					profileImageLoader.loadImage(mapedId, viewHolder.image, isListFlinging);
 				}
@@ -904,5 +906,17 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		{
 			notifyDataSetChanged();
 		}
-	}	
+	}
+	
+
+	private boolean getHasCustomPhoto(ContactInfo contactInfo)
+	{
+		// basically for the case of unknown number contactInfo object doesn't have the hasIcon information
+		return contactInfo.hasCustomPhoto() || ContactManager.getInstance().hasIcon(contactInfo.getMsisdn());
+	}
+	
+	public void updateHasCustomPhoto()
+	{
+		this.hasCustomPhoto = ContactManager.getInstance().hasIcon(this.mContactInfo.getMsisdn());
+	}
 }
