@@ -94,6 +94,8 @@ public class VoIPActivity extends Activity implements CallActions
 
 	private ImageButton holdButton, muteButton, speakerButton;
 
+	private boolean isActivityVisible;
+
 	private boolean isCallActive;
 
 	private enum CallStatus
@@ -234,16 +236,18 @@ public class VoIPActivity extends Activity implements CallActions
 		acquireWakeLock();
 //		isRunning = true;
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
+		isActivityVisible = true;
 		initProximitySensor();
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
+		isActivityVisible = false;
 		if (sensorManager != null && VoIPService.isConnected() != true) {
 			if (proximityWakeLock != null) 
 				proximityWakeLock.release();
@@ -444,14 +448,22 @@ public class VoIPActivity extends Activity implements CallActions
 			VoIPUtils.setupCallRatePopup(getApplicationContext(), bundle);
 		}
 		isCallActive = false;
-		new Handler().postDelayed(new Runnable()
+
+		if(isActivityVisible)
 		{
-			@Override
-			public void run()
+			new Handler().postDelayed(new Runnable()
 			{
-				finish();
-			}
-		}, 900);
+				@Override
+				public void run()
+				{
+					finish();
+				}
+			}, 900);
+		}
+		else
+		{
+			finish();
+		}
 	}
 
 	private void acquireWakeLock() {
