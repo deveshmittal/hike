@@ -194,12 +194,11 @@ public class HttpEngine
 		shortRequestExecuter.shutdown();
 		longRequestExecuter.shutdown();
 		responseExecuter.shutdown();
-
+		queue.shutdown();
+		
 		shortRequestExecuter = null;
 		longRequestExecuter = null;
 		responseExecuter = null;
-
-		queue.shutdown();
-
+		queue = null;
 	}
 }
