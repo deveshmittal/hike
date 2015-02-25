@@ -454,6 +454,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String VOIP_ACTIVE_CALLS_COUNT = "voipCallsCount";
 
 	public static final String DETAILED_HTTP_LOGGING_ENABLED = "detailedHttpLoggingEnabled";
+	
+	public static final String BULK_LAST_SEEN_PREF = "blsPref";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
