@@ -17,26 +17,20 @@
 package com.bsb.hike.offline;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-
 import org.apache.http.util.TextUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -82,11 +76,9 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -114,7 +106,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     private WifiP2pDevice currentDevice;
     private WifiP2pDevice connectedDevice = null;
     private static int currentSizeReceived = 0;
-    List<String> peers_msisdn = new ArrayList<String>();
+    private List<String> peers_msisdn = new ArrayList<String>();
     private static  int numOfIterations = 0;
     private int size = 0;
     
@@ -185,7 +177,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 					serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
 					serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, uri.toString());
 			
-					if(localIP.equals(IP_SERVER)){
+					if(localIP.equals(IP_SERVER) || !(clientIP.equals(IP_SERVER))){
 						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
 					}else{
 						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
@@ -258,6 +250,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        	WifiP2pConfig config = new WifiP2pConfig();
 	    		config.deviceAddress = currentDevice.deviceAddress;
 	    		config.wps.setup = WpsInfo.PBC;
+	    		config.groupOwnerIntent = 0;
 	    		if (progressDialog != null && progressDialog.isShowing()) {
 	    			progressDialog.dismiss();
 	    		}
@@ -435,6 +428,12 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     	}
     	return latestInstance;
     }
+    
+    public List<String> getLatestPeers()
+    {
+    	return peers_msisdn;
+    }
+    
     public void clearPeers() {
         peers.clear();
         peersStatus.clear();
@@ -469,7 +468,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
         void callDisconnect();
 
-        void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice connectingToDevice);
+        void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice ConnectingToDevice);
 
         void disconnect();
     }

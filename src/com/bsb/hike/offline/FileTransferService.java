@@ -32,7 +32,7 @@ public class FileTransferService extends IntentService {
 	public static final String EXTRAS_ADDRESS = "go_host";
 	public static final String EXTRAS_PORT = "go_port";
 	public static final String ACTION_SEND_TEXT = "SEND_TEXT";
-	public static boolean  isOfflineFileTransferFinished =  true;
+	public static boolean isOfflineFileTransferFinished =  true;
 	public FileTransferService(String name) {
 		super(name);
 	}

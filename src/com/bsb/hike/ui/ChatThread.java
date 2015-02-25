@@ -1919,7 +1919,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
 					serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filePath);
 					serviceIntent.putExtra("fileType", 2);
-				    if(localIP.equals(IP_SERVER)){
+				    if(localIP.equals(IP_SERVER) || !(clientIP.equals(IP_SERVER))){
 							serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
 					}else{
 							serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
@@ -6913,7 +6913,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filePath);
 		serviceIntent.putExtra("fileType", 1);
 		
-		if(localIP.equals(IP_SERVER)){
+		if(localIP.equals(IP_SERVER) || !(clientIP.equals(IP_SERVER))){
 			serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
 		}else{
 			serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
@@ -6930,7 +6930,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		Log.d(WiFiDirectActivity.TAG,"localip " + localIP);
 		
 		// Trick to find the ip in the file /proc/net/arp
-		String client_mac_fixed = new String(deviceAddress).replace("99", "19");
+		String client_mac_fixed = new String(deviceAddress);//.replace("99", "19");
 		String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
         Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
         Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);
@@ -6940,7 +6940,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		serviceIntent.putExtra("fileType", 5);	
         serviceIntent.putExtra("message", message);
         
-        if(localIP.equals(IP_SERVER)){
+        if(localIP.equals(IP_SERVER) || !(clientIP.equals(IP_SERVER))){
 			serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
 		}else{
 			serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
@@ -6991,7 +6991,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				default:
 					Toast.makeText(getApplicationContext(), "File not selected!", Toast.LENGTH_SHORT).show();
 			}
-			if(localIP.equals(IP_SERVER)){
+			if(localIP.equals(IP_SERVER) || !(clientIP.equals(IP_SERVER))){
 				serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
 			}else{
 				serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);

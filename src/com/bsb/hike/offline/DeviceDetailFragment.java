@@ -148,7 +148,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 					serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
 					serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, uri.toString());
 			
-					if(localIP.equals(IP_SERVER)){
+					if(localIP.equals(IP_SERVER) || !(clientIP.equals(IP_SERVER))){
 						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
 					}else{
 						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);

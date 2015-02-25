@@ -15,7 +15,7 @@ import android.util.Log;
 
 public class Utils {
 
-	private final static String p2pInt = "p2p0";
+	private final static String p2pInt = "p2p";
 
 	public static String getIPFromMac(String MAC) {
 		/*
@@ -35,10 +35,11 @@ public class Utils {
 					// Basic sanity check
 					String device = splitted[5];
 					if (device.matches(".*" +p2pInt+ ".*")){
-						String mac = splitted[3];
+						return splitted[0];
+						/*String mac = splitted[3];
 						if (mac.matches(MAC)) {
 							return splitted[0];
-						}
+						}*/
 					}
 				}
 			}
@@ -63,18 +64,34 @@ public class Utils {
 		 * 
 		 * */
 		try {
-			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) 
+			{
 				NetworkInterface intf = en.nextElement();
-				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) 
+				{
 					InetAddress inetAddress = enumIpAddr.nextElement();
                     
 					String iface = intf.getName();
 					Log.d(WiFiDirectActivity.TAG,iface);
-					if(iface.matches(".*" +p2pInt+ ".*")){
-						if (inetAddress instanceof Inet4Address) { // fix for Galaxy Nexus. IPv4 is easy to use :-)
+					if(iface.matches(".*" +p2pInt+ ".*"))
+					{
+						if (inetAddress instanceof Inet4Address)
+						{
 							return getDottedDecimalIP(inetAddress.getAddress());
 						}
-						if (inetAddress instanceof Inet6Address){
+					}
+				}
+				
+				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) 
+				{
+					InetAddress inetAddress = enumIpAddr.nextElement();
+                    
+					String iface = intf.getName();
+					Log.d(WiFiDirectActivity.TAG,iface);
+					if(iface.matches(".*" +p2pInt+ ".*"))
+					{
+						if (inetAddress instanceof Inet6Address)
+						{
 							return inetAddress.getHostAddress();
 						}
 					}
