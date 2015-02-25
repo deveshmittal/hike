@@ -53,6 +53,11 @@ public abstract class RequestCall implements Runnable, Comparable<RequestCall>
 		request.setPriority(priority);
 	}
 	
+	public Request<?> getRequest()
+	{
+		return request;
+	}
+	
 	@Override
 	public int hashCode()
 	{
