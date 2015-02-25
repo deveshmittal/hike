@@ -375,8 +375,9 @@ public class VoIPUtils {
 
 	public static void cancelMissedCallNotification(Context context)
 	{
-		NotificationManager notifManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
-		notifManager.cancel(HikeNotification.VOIP_MISSED_CALL_NOTIFICATION_ID);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
+		Intent it = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+		context.sendBroadcast(it);
 	}
 
 	public static NotificationCompat.Action[] getMissedCallNotifActions(Context context, String msisdn)
