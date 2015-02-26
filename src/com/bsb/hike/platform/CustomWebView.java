@@ -1,5 +1,6 @@
 package com.bsb.hike.platform;
 
+import com.bsb.hike.R;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import android.annotation.SuppressLint;
@@ -25,7 +26,7 @@ public class CustomWebView extends WebView
 
 	public CustomWebView(Context context, AttributeSet attrs)
 	{
-		this(context, attrs, com.android.internal.R.attr.webViewStyle);
+		this(context, attrs, android.R.attr.webViewStyle);
 	}
 
 	public CustomWebView(Context context, AttributeSet attrs, int defStyleAttr)
