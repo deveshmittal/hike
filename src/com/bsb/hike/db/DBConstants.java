@@ -263,6 +263,19 @@ public interface DBConstants
 		public static final String ID = "id";
 		public static final String ALARM_DATA = "data";
 		// APP ALARM ENDS HERE
+
+		// PopupDB -->json,start time,end time ,trigger point,Status
+
+		public static final String POPUPDATA = "popupdata";
+
+		public static final String START_TIME = "start_time";
+
+		public static final String END_TIME = "end_time";
+
+		public static final String TRIGGER_POINT = "trigger_point";
+
+		public static final String STATUS = "status";
+		
 		public static final String CONTENT_ID_INDEX = "contentTableContentIdIndex";
 	}
 
