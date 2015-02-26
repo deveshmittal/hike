@@ -184,11 +184,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		// If it's 1, it means we need to show a progress dialog and then wait
 		// for the
 		// pub sub thread event to cancel the dialog once the upgrade is done.
+		HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
+		
 		if ((HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.UPGRADING, false)))
 		{
 			progDialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.HIKE_UPGRADE_DIALOG, null);
 			showingProgress = true;
-			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
+			
 		}
 
 		if (!showingProgress)
@@ -384,6 +386,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (overFlowWindow != null && overFlowWindow.isShowing())
 			overFlowWindow.dismiss();
 		HikeMessengerApp.getPubSub().removeListeners(this, homePubSubListeners);
+		HikeMessengerApp.getPubSub().removeListeners(this, progressPubSubListeners);
 		super.onDestroy();
 	}
 
