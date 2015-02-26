@@ -59,7 +59,8 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) 
             {
                 connectionManager.setIsWifiP2pEnabled(true);
-            } else 
+            }
+            else 
             {
                 connectionManager.setIsWifiP2pEnabled(false);
                 connectionManager.resetData();
@@ -104,7 +105,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             {
                 if(WiFiDirectActivity.isOfflineFileTransferOn)
                 {
-                    connectionManager.enableDiscovery();
+                    //connectionManager.enableDiscovery();
                 }
             }
         }

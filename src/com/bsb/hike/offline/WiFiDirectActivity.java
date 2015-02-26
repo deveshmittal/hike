@@ -58,6 +58,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     public static WifiP2pDevice connectingToDevice = null;
     public static WifiP2pConfig connectingDeviceConfig = null;
     public static int tries;
+    private CheckInvitedStuckTask checkTask = null;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,7 +81,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     public void onResume() {
         super.onResume();
         registerReceiver(receiver, intentFilter);
-        connectionManager.enableDiscovery();
+        //connectionManager.enableDiscovery();
     }
 
     @Override
@@ -98,7 +99,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-    	connectionManager.enableDiscovery();
+    	//connectionManager.enableDiscovery();
     	super.onRestart();
     }
 
@@ -145,10 +146,10 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
                     Toast.LENGTH_SHORT).show();
     		return;
     	}
-    	this.connectingToDevice = ConnectingToDevice;
-    	this.connectingDeviceConfig = config;
-    	this.tries = numOfTries;
-    	(new CheckInvitedStuckTask(connectingToDevice)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    	WiFiDirectActivity.connectingToDevice = ConnectingToDevice;
+    	WiFiDirectActivity.connectingDeviceConfig = config;
+    	WiFiDirectActivity.tries = numOfTries;
+    	//new CheckInvitedStuckTask(connectingToDevice).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
         connectionManager.connect(config);    
     }
 
@@ -187,7 +188,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
             {
             	connectionManager.cancelConnect();
             }
-            connectionManager.enableDiscovery();
+            //connectionManager.enableDiscovery();
         }
 
     }
@@ -223,11 +224,12 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     		{
 	    		try 
 	    		{
+	    			/*
 	    			latestInstance = fragment.getLatestPeerInstance(connectingToDevice.deviceAddress);
 		    		if((latestInstance != null) && 
 		    				(latestInstance.status == WifiP2pDevice.INVITED))
 		    		{
-		    			Thread.sleep(5*1000);
+		    			Thread.sleep(10*1000);
 		    			// check if even after 5 seconds it is still in invited state
 		    			// then call reset
 		    			latestInstance = fragment.getLatestPeerInstance(connectingToDevice.deviceAddress);
@@ -242,6 +244,18 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 		    		{
 		    			Thread.sleep(5*1000);
 		    		}
+		    		*/
+	    			if(DeviceListFragment.groupInfo==null)
+	    			{
+	    				Thread.sleep(10*1000);
+	    			}
+	    			if(DeviceListFragment.groupInfo==null){
+	    				connectingToDevice = null;
+	    				fragment = null;
+	    				this.destroy = true;
+	    				return null;
+	    			}
+	    				
 	    		}
 	    		catch (InterruptedException e) 
 				{
@@ -256,6 +270,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     		if(destroy)
     		{
     			//Toast.makeText(getApplicationContext(), "Got Stuck in Invited mode. Resetting..!!", Toast.LENGTH_SHORT).show();
+    			DeviceListFragment.isReconnecting = true;
     			callDisconnect();
     		}
     	}
@@ -334,7 +349,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
         if(reasonCode==WifiP2pManager.ERROR)err="ERROR";
         if(reasonCode==WifiP2pManager.P2P_UNSUPPORTED) err="P2P_UNSUPPORTED";
         Log.e(TAG,"FAIL - couldnt start to discover peers code: "+err);
-		connectionManager.enableDiscovery();
+		//connectionManager.enableDiscovery();
 	}
 	
 	@Override

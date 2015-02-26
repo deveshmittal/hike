@@ -315,7 +315,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 							 serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
 							 serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filePath);
 							 serviceIntent.putExtra("fileType", 2);
-							 if(localIP.equals(IP_SERVER) || !(clientIP.equals(IP_SERVER))){
+							 if(localIP.equals(IP_SERVER) || ( (clientIP!=null) && !(clientIP.equals(IP_SERVER)) )){
 									serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
 								}else{
 									serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);

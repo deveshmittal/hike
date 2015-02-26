@@ -100,7 +100,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     private int mIconImageSize;
     private IconLoader iconLoader;
     //private WifiP2pInfo info;
-    private WifiP2pGroup groupInfo = null;
+    public static  WifiP2pGroup groupInfo = null;
     public static Intent intent;
     private Object syncMsisdn;
     private WifiP2pDevice currentDevice;
@@ -109,6 +109,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     private List<String> peers_msisdn = new ArrayList<String>();
     private static  int numOfIterations = 0;
     private int size = 0;
+    public static boolean isReconnecting = false;
     
 
     @Override
@@ -409,15 +410,16 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        }
         }
         
-        if(WiFiDirectActivity.connectingToDevice != null)
+        if(WiFiDirectActivity.connectingToDevice != null && isReconnecting == true)
         {
         	if(peers.size() == 0)
         		Toast.makeText(getActivity(), "Device List Empty!!", Toast.LENGTH_SHORT).show();
         	else
         	{
+        		isReconnecting = false;
         		if(peers.contains(WiFiDirectActivity.connectingToDevice))
         			((DeviceActionListener) getActivity()).connect(WiFiDirectActivity.connectingDeviceConfig,
-        															++(WiFiDirectActivity.tries), WiFiDirectActivity.connectingToDevice);
+        															(WiFiDirectActivity.tries++), WiFiDirectActivity.connectingToDevice);
         		else
         			Toast.makeText(getActivity(), "Device not present in peer list!!", Toast.LENGTH_SHORT).show();
         	}
@@ -645,7 +647,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
 	            for(WifiP2pDevice cpeer: peers)
             	{
-            		if(cpeer.status==WifiP2pDevice.CONNECTED)
+            		if(cpeer.status==WifiP2pDevice.CONNECTED || cpeer.status==WifiP2pDevice.UNAVAILABLE)
             		{
             			connectedDevice  = cpeer;  
             		}
