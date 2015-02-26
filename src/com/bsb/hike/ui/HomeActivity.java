@@ -66,6 +66,12 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
@@ -201,6 +207,35 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 			initialiseHomeScreen(savedInstanceState);
 		}
+			int val=ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal();
+			ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
+			{
+
+				@Override
+				public void onSuccess(final ProductContentModel mmModel)
+				{
+					runOnUiThread(new Runnable()
+					{
+						
+						@Override
+						public void run()
+						{
+							DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
+							HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
+							mmFragment.showDialog(getSupportFragmentManager());
+						}
+					});
+				
+				}
+
+				@Override
+				public void onFailure()
+				{
+					// No Popup to display
+				}
+				
+			});
+		
 		
 	}
 
@@ -1514,6 +1549,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					editor.commit();
 					updateOverFlowMenuNotification();
 					intent = IntentManager.getGamingIntent(HomeActivity.this);
+					
 					break;
 				case 4:
 					editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true);
@@ -1798,7 +1834,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}, delayTime);
 	}
 
-	private void hikeLogoClicked()
+	public void hikeLogoClicked()
 	{
 		if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
 		{

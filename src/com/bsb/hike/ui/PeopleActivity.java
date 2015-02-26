@@ -16,6 +16,12 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
@@ -28,6 +34,35 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 	{
 		super.onCreate(savedInstanceState);
 		initialisePeopleScreen(savedInstanceState);
+		int val=ProductPopupsConstants.PopupTriggerPoints.FAVOURITES.ordinal();
+		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
+		{
+
+			@Override
+			public void onSuccess(final ProductContentModel mmModel)
+			{
+				runOnUiThread(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
+						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
+						mmFragment.showDialog(getSupportFragmentManager());
+					}
+				});
+			
+			}
+
+			@Override
+			public void onFailure()
+			{
+				// No Popup to display
+			}
+			
+		});
+
 	}
 
 	private void initialisePeopleScreen(Bundle savedInstanceState)

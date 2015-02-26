@@ -48,6 +48,12 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -130,6 +136,36 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		setupActionBar();
 		Utils.executeContactListResultTask(new SetupContactList());
 		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+		
+		
+		int val=ProductPopupsConstants.PopupTriggerPoints.INVITE_SMS.ordinal();
+		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
+		{
+
+			@Override
+			public void onSuccess(final ProductContentModel mmModel)
+			{
+				runOnUiThread(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
+						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
+						mmFragment.showDialog(getSupportFragmentManager());
+					}
+				});
+			
+			}
+
+			@Override
+			public void onFailure()
+			{
+				// No Popup to display
+			}
+			
+		});
 	}
 
 	private void init()
@@ -260,6 +296,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		confirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
 		confirmDialog.setCancelButton(R.string.no);
 		confirmDialog.show();
+		
 	}
 
 	private void setLabel()
@@ -333,6 +370,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 
 		boolean loadOnUiThread;
+		private CheckBox selectAllCB;
 
 		@Override
 		protected void onPreExecute()
@@ -377,8 +415,8 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				selectAllContainer.setVisibility(View.VISIBLE);
 
 				final TextView selectAllText = (TextView) findViewById(R.id.select_all_text);
-				final CheckBox selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
-
+				 selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
+				
 				final int size = contactList.size();
 
 				selectAllText.setText(getString(R.string.select_all, size));
@@ -392,7 +430,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 						selectAllText.setText(getString(isChecked ? R.string.deselect_all : R.string.select_all, size));
 					}
 				});
-
+				
 				selectAllContainer.setOnClickListener(new OnClickListener()
 				{
 
@@ -406,7 +444,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				getRecommendedInvitesList(contactList, firstSectionList);
 				break;
 			}
-
+			
 			HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> completeSectionsData = new HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>>();
 			contactList.removeAll(firstSectionList);
 			if (!firstSectionList.isEmpty())
@@ -420,6 +458,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			listView.setAdapter(adapter);
 			listView.setEmptyView(findViewById(android.R.id.empty));
 			setupActionBarElements();
+			
+			if (selectAllCB != null && getIntent().getBooleanExtra(ProductPopupsConstants.SELECTALL, false))
+			{
+				selectAllCB.setChecked(true);
+			}
 		}
 	}
 

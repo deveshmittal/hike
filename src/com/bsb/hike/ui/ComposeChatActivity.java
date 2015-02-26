@@ -83,6 +83,12 @@ import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
@@ -168,6 +174,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private boolean deviceDetailsSent;
 
 	private boolean nuxIncentiveMode;
+	
+	private int val=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal();
 
 	 private HorizontalFriendsFragment newFragment =null;
 	@Override
@@ -421,9 +429,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			setMode(MULTIPLE_FWD);
 		}
+		else if(getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) || existingGroupId != null)
+		{
+				setMode(CREATE_GROUP_MODE);
+		}
 		else
 		{
-			setMode(getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) || existingGroupId != null ? CREATE_GROUP_MODE : START_CHAT_MODE);
+				setMode(START_CHAT_MODE);
+				val=ProductPopupsConstants.PopupTriggerPoints.COMPOSE_CHAT.ordinal();
 		}
 		
 		adapter.setIsCreatingOrEditingGroup(this.composeMode == CREATE_GROUP_MODE);
@@ -431,6 +444,38 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		adapter.executeFetchTask();
 		
 		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
+		
+		if(val!=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal())
+		{
+			ProductInfoManager.getInstance().isThereAnyPopup(val, new IActivityPopup()
+			{
+
+				@Override
+				public void onSuccess(final ProductContentModel mmModel)
+				{
+					runOnUiThread(new Runnable()
+					{
+
+						@Override
+						public void run()
+						{
+							DialogPojo mmDialogPojo = ProductInfoManager.getInstance().getDialogPojo(mmModel);
+							HikeDialogFragment mmFragment = HikeDialogFragment.onNewInstance(mmDialogPojo);
+							mmFragment.showDialog(getSupportFragmentManager());
+						}
+					});
+
+				}
+
+				@Override
+				public void onFailure()
+				{
+					// No Popup to display
+				}
+
+			});
+		}
+
 		
 	}
 

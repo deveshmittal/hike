@@ -53,6 +53,7 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.platform.HikePlatformConstants;
+import com.bsb.hike.productpopup.ProductInfoManager;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.MqttMessagesManager;
@@ -871,7 +872,7 @@ public void onTrimMemory(int level)
 			cricketBotEntry();
 			HikeSharedPreferenceUtil.getInstance(getApplicationContext()).saveData(HikePlatformConstants.CRICKET_PREF_NAME, true);
 		}
-
+		ProductInfoManager.getInstance().init();
 	}
 
 	// Hard coding the cricket bot on the App's onCreate so that there is a cricket bot entry

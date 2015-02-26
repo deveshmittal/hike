@@ -31,6 +31,12 @@ import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -215,6 +221,35 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		setupActionBar();
 
 		HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
+		
+		int val=ProductPopupsConstants.PopupTriggerPoints.SETTINGS_SCR.ordinal();
+		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
+		{
+
+			@Override
+			public void onSuccess(final ProductContentModel mmModel)
+			{
+				runOnUiThread(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
+						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
+						mmFragment.showDialog(getSupportFragmentManager());
+					}
+				});
+			
+			}
+
+			@Override
+			public void onFailure()
+			{
+				// No Popup to display
+			}
+			
+		});
 	}
 
 	private void addProfileHeaderView(ListView settingsList)

@@ -30,6 +30,12 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -108,6 +114,36 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 		{
 			groupImage.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(groupId, true));
 		}
+		
+		int val=ProductPopupsConstants.PopupTriggerPoints.NEWGRP.ordinal();
+		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
+		{
+
+			@Override
+			public void onSuccess(final ProductContentModel mmModel)
+			{
+				runOnUiThread(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
+						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
+						mmFragment.showDialog(getSupportFragmentManager());
+					}
+				});
+			
+			}
+
+			@Override
+			public void onFailure()
+			{
+				// No Popup to display
+			}
+			
+		});
+
 	}
 
 	@Override

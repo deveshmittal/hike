@@ -48,6 +48,12 @@ import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -232,6 +238,37 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 			tipView.setLayoutParams(layoutParams);
 			HikeTip.showTip(this, TipType.MOOD, tipView);
 		}
+		
+		
+		int val=ProductPopupsConstants.PopupTriggerPoints.STATUS.ordinal();
+		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
+		{
+
+			@Override
+			public void onSuccess(final ProductContentModel mmModel)
+			{
+				runOnUiThread(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
+						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
+						mmFragment.showDialog(getSupportFragmentManager());
+					}
+				});
+			
+			}
+
+			@Override
+			public void onFailure()
+			{
+				// No Popup to display
+			}
+			
+		});
+
 	}
 
 	private void setupActionBar()

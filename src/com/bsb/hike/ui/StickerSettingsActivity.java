@@ -7,6 +7,12 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.R;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.ui.fragments.StickerSettingsFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
@@ -21,6 +27,34 @@ public class StickerSettingsActivity extends HikeAppStateBaseFragmentActivity
 		setContentView(R.layout.sticker_settings_page);
 		setupSettingsFragment(savedInstanceState);
 		setupActionBar();
+		int val=ProductPopupsConstants.PopupTriggerPoints.STICKER_SHOP_SETTINGS.ordinal();
+		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
+		{
+
+			@Override
+			public void onSuccess(final ProductContentModel mmModel)
+			{
+				runOnUiThread(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
+						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
+						mmFragment.showDialog(getSupportFragmentManager());
+					}
+				});
+			
+			}
+
+			@Override
+			public void onFailure()
+			{
+				// No Popup to display
+			}
+			
+		});
 	}
 
 	private void setupActionBar()

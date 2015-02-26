@@ -12,7 +12,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.models.NuxCustomMessage;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
 import com.bsb.hike.ui.CreditsActivity;
@@ -22,8 +21,12 @@ import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.NUXInviteActivity;
 import com.bsb.hike.ui.NuxSendCustomMessageActivity;
+import com.bsb.hike.ui.PeopleActivity;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.SignupActivity;
+import com.bsb.hike.ui.StickerSettingsActivity;
+import com.bsb.hike.ui.StickerShopActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
@@ -305,6 +308,41 @@ public class IntentManager
 	{
 		Intent in = new Intent(context, NuxSendCustomMessageActivity.class);
 		return in;
+	}
+	
+	public static Intent getComposeChatIntent(Activity context)
+	{
+		Intent intent = new Intent(context, ComposeChatActivity.class);
+		intent.putExtra(HikeConstants.Extras.EDIT, true);
+		return intent;
+	}
+	
+	public static Intent getFavouritesIntent(Activity context)
+	{
+		Intent intent = new Intent(context, PeopleActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		return intent;
+	}
+
+	public static Intent getStickerShopIntent(Activity context)
+	{
+		Intent intent = new Intent(context, StickerShopActivity.class);
+		return intent;
+	}
+
+	public static Intent getStickerSettingIntent(Activity context)
+	{
+		Intent intent = new Intent(context, StickerSettingsActivity.class);
+		return intent;
+	}
+	
+	public static Intent getProfileIntent(Activity context)
+	{
+
+		Intent intent = new Intent();
+		intent.setClass(context, ProfileActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		return intent;
 	}
 
 }
