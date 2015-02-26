@@ -1752,7 +1752,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				// messages
 				return;
 			}
-			conv.addMessage(message);
 			if (Utils.shouldIncrementCounter(message))
 			{
 				conv.setUnreadCount(conv.getUnreadCount() + 1);
