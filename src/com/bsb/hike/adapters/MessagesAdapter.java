@@ -419,15 +419,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
-	public long getLastMsgTimeStamp()
-	{
-		if (convMessages.size() > 0)
-		{
-			return convMessages.get(convMessages.size()-1).getTimestamp();
-		}
-		return 0;
-	}
-	
 	public void removeMessage(int index)
 	{
 		convMessages.remove(index);

@@ -162,6 +162,7 @@ public class Conversation implements Comparable<Conversation>
 	public void setMessages(List<ConvMessage> messages)
 	{
 		this.messages = messages;
+		setTimestamp(messages.get(messages.size()-1).getTimestamp());
 	}
 
 	public void addMessage(ConvMessage message)
@@ -180,6 +181,7 @@ public class Conversation implements Comparable<Conversation>
 		this.messages.clear();
 		
 		this.messages.add(message);
+		setTimestamp(message.getTimestamp());
 	}
 	
 	public int getUnreadCount()
