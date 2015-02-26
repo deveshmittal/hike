@@ -1,5 +1,10 @@
 package com.bsb.hike.ui.fragments;
 
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -18,12 +23,27 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ValueAnimator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ValueAnimator.AnimatorUpdateListener;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.HikeHandlerUtil;
+import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.tasks.FinishableEvent;
+import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.HoloCircularProgress;
 import com.bsb.hike.view.RoundedImageView;
 
-public class ProfilePicFragment extends SherlockFragment
+public class ProfilePicFragment extends SherlockFragment implements FinishableEvent
 {
 	private View mFragmentView;
 
@@ -39,6 +59,8 @@ public class ProfilePicFragment extends SherlockFragment
 
 	private boolean isPaused;
 
+	private String imagePath;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
@@ -50,7 +72,7 @@ public class ProfilePicFragment extends SherlockFragment
 
 		Bundle bundle = getArguments();
 
-		String imagePath = bundle.getString(HikeConstants.HikePhotos.FILENAME);
+		imagePath = bundle.getString(HikeConstants.HikePhotos.FILENAME);
 
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inPreferredConfig = Bitmap.Config.RGB_565;
@@ -83,6 +105,98 @@ public class ProfilePicFragment extends SherlockFragment
 		mFragmentView.findViewById(R.id.retryButton).setVisibility(View.GONE);
 
 		updateProgress(10f);
+
+		if (imagePath != null)
+		{
+			/* the server only needs a smaller version */
+			final Bitmap smallerBitmap = HikeBitmapFactory.scaleDownBitmap(imagePath, HikeConstants.PROFILE_IMAGE_DIMENSIONS, HikeConstants.PROFILE_IMAGE_DIMENSIONS,
+					Bitmap.Config.RGB_565, true, false);
+
+			if (smallerBitmap == null)
+			{
+				// Failure TODO Handle
+			}
+
+			final byte[] bytes = BitmapUtils.bitmapToBytes(smallerBitmap, Bitmap.CompressFormat.JPEG, 100);
+
+			String httpRequestURL = "/account";
+
+			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL + "/avatar", RequestType.PROFILE_PIC, new HikeHttpRequest.HikeHttpCallback()
+			{
+				public void onFailure()
+				{
+					// Failure TODO Handle
+				}
+
+				public void onSuccess(JSONObject response)
+				{
+					// User info is saved in shared preferences
+					SharedPreferences preferences = HikeMessengerApp.getInstance().getApplicationContext()
+							.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
+
+					ContactInfo userInfo = Utils.getUserContactInfo(preferences);
+
+					String mLocalMSISDN = userInfo.getMsisdn();
+
+					ContactManager.getInstance().setIcon(mLocalMSISDN, bytes, false);
+
+					Utils.renameTempProfileImage(mLocalMSISDN);
+
+					/*
+					 * Making the profile pic change a status message.
+					 */
+					JSONObject data = response.optJSONObject("status");
+
+					if (data == null)
+					{
+						return;
+					}
+
+					String mappedId = data.optString(HikeConstants.STATUS_ID);
+					String msisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
+					String name = preferences.getString(HikeMessengerApp.NAME_SETTING, "");
+					long time = (long) System.currentTimeMillis() / 1000;
+
+					StatusMessage statusMessage = new StatusMessage(0, mappedId, msisdn, name, "", StatusMessageType.PROFILE_PIC, time, -1, 0);
+					HikeConversationsDatabase.getInstance().addStatusMessage(statusMessage, true);
+
+					ContactManager.getInstance().setIcon(statusMessage.getMappedId(), bytes, false);
+
+					String srcFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT + "/" + msisdn + ".jpg";
+
+					String destFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT + "/" + mappedId + ".jpg";
+
+					/*
+					 * Making a status update file so we don't need to download this file again.
+					 */
+					Utils.copyFile(srcFilePath, destFilePath, null);
+
+					int unseenUserStatusCount = preferences.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+					Editor editor = preferences.edit();
+					editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, ++unseenUserStatusCount);
+					editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
+					editor.commit();
+					/*
+					 * This would happen in the case where the user has added a self contact and received an mqtt message before saving this to the db.
+					 */
+
+					if (statusMessage.getId() != -1)
+					{
+						HikeMessengerApp.getPubSub().publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.TIMELINE_UPDATE_RECIEVED, statusMessage);
+					}
+
+					HikeMessengerApp.getLruCache().clearIconForMSISDN(mLocalMSISDN);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, mLocalMSISDN);
+
+					HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
+				}
+			});
+
+			request.setFilePath(imagePath);
+			
+			Utils.executeHttpTask(new HikeHTTPTask(ProfilePicFragment.this, R.string.delete_status_error), request);
+		}
 	}
 
 	private void updateProgress(float i)
@@ -201,5 +315,12 @@ public class ProfilePicFragment extends SherlockFragment
 	{
 		super.onResume();
 		isPaused = false;
+	}
+
+	@Override
+	public void onFinish(boolean success)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }
