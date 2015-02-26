@@ -89,7 +89,7 @@ public class IntentManager
 		Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
 		whatsappIntent.setType("text/plain");
 		whatsappIntent.setPackage(HikeConstants.PACKAGE_WATSAPP);
-		String inviteText = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, context.getString(R.string.watsapp_invitation));
+		String inviteText = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, context.getString(R.string.watsapp_invitation));
 		String inviteToken = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeConstants.INVITE_TOKEN, "");
 		inviteText = inviteText + inviteToken;
 		whatsappIntent.putExtra(Intent.EXTRA_TEXT, inviteText);
@@ -211,12 +211,8 @@ public class IntentManager
 		{
 			Logger.e(context.getClass().getSimpleName(), "Invalid JSON", e);
 		}
-		String phoneNumber = convMessage.getMsisdn();
-		ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNoOrMsisdn(phoneNumber);
-		String mContactName = contactInfo.getName();
 		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 		intent.putExtra(HikeConstants.Extras.PREV_MSISDN, convMessage.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 
 		return intent;
 	}
