@@ -332,18 +332,18 @@ public class VoIPUtils {
 
 	private static boolean shouldShowCallRatePopupNow(Context context)
 	{
-		return HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, false);
+		return HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, false);
 	}
 	
 	private static void incrementActiveCallCount(Context context)
 	{
-		int callsCount = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, ++callsCount);
+		int callsCount = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, ++callsCount);
 	}
 
 	private static void setupCallRatePopupNextTime(Context context)
 	{
-		HikeSharedPreferenceUtil sharedPref = HikeSharedPreferenceUtil.getInstance(context);
+		HikeSharedPreferenceUtil sharedPref = HikeSharedPreferenceUtil.getInstance();
 		int frequency = sharedPref.getData(HikeMessengerApp.VOIP_CALL_RATE_POPUP_FREQUENCY, -1);
 		int callsCount = sharedPref.getData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
 		boolean shownAlready = sharedPref.getData(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, false);
@@ -375,8 +375,9 @@ public class VoIPUtils {
 
 	public static void cancelMissedCallNotification(Context context)
 	{
-		NotificationManager notifManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
-		notifManager.cancel(HikeNotification.VOIP_MISSED_CALL_NOTIFICATION_ID);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
+		Intent it = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+		context.sendBroadcast(it);
 	}
 
 	public static NotificationCompat.Action[] getMissedCallNotifActions(Context context, String msisdn)
