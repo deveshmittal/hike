@@ -277,7 +277,7 @@ public class PlatformContentModel
 		return cardObj.appPackage;
 	}
 
-	class PlatformCardObjectModel
+	public class PlatformCardObjectModel
 	{
 
 		public String getAppName()
@@ -380,6 +380,16 @@ public class PlatformContentModel
 			this.h = h;
 		}
 
+		public String getnotifTitle()
+		{
+			return notifTitle;
+		}
+
+		public void setnotifTitle(String notifTitle)
+		{
+			this.notifTitle = notifTitle;
+		}
+		
 		@Expose
 		public String appName;
 
@@ -409,6 +419,9 @@ public class PlatformContentModel
 
 		@Expose
 		public String h;
+		
+		@Expose
+		public String notifTitle;
 
 	}
 
