@@ -5078,6 +5078,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
+		long lastTime = mAdapter.getLastMsgTimeStamp();
+		if (lastTime != 0)
+		{
+			Pair<String, Long> pair = new Pair<String, Long>(mConversation.getMsisdn(), lastTime);
+	        HikeMessengerApp.getPubSub().publish(HikePubSub.CONVERSATION_TS_UPDATED, pair);
+		}
+		
 		mAdapter.notifyDataSetChanged();
 	}
 	

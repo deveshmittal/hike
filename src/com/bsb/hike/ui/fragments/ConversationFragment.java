@@ -1696,8 +1696,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		mAdapter.notifyDataSetChanged();
 	}
 
-	public void updateConvTimestamp(Object object)
+	public void updateTimestampAndSortConversations(Object object)
 	{
+		Logger.d("ListeningTSPubsub", "listening");
 		Pair<String, Long> p = (Pair<String, Long>) object;
 		String msisdn = p.first;
 		Long ts = p.second;
@@ -1705,14 +1706,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		final Conversation conv = mConversationsByMSISDN.get(msisdn);
 		if (conv!= null)
 		{	
-			conv.setTimestamp(ts);
+			if (ts>=0)
+			{
+				conv.setTimestamp(ts);
+			}
 			
-			int prevIndex = displayedConversations.indexOf(conv);
 			Collections.sort(displayedConversations,
 					mConversationsComparator);
-			int newIndex = displayedConversations.indexOf(conv);
-			if (prevIndex != newIndex)
-			{
 				getActivity().runOnUiThread(new Runnable()
 				{
 					@Override
@@ -1721,7 +1721,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 							notifyDataSetChanged();
 					}
 				});
-			}
 		}
 	}
 	
@@ -1753,7 +1752,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				// messages
 				return;
 			}
-			conv.setTimestamp(message.getTimestamp());
+			conv.addMessage(message);
 			if (Utils.shouldIncrementCounter(message))
 			{
 				conv.setUnreadCount(conv.getUnreadCount() + 1);
@@ -2683,7 +2682,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if(HikePubSub.CONVERSATION_TS_UPDATED.equals(type))
 		{
-			updateConvTimestamp(object);
+			updateTimestampAndSortConversations(object);
 		}
 	}
 	
