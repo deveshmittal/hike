@@ -37,9 +37,7 @@ public class AnalyticsStore
 	private File highPriorityEventFile;
 	
 	private AtomicBoolean uploadUnderProgress = new AtomicBoolean(false);
-	
-	private long fileMaxSize;
-		
+			
 	/**
 	 * Constructor
 	 * @param context application context
@@ -47,9 +45,7 @@ public class AnalyticsStore
 	private AnalyticsStore(Context context)
 	{
 		this.context = context.getApplicationContext();
-						
-		fileMaxSize = HAManager.getInstance().getMaxFileSize();
-		
+								
 		try 
 		{
 			normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
@@ -176,6 +172,8 @@ public class AnalyticsStore
 				if(uploadUnderProgress.getAndSet(true))
 					return;
 				
+				long fileMaxSize = HAManager.getInstance().getMaxFileSize();
+
 				try
 				{
 					FileWriter normalFileWriter = null;
