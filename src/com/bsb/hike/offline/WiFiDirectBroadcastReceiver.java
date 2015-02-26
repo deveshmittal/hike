@@ -33,21 +33,16 @@ import com.bsb.hike.R;
  */
 public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 
-    private WifiP2pManager manager;
-    private Channel channel;
-    private WiFiDirectActivity activity;
+    private WifiP2pConnectionManager connectionManager;
 
     /**
      * @param manager WifiP2pManager system service
      * @param channel Wifi p2p channel
      * @param activity activity associated with the receiver
      */
-    public WiFiDirectBroadcastReceiver(WifiP2pManager manager, Channel channel,
-            WiFiDirectActivity activity) {
+    public WiFiDirectBroadcastReceiver(WifiP2pConnectionManager manager) {
         super();
-        this.manager = manager;
-        this.channel = channel;
-        this.activity = activity;
+        this.connectionManager = manager;
     }
 
     /*
@@ -58,54 +53,60 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
+        if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) 
+        {
             int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
-            if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
-                activity.setIsWifiP2pEnabled(true);
-            } else {
-                activity.setIsWifiP2pEnabled(false);
-                activity.resetData();
-
+            if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) 
+            {
+                connectionManager.setIsWifiP2pEnabled(true);
+            } else 
+            {
+                connectionManager.setIsWifiP2pEnabled(false);
+                connectionManager.resetData();
             }
             Log.d(WiFiDirectActivity.TAG, "P2P state changed - " + state);
-        } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
-
+        } 
+        else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) 
+        {
+        	
             // request available peers from the wifi p2p manager. This is an
             // asynchronous call and the calling activity is notified with a
             // callback on PeerListListener.onPeersAvailable()
-            if (manager != null) {
-                manager.requestPeers(channel, (PeerListListener) activity.getFragmentManager()
-                        .findFragmentById(R.id.frag_list));
-            }
+            connectionManager.requestPeers();
             Log.d(WiFiDirectActivity.TAG, "P2P peers changed");
-        } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
-
-            if (manager == null) {
-                return;
-            }
-
+        } 
+        else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) 
+        {
+        	
             NetworkInfo networkInfo = (NetworkInfo) intent
                     .getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
             
-            if (networkInfo.isConnected()) {
-
+            if (networkInfo.isConnected()) 
+            {
                 // we are connected with the other device, request connection
                 // info to find group owner IP
-
-                DeviceListFragment fragment = (DeviceListFragment) activity
-                        .getFragmentManager().findFragmentById(R.id.frag_list);
-                //manager.requestConnectionInfo(channel, fragment);
-                manager.requestGroupInfo(channel, fragment);
-            } else {
-                // It's a disconnect
-                activity.resetData();
+            	connectionManager.requestGroupInfo();
+            } else 
+            {
+            	connectionManager.resetData();
             }
-        } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
-            DeviceListFragment fragment = (DeviceListFragment) activity.getFragmentManager()
-                    .findFragmentById(R.id.frag_list);
-            fragment.updateThisDevice((WifiP2pDevice) intent.getParcelableExtra(
+        } 
+        else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) 
+        {
+            connectionManager.updateDevice((WifiP2pDevice) intent.getParcelableExtra(
                     WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));
 
+        }
+        else if(WifiP2pManager.WIFI_P2P_DISCOVERY_CHANGED_ACTION.equals(action))
+        {
+            int state  =   intent.getIntExtra(WifiP2pManager.EXTRA_DISCOVERY_STATE,1);
+            if(state==1)
+            {
+                if(WiFiDirectActivity.isOfflineFileTransferOn)
+                {
+                    connectionManager.enableDiscovery();
+                }
+            }
         }
     }
 }

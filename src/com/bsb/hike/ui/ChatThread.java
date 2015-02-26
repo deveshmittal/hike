@@ -6940,7 +6940,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		serviceIntent.putExtra("fileType", 5);	
         serviceIntent.putExtra("message", message);
         
-        if(localIP.equals(IP_SERVER) || !(clientIP.equals(IP_SERVER))){
+        if(localIP.equals(IP_SERVER) || ( (clientIP!=null) && !(clientIP.equals(IP_SERVER)) )){
 			serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
 		}else{
 			serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);

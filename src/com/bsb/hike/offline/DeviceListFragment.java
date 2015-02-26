@@ -85,7 +85,7 @@ import com.bsb.hike.utils.Utils;
  * A ListFragment that displays available peers on discovery and requests the
  * parent activity to handle user interaction events
  */
-public class DeviceListFragment extends ListFragment implements PeerListListener , ConnectionInfoListener ,GroupInfoListener{
+public class DeviceListFragment extends ListFragment implements PeerListListener ,GroupInfoListener{
 
 	public static final String IP_SERVER = "192.168.49.1";
 	public static int PORT = 8988;
@@ -177,7 +177,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 					serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
 					serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, uri.toString());
 			
-					if(localIP.equals(IP_SERVER) || !(clientIP.equals(IP_SERVER))){
+					if(localIP.equals(IP_SERVER) || ( (clientIP!=null) && !(clientIP.equals(IP_SERVER)) )){
 						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
 					}else{
 						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
@@ -241,7 +241,14 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    	else
 	    		phoneNumber = deviceContact.getName();
 
-	    	if(currentDevice.status != WifiP2pDevice.CONNECTED)
+	    	if(currentDevice.status == WifiP2pDevice.CONNECTED || currentDevice.status == WifiP2pDevice.UNAVAILABLE)
+	    	{
+	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
+	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
+	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
+	        	startActivity(intent);
+	    	}
+	    	else
 	    	{	
 	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
 	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
@@ -265,15 +272,6 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    		
 	    		((DeviceActionListener) getActivity()).connect(config, 0, currentDevice);
     	     }
-	    	
-	    	else
-	    	{
-	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
-	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
-	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
-	        	
-	        	startActivity(intent);
-	    	}
     	}
     }
     
@@ -410,6 +408,20 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	            return;
 	        }
         }
+        
+        if(WiFiDirectActivity.connectingToDevice != null)
+        {
+        	if(peers.size() == 0)
+        		Toast.makeText(getActivity(), "Device List Empty!!", Toast.LENGTH_SHORT).show();
+        	else
+        	{
+        		if(peers.contains(WiFiDirectActivity.connectingToDevice))
+        			((DeviceActionListener) getActivity()).connect(WiFiDirectActivity.connectingDeviceConfig,
+        															++(WiFiDirectActivity.tries), WiFiDirectActivity.connectingToDevice);
+        		else
+        			Toast.makeText(getActivity(), "Device not present in peer list!!", Toast.LENGTH_SHORT).show();
+        	}
+        }
     }
     
     public WifiP2pDevice getLatestPeerInstance(String deviceAddress)
@@ -463,32 +475,12 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
      * events.
      */
     public interface DeviceActionListener {
-
-        void showDetails(WifiP2pDevice device);
-
         void callDisconnect();
 
         void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice ConnectingToDevice);
 
         void disconnect();
     }
-
-	@Override
-	public void onConnectionInfoAvailable(WifiP2pInfo info) {
-		/*if (progressDialog != null && progressDialog.isShowing()) {
-			progressDialog.dismiss();
-		}
-    	this.info = info;
-    	// No check for HoneyComb since WiFi Direct runs only on devices with Android 4+
-    	if (!server_running){
-			new ServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-			server_running = true;
-		}
-    	if(intent != null)
-    		startActivity(intent);	
-    	*/
-	}
-	
 	
 	public static boolean copyFile(InputStream inputStream, OutputStream out) {
 		byte buf[] = new byte[1024];
@@ -798,40 +790,43 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
 	@Override
 	public void onGroupInfoAvailable(WifiP2pGroup group) {
-		Logger.d("Group", group.toString());
+		//Logger.d("Group", group.toString());
 		if (progressDialog != null && progressDialog.isShowing()) {
 		progressDialog.dismiss();
 	    }
 	    this.groupInfo = group;
-	// No check for HoneyComb since WiFi Direct runs only on devices with Android 4+
-	   if (!server_running){
-		  new ServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		  server_running = true;
-	   }
-	   if(intent != null)
-		 startActivity(intent);
-	   else
-	   {
-		   clearPeers();
-		   if(group.isGroupOwner())
-		   {
-				for(WifiP2pDevice  client :  group.getClientList()){
+	    // No check for HoneyComb since WiFi Direct runs only on devices with Android 4+
+	    if (!server_running)
+	    {
+	    	new ServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	    	server_running = true;
+	    }
+	    
+	    WiFiDirectActivity.connectingDeviceConfig = null;
+	    WiFiDirectActivity.connectingToDevice = null;
+	    WiFiDirectActivity.tries = 0;
+	    if(intent != null)
+	    	startActivity(intent);
+	    else
+	    {
+	    	clearPeers();
+	    	if(group.isGroupOwner())
+	    	{
+	    		for(WifiP2pDevice  client :  group.getClientList()){
 					peers.add(client);
 					peers_msisdn.add(client.deviceName);
 				    peersStatus.put(client,getDeviceStatus(client.status));
 				}
-		   }
-		   else
-		   {
+	    	}
+	    	else
+	    	{
 				WifiP2pDevice groupOwner  =  group.getOwner();
 				peers.add(groupOwner);
 				peers_msisdn.add(groupOwner.deviceName);
 				peersStatus.put(groupOwner,getDeviceStatus(groupOwner.status));
-		   }
-		   ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-	   }
-	  
+	    	}
+	    	((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+	    }
 	}
-	
 
 }
