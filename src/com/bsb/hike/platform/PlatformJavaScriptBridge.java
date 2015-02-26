@@ -311,6 +311,7 @@ public class PlatformJavaScriptBridge
 								WebViewHolder holder = (WebViewHolder) obj;
 								holder.id = -1; // will make sure new metadata is inflated in webview
 								adapter.notifyDataSetChanged();
+								updateConversationTimestamp();
 							}
 							else
 							{
@@ -328,6 +329,12 @@ public class PlatformJavaScriptBridge
 		}
 	}
 
+	private void updateConversationTimestamp()
+	{
+		Pair<String, Long> pair = new Pair<String, Long>(message.getMsisdn(),(System.currentTimeMillis() / 1000));
+		HikeMessengerApp.getPubSub().publish(HikePubSub.CONVERSATION_TS_UPDATED, pair);
+	}
+	
 	/**
 	 * Calling this function will initiate forward of the message to a friend or group.
 	 * @param json : if the data has changed , then send the updated fields and it will update the metadata.
