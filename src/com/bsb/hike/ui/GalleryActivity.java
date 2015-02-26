@@ -51,6 +51,8 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 	public static final String ACTION_BAR_TYPE_KEY = "action_bar";
 
+	public static final String RETURN_RESULT_KEY = "return_result";
+
 	public static final int PHOTOS_EDITOR_ACTION_BAR_TYPE = 1;
 
 	private int actionBarType;
@@ -59,7 +61,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private GalleryAdapter adapter;
 
-	private boolean isInsideAlbum;
+	private boolean isInsideAlbum, returnResult;
 
 	private String msisdn;
 
@@ -133,6 +135,8 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		{
 			actionBarType = 0;// default hike settings
 		}
+
+		returnResult = data.containsKey(RETURN_RESULT_KEY) ? data.getBoolean(RETURN_RESULT_KEY) : false;
 
 		String sortBy;
 		if (selectedBucket != null)
@@ -470,6 +474,11 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 					{
 						e.printStackTrace();
 					}
+				}
+				else if (returnResult)
+				{
+					setResult(RESULT_OK, intent);
+					finish();
 				}
 				else
 				{

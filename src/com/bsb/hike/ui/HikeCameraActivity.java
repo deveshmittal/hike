@@ -1,5 +1,8 @@
 package com.bsb.hike.ui;
 
+import java.io.File;
+import java.util.ArrayList;
+
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -8,9 +11,9 @@ import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,15 +25,17 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
-import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.models.GalleryItem;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
-import com.google.android.gms.internal.cm;
+import com.bsb.hike.utils.Utils;
 
 public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener
 {
@@ -230,13 +235,12 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			break;
 		case R.id.btngallery:
 			// Open gallery
-			Intent intent = new Intent();
-			intent.setClass(HikeCameraActivity.this, PictureEditer.class);
-			PendingIntent pendingIntent = PendingIntent.getActivity(HikeCameraActivity.this, 0, intent, 0);
-			Intent galleryPickerIntent = IntentManager.getHikeGalleryPickerIntent(HikeCameraActivity.this, false, false, GalleryActivity.PHOTOS_EDITOR_ACTION_BAR_TYPE,
-					pendingIntent);
+
+			Intent galleryPickerIntent = IntentManager.getHikeGalleryPickerIntentForResult(HikeCameraActivity.this, false, false, GalleryActivity.PHOTOS_EDITOR_ACTION_BAR_TYPE,
+					null);
 			startActivityForResult(galleryPickerIntent, GALLERY_PICKER_REQUEST);
 			break;
+
 		case R.id.btnflip:
 			flipCamera(v);
 			break;
@@ -324,12 +328,32 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		super.onActivityResult(requestCode, resultCode, data);
-
-		if (requestCode == GALLERY_PICKER_REQUEST)
+		if (resultCode == RESULT_OK)
 		{
-			if (resultCode == RESULT_OK)
+			switch (requestCode)
 			{
-				// Access selected file
+			case GALLERY_PICKER_REQUEST:
+				File myDir = new File(Utils.getFileParent(HikeFileType.IMAGE, false));
+				myDir.mkdir();
+				String fname = Utils.getOriginalFile(HikeFileType.IMAGE, null);
+				File file = new File(myDir, fname);
+				if (file.exists())
+				{
+					file.delete();
+				}
+				ArrayList<GalleryItem> itemList = data.getExtras().getParcelableArrayList(HikeConstants.Extras.GALLERY_SELECTIONS);
+				String src = null;
+				if (itemList != null && !itemList.isEmpty())
+				{
+					src = itemList.get(0).getFilePath();
+				}
+				Utils.startCropActivity(this, src, file.getAbsolutePath(), true);
+				break;
+			case HikeConstants.CROP_RESULT:
+				Intent intent = new Intent(HikeCameraActivity.this, PictureEditer.class);
+				intent.putExtra(HikeConstants.HikePhotos.FILENAME, data.getStringExtra(MediaStore.EXTRA_OUTPUT));
+				startActivity(intent);
+
 			}
 		}
 	}

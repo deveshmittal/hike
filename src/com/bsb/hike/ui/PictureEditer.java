@@ -63,16 +63,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		String filename = intent.getStringExtra(HikeConstants.HikePhotos.FILENAME);
 		if (filename == null)
 		{
-			ArrayList<GalleryItem> itemList = intent.getExtras().getParcelableArrayList(HikeConstants.Extras.GALLERY_SELECTIONS);
-
-			if (itemList != null && !itemList.isEmpty())
-			{
-				filename = itemList.get(0).getFilePath();
-			}
-		}
-
-		if (filename == null)
-		{
 			PictureEditer.this.finish();
 			return;
 		}

@@ -1388,6 +1388,8 @@ public class HikeConstants
 		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
 
 		public static final String NUX_INCENTIVE_MODE = "showNuxIncentiveMode";
+		
+		public static final String RETURN_CROP_RESULT_TO_FILE = "returnToFile";
 	}
 
 	public static final class LogEvent

@@ -74,6 +74,8 @@ public class CropImage extends MonitoredActivity
 
 	private Uri mSaveUri = null;
 
+	private boolean returnToFile;// check to prevent scaling when required
+
 	private int mAspectX, mAspectY;
 
 	private boolean mCircleCrop = false;
@@ -160,8 +162,15 @@ public class CropImage extends MonitoredActivity
 				mAspectY = 1;
 			}
 
+			if (extras.containsKey(HikeConstants.Extras.RETURN_CROP_RESULT_TO_FILE))
+			{
+				returnToFile = extras.getBoolean(HikeConstants.Extras.RETURN_CROP_RESULT_TO_FILE);
+			}
+
 			mImagePath = extras.getString(HikeConstants.Extras.IMAGE_PATH);
 			mSaveUri = extras.containsKey(MediaStore.EXTRA_OUTPUT) ? getImageUri(extras.getString(MediaStore.EXTRA_OUTPUT)) : null;
+
+			// look here
 			mBitmap = getBitmap(mImagePath);
 			String imageOrientation = Utils.getImageOrientation(mImagePath);
 			mBitmap = HikeBitmapFactory.rotateBitmap(mBitmap, Utils.getRotatedAngle(imageOrientation));
@@ -226,23 +235,30 @@ public class CropImage extends MonitoredActivity
 		 * resize the image while opening it. http://stackoverflow.com/questions/ 477572/android-strange-out-of-memory
 		 * -issue-while-loading-an-image-to-a-bitmap-object/823966#823966
 		 */
-		BitmapFactory.Options options = new BitmapFactory.Options();
-
-		/* query the filesize of the bitmap */
-		options.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(path, options);
-
-		final int maxSize = 1024;
-		int scale = 1;
-		/* determine the correct scale (must be a power of 2) */
-		if (options.outHeight > maxSize || options.outWidth > maxSize)
+		if (!returnToFile)
 		{
-			scale = Math.max(options.outHeight, options.outWidth) / maxSize;
-		}
+			BitmapFactory.Options options = new BitmapFactory.Options();
 
-		options = new BitmapFactory.Options();
-		options.inSampleSize = scale;
-		return BitmapFactory.decodeFile(path, options);
+			/* query the filesize of the bitmap */
+			options.inJustDecodeBounds = true;
+			BitmapFactory.decodeFile(path, options);
+
+			final int maxSize = 1024;
+			int scale = 1;
+			/* determine the correct scale (must be a power of 2) */
+			if (options.outHeight > maxSize || options.outWidth > maxSize)
+			{
+				scale = Math.max(options.outHeight, options.outWidth) / maxSize;
+			}
+
+			options = new BitmapFactory.Options();
+			options.inSampleSize = scale;
+			return BitmapFactory.decodeFile(path, options);
+		}
+		else
+		{
+			return BitmapFactory.decodeFile(path);// crop without scaling
+		}
 	}
 
 	private void startFaceDetection()
@@ -311,7 +327,8 @@ public class CropImage extends MonitoredActivity
 
 		// If we are circle cropping, we want alpha channel, which is the
 		// third param here.
-		Bitmap croppedImage = Bitmap.createBitmap(width, height, mCircleCrop ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+		Bitmap croppedImage = returnToFile ? Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888) : Bitmap.createBitmap(width, height, mCircleCrop ? Bitmap.Config.ARGB_8888
+				: Bitmap.Config.RGB_565);
 		{
 			Canvas canvas = new Canvas(croppedImage);
 			Rect dstRect = new Rect(0, 0, width, height);
@@ -384,7 +401,7 @@ public class CropImage extends MonitoredActivity
 
 		// Return the cropped image directly or save it to the specified URI.
 		Bundle myExtras = getIntent().getExtras();
-		if (myExtras != null && (myExtras.getParcelable(HikeConstants.Extras.DATA) != null || myExtras.getBoolean(HikeConstants.Extras.RETURN_DATA)))
+		if (!returnToFile && myExtras != null && (myExtras.getParcelable(HikeConstants.Extras.DATA) != null || myExtras.getBoolean(HikeConstants.Extras.RETURN_DATA)))
 		{
 			Bundle extras = new Bundle();
 			extras.putParcelable(HikeConstants.Extras.DATA, croppedImage);
