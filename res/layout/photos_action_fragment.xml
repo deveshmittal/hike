@@ -12,19 +12,6 @@
         android:background="#00000000" >
     </View>
 
-    <!--
-    <ListView
-        android:id="@+id/actionsListView"
-        android:layout_width="match_parent"
-        android:background="@color/photos_tabs_background" 
-        android:scrollbars="none"
-        android:divider="#33FFFFFF"
-        android:entries="@array/photos_actions_titles"
-        android:dividerHeight="0.5dp"
-        android:layout_height="0dp"
-        android:layout_weight="3107" />
-    -->
-
     <LinearLayout
         android:id="@+id/itemsLayout"
         android:layout_width="match_parent"

@@ -1,11 +1,9 @@
 package com.bsb.hike.ui.fragments;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView.FindListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,8 +15,6 @@ import com.bsb.hike.R;
 public class PhotoActionsFragment extends SherlockFragment
 {
 	private View mFragmentView;
-
-	// private ListView mListView;
 
 	private String[] mTitles;
 
@@ -48,29 +44,9 @@ public class PhotoActionsFragment extends SherlockFragment
 
 		mFragmentView = inflater.inflate(R.layout.photos_action_fragment, null);
 
-		// mListView = (ListView) mFragmentView.findViewById(R.id.actionsListView);
-
 		loadData();
 
 		PhotoActionsListAdapter mAdapter = new PhotoActionsListAdapter();
-
-		// mListView.setAdapter();
-
-		// mListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-		// {
-		// @Override
-		// public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-		// {
-		// if (position == 0)
-		// {
-		// mListener.onAction(ACTION_SET_DP);
-		// }
-		// else if (position == 1)
-		// {
-		// mListener.onAction(ACTION_SEND);
-		// }
-		// }
-		// });
 
 		View view1 = mAdapter.getView(0, null, null);
 

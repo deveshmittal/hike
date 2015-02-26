@@ -366,17 +366,9 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 			View preview = HikeCameraActivity.this.findViewById(R.id.previewWindow);
 
-			// float x = preview.getX();
-			//
-			// float y = preview.getY();
-
 			Rect r = new Rect();
 
 			preview.getGlobalVisibleRect(r);
-
-			// int heightDiff = cameraFragment.getHost().previewSize.width - containerView.getHeight();
-			//
-			// int bmpHeightDiff = (srcBmp.getHeight() * heightDiff) / cameraFragment.getHost().previewSize.width;
 
 			int bmpY = (int) (srcBmp.getHeight() * r.top / containerView.getHeight());
 
