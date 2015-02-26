@@ -9,8 +9,6 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,7 +20,6 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
-import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
@@ -30,7 +27,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
-import com.google.android.gms.internal.cm;
+import com.bsb.hike.utils.Logger;
 
 public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener
 {
@@ -108,7 +105,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				{
 					if (state != statePortrait)
 					{
-						Log.d("Animating", "from" + state + "to" + 0);
+						Logger.d("Animating", "from" + state + "to" + 0);
 						ObjectAnimator anim = ObjectAnimator.ofFloat(findViewById(R.id.btntakepic), "rotation", state, 0f);
 						anim.setDuration(500); // Duration in milliseconds
 						anim.setInterpolator(overshootInterp);
@@ -121,7 +118,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				{
 					if (state != stateLandscape1)
 					{
-						Log.d("Animating", "from" + state + "to" + stateLandscape1);
+						Logger.d("Animating", "from" + state + "to" + stateLandscape1);
 						ObjectAnimator anim = ObjectAnimator.ofFloat(findViewById(R.id.btntakepic), "rotation", state, stateLandscape1);
 						anim.setInterpolator(overshootInterp);
 						anim.setDuration(500); // Duration in milliseconds
@@ -134,7 +131,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				{
 					if (state != stateLandscape2)
 					{
-						Log.d("Animating", "from" + state + "to" + stateLandscape2);
+						Logger.d("Animating", "from" + state + "to" + stateLandscape2);
 						ObjectAnimator anim = ObjectAnimator.ofFloat(findViewById(R.id.btntakepic), "rotation", state, stateLandscape2);
 						anim.setDuration(500); // Duration in milliseconds
 						anim.setInterpolator(overshootInterp);

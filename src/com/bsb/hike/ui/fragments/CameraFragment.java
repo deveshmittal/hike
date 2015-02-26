@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.photos.HikeCameraHost;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.views.PhotosEditerFrameLayoutView;
@@ -182,7 +183,7 @@ public class CameraFragment extends SherlockFragment
 							public void run()
 							{
 								Intent i = new Intent(getActivity(), PictureEditer.class);
-								i.putExtra("FilePath", filePath);
+								i.putExtra(HikeConstants.HikePhotos.FILENAME, filePath);
 								getActivity().startActivity(i);
 							}
 						}, 100);

@@ -1,25 +1,24 @@
 package com.bsb.hike.ui.fragments;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.webkit.WebView.FindListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.R;
 
 public class PhotoActionsFragment extends SherlockFragment
 {
-
 	private View mFragmentView;
 
-	private ListView mListView;
+	// private ListView mListView;
 
 	private String[] mTitles;
 
@@ -27,26 +26,93 @@ public class PhotoActionsFragment extends SherlockFragment
 
 	private int itemIcons[] = { R.drawable.set_icon, R.drawable.send_icon };
 
+	private ActionListener mListener;
+
+	public static final int ACTION_SET_DP = 1;
+
+	public static final int ACTION_SEND = 2;
+
+	public static interface ActionListener
+	{
+		void onAction(int actionCode);
+	}
+
+	public PhotoActionsFragment(ActionListener argListener)
+	{
+		mListener = argListener;
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 
 		mFragmentView = inflater.inflate(R.layout.photos_action_fragment, null);
 
-		mListView = (ListView) mFragmentView.findViewById(R.id.actionsListView);
+		// mListView = (ListView) mFragmentView.findViewById(R.id.actionsListView);
 
 		loadData();
 
-		mListView.setAdapter(new PhotoActionsListAdapter());
+		PhotoActionsListAdapter mAdapter = new PhotoActionsListAdapter();
 
-		mListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+		// mListView.setAdapter();
+
+		// mListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+		// {
+		// @Override
+		// public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+		// {
+		// if (position == 0)
+		// {
+		// mListener.onAction(ACTION_SET_DP);
+		// }
+		// else if (position == 1)
+		// {
+		// mListener.onAction(ACTION_SEND);
+		// }
+		// }
+		// });
+
+		View view1 = mAdapter.getView(0, null, null);
+
+		View divider = new View(getActivity());
+
+		View view2 = mAdapter.getView(1, null, null);
+
+		view1.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+
+		view1.setOnClickListener(new View.OnClickListener()
 		{
+
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+			public void onClick(View v)
 			{
-				Toast.makeText(getActivity(), "Position: " + position + 1, Toast.LENGTH_LONG).show();
+				mListener.onAction(ACTION_SET_DP);
 			}
 		});
+
+		divider.setBackgroundColor(getResources().getColor(R.color.list_divider));
+
+		divider.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1));
+
+		view2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+
+		view2.setOnClickListener(new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				mListener.onAction(ACTION_SEND);
+			}
+		});
+
+		LinearLayout itemsLayout = (LinearLayout) mFragmentView.findViewById(R.id.itemsLayout);
+
+		itemsLayout.addView(view1);
+
+		itemsLayout.addView(divider);
+
+		itemsLayout.addView(view2);
 
 		return mFragmentView;
 	}
@@ -105,11 +171,11 @@ public class PhotoActionsFragment extends SherlockFragment
 			}
 
 			PhotosOptionsViewHolder holder = (PhotosOptionsViewHolder) convertView.getTag();
-			
+
 			holder.titleTv.setText(mTitles[position]);
-			
+
 			holder.descTv.setText(mDescription[position]);
-			
+
 			holder.iconIv.setImageDrawable(getResources().getDrawable(itemIcons[position]));
 
 			return convertView;
@@ -124,4 +190,5 @@ public class PhotoActionsFragment extends SherlockFragment
 			ImageView iconIv;
 		}
 	}
+
 }

@@ -105,7 +105,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 		imageOriginal = BitmapFactory.decodeFile(FilePath);
 		effectLayer.handleImage(new BitmapDrawable(imageOriginal));
 	}
-	
+
 	public void loadImageFromBitmap(Bitmap bmp)
 	{
 		effectLayer.handleImage(new BitmapDrawable(bmp));
@@ -129,7 +129,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 	public File saveImage()
 	{
 		doodleLayer.getMeasure(imageOriginal);
-		imageEdited = FlattenLayersToBitmap(imageOriginal, currentEffect);
+		imageEdited = flattenLayersToBitmap(imageOriginal, currentEffect);
 		File myDir = new File(Utils.getFileParent(HikeFileType.IMAGE, false));
 		myDir.mkdir();
 		String fname = Utils.getOriginalFile(HikeFileType.IMAGE, null);
@@ -186,7 +186,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 		doodleLayer.setOnDoodlingStartListener(listener);
 	}
 
-	private Bitmap FlattenLayersToBitmap(Bitmap src, ColorMatrixColorFilter filter)
+	private Bitmap flattenLayersToBitmap(Bitmap src, ColorMatrixColorFilter filter)
 	{
 
 		int w = src.getWidth();

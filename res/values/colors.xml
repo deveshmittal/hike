@@ -407,5 +407,8 @@
     <color name="photos_filters_font_color">#8b8e8f</color>
     <color name="photos_doodle_seperator">#2b2b2c</color>
     <color name="photos_action_bar_font">#229EE0</color>
+    <color name="photos_circular_progress_blue">#178ee1</color>
+    <color name="photos_circular_progress_red">#dd2b28</color>
+    
 </resources>
 	

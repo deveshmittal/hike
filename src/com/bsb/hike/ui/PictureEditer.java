@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,6 +14,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -28,7 +30,9 @@ import com.bsb.hike.photos.views.DoodleEffectItemLinearLayout;
 import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
 import com.bsb.hike.photos.views.PhotosEditerFrameLayoutView;
 import com.bsb.hike.ui.fragments.PhotoActionsFragment;
+import com.bsb.hike.ui.fragments.PhotoActionsFragment.ActionListener;
 import com.bsb.hike.ui.fragments.PreviewFragment;
+import com.bsb.hike.ui.fragments.ProfilePicFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
 import com.viewpagerindicator.IconPagerAdapter;
@@ -44,6 +48,12 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 	private EditorClickListener clickHandler;
 
 	private ImageView undoButton;
+
+	private PhotoActionsFragment mPhotosActionsFragment;
+
+	private String filename;
+
+	private View mActionBarDoneContainer;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -61,7 +71,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		clickHandler = new EditorClickListener(this);
 
 		Intent intent = getIntent();
-		String filename = intent.getStringExtra(HikeConstants.HikePhotos.FILENAME);
+		filename = intent.getStringExtra(HikeConstants.HikePhotos.FILENAME);
 		if (filename == null)
 		{
 			ArrayList<GalleryItem> itemList = intent.getExtras().getParcelableArrayList(HikeConstants.Extras.GALLERY_SELECTIONS);
@@ -94,6 +104,8 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 		TabPageIndicator tabs = (TabPageIndicator) findViewById(R.id.indicator);
 		tabs.setOnPageChangeListener(clickHandler);
+
+		setupActionBar();
 	}
 
 	@Override
@@ -101,7 +113,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 	{
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
 		super.onResume();
-		setupActionBar();
+		getSupportActionBar().getCustomView().findViewById(R.id.done_container).setVisibility(View.VISIBLE);
 	}
 
 	@Override
@@ -126,8 +138,10 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 			}
 		});
 
-		actionBarView.findViewById(R.id.done_container).setOnClickListener(clickHandler);
-		
+		mActionBarDoneContainer = actionBarView.findViewById(R.id.done_container);
+
+		mActionBarDoneContainer.setOnClickListener(clickHandler);
+
 		actionBar.setCustomView(actionBarView);
 	}
 
@@ -227,14 +241,18 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				{
 				case R.id.plusWidth:
 					if (doodleWidth + HikeConstants.HikePhotos.DELTA_BRUSH_WIDTH <= HikeConstants.HikePhotos.MAX_BRUSH_WIDTH)
+					{
 						doodleWidth += HikeConstants.HikePhotos.DELTA_BRUSH_WIDTH;
+					}
 					doodlePreview.setBrushWidth(HikePhotosUtils.dpToPx(mContext, doodleWidth));
 					doodlePreview.refresh();
 					editView.setBrushWidth(HikePhotosUtils.dpToPx(mContext, doodleWidth));
 					break;
 				case R.id.minusWidth:
 					if (doodleWidth - HikeConstants.HikePhotos.DELTA_BRUSH_WIDTH >= HikeConstants.HikePhotos.Min_BRUSH_WIDTH)
+					{
 						doodleWidth -= HikeConstants.HikePhotos.DELTA_BRUSH_WIDTH;
+					}
 					doodlePreview.setBrushWidth(HikePhotosUtils.dpToPx(mContext, doodleWidth));
 					doodlePreview.refresh();
 					editView.setBrushWidth(HikePhotosUtils.dpToPx(mContext, doodleWidth));
@@ -243,14 +261,44 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 					editView.undoLastDoodleDraw();
 					break;
 				case R.id.done_container:
-					// Change fragment
-					getSupportFragmentManager().beginTransaction().replace(R.id.overlayFrame, new PhotoActionsFragment()).commit();
-					getSupportActionBar().getCustomView().findViewById(R.id.done_container).setVisibility(View.INVISIBLE);
-					// File savedImage = editView.saveImage();
-					// Intent forwardIntent = IntentManager.getForwardImageIntent(mContext, savedImage);
-					// startActivity(forwardIntent);
-					break;
+					if (mPhotosActionsFragment == null)
+					{
+						mPhotosActionsFragment = new PhotoActionsFragment(new ActionListener()
+						{
 
+							@Override
+							public void onAction(int actionCode)
+							{
+								if (actionCode == PhotoActionsFragment.ACTION_SEND)
+								{
+									File savedImage = editView.saveImage();
+									Intent forwardIntent = IntentManager.getForwardImageIntent(mContext, savedImage);
+									forwardIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+									startActivity(forwardIntent);
+								}
+								else if (actionCode == PhotoActionsFragment.ACTION_SET_DP)
+								{
+									File savedImage = editView.saveImage();
+									getSupportFragmentManager().popBackStackImmediate();
+									ProfilePicFragment profilePicFragment = new ProfilePicFragment();
+									Bundle b = new Bundle();
+									b.putString(HikeConstants.HikePhotos.FILENAME, savedImage.getAbsolutePath());
+									profilePicFragment.setArguments(b);
+									getSupportFragmentManager().beginTransaction()
+											.setCustomAnimations(R.anim.fade_in_animation, R.anim.photo_option_out, R.anim.fade_in_animation, R.anim.photo_option_out)
+											.replace(R.id.overlayFrame, profilePicFragment).commit();
+								}
+							}
+						});
+					}
+					// Change fragment
+					getSupportFragmentManager().beginTransaction()
+							.setCustomAnimations(R.anim.photo_option_in, R.anim.photo_option_out, R.anim.photo_option_in, R.anim.photo_option_out)
+							.replace(R.id.overlayFrame, mPhotosActionsFragment).addToBackStack(null).commit();
+
+					mActionBarDoneContainer.setVisibility(View.INVISIBLE);
+
+					break;
 				}
 			}
 		}
@@ -305,4 +353,22 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 	}
 
+	@Override
+	public void onBackPressed()
+	{
+		if (getSupportFragmentManager().popBackStackImmediate())
+		{
+			mActionBarDoneContainer.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			// Tear down
+			super.onBackPressed();
+			if (filename != null)
+			{
+				File editFile = new File(filename);
+				editFile.delete();
+			}
+		}
+	}
 }
