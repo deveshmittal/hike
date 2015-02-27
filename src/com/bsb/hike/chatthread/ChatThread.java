@@ -2500,6 +2500,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	public void onRestart()
 	{
+		isActivityVisible = true;
 		/*
 		 * if (wasScreenOffEvent) { wasScreenOffEvent = false; return; }
 		 */
