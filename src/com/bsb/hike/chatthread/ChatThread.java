@@ -3538,13 +3538,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 
 		else
-		{
+		{	
 			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
 			/*
 			 * Resetting the transcript mode once the list has scrolled to the bottom.
 			 */
-			uiHandler.sendEmptyMessage(DISABLE_TRANSCRIPT_MODE);
+			uiHandler.sendEmptyMessageDelayed(DISABLE_TRANSCRIPT_MODE, 500);
 		}
 
 	}
