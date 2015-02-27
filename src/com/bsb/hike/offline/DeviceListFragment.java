@@ -244,7 +244,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
 	    	if(currentDevice.status == WifiP2pDevice.CONNECTED || currentDevice.status == WifiP2pDevice.UNAVAILABLE)
 	    	{
-	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
+	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, true);
 	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
 	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
 	        	startActivity(intent);
@@ -410,7 +410,8 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        }
         }
         
-        if(WiFiDirectActivity.connectingToDevice != null && isReconnecting == true)
+        if(WiFiDirectActivity.connectingToDevice != null && isReconnecting == true && 
+        		peers_msisdn.contains(WiFiDirectActivity.connectingToDevice.deviceName))
         {
         	if(peers.size() == 0)
         		Toast.makeText(getActivity(), "Device List Empty!!", Toast.LENGTH_SHORT).show();
@@ -419,7 +420,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         		isReconnecting = false;
         		if(peers.contains(WiFiDirectActivity.connectingToDevice))
         			((DeviceActionListener) getActivity()).connect(WiFiDirectActivity.connectingDeviceConfig,
-        															(WiFiDirectActivity.tries++), WiFiDirectActivity.connectingToDevice);
+        															++(WiFiDirectActivity.tries), WiFiDirectActivity.connectingToDevice);
         		else
         			Toast.makeText(getActivity(), "Device not present in peer list!!", Toast.LENGTH_SHORT).show();
         	}
@@ -647,7 +648,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
 	            for(WifiP2pDevice cpeer: peers)
             	{
-            		if(cpeer.status==WifiP2pDevice.CONNECTED || cpeer.status==WifiP2pDevice.UNAVAILABLE)
+            		if(cpeer.status==WifiP2pDevice.CONNECTED)//|| cpeer.status==WifiP2pDevice.UNAVAILABLE)
             		{
             			connectedDevice  = cpeer;  
             		}

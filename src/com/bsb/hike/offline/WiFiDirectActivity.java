@@ -149,7 +149,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     	WiFiDirectActivity.connectingToDevice = ConnectingToDevice;
     	WiFiDirectActivity.connectingDeviceConfig = config;
     	WiFiDirectActivity.tries = numOfTries;
-    	//new CheckInvitedStuckTask(connectingToDevice).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+    	new CheckInvitedStuckTask(connectingToDevice).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
         connectionManager.connect(config);    
     }
 
@@ -220,59 +220,46 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     	@Override
     	protected Void doInBackground(Void... params) 
     	{
-    		while(true)
+    		try 
     		{
-	    		try 
+    			
+    			latestInstance = fragment.getLatestPeerInstance(connectingToDevice.deviceAddress);
+	    		if( (latestInstance != null) && 
+	    				 (latestInstance.status != WifiP2pDevice.CONNECTED) )
 	    		{
-	    			/*
-	    			latestInstance = fragment.getLatestPeerInstance(connectingToDevice.deviceAddress);
-		    		if((latestInstance != null) && 
-		    				(latestInstance.status == WifiP2pDevice.INVITED))
-		    		{
-		    			Thread.sleep(10*1000);
-		    			// check if even after 5 seconds it is still in invited state
-		    			// then call reset
-		    			latestInstance = fragment.getLatestPeerInstance(connectingToDevice.deviceAddress);
-		    			if((latestInstance != null) && (latestInstance.status == WifiP2pDevice.INVITED)) {
-		    				connectingToDevice = null;
-		    				fragment = null;
-		    				this.destroy = true;
-		    				return null;
-		    			}
-		    		}
-		    		else
-		    		{
-		    			Thread.sleep(5*1000);
-		    		}
-		    		*/
-	    			if(DeviceListFragment.groupInfo==null)
-	    			{
-	    				Thread.sleep(10*1000);
-	    			}
-	    			if(DeviceListFragment.groupInfo==null){
-	    				connectingToDevice = null;
-	    				fragment = null;
-	    				this.destroy = true;
-	    				return null;
-	    			}
-	    				
+	    			Thread.sleep(10*1000);
 	    		}
-	    		catch (InterruptedException e) 
-				{
-	    			Logger.e(TAG, "Sleep failed in CheckInvitedStuckTask");
-					e.printStackTrace();
-				}
+	    		/*
+    			if(DeviceListFragment.groupInfo==null)
+    			{
+    				Thread.sleep(10*1000);
+    			}
+    			if(DeviceListFragment.groupInfo==null){
+    				connectingToDevice = null;
+    				fragment = null;
+    				this.destroy = true;
+    				return null;
+    			}*/
+    				
     		}
+    		catch (InterruptedException e) 
+			{
+    			Logger.e(TAG, "Sleep failed in CheckInvitedStuckTask");
+				e.printStackTrace();
+			}
+			return null;
     	}
     	
     	@Override
     	protected void onPostExecute(Void result) {
-    		if(destroy)
-    		{
-    			//Toast.makeText(getApplicationContext(), "Got Stuck in Invited mode. Resetting..!!", Toast.LENGTH_SHORT).show();
-    			DeviceListFragment.isReconnecting = true;
+    		latestInstance = fragment.getLatestPeerInstance(connectingToDevice.deviceAddress);
+			if((latestInstance == null) || (latestInstance.status != WifiP2pDevice.CONNECTED)) {
+				connectingToDevice = null;
+				fragment = null;
+				DeviceListFragment.isReconnecting = true;
     			callDisconnect();
-    		}
+				this.destroy = true;
+			}
     	}
     }
     
