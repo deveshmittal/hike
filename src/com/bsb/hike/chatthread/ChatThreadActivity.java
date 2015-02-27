@@ -141,6 +141,8 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	
 	public void backPressed()
 	{
+		Intent intent = IntentFactory.getHomeActivityIntent(this);
+		startActivity(intent);
 		super.onBackPressed();
 	}
 	
