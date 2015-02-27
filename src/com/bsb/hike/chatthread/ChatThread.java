@@ -2422,6 +2422,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	private void releaseStickerAndEmoticon()
 	{
+		/**
+		 * It is important that along with releasing resources for Stickers/Emoticons, we also close their windows to prevent any BadWindow Exceptions later on.
+		 */
+		if (mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
+		
 		mStickerPicker.releaseResources();
 		mEmoticonPicker.releaseReources();
 	}
