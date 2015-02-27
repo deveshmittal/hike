@@ -159,6 +159,7 @@ public abstract class Request<T> implements IRequestFacade
 	 * 
 	 * @return
 	 */
+	@Override
 	public List<Header> getHeaders()
 	{
 		return headers;
@@ -169,6 +170,7 @@ public abstract class Request<T> implements IRequestFacade
 	 * 
 	 * @return
 	 */
+	@Override
 	public IRequestBody getBody()
 	{
 		return body;
