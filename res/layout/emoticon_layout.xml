@@ -24,7 +24,7 @@
          android:layout_height="match_parent"
          android:layout_alignParentRight="true"
          android:layout_below="@id/divider"
-         android:background="#555555"
+         android:background="@color/erase_key_color"
          android:scaleType="centerInside"
          android:src="@drawable/ic_erase" />
 
@@ -33,6 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignWithParentIfMissing="true"
+            android:layout_below="@id/divider"
             android:layout_toLeftOf="@id/erase_key_image"
             android:background="#2d2f31" />
     </RelativeLayout>
