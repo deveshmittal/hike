@@ -131,6 +131,10 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomFontEditText;
+import com.bsb.hike.view.CustomLinearLayout;
+import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
+import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
 /**
  * 
@@ -139,7 +143,7 @@ import com.bsb.hike.utils.Utils;
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, CaptureImageListener,
 		PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener,
-		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, PopupListener
+		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, PopupListener, BackKeyListener
 {
 	private static final String TAG = "chatthread";
 
@@ -240,7 +244,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private int unreadMessageCount = 0;
 
-	protected EditText mComposeView;
+	protected CustomFontEditText mComposeView;
 
 	private GestureDetector mGestureDetector;
 
@@ -439,7 +443,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		addOnClickListeners();
 
 		audioRecordView = new AudioRecordView(activity, this);
-		mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
+		mComposeView = (CustomFontEditText) activity.findViewById(R.id.msg_compose);
 
 		showNetworkError(ChatThreadUtils.checkNetworkError());
 	}
@@ -1243,6 +1247,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		setMessagesRead(); // Setting messages as read if there are any unread ones
 
 		mComposeView.addTextChangedListener(this);
+		mComposeView.setBackKeyListener(this);
 
 		/**
 		 * ensure that when the softkeyboard Done button is pressed (different than the send button we have), we send the message.
@@ -3910,5 +3915,18 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			setEmoticonButtonSelected(false);
 		}
 		
+	}
+	
+	@Override
+	public void onBackKeyPressedET(CustomFontEditText editText)
+	{
+		// on back press - if keyboard was open , now keyboard gone , try to hide emoticons
+		// if keyboard ws not open , onbackpress of activity will get call back, dismiss popup there
+		// if we dismiss here in second case as well, then onbackpress of acitivty will be called and it will finish activity
+		
+		if (mShareablePopupLayout.isKeyboardOpen() && mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
 	}
 }
