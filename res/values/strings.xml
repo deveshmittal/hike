@@ -1316,7 +1316,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="call_rate_subheading">We\'d love to know how the quality of your last call was</string>
     <string name="call_rate_not_now">NOT NOW</string>
     <string name="call_rate_submit">SUBMIT</string>
-    <string name="happy_republic_day">Happy Republic Day</string>
     <string name="mute">Mute</string>
     <string name="unmute">Unmute</string>
     <string name="card_loading">LOADING</string>
@@ -1337,7 +1336,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="voip_issue_network">Network Issue</string>
     <string name="voip_issue_delay">Voice Delay</string>
 	<string name="voip_partner_is_busy">Busy</string>
-	<string name="voip_call_on_hold">Call on hold.</string>
+	<string name="voip_call_on_hold">Call on hold</string>
 	<string name="voip_call_issues_submit_toast">Your feedback has been submitted</string>
     <string name="video_compress">VIDEO COMPRESSION</string>
     <string name="send_compress_video">Send Compressed Video</string>
@@ -1357,4 +1356,14 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="voip_older_app">Older app version</string>
     <string name="voip_conn_failure">Connection Failure</string>
     <string name="voip_caller_poor_network">You are on a poor network</string>
+    <string name="voip_unable_to_connect_call">Unable to connect your call</string>
+    <string name="voip_unable_to_connect_to_network">Unable to connect to network</string>
+    <string name="voip_reconnecting_call">Reconnecting your call...</string>
+    <string name="voip_poor_network_quality">Network quality is poor</string>
+    <string name="voip_already_in_call">Already in call. Please try again later.</string>
+    <string name="nux_expired">This activity has expired</string>
+    <string name="nux_completed">You\'ve already completed this activity.</string>
+    <string name="holi">Happy Holi</string>
+    <string name="terms_conditions_hint">Terms &amp; Conditions</string>
+	<string name="terms_conditions_title">Terms</string>
 </resources>

@@ -421,13 +421,13 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			{
 				if(isCallActive)
 				{
-					if(VoIPUtils.shouldShowCallRatePopupNow(getSherlockActivity()))
+					if(VoIPUtils.shouldShowCallRatePopupNow())
 					{
 						Intent intent = new Intent(getSherlockActivity(), CallRateActivity.class);
 						intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 						startActivity(intent);
 					}
-					VoIPUtils.setupCallRatePopupNextTime(getSherlockActivity());
+					VoIPUtils.setupCallRatePopupNextTime();
 				}
 				isCallActive = false;
 				getSherlockActivity().finish();

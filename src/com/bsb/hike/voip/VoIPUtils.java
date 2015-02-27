@@ -311,14 +311,14 @@ public class VoIPUtils {
 		notificationDisplayed = false;
 	}
 
-	public static boolean shouldShowCallRatePopupNow(Context context)
+	public static boolean shouldShowCallRatePopupNow()
 	{
-		return HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, false);
+		return HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, false);
 	}
 	
-	public static void setupCallRatePopupNextTime(Context context)
+	public static void setupCallRatePopupNextTime()
 	{
-		HikeSharedPreferenceUtil sharedPref = HikeSharedPreferenceUtil.getInstance(context);
+		HikeSharedPreferenceUtil sharedPref = HikeSharedPreferenceUtil.getInstance();
 		int callsCount = sharedPref.getData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
 		sharedPref.saveData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, ++callsCount);
 
@@ -352,8 +352,9 @@ public class VoIPUtils {
 
 	public static void cancelMissedCallNotification(Context context)
 	{
-		NotificationManager notifManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
-		notifManager.cancel(HikeNotification.VOIP_MISSED_CALL_NOTIFICATION_ID);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
+		Intent it = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+		context.sendBroadcast(it);
 	}
 
 	public static NotificationCompat.Action[] getMissedCallNotifActions(Context context, String msisdn)
