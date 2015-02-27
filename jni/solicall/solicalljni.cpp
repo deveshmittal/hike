@@ -41,7 +41,7 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_packageInit
 extern "C"
 JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_AECInit
   (JNIEnv *env, jobject obj, jint CpuNR, jint CpuAEC, jshort AECMinOutputPercentageDuringEcho,
-			jshort AECTypeParam, jshort ComfortNoisePercent) {
+			jshort AECTypeParam, jshort ComfortNoisePercent, jint AECTailType) {
 
     sSoliCallInit mySoliCallInit;
 
@@ -61,7 +61,7 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_AECInit
     mySoliCallInit.sAECHowlingLevelTreatment = 10;
     mySoliCallInit.sMaxCoefInAECParam = 100;
     mySoliCallInit.sMinCoefInAECParam = 1;
-    mySoliCallInit.sAECTailType = -10;
+    mySoliCallInit.sAECTailType = AECTailType; // -10;
     mySoliCallInit.sAECMinTailType = -1;
     mySoliCallInit.iNumberOfSamplesInAECBurst = 2000;
     mySoliCallInit.iNumberOfSamplesInHighConfidenceAECBurst = 2000;
