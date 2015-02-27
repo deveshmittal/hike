@@ -95,6 +95,7 @@ import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.media.OverflowItemClickListener;
 import com.bsb.hike.media.PickContactParser;
 import com.bsb.hike.media.PickFileParser;
+import com.bsb.hike.media.PopupListener;
 import com.bsb.hike.media.PickFileParser.PickFileListener;
 import com.bsb.hike.media.ShareablePopup;
 import com.bsb.hike.media.ShareablePopupLayout;
@@ -138,7 +139,7 @@ import com.bsb.hike.utils.Utils;
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, CaptureImageListener,
 		PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener,
-		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener
+		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, PopupListener
 {
 	private static final String TAG = "chatthread";
 
@@ -460,7 +461,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			sharedPopups.add(mEmoticonPicker);
 			sharedPopups.add(mStickerPicker);
 			mShareablePopupLayout = new ShareablePopupLayout(activity.getApplicationContext(), activity.findViewById(R.id.chatThreadParentLayout),
-					(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)), mEatOuterTouchIds);
+					(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)), mEatOuterTouchIds, this);
 		}
 
 		else
@@ -486,7 +487,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	private void updateSharedPopups()
 	{
-		mShareablePopupLayout.updateMainView(activity.findViewById(R.id.chatThreadParentLayout));
+		mShareablePopupLayout.updateListenerAndView(this, activity.findViewById(R.id.chatThreadParentLayout));
 		mStickerPicker.updateListener(this, activity);
 		mEmoticonPicker.updateListener(this, activity);
 	}
@@ -885,9 +886,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			return true;
 		}
 
-		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
+		if (mShareablePopupLayout.isShowing())
 		{
-			dismissShareablePopup();
+			mShareablePopupLayout.dismiss();
 			return true;
 		}
 
@@ -905,25 +906,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		return false;
 	}
 	
-	private void dismissShareablePopup()
-	{
-		if(activity.findViewById(R.id.sticker_btn).isSelected())
-		{
-			setStickerButtonSelected(false);
-		}
-		if(activity.findViewById(R.id.emoticon_btn).isSelected())
-		{
-			setEmoticonButtonSelected(false);
-		}
-		
-		mShareablePopupLayout.dismiss();
-	}
-
 	private void actionBarBackPressed()
 	{
-		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
+		if (mShareablePopupLayout.isShowing())
 		{
-			dismissShareablePopup();
+			mShareablePopupLayout.dismiss();
 		}
 
 		if (removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true))
@@ -2434,11 +2421,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		/**
 		 * It is important that along with releasing resources for Stickers/Emoticons, we also close their windows to prevent any BadWindow Exceptions later on.
 		 */
-		if (mShareablePopupLayout!= null && mShareablePopupLayout.isShowing())
+		if (mShareablePopupLayout.isShowing())
 		{
-			dismissShareablePopup();
+			mShareablePopupLayout.dismiss();
 		}
 		
+		mShareablePopupLayout.releaseResources();
 		mStickerPicker.releaseResources();
 		mEmoticonPicker.releaseReources();
 	}
@@ -2523,6 +2511,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 
 		Logger.d(TAG, "ChatThread : onRestart called");
+		
 		/**
 		 * Something related to Stickers :
 		 * 
@@ -3906,5 +3895,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
+	}
+	
+	@Override
+	public void onPopupDismiss()
+	{
+		Logger.i(TAG, "onPopup Dismiss");
+		if(activity.findViewById(R.id.sticker_btn).isSelected())
+		{
+			setStickerButtonSelected(false);
+		}
+		if(activity.findViewById(R.id.emoticon_btn).isSelected())
+		{
+			setEmoticonButtonSelected(false);
+		}
+		
 	}
 }

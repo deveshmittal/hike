@@ -94,7 +94,7 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	public EmoticonPicker(Context context, EmoticonPickerListener emoPickerListener, View mainView, int firstTimeHeight, int[] eatOuterTouchIds)
 	{
 		this(context, emoPickerListener);
-		mPopUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, mContext, eatOuterTouchIds);
+		mPopUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, mContext, eatOuterTouchIds, null);
 	}
 
 	/**
