@@ -621,12 +621,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case R.id.sticker_btn:
 			setEmoticonButtonSelected(false);
-			setStickerButtonSelected(!v.isSelected());
+			setStickerButtonSelected(true);
 			stickerClicked();
 			break;
 		case R.id.emoticon_btn:
 			setStickerButtonSelected(false);
-			setEmoticonButtonSelected(!v.isSelected());
+			setEmoticonButtonSelected(true);
 			emoticonClicked();
 			break;
 		case R.id.send_message:
@@ -923,7 +923,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
 		{
-			mShareablePopupLayout.dismiss();
+			dismissShareablePopup();
 		}
 
 		if (removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true))
@@ -2434,9 +2434,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		/**
 		 * It is important that along with releasing resources for Stickers/Emoticons, we also close their windows to prevent any BadWindow Exceptions later on.
 		 */
-		if (mShareablePopupLayout.isShowing())
+		if (mShareablePopupLayout!= null && mShareablePopupLayout.isShowing())
 		{
-			mShareablePopupLayout.dismiss();
+			dismissShareablePopup();
 		}
 		
 		mStickerPicker.releaseResources();
