@@ -87,8 +87,16 @@ public class PlatformContent
 	{
 		if (!isInitialized)
 		{
-			PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
+			if (Utils.getExternalStorageState() == ExternalStorageState.WRITEABLE)
+			{
+				PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getExternalFilesDir(null) + File.separator
 						+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
+			}
+			else
+			{
+				PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
+						+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
+			}
 			isInitialized = true;
 		}
 

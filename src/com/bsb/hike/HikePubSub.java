@@ -388,8 +388,6 @@ public class HikePubSub implements Runnable
 	
 	public static final String PLATFORM_CARD_ALARM = "platformCardAlarm";
 
-	public static final String CONVERSATION_TS_UPDATED = "conversationTSUpdated";
-	
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
