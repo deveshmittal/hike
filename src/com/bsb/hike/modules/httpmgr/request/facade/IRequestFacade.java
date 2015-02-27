@@ -3,8 +3,9 @@ package com.bsb.hike.modules.httpmgr.request.facade;
 import java.util.List;
 
 import com.bsb.hike.modules.httpmgr.Header;
+import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
+import com.bsb.hike.modules.httpmgr.interceptor.Pipeline;
 import com.bsb.hike.modules.httpmgr.request.Request;
-import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
 import com.bsb.hike.modules.httpmgr.request.requestbody.IRequestBody;
 
 
@@ -21,4 +22,6 @@ public interface IRequestFacade
 	public void addHeaders(List<Header> headers);
 	
 	public void setBody(IRequestBody body);
+	
+	public Pipeline<IRequestInterceptor> getRequestInterceptors();
 }

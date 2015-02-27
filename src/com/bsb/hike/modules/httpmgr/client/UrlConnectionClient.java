@@ -108,6 +108,8 @@ public class UrlConnectionClient extends OkClient
 		T bodyContent = request.parseResponse(stream);
 
 		ResponseBody<T> responseBody = ResponseBody.create(mimeType, length, bodyContent);
-		return new Response.Builder().setUrl(connection.getURL().toString()).setStatusCode(status).setReason(reason).setHeaders(headers).setBody(responseBody).build();
+		Response response = new Response.Builder().setUrl(connection.getURL().toString()).setStatusCode(status).setReason(reason).setHeaders(headers).setBody(responseBody).build();
+		response.getResponseInterceptors().addAll(request.getResponseInterceptors());
+		return response;
 	}
 }

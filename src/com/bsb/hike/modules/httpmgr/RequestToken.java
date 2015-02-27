@@ -1,6 +1,8 @@
 package com.bsb.hike.modules.httpmgr;
 
 import com.bsb.hike.modules.httpmgr.client.ClientOptions;
+import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
+import com.bsb.hike.modules.httpmgr.interceptor.Pipeline;
 import com.bsb.hike.modules.httpmgr.request.Request;
 
 /**
@@ -44,4 +46,8 @@ public class RequestToken
 		return HttpManager.getInstance().isRequestRunning(request);
 	}
 
+	public Pipeline<IRequestInterceptor> getRequestInterceptors()
+	{
+		return request.getRequestInterceptors();
+	}
 }

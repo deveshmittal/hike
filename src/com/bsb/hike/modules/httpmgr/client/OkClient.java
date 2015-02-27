@@ -220,7 +220,9 @@ public class OkClient implements IClient
 		T bodyContent = request.parseResponse(responseBody.byteStream());
 		ResponseBody<T> body = ResponseBody.create(responseBody.toString(), (int) responseBody.contentLength(), bodyContent);
 		responseBuilder.setBody(body);
-		return responseBuilder.build();
+		Response res = responseBuilder.build();
+		res.getResponseInterceptors().addAll(request.getResponseInterceptors());
+		return res;
 	}
 
 	/**

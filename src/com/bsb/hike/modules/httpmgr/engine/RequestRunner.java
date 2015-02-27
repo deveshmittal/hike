@@ -1,13 +1,16 @@
 package com.bsb.hike.modules.httpmgr.engine;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import com.bsb.hike.modules.httpmgr.client.ClientOptions;
 import com.bsb.hike.modules.httpmgr.client.IClient;
 import com.bsb.hike.modules.httpmgr.client.OkUrlClient;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.interceptor.IResponseInterceptor;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.response.Response;
+import com.bsb.hike.modules.httpmgr.response.ResponseFacade;
 
 /**
  * This class clones the the {@link IClient} object and passes it to {@link RequestExecuter} for the final execution of the request
@@ -54,12 +57,50 @@ public class RequestRunner
 				}
 				else
 				{
-					requestListenerNotifier.notifyListenersOfRequestSuccess(request, response);
+					ResponseFacade responseFacade = new ResponseFacade(response);
+					Iterator<IResponseInterceptor> iterator = responseFacade.getResponseInterceptors().iterator();
+					ResponseInterceptorChain chain = new ResponseInterceptorChain(iterator, request, responseFacade);
+					chain.proceed();
 				}
 				requestMap.remove(request.getId());
 			}
 		});
 		requestExecuter.execute();
 	}
+	
+	public class ResponseInterceptorChain implements IResponseInterceptor.Chain
+	{
+		private Iterator<IResponseInterceptor> iterator;
 
+		private Request<?> request;
+
+		private ResponseFacade responseFacade;
+
+		public ResponseInterceptorChain(Iterator<IResponseInterceptor> iterator, Request<?> request, ResponseFacade responseFacade)
+		{
+			this.iterator = iterator;
+			this.request = request;
+			this.responseFacade = responseFacade;
+		}
+
+		@Override
+		public ResponseFacade getResponseFacade()
+		{
+			return responseFacade;
+		}
+
+		@Override
+		public void proceed()
+		{
+			if (iterator.hasNext())
+			{
+				ResponseInterceptorChain chain = new ResponseInterceptorChain(iterator, request, responseFacade);
+				iterator.next().intercept(chain);
+			}
+			else
+			{
+				requestListenerNotifier.notifyListenersOfRequestSuccess(request, responseFacade.getResponse());
+			}
+		}
+	}
 }

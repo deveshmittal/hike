@@ -15,8 +15,10 @@ import android.text.TextUtils;
 
 import com.bsb.hike.modules.httpmgr.Header;
 import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
+import com.bsb.hike.modules.httpmgr.interceptor.IResponseInterceptor;
+import com.bsb.hike.modules.httpmgr.interceptor.Pipeline;
 import com.bsb.hike.modules.httpmgr.request.facade.IRequestFacade;
-import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IProgressListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListener;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
@@ -51,11 +53,13 @@ public abstract class Request<T> implements IRequestFacade
 
 	private boolean isCancelled;
 
+	private Pipeline<IRequestInterceptor> requestInteceptors;
+
+	private Pipeline<IResponseInterceptor> responseInteceptors;
+
 	private CopyOnWriteArrayList<IRequestListener> requestListeners;
 
 	private IRequestCancellationListener requestCancellationListener;
-
-	private IPreProcessListener preProcessListener;
 
 	private IProgressListener progressListener;
 
@@ -76,7 +80,6 @@ public abstract class Request<T> implements IRequestFacade
 		this.requestType = builder.requestType;
 		this.retryPolicy = builder.retryPolicy;
 		this.requestListeners = builder.requestListeners;
-		this.preProcessListener = builder.preProcessListener;
 		this.responseOnUIThread = builder.responseOnUIThread;
 		this.asynchronous = builder.asynchronous;
 		ensureSaneDefaults();
@@ -107,6 +110,15 @@ public abstract class Request<T> implements IRequestFacade
 		if (id < 0)
 		{
 			id = hashCode();
+		}
+		if (requestInteceptors == null)
+		{
+			requestInteceptors = new Pipeline<IRequestInterceptor>();
+		}
+
+		if (responseInteceptors == null)
+		{
+			responseInteceptors = new Pipeline<IResponseInterceptor>();
 		}
 	}
 	
@@ -207,16 +219,16 @@ public abstract class Request<T> implements IRequestFacade
 		return requestListeners;
 	}
 
-	/**
-	 * Returns the {@link IPreProcessListener} object
-	 * 
-	 * @return
-	 */
-	public IPreProcessListener getPreProcessListener()
+	public Pipeline<IRequestInterceptor> getRequestInterceptors()
 	{
-		return preProcessListener;
+		return requestInteceptors;
 	}
 
+	public Pipeline<IResponseInterceptor> getResponseInterceptors()
+	{
+		return responseInteceptors;
+	}
+	
 	/**
 	 * Returns the {@link IRequestCancellationListener} object used when request is cancelled
 	 * 
@@ -281,6 +293,7 @@ public abstract class Request<T> implements IRequestFacade
 		this.headers = headers;
 	}
 
+	@Override
 	/**
 	 * Adds more headers to the list of headers of the request
 	 * 
@@ -443,11 +456,9 @@ public abstract class Request<T> implements IRequestFacade
 
 		private short requestType = REQUEST_TYPE_LONG;
 
-		private IRetryPolicy retryPolicy  = new DefaultRetryPolicy();
+		private IRetryPolicy retryPolicy = new DefaultRetryPolicy();
 
 		private CopyOnWriteArrayList<IRequestListener> requestListeners;
-
-		private IPreProcessListener preProcessListener;
 
 		private boolean responseOnUIThread;
 
@@ -599,18 +610,6 @@ public abstract class Request<T> implements IRequestFacade
 				this.requestListeners = new CopyOnWriteArrayList<IRequestListener>();
 			}
 			this.requestListeners.add(requestListener);
-			return self();
-		}
-
-		/**
-		 * Sets the {@link IPreProcessListener} object to the request which will be used to perfoem background task other than http call
-		 * 
-		 * @param preProcessListener
-		 * @return
-		 */
-		public S setPreProcessListener(IPreProcessListener preProcessListener)
-		{
-			this.preProcessListener = preProcessListener;
 			return self();
 		}
 

@@ -13,17 +13,18 @@ import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.util.Iterator;
 
 import org.apache.http.conn.ConnectTimeoutException;
 
 import com.bsb.hike.modules.httpmgr.DefaultHeaders;
 import com.bsb.hike.modules.httpmgr.client.IClient;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
 import com.bsb.hike.modules.httpmgr.network.NetworkChecker;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.RequestCall;
 import com.bsb.hike.modules.httpmgr.request.facade.RequestFacade;
-import com.bsb.hike.modules.httpmgr.request.listener.IPreProcessListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
 
@@ -59,10 +60,10 @@ public class RequestExecuter
 	 */
 	private void preProcess()
 	{
-		if (request.getPreProcessListener() != null)
-		{
-			request.getPreProcessListener().doInBackground(new RequestFacade(request));
-		}
+		RequestFacade requestFacade = new RequestFacade(request);
+		Iterator<IRequestInterceptor> iterator = requestFacade.getRequestInterceptors().iterator();
+		RequestInterceptorChain chain = new RequestInterceptorChain(iterator, requestFacade);
+	    chain.proceed();
 	}
 
 	/**
@@ -268,6 +269,39 @@ public class RequestExecuter
 		else
 		{
 			listener.onResponse(null, httpException);
+		}
+	}
+	
+	public class RequestInterceptorChain implements IRequestInterceptor.Chain
+	{
+		private Iterator<IRequestInterceptor> iterator;
+
+		private RequestFacade requestFacade;
+
+		public RequestInterceptorChain(Iterator<IRequestInterceptor> iterator, RequestFacade requestFacade)
+		{
+			this.iterator = iterator;
+			this.requestFacade = requestFacade;
+		}
+
+		@Override
+		public RequestFacade getRequestFacade()
+		{
+			return requestFacade;
+		}
+
+		@Override
+		public void proceed()
+		{
+			if (iterator.hasNext())
+			{
+				RequestInterceptorChain chain = new RequestInterceptorChain(iterator, requestFacade);
+				iterator.next().intercept(chain);
+			}
+			else
+			{
+				processRequest();
+			}
 		}
 	}
 }
