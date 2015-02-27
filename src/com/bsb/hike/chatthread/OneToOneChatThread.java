@@ -1909,6 +1909,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				h20NextClick();
 			}
 			break;
+			
+		case R.id.block_unknown_contact:
+			HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, msisdn);
+			break;
+
+		case R.id.add_unknown_contact:
+			Utils.addToContacts(activity, msisdn);
+			break;
+
 		default:
 			super.onClick(v);
 		}

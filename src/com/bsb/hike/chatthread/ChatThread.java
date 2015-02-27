@@ -659,12 +659,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case R.id.selected_state_overlay:
 			onBlueOverLayClick((ConvMessage) v.getTag(), v);
 			break;
-		case R.id.block_unknown_contact:
-			HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, msisdn);
-			break;
-		case R.id.add_unknown_contact:
-			Utils.addToContacts(activity.getApplicationContext(), msisdn);
-			break;
 		default:
 			Logger.e(TAG, "onClick Registered but not added in onClick : " + v.toString());
 			break;
