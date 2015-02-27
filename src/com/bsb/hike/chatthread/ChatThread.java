@@ -998,15 +998,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.up_down_lower_part));
 		}
 		mBottomView.setVisibility(View.GONE);
-		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
 		mComposeView.requestFocus();
+		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
 		searchManager = new MessageSearchManager();
 		mComposeView.addTextChangedListener(searchManager);
+		mComposeView.setOnEditorActionListener(searchManager);
 		activity.findViewById(R.id.next).setOnClickListener(searchManager);
 		activity.findViewById(R.id.previous).setOnClickListener(searchManager);
 	}
 
-	public class MessageSearchManager implements OnClickListener, TextWatcher
+	public class MessageSearchManager implements OnClickListener, TextWatcher, OnEditorActionListener
 	{
 		private ArrayList<Integer> indexList;
 
@@ -1383,6 +1384,18 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		public void afterTextChanged(Editable s)
 		{
 			makeNewSearch(s.toString());
+		}
+
+		@Override
+		public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
+		{
+			if (actionId == EditorInfo.IME_ACTION_SEARCH)
+			{
+				int prev = prevMessage();
+				setUI(prev);
+				return true;
+			}
+			return false;
 		}
 
 	}
