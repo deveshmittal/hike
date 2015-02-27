@@ -1118,6 +1118,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		Logger.i(TAG, " This emoticon was selected : " + emoticonIndex);
 		Utils.emoticonClicked(activity.getApplicationContext(), emoticonIndex, mComposeView);
 	}
+	
+	@Override
+	public void eraseEmoticon()
+	{
+		if (mComposeView != null)
+		{
+			mComposeView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
+		}
+	}
 
 	@Override
 	public void audioRecordSuccess(String filePath, long duration)

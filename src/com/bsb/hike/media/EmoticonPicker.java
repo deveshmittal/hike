@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
 import com.bsb.hike.R;
@@ -21,7 +22,7 @@ import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
  * @author piyush
  * 
  */
-public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
+public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, OnClickListener
 {
 	private EmoticonPickerListener mEmoPickerListener;
 
@@ -164,6 +165,9 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 		}
 
 		StickerEmoticonIconPageIndicator mIconPageIndicator = (StickerEmoticonIconPageIndicator) view.findViewById(R.id.emoticon_icon_indicator);
+		
+		View eraseKey = view.findViewById(R.id.erase_key_image);
+		eraseKey.setOnClickListener(this);
 
 		int[] tabDrawables = new int[] { R.drawable.emo_recent, R.drawable.emo_tab_1_selector, R.drawable.emo_tab_2_selector, R.drawable.emo_tab_3_selector,
 				R.drawable.emo_tab_4_selector, R.drawable.emo_tab_5_selector, R.drawable.emo_tab_6_selector, R.drawable.emo_tab_7_selector, R.drawable.emo_tab_8_selector,
@@ -254,6 +258,26 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 		if (mEmoPickerListener != null)
 		{
 			mEmoPickerListener.emoticonSelected(emoticonIndex);
+		}
+	}
+	
+	@Override
+	public void eraseEmoticon()
+	{
+		if (mEmoPickerListener != null)
+		{
+			mEmoPickerListener.eraseEmoticon();
+		}
+	}
+
+	@Override
+	public void onClick(View v)
+	{
+		switch (v.getId())
+		{
+		case R.id.erase_key_image:
+			eraseEmoticon();
+			break;
 		}
 	}
 
