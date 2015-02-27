@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat.Action;
 import android.text.SpannableString;
 import android.text.TextUtils;
 
@@ -46,6 +47,7 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.voip.VoIPUtils;
 
 public class HikeNotification
 {
@@ -70,6 +72,8 @@ public class HikeNotification
 	public static final int STEALTH_POPUP_NOTIFICATION_ID = -89;
 
 	public static final int HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID = -89;
+
+	public static final int VOIP_MISSED_CALL_NOTIFICATION_ID = -89;
 
 	// We need a constant notification id for bulk/big text notifications. Since
 	// we are using msisdn for other single notifications, it is safe to use any
@@ -555,6 +559,15 @@ public class HikeNotification
 					return;
 				}
 			}
+			else if(convMessage.isVoipMissedCallMsg())
+			{
+				NotificationCompat.Action[] actions = VoIPUtils.getMissedCallNotifActions(context, convMessage.getMsisdn());
+				showBigTextStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
+						VOIP_MISSED_CALL_NOTIFICATION_ID, hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
+						hikeNotifMsgStack.getNotificationBigText(), isSingleMsisdn ? hikeNotifMsgStack.lastAddedMsisdn : "bulk", hikeNotifMsgStack.getNotificationSubText(),
+						avatarDrawable, shouldNotPlaySound, retryCount, actions);
+				return;
+			}
 		}
 
 		if (hikeNotifMsgStack.getSize() == 1)
@@ -955,6 +968,12 @@ public class HikeNotification
 	public void showBigTextStyleNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text,
 			final String key, final String message, final String msisdn, String subMessage, Drawable argAvatarDrawable, boolean shouldNotPlaySound, int retryCount)
 	{
+		showBigTextStyleNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, subMessage, argAvatarDrawable, shouldNotPlaySound, retryCount, null);
+	}
+
+	public void showBigTextStyleNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text,
+			final String key, final String message, final String msisdn, String subMessage, Drawable argAvatarDrawable, boolean shouldNotPlaySound, int retryCount, Action[] actions)
+	{
 
 		final boolean shouldNotPlayNotification = shouldNotPlaySound ? shouldNotPlaySound : (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 
@@ -980,6 +999,14 @@ public class HikeNotification
 			bigTextStyle.setSummaryText(subMessage);
 		}
 		bigTextStyle.bigText(message);
+
+		if(actions != null)
+		{
+			for(Action action : actions)
+			{
+				mBuilder.addAction(action);
+			}
+		}
 
 		// Moves the big view style object into the notification object.
 		mBuilder.setStyle(bigTextStyle);

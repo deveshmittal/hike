@@ -3053,15 +3053,13 @@ public class MqttMessagesManager
 	private void handleVOIPPacket(JSONObject jsonObj) throws JSONException
 	{
 
-//		Log.d(VoIPConstants.TAG, "Received VoIP Message");
-
 		// VoIP checks
-		if (jsonObj.has(HikeConstants.SUB_TYPE)) {
+		if (jsonObj.has(HikeConstants.SUB_TYPE)) 
+		{
 			
 			String subType = jsonObj.getString(HikeConstants.SUB_TYPE); 
-//			Log.d(VoIPConstants.TAG, "VoIP Message subtype: " + subType);
-
-			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO)) {
+			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO)) 
+			{
 
 				/**
 				 * Socket information is the same as a request for call initiation. 
@@ -3077,79 +3075,79 @@ public class MqttMessagesManager
 				JSONObject metadataJSON = jsonObj.getJSONObject(HikeConstants.DATA).getJSONObject(HikeConstants.METADATA);
 				
 				// Check for currently active voip call
-				if (VoIPService.isConnected() && 
-						metadataJSON.getInt("callId") != VoIPService.getCallId() &&
-						metadataJSON.getBoolean("reconnecting") != true) {
+				if (VoIPService.isConnected() && metadataJSON.getInt(VoIPConstants.Extras.CALL_ID) != VoIPService.getCallId() &&
+						metadataJSON.getBoolean(VoIPConstants.Extras.RECONNECTING) != true) {
 					Log.w(VoIPConstants.TAG, "We are already in a Hike call.");
-					VoIPUtils.sendMessage(jsonObj.getString(HikeConstants.FROM), 
-							HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
-							HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
+					VoIPUtils.sendMessage(jsonObj.getString(HikeConstants.FROM), HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
 				}
 					
 				// Check if the initiator (us) has already hung up
-				if (metadataJSON.getBoolean("initiator") == false && 
-						VoIPService.isConnected() == false &&
-						metadataJSON.getInt("callId") != VoIPService.getCallId()) {
+				if (metadataJSON.getBoolean(VoIPConstants.Extras.INITIATOR) == false && VoIPService.isConnected() == false &&
+						metadataJSON.getInt(VoIPConstants.Extras.CALL_ID) != VoIPService.getCallId()) {
 					Log.w(VoIPConstants.TAG, "Receiving a reply for a terminated call.");
 					return;		
 				}
 				
 				Intent i = new Intent(context.getApplicationContext(), VoIPService.class);
-				i.putExtra("action", "setpartnerinfo");
-				i.putExtra("msisdn", jsonObj.getString(HikeConstants.FROM));
-				i.putExtra("internalIP", metadataJSON.getString("internalIP"));
-				i.putExtra("internalPort", metadataJSON.getInt("internalPort"));
-				i.putExtra("externalIP", metadataJSON.getString("externalIP"));
-				i.putExtra("externalPort", metadataJSON.getInt("externalPort"));
-				i.putExtra("relay", metadataJSON.getString("relay"));
-				i.putExtra("relayport", metadataJSON.getInt("relayport"));
-				i.putExtra("reconnecting", metadataJSON.getBoolean("reconnecting"));
-				i.putExtra("initiator", metadataJSON.getBoolean("initiator"));
-				i.putExtra("callId", metadataJSON.getInt("callId"));
+				i.putExtra(VoIPConstants.Extras.ACTION, VoIPConstants.Extras.SET_PARTNER_INFO);
+				i.putExtra(VoIPConstants.Extras.MSISDN, jsonObj.getString(HikeConstants.FROM));
+				i.putExtra(VoIPConstants.Extras.INTERNAL_IP, metadataJSON.getString(VoIPConstants.Extras.INTERNAL_IP));
+				i.putExtra(VoIPConstants.Extras.INTERNAL_PORT, metadataJSON.getInt(VoIPConstants.Extras.INTERNAL_PORT));
+				i.putExtra(VoIPConstants.Extras.EXTERNAL_IP, metadataJSON.getString(VoIPConstants.Extras.EXTERNAL_IP));
+				i.putExtra(VoIPConstants.Extras.EXTERNAL_PORT, metadataJSON.getInt(VoIPConstants.Extras.EXTERNAL_PORT));
+				i.putExtra(VoIPConstants.Extras.RELAY, metadataJSON.getString(VoIPConstants.Extras.RELAY));
+				i.putExtra(VoIPConstants.Extras.RELAY_PORT, metadataJSON.getInt(VoIPConstants.Extras.RELAY_PORT));
+				i.putExtra(VoIPConstants.Extras.RECONNECTING, metadataJSON.getBoolean(VoIPConstants.Extras.RECONNECTING));
+				i.putExtra(VoIPConstants.Extras.INITIATOR, metadataJSON.getBoolean(VoIPConstants.Extras.INITIATOR));
+				i.putExtra(VoIPConstants.Extras.CALL_ID, metadataJSON.getInt(VoIPConstants.Extras.CALL_ID));
 				context.startService(i);
-//				Log.w(VoIPConstants.TAG, "Intent passed to service.");
 				return;
 			}
 			
-			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING)) {
+			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING)) 
+			{
 				Logger.d(VoIPConstants.TAG, "Adding a missed call to our chat history.");
 				VoIPClient clientPartner = new VoIPClient();
 				clientPartner.setPhoneNumber(jsonObj.getString(HikeConstants.FROM));
 				clientPartner.setInitiator(true);
 				VoIPUtils.resetNotificationStatus();
-				VoIPUtils.addMessageToChatThread(context, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, jsonObj.getJSONObject(HikeConstants.DATA).getLong(HikeConstants.TIMESTAMP));
+				VoIPUtils.addMessageToChatThread(context, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0, jsonObj.getJSONObject(HikeConstants.DATA).getLong(HikeConstants.TIMESTAMP), true);
 			}
 			
-			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_UPGRADABLE)) {
+			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_UPGRADABLE)) 
+			{
 				String message = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.HIKE_MESSAGE);
 				Intent i = new Intent(context, VoIPActivity.class);
-				i.putExtra("action", VoIPConstants.PARTNER_REQUIRES_UPGRADE);
-				i.putExtra("message", message);
+				i.putExtra(VoIPConstants.Extras.ACTION, VoIPConstants.PARTNER_REQUIRES_UPGRADE);
+				i.putExtra(VoIPConstants.Extras.MESSAGE, message);
 				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 				context.startActivity(i);
 			}
 			
-			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_NOT_UPGRADABLE)) {
+			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_NOT_UPGRADABLE)) 
+			{
 				String message = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.HIKE_MESSAGE);
 				Intent i = new Intent(context, VoIPActivity.class);
-				i.putExtra("action", VoIPConstants.PARTNER_INCOMPATIBLE);
-				i.putExtra("message", message);
+				i.putExtra(VoIPConstants.Extras.ACTION, VoIPConstants.PARTNER_INCOMPATIBLE);
+				i.putExtra(VoIPConstants.Extras.MESSAGE, message);
 				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 				context.startActivity(i);
 			}
 			
-			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_HAS_BLOCKED_YOU)) {
+			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_HAS_BLOCKED_YOU)) 
+			{
 				String message = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.HIKE_MESSAGE);
 				Intent i = new Intent(context, VoIPActivity.class);
-				i.putExtra("action", VoIPConstants.PARTNER_HAS_BLOCKED_YOU);
-				i.putExtra("message", message);
+				i.putExtra(VoIPConstants.Extras.ACTION, VoIPConstants.PARTNER_HAS_BLOCKED_YOU);
+				i.putExtra(VoIPConstants.Extras.MESSAGE, message);
 				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 				context.startActivity(i);
 			}
 			
-			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL)) {
+			if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL)) 
+			{
 				Intent i = new Intent(context, VoIPActivity.class);
-				i.putExtra("action", VoIPConstants.PARTNER_IN_CALL);
+				i.putExtra(VoIPConstants.Extras.ACTION, VoIPConstants.PARTNER_IN_CALL);
 				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 				context.startActivity(i);
 			}
