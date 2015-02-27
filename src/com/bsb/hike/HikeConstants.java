@@ -2283,7 +2283,4 @@ public class HikeConstants
 	public static final String ERROR_MESSAGE = "em";
 	
 	public static final String EXCEPTION_MESSAGE = "exm";
-	
-	public static final String REARRANGE_CHAT = "rearrange_chat";
-	
 }
