@@ -42,6 +42,7 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
@@ -2518,16 +2519,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		Logger.d(TAG, "ChatThread : onRestart called");
 		
 		/**
-		 * Something related to Stickers :
-		 * 
-		 * int softInput = getWindow().getAttributes().softInputMode; if (softInput == WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE || softInput ==
-		 * WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE) { // keyboard will come for sure if (isEmoticonPalleteVisible()) { resizeMainheight(0, false); } return; } //
-		 * mean last time it was above keyboard, so no guarantee of keyboard, simply discard it if (isEmoticonPalleteVisible() && findViewById(R.id.chat_layout).getPaddingBottom()
-		 * == 0) { dismissPopupWindow();
-		 * 
-		 * }
+		 * Last time, the popup was above the keyboard. There's no guarantee of keyboard now, so dismissing it. 
 		 */
-
+		if (mShareablePopupLayout.isShowing() && activity.findViewById(R.id.chatThreadParentLayout).getPaddingBottom() == 0)
+		{
+			mShareablePopupLayout.dismiss();
+		}
 	}
 
 	/**
