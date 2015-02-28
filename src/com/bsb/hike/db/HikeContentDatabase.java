@@ -24,22 +24,18 @@ import com.bsb.hike.utils.Logger;
 public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants, HIKE_CONTENT
 {
 
-	private static HikeContentDatabase hikeContentDatabase;
+	private static HikeContentDatabase hikeContentDatabase=new HikeContentDatabase();
 
 	SQLiteDatabase mDB;
 
-	private HikeContentDatabase(Context context)
+	private HikeContentDatabase()
 	{
-		super(context, DB_NAME, null, DB_VERSION);
+		super(HikeMessengerApp.getInstance().getApplicationContext(), DB_NAME, null, DB_VERSION);
 		mDB = getWritableDatabase();
 	}
 
-	public static HikeContentDatabase getInstance(Context context)
+	public static HikeContentDatabase getInstance()
 	{
-		if (hikeContentDatabase == null)
-		{
-			hikeContentDatabase = new HikeContentDatabase(context);
-		}
 		return hikeContentDatabase;
 	}
 

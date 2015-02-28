@@ -58,7 +58,7 @@ public class ProductInfoManager
 			@Override
 			public void run()
 			{
-				mmSparseArray = HikeContentDatabase.getInstance(context).getAllPopup();
+				mmSparseArray = HikeContentDatabase.getInstance().getAllPopup();
 			}
 		});
 
@@ -186,7 +186,7 @@ public class ProductInfoManager
 				switch (event)
 				{
 				case LOW_CONNECTIVITY:
-					HikeContentDatabase.getInstance(context).updatePopupStatus(productContentModel.hashCode(), PopupStateEnum.NOT_DOWNLOADED.ordinal());
+					HikeContentDatabase.getInstance().updatePopupStatus(productContentModel.hashCode(), PopupStateEnum.NOT_DOWNLOADED.ordinal());
 					if (getListener() != null)
 					{
 						getListener().onFailure();
@@ -247,7 +247,7 @@ public class ProductInfoManager
 						mmArrayList.add(productContentModel);
 						mmSparseArray.put(productContentModel.getTriggerpoint(), mmArrayList);
 					}
-					HikeContentDatabase.getInstance(context).updatePopupStatus(productContentModel.hashCode(), PopupStateEnum.DOWNLOADED.ordinal());
+					HikeContentDatabase.getInstance().updatePopupStatus(productContentModel.hashCode(), PopupStateEnum.DOWNLOADED.ordinal());
 				}
 			}
 
@@ -295,7 +295,7 @@ public class ProductInfoManager
 		// saving the Popup in DataBase:
 		ProductContentModel productContentModel = ProductContentModel.makeProductContentModel(metaData);
 
-		HikeContentDatabase.getInstance(context).savePopup(productContentModel, PopupStateEnum.NOT_DOWNLOADED.ordinal());
+		HikeContentDatabase.getInstance().savePopup(productContentModel, PopupStateEnum.NOT_DOWNLOADED.ordinal());
 
 		parseAndShowPopup(productContentModel, null);
 

@@ -220,7 +220,7 @@ public class HikeAlarmManager
 		intent.putExtra(ALARM_TIME, time);
 
 		if (persistance)
-			HikeContentDatabase.getInstance(context).insertIntoAlarmManagerDB(time, requestCode, WillWakeCPU, intent);
+			HikeContentDatabase.getInstance().insertIntoAlarmManagerDB(time, requestCode, WillWakeCPU, intent);
 		
 		PendingIntent mPendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -256,7 +256,7 @@ public class HikeAlarmManager
 
 		if (mPendingIntent != null)
 		{
-			HikeContentDatabase.getInstance(context).deleteFromAlarmManagerDB(requestCode);
+			HikeContentDatabase.getInstance().deleteFromAlarmManagerDB(requestCode);
 			mAlarmManager.cancel(mPendingIntent);
 		}
 	}
@@ -273,7 +273,7 @@ public class HikeAlarmManager
 	{
 		
 		int requestCode = intent.getIntExtra(HikeAlarmManager.INTENT_EXTRA, HikeAlarmManager.REQUESTCODE_DEFAULT);
-		HikeContentDatabase.getInstance(context).deleteFromAlarmManagerDB(requestCode);
+		HikeContentDatabase.getInstance().deleteFromAlarmManagerDB(requestCode);
 		switch (requestCode)
 		{
 		case HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD:
@@ -340,7 +340,7 @@ public class HikeAlarmManager
 			@Override
 			public void run()
 			{
-				HikeContentDatabase.getInstance(context).rePopulateAlarmWhenClosed();
+				HikeContentDatabase.getInstance().rePopulateAlarmWhenClosed();
 				
 			}
 		}),0);
@@ -358,7 +358,7 @@ public class HikeAlarmManager
 	{
 		int requestCode = intent.getIntExtra(HikeAlarmManager.INTENT_EXTRA, HikeAlarmManager.REQUESTCODE_DEFAULT);
 
-		HikeContentDatabase.getInstance(context).deleteFromAlarmManagerDB(requestCode);
+		HikeContentDatabase.getInstance().deleteFromAlarmManagerDB(requestCode);
 
 		switch (requestCode)
 		{
