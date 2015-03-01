@@ -13,7 +13,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Dialog;
 import android.app.NotificationManager;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -131,6 +133,8 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.SearchManager;
+import com.bsb.hike.utils.SearchManager.ItemFinder;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
@@ -203,6 +207,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected static final int SEARCH_ACTION_MODE = 24;
 
+	protected static final int SEARCH_NEXT = 25;
+
+	protected static final int SEARCH_PREVIOUS = 26;
+
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -259,8 +267,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected int selectedNonTextMsgs;
 
-	protected MessageSearchManager searchManager;
-
+	protected static SearchManager messageSearchManager;
+	
 	protected int selectedNonForwadableMsgs;
 
 	protected int shareableMessagesCount;
@@ -268,6 +276,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected int selectedCancelableMsgs;
 
 	protected ChatThreadTips mTips;
+	
+	private Dialog searchDialog;
 
 	private static final String NEW_LINE_DELIMETER = "\n";
 
@@ -981,9 +991,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		activity.startActivityForResult(imageIntent, AttachmentPicker.GALLERY);
 	}
 	
-	public MessageSearchManager getMessageSearchManager()
+	public SearchManager getMessageSearchManager()
 	{
-		return searchManager;
+		return messageSearchManager;
 	}
 
 	private void setupSearchMode()
@@ -1000,326 +1010,29 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mBottomView.setVisibility(View.GONE);
 		mComposeView.requestFocus();
 		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
-		searchManager = new MessageSearchManager();
-		mComposeView.addTextChangedListener(searchManager);
-		mComposeView.setOnEditorActionListener(searchManager);
-		activity.findViewById(R.id.next).setOnClickListener(searchManager);
-		activity.findViewById(R.id.previous).setOnClickListener(searchManager);
+		messageSearchManager = new SearchManager(messages, searchMessageFinder);
+		mComposeView.addTextChangedListener(searchTestWatcher);
+		mComposeView.setOnEditorActionListener(searchActionClickListener);
+		activity.findViewById(R.id.next).setOnClickListener(searchOptionsClickListener);
+		activity.findViewById(R.id.previous).setOnClickListener(searchOptionsClickListener);
 	}
-
-	public class MessageSearchManager implements OnClickListener, TextWatcher, OnEditorActionListener
+	
+	ItemFinder searchMessageFinder = new ItemFinder()
 	{
-		private ArrayList<Integer> indexList;
-
-		private String searchText;
-
-		private int messageViewBacklash = 1;
-
-		private int loadMessageCount;
-
-		public MessageSearchManager()
+		@Override
+		public boolean doesItemContain(Object item, String s)
 		{
-			indexList = new ArrayList<Integer>();
-		}
-
-		public void makeNewSearch(String s)
-		{
-			searchText = s;
-			indexList.clear();
-			loadMessageCount = 50;
-			mAdapter.setSearchText(searchText);
-			updateUI();
-		}
-
-		public void endSearch()
-		{
-			searchText = "";
-			updateUI();
-		}
-
-		public String getSearchText()
-		{
-			return searchText;
-		}
-
-		private int nextMessage()
-		{
-			if (TextUtils.isEmpty(searchText))
-			{
-				return -1;
-			}
-			Logger.d("search", "nextMessage()");
-			Logger.d("search", "list: " + indexList.toString());
-			int currentCusrsor = getCurrentCursor();
-			Logger.d("search", "currentCusrsor: " + currentCusrsor);
-			int position = Collections.binarySearch(indexList, currentCusrsor);
-			Logger.d("search", "position: " + position);
-
-			int start, end, threshold = -1;
-			int lastMessageIndex = messages.size() - 1;
-			if (indexList.isEmpty())
-			{
-				start = currentCusrsor;
-				end = lastMessageIndex;
-			}
-			else
-			{
-				int lastIndex = indexList.get(indexList.size() - 1);
-				int firstIndex = indexList.get(0);
-				if (currentCusrsor >= lastIndex)
-				{
-					start = lastIndex + 1;
-					end = lastMessageIndex;
-					threshold = currentCusrsor;
-				}
-				else if (currentCusrsor < firstIndex)
-				{
-					start = currentCusrsor;
-					end = firstIndex - 1;
-				}
-				else
-				{
-					if (position >= 0)
-					{
-						position++;
-					}
-					else
-					{
-						position *= (-1);
-						position -= 1;
-					}
-					return applyBackLash(indexList.get(position));
-				}
-			}
-			boolean found = false;
-			if (end == lastMessageIndex)
-			{
-				found = searchFirstMessage(start, end, threshold);
-			}
-			else
-			{
-				found = searchAllMessages(start, end);
-			}
-			position = Collections.binarySearch(indexList, currentCusrsor);
-			if (position >= 0)
-			{
-				position++;
-			}
-			else
-			{
-				position *= (-1);
-				position -= 1;
-			}
-			if (position >=0 && position < indexList.size())
-			{
-				return applyBackLash(indexList.get(position));
-			}
-			else
-			{
-				return -1;
-			}
-		}
-
-		private int prevMessage()
-		{
-			if (TextUtils.isEmpty(searchText))
-			{
-				return -1;
-			}
-			Logger.d("search", "prevMessage()");
-			Logger.d("search", "list: " + indexList.toString());
-			int currentCusrsor = getCurrentCursor();
-			Logger.d("search", "currentCusrsor: " + currentCusrsor);
-			int position = Collections.binarySearch(indexList, currentCusrsor);
-			Logger.d("search", "position: " + position);
-
-			int start, end, threshold = -1;
-			if (indexList.isEmpty())
-			{
-				start = currentCusrsor;
-				end = 0;
-			}
-			else
-			{
-				int lastIndex = indexList.get(indexList.size() - 1);
-				int firstIndex = indexList.get(0);
-				if (currentCusrsor > lastIndex)
-				{
-					start = currentCusrsor;
-					end = lastIndex + 1;
-				}
-				else if (currentCusrsor <= firstIndex)
-				{
-					start = firstIndex - 1;
-					end = 0;
-					threshold = currentCusrsor;
-				}
-				else
-				{
-					if (position >= 0)
-					{
-						position--;
-					}
-					else
-					{
-						position *= (-1);
-						position -= 2;
-					}
-					return applyBackLash(indexList.get(position));
-				}
-			}
-			boolean found = false;
-			if (end == 0)
-			{
-				while (!found)
-				{
-					if (start == end)
-					{
-						break;
-					}
-					found = searchFirstMessage(start, end, threshold);
-					start = loadMessages();
-				}
-			}
-			else
-			{
-				found = searchAllMessages(start, end);
-			}
-			position = Collections.binarySearch(indexList, currentCusrsor);
-			if (position >= 0)
-			{
-				position--;
-			}
-			else
-			{
-				position *= (-1);
-				position -= 2;
-			}
-			if (position >=0 && position < indexList.size())
-			{
-				return applyBackLash(indexList.get(position));
-			}
-			else
-			{
-				return -1;
-			}
-		}
-
-		private boolean searchAllMessages(int from, int to)
-		{
-			boolean found = false;
-			if (from > to)
-			{
-				from ^= to ^= from ^= to;
-			}
-			for (; from <= to; from++)
-			{
-				if (doesMessageHaveText(messages.get(from), searchText))
-				{
-					Logger.d("search","adding: " + from);
-					indexList.add(from);
-					Collections.sort(indexList);
-					found = true;
-				}
-			}
-			return found;
-		}
-
-		private boolean searchFirstMessage(int from, int to, int threshold)
-		{
-			Logger.d("search", "searching first in range: " + from + "-" + to + " with threshold of " + threshold);
-			if (from > to)
-			{
-				for (; from >= to; from--)
-				{
-					if (doesMessageHaveText(messages.get(from), searchText))
-					{
-						Logger.d("search","adding: " + from);
-						indexList.add(from);
-						Collections.sort(indexList);
-						if (threshold >= 0)
-						{
-							if (from < threshold)
-							{
-								return true;
-							}
-						}
-						else
-						{
-							return true;
-						}
-					}
-				}
-				return false;
-			}
-			else
-			{
-				for (; from <= to; from++)
-				{
-					if (doesMessageHaveText(messages.get(from), searchText))
-					{
-						Logger.d("search","adding: " + from);
-						indexList.add(from);
-						Collections.sort(indexList);
-						if (threshold >= 0)
-						{
-							if (from > threshold)
-							{
-								return true;
-							}
-						}
-						else
-						{
-							return true;
-						}
-					}
-				}
-				return false;
-			}
-		}
-
-		private int applyBackLash(int position)
-		{
-			if (position >= messageViewBacklash)
-				position -= messageViewBacklash;
-			
-			return position;
-		}
-		private int loadMessages()
-		{
-			List<ConvMessage> msgList = loadMoreMessages(loadMessageCount);
-			loadMessageCount *= 2;
-			loadMessagesFinished(msgList);
-			if (msgList == null || msgList.isEmpty())
-			{
-				return 0;
-			}
-			else
-			{
-				return msgList.size();
-			}
-		}
-
-		private void updateIndex(int count)
-		{
-			for (Integer index : indexList)
-			{
-				index += count;
-			}
-		}
-
-		private boolean doesMessageHaveText(ConvMessage message, String text)
-		{
+			ConvMessage message = (ConvMessage) item;
 			if (message.isFileTransferMessage())
 			{
-				if (message.getMetadata().getHikeFiles().get(0).getFileName().contains(text))
+				if (message.getMetadata().getHikeFiles().get(0).getFileName().contains(s))
 				{
 					return true;
 				}
 			}
 			if (!TextUtils.isEmpty(message.getMessage()))
 			{
-				if (message.getMessage().contains(text))
+				if (message.getMessage().contains(s))
 				{
 					Logger.d("search", "returning true for: " + message.getMessage());
 					return true;
@@ -1327,77 +1040,88 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 			return false;
 		}
-
-		private int getCurrentCursor()
+	};
+	
+	TextWatcher searchTestWatcher = new TextWatcher()
+	{
+		
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before, int count)
 		{
-			int firstMessagePosition = mConversationsView.getFirstVisiblePosition();
-			firstMessagePosition += messageViewBacklash;
-			return firstMessagePosition;
+			// TODO Auto-generated method stub
+			
 		}
-
-		private void updateUI()
+		
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count, int after)
 		{
+			// TODO Auto-generated method stub
+			
+		}
+		
+		@Override
+		public void afterTextChanged(Editable s)
+		{
+			messageSearchManager.makeNewSearch(s.toString());
+			mAdapter.setSearchText(s.toString());
 			mAdapter.notifyDataSetChanged();
 		}
+	};
 
-		private void setUI(int position)
+	OnEditorActionListener searchActionClickListener = new OnEditorActionListener()
+	{
+		@Override
+		public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
 		{
-			if (position >= 0)
+			if (actionId == EditorInfo.IME_ACTION_SEARCH)
 			{
-				mConversationsView.setSelection(position);
+				searchMessage(false);
 			}
-			else
-			{
-				showToast(R.string.access_error);
-			}
+			return false;
 		}
+	};
 
+	OnClickListener searchOptionsClickListener = new OnClickListener()
+	{
 		@Override
 		public void onClick(View v)
 		{
 			switch (v.getId())
 			{
 			case R.id.next:
-				int next = nextMessage();
-				Logger.d("search", "setting selection to position: " + next);
-				setUI(next);
+				searchMessage(true);
 				break;
 			case R.id.previous:
-				int prev = prevMessage();
-				Logger.d("search", "setting selection to position: " + prev);
-				setUI(prev);
+				searchMessage(false);
 				break;
 			}
 		}
-
-		@Override
-		public void beforeTextChanged(CharSequence s, int start, int count, int after)
+	};
+	
+	private void searchMessage(boolean searchNext)
+	{
+		if (searchNext)
 		{
+			activity.getSupportLoaderManager().restartLoader(SEARCH_NEXT, null, this);
 		}
-
-		@Override
-		public void onTextChanged(CharSequence s, int start, int before, int count)
+		else
 		{
+			activity.getSupportLoaderManager().restartLoader(SEARCH_PREVIOUS, null, this);
 		}
+		searchDialog = ProgressDialog.show(activity, null, "Searching...");
+	}
 
-		@Override
-		public void afterTextChanged(Editable s)
+	private void updateUIforSearchResult(int position)
+	{
+		searchDialog.dismiss();
+		if (position >= 0)
 		{
-			makeNewSearch(s.toString());
+			mConversationsView.setSelection(position);
 		}
-
-		@Override
-		public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
+		else
 		{
-			if (actionId == EditorInfo.IME_ACTION_SEARCH)
-			{
-				int prev = prevMessage();
-				setUI(prev);
-				return true;
-			}
-			return false;
+			showToast(R.string.access_error);
 		}
-
 	}
 
 	private void destroySearchMode()
@@ -1406,8 +1130,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
 		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
 		mBottomView.setVisibility(View.VISIBLE);
-		searchManager.endSearch();
-		searchManager = null;
+		messageSearchManager.endSearch();
+		messageSearchManager = null;
 		mAdapter.setSearchText(null);
 	}
 
@@ -2089,7 +1813,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				Logger.i(TAG, "Adding 'n' new messages in the list : " + list.size());
 				int scrollOffset = 0;
 
-				int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
 
 				int firstVisibleItem = mConversationsView.getFirstVisiblePosition();
 
@@ -2098,16 +1821,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					scrollOffset = mConversationsView.getChildAt(0).getTop();
 				}
 
-				mAdapter.addMessages(list, startIndex);
-				addtoMessageMap(startIndex, startIndex + list.size());
+				addMoreMessages(list);
 
 				mAdapter.notifyDataSetChanged();
 				mConversationsView.setSelectionFromTop(firstVisibleItem + list.size(), scrollOffset);
 				
-				if (searchManager != null)
-				{
-					searchManager.updateIndex(list.size());
-				}
 			}
 
 			else
@@ -2119,6 +1837,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 
 			loadingMoreMessages = false;
+		}
+	}
+	
+	private void addMoreMessages(List<ConvMessage> list)
+	{
+		int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
+		mAdapter.addMessages(list, startIndex);
+		addtoMessageMap(startIndex, startIndex + list.size());
+		if (messageSearchManager != null)
+		{
+			messageSearchManager.updateIndex(list.size());
 		}
 	}
 
@@ -2134,6 +1863,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			return new ConversationLoader(activity.getApplicationContext(), LOAD_MORE_MESSAGES, this);
 		}
+		else if (arg0 == SEARCH_NEXT || arg0 == SEARCH_PREVIOUS)
+		{
+			return new MessageFinder(activity.getApplicationContext(), arg0, this);
+		}
 		else
 		{
 			throw new IllegalArgumentException("On create loader is called with wrong loader id");
@@ -2144,16 +1877,30 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void onLoadFinished(Loader<Object> arg0, Object arg1)
 	{
 		Logger.d(TAG, "onLoadFinished");
-		ConversationLoader loader = (ConversationLoader) arg0;
-		if (loader.loaderId == FETCH_CONV)
+		if (arg0 instanceof ConversationLoader)
 		{
-			setupConversation((Conversation) arg1);
+			ConversationLoader loader = (ConversationLoader) arg0;
+			if (loader.loaderId == FETCH_CONV)
+			{
+				setupConversation((Conversation) arg1);
+			}
+			else if (loader.loaderId == LOAD_MORE_MESSAGES)
+			{
+				loadMessagesFinished((List<ConvMessage>) arg1);
+			}
 		}
-		else if (loader.loaderId == LOAD_MORE_MESSAGES)
+		else if (arg0 instanceof MessageFinder)
 		{
-			loadMessagesFinished((List<ConvMessage>) arg1);
+			MessageFinder loader = (MessageFinder) arg0;
+			if (loader.loaderId == SEARCH_NEXT)
+			{
+				updateUIforSearchResult((int) arg1);
+			}
+			else if (loader.loaderId == SEARCH_PREVIOUS)
+			{
+				updateUIforSearchResult((int) arg1);
+			}
 		}
-
 		else
 		{
 			throw new IllegalStateException("Expected data is either Conversation OR List<ConvMessages> , please check " + arg0.getClass().getCanonicalName());
@@ -2233,6 +1980,67 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 		}
 
+	}
+	
+	private static class MessageFinder extends AsyncTaskLoader<Object>
+	{
+		int loaderId;
+	
+		int position = -1;
+
+		int loadMessageCount = 50;
+
+		WeakReference<ChatThread> chatThread;
+
+		public MessageFinder(Context context, int loaderId, ChatThread chatThread)
+		{
+			super(context);
+			Logger.i(TAG, "message finder object " + loaderId);
+			this.loaderId = loaderId;
+			this.chatThread = new WeakReference<ChatThread>(chatThread);
+		}
+
+		@Override
+		public Object loadInBackground()
+		{
+			Logger.i(TAG, "search in background");
+
+			if (chatThread.get() != null)
+			{
+				if (loaderId == SEARCH_NEXT)
+				{
+					position = messageSearchManager.getNextItem(chatThread.get().mConversationsView.getFirstVisiblePosition());
+				}
+				else if (loaderId == SEARCH_PREVIOUS)
+				{
+					position = messageSearchManager.getPrevItem(chatThread.get().mConversationsView.getFirstVisiblePosition());
+					while (position < 0)
+					{
+						Logger.d("search","fetching messgaes: " + loadMessageCount);
+						List<ConvMessage> msgList = chatThread.get().loadMoreMessages(loadMessageCount);
+						if (msgList == null || msgList.isEmpty())
+						{
+							break;
+						}
+						
+						chatThread.get().addMoreMessages(msgList);
+						loadMessageCount *= 2;
+						position = messageSearchManager.getPrevItem(chatThread.get().mConversationsView.getFirstVisiblePosition());
+					}
+				}
+				return position;
+			}
+			return position;
+		}
+		
+		/**
+		 * This has to be done due to some bug in compat library -- http://stackoverflow.com/questions/10524667/android-asynctaskloader-doesnt-start-loadinbackground
+		 */
+		protected void onStartLoading()
+		{
+			Logger.i(TAG, "message finder onStartLoading");
+			forceLoad();
+		}
 	}
 
 	@Override
