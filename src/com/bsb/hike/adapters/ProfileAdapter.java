@@ -700,6 +700,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			{
 				viewHolder.icon.setImageResource(EmoticonConstants.moodMapping.get(statusMessage.getMoodId()));
 				viewHolder.iconFrame.setVisibility(View.GONE);
+				viewHolder.icon.setBackgroundResource(0);
 			}
 			else
 			{
@@ -800,7 +801,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 	private void setAvatar(String msisdn, ImageView avatarView)
 	{
-		iconLoader.loadImage(msisdn, avatarView, false, true, true);
+		iconLoader.loadImage(msisdn, avatarView, false, true);
 	}
 
 	private class ViewHolder
