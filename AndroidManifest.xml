@@ -215,7 +215,7 @@
         </activity>
         <activity
             android:name=".cropimage.CropImage"
-            android:theme="@style/NoTitleBar" />
+             />
         <activity android:name=".ui.CreditsActivity" >
         </activity>
         <activity

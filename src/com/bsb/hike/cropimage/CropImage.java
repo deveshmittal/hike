@@ -47,12 +47,15 @@ import android.os.Handler;
 import android.os.StatFs;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
@@ -113,10 +116,14 @@ public class CropImage extends MonitoredActivity
 	@Override
 	public void onCreate(Bundle icicle)
 	{
+		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
+		
 		super.onCreate(icicle);
+		
 		mContentResolver = getContentResolver();
 
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		
 		setContentView(R.layout.cropimage);
 
 		/*
@@ -195,14 +202,6 @@ public class CropImage extends MonitoredActivity
 		// Make UI fullscreen.
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-		findViewById(R.id.save).setOnClickListener(new View.OnClickListener()
-		{
-			public void onClick(View v)
-			{
-				onSaveClicked();
-			}
-		});
-
 		findViewById(R.id.rotateLeft).setOnClickListener(new View.OnClickListener()
 		{
 			public void onClick(View v)
@@ -214,9 +213,41 @@ public class CropImage extends MonitoredActivity
 			}
 		});
 
+		setupActionBar();
+		
 		startFaceDetection();
 	}
+	
+	private void setupActionBar()
+	{
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.photos_action_bar, null);
+		actionBarView.findViewById(R.id.back).setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				onBackPressed();
+			}
+		});
+
+		actionBarView.findViewById(R.id.done_container);
+
+		actionBarView.findViewById(R.id.done_container).setOnClickListener(new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				onSaveClicked();
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
+	}
+	
 	@Override
 	public void onBackPressed()
 	{
@@ -543,8 +574,9 @@ public class CropImage extends MonitoredActivity
 
 			Rect imageRect = new Rect(0, 0, width, height);
 
-			// make the default size about 4/5 of the width or height
-			int cropWidth = Math.min(width, height) * 4 / 5;
+			// REMOVED: make the default size about 4/5 of the width or height//* 4 / 5;
+			int cropWidth = Math.min(width, height);
+			
 			int cropHeight = cropWidth;
 
 			if (mAspectX != 0 && mAspectY != 0)
