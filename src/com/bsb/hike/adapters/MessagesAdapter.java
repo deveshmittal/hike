@@ -65,6 +65,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -112,22 +113,6 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.HoloCircularProgress;
-import org.json.JSONArray;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import com.bsb.hike.voip.VoIPConstants;
 
 
 public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener, OnCheckedChangeListener
@@ -840,8 +825,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				stickerImage = new File(categoryDirPath, stickerId);
 			}
 
-			String key = categoryId + stickerId;
-
 			if (stickerImage != null && stickerImage.exists())
 			{
 				Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
@@ -995,7 +978,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			FileSavedState fss = null;
 			final HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-			HikeFileType hikeFileType = hikeFile.getHikeFileType();
 			File file = hikeFile.getFile();
 			if (convMessage.isSent())
 			{
@@ -1808,7 +1790,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (v == null)
 				{
 					textHolder = new TextViewHolder();
-					long time = System.currentTimeMillis();
 					v = inflateView(R.layout.message_sent_text, parent, false);
 					textHolder.text = (TextView) v.findViewById(R.id.text);
 					textHolder.time = (TextView) v.findViewById(R.id.time);
@@ -2346,18 +2327,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return v;
 	}
 
-	private void setDefaultSticker(ImageView imageView, int imageRes)
-	{
-		try
-		{
-			imageView.setImageResource(imageRes);
-		}
-		catch (OutOfMemoryError error)
-		{
-			Logger.w(getClass().getSimpleName(), "OOM while setting default sticker");
-		}
-	}
-
 	private void setBubbleColor(ConvMessage convMessage, ViewGroup messageContainer)
 	{
 		int leftPad = messageContainer.getPaddingLeft();
@@ -2457,11 +2426,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private void setAvatar(String msisdn, ImageView imageView)
 	{
 		iconLoader.loadImage(msisdn, true, imageView, true);
-	}
-
-	private int getDownloadFailedResIcon()
-	{
-		return isDefaultTheme ? R.drawable.ic_download_failed : R.drawable.ic_download_failed_custom;
 	}
 
 	private void setNudgeImageResource(ChatTheme chatTheme, ImageView iv, boolean isMessageSent)
@@ -2859,51 +2823,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	};
 
-	private void setFileButtonResource(ImageView button, ConvMessage convMessage, HikeFile hikeFile)
-	{
-		// TODO : handle according to filestate
-		button.setBackgroundResource(R.drawable.bg_red_btn_selector);
-		if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
-		{
-			button.setImageResource(R.drawable.ic_download_file);
-			button.setBackgroundResource(R.drawable.bg_red_btn_disabled);
-		}
-		else if (hikeFile.wasFileDownloaded() && hikeFile.getHikeFileType() != HikeFileType.CONTACT)
-		{
-			button.setImageResource(R.drawable.ic_open_received_file);
-		}
-		else
-		{
-			button.setImageResource(R.drawable.ic_download_file);
-		}
-	}
-
 	private void setTextAndIconForSystemMessages(TextView textView, CharSequence text, int iconResId)
 	{
 		textView.setText(text);
 		textView.setCompoundDrawablesWithIntrinsicBounds(iconResId, 0, 0, 0);
 	}
 
-	private void showTryingAgainIcon(ImageView iv, long ts)
-	{
-		/*
-		 * We are checking this so that we can delay the try again icon from being shown immediately if the user just sent the msg. If it has been over 5 secs then the user will
-		 * immediately see the icon though.
-		 */
-		if ((((long) System.currentTimeMillis() / 1000) - ts) < 3)
-		{
-			iv.setVisibility(View.INVISIBLE);
-
-			Animation anim = AnimationUtils.loadAnimation(context, android.R.anim.fade_in);
-			anim.setStartOffset(4000);
-			anim.setDuration(1);
-
-			iv.setAnimation(anim);
-		}
-		iv.setVisibility(View.VISIBLE);
-		iv.setImageResource(R.drawable.ic_retry_sending);
-	}
-
+	
 	Handler handler = new Handler();
 
 	public void scheduleHikeOfflineTip()
@@ -3534,31 +3460,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
-	private String getUndeliveredTextRes()
-	{
-		ConvMessage convMessage = convMessages.get(lastSentMessagePosition);
-
-		int res;
-		if (convMessage.getState() == State.SENT_UNCONFIRMED)
-		{
-			/*
-			 * We don't want to show the user as offline. So we return blank here.
-			 */
-			return "";
-		}
-		else
-		{
-			/*
-			 * We don't show the contact as offline if the user is online in the last time.
-			 */
-			if (chatThread.isContactOnline())
-			{
-				return "";
-			}
-			res = conversation.isOnhike() && !(conversation instanceof GroupConversation) ? R.string.msg_undelivered : R.string.sms_undelivered;
-		}
-		return context.getString(res, Utils.getFirstName(conversation.getLabel()));
-	}
 
 	private void showSMSDialog(final boolean nativeOnly)
 	{
@@ -3572,7 +3473,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		View hikeSMS = dialog.findViewById(R.id.hike_sms_container);
 		View nativeSMS = dialog.findViewById(R.id.native_sms_container);
 		TextView nativeHeader = (TextView) dialog.findViewById(R.id.native_sms_header);
-		TextView nativeSubtext = (TextView) dialog.findViewById(R.id.native_sms_subtext);
 		TextView hikeSmsHeader = (TextView) dialog.findViewById(R.id.hike_sms_header);
 		TextView hikeSmsSubtext = (TextView) dialog.findViewById(R.id.hike_sms_subtext);
 
@@ -4505,7 +4405,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (convMessage.getMsgID() == msgId && convMessage.isFileTransferMessage())
 				{
 					HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-					if (hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile.getHikeFileType() == HikeFileType.VIDEO)
+					if (hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile.getHikeFileType() == HikeFileType.VIDEO || hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
 					{
 						return true;
 					}
