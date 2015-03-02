@@ -1920,9 +1920,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void destroyActionMode()
 	{
-		shareableMessagesCount = 0;
-		selectedNonForwadableMsgs = 0;
-		selectedNonForwadableMsgs = 0;
+		resetSelectedMessageCounters();
 		mAdapter.removeSelection();
 		mAdapter.setActionMode(false);
 		mAdapter.notifyDataSetChanged();
@@ -1931,6 +1929,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * if we have hidden tips while initializing action mode we should unhide them
 		 */ 
 		mTips.showHiddenTip();
+	}
+	
+	private void resetSelectedMessageCounters()
+	{
+		shareableMessagesCount = 0;
+		selectedNonForwadableMsgs = 0;
+		selectedNonForwadableMsgs = 0;
+		selectedNonTextMsgs = 0;
 	}
 
 	@Override
