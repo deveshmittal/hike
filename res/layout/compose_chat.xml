@@ -10,7 +10,6 @@
         android:id="@+id/spinner"
         layout="@layout/spinner_center_screen"
         android:visibility="gone" />
-    
 	<FrameLayout
        android:id="@+id/horizontal_friends_placeholder"
        android:layout_height="wrap_content"

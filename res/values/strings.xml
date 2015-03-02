@@ -1358,4 +1358,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="label_peers">PEERS</string>
     <string name="empty"></string>
     <string name="apk">Apps</string>
+    <string name="send_offline_files">""Offline File Transfer"</string>
 </resources>

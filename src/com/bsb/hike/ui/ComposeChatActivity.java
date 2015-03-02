@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -874,12 +875,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			return;
 		}
-
+        
 		View backContainer = groupChatActionBar.findViewById(R.id.back);
 
 		title = (TextView) groupChatActionBar.findViewById(R.id.title);
 		groupChatActionBar.findViewById(R.id.seprator).setVisibility(View.GONE);
-		
+	
 		backContainer.setOnClickListener(new OnClickListener()
 		{
 
@@ -899,7 +900,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			// For showing progress bar when activity is closed and opened again
 			showProgressBarContactsSync(View.VISIBLE);
 		}
-
 		actionBar.setCustomView(groupChatActionBar);
 
 		showingMultiSelectActionBar = false;

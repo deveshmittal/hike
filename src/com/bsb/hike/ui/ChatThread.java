@@ -1524,6 +1524,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				optionsList.add(new OverFlowMenuItem(getString(R.string.add_as_favorite_menu), 7));
 			}
+			optionsList.add(new OverFlowMenuItem(getString(R.string.send_offline_files), 8));
 		}
 
 		dismissPopupWindow();
@@ -1652,6 +1653,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 4:
 					setupThemePicker(null);
 					break;
+				case 8:
+					com.bsb.hike.offline.WiFiDirectActivity.isOfflineFileTransferOn = true;
+				 	Intent intent = new Intent(getApplicationContext(), com.bsb.hike.offline.WiFiDirectActivity.class);
+				 	startActivity(intent);
+				 	break;
 				}
 
 			}
