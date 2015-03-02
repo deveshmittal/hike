@@ -218,7 +218,7 @@ public class SearchManager
 		}
 		for (; from <= to; from++)
 		{
-			if (finder.doesItemContain(itemList.get(from), searchText))
+			if (finder.doesItemContain(from, searchText))
 			{
 				Logger.d("search", "adding: " + from);
 				indexList.add(from);
@@ -236,7 +236,7 @@ public class SearchManager
 		{
 			for (; from >= to; from--)
 			{
-				if (finder.doesItemContain(itemList.get(from), searchText))
+				if (finder.doesItemContain(from, searchText))
 				{
 					Logger.d("search", "adding: " + from);
 					indexList.add(from);
@@ -260,7 +260,7 @@ public class SearchManager
 		{
 			for (; from <= to; from++)
 			{
-				if (finder.doesItemContain(itemList.get(from), searchText))
+				if (finder.doesItemContain(from, searchText))
 				{
 					Logger.d("search", "adding: " + from);
 					indexList.add(from);
@@ -305,7 +305,7 @@ public class SearchManager
 		 * 
 		 * @return If the item has the search text.
 		 */
-		boolean doesItemContain(Object item, String s);
+		boolean doesItemContain(int index, String s);
 	}
 
 }

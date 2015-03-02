@@ -115,6 +115,7 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
@@ -1022,9 +1023,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	ItemFinder searchMessageFinder = new ItemFinder()
 	{
 		@Override
-		public boolean doesItemContain(Object item, String s)
+		public boolean doesItemContain(int index, String s)
 		{
-			ConvMessage message = (ConvMessage) item;
+			ConvMessage message = messages.get(index);
 			if (message.isFileTransferMessage())
 			{
 				if (message.getMetadata().getHikeFiles().get(0).getFileName().toLowerCase().contains(s))
@@ -1037,6 +1038,29 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				if (message.getMetadata().getStatusMessage().getText().toLowerCase().contains(s))
 				{
 					return true;
+				}
+			}
+			else if (Utils.isGroupConversation(msisdn) && mAdapter.ifFirstMessageFromRecepient(message, index))
+			{
+				String number = null;
+				String name = ((GroupConversation) mConversation).getGroupParticipantFirstName(message.getGroupParticipantMsisdn());
+				if (((GroupConversation) mConversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
+				{
+					number = message.getGroupParticipantMsisdn();
+				}
+				if (number != null)
+				{
+					if (number.contains(s) || name.contains(s))
+					{
+						return true;
+					}
+				}
+				else
+				{
+					if (name.contains(s))
+					{
+						return true;
+					}
 				}
 			}
 			if (!TextUtils.isEmpty(message.getMessage()))
