@@ -215,7 +215,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 					HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
 
-					updateProgress(10f);
+					updateProgress(100f - mCurrentProgress);
 				}
 			});
 

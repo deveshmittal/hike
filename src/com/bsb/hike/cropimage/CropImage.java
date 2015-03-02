@@ -440,7 +440,7 @@ public class CropImage extends MonitoredActivity
 		else
 		{
 			final Bitmap b = croppedImage;
-			Util.startBackgroundJob(this, null, "Saving image", new Runnable()
+			Util.startBackgroundJob(this, null, getString(R.string.cropping_image), new Runnable()
 			{
 				public void run()
 				{

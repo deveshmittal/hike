@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Environment;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
@@ -130,10 +131,27 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 	{
 		doodleLayer.getMeasure(imageOriginal);
 		imageEdited = flattenLayersToBitmap(imageOriginal, currentEffect);
-		File myDir = new File(Utils.getFileParent(fileType, false));
-		myDir.mkdir();
-		String fname = Utils.getOriginalFile(fileType, originalName);
-		File file = new File(myDir, fname);
+		File file = null;
+		if (fileType == HikeFileType.IMAGE)
+		{
+			try
+			{
+				file = File.createTempFile(Utils.getOriginalFile(fileType, originalName), ".jpg");
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				return null;
+			}
+		}
+		else
+		{
+			File myDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+			myDir.mkdir();
+			String fname = Utils.getOriginalFile(fileType, originalName);
+			file = new File(myDir, fname);
+		}
+		
 		if (file.exists())
 		{
 			file.delete();

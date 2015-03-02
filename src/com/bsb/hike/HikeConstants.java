@@ -2307,7 +2307,7 @@ public class HikeConstants
 
 		public static final String FILENAME = "FilePath";
 
-		public static final int MAX_BRUSH_WIDTH = 50;
+		public static final int MAX_BRUSH_WIDTH = 48;
 
 		public static final int Min_BRUSH_WIDTH = 8;
 
@@ -2321,7 +2321,9 @@ public class HikeConstants
 
 		public static final int DOODLE_FRAGMENT_ID = 1;
 
-		public static final int DEFAULT_BRUSH_WIDTH = 38;
+		public static final int DEFAULT_BRUSH_WIDTH = 18;
+		
+		public static final int PREVIEW_BRUSH_WIDTH = 38;
 
 		public static final int DEFAULT_BRUSH_COLOR = 0xFF000000;
 

@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
+import java.io.IOException;
 
 import android.content.Context;
 import android.content.Intent;
@@ -97,6 +98,15 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		tabs.setOnPageChangeListener(clickHandler);
 
 		setupActionBar();
+
+		try
+		{
+			new File(filename).delete();
+		}
+		catch (NullPointerException npe)
+		{
+			npe.printStackTrace();
+		}
 	}
 
 	@Override

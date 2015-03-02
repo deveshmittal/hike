@@ -66,7 +66,7 @@ public class PhotoActionsFragment extends SherlockFragment
 			}
 		});
 
-		divider.setBackgroundColor(getResources().getColor(R.color.list_divider));
+		divider.setBackgroundColor(getResources().getColor(R.color.light_grey_drop_shadow));
 
 		divider.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1));
 

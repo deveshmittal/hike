@@ -29,7 +29,7 @@ public class DoodleEffectItemLinearLayout extends EffectItemLinearLayout
 	{
 		super(context, attrs);
 		// TODO Auto-generated constructor stub
-		brushWidth = HikePhotosUtils.dpToPx(context, HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH);
+		brushWidth = HikePhotosUtils.dpToPx(context, HikeConstants.HikePhotos.PREVIEW_BRUSH_WIDTH);
 		brushColor = HikeConstants.HikePhotos.DEFAULT_BRUSH_COLOR;
 		ringColor = HikeConstants.HikePhotos.DEFAULT_RING_COLOR;
 		setImage(getCircleIcon());

@@ -36,29 +36,32 @@ import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
 /**
  * @author akhiltripathi
  * 
- * Utility class for picture editing.
+ *         Utility class for picture editing.
  */
 
 public class HikePhotosUtils
 {
-	//enum for features provided in the photo editer view
+	// enum for features provided in the photo editer view
 	public enum MenuType
 	{
 		Effects, Doodle, Border, Text, Quality
 	}
+
+	// array cpntaining colors hex codes for colors provided in doodling
+	public static int[] DoodleColors = { 0xffff6d00, 0xff1014e2, 0xff86d71d,
+
+	0xff18e883, 0xfff31717, 0xfff7d514, 0xff7418f0,
+
+	0xff16efc4, 0xffffffff, 0xff000000, 0xff2ab0fc };
 	
-	
-	//array cpntaining colors hex codes for colors provided in doodling
-	public static int[] DoodleColors = { 0xFFFF4040, 0xFFA8FA72, 0xFF72A8FA, 0xFFFA72A8, 0xFFFFFFFF, 0xFFECFA72, 0xFFF9B074, 0xFF5A0949, 0xFF000000 };
+//	{ 0xFFFF4040, 0xFFA8FA72, 0xFF72A8FA, 0xFFFA72A8, 0xFFFFFFFF, 0xFFECFA72, 0xFFF9B074, 0xFF5A0949, 0xFF000000 };
 
 	/**
 	 * Util method which converts the dp value into float(pixel value) based on the given context resources
 	 * 
-	 * @param 
-	 * 		context : Context of the application
-	 * 		dps : Value in DP
-	 * @return
-	 * 		value in pixel		
+	 * @param context
+	 *            : Context of the application dps : Value in DP
+	 * @return value in pixel
 	 */
 	public static int dpToPx(Context context, int dps)
 	{
@@ -67,39 +70,38 @@ public class HikePhotosUtils
 
 		return pixels;
 	}
-	
-	
-	
+
 	/**
 	 * Utility class for Filters
-	 *
+	 * 
 	 */
 	public static class FilterTools
 	{
 
 		private static FilterType selectedFilter = FilterType.AMARO;
+
 		private static FilterEffectItemLinearLayout prev;
-		
+
 		public static void setCurrentFilterItem(FilterEffectItemLinearLayout item)
 		{
-			prev=item;
+			prev = item;
 		}
-		
+
 		public static FilterEffectItemLinearLayout getCurrentFilterItem()
 		{
 			return prev;
 		}
-		
+
 		public static FilterType getSelectedFilter()
 		{
 			return selectedFilter;
 		}
-		
+
 		public static void setSelectedFilter(FilterType type)
 		{
-			selectedFilter=type;
+			selectedFilter = type;
 		}
-		
+
 		public enum FilterType
 		{
 			BRIGHTNESS, CONTRAST, SATURATION, HUE, SEPIA, GRAYSCALE, POLAROID, FADED, BGR, INVERSION, X_PRO_2, WILLOW, WALDEN, VALENCIA, TOASTER, SUTRO, SIERRA, RISE, NASHVILLE, MAYFAIR, LO_FI, KELVIN, INKWELL, HUDSON, HEFE, EARLYBIRD, BRANNAN, AMARO, E1977
@@ -118,7 +120,7 @@ public class HikePhotosUtils
 				names.add(name);
 				filters.add(filter);
 			}
-			
+
 			/**
 			 * @return returns list having complex filters obtained from applying sequence of quality filterson the image
 			 */
@@ -165,10 +167,9 @@ public class HikePhotosUtils
 				return effectfilters;
 
 			}
-			
-			/** 
-			 * @return
-			 * 		Filters that help in enhancing the image quality
+
+			/**
+			 * @return Filters that help in enhancing the image quality
 			 */
 			public static FilterList getQualityFilters()
 			{
@@ -193,10 +194,10 @@ public class HikePhotosUtils
 		}
 
 	}
-	
+
 	/**
 	 * Utility class for Borders/Frames
-	 *
+	 * 
 	 */
 
 	public static class BorderTools
