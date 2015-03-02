@@ -20,7 +20,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.WelcomeTutorial;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.modules.httpmgr.HttpRequestConstants;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequestConstants;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.AccountUtils;

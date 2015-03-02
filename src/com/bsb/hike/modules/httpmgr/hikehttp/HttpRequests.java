@@ -1,7 +1,8 @@
-package com.bsb.hike.modules.httpmgr;
+package com.bsb.hike.modules.httpmgr.hikehttp;
 
-import static com.bsb.hike.modules.httpmgr.HttpRequestConstants.singleStickerDownloadBase;
+import static com.bsb.hike.modules.httpmgr.hikehttp.HttpRequestConstants.singleStickerDownloadBase;
 
+import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.request.JSONObjectRequest;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.utils.Utils;

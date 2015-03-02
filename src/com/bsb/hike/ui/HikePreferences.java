@@ -36,7 +36,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.service.HikeMqttManagerNew;
-import com.bsb.hike.modules.httpmgr.HttpRequestConstants;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequestConstants;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.BackupAccountTask;
 import com.bsb.hike.tasks.BackupAccountTask.BackupAccountListener;
