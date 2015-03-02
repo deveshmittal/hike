@@ -135,6 +135,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		if (groupConversation != null)
 		{
 			mActionBar.onCreateOptionsMenu(menu, R.menu.group_chat_thread_menu, getOverFlowItems(), this, this);
+			updateUnreadPinCount();
 			return super.onCreateOptionsMenu(menu);
 		}
 
@@ -1408,4 +1409,5 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		HAManager.getInstance().record(viaPinIcon ? HikeConstants.LogEvent.PIN_POSTED_VIA_ICON : HikeConstants.LogEvent.PIN_POSTED_VIA_HASH_PIN, AnalyticsConstants.UI_EVENT,
 				AnalyticsConstants.CLICK_EVENT);
 	}
+	
 }

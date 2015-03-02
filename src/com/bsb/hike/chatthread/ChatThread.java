@@ -198,7 +198,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static final int STICKER_FTUE_TIP = 24;
 
     protected static final int MULTI_MSG_DB_INSERTED = 25;
-
+    
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -3465,8 +3465,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void updateOverflowMenuIndicatorCount(int newCount)
 	{
 		MenuItem menuItem = mActionBar.getMenuItem(R.id.overflow_menu);
-
-		if (menuItem != null)
+		
+		if (menuItem != null && menuItem.getActionView() != null)
 		{
 			TextView topBarCounter = (TextView) menuItem.getActionView().findViewById(R.id.top_bar_indicator);
 
@@ -3486,7 +3486,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 
 	}
-
+	
 	private String getUnreadCounterText(int counter)
 	{
 		if (counter >= HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY)
