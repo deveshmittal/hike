@@ -323,9 +323,19 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
-	{
+	{   type = getIntent().getIntExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.NOT_SHAREABLE);
+ 
 		if (!showingMultiSelectActionBar)
 			getSupportMenuInflater().inflate(R.menu.compose_chat_menu, menu);
+		if (type != HikeConstants.Extras.NOT_SHAREABLE)
+		{
+			if (menu.hasVisibleItems())
+			{
+
+				menu.getItem(0).setVisible(true);
+			}
+
+		}
 		return super.onCreateOptionsMenu(menu);
 	}
 
