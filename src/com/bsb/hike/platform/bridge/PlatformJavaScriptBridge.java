@@ -291,6 +291,28 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 		}
 	}
 
+	/**
+	 * calling this method will forcefully mute the chat thread. The user won't receive any more
+	 * notifications after calling this.
+	 */
+	@JavascriptInterface
+	public void muteChatThread()
+	{
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MUTE_CONVERSATION_TOGGLED,
+				new Pair<String, Boolean>(message.getMsisdn(), false));
+	}
+
+	/**
+	 * calling this method will forcefully block the chat thread. The user won't see any messages in the
+	 * chat thread after calling this.
+	 */
+	@JavascriptInterface
+	public void blockChatThread()
+	{
+		HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, message.getMsisdn());
+	}
+
 	@JavascriptInterface
 	public void share()
 	{

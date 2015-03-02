@@ -1856,11 +1856,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// Sticker message is a non text message.
 			selectedNonTextMsg(isMsgSelected);
 		}
-        else if (message.getMessageType() == MESSAGE_TYPE.CONTENT || message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+        else if (message.getMessageType() == MESSAGE_TYPE.CONTENT )
         {
             // Content card is a non text message.
             selectedNonTextMsg(isMsgSelected);
         }
+		else if (message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+		{
+			if (message.webMetadata.isLongPressDisabled())
+			{
+				return false;
+			}
+
+			selectedNonTextMsg(isMsgSelected);
+		}
 
 		invalidateOptionsMenu();
 		return true;
