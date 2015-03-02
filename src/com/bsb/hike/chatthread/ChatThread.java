@@ -1136,7 +1136,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		else
 		{
-			showToast(R.string.access_error);
+			showToast(R.string.no_results);
 		}
 	}
 
