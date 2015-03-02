@@ -1546,10 +1546,20 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		while (i >= 0)
 		{
 			ConvMessage convMessage = messages.get(i);
-			if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
+			/**
+			 * If the convMessage is received, we continue since it could be possible that sent messages above it could be also in Single Tick mode
+			 */
+			if (!convMessage.isSent())
+			{
+				i--;
+				continue;
+			}
+			
+			else if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
 			{
 				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
 			}
+			
 			else
 			{
 				break;
