@@ -21,7 +21,7 @@ JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_packageInit
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_com_bsb_hike_voip_SolicallWrapper_AECInit
-  (JNIEnv *, jobject, jint, jint, jshort, jshort, jshort);
+  (JNIEnv *, jobject, jint, jint, jshort, jshort, jshort, jint);
 
 /*
  * Class:     com_bsb_hike_voip_SolicallWrapper

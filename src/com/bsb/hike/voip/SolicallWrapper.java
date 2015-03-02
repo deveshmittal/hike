@@ -6,7 +6,7 @@ public class SolicallWrapper {
 	
 	private native int packageInit();
 	private native int AECInit(int CpuNR, int CpuAEC, short AECMinOutputPercentageDuringEcho, 
-			short AECTypeParam, short ComfortNoisePercent);
+			short AECTypeParam, short ComfortNoisePercent, int AECTailType);
 	private native int processSpeakerFrame(byte[] stream);
 	private native int processMicFrame(byte[] input, byte[] output);
 	private native int terminate();
@@ -21,7 +21,7 @@ public class SolicallWrapper {
 		int init = packageInit();
 		Logger.d(VoIPConstants.TAG, "AEC packageInit: " + init);
 
-		init = AECInit(2, 2, (short)100, (short)8, (short)100);
+		init = AECInit(0, 2, (short)100, (short)8, (short)100, -18);
 		Logger.d(VoIPConstants.TAG, "AEC init: " + init);
 	}
 	

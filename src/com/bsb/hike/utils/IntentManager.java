@@ -1,11 +1,17 @@
 package com.bsb.hike.utils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Message;
 import android.text.TextUtils;
 import android.widget.Toast;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
@@ -31,18 +37,7 @@ import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.google.android.gms.internal.co;
-
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Message;
-import android.text.TextUtils;
-import android.widget.Toast;
 
 public class IntentManager
 {
@@ -100,7 +95,7 @@ public class IntentManager
 		Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
 		whatsappIntent.setType("text/plain");
 		whatsappIntent.setPackage(HikeConstants.PACKAGE_WATSAPP);
-		String inviteText = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, context.getString(R.string.watsapp_invitation));
+		String inviteText = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, context.getString(R.string.watsapp_invitation));
 		String inviteToken = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeConstants.INVITE_TOKEN, "");
 		inviteText = inviteText + inviteToken;
 		whatsappIntent.putExtra(Intent.EXTRA_TEXT, inviteText);
@@ -222,12 +217,8 @@ public class IntentManager
 		{
 			Logger.e(context.getClass().getSimpleName(), "Invalid JSON", e);
 		}
-		String phoneNumber = convMessage.getMsisdn();
-		ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNoOrMsisdn(phoneNumber);
-		String mContactName = contactInfo.getName();
 		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 		intent.putExtra(HikeConstants.Extras.PREV_MSISDN, convMessage.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 
 		return intent;
 	}
