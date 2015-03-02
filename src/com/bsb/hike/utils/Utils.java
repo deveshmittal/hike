@@ -2820,7 +2820,7 @@ public class Utils
 	 * @param subType
 	 * @param sessionMetaDataObject
 	 */
-	private static void sendSessionMQTTPacket(Context context, String subType, JSONObject sessionMetaDataObject)
+	public static void sendSessionMQTTPacket(Context context, String subType, JSONObject sessionMetaDataObject)
 	{
 		JSONObject sessionObject = new JSONObject();
 		JSONObject data = new JSONObject();
