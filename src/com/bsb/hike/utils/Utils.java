@@ -2835,6 +2835,7 @@ public class Utils
 			
 			sessionObject.put(HikeConstants.DATA, data);
 			HikeMqttManagerNew.getInstance().sendMessage(sessionObject, HikeMqttManagerNew.MQTT_QOS_ONE);
+			Logger.d("sessionmqtt", "Sesnding Session MQTT Packet with qos 1, and : "+ subType);
 		}
 		catch (JSONException e)
 		{
