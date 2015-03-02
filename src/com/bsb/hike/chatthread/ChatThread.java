@@ -1012,7 +1012,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mComposeView.requestFocus();
 		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
 		messageSearchManager = new SearchManager(messages, searchMessageFinder);
-		mComposeView.addTextChangedListener(searchTestWatcher);
+		mComposeView.addTextChangedListener(searchTextWatcher);
 		mComposeView.setOnEditorActionListener(searchActionClickListener);
 		activity.findViewById(R.id.next).setOnClickListener(searchOptionsClickListener);
 		activity.findViewById(R.id.previous).setOnClickListener(searchOptionsClickListener);
@@ -1075,7 +1075,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	};
 	
-	TextWatcher searchTestWatcher = new TextWatcher()
+	TextWatcher searchTextWatcher = new TextWatcher()
 	{
 		
 		@Override
@@ -1167,6 +1167,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private void destroySearchMode()
 	{
 		mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
+		mComposeView.requestFocus();
+		mComposeView.removeTextChangedListener(searchTextWatcher);
+		mComposeView.setText("");
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
 		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
 		mBottomView.setVisibility(View.VISIBLE);
