@@ -42,6 +42,7 @@ public class Response implements IResponseFacade
 	 * 
 	 * @return
 	 */
+	@Override
 	public String getUrl()
 	{
 		return url;
@@ -52,6 +53,7 @@ public class Response implements IResponseFacade
 	 * 
 	 * @return
 	 */
+	@Override
 	public int getStatusCode()
 	{
 		return statusCode;
@@ -62,6 +64,7 @@ public class Response implements IResponseFacade
 	 * 
 	 * @return
 	 */
+	@Override
 	public String getReason()
 	{
 		return reason;
@@ -72,6 +75,7 @@ public class Response implements IResponseFacade
 	 * 
 	 * @return
 	 */
+	@Override
 	public List<Header> getHeaders()
 	{
 		return headers;
@@ -82,6 +86,7 @@ public class Response implements IResponseFacade
 	 * 
 	 * @return
 	 */
+	@Override
 	public ResponseBody<?> getBody()
 	{
 		return body;

@@ -1,5 +1,8 @@
 package com.bsb.hike.modules.httpmgr.response;
 
+import java.util.List;
+
+import com.bsb.hike.modules.httpmgr.Header;
 import com.bsb.hike.modules.httpmgr.interceptor.Pipeline;
 import com.bsb.hike.modules.httpmgr.interceptor.IResponseInterceptor;
 
@@ -11,5 +14,15 @@ import com.bsb.hike.modules.httpmgr.interceptor.IResponseInterceptor;
  */
 public interface IResponseFacade
 {
+	public String getUrl();
+	
+	public int getStatusCode();
+	
+	public String getReason();
+	
+	public List<Header> getHeaders();
+	
+	public ResponseBody<?> getBody();
+	
 	public Pipeline<IResponseInterceptor> getResponseInterceptors();
 }
