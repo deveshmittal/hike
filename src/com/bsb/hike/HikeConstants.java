@@ -1406,7 +1406,7 @@ public class HikeConstants
 		
 		}
 	    
-		public static final String SHARE_CONTENT = "ShareContent";
+		public static final String SHARE_CONTENT = "shareContent";
 			
 		public static final String WHATSAPP_PACKAGE = "com.whatsapp";
 		
