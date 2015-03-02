@@ -1059,41 +1059,41 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		if (super.updateUIAsPerTheme(theme))
 		{
-			/**
-			 * If the conv is not on hike, neither is the number an international one and the device OS is < v 4.4 Kitkat
-			 */
-			if (!mConversation.isOnhike() && !Utils.isContactInternational(msisdn) && !Utils.isKitkatOrHigher())
-			{
-				setupSMSToggleLayout(theme);
-			}
+			setupSMSToggleLayout();
 		}
 		return false;
-	};
+	}
 
 	/**
 	 * Used to setup FreeSMS - Hike SMS Toggle button for Versions below KitKat
 	 */
-	private void setupSMSToggleLayout(ChatTheme theme)
+	private void setupSMSToggleLayout()
 	{
-		ViewStub viewStub = (ViewStub) activity.findViewById(R.id.sms_toggle_view_stub);
-
 		/**
-		 * Inflating it only once when needed on demand.
+		 * Proceeding only if the conv is not on hike, neither is the number an international one and the device OS is < v 4.4 Kitkat
 		 */
-		if (viewStub != null)
+		if (!mConversation.isOnhike() && !Utils.isContactInternational(msisdn) && !Utils.isKitkatOrHigher())
 		{
-			viewStub.setOnInflateListener(this);
-			viewStub.inflate();
-		}
 
-		/**
-		 * ViewStub has been inflated
-		 */
-		else
-		{
-			setUpSMSViews();
-		}
+			ViewStub viewStub = (ViewStub) activity.findViewById(R.id.sms_toggle_view_stub);
 
+			/**
+			 * Inflating it only once when needed on demand.
+			 */
+			if (viewStub != null)
+			{
+				viewStub.setOnInflateListener(this);
+				viewStub.inflate();
+			}
+
+			/**
+			 * ViewStub has been inflated
+			 */
+			else
+			{
+				setUpSMSViews();
+			}
+		}
 	}
 
 	private void setUpSMSViews()
