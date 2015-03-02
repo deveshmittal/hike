@@ -1025,14 +1025,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			ConvMessage message = (ConvMessage) item;
 			if (message.isFileTransferMessage())
 			{
-				if (message.getMetadata().getHikeFiles().get(0).getFileName().contains(s))
+				if (message.getMetadata().getHikeFiles().get(0).getFileName().toLowerCase().contains(s))
 				{
 					return true;
 				}
 			}
 			if (!TextUtils.isEmpty(message.getMessage()))
 			{
-				if (message.getMessage().contains(s))
+				if (message.getMessage().toLowerCase().contains(s))
 				{
 					Logger.d("search", "returning true for: " + message.getMessage());
 					return true;
@@ -1062,8 +1062,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		@Override
 		public void afterTextChanged(Editable s)
 		{
-			messageSearchManager.makeNewSearch(s.toString());
-			mAdapter.setSearchText(s.toString());
+			String searchText = s.toString().toLowerCase();
+			messageSearchManager.makeNewSearch(searchText);
+			mAdapter.setSearchText(searchText);
 			mAdapter.notifyDataSetChanged();
 		}
 	};

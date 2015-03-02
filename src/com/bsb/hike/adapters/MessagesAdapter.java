@@ -1855,9 +1855,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			textHolder.text.setText(markedUp);
 			
 			String messageText = markedUp.toString();
-			if (!TextUtils.isEmpty(searchText) && messageText.contains(searchText))
+			if (!TextUtils.isEmpty(searchText) && messageText.toLowerCase().contains(searchText))
 			{
-				int startSpanIndex = messageText.indexOf(searchText);
+				int startSpanIndex = messageText.toLowerCase().indexOf(searchText);
 				SpannableString spanText = new SpannableString(markedUp);
 				spanText.setSpan(new BackgroundColorSpan(context.getResources().getColor(R.color.text_bg)), startSpanIndex, startSpanIndex + searchText.length(),
 						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
