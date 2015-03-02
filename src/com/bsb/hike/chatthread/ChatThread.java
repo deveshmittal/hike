@@ -1015,6 +1015,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mComposeView.setOnEditorActionListener(searchActionClickListener);
 		activity.findViewById(R.id.next).setOnClickListener(searchOptionsClickListener);
 		activity.findViewById(R.id.previous).setOnClickListener(searchOptionsClickListener);
+		activity.findViewById(R.id.search_clear_btn).setOnClickListener(searchOptionsClickListener);
+		
 	}
 	
 	ItemFinder searchMessageFinder = new ItemFinder()
@@ -1104,6 +1106,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			case R.id.previous:
 				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
 				searchMessage(false);
+				break;
+			case R.id.search_clear_btn:
+				mComposeView.setText("");
 				break;
 			}
 		}

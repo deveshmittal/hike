@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="48dp" >
+    android:layout_height="fill_parent" >
 
     <ImageView
         android:id="@+id/next"
@@ -46,6 +46,17 @@
             android:textColor="@color/white"
             android:textCursorDrawable="@null"
             android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/search_clear_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-8dp"
+            android:background="?attr/selectableItemBackground"
+            android:focusable="true"
+            android:padding="4dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_top_bar_search_close" />
     </LinearLayout>
 
 </RelativeLayout>
