@@ -2414,7 +2414,7 @@ public class Utils
 		activity.startActivityForResult(intent, HikeConstants.CROP_RESULT);
 	}
 
-	public static void startCropActivity(Activity activity, String path, String destPath, boolean preventScaling)
+	public static void startCropActivityForResult(Activity activity, String path, String destPath, boolean preventScaling)
 	{
 		/* Crop the image */
 		Intent intent = new Intent(activity, CropImage.class);

@@ -348,13 +348,28 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				{
 					src = itemList.get(0).getFilePath();
 				}
-				Utils.startCropActivity(this, src, file.getAbsolutePath(), true);
+				Utils.startCropActivityForResult(this, src, file.getAbsolutePath(), true);
 				break;
 			case HikeConstants.CROP_RESULT:
 				Intent intent = new Intent(HikeCameraActivity.this, PictureEditer.class);
 				intent.putExtra(HikeConstants.HikePhotos.FILENAME, data.getStringExtra(MediaStore.EXTRA_OUTPUT));
 				startActivity(intent);
 
+			}
+		}
+		else if (resultCode == RESULT_CANCELED)
+		{
+			switch (requestCode)
+			{
+			case HikeConstants.CROP_RESULT:
+				// Open gallery
+				Intent galleryPickerIntent = IntentManager.getHikeGalleryPickerIntentForResult(HikeCameraActivity.this, false, false,
+						GalleryActivity.PHOTOS_EDITOR_ACTION_BAR_TYPE, null);
+				startActivityForResult(galleryPickerIntent, GALLERY_PICKER_REQUEST);
+				break;
+
+			default:
+				break;
 			}
 		}
 	}

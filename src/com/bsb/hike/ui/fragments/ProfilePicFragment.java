@@ -38,7 +38,6 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.HoloCircularProgress;
 import com.bsb.hike.view.RoundedImageView;
@@ -108,6 +107,9 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 		if (imagePath != null)
 		{
+
+			// TODO move this code to network manager refactoring module
+
 			/* the server only needs a smaller version */
 			final Bitmap smallerBitmap = HikeBitmapFactory.scaleDownBitmap(imagePath, HikeConstants.PROFILE_IMAGE_DIMENSIONS, HikeConstants.PROFILE_IMAGE_DIMENSIONS,
 					Bitmap.Config.RGB_565, true, false);
@@ -194,7 +196,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 			});
 
 			request.setFilePath(imagePath);
-			
+
 			Utils.executeHttpTask(new HikeHTTPTask(ProfilePicFragment.this, R.string.delete_status_error), request);
 		}
 	}
@@ -253,33 +255,39 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 						@Override
 						public void run()
 						{
-							if (isPaused)
-							{
-								return;
-							}
-
-							changeTextWithAnimation(text1, getString(R.string.photo_dp_save_error));
-
-							changeTextWithAnimation(text2, getString(R.string.photo_dp_save_error_sub));
-
-							mCircularProgress.setProgressColor(getResources().getColor(R.color.photos_circular_progress_red));
-
-							mFragmentView.findViewById(R.id.retryButton).setVisibility(View.VISIBLE);
-
-							mFragmentView.findViewById(R.id.retryButton).setOnClickListener(new View.OnClickListener()
-							{
-								@Override
-								public void onClick(View v)
-								{
-									mCurrentProgress = 0.0f;
-									startUpload();
-								}
-							});
+							showErrorState();
 						}
 					});
 				}
 			}, 5000);
 		}
+	}
+
+	private void showErrorState()
+	{
+
+		if (isPaused)
+		{
+			return;
+		}
+
+		changeTextWithAnimation(text1, getString(R.string.photo_dp_save_error));
+
+		changeTextWithAnimation(text2, getString(R.string.photo_dp_save_error_sub));
+
+		mCircularProgress.setProgressColor(getResources().getColor(R.color.photos_circular_progress_red));
+
+		mFragmentView.findViewById(R.id.retryButton).setVisibility(View.VISIBLE);
+
+		mFragmentView.findViewById(R.id.retryButton).setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				mCurrentProgress = 0.0f;
+				startUpload();
+			}
+		});
 	}
 
 	private void changeTextWithAnimation(final TextView tv, final String newText)
@@ -321,6 +329,6 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 	public void onFinish(boolean success)
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 }
