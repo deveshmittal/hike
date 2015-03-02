@@ -2394,4 +2394,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		return Utils.isVoipActivated(activity.getApplicationContext()) && mConversation.isOnhike() && !HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn);
 	}
+	
+	@Override
+	protected void showThemePicker()
+	{
+		super.showThemePicker();
+		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip);
+	}
 }

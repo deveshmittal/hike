@@ -1410,4 +1410,11 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 				AnalyticsConstants.CLICK_EVENT);
 	}
 	
+	@Override
+	protected void showThemePicker()
+	{
+		super.showThemePicker();
+		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip_group);
+	}
+	
 }

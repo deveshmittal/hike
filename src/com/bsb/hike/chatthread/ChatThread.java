@@ -786,7 +786,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			themePicker = new ThemePicker(activity, this, currentTheme);
 		}
-		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme);
 	}
 
 	protected void showAttchmentPicker()

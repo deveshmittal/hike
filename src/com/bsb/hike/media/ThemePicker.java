@@ -59,8 +59,8 @@ public class ThemePicker implements BackPressListener, OnDismissListener,
 	 * This method calls {@link #showThemePicker(int, int, View, ChatTheme)}
 	 * with offset as 0
 	 */
-	public void showThemePicker(View anchor, ChatTheme currentTheme) {
-		showThemePicker(0, 0, anchor, currentTheme);
+	public void showThemePicker(View anchor, ChatTheme currentTheme, int footerTextResId) {
+		showThemePicker(0, 0, anchor, currentTheme, footerTextResId);
 	}
 
 	/**
@@ -74,11 +74,11 @@ public class ThemePicker implements BackPressListener, OnDismissListener,
 	 * @param currentTheme
 	 */
 	public void showThemePicker(int xoffset, int yoffset, View anchor,
-			ChatTheme currentTheme) {
+			ChatTheme currentTheme, int footerTextResId) {
 		Logger.i(TAG, "show theme picker");
 		this.userSelection = currentTheme;
 		sherlockFragmentActivity.startActionMode(actionmodeCallback);
-		initView();
+		initView(footerTextResId);
 		popUpLayout.showPopUpWindowNoDismiss(xoffset, yoffset, anchor,
 				getView());
 		popUpLayout.setOnDismissListener(this);
@@ -89,10 +89,10 @@ public class ThemePicker implements BackPressListener, OnDismissListener,
 	}
 
 	/**
-	 * This methos inflates view needed to show theme picker, if view is
+	 * This method inflates view needed to show theme picker, if view is
 	 * inflated already (not null) We simply return
 	 */
-	public void initView() {
+	public void initView(int footerTextResId) {
 		if (viewToDisplay != null) {
 			return;
 		}
@@ -105,11 +105,7 @@ public class ThemePicker implements BackPressListener, OnDismissListener,
 		TextView chatThemeTip = (TextView) parentView
 				.findViewById(R.id.chat_theme_tip);
 
-		// chatThemeTip.setText(mConversation instanceof GroupConversation ?
-		// R.string.chat_theme_tip_group : R.string.chat_theme_tip);
-		// chatThemeTip.setVisibility(mConversation.isOnhike() ? View.VISIBLE :
-		// View.GONE);
-		chatThemeTip.setText(R.string.chat_theme_tip_group);
+		chatThemeTip.setText(footerTextResId);
 
 		attachmentsGridView.setNumColumns(getNumColumnsChatThemes());
 
