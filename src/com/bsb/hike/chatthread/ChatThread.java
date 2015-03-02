@@ -1083,6 +1083,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			if (actionId == EditorInfo.IME_ACTION_SEARCH)
 			{
+				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
 				searchMessage(false);
 			}
 			return false;
@@ -1097,9 +1098,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			switch (v.getId())
 			{
 			case R.id.next:
+				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
 				searchMessage(true);
 				break;
 			case R.id.previous:
+				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
 				searchMessage(false);
 				break;
 			}
