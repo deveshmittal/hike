@@ -1350,5 +1350,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="photo_dp_saved_sub">Lookin\' good.</string>
     <string name="photo_dp_save_error">Couldn\'t set profile photo.</string>
     <string name="photo_dp_save_error_sub">Touch anywhere to retry.</string>
-
+    <string name="photo_gallery_choose_pic">Choose a photo</string>
 </resources>

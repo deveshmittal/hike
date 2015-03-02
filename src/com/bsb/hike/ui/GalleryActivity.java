@@ -304,6 +304,13 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 					onBackPressed();
 				}
 			});
+
+			TextView titleView = (TextView)actionBarView.findViewById(R.id.title);
+			
+			titleView.setText(getString(R.string.photo_gallery_choose_pic));
+			
+			titleView.setVisibility(View.VISIBLE);
+			
 			actionBarView.findViewById(R.id.done_container).setVisibility(View.INVISIBLE);
 			break;
 		default:

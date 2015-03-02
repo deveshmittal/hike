@@ -50,9 +50,9 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -232,8 +232,6 @@ public class CropImage extends MonitoredActivity
 				onBackPressed();
 			}
 		});
-
-		actionBarView.findViewById(R.id.done_container);
 
 		actionBarView.findViewById(R.id.done_container).setOnClickListener(new View.OnClickListener()
 		{
