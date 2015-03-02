@@ -231,7 +231,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 						@Override
 						public void run()
 						{
-							updateProgress(10);
+							updateProgress(40);
 						}
 					});
 				}

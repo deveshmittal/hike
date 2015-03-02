@@ -1,11 +1,10 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,15 +13,16 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.models.GalleryItem;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
 import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
@@ -35,6 +35,7 @@ import com.bsb.hike.ui.fragments.PreviewFragment;
 import com.bsb.hike.ui.fragments.ProfilePicFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
 import com.viewpagerindicator.TabPageIndicator;
 
@@ -261,14 +262,19 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 							{
 								if (actionCode == PhotoActionsFragment.ACTION_SEND)
 								{
-									File savedImage = editView.saveImage();
+									File savedImage = editView.saveImage(HikeFileType.IMAGE, null);
 									Intent forwardIntent = IntentManager.getForwardImageIntent(mContext, savedImage);
 									forwardIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 									startActivity(forwardIntent);
 								}
 								else if (actionCode == PhotoActionsFragment.ACTION_SET_DP)
 								{
-									File savedImage = editView.saveImage();
+									// User info is saved in shared preferences
+									SharedPreferences preferences = HikeMessengerApp.getInstance().getApplicationContext()
+											.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
+									ContactInfo userInfo = Utils.getUserContactInfo(preferences);
+									String mLocalMSISDN = userInfo.getMsisdn();
+									File savedImage = editView.saveImage(HikeFileType.PROFILE, mLocalMSISDN);
 									getSupportFragmentManager().popBackStackImmediate();
 									ProfilePicFragment profilePicFragment = new ProfilePicFragment();
 									Bundle b = new Bundle();

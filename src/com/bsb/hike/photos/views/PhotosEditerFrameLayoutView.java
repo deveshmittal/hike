@@ -126,13 +126,13 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 		doodleLayer.setColor(Color);
 	}
 
-	public File saveImage()
+	public File saveImage(HikeFileType fileType, String originalName)
 	{
 		doodleLayer.getMeasure(imageOriginal);
 		imageEdited = flattenLayersToBitmap(imageOriginal, currentEffect);
-		File myDir = new File(Utils.getFileParent(HikeFileType.IMAGE, false));
+		File myDir = new File(Utils.getFileParent(fileType, false));
 		myDir.mkdir();
-		String fname = Utils.getOriginalFile(HikeFileType.IMAGE, null);
+		String fname = Utils.getOriginalFile(fileType, originalName);
 		File file = new File(myDir, fname);
 		if (file.exists())
 		{
