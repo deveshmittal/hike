@@ -1,5 +1,12 @@
 package com.bsb.hike.modules.httpmgr.interceptor;
 
+/**
+ * A node (as in linked list) class of interceptor used in {@link Pipeline}
+ * 
+ * @author sidharth
+ * 
+ * @param <T>
+ */
 public class Interceptor<T>
 {
 	private String tag;

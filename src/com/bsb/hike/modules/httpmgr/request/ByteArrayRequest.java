@@ -6,6 +6,12 @@ import java.io.InputStream;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.Utils;
 
+/**
+ * Byte array request is used to return response in form of byte[] to the request listener. InputStream to byte[] is done in {@link Request#parseResponse(InputStream)}
+ * 
+ * @author sidharth
+ * 
+ */
 public class ByteArrayRequest extends Request<byte[]>
 {
 	private ByteArrayRequest(Init<?> init)

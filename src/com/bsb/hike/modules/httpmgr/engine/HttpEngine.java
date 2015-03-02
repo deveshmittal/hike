@@ -17,6 +17,8 @@ import com.bsb.hike.modules.httpmgr.response.ResponseCall;
 import com.squareup.okhttp.internal.Util;
 
 /**
+ * This class is core center of Http manager. It contains short , long and response executors for maintaining short running requests , long running requests and notifying response
+ * respectively
  * 
  * @author anubhavgupta
  * 
@@ -27,12 +29,16 @@ public class HttpEngine
 
 	static short SHORT_EXECUTER = 0x1;
 
+	/** Executor for executing for short running requests */
 	private HttpExecuter shortRequestExecuter;
 
+	/** Executor for executing for long running requests */
 	private HttpExecuter longRequestExecuter;
 
+	/** Executor for notifying the response */
 	private ThreadPoolExecutor responseExecuter;
 
+	/** Queue which maintains the order of the requests to be executed */
 	private HttpQueue queue;
 
 	/**
@@ -41,7 +47,7 @@ public class HttpEngine
 	public HttpEngine()
 	{
 		LogFull.i("starting http engine");
-		
+
 		// executer used for serving short requests
 		shortRequestExecuter = new HttpExecuter(this, SHORT_EXECUTER, CORE_POOL_SIZE, Utils.threadFactory("short-thread", false), Utils.rejectedExecutionHandler());
 
@@ -53,10 +59,16 @@ public class HttpEngine
 
 		// underlying queue used for storing submitted and running request
 		queue = new HttpQueue();
-		
+
 		LogFull.i("http engine started");
 	}
 
+	/**
+	 * Submits the request to respective executor with delay passed as parameter
+	 * 
+	 * @param request
+	 * @param delay
+	 */
 	public void submit(RequestCall request, long delay)
 	{
 		if (delay <= 0)
@@ -70,7 +82,7 @@ public class HttpEngine
 	}
 
 	/**
-	 * Adds the queue to respective queue and submits a new request to respective executer based on request type, if number of requests is less than that can be served by executer
+	 * Adds the request to respective queue and also submits it to respective executer based on request type, if number of requests is less than that can be served by executer
 	 * 
 	 * @param request
 	 */
@@ -144,7 +156,7 @@ public class HttpEngine
 	 */
 	synchronized void incrementRunningTasksSize(short executer)
 	{
-		LogFull.d("Incrementing running task size for executer : "  + executer);
+		LogFull.d("Incrementing running task size for executer : " + executer);
 		queue.incrementRunningTasksSize(executer);
 	}
 
@@ -155,7 +167,7 @@ public class HttpEngine
 	 */
 	synchronized void decrementRunningTasksSize(short executer)
 	{
-		LogFull.d("Decrementing running task size for executer : "  + executer);
+		LogFull.d("Decrementing running task size for executer : " + executer);
 		queue.decrementRunningTasksSize(executer);
 	}
 
@@ -206,7 +218,7 @@ public class HttpEngine
 		longRequestExecuter.shutdown();
 		responseExecuter.shutdown();
 		queue.shutdown();
-		
+
 		shortRequestExecuter = null;
 		longRequestExecuter = null;
 		responseExecuter = null;

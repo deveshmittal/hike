@@ -2,13 +2,18 @@ package com.bsb.hike.modules.httpmgr.request;
 
 import java.util.concurrent.Future;
 
+/**
+ * Abstract class that implements {@link Runnable} and consists of request object. This class object is submitted to the executors
+ * 
+ * @author sidharth
+ * 
+ */
 public abstract class RequestCall implements Runnable, Comparable<RequestCall>
 {
-
 	private Request<?> request;
 
 	private long submissionTime;
-	
+
 	public RequestCall(Request<?> request)
 	{
 		this.request = request;
@@ -37,7 +42,7 @@ public abstract class RequestCall implements Runnable, Comparable<RequestCall>
 	{
 		return submissionTime;
 	}
-	
+
 	public boolean isCancelled()
 	{
 		return request.isCancelled();
@@ -47,17 +52,17 @@ public abstract class RequestCall implements Runnable, Comparable<RequestCall>
 	{
 		request.setFuture(future);
 	}
-	
+
 	public void setPriority(int priority)
 	{
 		request.setPriority(priority);
 	}
-	
+
 	public Request<?> getRequest()
 	{
 		return request;
 	}
-	
+
 	@Override
 	public int hashCode()
 	{

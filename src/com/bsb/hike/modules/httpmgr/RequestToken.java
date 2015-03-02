@@ -24,26 +24,31 @@ public class RequestToken
 	}
 
 	/**
-	 * 
+	 * Passes the request to HttpManager for execution
 	 */
 	public void execute()
 	{
 		HttpManager.getInstance().addRequest(request);
 	}
-	
+
+	/**
+	 * Passes the request to HttpManager for execution with {@link ClientOptions} passed as parameter
+	 * 
+	 * @param options
+	 */
 	public void execute(ClientOptions options)
 	{
 		HttpManager.getInstance().addRequest(request, options);
 	}
 
 	/**
-	 * 
+	 * Cancels the requestF
 	 */
 	public void cancel()
 	{
 		HttpManager.getInstance().cancel(request);
 	}
-	
+
 	/**
 	 * Removes particular listener from list of listeners for a request
 	 * 
@@ -53,7 +58,7 @@ public class RequestToken
 	{
 		HttpManager.getInstance().removeListener(request, listener);
 	}
-	
+
 	/**
 	 * Removes list of listeners from list of request listeners for a request
 	 * 
@@ -63,9 +68,10 @@ public class RequestToken
 	{
 		HttpManager.getInstance().removeListeners(request, listeners);
 	}
-	
+
 	/**
 	 * Determines whether a request is running or not
+	 * 
 	 * @return true if request is already running
 	 */
 	public boolean isRequestRunning()

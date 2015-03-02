@@ -12,6 +12,12 @@ import com.bsb.hike.modules.httpmgr.request.Request;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.RequestBody;
 
+/**
+ * This class uses {@link GZIPOutputStream} for gzipping the body
+ * 
+ * @author sidharth
+ * 
+ */
 public class GzipRequestBody implements IRequestBody
 {
 	private IRequestBody originalBody;

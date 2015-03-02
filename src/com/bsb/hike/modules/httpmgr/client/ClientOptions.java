@@ -21,6 +21,13 @@ import com.squareup.okhttp.Protocol;
 import com.squareup.okhttp.Response;
 import com.squareup.okhttp.internal.Util;
 
+/**
+ * This class represents the client options used for executing a request, if caller does not specify client options then default client options are used for executing a request
+ * {@see Defaults}
+ * 
+ * @author anubhav & sidharth
+ * 
+ */
 public class ClientOptions
 {
 	final int connectTimeout;
@@ -38,7 +45,7 @@ public class ClientOptions
 	final SocketFactory socketFactory;
 
 	final SSLSocketFactory sslSocketFactory;
-	
+
 	final Cache cache;
 
 	final Authenticator authenticator;
@@ -46,17 +53,17 @@ public class ClientOptions
 	final CertificatePinner certificatePinner;
 
 	final HostnameVerifier hostnameVerifier;
-	
+
 	final List<ConnectionSpec> connectionSpecs;
-	
+
 	final List<Protocol> protocols;
-	
+
 	final Dispatcher dispatcher;
-	
+
 	final ConnectionPool connectionPool;
-	
+
 	boolean followSslRedirects = true;
-	
+
 	boolean followRedirects = true;
 
 	public ClientOptions(Builder builder)
@@ -143,27 +150,27 @@ public class ClientOptions
 	{
 		return authenticator;
 	}
-	
+
 	public final List<Protocol> getProtocols()
 	{
 		return protocols;
 	}
-	
+
 	public final List<ConnectionSpec> getConnectionSpecs()
 	{
 		return connectionSpecs;
 	}
-	
+
 	public final Dispatcher getDispatcher()
 	{
 		return dispatcher;
 	}
-	
+
 	public final ConnectionPool getConnectionPool()
 	{
 		return connectionPool;
 	}
-	
+
 	public final boolean getFollowSslRedirects()
 	{
 		return followSslRedirects;
@@ -187,7 +194,7 @@ public class ClientOptions
 		private ProxySelector proxySelector;
 
 		private CookieHandler cookieHandler;
-		
+
 		private Cache cache;
 
 		private SocketFactory socketFactory;
@@ -199,17 +206,17 @@ public class ClientOptions
 		private CertificatePinner certificatePinner;
 
 		private Authenticator authenticator;
-		
+
 		private ConnectionPool connectionPool;
-		
+
 		private boolean followSslRedirects;
-		
+
 		private boolean followRedirects;
-		
+
 		private Dispatcher dispatcher;
-		
+
 		private List<Protocol> protocols;
-		
+
 		private List<ConnectionSpec> connectionSpecs;
 
 		/**
@@ -263,7 +270,7 @@ public class ClientOptions
 			if (millis > Integer.MAX_VALUE)
 				throw new IllegalArgumentException("Timeout too large.");
 			writeTimeout = (int) millis;
-			
+
 			return this;
 		}
 
@@ -301,7 +308,7 @@ public class ClientOptions
 			this.cookieHandler = cookieHandler;
 			return this;
 		}
-		
+
 		public final Builder setCache(Cache cache)
 		{
 			this.cache = cache;
@@ -345,7 +352,9 @@ public class ClientOptions
 		}
 
 		/**
-		 * <p><b>Only for OkHttp Client </b></p>
+		 * <p>
+		 * <b>Only for OkHttp Client </b>
+		 * </p>
 		 * Sets the certificate pinner that constrains which certificates are trusted. By default HTTPS connections rely on only the {@link #setSslSocketFactory SSL socket factory}
 		 * to establish trust. Pinning certificates avoids the need to trust certificate authorities.
 		 */
@@ -356,7 +365,9 @@ public class ClientOptions
 		}
 
 		/**
-		 *  <p><b>Only for OkHttp Client </b></p>
+		 * <p>
+		 * <b>Only for OkHttp Client </b>
+		 * </p>
 		 * Sets the authenticator used to respond to challenges from the remote web server or proxy server.
 		 * 
 		 * <p>
@@ -369,7 +380,9 @@ public class ClientOptions
 		}
 
 		/**
-		 *  <p><b>Only for OkHttp Client </b></p>
+		 * <p>
+		 * <b>Only for OkHttp Client </b>
+		 * </p>
 		 * Sets the connection pool used to recycle HTTP and HTTPS connections.
 		 * 
 		 * <p>
@@ -382,7 +395,9 @@ public class ClientOptions
 		}
 
 		/**
-		 *  <p><b>Only for OkHttp Client </b></p>
+		 * <p>
+		 * <b>Only for OkHttp Client </b>
+		 * </p>
 		 * Configure this client to follow redirects from HTTPS to HTTP and from HTTP to HTTPS.
 		 * 
 		 * <p>
@@ -394,16 +409,21 @@ public class ClientOptions
 			return this;
 		}
 
-		/** <p><b>Only for OkHttp Client </b></p>
-		 * Configure this client to follow redirects. If unset, redirects be followed. */
+		/**
+		 * <p>
+		 * <b>Only for OkHttp Client </b>
+		 * </p>
+		 * Configure this client to follow redirects. If unset, redirects be followed.
+		 */
 		public final void setFollowRedirects(boolean followRedirects)
 		{
 			this.followRedirects = followRedirects;
 		}
 
-		
 		/**
-		 *  <p><b>Only for OkHttp Client </b></p>
+		 * <p>
+		 * <b>Only for OkHttp Client </b>
+		 * </p>
 		 * Sets the dispatcher used to set policy and execute asynchronous requests. Must not be null.
 		 */
 		public final Builder setDispatcher(Dispatcher dispatcher)
@@ -415,7 +435,9 @@ public class ClientOptions
 		}
 
 		/**
-		 *  <p><b>Only for OkHttp Client </b></p>
+		 * <p>
+		 * <b>Only for OkHttp Client </b>
+		 * </p>
 		 * Configure the protocols used by this client to communicate with remote servers. By default this client will prefer the most efficient transport available, falling back
 		 * to more ubiquitous protocols. Applications should only call this method to avoid specific compatibility problems, such as web servers that behave incorrectly when SPDY
 		 * is enabled.
@@ -461,9 +483,12 @@ public class ClientOptions
 			this.protocols = Util.immutableList(protocols);
 			return this;
 		}
-		
+
 		/**
-		 * <p><b>Only for OkHttp Client </b></p>
+		 * <p>
+		 * <b>Only for OkHttp Client </b>
+		 * </p>
+		 * 
 		 * @param connectionSpecs
 		 * @return
 		 */
@@ -472,44 +497,44 @@ public class ClientOptions
 			this.connectionSpecs = Util.immutableList(connectionSpecs);
 			return this;
 		}
-		
+
 		/** Create the {@link ClientOptions} instances. */
 		public ClientOptions build()
 		{
 			ensureSaneDefaults();
 			return new ClientOptions(this);
 		}
-		
+
 		private void ensureSaneDefaults()
 		{
-			if(connectTimeout < 0)
+			if (connectTimeout < 0)
 			{
 				connectTimeout = Defaults.CONNECT_TIMEOUT_MILLIS;
 			}
-			
-			if(readTimeout < 0)
+
+			if (readTimeout < 0)
 			{
 				connectTimeout = Defaults.READ_TIMEOUT_MILLIS;
 			}
-			
-			if(writeTimeout < 0)
+
+			if (writeTimeout < 0)
 			{
 				writeTimeout = Defaults.WRITE_TIMEOUT_MILLIS;
 			}
-			
-			if(socketFactory == null)
+
+			if (socketFactory == null)
 			{
 				socketFactory = Defaults.SOCKET_FACTORY;
 			}
-			
-			if(sslSocketFactory == null)
+
+			if (sslSocketFactory == null)
 			{
 				sslSocketFactory = Defaults.SSL_SOCKET_FACTORY;
 			}
-			
+
 		}
 	}
-	
+
 	/**
 	 * Returns clientoption with default values set
 	 * 
@@ -517,9 +542,13 @@ public class ClientOptions
 	 */
 	static ClientOptions getDefaultClientOptions()
 	{
-		ClientOptions defaultClientOptions = new ClientOptions.Builder().setConnectTimeout(Defaults.CONNECT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
-				.setReadTimeout(Defaults.CONNECT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS).setWriteTimeout(Defaults.WRITE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
-				.setSocketFactory(Defaults.SOCKET_FACTORY).setSslSocketFactory(Defaults.SSL_SOCKET_FACTORY).build();
+		ClientOptions defaultClientOptions = new ClientOptions.Builder()
+				.setConnectTimeout(Defaults.CONNECT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+				.setReadTimeout(Defaults.CONNECT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+				.setWriteTimeout(Defaults.WRITE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+				.setSocketFactory(Defaults.SOCKET_FACTORY)
+				.setSslSocketFactory(Defaults.SSL_SOCKET_FACTORY)
+				.build();
 		return defaultClientOptions;
 	}
 }

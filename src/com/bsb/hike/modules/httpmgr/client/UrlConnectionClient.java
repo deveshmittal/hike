@@ -16,7 +16,7 @@ import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.modules.httpmgr.response.ResponseBody;
 
 /**
- * Reperesemts UrlConnection client wrapper
+ * Represents UrlConnection client wrapper
  * 
  * @author anubhavgupta @ sidharth
  * 
@@ -45,6 +45,13 @@ public class UrlConnectionClient implements IClient
 		return connection;
 	}
 
+	/**
+	 * Creates a HttpUrlConnection request from hike http request
+	 * 
+	 * @param connection
+	 * @param request
+	 * @throws IOException
+	 */
 	void prepareRequest(HttpURLConnection connection, Request<?> request) throws IOException
 	{
 		connection.setRequestMethod(request.getMethod());
@@ -75,6 +82,14 @@ public class UrlConnectionClient implements IClient
 		}
 	}
 
+	/**
+	 * Parses the HttpUrlConnection response to hike htto response
+	 * 
+	 * @param request
+	 * @param connection
+	 * @return
+	 * @throws Throwable
+	 */
 	<T> Response readResponse(Request<T> request, HttpURLConnection connection) throws Throwable
 	{
 		int status = connection.getResponseCode();

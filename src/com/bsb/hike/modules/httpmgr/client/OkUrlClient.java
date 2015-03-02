@@ -10,8 +10,9 @@ import com.squareup.okhttp.OkUrlFactory;
 
 /**
  * Represents UrlClient wrapper with underlying pooling and caching done by OkHttp
+ * 
  * @author anubhavgupta & sidharth
- *
+ * 
  */
 public class OkUrlClient extends UrlConnectionClient
 {
@@ -38,11 +39,11 @@ public class OkUrlClient extends UrlConnectionClient
 	{
 		return okUrlFactory.open(new URL(request.getUrl()));
 	}
-	
-	@Override
+
 	/**
 	 * Clones the OkUrlClient with given client option parameters
 	 */
+	@Override
 	public OkUrlClient clone(ClientOptions clientOptions)
 	{
 		return new OkUrlClient(OkClient.setClientParameters(okUrlFactory.client().clone(), clientOptions));

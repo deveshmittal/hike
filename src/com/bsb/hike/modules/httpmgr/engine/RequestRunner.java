@@ -13,7 +13,7 @@ import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.modules.httpmgr.response.ResponseFacade;
 
 /**
- * This class clones the the {@link IClient} object and passes it to {@link RequestExecuter} for the final execution of the request
+ * This class clones the {@link IClient} object and passes it to {@link RequestExecuter} for the final execution of the request
  * 
  * @author sidharth & anubhav
  * 
@@ -67,7 +67,12 @@ public class RequestRunner
 		});
 		requestExecuter.execute();
 	}
-	
+
+	/**
+	 * This class implements {@link IResponseInterceptor.Chain} and executes {@link IResponseInterceptor#intercept(IResponseInterceptor.Chain) for each node present in the interceptor chain
+	 * @author sidharth
+	 *
+	 */
 	public class ResponseInterceptorChain implements IResponseInterceptor.Chain
 	{
 		private Iterator<IResponseInterceptor> iterator;
@@ -103,7 +108,10 @@ public class RequestRunner
 			}
 		}
 	}
-	
+
+	/**
+	 * Shutdown method to close everything (setting all variables to null for easy garbage collection)
+	 */
 	public void shutdown()
 	{
 		engine.shutDown();

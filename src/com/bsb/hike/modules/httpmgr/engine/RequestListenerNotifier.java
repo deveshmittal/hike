@@ -9,7 +9,8 @@ import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.modules.httpmgr.response.ResponseCall;
 
 /**
- * This class is responsible for notifying the request listeners of the request about the success or failure of the request
+ * This class is responsible for notifying the request listeners of the request about the success or failure of the request. The response is either sent synchronously i.e on same
+ * thread from where request is executed or asynchronously (on response executor) or on UI thread
  * 
  * @author sidharth
  * 
@@ -78,7 +79,7 @@ public class RequestListenerNotifier
 		{
 			listener.onRequestSuccess(response);
 		}
-		
+
 		request.finish();
 		response.finish();
 	}
@@ -146,7 +147,7 @@ public class RequestListenerNotifier
 		{
 			listener.onRequestFailure(ex);
 		}
-		
+
 		request.finish();
 	}
 
@@ -203,7 +204,7 @@ public class RequestListenerNotifier
 		};
 		return call;
 	}
-	
+
 	public void shutdown()
 	{
 		engine = null;

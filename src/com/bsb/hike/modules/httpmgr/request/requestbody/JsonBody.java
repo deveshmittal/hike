@@ -6,12 +6,11 @@ import org.json.JSONObject;
 
 public class JsonBody extends ByteArrayBody
 {
-
 	public JsonBody(JSONObject jsonBody)
 	{
 		super("application/json", convertToBytes(jsonBody));
 	}
-	
+
 	private static byte[] convertToBytes(JSONObject jsonBody)
 	{
 		try

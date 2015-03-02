@@ -22,7 +22,6 @@ import com.bsb.hike.modules.httpmgr.client.IClient;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
 import com.bsb.hike.modules.httpmgr.log.LogFull;
-import com.bsb.hike.modules.httpmgr.log.LogHttp;
 import com.bsb.hike.modules.httpmgr.network.NetworkChecker;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.RequestCall;
@@ -58,7 +57,7 @@ public class RequestExecuter
 	}
 
 	/**
-	 * Simply calls the {@link IPreProcessListener#doInBackground()} for executing tasks other than http task
+	 * Starts the request interceptor chain for pre processing of request before executing
 	 */
 	private void preProcess()
 	{
@@ -66,7 +65,7 @@ public class RequestExecuter
 		RequestFacade requestFacade = new RequestFacade(request);
 		Iterator<IRequestInterceptor> iterator = requestFacade.getRequestInterceptors().iterator();
 		RequestInterceptorChain chain = new RequestInterceptorChain(iterator, requestFacade);
-	    chain.proceed();
+		chain.proceed();
 	}
 
 	/**
@@ -160,7 +159,7 @@ public class RequestExecuter
 	{
 		engine.solveStarvation(requestCall);
 	}
-	
+
 	/**
 	 * Checks if network is available or not and request is cancelled or not. If network is available and request is not cancelled yet then executes the request using
 	 * {@link IClient}
@@ -168,8 +167,8 @@ public class RequestExecuter
 	 */
 	public void processRequest()
 	{
-		LogFull.d(request.toString() +  " processing started");
-		
+		LogFull.d(request.toString() + " processing started");
+
 		if (!NetworkChecker.isNetworkAvailable())
 		{
 			if (!request.isCancelled())
@@ -201,7 +200,7 @@ public class RequestExecuter
 			}
 
 			LogFull.d(request.toString() + " completed");
-			// positive response 
+			// positive response
 			listener.onResponse(response, null);
 		}
 		catch (SocketTimeoutException ex)
@@ -228,7 +227,7 @@ public class RequestExecuter
 				handleRetry(ex, REASON_CODE_NO_NETWORK);
 				return;
 			}
-			
+
 			if (statusCode == HTTP_UNAUTHORIZED || statusCode == HTTP_FORBIDDEN)
 			{
 				handleException(ex, REASON_CODE_AUTH_FAILURE);
@@ -285,7 +284,12 @@ public class RequestExecuter
 			listener.onResponse(null, httpException);
 		}
 	}
-	
+
+	/**
+	 * This class implements {@link IRequestInterceptor.Chain} and executes {@link IRequestInterceptor#intercept(IRequestInterceptor.Chain) for each node present in the interceptor chain
+	 * @author sidharth
+	 *
+	 */
 	public class RequestInterceptorChain implements IRequestInterceptor.Chain
 	{
 		private Iterator<IRequestInterceptor> iterator;

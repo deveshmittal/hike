@@ -1,16 +1,12 @@
 package com.bsb.hike.modules.httpmgr.exception;
 
 /**
- * Super class of all exceptions in RoboSpice.
+ * Super class of all exceptions in HttpManager
  * 
  * @author sni
  */
 public class HttpException extends Exception
 {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 647946546917050370L;
 	
 	public static final short REASON_CODE_UNEXPECTED_ERROR = 0x0;

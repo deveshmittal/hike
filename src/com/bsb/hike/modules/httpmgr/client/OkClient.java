@@ -170,8 +170,6 @@ public class OkClient implements IClient
 	/**
 	 * Parse hike http request to OkHttpRequest
 	 * 
-	 * @param <T>
-	 * 
 	 * @param request
 	 * @return
 	 */
@@ -193,8 +191,7 @@ public class OkClient implements IClient
 	/**
 	 * Parse OkhttpResponse to hike http response
 	 * 
-	 * @param <T>
-	 * 
+	 * @param request
 	 * @param response
 	 * @return
 	 * @throws Throwable
@@ -206,7 +203,7 @@ public class OkClient implements IClient
 		responseBuilder.setStatusCode(response.code());
 		responseBuilder.setReason(response.message());
 		com.squareup.okhttp.ResponseBody responseBody = response.body();
-		
+
 		InputStream stream = responseBody.byteStream();
 		try
 		{

@@ -9,7 +9,7 @@ import com.bsb.hike.modules.httpmgr.interceptor.IResponseInterceptor;
 import com.bsb.hike.modules.httpmgr.interceptor.Pipeline;
 
 /**
- * Encapsulates all of the information necessary to make an HTTP response.
+ * Encapsulates all of the information necessary to make an HTTP response , implements {@link IResponseFacade}
  * 
  * @author sidharth
  */
@@ -24,7 +24,7 @@ public class Response implements IResponseFacade
 	private List<Header> headers;
 
 	private ResponseBody<?> body;
-	
+
 	private Pipeline<IResponseInterceptor> responseInterceptors;
 
 	private Response(Builder builder)
@@ -101,7 +101,7 @@ public class Response implements IResponseFacade
 		this.body = null;
 		this.responseInterceptors = null;
 	}
-	
+
 	public static class Builder
 	{
 		private String url;
@@ -113,7 +113,7 @@ public class Response implements IResponseFacade
 		private List<Header> headers;
 
 		private ResponseBody<?> body;
-		
+
 		private Pipeline<IResponseInterceptor> responseInterceptors;
 
 		/**

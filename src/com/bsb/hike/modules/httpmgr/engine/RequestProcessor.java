@@ -76,7 +76,13 @@ public class RequestProcessor
 			requestRunner.submit(request, options);
 		}
 	}
-	
+
+	/**
+	 * Returns true if the request passed as parameter is running currently otherwise false
+	 * 
+	 * @param request
+	 * @return
+	 */
 	public boolean isRequestRunning(Request<?> request)
 	{
 		long requestId = request.getId();
@@ -88,7 +94,10 @@ public class RequestProcessor
 		LogFull.d(request.toString() + " is not already running ");
 		return false;
 	}
-	
+
+	/**
+	 * Shutdown method to close everything (setting all variables to null for easy garbage collection)
+	 */
 	public void shutdown()
 	{
 		requestMap.clear();

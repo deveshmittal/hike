@@ -24,10 +24,10 @@ public class HttpManager
 	private static volatile HttpManager _instance;
 
 	private static RequestProcessor requestProcessor;
-	
+
 	private HttpManager(ClientOptions options)
 	{
-		if(HttpLogger.DEBUG)
+		if (HttpLogger.DEBUG)
 		{
 			boolean t = true;
 			if (t)
@@ -43,7 +43,7 @@ public class HttpManager
 		HttpEngine engine = new HttpEngine();
 		RequestListenerNotifier notifier = new RequestListenerNotifier(engine);
 		requestProcessor = new RequestProcessor(options, engine, notifier);
-		
+
 	}
 
 	static HttpManager getInstance()
@@ -112,7 +112,7 @@ public class HttpManager
 	{
 		request.cancel();
 	}
-	
+
 	/**
 	 * Removes particular listener from list of listeners for a request
 	 * 
@@ -123,10 +123,10 @@ public class HttpManager
 	{
 		List<IRequestListener> listeners = new ArrayList<IRequestListener>(1);
 		listeners.add(listener);
-		
+
 		request.removeRequestListeners(listeners);
 	}
-	
+
 	/**
 	 * Removes list of listeners from list of request listeners for a request
 	 * 
@@ -137,9 +137,10 @@ public class HttpManager
 	{
 		request.removeRequestListeners(listeners);
 	}
-	
+
 	/**
 	 * Determines whether a request is running or not
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -147,7 +148,10 @@ public class HttpManager
 	{
 		return requestProcessor.isRequestRunning(request);
 	}
-	
+
+	/**
+	 * Shutdown method to close everything (setting all variables to null for easy garbage collection)
+	 */
 	public static void shutdown()
 	{
 		requestProcessor.shutdown();

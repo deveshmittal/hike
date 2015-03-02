@@ -6,6 +6,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 
+/**
+ * This class implements a doubly linked list and also contains a map which has tag of a node as key and node as it's value for O(1) access to node using a given tag. It is used
+ * for maintaining request interceptor chain and response interceptor chain
+ * 
+ * @author sidharth
+ * 
+ * @param <T>
+ */
 public class Pipeline<T> implements IPipeline<T>, Iterable<T>
 {
 	private static final String HEAD_TAG = "head";
@@ -156,21 +164,6 @@ public class Pipeline<T> implements IPipeline<T>, Iterable<T>
 		node.setTag(newTag);
 		map.put(newTag, node);
 	}
-
-//	public T get(int index)
-//	{
-//		Interceptor<T> curr = head.next;
-//		while (index > 0)
-//		{
-//			if (curr == tail)
-//			{
-//				throw new IllegalArgumentException();
-//			}
-//			curr = curr.next;
-//			index--;
-//		}
-//		return curr.element();
-//	}
 
 	@Override
 	public Iterator<T> iterator()

@@ -15,10 +15,14 @@ import com.bsb.hike.modules.httpmgr.log.LogFull;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.RequestCall;
 
+/**
+ * This class is used to maintain to ordering of the requests in two queues one is short queue for short running requests and other is long queue for long running requests
+ * 
+ * @author anubhav
+ * 
+ */
 public class HttpQueue
 {
-	private static final long serialVersionUID = 1L;
-
 	private PriorityQueue<RequestCall> shortQueue;
 
 	private PriorityQueue<RequestCall> longQueue;

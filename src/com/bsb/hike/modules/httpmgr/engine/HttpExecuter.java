@@ -1,5 +1,6 @@
 package com.bsb.hike.modules.httpmgr.engine;
 
+import static com.bsb.hike.modules.httpmgr.engine.HttpEngineConstants.ALLOW_CORE_THREAD_TIMEOUT;
 import static com.bsb.hike.modules.httpmgr.engine.HttpEngineConstants.KEEP_ALIVE_TIME;
 
 import java.util.concurrent.RejectedExecutionHandler;
@@ -9,11 +10,9 @@ import java.util.concurrent.TimeUnit;
 
 import android.os.Build;
 
-import com.bsb.hike.modules.httpmgr.log.LogFull;
-import com.bsb.hike.utils.Logger;
-
-
 /**
+ * This class extends {@link ScheduledThreadPoolExecutor} and is used to maintain the count of requests that are currently running inside the executor. This count of currently
+ * running requests is used by {@link HttpQueue} for deciding on which executor to submit the next request
  * 
  * @author anubhavgupta
  * 
@@ -31,7 +30,7 @@ public class HttpExecuter extends ScheduledThreadPoolExecutor
 		this.executerType = executerType;
 
 	}
-	
+
 	@Override
 	protected void beforeExecute(Thread t, Runnable r)
 	{
@@ -44,7 +43,7 @@ public class HttpExecuter extends ScheduledThreadPoolExecutor
 	{
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD)
 		{
-			super.allowCoreThreadTimeOut(true);
+			super.allowCoreThreadTimeOut(ALLOW_CORE_THREAD_TIMEOUT);
 		}
 	}
 

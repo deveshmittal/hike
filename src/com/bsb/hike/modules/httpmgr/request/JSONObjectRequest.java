@@ -9,8 +9,15 @@ import org.json.JSONObject;
 import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.Utils;
 
+/**
+ * JSONObject request is used to return response in form of {@link JSONObject} to the request listener. InputStream to {@link JSONObject} is done in
+ * {@link Request#parseResponse(InputStream)}
+ * 
+ * @author sidharth
+ * 
+ */
 public class JSONObjectRequest extends Request<JSONObject>
-{	
+{
 	private JSONObjectRequest(Init<?> init)
 	{
 		super(init);

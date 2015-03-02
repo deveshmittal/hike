@@ -7,6 +7,12 @@ import java.io.InputStream;
 
 import com.bsb.hike.modules.httpmgr.RequestToken;
 
+/**
+ * File request is used to return response in form of File to the request listener. InputStream to File is done in {@link Request#parseResponse(InputStream)}
+ * 
+ * @author sidharth
+ * 
+ */
 public class FileRequest extends Request<File>
 {
 	private int BUFFER_SIZE = 4 * 1024; // 4Kb
