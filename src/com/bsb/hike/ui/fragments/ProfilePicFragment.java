@@ -3,16 +3,20 @@ package com.bsb.hike.ui.fragments;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -26,6 +30,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.R.anim;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -38,6 +43,8 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.HoloCircularProgress;
 import com.bsb.hike.view.RoundedImageView;
@@ -54,11 +61,13 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 	private TextView text2;
 
-	private Interpolator deceleratorInterp = new DecelerateInterpolator();
+	private Interpolator animInterpolator = new LinearInterpolator();
 
 	private boolean isPaused;
 
 	private String imagePath;
+
+	private boolean failed;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -85,7 +94,15 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 		text2 = (TextView) mFragmentView.findViewById(R.id.text2);
 
-		startUpload();
+		new Handler().postDelayed(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				startUpload();
+			}
+		}, 300);
 
 		return mFragmentView;
 	}
@@ -103,12 +120,11 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 		mFragmentView.findViewById(R.id.retryButton).setVisibility(View.GONE);
 
-		updateProgress(10f);
-
 		if (imagePath != null)
 		{
 
 			// TODO move this code to network manager refactoring module
+			updateProgress(10f);
 
 			/* the server only needs a smaller version */
 			final Bitmap smallerBitmap = HikeBitmapFactory.scaleDownBitmap(imagePath, HikeConstants.PROFILE_IMAGE_DIMENSIONS, HikeConstants.PROFILE_IMAGE_DIMENSIONS,
@@ -116,8 +132,10 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 			if (smallerBitmap == null)
 			{
-				// Failure TODO Handle
+				showErrorState();
 			}
+
+			updateProgress(10f);
 
 			final byte[] bytes = BitmapUtils.bitmapToBytes(smallerBitmap, Bitmap.CompressFormat.JPEG, 100);
 
@@ -127,11 +145,13 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 			{
 				public void onFailure()
 				{
-					// Failure TODO Handle
+					showErrorState();
 				}
 
 				public void onSuccess(JSONObject response)
 				{
+
+					updateProgress(10f);
 					// User info is saved in shared preferences
 					SharedPreferences preferences = HikeMessengerApp.getInstance().getApplicationContext()
 							.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
@@ -168,6 +188,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 					String destFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT + "/" + mappedId + ".jpg";
 
+					updateProgress(10f);
 					/*
 					 * Making a status update file so we don't need to download this file again.
 					 */
@@ -178,6 +199,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 					editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, ++unseenUserStatusCount);
 					editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
 					editor.commit();
+
 					/*
 					 * This would happen in the case where the user has added a self contact and received an mqtt message before saving this to the db.
 					 */
@@ -192,56 +214,82 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 					HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, mLocalMSISDN);
 
 					HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
+
+					updateProgress(10f);
 				}
 			});
 
 			request.setFilePath(imagePath);
 
 			Utils.executeHttpTask(new HikeHTTPTask(ProfilePicFragment.this, R.string.delete_status_error), request);
+
+			updateProgressUniformly(60f, 10f);
 		}
+	}
+
+	private void updateProgressUniformly(final float total, final float interval)
+	{
+		if (total <= 0.0f || failed)
+		{
+			return;
+		}
+
+		new Handler(Looper.getMainLooper()).postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				updateProgress(interval);
+				updateProgressUniformly(total - interval, interval);
+			}
+		}, 1000);
 	}
 
 	private void updateProgress(float i)
 	{
 
+		if (isPaused)
+		{
+			return;
+		}
+
 		ValueAnimator mAnim = ObjectAnimator.ofFloat(mCurrentProgress, mCurrentProgress + i);
-		mAnim.setInterpolator(deceleratorInterp);
+		mAnim.setInterpolator(animInterpolator);
 		mAnim.setEvaluator(new FloatEvaluator());
-		mAnim.setDuration(2000);
+		mAnim.setDuration(1000);
 		mAnim.addUpdateListener(new AnimatorUpdateListener()
 		{
 			@Override
-			public void onAnimationUpdate(ValueAnimator animation)
+			public void onAnimationUpdate(final ValueAnimator animation)
 			{
 				Float value = (Float) animation.getAnimatedValue();
+
 				mCircularProgress.setProgress(value / 100f);
+
+				if (mCircularProgress.getProgress() >= 1f || failed)
+				{
+					animation.cancel();
+				}
 			}
 		});
 		mAnim.start();
 
 		mCurrentProgress += i;
 
-		if (mCurrentProgress < 100f)
+		if (mCurrentProgress >= 100f && !failed)
 		{
-			HikeHandlerUtil.getInstance().postRunnableWithDelay(new Runnable()
+
+			changeTextWithAnimation(text1, getString(R.string.photo_dp_finishing));
+
+			new Handler(Looper.getMainLooper()).postDelayed(new Runnable()
 			{
+
 				@Override
 				public void run()
 				{
-					ProfilePicFragment.this.getActivity().runOnUiThread(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							updateProgress(40);
-						}
-					});
+					changeTextWithAnimation(text1, getString(R.string.photo_dp_saved));
 				}
-			}, 2000);
-		}
-		else
-		{
-			changeTextWithAnimation(text1, getString(R.string.photo_dp_saved));
+			}, 1000);
 
 			changeTextWithAnimation(text2, getString(R.string.photo_dp_saved_sub));
 
@@ -255,21 +303,35 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 						@Override
 						public void run()
 						{
-							showErrorState();
+							if (!isPaused && !failed)
+							{
+								Intent in = new Intent(getActivity(), HomeActivity.class);
+								in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+								getActivity().startActivity(in);
+							}
+							else
+							{
+								getActivity().finish();
+							}
 						}
 					});
 				}
-			}, 5000);
+			}, 2000);
 		}
+
 	}
 
 	private void showErrorState()
 	{
 
+		failed = true;
+
 		if (isPaused)
 		{
 			return;
 		}
+		
+		mCircularProgress.setProgress(1f);
 
 		changeTextWithAnimation(text1, getString(R.string.photo_dp_save_error));
 
@@ -294,7 +356,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 	{
 		ObjectAnimator visToInvis = ObjectAnimator.ofFloat(tv, "alpha", 1f, 0.2f);
 		visToInvis.setDuration(250);
-		visToInvis.setInterpolator(deceleratorInterp);
+		visToInvis.setInterpolator(animInterpolator);
 		visToInvis.addListener(new AnimatorListenerAdapter()
 		{
 			@Override
@@ -304,7 +366,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 				tv.setText(newText);
 				ObjectAnimator invisToVis = ObjectAnimator.ofFloat(tv, "alpha", 0.2f, 1f);
 				invisToVis.setDuration(250);
-				invisToVis.setInterpolator(deceleratorInterp);
+				invisToVis.setInterpolator(animInterpolator);
 				invisToVis.start();
 			}
 		});

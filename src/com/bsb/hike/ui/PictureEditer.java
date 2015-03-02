@@ -282,7 +282,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 									profilePicFragment.setArguments(b);
 									getSupportFragmentManager().beginTransaction()
 											.setCustomAnimations(R.anim.fade_in_animation, R.anim.photo_option_out, R.anim.fade_in_animation, R.anim.photo_option_out)
-											.replace(R.id.overlayFrame, profilePicFragment).commit();
+											.replace(R.id.overlayFrame, profilePicFragment).addToBackStack(null).commit();
 								}
 							}
 						});
