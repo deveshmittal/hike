@@ -621,9 +621,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected OverFlowMenuItem[] getOverFlowMenuItems()
 	{
 		return new OverFlowMenuItem[] {
+				new OverFlowMenuItem(getString(R.string.search), 0, 0, R.string.search),
 				new OverFlowMenuItem(getString(R.string.clear_chat), 0, 0, R.string.clear_chat),
-				new OverFlowMenuItem(getString(R.string.email_chat), 0, 0, R.string.email_chat),
-				new OverFlowMenuItem(getString(R.string.search), 0, 0, R.string.search)};
+				new OverFlowMenuItem(getString(R.string.email_chat), 0, 0, R.string.email_chat)};
 	}
 
 	protected void showOverflowMenu()
