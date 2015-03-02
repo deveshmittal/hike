@@ -3,14 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center"
-    android:orientation="vertical" >
+    android:orientation="vertical" 
+    android:background="#0a0a0a">
 
     <com.bsb.hike.ui.utils.RecyclingImageView
         android:id="@+id/user_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="fitCenter"
-        android:background="#141414"
         android:padding="5dp" />
 
     <LinearLayout
@@ -19,7 +19,6 @@
         android:layout_gravity="center_vertical"
         android:layout_marginBottom="6dp"
         android:layout_marginTop="6dp"
-        android:background="#333333"
         android:orientation="horizontal" >
 
         <com.bsb.hike.ui.utils.RecyclingImageView
