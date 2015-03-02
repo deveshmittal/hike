@@ -1388,6 +1388,30 @@ public class HikeConstants
 		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
 		
 		public static final String NUX_INCENTIVE_MODE = "showNuxIncentiveMode";
+		
+		//constants related to share
+		public static final class ShareTypes
+		{
+			
+			public static final int SMS_SHARE = 0;
+		
+			public static final int IMAGE_SHARE = 1;
+		
+			public static final int STICKER_SHARE = 2;
+
+			public static final int STICKER_SHARE_PALLETE = 3;
+		
+		}
+	    
+		public static final String SHARE_CONTENT = "ShareContent";
+			
+		public static final String WHATSAPP_PACKAGE = "com.whatsapp";
+		
+		public static final String SHARE_TYPE = "shareType";
+		
+		public static final int NOT_SHAREABLE = -1 ;
+		
+				
 	}
 
 	public static final class LogEvent
@@ -2138,6 +2162,7 @@ public class HikeConstants
 	{
 		public static final String MESSAGE_TYPE = "messageType";
 				
+		//ft, sticker, nudge, 
 		public static final int PLAIN_TEXT = 0;
 
 		public static final int TEXT_PIN = 1;

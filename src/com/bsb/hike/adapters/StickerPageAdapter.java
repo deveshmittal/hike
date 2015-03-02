@@ -8,6 +8,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
@@ -16,6 +17,8 @@ import android.widget.ImageView.ScaleType;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.Sticker;
@@ -25,11 +28,13 @@ import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.utils.RecyclingImageView;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.ShareUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 
-public class StickerPageAdapter extends BaseAdapter implements OnClickListener
+public class StickerPageAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener
 {
 
 	public static enum ViewType
@@ -195,7 +200,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			Sticker sticker = (Sticker) item.getSticker();
 			stickerLoader.loadImage(sticker.getSmallStickerPath(), ((ImageView) convertView), isListFlinging);
 			convertView.setOnClickListener(this);
-				
+			convertView.setOnLongClickListener(this);	
 			break;
 		case UPDATE:
 			viewHolder.image.setVisibility(View.VISIBLE);
@@ -350,6 +355,21 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		int position;
 		
 		ImageView tickImage;
+	}
+	
+	@Override
+	public boolean onLongClick(View v)
+	{
+		ViewHolder viewHolder = (ViewHolder) v.getTag();
+		int position = viewHolder.position;
+		StickerPageAdapterItem item = (StickerPageAdapterItem) getItem(position);
+		if (item.getType() == StickerPageAdapterItem.STICKER )
+		{
+			Sticker sticker = item.getSticker();
+		    Intent intent = ShareUtils.shareContent(HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE,sticker);
+			HikeMessengerApp.getInstance().startActivity(intent); 
+		}
+		return false;
 	}
 	
 }

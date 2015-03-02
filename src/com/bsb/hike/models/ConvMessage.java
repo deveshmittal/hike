@@ -904,6 +904,35 @@ public class ConvMessage
 		}
 	}
 
+	public boolean isImageMsg()
+	{
+		if (isFileTransferMessage())
+		{
+			if (getMetadata().getHikeFiles().get(0).getHikeFileType() == HikeFileType.IMAGE)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isTextMsg()
+	{
+		if(getMessageType() != MESSAGE_TYPE.PLAIN_TEXT)
+		{
+			return false;
+		}
+		
+		//a MESSAGE_TYPE.PLAIN_TEXT type message might be ft, sticker or nudge.So, rolling out these possibilities
+		if (isFileTransferMessage() || isStickerMessage() || getMetadata() != null && getMetadata().isPokeMessage())
+		{
+			return false;
+		}
+			
+		return true;
+	}
+
+	
 	public boolean isGroupChat()
 	{
 		return Utils.isGroupConversation(this.mMsisdn);

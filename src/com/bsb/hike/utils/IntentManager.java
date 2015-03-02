@@ -3,6 +3,7 @@ package com.bsb.hike.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Message;
 import android.text.TextUtils;
 import android.widget.Toast;
@@ -59,6 +60,38 @@ public class IntentManager
 	{
 		context.startActivity(Utils.getIntentForPrivacyScreen(context));
 	}
+	
+	public static Intent shareImageIntent(String mimeType, String imagePath, String text)
+	{
+		Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+		intent.setType(mimeType);
+		intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(imagePath));
+		if (!TextUtils.isEmpty(text))
+		{
+			intent.putExtra(Intent.EXTRA_TEXT, text);
+		}
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		Logger.i("imageShare", "shared image with " + intent.getExtras());
+		return intent;
+	}
+
+	public static Intent shareSmsIntentWhatsapp(String text)
+	{
+		Intent intent = new Intent(Intent.ACTION_SEND);
+		intent.setType("text/plain");
+		intent.setPackage(HikeConstants.Extras.WHATSAPP_PACKAGE);
+		intent.putExtra(Intent.EXTRA_TEXT, text);
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		return intent;
+	}
+
+	public static Intent shareImageIntentWhatsapp(String mimeType, String imagePath, String text)
+	{
+		Intent intent = shareImageIntent(mimeType, imagePath, text);
+		intent.setPackage(HikeConstants.Extras.WHATSAPP_PACKAGE);
+		return intent;
+	}
+
 
 	public static void openSettingMedia(Context context)
 	{

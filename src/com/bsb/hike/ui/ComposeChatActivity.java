@@ -1,6 +1,8 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +23,12 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,7 +36,12 @@ import android.preference.PreferenceManager;
 import android.provider.ContactsContract.Data;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Layout.Alignment;
+import android.text.Html;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,6 +60,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -74,6 +88,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.Sticker;
@@ -90,10 +105,12 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.ShareUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
@@ -169,7 +186,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private boolean nuxIncentiveMode;
 
-	 private HorizontalFriendsFragment newFragment =null;
+	private Sticker sticker;
+
+	private String sms;
+
+	private HikeFile hikeFile;
+
+	int type = HikeConstants.Extras.NOT_SHAREABLE;
+
+	private HorizontalFriendsFragment newFragment = null;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -330,6 +356,29 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 			}
 		}
+		
+		if (item.getItemId() == R.id.whatsapp_share) 
+		{  Object obj = null ;
+			switch(type)
+			{  
+			   case HikeConstants.Extras.ShareTypes.STICKER_SHARE:
+				    obj=(Sticker) getIntent().getSerializableExtra(HikeConstants.Extras.SHARE_CONTENT);
+					break;
+			   case HikeConstants.Extras.ShareTypes.IMAGE_SHARE:
+		 			obj = getIntent().getStringExtra(HikeConstants.Extras.SHARE_CONTENT);
+			        break;
+			   case HikeConstants.Extras.ShareTypes.SMS_SHARE:
+					obj = getIntent().getStringExtra(HikeConstants.Extras.SHARE_CONTENT);
+                    break;
+  			}
+		    Intent intent = ShareUtils.shareContent(type,obj);
+		    if ( intent != null)
+		    {
+		    startActivity(intent);
+		    } 
+		    this.finish();		
+		}		
+	
 		return super.onOptionsItemSelected(item);
 	}
 	
