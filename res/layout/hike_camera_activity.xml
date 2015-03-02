@@ -45,9 +45,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="48dp"
             android:layout_alignParentBottom="true"
-            android:layout_weight="@integer/photos_editor_tabs_weight"
             android:background="@color/photos_tabs_background"
             android:gravity="center" >
 

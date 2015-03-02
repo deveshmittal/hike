@@ -19,6 +19,7 @@
     <com.jess.ui.TwoWayGridView
         android:id="@+id/HorizontalGridView"
         android:layout_width="match_parent"
+        android:scrollbars="none"
         android:layout_height="0dp"
         android:layout_weight="@integer/photos_pager_preview_weight"
         android:layout_gravity="center"
