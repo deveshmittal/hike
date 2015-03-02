@@ -2063,7 +2063,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						((ViewGroup) participantInfoHolder.container).addView(mainMessage);
 					}
 					String participantMsisdn = metadata.getMsisdn();
-					String name = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
+					String name = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participantMsisdn);
 					message = Utils.getFormattedParticipantInfo(String.format(context.getString(R.string.left_conversation), name), name);
 				}
 				else
@@ -2084,7 +2084,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (conversation instanceof GroupConversation)
 				{
 					String participantMsisdn = metadata.getMsisdn();
-					name = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
+					name = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participantMsisdn);
 					message = context.getString(infoState == ParticipantInfoState.USER_JOIN ? (metadata.isOldUser() ? R.string.user_back_on_hike : R.string.joined_hike_new)
 							: R.string.joined_conversation, name);
 				}
@@ -2137,7 +2137,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				String msisdn = metadata.getMsisdn();
 				String userMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
+				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
 				String message = String.format(context.getString(convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name
 						: R.string.change_group_image), participantName);
 
@@ -2206,7 +2206,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					StringBuilder dndNamesSB = new StringBuilder();
 					for (int i = 0; i < dndNumbers.length(); i++)
 					{
-						String name = conversation instanceof GroupConversation ? ((GroupConversation) conversation).getGroupParticipantFirstName(dndNumbers.optString(i)) : Utils
+						String name = conversation instanceof GroupConversation ? ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(dndNumbers.optString(i)) : Utils
 								.getFirstName(conversation.getLabel());
 						if (i < dndNumbers.length() - 2)
 						{
@@ -2260,7 +2260,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				String name;
 				if (isGroupChat)
 				{
-					name = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
+					name = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
 				}
 				else
 				{
@@ -2532,7 +2532,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			if (firstMessageFromParticipant)
 			{
 				String number = null;
-				String name = ((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn());
+				String name = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(convMessage.getGroupParticipantMsisdn());
 				if (((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
 				{
 					number = convMessage.getGroupParticipantMsisdn();
@@ -3093,7 +3093,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			for (int i = readByList.size() - 1; i >= lastIndex; i--)
 			{
-				sb.append(groupConversation.getGroupParticipantFirstName(readByList.get(i)));
+				sb.append(groupConversation.getGroupParticipantFullFirstName(readByList.get(i)));
 				if (i > lastIndex + 1)
 				{
 					sb.append(", ");
@@ -4351,7 +4351,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		String name = convMessage.isSent() ?
 				"You" :
-				(conversation instanceof GroupConversation) ? ((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()) : "";
+				(conversation instanceof GroupConversation) ? ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(convMessage.getGroupParticipantMsisdn()) : "";
 		statusHolder.dayTextView.setText(context.getString(R.string.xyz_posted_pin, name));
 
 		statusHolder.messageInfo.setText(convMessage.getTimestampFormatted(true, context));
