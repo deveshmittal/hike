@@ -1030,6 +1030,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					return true;
 				}
 			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
+			{
+				if (message.getMetadata().getStatusMessage().getText().toLowerCase().contains(s))
+				{
+					return true;
+				}
+			}
 			if (!TextUtils.isEmpty(message.getMessage()))
 			{
 				if (message.getMessage().toLowerCase().contains(s))

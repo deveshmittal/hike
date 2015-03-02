@@ -1743,7 +1743,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				dayHolder = fileHolder;
 				setSenderDetails(convMessage, position, fileHolder, false);
-				fileHolder.fileName.setText(hikeFile.getFileName());
+				String fileName = hikeFile.getFileName();
+				fileHolder.fileName.setText(fileName);
+				if (!TextUtils.isEmpty(searchText) && fileName.toLowerCase().contains(searchText))
+				{
+					int startSpanIndex = fileName.toLowerCase().indexOf(searchText);
+					SpannableString spanText = new SpannableString(hikeFile.getFileName());
+					spanText.setSpan(new BackgroundColorSpan(context.getResources().getColor(R.color.text_bg)), startSpanIndex, startSpanIndex + searchText.length(),
+							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+					fileHolder.fileName.setText(spanText, TextView.BufferType.SPANNABLE);
+				}
+				
 				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
 					fileHolder.fileSize.setText(Utils.getSizeForDisplay((int) hikeFile.getFile().length()));
@@ -3870,7 +3880,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT)
 		{
 			SmileyParser smileyParser = SmileyParser.getInstance();
-			statusHolder.messageTextView.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
+			
+			String messageText = statusMessage.getText();
+			if (!TextUtils.isEmpty(searchText) && messageText.toLowerCase().contains(searchText))
+			{
+				int startSpanIndex = messageText.toLowerCase().indexOf(searchText);
+				SpannableString spanText = new SpannableString(messageText);
+				spanText.setSpan(new BackgroundColorSpan(context.getResources().getColor(R.color.text_bg)), startSpanIndex, startSpanIndex + searchText.length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				statusHolder.messageTextView.setText(smileyParser.addSmileySpans(spanText, true), TextView.BufferType.SPANNABLE);
+			}
+			else
+			{
+				statusHolder.messageTextView.setText(smileyParser.addSmileySpans(messageText, true));
+			}
 			Linkify.addLinks(statusHolder.messageTextView, Linkify.ALL);
 
 		}
