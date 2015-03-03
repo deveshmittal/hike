@@ -355,7 +355,7 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 
 	public void setData()
 	{
-		mWebView.loadUrl("javascript:setData('" + message.webMetadata.getHelperData().toString() + "','" + message.isSent() + "')");
+		mWebView.loadUrl("javascript:setData('" + message.getMsisdn() + "','" + message.webMetadata.getHelperData().toString() + "','" + message.isSent() + "')");
 	}
 
 	public void alarmPlayed(String alarmData)
