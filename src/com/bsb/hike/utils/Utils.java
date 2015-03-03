@@ -5303,4 +5303,9 @@ public class Utils
 		}
 		return false;
 	}
+	
+	public static boolean isOkHttp()
+	{
+		return HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.TOGGLE_OK_HTTP, true);
+	}
 }
