@@ -15,15 +15,12 @@ public class SearchManager
 
 	private int itemViewBacklash = 1;
 
-	private ArrayList<Object> itemList;
+	private ArrayList<Searchable> itemList;
 
-	private ItemFinder finder;
-
-	public SearchManager(Collection<?> collection, ItemFinder itemfinder)
+	public SearchManager(Collection<? extends Searchable> collection)
 	{
 		this.indexList = new ArrayList<Integer>();
-		this.itemList = new ArrayList<Object>(collection);
-		this.finder = itemfinder;
+		this.itemList = new ArrayList<Searchable>(collection);
 	}
 
 	public void makeNewSearch(String s)
@@ -34,7 +31,7 @@ public class SearchManager
 
 	public void endSearch()
 	{
-		searchText = "";
+		makeNewSearch("");
 	}
 
 	public String getSearchText()
@@ -218,7 +215,7 @@ public class SearchManager
 		}
 		for (; from <= to; from++)
 		{
-			if (finder.doesItemContain(from, searchText))
+			if (itemList.get(from).doesItemContain(searchText))
 			{
 				Logger.d("search", "adding: " + from);
 				indexList.add(from);
@@ -236,7 +233,7 @@ public class SearchManager
 		{
 			for (; from >= to; from--)
 			{
-				if (finder.doesItemContain(from, searchText))
+				if (itemList.get(from).doesItemContain(searchText))
 				{
 					Logger.d("search", "adding: " + from);
 					indexList.add(from);
@@ -260,7 +257,7 @@ public class SearchManager
 		{
 			for (; from <= to; from++)
 			{
-				if (finder.doesItemContain(from, searchText))
+				if (itemList.get(from).doesItemContain(searchText))
 				{
 					Logger.d("search", "adding: " + from);
 					indexList.add(from);
@@ -298,14 +295,14 @@ public class SearchManager
 		}
 	}
 
-	public interface ItemFinder
+	public interface Searchable
 	{
 		/**
 		 * Checks if the item contains the search text.
 		 * 
 		 * @return If the item has the search text.
 		 */
-		boolean doesItemContain(int index, String s);
+		boolean doesItemContain(String s);
 	}
 
 }

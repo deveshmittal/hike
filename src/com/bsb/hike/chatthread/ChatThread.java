@@ -135,7 +135,6 @@ import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SearchManager;
-import com.bsb.hike.utils.SearchManager.ItemFinder;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
@@ -1006,69 +1005,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mBottomView.setVisibility(View.GONE);
 		mComposeView.requestFocus();
 		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
-		messageSearchManager = new SearchManager(messages, searchMessageFinder);
+		messageSearchManager = new SearchManager(messages);
 		mComposeView.addTextChangedListener(searchTextWatcher);
 		mComposeView.setOnEditorActionListener(searchActionClickListener);
 		activity.findViewById(R.id.next).setOnClickListener(searchOptionsClickListener);
 		activity.findViewById(R.id.previous).setOnClickListener(searchOptionsClickListener);
 		activity.findViewById(R.id.search_clear_btn).setOnClickListener(searchOptionsClickListener);
-		
 	}
-	
-	ItemFinder searchMessageFinder = new ItemFinder()
-	{
-		@Override
-		public boolean doesItemContain(int index, String s)
-		{
-			ConvMessage message = messages.get(index);
-			if (message.isFileTransferMessage())
-			{
-				if (message.getMetadata().getHikeFiles().get(0).getFileName().toLowerCase().contains(s))
-				{
-					return true;
-				}
-			}
-			else if (message.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
-			{
-				if (message.getMetadata().getStatusMessage().getText().toLowerCase().contains(s))
-				{
-					return true;
-				}
-			}
-			else if (Utils.isGroupConversation(msisdn) && mAdapter.ifFirstMessageFromRecepient(message, index))
-			{
-				String number = null;
-				String name = ((GroupConversation) mConversation).getGroupParticipantFirstName(message.getGroupParticipantMsisdn());
-				if (((GroupConversation) mConversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
-				{
-					number = message.getGroupParticipantMsisdn();
-				}
-				if (number != null)
-				{
-					if (number.contains(s) || name.contains(s))
-					{
-						return true;
-					}
-				}
-				else
-				{
-					if (name.contains(s))
-					{
-						return true;
-					}
-				}
-			}
-			if (!TextUtils.isEmpty(message.getMessage()))
-			{
-				if (message.getMessage().toLowerCase().contains(s))
-				{
-					Logger.d("search", "returning true for: " + message.getMessage());
-					return true;
-				}
-			}
-			return false;
-		}
-	};
 	
 	TextWatcher searchTextWatcher = new TextWatcher()
 	{
