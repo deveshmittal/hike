@@ -42,7 +42,6 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
@@ -54,7 +53,6 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -91,13 +89,12 @@ import com.bsb.hike.media.AudioRecordView.AudioRecordListener;
 import com.bsb.hike.media.CaptureImageParser;
 import com.bsb.hike.media.CaptureImageParser.CaptureImageListener;
 import com.bsb.hike.media.EmoticonPicker;
-import com.bsb.hike.media.EmoticonPickerListener;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.media.OverflowItemClickListener;
 import com.bsb.hike.media.PickContactParser;
 import com.bsb.hike.media.PickFileParser;
-import com.bsb.hike.media.PopupListener;
 import com.bsb.hike.media.PickFileParser.PickFileListener;
+import com.bsb.hike.media.PopupListener;
 import com.bsb.hike.media.ShareablePopup;
 import com.bsb.hike.media.ShareablePopupLayout;
 import com.bsb.hike.media.StickerPicker;
@@ -133,9 +130,7 @@ import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontEditText;
-import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
-import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
 /**
  * 
@@ -143,7 +138,7 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
  */
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, CaptureImageListener,
-		PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener,
+		PickFileListener, StickerPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener,
 		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, PopupListener, BackKeyListener
 {
 	private static final String TAG = "chatthread";
@@ -453,14 +448,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void initView()
 	{
+		audioRecordView = new AudioRecordView(activity, this);
+		mComposeView = (CustomFontEditText) activity.findViewById(R.id.msg_compose);
+		
 		initShareablePopup();
 
 		initActionMode();
 
 		addOnClickListeners();
-
-		audioRecordView = new AudioRecordView(activity, this);
-		mComposeView = (CustomFontEditText) activity.findViewById(R.id.msg_compose);
 
 		showNetworkError(ChatThreadUtils.checkNetworkError());
 	}
@@ -510,7 +505,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		mShareablePopupLayout.updateListenerAndView(this, activity.findViewById(R.id.chatThreadParentLayout));
 		mStickerPicker.updateListener(this, activity);
-		mEmoticonPicker.updateListener(this, activity);
+		mEmoticonPicker.updateETAndContext(mComposeView, activity);
 	}
 
 	private void addOnClickListeners()
@@ -530,7 +525,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private void initEmoticonPicker()
 	{
-		mEmoticonPicker = new EmoticonPicker(activity, this);
+		mEmoticonPicker = new EmoticonPicker(activity, mComposeView);
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -1120,22 +1115,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	}
 
 	@Override
-	public void emoticonSelected(int emoticonIndex)
-	{
-		Logger.i(TAG, " This emoticon was selected : " + emoticonIndex);
-		Utils.emoticonClicked(activity.getApplicationContext(), emoticonIndex, mComposeView);
-	}
-	
-	@Override
-	public void eraseEmoticon()
-	{
-		if (mComposeView != null)
-		{
-			mComposeView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
-		}
-	}
-
-	@Override
 	public void audioRecordSuccess(String filePath, long duration)
 	{
 		Logger.i(TAG, "Audio Recorded " + filePath + "--" + duration);
@@ -1262,6 +1241,29 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		setMessagesRead(); // Setting messages as read if there are any unread ones
 
+		setEditTextListeners();
+		
+		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
+
+		// Register broadcasts
+		mBroadCastReceiver = new ChatThreadBroadcasts();
+
+		IntentFilter intentFilter = new IntentFilter(StickerManager.STICKERS_UPDATED);
+		intentFilter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
+		intentFilter.addAction(StickerManager.STICKERS_DOWNLOADED);
+
+		LocalBroadcastManager.getInstance(activity.getBaseContext()).registerReceiver(mBroadCastReceiver, intentFilter);
+		
+		/**
+		 * Adding PubSub, here since all the heavy work related to fetching of messages and setting up UI has been done already.
+		 */
+		addToPubSub();
+
+		takeActionBasedOnIntent();
+	}
+	
+	protected void setEditTextListeners()
+	{
 		mComposeView.addTextChangedListener(this);
 		mComposeView.setBackKeyListener(this);
 
@@ -1282,23 +1284,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		mComposeView.setOnKeyListener(this);
 
-		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
-
-		// Register broadcasts
-		mBroadCastReceiver = new ChatThreadBroadcasts();
-
-		IntentFilter intentFilter = new IntentFilter(StickerManager.STICKERS_UPDATED);
-		intentFilter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
-		intentFilter.addAction(StickerManager.STICKERS_DOWNLOADED);
-
-		LocalBroadcastManager.getInstance(activity.getBaseContext()).registerReceiver(mBroadCastReceiver, intentFilter);
-		
-		/**
-		 * Adding PubSub, here since all the heavy work related to fetching of messages and setting up UI has been done already.
-		 */
-		addToPubSub();
-
-		takeActionBasedOnIntent();
 	}
 
 	/*

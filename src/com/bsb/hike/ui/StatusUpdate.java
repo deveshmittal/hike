@@ -894,9 +894,4 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		Utils.emoticonClicked(getApplicationContext(), emoticonIndex, statusTxt);
 	}
 	
-	@Override
-	public void eraseEmoticon()
-	{
-		//This method just completes the interface
-	}
 }
