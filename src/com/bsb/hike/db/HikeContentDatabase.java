@@ -24,7 +24,7 @@ import com.bsb.hike.utils.Logger;
 public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants, HIKE_CONTENT
 {
 
-	private static HikeContentDatabase hikeContentDatabase=new HikeContentDatabase();
+	private static final HikeContentDatabase hikeContentDatabase=new HikeContentDatabase();
 
 	SQLiteDatabase mDB;
 

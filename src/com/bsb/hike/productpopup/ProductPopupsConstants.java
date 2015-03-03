@@ -17,7 +17,7 @@ public class ProductPopupsConstants
 
 	public static final String IS_FULL_SCREEN = "isFullScreen";
 
-	public static final String NOTIFICATION_TEXT = "notiftext";
+	public static final String USER = "notiftext";
 
 	public static final String PUSH = "push";
 
@@ -312,8 +312,15 @@ public class ProductPopupsConstants
 			{
 				return "openappstore";
 			}
+		},
+		CANCELDIALOG
+		{
+			@Override
+			public String toString()
+			{
+				return "cancel";
+			}
 		};
-		
 		
 	}
 

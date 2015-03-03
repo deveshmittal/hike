@@ -1,15 +1,21 @@
 package com.bsb.hike.productpopup;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.SparseArray;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeContentDatabase;
 import com.bsb.hike.models.HikeAlarmManager;
@@ -20,6 +26,8 @@ import com.bsb.hike.platform.content.PlatformContent.EventCode;
 import com.bsb.hike.platform.content.PlatformContentModel;
 import com.bsb.hike.productpopup.ProductPopupsConstants.PopupStateEnum;
 import com.bsb.hike.productpopup.ProductPopupsConstants.PopupTriggerPoints;
+import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -219,19 +227,6 @@ public class ProductInfoManager
 				{
 					productContentModel.setFormedData(content.getFormedData());
 					getListener().onSuccess(productContentModel);
-					//
-					// // deleting the popup from the Memory
-					// ArrayList<ProductContentModel> mmArrayList = mmSparseArray.get(productContentModel.getTriggerpoint());
-					// if (mmArrayList != null)
-					// {
-					// mmArrayList.remove(productContentModel);
-					// }
-					// mmArrayList = new ArrayList<ProductContentModel>();
-					//
-					// mmArrayList.add(productContentModel);
-					//
-					// // deleting the popup from the DataBase
-					// deletePopups(mmArrayList);
 				}
 				else
 				{
@@ -261,7 +256,7 @@ public class ProductInfoManager
 		{
 
 			Intent intent = new Intent();
-			intent.putExtra(ProductPopupsConstants.NOTIFICATION_TEXT, productContentModel.getNotifText());
+			intent.putExtra(ProductPopupsConstants.USER, productContentModel.getUser());
 			intent.putExtra(ProductPopupsConstants.NOTIFICATION_TITLE, productContentModel.getNotifTitle());
 			intent.putExtra(ProductPopupsConstants.PUSH_SOUND, productContentModel.shouldPlaySound());
 			intent.putExtra(ProductPopupsConstants.TRIGGER_POINT, productContentModel.getTriggerpoint());
@@ -316,7 +311,7 @@ public class ProductInfoManager
 
 		if (triggerpoint == PopupTriggerPoints.CHAT_SCR.ordinal())
 		{
-			HikeNotification.getInstance(context).notifyStringMessage(text, title, !shouldPlaySound);
+			HikeNotification.getInstance(context).notifyStringMessage(user, title, !shouldPlaySound);
 
 		}
 		else
@@ -334,9 +329,71 @@ public class ProductInfoManager
 	 */
 	public DialogPojo getDialogPojo(ProductContentModel mmModel)
 	{
-		DialogPojo mmPojo = new DialogPojo(mmModel.isFullScreen(), mmModel.getHeight(), mmModel.getFormedData());
-		mmPojo.setData(mmModel);
+		DialogPojo mmPojo = new DialogPojo(mmModel.isFullScreen(), mmModel.getHeight(), mmModel.getFormedData(), mmModel);
 		return mmPojo;
+	}
+
+	/**
+	 * function to get the host from the Url.
+	 * @param metaData
+	 * @return
+	 */
+	private String getUrl(String metaData)
+	{
+		HikeSharedPreferenceUtil mmHikeSharedPreferenceUtil = HikeSharedPreferenceUtil.getInstance(context);
+		try
+		{
+			JSONObject mmObject = new JSONObject(metaData);
+			String url = mmObject.optString(ProductPopupsConstants.URL);
+			if (!TextUtils.isEmpty(url))
+			{
+				url = url.replace("$reward_token", mmHikeSharedPreferenceUtil.getData(HikeMessengerApp.REWARDS_TOKEN, ""));
+				url = url.replace("$msisdn", mmHikeSharedPreferenceUtil.getData(HikeMessengerApp.MSISDN_SETTING, ""));
+				url = url.replace("$uid", mmHikeSharedPreferenceUtil.getData(HikeMessengerApp.TOKEN_SETTING, ""));
+			}
+			return url;
+
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+
+	/**
+	 * The function calls the Url.Calling from background  Thread .
+	 * @param metaData
+	 */
+	public void callToServer(final String metaData)
+	{
+
+		handler.post(new Runnable()
+		{
+		
+			@Override
+			public void run()
+			{
+				try
+				{
+					String host = getUrl(metaData);
+					if (!TextUtils.isEmpty(host))
+					{
+						URL url = new URL(host);
+						HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+						connection.connect();
+						Logger.d("ProductPopup",connection.getResponseCode()+"");
+					}
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+
+			}
+		});
 	}
 
 }

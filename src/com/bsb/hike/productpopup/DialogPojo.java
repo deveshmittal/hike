@@ -13,11 +13,10 @@ public class DialogPojo
 
 	boolean isFullScreen;
 
-	int height;
+	int heigth;
 
 	String html;
 	
-	//Any Addition data that the user want to persist.(optional hence not included in the constructor.)
 	Object data;
 
 	
@@ -28,12 +27,27 @@ public class DialogPojo
 	 */
 	public DialogPojo(boolean isFullScreen, int heigth, String html)
 	{
-		this.isFullScreen = isFullScreen;
-		this.height = heigth;
-		this.html = html;
+		this(isFullScreen,heigth,html,null);
 	}
 
 	
+	
+	/**
+	 * @param isFullScreen
+	 * @param height
+	 * @param html
+	 * @param data
+	 */
+	public DialogPojo(boolean isFullScreen, int heigth, String html, Object data)
+	{
+		this.isFullScreen = isFullScreen;
+		this.heigth = heigth;
+		this.html = html;
+		this.data = data;
+	}
+
+
+
 	/**
 	 * @return the isFullScreen
 	 */
@@ -47,7 +61,7 @@ public class DialogPojo
 	 */
 	public int getHeight()
 	{
-		return height;
+		return heigth;
 	}
 
 	/**

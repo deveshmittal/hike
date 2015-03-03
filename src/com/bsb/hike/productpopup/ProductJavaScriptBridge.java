@@ -1,6 +1,9 @@
 package com.bsb.hike.productpopup;
 
 import java.lang.ref.WeakReference;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 import org.json.JSONException;
@@ -19,6 +22,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.platform.bridge.JavascriptBridge;
+import com.bsb.hike.productpopup.ProductPopupsConstants.PopUpAction;
+import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.productpopup.ProductPopupsConstants.HIKESCREEN;
 import com.bsb.hike.productpopup.ProductPopupsConstants.PopUpAction;

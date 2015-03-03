@@ -30,9 +30,9 @@ public class ProductContentModel
 
 	private String formedData;
 
-	public String notifTitle;
+	private String notifTitle;
 
-	public long pushTime;
+	private long pushTime;
 
 	private ProductContentModel(JSONObject contentData)
 	{
@@ -40,7 +40,7 @@ public class ProductContentModel
 
 		starttime = contentData.optLong(START_TIME, 0l);
 		endtime = contentData.optLong(END_TIME, new Long(Integer.MAX_VALUE));
-		triggerpoint = contentData.optInt(TRIGGER_POINT);
+		triggerpoint = contentData.optInt(TRIGGER_POINT,PopupTriggerPoints.HOME_SCREEN.ordinal());
 		isFullScreen = contentData.optBoolean(IS_FULL_SCREEN, false);
 		pushTime = contentData.optLong(PUSH_TIME, 0l);
 	}
@@ -99,7 +99,7 @@ public class ProductContentModel
 	{
 		String text = mmContentModel.cardObj.getPush();
 
-		if (PushTypeEnum.getEnum(text)== PushTypeEnum.PUSH)
+		if (PushTypeEnum.getEnum(text)== PushTypeEnum.LOUD)
 		{
 			return true;
 		}
@@ -107,9 +107,9 @@ public class ProductContentModel
 		return false;
 	}
 
-	public String getNotifText()
+	public String getUser()
 	{
-		return mmContentModel.cardObj.getNotifText();
+		return mmContentModel.cardObj.getUser();
 	}
 
 	public JsonObject getLd()
@@ -203,7 +203,7 @@ public class ProductContentModel
 	
 	public boolean isPushReceived()
 	{
-		if (!TextUtils.isEmpty(getNotifText()) && !TextUtils.isEmpty(getNotifTitle()))
+		if (!TextUtils.isEmpty(getUser()) && !TextUtils.isEmpty(getNotifTitle()))
 		{
 			return true;
 		}
