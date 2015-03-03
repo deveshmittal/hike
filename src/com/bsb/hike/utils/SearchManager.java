@@ -17,10 +17,15 @@ public class SearchManager
 
 	private ArrayList<Searchable> itemList;
 
-	public SearchManager(Collection<? extends Searchable> collection)
+	public SearchManager()
 	{
 		this.indexList = new ArrayList<Integer>();
+	}
+	
+	public void init(Collection<? extends Searchable> collection)
+	{
 		this.itemList = new ArrayList<Searchable>(collection);
+		clearSearch();
 	}
 
 	public void makeNewSearch(String s)
@@ -29,7 +34,7 @@ public class SearchManager
 		indexList.clear();
 	}
 
-	public void endSearch()
+	public void clearSearch()
 	{
 		makeNewSearch("");
 	}
