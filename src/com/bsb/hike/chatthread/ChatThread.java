@@ -13,7 +13,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Dialog;
 import android.app.NotificationManager;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +33,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -43,6 +46,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
@@ -65,6 +69,8 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.widget.SearchView;
+import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
@@ -109,6 +115,7 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
@@ -121,15 +128,20 @@ import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.SearchManager;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomLinearLayout;
+import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
+import com.bsb.hike.view.CustomFontEditText;
 
 /**
  * 
@@ -193,6 +205,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
     protected static final int MULTI_MSG_DB_INSERTED = 25;
 
+	protected static final int SEARCH_ACTION_MODE = 24;
+
+	protected static final int SEARCH_NEXT = 25;
+
+	protected static final int SEARCH_PREVIOUS = 26;
+
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -249,6 +267,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected int selectedNonTextMsgs;
 
+	protected static SearchManager messageSearchManager;
+	
 	protected int selectedNonForwadableMsgs;
 
 	protected int shareableMessagesCount;
@@ -256,6 +276,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected int selectedCancelableMsgs;
 
 	protected ChatThreadTips mTips;
+	
+	private Dialog searchDialog;
 
 	private static final String NEW_LINE_DELIMETER = "\n";
 
@@ -572,6 +594,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case AttachmentPicker.GALLERY:
 			startHikeGallery(mConversation.isOnhike());
 			break;
+		case R.string.search:
+			setupSearchMode();
+			break;
 		default:
 			break;
 		}
@@ -595,8 +620,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected OverFlowMenuItem[] getOverFlowMenuItems()
 	{
-		return new OverFlowMenuItem[] { new OverFlowMenuItem(getString(R.string.clear_chat), 0, 0, R.string.clear_chat),
-				new OverFlowMenuItem(getString(R.string.email_chat), 0, 0, R.string.email_chat) };
+		return new OverFlowMenuItem[] {
+				new OverFlowMenuItem(getString(R.string.search), 0, 0, R.string.search),
+				new OverFlowMenuItem(getString(R.string.clear_chat), 0, 0, R.string.clear_chat),
+				new OverFlowMenuItem(getString(R.string.email_chat), 0, 0, R.string.email_chat)};
 	}
 
 	protected void showOverflowMenu()
@@ -664,6 +691,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case R.id.add_unknown_contact:
 			Utils.addToContacts(activity.getApplicationContext(), msisdn);
+			break;
+		case R.id.next:
+			Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+			searchMessage(true);
+			break;
+		case R.id.previous:
+			Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+			searchMessage(false);
+			break;
+		case R.id.search_clear_btn:
+			mComposeView.setText("");
 			break;
 		default:
 			Logger.e(TAG, "onClick Registered but not added in onClick : " + v.toString());
@@ -964,6 +1002,98 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		activity.startActivityForResult(imageIntent, AttachmentPicker.GALLERY);
 	}
 
+	private void setupSearchMode()
+	{
+		mActionMode.showActionMode(SEARCH_ACTION_MODE, R.layout.search_action_bar);
+		int id = mComposeView.getId();
+		mComposeView = (CustomFontEditText) activity.findViewById(R.id.search_text);
+		mComposeView.setTag(id);
+		View mBottomView = activity.findViewById(R.id.bottom_panel);
+		if (mShareablePopupLayout.isKeyboardOpen())
+		{ // ifkeyboard is not open, then keyboard will come which will make so much animation on screen
+			mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.up_down_lower_part));
+		}
+		mBottomView.setVisibility(View.GONE);
+		mComposeView.requestFocus();
+		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
+		if (messageSearchManager == null)
+		{
+			messageSearchManager = new SearchManager();
+		}
+		messageSearchManager.init(messages);
+		mComposeView.addTextChangedListener(searchTextWatcher);
+		mComposeView.setOnEditorActionListener(this);
+		activity.findViewById(R.id.next).setOnClickListener(this);
+		activity.findViewById(R.id.previous).setOnClickListener(this);
+		activity.findViewById(R.id.search_clear_btn).setOnClickListener(this);
+	}
+	
+	TextWatcher searchTextWatcher = new TextWatcher()
+	{
+		
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before, int count)
+		{
+			// TODO Auto-generated method stub
+			
+		}
+		
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count, int after)
+		{
+			// TODO Auto-generated method stub
+			
+		}
+		
+		@Override
+		public void afterTextChanged(Editable s)
+		{
+			String searchText = s.toString().toLowerCase();
+			messageSearchManager.makeNewSearch(searchText);
+			mAdapter.setSearchText(searchText);
+			mAdapter.notifyDataSetChanged();
+		}
+	};
+
+	private void searchMessage(boolean searchNext)
+	{
+		if (searchNext)
+		{
+			activity.getSupportLoaderManager().restartLoader(SEARCH_NEXT, null, this);
+		}
+		else
+		{
+			activity.getSupportLoaderManager().restartLoader(SEARCH_PREVIOUS, null, this);
+		}
+		searchDialog = ProgressDialog.show(activity, null, "Searching...");
+	}
+
+	private void updateUIforSearchResult(int position)
+	{
+		searchDialog.dismiss();
+		if (position >= 0)
+		{
+			mConversationsView.setSelection(position);
+		}
+		else
+		{
+			showToast(R.string.no_results);
+		}
+	}
+
+	private void destroySearchMode()
+	{
+		mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
+		mComposeView.requestFocus();
+		mComposeView.removeTextChangedListener(searchTextWatcher);
+		mComposeView.setText("");
+		View mBottomView = activity.findViewById(R.id.bottom_panel);
+		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
+		mBottomView.setVisibility(View.VISIBLE);
+		messageSearchManager.clearSearch();
+		mAdapter.setSearchText(null);
+	}
+
 	protected void showToast(int messageId)
 	{
 		Toast.makeText(activity, getString(messageId), Toast.LENGTH_SHORT).show();
@@ -1209,12 +1339,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected List<ConvMessage> loadMoreMessages()
 	{
-		int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
+		return loadMoreMessages(HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME);
+	}
+	protected List<ConvMessage> loadMoreMessages(int oldMessagesToLoad)
+	{
+		int startIndex = getMessagesStartIndex();
 
 		long firstMsgId = messages.get(startIndex).getMsgID();
 		Logger.i(TAG, "inside background thread: loading more messages " + firstMsgId);
 
-		return mConversationDb.getConversationThread(msisdn, HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME, mConversation, firstMsgId);
+		return mConversationDb.getConversationThread(msisdn, oldMessagesToLoad, mConversation, firstMsgId);
 	}
 
 	protected abstract int getContentView();
@@ -1638,7 +1772,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				Logger.i(TAG, "Adding 'n' new messages in the list : " + list.size());
 				int scrollOffset = 0;
 
-				int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
 
 				int firstVisibleItem = mConversationsView.getFirstVisiblePosition();
 
@@ -1647,11 +1780,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					scrollOffset = mConversationsView.getChildAt(0).getTop();
 				}
 
-				mAdapter.addMessages(list, startIndex);
-				addtoMessageMap(startIndex, startIndex + list.size());
+				addMoreMessages(list);
 
 				mAdapter.notifyDataSetChanged();
 				mConversationsView.setSelectionFromTop(firstVisibleItem + list.size(), scrollOffset);
+				
 			}
 
 			else
@@ -1664,6 +1797,23 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 			loadingMoreMessages = false;
 		}
+	}
+	
+	private void addMoreMessages(List<ConvMessage> list)
+	{
+		int startIndex = getMessagesStartIndex();
+		mAdapter.addMessages(list, startIndex);
+		addtoMessageMap(startIndex, startIndex + list.size());
+		if (messageSearchManager != null)
+		{
+			messageSearchManager.updateIndex(list.size());
+			messageSearchManager.updateDataSet(messages);
+		}
+	}
+	
+	private int getMessagesStartIndex()
+	{
+		return messages.get(0).isBlockAddHeader() ? 1 : 0;
 	}
 
 	@Override
@@ -1678,6 +1828,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			return new ConversationLoader(activity.getApplicationContext(), LOAD_MORE_MESSAGES, this);
 		}
+		else if (arg0 == SEARCH_NEXT || arg0 == SEARCH_PREVIOUS)
+		{
+			return new MessageFinder(activity.getApplicationContext(), arg0, this);
+		}
 		else
 		{
 			throw new IllegalArgumentException("On create loader is called with wrong loader id");
@@ -1688,16 +1842,30 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void onLoadFinished(Loader<Object> arg0, Object arg1)
 	{
 		Logger.d(TAG, "onLoadFinished");
-		ConversationLoader loader = (ConversationLoader) arg0;
-		if (loader.loaderId == FETCH_CONV)
+		if (arg0 instanceof ConversationLoader)
 		{
-			setupConversation((Conversation) arg1);
+			ConversationLoader loader = (ConversationLoader) arg0;
+			if (loader.loaderId == FETCH_CONV)
+			{
+				setupConversation((Conversation) arg1);
+			}
+			else if (loader.loaderId == LOAD_MORE_MESSAGES)
+			{
+				loadMessagesFinished((List<ConvMessage>) arg1);
+			}
 		}
-		else if (loader.loaderId == LOAD_MORE_MESSAGES)
+		else if (arg0 instanceof MessageFinder)
 		{
-			loadMessagesFinished((List<ConvMessage>) arg1);
+			MessageFinder loader = (MessageFinder) arg0;
+			if (loader.loaderId == SEARCH_NEXT)
+			{
+				updateUIforSearchResult((int) arg1);
+			}
+			else if (loader.loaderId == SEARCH_PREVIOUS)
+			{
+				updateUIforSearchResult((int) arg1);
+			}
 		}
-
 		else
 		{
 			throw new IllegalStateException("Expected data is either Conversation OR List<ConvMessages> , please check " + arg0.getClass().getCanonicalName());
@@ -1777,6 +1945,67 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 		}
 
+	}
+	
+	private static class MessageFinder extends AsyncTaskLoader<Object>
+	{
+		int loaderId;
+	
+		int position = -1;
+
+		int loadMessageCount = 50;
+
+		WeakReference<ChatThread> chatThread;
+
+		public MessageFinder(Context context, int loaderId, ChatThread chatThread)
+		{
+			super(context);
+			Logger.i(TAG, "message finder object " + loaderId);
+			this.loaderId = loaderId;
+			this.chatThread = new WeakReference<ChatThread>(chatThread);
+		}
+
+		@Override
+		public Object loadInBackground()
+		{
+			Logger.i(TAG, "search in background");
+
+			if (chatThread.get() != null)
+			{
+				if (loaderId == SEARCH_NEXT)
+				{
+					position = messageSearchManager.getNextItem(chatThread.get().mConversationsView.getFirstVisiblePosition());
+				}
+				else if (loaderId == SEARCH_PREVIOUS)
+				{
+					position = messageSearchManager.getPrevItem(chatThread.get().mConversationsView.getFirstVisiblePosition());
+					while (position < 0)
+					{
+						Logger.d("search","fetching messgaes: " + loadMessageCount);
+						List<ConvMessage> msgList = chatThread.get().loadMoreMessages(loadMessageCount);
+						if (msgList == null || msgList.isEmpty())
+						{
+							break;
+						}
+						
+						chatThread.get().addMoreMessages(msgList);
+						loadMessageCount *= 2;
+						position = messageSearchManager.getPrevItem(chatThread.get().mConversationsView.getFirstVisiblePosition());
+					}
+				}
+				return position;
+			}
+			return position;
+		}
+		
+		/**
+		 * This has to be done due to some bug in compat library -- http://stackoverflow.com/questions/10524667/android-asynctaskloader-doesnt-start-loadinbackground
+		 */
+		protected void onStartLoading()
+		{
+			Logger.i(TAG, "message finder onStartLoading");
+			forceLoad();
+		}
 	}
 
 	@Override
@@ -1945,7 +2174,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
 		{
-			int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
+			int startIndex = getMessagesStartIndex();
 
 			/*
 			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
@@ -3644,7 +3873,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case MULTI_SELECT_ACTION_MODE:
 			destroyActionMode();
 			break;
-
+		case SEARCH_ACTION_MODE:
+			destroySearchMode();
+			break;
 		default:
 			break;
 		}
@@ -3852,13 +4083,24 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			return false;
 		}
 
-		if ((view == mComposeView)
-				&& ((actionId == EditorInfo.IME_ACTION_SEND) || ((keyEvent != null) && (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
-						&& (keyEvent.getAction() != KeyEvent.ACTION_UP) && (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS))))
+		if ((view == mComposeView))
 		{
-			sendButtonClicked();
-			Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
-			return true;
+
+			if ((actionId == EditorInfo.IME_ACTION_SEND)
+					|| ((keyEvent != null) && (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) && (keyEvent.getAction() != KeyEvent.ACTION_UP) && (getResources()
+							.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)))
+			{
+				sendButtonClicked();
+				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+				return true;
+			}
+			else if (actionId == EditorInfo.IME_ACTION_SEARCH)
+			{
+				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+				searchMessage(false);
+				return true;
+			}
+			return false;
 		}
 		return false;
 	}

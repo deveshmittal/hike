@@ -16,13 +16,14 @@ import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
+import com.bsb.hike.utils.SearchManager.Searchable;
 import com.bsb.hike.utils.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ConvMessage
+public class ConvMessage implements Searchable
 {
 	private boolean isBlockAddHeader;
 
@@ -977,6 +978,33 @@ public class ConvMessage
 	
 	public void setMsisdn(String msisdn){
 		this.mMsisdn = msisdn;
+	}
+
+	@Override
+	public boolean doesItemContain(String s)
+	{
+		if (isFileTransferMessage())
+		{
+			if (getMetadata().getHikeFiles().get(0).getFileName().toLowerCase().contains(s))
+			{
+				return true;
+			}
+		}
+		else if (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
+		{
+			if (getMetadata().getStatusMessage().getText().toLowerCase().contains(s))
+			{
+				return true;
+			}
+		}
+		if (!TextUtils.isEmpty(getMessage()))
+		{
+			if (getMessage().toLowerCase().contains(s))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	
