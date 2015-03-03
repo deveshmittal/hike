@@ -105,10 +105,7 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 		super.onNewIntent(intent);
 		if(processNewIntent(intent))
 		{
-			/**
-			 * Calling onStop here because Lifecycle methods does not call onStop. We are switching to a different chat thread and hence we want to save drafts for user in the prev chat thread
-			 */
-			chatThread.onStop();
+			chatThread.onPreNewIntent();
 			init(intent);
 			setIntent(intent);
 			chatThread.onNewIntent();

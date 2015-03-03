@@ -2548,6 +2548,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		releaseStickerAndEmoticon();
 	}
 	
+	/**
+	 * This method is to be called before onNewIntent to cater to the following : 
+	 * 1. Save drafts for the current chat thread if any. 
+	 * 2. Dismiss stickers and emoticon pallete 
+	 */
+	protected void onPreNewIntent()
+	{
+		saveDraft();
+		if (mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
+	}
+	
 	protected void onStart()
 	{
 		/**
