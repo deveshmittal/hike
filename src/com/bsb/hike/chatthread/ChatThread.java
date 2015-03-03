@@ -1343,7 +1343,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	}
 	protected List<ConvMessage> loadMoreMessages(int oldMessagesToLoad)
 	{
-		int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
+		int startIndex = getMessagesStartIndex();
 
 		long firstMsgId = messages.get(startIndex).getMsgID();
 		Logger.i(TAG, "inside background thread: loading more messages " + firstMsgId);
@@ -1801,13 +1801,18 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	private void addMoreMessages(List<ConvMessage> list)
 	{
-		int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
+		int startIndex = getMessagesStartIndex();
 		mAdapter.addMessages(list, startIndex);
 		addtoMessageMap(startIndex, startIndex + list.size());
 		if (messageSearchManager != null)
 		{
 			messageSearchManager.updateIndex(list.size());
 		}
+	}
+	
+	private int getMessagesStartIndex()
+	{
+		return messages.get(0).isBlockAddHeader() ? 1 : 0;
 	}
 
 	@Override
@@ -2168,7 +2173,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
 		{
-			int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
+			int startIndex = getMessagesStartIndex();
 
 			/*
 			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
