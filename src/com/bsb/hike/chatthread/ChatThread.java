@@ -991,11 +991,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		imageIntent.putExtra(GalleryActivity.START_FOR_RESULT, true);
 		activity.startActivityForResult(imageIntent, AttachmentPicker.GALLERY);
 	}
-	
-	public SearchManager getMessageSearchManager()
-	{
-		return messageSearchManager;
-	}
 
 	private void setupSearchMode()
 	{
