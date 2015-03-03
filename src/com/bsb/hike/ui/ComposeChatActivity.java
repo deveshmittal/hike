@@ -188,12 +188,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private boolean nuxIncentiveMode;
 
-    private Sticker sticker;
-
-	private String sms;
-
-	private HikeFile hikeFile;
-
 	int type = HikeConstants.Extras.NOT_SHAREABLE;
 
 	 private HorizontalFriendsFragment newFragment;
@@ -383,7 +377,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			   case HikeConstants.Extras.ShareTypes.IMAGE_SHARE:
 		 			obj = getIntent().getStringExtra(HikeConstants.Extras.SHARE_CONTENT);
 			        break;
-			   case HikeConstants.Extras.ShareTypes.SMS_SHARE:
+			   case HikeConstants.Extras.ShareTypes.TEXT_SHARE:
 					obj = getIntent().getStringExtra(HikeConstants.Extras.SHARE_CONTENT);
                     break;
   			}

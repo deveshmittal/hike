@@ -40,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="1dp"
                 android:maxLines="2"
-                android:text="@string/stickerShareHeading"
+                android:text="@string/sticker_share_heading"
                 android:textColor="@color/white"
                 android:textSize="8sp"
                 android:textStyle="bold" />
@@ -52,7 +52,7 @@
                 android:layout_marginLeft="1dp"
                 android:layout_marginRight="4dp"
                 android:maxLines="2"
-                android:text="@string/stickerShareDescription"
+                android:text="@string/sticker_share_description"
                 android:textColor="@color/white"
                 android:textSize="6sp"
                 android:textStyle="normal" />

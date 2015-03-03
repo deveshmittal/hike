@@ -181,6 +181,7 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.ShareUtilsModel;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
@@ -8133,10 +8134,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			
 			if (selectedMessagesMap.get(selectedMsgIds.get(0)).isTextMsg())
 			{   
-				share_type = HikeConstants.Extras.ShareTypes.SMS_SHARE;
+				share_type = HikeConstants.Extras.ShareTypes.TEXT_SHARE;
 		    }
-
-			if( mAdapter.getSelectedCount() == 1 && Utils.appInstalledOrNot(HikeConstants.Extras.WHATSAPP_PACKAGE) )
+			
+			boolean showShareFunctionality = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.SHOW_SHARE_FUNCTIONALITY, false);
+			boolean shareFunctionalityPallete = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.SHARE_FUNCTIONALITY_PALETTE, false); 
+			ShareUtilsModel shareUtilsModel = new ShareUtilsModel(showShareFunctionality,shareFunctionalityPallete);
+			if( mAdapter.getSelectedCount() == 1 && Utils.isPackageInstalled(getApplicationContext(), HikeConstants.Extras.WHATSAPP_PACKAGE)  && shareUtilsModel.getShowShareFunctionality() )
 			{   ConvMessage message = selectedMessagesMap.get(selectedMsgIds.get(0));
 				switch(share_type)
 				{ 
@@ -8146,10 +8150,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			        	intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, sticker);
 			        	break;
 			        
-			        case HikeConstants.Extras.ShareTypes.SMS_SHARE:
-						String sms = message.getMessage();
-						intent.putExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.ShareTypes.SMS_SHARE);
-						intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, sms);
+			        case HikeConstants.Extras.ShareTypes.TEXT_SHARE:
+						String text = message.getMessage();
+						intent.putExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.ShareTypes.TEXT_SHARE);
+						intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, text);
 						break;
 			        
 			        case HikeConstants.Extras.ShareTypes.IMAGE_SHARE:

@@ -74,7 +74,7 @@ public class IntentManager
 		return intent;
 	}
 
-	public static Intent shareSmsIntentWhatsapp(String text)
+	public static Intent shareTextIntentWhatsapp(String text)
 	{
 		Intent intent = new Intent(Intent.ACTION_SEND);
 		intent.setType("text/plain");

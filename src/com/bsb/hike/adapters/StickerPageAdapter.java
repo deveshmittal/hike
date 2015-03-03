@@ -21,6 +21,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.models.ShareUtilsModel;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
@@ -28,6 +29,7 @@ import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.utils.RecyclingImageView;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.ShareUtils;
 import com.bsb.hike.utils.StickerManager;
@@ -60,9 +62,15 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener, 
 	
 	AbsListView absListView;
 	
+	private boolean shareFunctionalityPalette;
+	
+	private boolean showShareFunctionality;
+	
 	public StickerPageAdapter(Activity activity, List<StickerPageAdapterItem> itemList, StickerCategory category, StickerLoader worker, AbsListView absListView )
-	{
-		this.activity = activity;
+	{   
+		shareFunctionalityPalette = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.SHARE_FUNCTIONALITY_PALETTE, false);
+	    showShareFunctionality = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.SHOW_SHARE_FUNCTIONALITY, false);
+	    this.activity = activity;
 		this.itemList = itemList;
 		this.category = category;
 		this.inflater = LayoutInflater.from(activity);
@@ -359,11 +367,13 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener, 
 	
 	@Override
 	public boolean onLongClick(View v)
-	{
+	{  
 		ViewHolder viewHolder = (ViewHolder) v.getTag();
 		int position = viewHolder.position;
 		StickerPageAdapterItem item = (StickerPageAdapterItem) getItem(position);
-		if (item.getType() == StickerPageAdapterItem.STICKER )
+		ShareUtilsModel shareUtilsModel = new ShareUtilsModel(showShareFunctionality,shareFunctionalityPalette);
+		
+		if (item.getType() == StickerPageAdapterItem.STICKER && shareUtilsModel.getShareFunctionalityPalette())
 		{
 			Sticker sticker = item.getSticker();
 		    Intent intent = ShareUtils.shareContent(HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE,sticker);

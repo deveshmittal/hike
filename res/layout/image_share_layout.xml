@@ -42,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="3"
-                android:text="@string/imageShareHeading"
+                android:text="@string/image_share_heading"
                 android:textColor="@color/white"
                 android:textSize="7sp"
                 android:textStyle="bold" />
@@ -53,7 +53,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="4dp"
                 android:maxLines="2"
-                android:text="@string/imageShareDescription"
+                android:text="@string/image_share_description"
                 android:textColor="@color/white"
                 android:textSize="5sp"
                 android:textStyle="normal" />
