@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.view.RoundedDrawable;
 /**
  * @author akhiltripathi
  *	
@@ -105,7 +106,7 @@ public abstract class EffectItemLinearLayout extends LinearLayout
 	{
 		if (icon != null)
 		{
-			return ((BitmapDrawable) this.icon.getDrawable()).getBitmap();
+			return ((RoundedDrawable) this.icon.getDrawable()).toBitmap();
 		}
 		else
 		{
