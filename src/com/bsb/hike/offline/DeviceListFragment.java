@@ -90,8 +90,10 @@ import com.bsb.hike.utils.Utils;
 public class DeviceListFragment extends ListFragment implements PeerListListener ,GroupInfoListener{
 
 	public static final String IP_SERVER = "192.168.49.1";
-	public static int PORT = 8988;
-	private static boolean server_running = false;
+	public static int fileTransferPort = 18988;
+	public static int textMessagePort = 18999;
+	private static boolean fileTransferServerRunning = false;
+	private static boolean textTransferServerRunning = false;
 	private final int RESULT_OK = -1;
 	
     private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
@@ -110,7 +112,8 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     private static int currentSizeReceived = 0;
     private List<String> peers_msisdn = new ArrayList<String>();
     private static  int numOfIterations = 0;
-    private int size = 0;
+    private int fileSize = 0;
+    private int textSize = 0;
     public static boolean isReconnecting = false;
     
 
@@ -154,7 +157,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         }
     }
 
-    
+    /*
     @Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -186,7 +189,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
 					}
 			
-					serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
+					serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, fileTransferPort);
 					long start = System.currentTimeMillis();
 					getActivity().startService(serviceIntent);
 					long end = System.currentTimeMillis();
@@ -201,7 +204,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 			Log.e("wifidirectdemo", "Something went wrong. Please select the file again!");
 		}
 	}
-	
+	*/
 	
     /**
      * Initiate a connection with the peer.
@@ -212,7 +215,8 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     		syncMsisdn = new Object();
     	synchronized(syncMsisdn){
     		Log.d("DeviceListFragment", peers.get(position).deviceAddress + "-----> " + peers.get(position).status );
-    		if(FileTransferService.isOfflineFileTransferFinished == false)
+    		if(!OfflineFileTransferManager.getInstance().getIsOfflineFileTransferFinished() ||
+    				!OfflineFileTransferManager.getInstance().getIsOfflineTextTransferFinished())
     		{
     			if(peers.get(position).deviceAddress.compareTo(currentDevice.deviceAddress)==0)
     			{
@@ -514,7 +518,83 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	 * A simple server socket that accepts connection and writes some data on
 	 * the stream.
 	 */
-	public class ServerAsyncTask extends AsyncTask<Void,Void, String> {
+	
+	public class TextReceiveAsyncTask extends AsyncTask<Void,Void, String>
+	{
+		private final Context context;
+		byte type;
+		
+		public TextReceiveAsyncTask(Context context) {
+			this.context = context;
+		}
+		@Override
+		protected String doInBackground(Void... params) {
+			String message = "";
+			try 
+			{
+				ServerSocket serverSocket = new ServerSocket(textMessagePort);
+                Log.d(WiFiDirectActivity.TAG, "Server: Socket opened");
+                Socket client = serverSocket.accept();
+
+                OfflineFileTransferManager.getInstance().setOfflineTextTransferFinished(false);
+                InputStream inputstream = client.getInputStream();
+                byte[] typeArr = new byte[1];
+                inputstream.read(typeArr, 0, typeArr.length);
+                byte[] intArray = new byte[4];
+                inputstream.read(intArray, 0, 4);
+                textSize = com.bsb.hike.offline.Utils.byteArrayToInt(intArray);
+                Log.d(WiFiDirectActivity.TAG, ""+textSize);
+                type = typeArr[0];
+                byte[] msg  =  new byte[textSize];
+            	inputstream.read(msg,0,textSize);
+            	serverSocket.close();
+            	textTransferServerRunning = false;
+            	message = (new String(msg));	
+			}
+			catch (IOException e) {
+				Log.e(WiFiDirectActivity.TAG, e.getMessage());
+			}
+			return message;
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			for(WifiP2pDevice cpeer: peers)
+        	{
+        		if(cpeer.status==WifiP2pDevice.CONNECTED || cpeer.status==WifiP2pDevice.UNAVAILABLE)
+        		{
+        			connectedDevice  = cpeer;  
+        		}
+        	}
+			
+			ConvMessage convMessage =  new ConvMessage(result,connectedDevice.deviceName,System.currentTimeMillis()/1000,ConvMessage.State.RECEIVED_UNREAD);
+			convMessage.setMappedMsgID(System.currentTimeMillis());
+			if(convMessage.getMessage().compareTo("Nudge!")==0)
+			{
+				try {
+					JSONObject md = ((convMessage.getMetadata() != null) ? convMessage.getMetadata().getJSON() : new JSONObject());
+					md.put(HikeConstants.POKE, true);
+					convMessage.setMetadata(md);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+			
+			OfflineFileTransferManager.getInstance().setOfflineTextTransferFinished(true);
+			peersStatus.put(connectedDevice, "Available for file transfer");
+			((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+			if(!textTransferServerRunning)
+			{
+				new TextReceiveAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+				textTransferServerRunning = true;
+			}
+		}
+	}
+	
+	public class FileReceiveServerAsyncTask extends AsyncTask<Void,Void, String> {
 
 		private final Context context;
 		byte type;
@@ -524,7 +604,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		/**
 		 * @param context
 		 */
-		public ServerAsyncTask(Context context) {
+		public FileReceiveServerAsyncTask(Context context) {
 			this.context = context;
 		}
 
@@ -532,23 +612,21 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		protected String doInBackground(Void... params) {
 			String path = "";
 			try {
-				ServerSocket serverSocket = new ServerSocket(PORT);
+				ServerSocket serverSocket = new ServerSocket(fileTransferPort);
                 Log.d(WiFiDirectActivity.TAG, "Server: Socket opened");
                 Socket client = serverSocket.accept();
-               
-                //Log.d(WiFiDirectActivity.TAG, "Server: connection done.. Receiving File");
-                //Toast.makeText(, text, duration)
-                //DeviceListFragment fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
-                FileTransferService.isOfflineFileTransferFinished = false;
+
+                OfflineFileTransferManager.getInstance().setIsOfflineFileTransferFinished(false);
+                Log.d("OfflineFileTransferManager", "Reached");
                 InputStream inputstream = client.getInputStream();
                 byte[] typeArr = new byte[1];
                 inputstream.read(typeArr, 0, typeArr.length);
                 byte[] intArray = new byte[4];
                 inputstream.read(intArray, 0, 4);
-                size = com.bsb.hike.offline.Utils.byteArrayToInt(intArray);
-                Log.d(WiFiDirectActivity.TAG, ""+size);
+                fileSize = com.bsb.hike.offline.Utils.byteArrayToInt(intArray);
+                Log.d(WiFiDirectActivity.TAG, ""+fileSize);
                 currentSizeReceived = 0;
-                numOfIterations = size/1024 + ((size%1024!=0)?1:0);
+                numOfIterations = fileSize/1024 + ((fileSize%1024!=0)?1:0);
                 type = typeArr[0];
                 if(publishProgressThread == null)
 	                	publishProgressThread = (new Thread() {
@@ -600,21 +678,23 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                         dirs.mkdirs();
                     f.createNewFile();
                     break;
+                /*
                 case 5:
-                	byte[] msg  =  new byte[size];
-                	inputstream.read(msg,0,size);
+                	byte[] msg  =  new byte[fileSize];
+                	inputstream.read(msg,0,fileSize);
                 	serverSocket.close();
-                	server_running = false;
+                	fileTransferServerRunning = false;
                 	path = (new String(msg));
                 	break;
+                	*/
                 }
                 
-                if(type!=5)
+                //if(type!=5)
                 {
 	                Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
 	                copyFile(inputstream, new FileOutputStream(f));
 	                serverSocket.close();
-	                server_running = false;
+	                fileTransferServerRunning = false;
 	                path =  f.getAbsolutePath();
                 }
 			} catch (IOException e) {
@@ -674,7 +754,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
 						thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
 						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
-						Logger.d(getClass().getSimpleName(), "Thumbnail Size : " + tBytes.length);
+						Logger.d(getClass().getSimpleName(), "Thumbnail fileSize : " + tBytes.length);
 						JSONObject metadata = null;
 						ConvMessage convMessage = null;
 						try {
@@ -705,7 +785,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
 						thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
 						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
-						Logger.d(getClass().getSimpleName(), "Thumbnail Size : " + tBytes.length);
+						Logger.d(getClass().getSimpleName(), "Thumbnail fileSize : " + tBytes.length);
 						JSONObject metadata = null;
 						ConvMessage convMessage = null;
 						try {
@@ -732,6 +812,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 					intent.setDataAndType(Uri.parse("file://" + result), "audio/*");
 					context.startActivity(intent);
 				}
+				/*
 				else if(type==5)
 				{
 					ConvMessage convMessage =  new ConvMessage(result,connectedDevice.deviceName,System.currentTimeMillis()/1000,ConvMessage.State.RECEIVED_UNREAD);
@@ -749,17 +830,19 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 					
 					HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
-				}
+				}*/
 				
 			}
-			FileTransferService.isOfflineFileTransferFinished = true;
-			publishProgressThread.interrupt();
+			OfflineFileTransferManager.getInstance().setIsOfflineFileTransferFinished(true);
+			if(publishProgressThread != null)
+				publishProgressThread.interrupt();
 			peersStatus.put(connectedDevice, "Available for file transfer");
 			((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-			if(!server_running)
+			if(!fileTransferServerRunning)
 			{
-				new ServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-				server_running = true;
+				new FileReceiveServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+				fileTransferServerRunning = true;
+
 			}
 			
 		}
@@ -767,18 +850,18 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		@Override
 		protected void onProgressUpdate(Void... values) {
         		Double percentage = 0.0;
-        			if(numOfIterations != 0)
-        				percentage = (currentSizeReceived/(double)numOfIterations);
-        			else
-        				percentage = 100.0;
-        			if((percentage*100)>=100)
-        				percentage = 1.0;
-        			percentage *= 100.0;
-        			DecimalFormat df = new DecimalFormat("#.##");
-        			percentage =  Double.valueOf(df.format(percentage));
-        			peersStatus.put(connectedDevice, "Receiving file " + (percentage)+ "%");
-    				((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-			super.onProgressUpdate(values);
+    			if(numOfIterations != 0)
+    				percentage = (currentSizeReceived/(double)numOfIterations);
+    			else
+    				percentage = 100.0;
+    			if((percentage*100)>=100)
+    				percentage = 1.0;
+    			percentage *= 100.0;
+    			DecimalFormat df = new DecimalFormat("#.##");
+    			percentage =  Double.valueOf(df.format(percentage));
+    			peersStatus.put(connectedDevice, "Receiveing file " + (percentage)+ "%");
+				((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+				super.onProgressUpdate(values);
 		}
 
 	}
@@ -791,10 +874,15 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    }
 	    DeviceListFragment.groupInfo = group;
 	    // No check for HoneyComb since WiFi Direct runs only on devices with Android 4+
-	    if (!server_running)
+	    if (!fileTransferServerRunning)
 	    {
-	    	new ServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-	    	server_running = true;
+	    	new FileReceiveServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+	    	fileTransferServerRunning = true;
+	    }
+	    if(!textTransferServerRunning)
+	    {
+	    	new TextReceiveAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+	    	textTransferServerRunning = true;
 	    }
 	    
 	    WiFiDirectActivity.connectingDeviceConfig = null;

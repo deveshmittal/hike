@@ -270,7 +270,8 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     {
 		@Override
 		protected Void doInBackground(Void... params) {
-			while(!FileTransferService.isOfflineFileTransferFinished)
+			while(!OfflineFileTransferManager.getInstance().getIsOfflineFileTransferFinished() ||
+					!OfflineFileTransferManager.getInstance().getIsOfflineTextTransferFinished())
 	    	{
 				try {
 					Thread.sleep(1*1000);

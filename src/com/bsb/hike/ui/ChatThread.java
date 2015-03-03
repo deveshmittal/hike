@@ -184,6 +184,8 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.offline.FileTransferService;
+import com.bsb.hike.offline.OfflineFileTransferManager;
+import com.bsb.hike.offline.OfflineInfoPacket;
 import com.bsb.hike.offline.WiFiDirectActivity;
 import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.HikePlatformConstants;
@@ -1904,15 +1906,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
         {
         	if(convMessage.isStickerMessage())
         	{
-        		try {
+        		try 
+        		{
 					String filePath = (String) convMessage.getMetadata().getJSON().get(StickerManager.STICKER_PATH);
 					String deviceAddress = getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
 					addMessage(convMessage,playPinAnim);
 					HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
 					String localIP = com.bsb.hike.offline.Utils.getLocalIPAddress();
 					localIP = localIP.substring(0, localIP.length()-5);
-					String IP_SERVER = com.bsb.hike.offline.DeviceListFragment.IP_SERVER;
-					int PORT = com.bsb.hike.offline.DeviceListFragment.PORT;
+					String IP_SERVER = OfflineFileTransferManager.IP_SERVER;
+					int PORT = com.bsb.hike.offline.DeviceListFragment.fileTransferPort;
 					Log.d(WiFiDirectActivity.TAG,"localip " + localIP);
 					
 					// Trick to find the ip in the file /proc/net/arp
@@ -1921,18 +1924,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			        Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
 			        Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);
 			        
-					Intent serviceIntent = new Intent(getApplicationContext(), FileTransferService.class);
-					serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
-					serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filePath);
-					serviceIntent.putExtra("fileType", 2);
+			        String hostAddress;
+					int type = 2;
 				    if(localIP.equals(IP_SERVER) || ( (clientIP!=null) && !(clientIP.equals(IP_SERVER)) )){
-							serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
-					}else{
-							serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
+							hostAddress = clientIP;
 					}
-					serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
-					startService(serviceIntent);
-					} catch (JSONException e) {
+				    else{
+							hostAddress = IP_SERVER;
+					}
+				    
+				    OfflineInfoPacket offlineInfoPacket = new OfflineInfoPacket(filePath, false, null, hostAddress, type);
+				    OfflineFileTransferManager.getInstance().sendMessage(offlineInfoPacket);
+					
+				} 
+        		catch (JSONException e) 
+        		{
 					e.printStackTrace();
 				}
         	}
@@ -6904,8 +6910,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void sendOfflineText(String deviceAddress,  String message)
 	{
 		String localIP = com.bsb.hike.offline.Utils.getLocalIPAddress();
-		String IP_SERVER = com.bsb.hike.offline.DeviceListFragment.IP_SERVER;
-		int PORT = com.bsb.hike.offline.DeviceListFragment.PORT;
+		String IP_SERVER = OfflineFileTransferManager.IP_SERVER;
+		int PORT = com.bsb.hike.offline.DeviceListFragment.fileTransferPort;
 		Log.d(WiFiDirectActivity.TAG,"localip " + localIP);
 		
 		// Trick to find the ip in the file /proc/net/arp
@@ -6913,28 +6919,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
         Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
         Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);
-        
-		Intent serviceIntent = new Intent(getApplicationContext(), FileTransferService.class);
-		serviceIntent.putExtra("fileType", 5);
-        serviceIntent.putExtra("message", message);
-        
+
+		String hostAddress;
+		int type = 5;
         if(localIP.equals(IP_SERVER) || ( (clientIP!=null) && !(clientIP.equals(IP_SERVER)) )){
-			serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
+			hostAddress = clientIP;
 		}else{
-			serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
+			hostAddress = IP_SERVER;
 		}
-		serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
-		serviceIntent.setAction(FileTransferService.ACTION_SEND_TEXT);
-		startService(serviceIntent);
-		
-	
+        OfflineInfoPacket offlineInfoPacket = new OfflineInfoPacket(null, true, message, hostAddress, type);
+        OfflineFileTransferManager.getInstance().sendMessage(offlineInfoPacket);	
 	}
 	private void initialiseOfflineFileTransfer(String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration,
 			boolean isForwardingFile, int attachementType,  String deviceAddress, int fType)
 	{
 		String localIP = com.bsb.hike.offline.Utils.getLocalIPAddress();
-		String IP_SERVER = com.bsb.hike.offline.DeviceListFragment.IP_SERVER;
-		int PORT = com.bsb.hike.offline.DeviceListFragment.PORT;
+		String IP_SERVER = OfflineFileTransferManager.IP_SERVER;
 		Log.d(WiFiDirectActivity.TAG,"localip " + localIP);
 		
 		// Trick to find the ip in the file /proc/net/arp
@@ -6942,41 +6942,38 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
         Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
         Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);
-       
-		Intent serviceIntent = new Intent(getApplicationContext(), FileTransferService.class);
-		serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
-		serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filePath);
-		             
+		String hostAddress;
+		int type = 0;
 		try
 		{
 			switch(fType)
 			{
 				case HikeConstants.SHARE_APK_CODE:
-					serviceIntent.putExtra("fileType", 1);
+					type = 1;
 			        break;
 				case HikeConstants.IMAGE_CAPTURE_CODE:
-					serviceIntent.putExtra("fileType", 2);
+					type = 2;
 			        break;
 				case HikeConstants.IMAGE_TRANSFER_CODE:
-					serviceIntent.putExtra("fileType", 2);
+					type = 2;
 			        break;
 				case HikeConstants.VIDEO_TRANSFER_CODE:
-					serviceIntent.putExtra("fileType", 3);
+					type = 3;
 					break;
 				case HikeConstants.AUDIO_TRANSFER_CODE:
-					serviceIntent.putExtra("fileType", 4);
+					type = 4;
 					break;
 				default:
 					Toast.makeText(getApplicationContext(), "File not selected!", Toast.LENGTH_SHORT).show();
 			}
 			if(localIP.equals(IP_SERVER) || ( (clientIP!=null) && !(clientIP.equals(IP_SERVER)) )){
-				serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
+				hostAddress = clientIP;
 			}else{
-				serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
+				hostAddress = IP_SERVER;
 			}
-	
-			serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
-			startService(serviceIntent);
+			OfflineInfoPacket offlineInfoPacket = new OfflineInfoPacket(filePath, false, null, hostAddress, type);
+			OfflineFileTransferManager.getInstance().sendMessage(offlineInfoPacket);
+			
 			File file = new File(filePath);
 			FileTransferManager.getInstance(getApplicationContext()).uploadOfflineFile(mContactNumber, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile,
 					mConversation.isOnhike(), recordingDuration, attachementType);

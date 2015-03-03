@@ -44,6 +44,8 @@ import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.offline.FileTransferService;
+import com.bsb.hike.offline.OfflineFileTransferManager;
+import com.bsb.hike.offline.OfflineInfoPacket;
 import com.bsb.hike.offline.WiFiDirectActivity;
 import com.bsb.hike.smartImageLoader.GalleryImageLoader;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
@@ -303,26 +305,24 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 					}else{
 						String deviceAddress  =  getIntent().getExtras().getString("OfflineDeviceName");
 						String localIP = com.bsb.hike.offline.Utils.getLocalIPAddress();
-						String IP_SERVER = com.bsb.hike.offline.DeviceListFragment.IP_SERVER;
-						int PORT = com.bsb.hike.offline.DeviceListFragment.PORT;
+						String IP_SERVER = OfflineFileTransferManager.IP_SERVER;
+						
 						String client_mac_fixed = new String(deviceAddress).replace("99", "19");
 						String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
 					     
 						for (GalleryItem galleryItem : galleryItems)
 						{
 							 String filePath = galleryItem.getFilePath();
-						     Intent serviceIntent = new Intent(getApplicationContext(), FileTransferService.class);
-							 serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
-							 serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filePath);
-							 serviceIntent.putExtra("fileType", 2);
+							 String hostAddress;
+							 int type = 2;
 							 if(localIP.equals(IP_SERVER) || ( (clientIP!=null) && !(clientIP.equals(IP_SERVER)) )){
-									serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
+									hostAddress = clientIP;
 								}else{
-									serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
+									hostAddress = IP_SERVER;
 								}
-						
-							 serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, PORT);
-							 startService(serviceIntent);
+							 OfflineInfoPacket offlineInfoPacket = new OfflineInfoPacket(filePath, false, null, hostAddress, type);
+							 OfflineFileTransferManager.getInstance().sendMessage(offlineInfoPacket);
+							 
 							 File file = new File(filePath);
 							 Boolean onHike  = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
 							 String msisdn  = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
