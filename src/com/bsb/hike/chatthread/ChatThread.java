@@ -692,6 +692,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case R.id.add_unknown_contact:
 			Utils.addToContacts(activity.getApplicationContext(), msisdn);
 			break;
+		case R.id.next:
+			Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+			searchMessage(true);
+			break;
+		case R.id.previous:
+			Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+			searchMessage(false);
+			break;
+		case R.id.search_clear_btn:
+			mComposeView.setText("");
+			break;
 		default:
 			Logger.e(TAG, "onClick Registered but not added in onClick : " + v.toString());
 			break;
@@ -1012,9 +1023,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		messageSearchManager.init(messages);
 		mComposeView.addTextChangedListener(searchTextWatcher);
 		mComposeView.setOnEditorActionListener(searchActionClickListener);
-		activity.findViewById(R.id.next).setOnClickListener(searchOptionsClickListener);
-		activity.findViewById(R.id.previous).setOnClickListener(searchOptionsClickListener);
-		activity.findViewById(R.id.search_clear_btn).setOnClickListener(searchOptionsClickListener);
+		activity.findViewById(R.id.next).setOnClickListener(this);
+		activity.findViewById(R.id.previous).setOnClickListener(this);
+		activity.findViewById(R.id.search_clear_btn).setOnClickListener(this);
 	}
 	
 	TextWatcher searchTextWatcher = new TextWatcher()
@@ -1055,28 +1066,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				searchMessage(false);
 			}
 			return false;
-		}
-	};
-
-	OnClickListener searchOptionsClickListener = new OnClickListener()
-	{
-		@Override
-		public void onClick(View v)
-		{
-			switch (v.getId())
-			{
-			case R.id.next:
-				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
-				searchMessage(true);
-				break;
-			case R.id.previous:
-				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
-				searchMessage(false);
-				break;
-			case R.id.search_clear_btn:
-				mComposeView.setText("");
-				break;
-			}
 		}
 	};
 	
