@@ -674,10 +674,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		{
 			String alter1 = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.SERVER_ID + " INTEGER";
 			String alter2 = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.CONVERSATION_TYPE + " INTEGER DEFAULT 0";
-			String alter3 = "UPDATE " + DBConstants.MESSAGES_TABLE + " SET " + DBConstants.SERVER_ID + " = "  + DBConstants.MESSAGE_ID;
 			db.execSQL(alter1);
 			db.execSQL(alter2);
-			db.execSQL(alter3);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.UPGRADE_FOR_SERVER_ID_FIELD, 1);
 		}
 	}
 
@@ -6458,5 +6457,38 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 			}
 		}
+	}
+	
+	public boolean upgradeForServerIdField()
+	{
+		boolean result = false;
+		try
+		{
+			mDb.beginTransaction();
+			
+			long startTime = System.currentTimeMillis();
+			
+			String update = "UPDATE " + DBConstants.MESSAGES_TABLE + " SET " + DBConstants.SERVER_ID + " = "  + DBConstants.MESSAGE_ID;
+			mDb.execSQL(update);
+			
+			long endTime = System.currentTimeMillis();
+			
+			Logger.d("HikeConversationDatadase", " ServerId db upgrade time : "+(startTime-endTime));
+			
+			mDb.setTransactionSuccessful();
+			result = true;
+		}
+		catch (Exception e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception : ", e);
+			e.printStackTrace();
+			result = false;
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
+		
+		return result;
 	}
 }
