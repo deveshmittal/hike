@@ -35,8 +35,10 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
@@ -323,6 +325,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean isH20TipShowing;
 	
 	private OnClickListener mOnClickListener;
+
+	private String searchText;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, OnClickListener listener, ListView mListView, Activity activity)
 	{
@@ -1739,7 +1743,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				dayHolder = fileHolder;
 				setSenderDetails(convMessage, position, fileHolder, false);
-				fileHolder.fileName.setText(hikeFile.getFileName());
+				String fileName = hikeFile.getFileName();
+				fileHolder.fileName.setText(fileName);
+				checkIfContainsSearchText(fileHolder.fileName);
+				
 				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
 					fileHolder.fileSize.setText(Utils.getSizeForDisplay((int) hikeFile.getFile().length()));
@@ -1849,6 +1856,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			markedUp = smileyParser.addSmileySpans(markedUp, false);
 			textHolder.text.setText(markedUp);
+			checkIfContainsSearchText(textHolder.text);
+
 			Linkify.addLinks(textHolder.text, Linkify.ALL);
 			Linkify.addLinks(textHolder.text, Utils.shortCodeRegex, "tel:");
 
@@ -2518,10 +2527,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (detailHolder.senderName != null)
 				{
 					detailHolder.senderName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+					checkIfContainsSearchText(detailHolder.senderName);
 				}
 				if (detailHolder.senderNameUnsaved != null)
 				{
 					detailHolder.senderNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+					checkIfContainsSearchText(detailHolder.senderNameUnsaved);
 				}
 			}
 			else
@@ -2529,10 +2540,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (detailHolder.senderName != null)
 				{
 					detailHolder.senderName.setTextColor(context.getResources().getColor(R.color.chat_color));
+					checkIfContainsSearchText(detailHolder.senderName);
 				}
 				if (detailHolder.senderNameUnsaved != null)
 				{
 					detailHolder.senderNameUnsaved.setTextColor(context.getResources().getColor(R.color.unsaved_contact_name));
+					checkIfContainsSearchText(detailHolder.senderNameUnsaved);
 				}
 			}
 			detailHolder.avatarImage.setVisibility(View.VISIBLE);
@@ -2543,6 +2556,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			detailHolder.senderDetails.setVisibility(View.GONE);
 			detailHolder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
+		}
+	}
+	
+	private void checkIfContainsSearchText(TextView tv)
+	{
+		String text = tv.getText().toString();
+		if (!TextUtils.isEmpty(searchText) && text.toLowerCase().contains(searchText))
+		{
+			int startSpanIndex = text.toLowerCase().indexOf(searchText);
+			SpannableString spanText = new SpannableString(text);
+			spanText.setSpan(new BackgroundColorSpan(context.getResources().getColor(R.color.text_bg)), startSpanIndex, startSpanIndex + searchText.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			tv.setText(spanText, TextView.BufferType.SPANNABLE);
 		}
 	}
 
@@ -2673,6 +2699,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		holder.initializing.setVisibility(View.VISIBLE);
 	}
 
+	public void setSearchText(String s)
+	{
+		searchText = s;
+	}
+
 	private void showTransferProgress(FTViewHolder holder, FileSavedState fss, long msgId, HikeFile hikeFile, boolean isSent)
 	{
 		int progress = FileTransferManager.getInstance(context).getFTProgress(msgId, hikeFile.getFile(), isSent);
@@ -2740,7 +2771,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
-	private boolean ifFirstMessageFromRecepient(ConvMessage convMessage, int position)
+	public boolean ifFirstMessageFromRecepient(ConvMessage convMessage, int position)
 	{
 		boolean ret = false;
 		if (!convMessage.isSent())
@@ -3850,7 +3881,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT)
 		{
 			SmileyParser smileyParser = SmileyParser.getInstance();
+			
 			statusHolder.messageTextView.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
+			checkIfContainsSearchText(statusHolder.messageTextView);
 			Linkify.addLinks(statusHolder.messageTextView, Linkify.ALL);
 
 		}
