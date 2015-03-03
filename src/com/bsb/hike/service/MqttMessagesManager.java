@@ -1440,6 +1440,11 @@ public class MqttMessagesManager
 			HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.Extras.GENERAL_SO_TIMEOUT, timeout);
 			AccountUtils.setSocketTimeout((int) timeout);
 		}
+		if(data.has(HikeConstants.Extras.ENABLE_PHOTOS))
+		{
+			boolean enablePhoto = data.getBoolean(HikeConstants.Extras.ENABLE_PHOTOS);
+			HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.ACCOUNT_SETTINGS).saveData(HikeConstants.Extras.ENABLE_PHOTOS, enablePhoto);
+		}
 		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);

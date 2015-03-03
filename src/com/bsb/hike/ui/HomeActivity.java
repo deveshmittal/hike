@@ -155,6 +155,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE };
 
+	private boolean photosEnabled;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -202,6 +204,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			initialiseHomeScreen(savedInstanceState);
 		}
 		
+		photosEnabled = accountPrefs.getBoolean(HikeConstants.Extras.ENABLE_PHOTOS, false);
 	}
 
 	private void setupActionBar()
@@ -463,24 +466,31 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void onClick(View v)
 			{
-				showComposeOverflowMenu();
-				newConversationIndicator.setVisibility(View.GONE);
-//				try
-//				{
-//					JSONObject metadata = new JSONObject();
-//					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
-//					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
-//				}
-//				catch(JSONException e)
-//				{
-//					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
-//				}
-//
-//				Intent intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
-//				intent.putExtra(HikeConstants.Extras.EDIT , true);
-//				
-//				newConversationIndicator.setVisibility(View.GONE);
-//				startActivity(intent);
+				if (photosEnabled)
+				{
+					showComposeOverflowMenu();
+					accountPrefs.edit().putBoolean(HikeConstants.SHOW_PHOTOS_ENABLED_DOT, true).commit();
+					newConversationIndicator.setVisibility(View.GONE);
+				}
+				else
+				{
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch (JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
+
+					Intent intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
+					intent.putExtra(HikeConstants.Extras.EDIT, true);
+
+					newConversationIndicator.setVisibility(View.GONE);
+					startActivity(intent);
+				}
 			}
 		});
 		
@@ -1895,12 +1905,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					newConversationIndicator.setVisibility(View.VISIBLE);
 					newConversationIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
 				}
-				else
+				else if(photosEnabled && accountPrefs.getBoolean(HikeConstants.SHOW_PHOTOS_ENABLED_DOT, true))
 				{
 					newConversationIndicator.setText("1");
 					newConversationIndicator.setVisibility(View.VISIBLE);
 					newConversationIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
-//					newConversationIndicator.setVisibility(View.GONE);
+				}
+				else
+				{
+					newConversationIndicator.setVisibility(View.GONE);
 				}
 			}
 		}, delayTime);

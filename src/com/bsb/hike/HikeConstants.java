@@ -555,6 +555,8 @@ public class HikeConstants
 	public static final String IS_HOME_OVERFLOW_CLICKED = "isHomeOverflowClicked";
 
 	public static final String SHOW_RECENTLY_JOINED_DOT = "showRecentlyJoinedDot";
+	
+	public static final String SHOW_PHOTOS_ENABLED_DOT = "showphotosenabled";
 
 	public static final String SHOW_TIMELINE_RED_DOT = "showTimelineRedDot";
 
@@ -1394,6 +1396,8 @@ public class HikeConstants
 		public static final String RETURN_CROP_RESULT_TO_FILE = "returnToFile";
 
 		public static final String GENERAL_SO_TIMEOUT = "sto";
+		
+		public static final String ENABLE_PHOTOS = "ph_en";
 
 		public static final String FT_UPLOAD_SO_TIMEOUT = "ftsto";
 	}
