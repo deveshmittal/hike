@@ -75,4 +75,14 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V1 + BASE_STICKER;
 	}
+	
+	public static String lastSeenUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_USER + "/lastseen";
+	}
+
+	public static String bulkLastSeenUrl()
+	{
+		return BASE_URL + BASE_V2 + BASE_USER + "/bls";
+	}
 }
