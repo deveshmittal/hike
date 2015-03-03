@@ -126,6 +126,8 @@ public class HikeConstants
 	public static final String CREDITS = "credits";
 
 	public static final String ON_HIKE = "onhike";
+	
+	public static final String IS_BROADCAST = "isBroadcast";
 
 	public static final String DND = "dnd";
 
@@ -652,6 +654,8 @@ public class HikeConstants
 
 	public static final int MAX_CONTACTS_IN_GROUP = 100;
 
+	public static final int MAX_CONTACTS_IN_BROADCAST = 500;
+
 	public static final int MAX_SMS_CONTACTS_IN_GROUP = MAX_CONTACTS_IN_GROUP;
 
 	public static final int PROFILE_IMAGE_DIMENSIONS = 120;
@@ -1057,6 +1061,8 @@ public class HikeConstants
 		public static final String PREV_MSISDN = "prevMsisdn";
 
 		public static final String PREV_NAME = "prevName";
+		
+		public static final String BROADCAST_RECIPIENTS = "broadcastRecipients";
 
 		public static final String INVITE = "invite";
 
@@ -1272,6 +1278,10 @@ public class HikeConstants
 		public static final String EMOTICON_TYPE = "emoticonType";
 
 		public static final String CREATE_GROUP = "createGroup";
+		
+		public static final String COMPOSE_MODE = "composeMode";
+
+		public static final int CREATE_BROADCAST_MODE = 7;
 
 		public static final String FROM_CREDITS_SCREEN = "fromCreditsScreen";
 
@@ -1329,7 +1339,7 @@ public class HikeConstants
 
 		public static final String GROUP_NAME = "groupName";
 
-		public static final String GROUP_ID = "groupId";
+		public static final String GROUP_BROADCAST_ID = "groupOrBroadcastId";
 
 		public static final String SHOWING_INVALID_PIN_ERROR = "showingInvalidPinError";
 

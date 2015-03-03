@@ -755,6 +755,11 @@ public class Utils
 	{
 		return msisdn!=null && !msisdn.startsWith("+");
 	}
+	
+	public static boolean isBroadcastConversation(String msisdn)
+	{
+		return msisdn!=null && msisdn.startsWith("b:");
+	}
 
 	public static String validateBotMsisdn(String msisdn){
 		if (!msisdn.startsWith("+")){

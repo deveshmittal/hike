@@ -539,6 +539,7 @@
     <string name="read_by_everyone">Read by everyone</string>
     <string name="attach">Attach</string>
     <string name="new_group">New Group</string>
+    <string name="new_broadcast">New Broadcast</string>
     <string name="sent_friend_request">Sent a friend request</string>
     <string name="xyz_posted_update">%1$s posted an update</string>
     <string name="sent_you_friend_request">Sent you a friend request</string>
@@ -770,6 +771,7 @@
     <string name="compose_chat_action_bar_group_mode_title">Select members (min 2)</string>
     <string name="compose_chat_action_bar_title">New Chat</string>
     <string name="name_group">Name the group</string>
+    <string name="name_broadcast">Name the broadcast list</string>
     <string name="group_chats">Group Chats</string>
     <string name="friend_requests_sent">Friend requests sent</string>
     <string name="blue_status_updates">status updates</string>
@@ -922,6 +924,7 @@
     <string name="add_to_contacts">Add to contacts</string>
     <string name="delete_leave">Delete and exit group</string>
     <string name="group_participant_info">You can add upto 100 people to a group</string>
+    <string name="broadcast_participant_info">You can add upto 500 people to this list</string>
     <string name="photo">GALLERY</string>
     <string name="video">VIDEOS</string>
     <string name="location_option">LOCATION</string>

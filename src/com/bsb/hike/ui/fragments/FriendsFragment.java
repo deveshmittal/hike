@@ -34,7 +34,7 @@ import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.ui.CreateNewGroupActivity;
+import com.bsb.hike.ui.CreateNewGroupOrBroadcastActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.LastSeenScheduler;
@@ -160,7 +160,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			}
 			else
 			{
-				intent = new Intent(getActivity(), CreateNewGroupActivity.class);
+				intent = new Intent(getActivity(), CreateNewGroupOrBroadcastActivity.class);
 			}
 			startActivity(intent);
 		}

@@ -1526,7 +1526,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					intent = new Intent(HomeActivity.this, SettingsActivity.class);
 					break;
 				case 6:
-					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
+					intent = new Intent(HomeActivity.this, CreateNewGroupOrBroadcastActivity.class);
 					break;
 				case 7:
 					try

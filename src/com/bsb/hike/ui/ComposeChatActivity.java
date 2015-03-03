@@ -698,7 +698,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else
 		{
-			mode = getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) || existingGroupId != null ? CREATE_GROUP_MODE : START_CHAT_MODE;
+			mode = getIntent().hasExtra(HikeConstants.Extras.GROUP_BROADCAST_ID) || existingGroupId != null ? CREATE_GROUP_MODE : START_CHAT_MODE;
 		}
 		setMode(mode);
 	}
@@ -805,7 +805,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if (TextUtils.isEmpty(groupId))
 		{
 			// Create new group
-			groupId = getIntent().getStringExtra(HikeConstants.Extras.GROUP_ID);
+			groupId = getIntent().getStringExtra(HikeConstants.Extras.GROUP_BROADCAST_ID);
 			newGroup = true;
 		}
 		else
