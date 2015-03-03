@@ -27,6 +27,7 @@ import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.util.Log;
 
 import com.bsb.hike.R;
+import com.bsb.hike.utils.Logger;
 
 /**
  * A BroadcastReceiver that notifies of important wifi p2p events.
@@ -77,7 +78,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             Log.d(WiFiDirectActivity.TAG, "P2P peers changed");
         } 
         else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) 
-        {
+        { 
         	
             NetworkInfo networkInfo = (NetworkInfo) intent
                     .getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
@@ -105,7 +106,8 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             {
                 if(WiFiDirectActivity.isOfflineFileTransferOn)
                 {
-                    //connectionManager.enableDiscovery();
+                    Logger.d("wifidirectdemo", "Discovery changed");
+                	connectionManager.enableDiscovery();
                 }
             }
         }

@@ -206,7 +206,7 @@ public class UploadFileTask extends FileTransferBase
 		_state = FTState.COMPLETED;
 		this.mAttachementType = attachement;
 		createConvMessage();
-		stateFile = getStateFile((ConvMessage) userContext);
+		stateFile = getStateFile(((ConvMessage) userContext));
 		saveFileState(null);
 	}
 
