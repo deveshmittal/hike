@@ -207,35 +207,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 			initialiseHomeScreen(savedInstanceState);
 		}
-			int val=ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal();
-			ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
-			{
-
-				@Override
-				public void onSuccess(final ProductContentModel mmModel)
-				{
-					runOnUiThread(new Runnable()
-					{
-						
-						@Override
-						public void run()
-						{
-							DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
-							HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
-							mmFragment.showDialog(getSupportFragmentManager());
-						}
-					});
-				
-				}
-
-				@Override
-				public void onFailure()
-				{
-					// No Popup to display
-				}
-				
-			});
 		
+			isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());		
 		
 	}
 

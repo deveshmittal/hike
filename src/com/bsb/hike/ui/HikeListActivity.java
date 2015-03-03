@@ -138,34 +138,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		
 		
-		int val=ProductPopupsConstants.PopupTriggerPoints.INVITE_SMS.ordinal();
-		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
-		{
-
-			@Override
-			public void onSuccess(final ProductContentModel mmModel)
-			{
-				runOnUiThread(new Runnable()
-				{
-					
-					@Override
-					public void run()
-					{
-						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
-						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
-						mmFragment.showDialog(getSupportFragmentManager());
-					}
-				});
-			
-			}
-
-			@Override
-			public void onFailure()
-			{
-				// No Popup to display
-			}
-			
-		});
+		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.INVITE_SMS.ordinal());
 	}
 
 	private void init()

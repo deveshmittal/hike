@@ -222,34 +222,8 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 		HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
 		
-		int val=ProductPopupsConstants.PopupTriggerPoints.SETTINGS_SCR.ordinal();
-		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
-		{
-
-			@Override
-			public void onSuccess(final ProductContentModel mmModel)
-			{
-				runOnUiThread(new Runnable()
-				{
-					
-					@Override
-					public void run()
-					{
-						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
-						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
-						mmFragment.showDialog(getSupportFragmentManager());
-					}
-				});
-			
-			}
-
-			@Override
-			public void onFailure()
-			{
-				// No Popup to display
-			}
-			
-		});
+		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.SETTINGS_SCR.ordinal());
+		
 	}
 
 	private void addProfileHeaderView(ListView settingsList)

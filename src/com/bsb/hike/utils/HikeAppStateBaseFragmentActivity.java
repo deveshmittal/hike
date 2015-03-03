@@ -14,6 +14,11 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.models.HikeAlarmManager;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
 import com.bsb.hike.ui.fragments.ImageViewerFragment;
 import com.bsb.hike.voip.view.CallIssuesPopup;
 import com.bsb.hike.voip.view.CallRatePopup;
@@ -199,5 +204,37 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 				}
 			}
 		});
+	}
+	
+	public void isThereAnyPopUpForMe(int popUpTriggerPoint)
+	{
+		ProductInfoManager.getInstance().isThereAnyPopup(popUpTriggerPoint,new IActivityPopup()
+		{
+
+			@Override
+			public void onSuccess(final ProductContentModel mmModel)
+			{
+				runOnUiThread(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
+						HikeDialogFragment mmFragment=HikeDialogFragment.getInstance(mmDialogPojo);
+						mmFragment.showDialog(getSupportFragmentManager());
+					}
+				});
+			
+			}
+
+			@Override
+			public void onFailure()
+			{
+				// No Popup to display
+			}
+			
+		});
+	
 	}
 }

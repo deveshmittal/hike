@@ -898,24 +898,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			
 		}
 		Logger.i("chatthread", "on create end");
-		int val=ProductPopupsConstants.PopupTriggerPoints.CHAT_SCR.ordinal();
-		ProductInfoManager.getInstance().isThereAnyPopup(val, new IActivityPopup()
-		{
-			
-			@Override
-			public void onSuccess(ProductContentModel productContentModel)
-			{
-				DialogPojo mmPojo=ProductInfoManager.getInstance().getDialogPojo(productContentModel);
-				HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmPojo);
-				mmFragment.showDialog(getSupportFragmentManager());
-			}
-			
-			@Override
-			public void onFailure()
-			{
-				
-			}
-		});
+		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.CHAT_SCR.ordinal());
 
 	}
 	
@@ -1412,34 +1395,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Utils.onCallClicked(this, mContactNumber, VoIPUtils.CallSource.CHAT_THREAD);
 			break;
 		case R.id.attachment:
-			int val=ProductPopupsConstants.PopupTriggerPoints.ATCH_SCR.ordinal();
-			ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
-			{
-
-				@Override
-				public void onSuccess(final ProductContentModel mmModel)
-				{
-					runOnUiThread(new Runnable()
-					{
-						
-						@Override
-						public void run()
-						{
-							DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
-							HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
-							mmFragment.showDialog(getSupportFragmentManager());
-						}
-					});
-				
-				}
-
-				@Override
-				public void onFailure()
-				{
-					// No Popup to display
-				}
-				
-			});
+			isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.ATCH_SCR.ordinal());
 			// hide pop up if any
 			return attachmentClicked();
 		case R.id.overflow_menu:
@@ -7015,34 +6971,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 		
-		int val=ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal();
-		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
-		{
-
-			@Override
-			public void onSuccess(final ProductContentModel mmModel)
-			{
-				runOnUiThread(new Runnable()
-				{
-					
-					@Override
-					public void run()
-					{
-						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
-						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
-						mmFragment.showDialog(getSupportFragmentManager());
-					}
-				});
-			
-			}
-
-			@Override
-			public void onFailure()
-			{
-				// No Popup to display
-			}
-			
-		});	
+		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal());
 	}
 
 	public void onEmoticonBtnClicked(View v)

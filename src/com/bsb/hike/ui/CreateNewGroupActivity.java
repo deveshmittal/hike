@@ -115,34 +115,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 			groupImage.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(groupId, true));
 		}
 		
-		int val=ProductPopupsConstants.PopupTriggerPoints.NEWGRP.ordinal();
-		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
-		{
-
-			@Override
-			public void onSuccess(final ProductContentModel mmModel)
-			{
-				runOnUiThread(new Runnable()
-				{
-					
-					@Override
-					public void run()
-					{
-						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
-						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
-						mmFragment.showDialog(getSupportFragmentManager());
-					}
-				});
-			
-			}
-
-			@Override
-			public void onFailure()
-			{
-				// No Popup to display
-			}
-			
-		});
+		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.NEWGRP.ordinal());
 
 	}
 

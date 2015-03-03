@@ -27,34 +27,8 @@ public class StickerSettingsActivity extends HikeAppStateBaseFragmentActivity
 		setContentView(R.layout.sticker_settings_page);
 		setupSettingsFragment(savedInstanceState);
 		setupActionBar();
-		int val=ProductPopupsConstants.PopupTriggerPoints.STICKER_SHOP_SETTINGS.ordinal();
-		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
-		{
-
-			@Override
-			public void onSuccess(final ProductContentModel mmModel)
-			{
-				runOnUiThread(new Runnable()
-				{
-					
-					@Override
-					public void run()
-					{
-						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
-						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
-						mmFragment.showDialog(getSupportFragmentManager());
-					}
-				});
-			
-			}
-
-			@Override
-			public void onFailure()
-			{
-				// No Popup to display
-			}
-			
-		});
+		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.STICKER_SHOP_SETTINGS.ordinal());
+		
 	}
 
 	private void setupActionBar()

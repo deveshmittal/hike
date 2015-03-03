@@ -25,7 +25,7 @@ import android.widget.ProgressBar;
 import com.bsb.hike.R;
 import com.bsb.hike.platform.CustomWebView;
 import com.bsb.hike.platform.HikePlatformConstants;
-import com.bsb.hike.platform.content.PlatformWebClient;
+import com.bsb.hike.platform.content.HikeWebClient;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -136,7 +136,7 @@ public class HikeDialogFragment extends DialogFragment
 		mmWebView.loadDataWithBaseURL("", mmModel.getFormedData(), "text/html", "UTF-8", "");
 	}
 
-	class CustomWebClient extends PlatformWebClient
+	class CustomWebClient extends HikeWebClient
 	{
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon)

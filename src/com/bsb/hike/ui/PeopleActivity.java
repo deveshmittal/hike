@@ -34,35 +34,8 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 	{
 		super.onCreate(savedInstanceState);
 		initialisePeopleScreen(savedInstanceState);
-		int val=ProductPopupsConstants.PopupTriggerPoints.FAVOURITES.ordinal();
-		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
-		{
-
-			@Override
-			public void onSuccess(final ProductContentModel mmModel)
-			{
-				runOnUiThread(new Runnable()
-				{
-					
-					@Override
-					public void run()
-					{
-						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
-						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
-						mmFragment.showDialog(getSupportFragmentManager());
-					}
-				});
-			
-			}
-
-			@Override
-			public void onFailure()
-			{
-				// No Popup to display
-			}
-			
-		});
-
+		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.FAVOURITES.ordinal());
+		
 	}
 
 	private void initialisePeopleScreen(Bundle savedInstanceState)

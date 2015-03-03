@@ -254,6 +254,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public SmileyParser smileyParser;
 	
+	int triggerPointPopup=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal();
+	
 	private static final String TAG = "Profile_Activity";
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -324,7 +326,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			HikeMessengerApp.getPubSub().removeListeners(this, profilEditPubSubListeners);
 		}
 	}
-int val=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal();
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -394,7 +396,7 @@ int val=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal();
 				this.profileType = ProfileType.USER_PROFILE_EDIT;
 				setupEditScreen();
 				HikeMessengerApp.getPubSub().addListeners(this, profilEditPubSubListeners);
-				val=ProductPopupsConstants.PopupTriggerPoints.EDIT_PROFILE.ordinal();
+				triggerPointPopup=ProductPopupsConstants.PopupTriggerPoints.EDIT_PROFILE.ordinal();
 			}
 			else
 			{
@@ -404,7 +406,7 @@ int val=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal();
 				this.profileType = ProfileType.USER_PROFILE;
 				setupProfileScreen(savedInstanceState);
 				HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
-				val=ProductPopupsConstants.PopupTriggerPoints.PROFILE_PHOTO.ordinal();
+				triggerPointPopup=ProductPopupsConstants.PopupTriggerPoints.PROFILE_PHOTO.ordinal();
 			}
 		}
 		if (mActivityState.groupEditDialogShowing)
@@ -417,36 +419,9 @@ int val=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal();
 			onHeaderButtonClicked(null);
 		}
 		
-		if(val!=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal())
+		if (triggerPointPopup != ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal())
 		{
-			ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
-			{
-
-				@Override
-				public void onSuccess(final ProductContentModel mmModel)
-				{
-					runOnUiThread(new Runnable()
-					{
-						
-						@Override
-						public void run()
-						{
-							DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
-							HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
-							mmFragment.showDialog(getSupportFragmentManager());
-						}
-					});
-				
-				}
-
-				@Override
-				public void onFailure()
-				{
-					// No Popup to display
-				}
-				
-			});
-		
+			isThereAnyPopUpForMe(triggerPointPopup);
 		}
 		
 	}

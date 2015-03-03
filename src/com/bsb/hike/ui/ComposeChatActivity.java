@@ -175,7 +175,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private boolean nuxIncentiveMode;
 	
-	private int val=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal();
+	private int triggerPointForPopup=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal();
 
 	 private HorizontalFriendsFragment newFragment =null;
 	@Override
@@ -436,7 +436,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		else
 		{
 				setMode(START_CHAT_MODE);
-				val=ProductPopupsConstants.PopupTriggerPoints.COMPOSE_CHAT.ordinal();
+				triggerPointForPopup=ProductPopupsConstants.PopupTriggerPoints.COMPOSE_CHAT.ordinal();
 		}
 		
 		adapter.setIsCreatingOrEditingGroup(this.composeMode == CREATE_GROUP_MODE);
@@ -445,35 +445,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		
 		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
 		
-		if(val!=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal())
+		if(triggerPointForPopup!=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal())
 		{
-			ProductInfoManager.getInstance().isThereAnyPopup(val, new IActivityPopup()
-			{
-
-				@Override
-				public void onSuccess(final ProductContentModel mmModel)
-				{
-					runOnUiThread(new Runnable()
-					{
-
-						@Override
-						public void run()
-						{
-							DialogPojo mmDialogPojo = ProductInfoManager.getInstance().getDialogPojo(mmModel);
-							HikeDialogFragment mmFragment = HikeDialogFragment.onNewInstance(mmDialogPojo);
-							mmFragment.showDialog(getSupportFragmentManager());
-						}
-					});
-
-				}
-
-				@Override
-				public void onFailure()
-				{
-					// No Popup to display
-				}
-
-			});
+			isThereAnyPopUpForMe(triggerPointForPopup);
 		}
 
 		

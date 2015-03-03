@@ -78,34 +78,8 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 		}
 		
-		int val=ProductPopupsConstants.PopupTriggerPoints.FREE_SMS.ordinal();
-		ProductInfoManager.getInstance().isThereAnyPopup(val,new IActivityPopup()
-		{
-
-			@Override
-			public void onSuccess(final ProductContentModel mmModel)
-			{
-				runOnUiThread(new Runnable()
-				{
-					
-					@Override
-					public void run()
-					{
-						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
-						HikeDialogFragment mmFragment=HikeDialogFragment.onNewInstance(mmDialogPojo);
-						mmFragment.showDialog(getSupportFragmentManager());
-					}
-				});
-			
-			}
-
-			@Override
-			public void onFailure()
-			{
-				// No Popup to display
-			}
-			
-		});
+		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.FREE_SMS.ordinal());
+	
 
 	}
 

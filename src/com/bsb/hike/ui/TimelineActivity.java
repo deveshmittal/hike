@@ -74,34 +74,7 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 		initialiseTimelineScreen(savedInstanceState);
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		int val = ProductPopupsConstants.PopupTriggerPoints.TIMELINE.ordinal();
-		ProductInfoManager.getInstance().isThereAnyPopup(val, new IActivityPopup()
-		{
-
-			@Override
-			public void onSuccess(final ProductContentModel mmModel)
-			{
-				runOnUiThread(new Runnable()
-				{
-
-					@Override
-					public void run()
-					{
-						DialogPojo mmDialogPojo = ProductInfoManager.getInstance().getDialogPojo(mmModel);
-						HikeDialogFragment mmFragment = HikeDialogFragment.onNewInstance(mmDialogPojo);
-						mmFragment.showDialog(getSupportFragmentManager());
-					}
-				});
-
-			}
-
-			@Override
-			public void onFailure()
-			{
-				// No Popup to display
-			}
-
-		});
+		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.TIMELINE.ordinal());
 	}
 
 	private void initialiseTimelineScreen(Bundle savedInstanceState)

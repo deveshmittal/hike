@@ -330,14 +330,14 @@ public class PlatformContentModel
 			this.push = push;
 		}
 
-		public String getNotifText()
+		public String getUser()
 		{
-			return notifText;
+			return user;
 		}
 
-		public void setNotifText(String notifText)
+		public void setUser(String user)
 		{
-			this.notifText = notifText;
+			this.user = user;
 		}
 
 		public String getHm()
@@ -406,7 +406,7 @@ public class PlatformContentModel
 		public String push;
 
 		@Expose
-		public String notifText;
+		public String user;
 
 		@Expose
 		public String hm;
