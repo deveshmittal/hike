@@ -5,10 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -69,8 +68,8 @@ public class PlatformJavaScriptBridge
 	}
 
 	/**
-	 * call this function to Show toast for the string that is sent by the javascript.
-	 * @param toast :
+	 * call this function to Show toast message
+	 * @param toast : the given string to be displayed in message
 	 */
 	@JavascriptInterface
 	public void showToast(String toast)
@@ -143,6 +142,10 @@ public class PlatformJavaScriptBridge
 		}
 	}
 
+	/**
+	 * Sets whether JavaScript running in the context of a file scheme URL should be allowed to access content from other file scheme URLs.
+	 */
+	@SuppressLint("NewApi")
 	@JavascriptInterface
 	public void allowUniversalAccess()
 	{
@@ -241,7 +244,7 @@ public class PlatformJavaScriptBridge
 
 	/**
 	 * This function will replace the entire metadata of the message.
-	 * @param metadata
+	 * @param metadata : The New JSON
 	 */
 	@JavascriptInterface
 	public void replaceMetadata(String metadata)
@@ -268,8 +271,8 @@ public class PlatformJavaScriptBridge
 	/**
 	 * calling this function will generate logs for testing at the android IDE. The first param will be tag used for logging and the second param
 	 * is data that is used for logging. this will create verbose logs for testing purposes.
-	 * @param tag
-	 * @param data
+	 * @param tag : tag of log, can be think as context of log for search purpose
+	 * @param data : The data of log, message string
 	 */
 	@JavascriptInterface
 	public void logFromJS(String tag, String data)
@@ -390,11 +393,19 @@ public class PlatformJavaScriptBridge
 
 	}
 	
+	/**
+	 * This function is used to share current content of card with external apps, we create image out of current visible content and use standard hike share template to share 
+	 */
 	@JavascriptInterface
 	public void share(){
 		share(null,null);
 	}
 	
+	/**
+	 * This function is used to share current content of card with external apps, we create image out of current visible content and use standard hike share template to share 
+	 * @param text : This is header text, can be think as Subject of email
+	 * @param caption : This is caption text, can be think as body of email
+	 */
 	@JavascriptInterface
 	public void share(String text,String caption)
 	{
@@ -459,8 +470,8 @@ public class PlatformJavaScriptBridge
 	}
 
 	/**
-	 * This function is called whenever the onLoadFinished of the html is called. This function calling is MUST.
-	 * This function is also used for analytics purpose.
+	 * This function is called whenever the onLoadFinished of the html is called.
+	 * This function is also used for analytics purpose. It is must to call this function else we do not guarantee that your micro app will behave properly.
 	 * @param height : The height of the loaded content
 	 */
 	@JavascriptInterface
