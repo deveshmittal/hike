@@ -1022,7 +1022,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		messageSearchManager.init(messages);
 		mComposeView.addTextChangedListener(searchTextWatcher);
-		mComposeView.setOnEditorActionListener(searchActionClickListener);
+		mComposeView.setOnEditorActionListener(this);
 		activity.findViewById(R.id.next).setOnClickListener(this);
 		activity.findViewById(R.id.previous).setOnClickListener(this);
 		activity.findViewById(R.id.search_clear_btn).setOnClickListener(this);
@@ -1055,20 +1055,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	};
 
-	OnEditorActionListener searchActionClickListener = new OnEditorActionListener()
-	{
-		@Override
-		public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
-		{
-			if (actionId == EditorInfo.IME_ACTION_SEARCH)
-			{
-				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
-				searchMessage(false);
-			}
-			return false;
-		}
-	};
-	
 	private void searchMessage(boolean searchNext)
 	{
 		if (searchNext)
@@ -4091,13 +4077,24 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			return false;
 		}
 
-		if ((view == mComposeView)
-				&& ((actionId == EditorInfo.IME_ACTION_SEND) || ((keyEvent != null) && (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
-						&& (keyEvent.getAction() != KeyEvent.ACTION_UP) && (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS))))
+		if ((view == mComposeView))
 		{
-			sendButtonClicked();
-			Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
-			return true;
+
+			if ((actionId == EditorInfo.IME_ACTION_SEND)
+					|| ((keyEvent != null) && (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) && (keyEvent.getAction() != KeyEvent.ACTION_UP) && (getResources()
+							.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)))
+			{
+				sendButtonClicked();
+				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+				return true;
+			}
+			else if (actionId == EditorInfo.IME_ACTION_SEARCH)
+			{
+				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+				searchMessage(false);
+				return true;
+			}
+			return false;
 		}
 		return false;
 	}
