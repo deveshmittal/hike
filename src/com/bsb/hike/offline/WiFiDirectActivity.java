@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -81,7 +82,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     public void onResume() {
         super.onResume();
         registerReceiver(receiver, intentFilter);
-        //connectionManager.enableDiscovery();
+        connectionManager.enableDiscovery();
     }
 
     @Override
@@ -99,7 +100,6 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-    	//connectionManager.enableDiscovery();
     	super.onRestart();
     }
 
@@ -144,6 +144,9 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     	{
     		Toast.makeText(WiFiDirectActivity.this, "Connect failed. Retry.",
                     Toast.LENGTH_SHORT).show();
+    		DeviceListFragment fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
+    		if(fragment.progressDialog!=null && fragment.progressDialog.isShowing())
+    			fragment.progressDialog.dismiss();
     		return;
     	}
     	WiFiDirectActivity.connectingToDevice = ConnectingToDevice;
@@ -188,7 +191,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
             {
             	connectionManager.cancelConnect();
             }
-            //connectionManager.enableDiscovery();
+            connectionManager.enableDiscovery();
         }
 
     }
@@ -301,20 +304,23 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 
 	@Override
 	public void connectFailure(int reasonCode) {
-		// TODO Auto-generated method stub
+		 Toast.makeText(this, "Connect failed. Reason: "+reasonCode+ ".Retry.",
+                 Toast.LENGTH_SHORT).show();
 		
 	}
 
 	@Override
 	public void cancelConnectSuccess() {
-		// TODO Auto-generated method stub
+		Toast.makeText(this, "Aborting connection. It will take some time to recover.",
+                Toast.LENGTH_SHORT).show();
 		
 	}
 
 	@Override
 	public void cancelConnectFailure(int reasonCode) {
-		// TODO Auto-generated method stub
-		
+		Toast.makeText(this,
+                "Connect abort request failed. Reason Code: " + reasonCode,
+                Toast.LENGTH_SHORT).show();
 	}
 	
 	@Override
@@ -322,7 +328,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 		Toast.makeText(this, "Discovery enabled!!", Toast.LENGTH_SHORT).show();
 		
 	}
-	
+	  
 	@Override
 	public void notifyWifiNotEnabled()
 	{
@@ -336,7 +342,13 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
         if(reasonCode==WifiP2pManager.ERROR)err="ERROR";
         if(reasonCode==WifiP2pManager.P2P_UNSUPPORTED) err="P2P_UNSUPPORTED";
         Log.e(TAG,"FAIL - couldnt start to discover peers code: "+err);
-		//connectionManager.enableDiscovery();
+        
+        try {
+			Thread.sleep(500);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		connectionManager.enableDiscovery();
 	}
 	
 	@Override
@@ -347,6 +359,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
         if (fragmentList != null) {
             fragmentList.clearPeers();
         }
+        connectionManager.enableDiscovery();
 	}
 
 	@Override

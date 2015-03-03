@@ -126,8 +126,7 @@ public class WifiP2pConnectionManager implements ChannelListener
 
 			@Override
             public void onFailure(int reason) {
-                Toast.makeText(context, "Connect failed. Retry.",
-                        Toast.LENGTH_SHORT).show();
+               wifiP2pConnectionManagerListener.connectFailure(reason);
             }
         });
 	}
@@ -155,15 +154,12 @@ public class WifiP2pConnectionManager implements ChannelListener
         	
             @Override
             public void onSuccess() {
-                Toast.makeText(context, "Aborting connection. It will take some time to recover.",
-                        Toast.LENGTH_SHORT).show();
+                wifiP2pConnectionManagerListener.cancelConnectSuccess();
             }
 
             @Override
             public void onFailure(int reasonCode) {
-                Toast.makeText(context,
-                        "Connect abort request failed. Reason Code: " + reasonCode,
-                        Toast.LENGTH_SHORT).show();
+                wifiP2pConnectionManagerListener.cancelConnectFailure(reasonCode);
             }
         });
 	}
