@@ -418,7 +418,7 @@ public class DbConversationListener implements Listener
 			Pair<String, Long> p = (Pair<String, Long>) object;
 			String msisdn = p.first;
 			long timestamp = p.second;
-			mConversationDb.updateTimestamp(msisdn, timestamp);
+			boolean isUpdated = mConversationDb.updateTimestamp(msisdn, timestamp);
 		}
 	}
 

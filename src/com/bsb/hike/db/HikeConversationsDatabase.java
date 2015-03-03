@@ -2262,7 +2262,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	 */
 	public int getExtraConvUnreadCount(String msisdn)
 	{
-		return HikeSharedPreferenceUtil.getInstance(mContext, HikeSharedPreferenceUtil.CONV_UNREAD_COUNT).getData(msisdn, 0);
+		return HikeSharedPreferenceUtil.getInstance(HikeSharedPreferenceUtil.CONV_UNREAD_COUNT).getData(msisdn, 0);
 	}
 
 	/*
@@ -2271,7 +2271,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	 */
 	public void setExtraConvUnreadCount(String msisdn, int count)
 	{
-		HikeSharedPreferenceUtil.getInstance(mContext, HikeSharedPreferenceUtil.CONV_UNREAD_COUNT).saveData(msisdn, count);
+		HikeSharedPreferenceUtil.getInstance(HikeSharedPreferenceUtil.CONV_UNREAD_COUNT).saveData(msisdn, count);
 	}
 
 	public Conversation getConversation(String msisdn, int limit)
@@ -6448,12 +6448,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 	
-	public void updateTimestamp(String msisdn, long timestamp)
+	public boolean updateTimestamp(String msisdn, long timestamp)
 	{
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.TIMESTAMP, timestamp);
-
-		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
+		int rowsUpdated = mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
+		boolean updated = (rowsUpdated != 0);
+		return (updated);
 	}
 	
 	public boolean isContentMessageExist(String msisdn,String contentId)
