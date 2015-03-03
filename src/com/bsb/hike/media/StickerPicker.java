@@ -103,7 +103,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, int[] eatTouchEventViewIds)
 	{
 		this(context, listener);
-		popUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, context.getApplicationContext(), eatTouchEventViewIds);
+		popUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, context.getApplicationContext(), eatTouchEventViewIds, null);
 	}
 
 	/**

@@ -161,6 +161,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_marginBottom="12dp"
                 android:layout_marginRight="16dp"
+                android:background="@drawable/bg_new_msg"
                 android:visibility="gone" >
 
                 <include layout="@layout/new_message_indicator" />
@@ -173,11 +174,22 @@
                 android:layout_above="@+id/tipContainerBottom"
                 android:layout_alignWithParentIfMissing="true"
                 android:layout_alignParentRight="true"
+                android:background="@drawable/bg_new_msg"
                 android:layout_marginBottom="12dp"
                 android:layout_marginRight="16dp"
                 android:visibility="gone" >
 
-                <include layout="@layout/new_message_indicator" />
+               <ImageView
+                   android:id="@+id/indicator_img"
+                   android:layout_width="wrap_content"
+                   android:layout_height="match_parent"
+                   android:layout_marginTop="1dp"
+                   android:contentDescription="Unread indicator Down Icon"
+                   android:paddingLeft="10dp"
+                   android:paddingRight="10dp"
+                   android:scaleType="centerInside"
+                   android:src="@drawable/ic_inverted_triangle" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -188,10 +200,21 @@
                 android:layout_alignTop="@id/conversations_list"
                 android:layout_marginRight="16dp"
                 android:layout_marginTop="12dp"
+                android:background="@drawable/bg_new_msg"
                 android:visibility="gone" >
-
-                <include layout="@layout/new_message_indicator" />
-            </LinearLayout>
+                
+                <ImageView
+                    android:id="@+id/indicator_img"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="1dp"
+                    android:contentDescription="Unread indicator Up Icon"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_inverted_up_triangle" />
+                
+			</LinearLayout>
             
             <View
                 android:layout_width="match_parent"

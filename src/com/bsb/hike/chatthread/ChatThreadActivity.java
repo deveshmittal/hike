@@ -3,12 +3,14 @@ package com.bsb.hike.chatthread;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
@@ -99,9 +101,11 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	@Override
 	protected void onNewIntent(Intent intent)
 	{
+		Logger.i(TAG, "OnNew Intent called");
 		super.onNewIntent(intent);
 		if(processNewIntent(intent))
 		{
+			chatThread.onPreNewIntent();
 			init(intent);
 			setIntent(intent);
 			chatThread.onNewIntent();
@@ -141,6 +145,8 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	
 	public void backPressed()
 	{
+		Intent intent = IntentFactory.getHomeActivityIntent(this);
+		startActivity(intent);
 		super.onBackPressed();
 	}
 	
@@ -210,4 +216,5 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	{
 		return chatThread.getContactNumber();
 	}
+	
 }

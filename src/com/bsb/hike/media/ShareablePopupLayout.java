@@ -34,10 +34,10 @@ public class ShareablePopupLayout
 	 * @param eatOuterTouchIds
 	 */
 
-	public ShareablePopupLayout(Context context, View mainView, int firstTimeHeight, int[] eatOuterTouchIds)
+	public ShareablePopupLayout(Context context, View mainView, int firstTimeHeight, int[] eatOuterTouchIds, PopupListener listener)
 	{
 		initViewToDisplay(context);
-		initPopupLayout(context, mainView, firstTimeHeight, eatOuterTouchIds);
+		initPopupLayout(context, mainView, firstTimeHeight, eatOuterTouchIds, listener);
 	}
 
 	private void initViewToDisplay(Context context)
@@ -54,12 +54,12 @@ public class ShareablePopupLayout
 	 * @param eatOuterTouchIds
 	 */
 
-	private void initPopupLayout(Context context, View mainView, int firstTimeHeight, int[] eatOuterTouchIds)
+	private void initPopupLayout(Context context, View mainView, int firstTimeHeight, int[] eatOuterTouchIds, PopupListener listener)
 	{
 		if (mKeyboardPopupLayout == null)
 		{
-			mKeyboardPopupLayout = (eatOuterTouchIds == null) ? new KeyboardPopupLayout(mainView, firstTimeHeight, context) : new KeyboardPopupLayout(mainView, firstTimeHeight,
-					context, eatOuterTouchIds);
+			mKeyboardPopupLayout = (eatOuterTouchIds == null) ? new KeyboardPopupLayout(mainView, firstTimeHeight, context, listener) : new KeyboardPopupLayout(mainView, firstTimeHeight,
+					context, eatOuterTouchIds, listener);
 		}
 	}
 
@@ -191,14 +191,19 @@ public class ShareablePopupLayout
 		return mKeyboardPopupLayout.isShowing();
 	}
 
-	public void updateMainView(View view)
+	public void updateListenerAndView(PopupListener listener, View view)
 	{
-		this.mKeyboardPopupLayout.updateMainView(view);
+		this.mKeyboardPopupLayout.updateListenerAndView(listener, view);
 	}
 
 	public boolean isKeyboardOpen()
 	{
 		return mKeyboardPopupLayout.isKeyboardOpen();
+	}
+
+	public void releaseResources()
+	{
+		mKeyboardPopupLayout.releaseResources();
 	}
 
 }

@@ -4,15 +4,19 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.support.v4.view.ViewPager;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
 /**
@@ -21,10 +25,8 @@ import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
  * @author piyush
  * 
  */
-public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
+public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, OnClickListener
 {
-	private EmoticonPickerListener mEmoPickerListener;
-
 	private Context mContext;
 
 	private KeyboardPopupLayout mPopUpLayout;
@@ -34,6 +36,8 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 	private int mLayoutResId = -1;
 
 	private static final String TAG = "EmoticonPicker";
+	
+	private EditText mEditText;
 
 	/**
 	 * Constructor
@@ -42,10 +46,10 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 	 * @param emoPickerListener
 	 */
 
-	public EmoticonPicker(Context context, EmoticonPickerListener emoPickerListener)
+	public EmoticonPicker(Context context, EditText editText)
 	{
 		this.mContext = context;
-		this.mEmoPickerListener = emoPickerListener;
+		this.mEditText = editText;
 	}
 
 	/**
@@ -56,9 +60,9 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 	 * @param popUpLayout
 	 */
 
-	public EmoticonPicker(int layoutResId, Context context, EmoticonPickerListener emoPickerListener, KeyboardPopupLayout popUpLayout)
+	public EmoticonPicker(int layoutResId, Context context, EditText editText, KeyboardPopupLayout popUpLayout)
 	{
-		this(context, emoPickerListener);
+		this(context, editText);
 		this.mLayoutResId = layoutResId;
 		this.mPopUpLayout = popUpLayout;
 	}
@@ -72,9 +76,9 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 	 * @param popUpLayout
 	 */
 
-	public EmoticonPicker(View view, Context context, EmoticonPickerListener emoPickerListener, KeyboardPopupLayout popUpLayout)
+	public EmoticonPicker(View view, Context context, EditText editText, KeyboardPopupLayout popUpLayout)
 	{
-		this(context, emoPickerListener);
+		this(context, editText);
 		this.mPopUpLayout = popUpLayout;
 		this.mViewToDisplay = view;
 		initViewComponents(mViewToDisplay);
@@ -90,10 +94,10 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 	 * @param firstTimeHeight
 	 * @param eatOuterTouchIds
 	 */
-	public EmoticonPicker(Context context, EmoticonPickerListener emoPickerListener, View mainView, int firstTimeHeight, int[] eatOuterTouchIds)
+	public EmoticonPicker(Context context, EditText editText, View mainView, int firstTimeHeight, int[] eatOuterTouchIds)
 	{
-		this(context, emoPickerListener);
-		mPopUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, mContext, eatOuterTouchIds);
+		this(context, editText);
+		mPopUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, mContext, eatOuterTouchIds, null);
 	}
 
 	/**
@@ -104,14 +108,14 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 	 *            This is the activity or fragment's root view, which would get resized when keyboard is toggled
 	 */
 
-	public EmoticonPicker(Activity activiy, EmoticonPickerListener emoPickerListener, View mainView, int firstTimeHeight)
+	public EmoticonPicker(Activity activiy, EditText editText, View mainView, int firstTimeHeight)
 	{
-		this(activiy, emoPickerListener, mainView, firstTimeHeight, null);
+		this(activiy, editText, mainView, firstTimeHeight, null);
 	}
 
-	public EmoticonPicker(int layoutResId, Activity context, EmoticonPickerListener listener)
+	public EmoticonPicker(int layoutResId, Activity context, EditText editText)
 	{
-		this(context, listener);
+		this(context, editText);
 		this.mLayoutResId = layoutResId;
 	}
 
@@ -164,6 +168,9 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 		}
 
 		StickerEmoticonIconPageIndicator mIconPageIndicator = (StickerEmoticonIconPageIndicator) view.findViewById(R.id.emoticon_icon_indicator);
+		
+		View eraseKey = view.findViewById(R.id.erase_key_image);
+		eraseKey.setOnClickListener(this);
 
 		int[] tabDrawables = new int[] { R.drawable.emo_recent, R.drawable.emo_tab_1_selector, R.drawable.emo_tab_2_selector, R.drawable.emo_tab_3_selector,
 				R.drawable.emo_tab_4_selector, R.drawable.emo_tab_5_selector, R.drawable.emo_tab_6_selector, R.drawable.emo_tab_7_selector, R.drawable.emo_tab_8_selector,
@@ -239,21 +246,43 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener
 	public void releaseReources()
 	{
 		this.mContext = null;
-		this.mEmoPickerListener = null;
+		this.mEditText = null;
 	}
 	
-	public void updateListener(EmoticonPickerListener listener, Context context)
+	public void updateETAndContext(EditText editText, Context context)
 	{
-		this.mEmoPickerListener = listener;
+		updateET(editText);
 		this.mContext = context;
+	}
+	
+	public void updateET(EditText editText)
+	{
+		this.mEditText = editText;
 	}
 
 	@Override
 	public void emoticonSelected(int emoticonIndex)
 	{
-		if (mEmoPickerListener != null)
+		Logger.i(TAG, " This emoticon was selected : " + emoticonIndex);
+		Utils.emoticonClicked(mContext.getApplicationContext(), emoticonIndex, mEditText);
+	}
+	
+	public void eraseEmoticon()
+	{
+		if (mEditText != null)
 		{
-			mEmoPickerListener.emoticonSelected(emoticonIndex);
+			mEditText.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
+		}
+	}
+
+	@Override
+	public void onClick(View v)
+	{
+		switch (v.getId())
+		{
+		case R.id.erase_key_image:
+			eraseEmoticon();
+			break;
 		}
 	}
 

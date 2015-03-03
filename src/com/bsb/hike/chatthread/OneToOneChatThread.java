@@ -1059,41 +1059,41 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		if (super.updateUIAsPerTheme(theme))
 		{
-			/**
-			 * If the conv is not on hike, neither is the number an international one and the device OS is < v 4.4 Kitkat
-			 */
-			if (!mConversation.isOnhike() && !Utils.isContactInternational(msisdn) && !Utils.isKitkatOrHigher())
-			{
-				setupSMSToggleLayout(theme);
-			}
+			setupSMSToggleLayout();
 		}
 		return false;
-	};
+	}
 
 	/**
 	 * Used to setup FreeSMS - Hike SMS Toggle button for Versions below KitKat
 	 */
-	private void setupSMSToggleLayout(ChatTheme theme)
+	private void setupSMSToggleLayout()
 	{
-		ViewStub viewStub = (ViewStub) activity.findViewById(R.id.sms_toggle_view_stub);
-
 		/**
-		 * Inflating it only once when needed on demand.
+		 * Proceeding only if the conv is not on hike, neither is the number an international one and the device OS is < v 4.4 Kitkat
 		 */
-		if (viewStub != null)
+		if (!mConversation.isOnhike() && !Utils.isContactInternational(msisdn) && !Utils.isKitkatOrHigher())
 		{
-			viewStub.setOnInflateListener(this);
-			viewStub.inflate();
-		}
 
-		/**
-		 * ViewStub has been inflated
-		 */
-		else
-		{
-			setUpSMSViews();
-		}
+			ViewStub viewStub = (ViewStub) activity.findViewById(R.id.sms_toggle_view_stub);
 
+			/**
+			 * Inflating it only once when needed on demand.
+			 */
+			if (viewStub != null)
+			{
+				viewStub.setOnInflateListener(this);
+				viewStub.inflate();
+			}
+
+			/**
+			 * ViewStub has been inflated
+			 */
+			else
+			{
+				setUpSMSViews();
+			}
+		}
 	}
 
 	private void setUpSMSViews()
@@ -1546,10 +1546,20 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		while (i >= 0)
 		{
 			ConvMessage convMessage = messages.get(i);
-			if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
+			/**
+			 * If the convMessage is received, we continue since it could be possible that sent messages above it could be also in Single Tick mode
+			 */
+			if (!convMessage.isSent())
+			{
+				i--;
+				continue;
+			}
+			
+			else if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
 			{
 				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
 			}
+			
 			else
 			{
 				break;
@@ -1909,6 +1919,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				h20NextClick();
 			}
 			break;
+			
+		case R.id.block_unknown_contact:
+			HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, msisdn);
+			break;
+
+		case R.id.add_unknown_contact:
+			Utils.addToContacts(activity, msisdn);
+			break;
+
 		default:
 			super.onClick(v);
 		}
@@ -2384,5 +2403,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private boolean shouldShowCallIcon()
 	{
 		return Utils.isVoipActivated(activity.getApplicationContext()) && mConversation.isOnhike() && !HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn);
+	}
+	
+	@Override
+	protected void showThemePicker()
+	{
+		super.showThemePicker();
+		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip);
 	}
 }

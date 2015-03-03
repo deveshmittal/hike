@@ -135,6 +135,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		if (groupConversation != null)
 		{
 			mActionBar.onCreateOptionsMenu(menu, R.menu.group_chat_thread_menu, getOverFlowItems(), this, this);
+			updateUnreadPinCount();
 			return super.onCreateOptionsMenu(menu);
 		}
 
@@ -770,6 +771,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		View content = activity.findViewById(R.id.impMessageCreateView);
 		content.setVisibility(View.VISIBLE);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
+		mEmoticonPicker.updateET(mComposeView);
 		
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
 		if (mShareablePopupLayout.isKeyboardOpen())
@@ -800,7 +802,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	{
 		// AFTER PIN MODE, we make sure mComposeView is reinitialized to message composer compose
 
-		mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
+		mComposeView = (CustomFontEditText) activity.findViewById(R.id.msg_compose);
+		setEditTextListeners();
+		mEmoticonPicker.updateET(mComposeView);
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
 		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
 		mBottomView.setVisibility(View.VISIBLE);
@@ -1408,4 +1412,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		HAManager.getInstance().record(viaPinIcon ? HikeConstants.LogEvent.PIN_POSTED_VIA_ICON : HikeConstants.LogEvent.PIN_POSTED_VIA_HASH_PIN, AnalyticsConstants.UI_EVENT,
 				AnalyticsConstants.CLICK_EVENT);
 	}
+	
+	@Override
+	protected void showThemePicker()
+	{
+		super.showThemePicker();
+		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip_group);
+	}
+	
 }
