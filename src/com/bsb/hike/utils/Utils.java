@@ -5261,6 +5261,7 @@ public class Utils
 		}
 	}
 	
+	
 	public static Bitmap undrawnViewToBitmap(View view) {
 		int measuredWidth = View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.UNSPECIFIED);
 		int measuredHeight = View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.UNSPECIFIED);

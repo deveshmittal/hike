@@ -1391,9 +1391,56 @@ public class HikeConstants
 		
 		public static final String NUX_INCENTIVE_MODE = "showNuxIncentiveMode";
 
+		
+		//constants related to share
+		public static final class ShareTypes
+		{
+			
+			public static final int TEXT_SHARE = 0;
+		
+			public static final int IMAGE_SHARE = 1;
+		
+			public static final int STICKER_SHARE = 2;
+
+			public static final int STICKER_SHARE_PALLETE = 3;
+		
+		}
+	    
+		public static final String SHARE_CONTENT = "shareContent";
+			
+		public static final String WHATSAPP_PACKAGE = "com.whatsapp";
+		
+		public static final String SHARE_TYPE = "shareType";
+		
+		public static final int NOT_SHAREABLE = -1 ;
+		
+				
+
+
 		public static final String GENERAL_SO_TIMEOUT = "sto";
 
 		public static final String FT_UPLOAD_SO_TIMEOUT = "ftsto";
+
+		public static final String STICKER_HEADING = "shareStkrTtl";
+
+		public static final String STICKER_DESCRIPTION = "shareStkrTxt";
+
+		public static final String STICKER_CAPTION = "shareStkrCptn";
+		
+        public static final String IMAGE_HEADING = "shareImgTtl";
+		
+		public static final String IMAGE_DESCRIPTION = "shareImgTxt";
+		
+		public static final String IMAGE_CAPTION = "shareImgCptn";
+
+        public static final String TEXT_HEADING = "shareMsgTitle";
+		
+		public static final String TEXT_CAPTION = "shareMsgTxt";
+				
+		public static final String SHOW_SHARE_FUNCTIONALITY = "shareWA";
+
+		public static final String SHARE_FUNCTIONALITY_PALETTE = "shareStkrPlt";
+		
 	}
 
 	public static final class LogEvent
@@ -2144,6 +2191,7 @@ public class HikeConstants
 	{
 		public static final String MESSAGE_TYPE = "messageType";
 				
+		//ft, sticker, nudge, 
 		public static final int PLAIN_TEXT = 0;
 
 		public static final int TEXT_PIN = 1;
