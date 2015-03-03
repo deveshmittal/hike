@@ -3,7 +3,7 @@
     package="com.bsb.hike"
     android:installLocation="auto"
     android:versionCode="1221"
-    android:versionName="3.7.8.0.1.productpopup" >
+    android:versionName="3.7.8.01.productpopup" >
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="17" />

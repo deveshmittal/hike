@@ -5255,13 +5255,7 @@ public class Utils
 		return false;
 	}
 	
-	public static void notifyUser(String text, String title, boolean shouldNotPlaySound)
-	{
-		Drawable drawable = HikeMessengerApp.getInstance().getApplicationContext().getResources().getDrawable(R.drawable.hike_avtar_protip);
-		Intent intent=Utils.getHomeActivityIntent(HikeMessengerApp.getInstance().getApplicationContext());
-		HikeNotification.getInstance(HikeMessengerApp.getInstance().getApplicationContext()).showBigTextStyleNotification(intent, 0, System.currentTimeMillis(), HikeNotification.HIKE_SUMMARY_NOTIFICATION_ID, title, text,
-				title, "", null, drawable, shouldNotPlaySound, 0);
-	}
+	
 	
 	public static void launchPlayStore(String packageName,Context context)
 	{

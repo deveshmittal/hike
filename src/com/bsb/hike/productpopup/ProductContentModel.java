@@ -202,7 +202,7 @@ public class ProductContentModel
 	 */
 	
 	public boolean isPushReceived()
-	{
+	{	
 		if (!TextUtils.isEmpty(getUser()) && !TextUtils.isEmpty(getNotifTitle()))
 		{
 			return true;

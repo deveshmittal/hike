@@ -418,6 +418,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			mainFragment.onNewintent(intent);
 		}
+		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());
 	}
 
 	@Override
