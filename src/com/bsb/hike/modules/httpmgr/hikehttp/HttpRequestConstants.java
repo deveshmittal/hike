@@ -85,4 +85,9 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V2 + BASE_USER + "/bls";
 	}
+	
+	public static String getStatusBaseUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_USER + "/status";
+	}
 }
