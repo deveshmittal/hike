@@ -1394,6 +1394,10 @@ public class HikeConstants
 		public static final String GENERAL_SO_TIMEOUT = "sto";
 
 		public static final String FT_UPLOAD_SO_TIMEOUT = "ftsto";
+		
+		public static final String MAX_MESSAGE_PROCESS_TIME = "mmpt";
+		
+		public static final String CHANGE_MAX_MESSAGE_PROCESS_TIME = "cmpt";
 	}
 
 	public static final class LogEvent
@@ -2283,4 +2287,6 @@ public class HikeConstants
 	public static final String ERROR_MESSAGE = "em";
 	
 	public static final String EXCEPTION_MESSAGE = "exm";
+	
+	public static final String MESSAGE_PROCESS_TIME = "mpt";
 }

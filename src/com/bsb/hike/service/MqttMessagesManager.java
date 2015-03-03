@@ -1441,6 +1441,15 @@ public class MqttMessagesManager
 			AccountUtils.setSocketTimeout((int) timeout);
 		}
 		
+		if(data.has(HikeConstants.Extras.CHANGE_MAX_MESSAGE_PROCESS_TIME))
+		{
+			long maxMessageProcessTime = data.optLong(HikeConstants.Extras.CHANGE_MAX_MESSAGE_PROCESS_TIME);
+			if(maxMessageProcessTime > 0)
+			{
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.Extras.MAX_MESSAGE_PROCESS_TIME, maxMessageProcessTime);
+			}
+		}
+		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
 		
