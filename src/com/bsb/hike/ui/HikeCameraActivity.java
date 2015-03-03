@@ -196,6 +196,8 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.containerImageView);
 
 		iv.setVisibility(View.GONE);
+		
+		HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(true);
 	}
 
 	@Override
@@ -214,6 +216,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		switch (viewId)
 		{
 		case R.id.btntakepic:
+			HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(false);
 			cameraFragment.takePicture();
 			final View snapOverlay = findViewById(R.id.snapOverlay);
 			ObjectAnimator invisToVis = ObjectAnimator.ofFloat(snapOverlay, "alpha", 0f, 0.8f);

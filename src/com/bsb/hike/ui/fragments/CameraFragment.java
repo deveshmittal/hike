@@ -215,7 +215,7 @@ public class CameraFragment extends SherlockFragment
 	{
 		// takePicture(true, true);
 		final PictureTransaction xact = new PictureTransaction(getHost());
-		xact.mirrorFFC(false);
+		xact.mirrorFFC(true);
 		xact.useSingleShotMode(true);
 		xact.needBitmap(true);
 		xact.needByteArray(true);

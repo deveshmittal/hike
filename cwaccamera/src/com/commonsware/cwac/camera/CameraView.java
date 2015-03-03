@@ -337,7 +337,18 @@ public class CameraView extends ViewGroup implements AutoFocusCallback
 
 				pictureParams.setPictureSize(pictureSize.width, pictureSize.height);
 				pictureParams.setPictureFormat(ImageFormat.JPEG);
-				pictureParams.setRotation(90);
+				
+				Camera.CameraInfo info = new Camera.CameraInfo();
+				Camera.getCameraInfo(cameraId, info);
+
+				if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT)
+				{
+					pictureParams.setRotation(270);
+				}
+				else
+				{
+					pictureParams.setRotation(90);
+				}
 
 				if (xact.flashMode != null)
 				{
