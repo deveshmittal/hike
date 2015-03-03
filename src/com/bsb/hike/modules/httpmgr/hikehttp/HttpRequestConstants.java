@@ -48,7 +48,7 @@ public class HttpRequestConstants
 	
 	public static synchronized void toggleStaging()
 	{
-		isProduction = HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.getInstance()).getData(HikeMessengerApp.PRODUCTION, true);
+		isProduction = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.PRODUCTION, true);
 		changeBaseUrl();
 	}
 

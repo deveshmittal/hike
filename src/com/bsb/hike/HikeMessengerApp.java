@@ -21,6 +21,8 @@ import org.acra.sender.HttpSender;
 import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
 import org.acra.util.HttpRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
@@ -35,9 +37,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
-import android.os.Message;
-import android.os.Messenger;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Pair;
@@ -45,13 +46,15 @@ import android.util.Pair;
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
+import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.httpmgr.HttpManager;
 import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequestConstants;
 import com.bsb.hike.notifications.ToastListener;
-import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.service.HikeService;
+import com.bsb.hike.service.MqttMessagesManager;
 import com.bsb.hike.service.RegisterToGCMTrigger;
 import com.bsb.hike.service.SendGCMIdToServerTrigger;
 import com.bsb.hike.service.UpgradeIntentService;
@@ -166,6 +169,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String TOTAL_CREDITS_PER_MONTH = HikeConstants.TOTAL_CREDITS_PER_MONTH;
 
 	public static final String PRODUCTION = "production";
+	
+	public static final String PRODUCTION_HOST_TOGGLE = "productionHostToggle";
 
 	public static final String COUNTRY_CODE = "countryCode";
 
@@ -436,7 +441,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN = "showCategoryReordering";
 	
 	public static final String STICKED_BTN_CLICKED_FIRST_TIME = "stickerBtnClickedFirstTime";
-	
+
 	public static final String STICKER_SETTING_CHECK_BOX_CLICKED = "stickerSettingCheckBoxClicked";
 	
 	public static final String STICKER_SETTING_UNCHECK_BOX_CLICKED = "stickerSettingUnCheckBoxClicked";
@@ -457,6 +462,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String VOIP_ACTIVE_CALLS_COUNT = "voipCallsCount";
 
+	public static final String DETAILED_HTTP_LOGGING_ENABLED = "detailedHttpLoggingEnabled";
+	
+	public static final String BULK_LAST_SEEN_PREF = "blsPref";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
@@ -464,8 +473,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	private static HikePubSub mPubSubInstance;
 
 	public static boolean isIndianUser;
-
-	private static Messenger mMessenger;
 
 	private static Map<String, TypingNotification> typingNotificationMap;
 
@@ -500,32 +507,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	RegisterToGCMTrigger mmRegisterToGCMTrigger = null;
 
 	SendGCMIdToServerTrigger mmGcmIdToServerTrigger = null;
-
-	class IncomingHandler extends Handler
-	{
-		@Override
-		public void handleMessage(Message msg)
-		{
-			Logger.d("HikeMessengerApp", "In handleMessage " + msg.what);
-			switch (msg.what)
-			{
-			case HikeService.MSG_APP_MESSAGE_STATUS:
-				boolean success = msg.arg1 != 0;
-				Long msgId = (Long) msg.obj;
-				Logger.d("HikeMessengerApp", "received msg status msgId:" + msgId + " state: " + success);
-				// TODO handle this where we are saving all the mqtt messages
-				String event = success ? HikePubSub.SERVER_RECEIVED_MSG : HikePubSub.MESSAGE_FAILED;
-				mPubSubInstance.publish(event, msgId);
-				break;
-			case HikeService.MSG_APP_CONN_STATUS:
-				Logger.d("HikeMessengerApp", "received connection status " + msg.arg1);
-				int s = msg.arg1;
-				MQTTConnectionStatus status = MQTTConnectionStatus.values()[s];
-				mPubSubInstance.publish(HikePubSub.CONNECTION_STATUS, status);
-				break;
-			}
-		}
-	}
 
 	static
 	{
@@ -704,7 +685,7 @@ public void onTrimMemory(int level)
 		/*
 		 * Resetting the stealth mode when the app starts. 
 		 */
-		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 		performPreferenceTransition();
 		String currentAppVersion = settings.getString(CURRENT_APP_VERSION, "");
 		String actualAppVersion = "";
@@ -792,19 +773,18 @@ public void onTrimMemory(int level)
 			editor.commit();
 		}
 		
-		if(Utils.isKitkatOrHigher() && !HikeSharedPreferenceUtil.getInstance(this).getData(HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE, false))
+		if(Utils.isKitkatOrHigher() && !HikeSharedPreferenceUtil.getInstance().getData(HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE, false))
 		{
 			/*
 			 * On upgrade in kitkat or higher we need to reset sms setting preferences 
 			 * as we are now removing these settings from UI.
 			 */
-			HikeSharedPreferenceUtil.getInstance(this).saveData(HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE, true);
+			HikeSharedPreferenceUtil.getInstance().saveData(HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE, true);
 			Editor editor = preferenceManager.edit();
 			editor.remove(HikeConstants.SEND_SMS_PREF);
 			editor.remove(HikeConstants.RECEIVE_SMS_PREF);
 			editor.commit();
 		}
-
 		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), Utils.switchSSLOn(getApplicationContext()));
 		HttpRequestConstants.setUpBase();
 		
@@ -813,8 +793,6 @@ public void onTrimMemory(int level)
 		stealthMsisdn = new HashSet<String>();
 
 		initialiseListeners();
-
-		mMessenger = new Messenger(new IncomingHandler());
 
 		if (token != null)
 		{
@@ -850,6 +828,9 @@ public void onTrimMemory(int level)
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_SUPPORT, "hike support");
 		hikeBotNamesMap.put(HikeConstants.NUX_BOT, "Natasha");
+		hikeBotNamesMap.put(HikeConstants.CRICKET_BOT, "Cricket");
+
+		HikeConversationsDatabase.getInstance().addBotToHashMap(hikeBotNamesMap);
 		initHikeLruCache(getApplicationContext());
 		initContactManager();
 		/*
@@ -864,8 +845,53 @@ public void onTrimMemory(int level)
 		registerReceivers();
 		
 		HttpManager.init();
+
+		if (!HikeSharedPreferenceUtil.getInstance().getData(HikePlatformConstants.CRICKET_PREF_NAME, false))
+		{
+			cricketBotEntry();
+			HikeSharedPreferenceUtil.getInstance().saveData(HikePlatformConstants.CRICKET_PREF_NAME, true);
+		}
 	}
-	
+
+	// Hard coding the cricket bot on the App's onCreate so that there is a cricket bot entry
+	// when there is no bot currently in the app. Using the shared prefs for that matter.
+	// Hardcoding the bot name, bot msisdn and the bot chat theme. Can be updated using the
+	// AC packet cbot and delete using the ac packet dbot.
+	private void cricketBotEntry()
+	{
+		HikeHandlerUtil mThread = HikeHandlerUtil.getInstance();
+		mThread.startHandlerThread();
+		mThread.postRunnableWithDelay(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Logger.d("create bot", "cricket bot entry started");
+				final JSONObject jsonObject = new JSONObject();
+				try
+				{
+					jsonObject.put(HikeConstants.MSISDN, HikePlatformConstants.CRICKET_BOT_MSISDN);
+					jsonObject.put(HikeConstants.NAME, HikePlatformConstants.CRICKET_BOT_NAME);
+					jsonObject.put(HikeConstants.BOT_CHAT_THEME, HikePlatformConstants.CRICKET_CHAT_THEME_ID);
+
+					BitmapDrawable drawable = (BitmapDrawable) getApplicationContext().getResources().getDrawable(R.drawable.cric_icon);
+					String base64Icon = Utils.drawableToString(drawable);
+					if (base64Icon != null)
+					{
+						jsonObject.put(HikeConstants.BOT_THUMBNAIL, base64Icon);
+					}
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+
+				MqttMessagesManager.getInstance(getApplicationContext()).createBot(jsonObject);
+			}
+		}, 0);
+
+	}
+
 	public static HikeMessengerApp getInstance()
 	{
 		return _instance;
@@ -890,7 +916,7 @@ public void onTrimMemory(int level)
 		// turn off future push notifications as soon as the app has
 		// started.
 		// this has to be turned on whenever the upgrade finishes.
-		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.UPGRADING, true);
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.UPGRADING, true);
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		editor.putBoolean(BLOCK_NOTIFICATIONS, true);
 		editor.commit();
@@ -901,7 +927,7 @@ public void onTrimMemory(int level)
 
 	private void replaceGBKeys()
 	{
-		HikeSharedPreferenceUtil preferenceUtil = HikeSharedPreferenceUtil.getInstance(this);
+		HikeSharedPreferenceUtil preferenceUtil = HikeSharedPreferenceUtil.getInstance();
 
 		boolean gbDetailsSent = preferenceUtil.getData("whatsappDetailsSent", false);
 		int lastGBBackoffTime = preferenceUtil.getData("lastBackOffTimeWhatsapp", 0);
@@ -948,7 +974,10 @@ public void onTrimMemory(int level)
 		Utils.makeNoMediaFile(folder);
 
 		folder = new File(root + HikeConstants.IMAGE_ROOT + HikeConstants.SENT_ROOT);
-		Utils.makeNoMediaFile(folder);
+		/*
+		 * Fixed issue where sent media directory is getting visible in Gallery.
+		 */
+		Utils.makeNoMediaFile(folder, true);
 
 		folder = new File(root + HikeConstants.VIDEO_ROOT + HikeConstants.SENT_ROOT);
 		Utils.makeNoMediaFile(folder);
@@ -1062,7 +1091,7 @@ public void onTrimMemory(int level)
 		}
 		if (toastListener == null)
 		{
-			toastListener = toastListener = ToastListener.getInstance(getApplicationContext());
+			toastListener = ToastListener.getInstance(getApplicationContext());
 		}
 		if (activityTimeLogger == null)
 		{
@@ -1088,7 +1117,7 @@ public void onTrimMemory(int level)
 			/*
 			 * Send a fg/bg packet on reconnecting.
 			 */
-			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true);
+			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true, false);
 		}
 	};
 
@@ -1103,5 +1132,10 @@ public void onTrimMemory(int level)
 			edit.putBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, true);
 			edit.commit();
 		}
+	}
+	
+	public boolean isHikeBotNumber(String msisdn)
+	{
+		return hikeBotNamesMap.containsKey(msisdn);
 	}
 }

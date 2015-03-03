@@ -41,6 +41,8 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private boolean isMicromaxDevice;
 
 	private Dialog errorDialog;
+	
+	private int stagingToggle = AccountUtils._PRODUCTION_HOST;
 
 	SignupTask mTask; 
 	
