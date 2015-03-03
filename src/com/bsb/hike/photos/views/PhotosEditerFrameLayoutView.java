@@ -10,14 +10,16 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Environment;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikePhotosUtils;
+import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
 import com.bsb.hike.utils.Utils;
@@ -26,7 +28,7 @@ import com.bsb.hike.utils.Utils;
  * @author akhiltripathi Custom View extends FrameLayout Packs all the editing layers <filter layer,vignette layer ,doodle layer> into a single view ,in same z-order
  * 
  */
-public class PhotosEditerFrameLayoutView extends FrameLayout
+public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilterAppliedListener
 {
 	private CanvasImageView doodleLayer;
 
@@ -38,7 +40,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 
 	private boolean enableDoodling = false, enableText = false;
 
-	private Bitmap imageOriginal, imageEdited, scaledImageOriginal;
+	private Bitmap imageOriginal, imageEdited,imageScaled, scaledImageOriginal;
 
 	public PhotosEditerFrameLayoutView(Context context)
 	{
@@ -91,8 +93,9 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 
 	public void applyFilter(FilterType filter)
 	{
-		currentEffect = effectLayer.applyEffect(filter, HikeConstants.HikePhotos.DEFAULT_FILTER_APPLY_PERCENTAGE);
+		effectLayer.applyEffect(filter, HikeConstants.HikePhotos.DEFAULT_FILTER_APPLY_PERCENTAGE,this);
 		effectLayer.invalidate();
+		vignetteLayer.setFilter(filter);
 	}
 
 	/**
@@ -104,12 +107,15 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 	public void loadImageFromFile(String FilePath)
 	{
 		imageOriginal = BitmapFactory.decodeFile(FilePath);
-		effectLayer.handleImage(new BitmapDrawable(imageOriginal));
+		DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+		int width = metrics.widthPixels;
+		imageScaled =Bitmap.createScaledBitmap(imageOriginal, width, width, false);
+		effectLayer.handleImage(imageScaled);
 	}
 
 	public void loadImageFromBitmap(Bitmap bmp)
 	{
-		effectLayer.handleImage(new BitmapDrawable(bmp));
+		effectLayer.handleImage(bmp);
 	}
 
 	public void enableDoodling()
@@ -223,4 +229,12 @@ public class PhotosEditerFrameLayoutView extends FrameLayout
 		return bitmapResult;
 	}
 
+	@Override
+	public void onFilterApplied(Bitmap preview)
+	{
+		// TODO Auto-generated method stub
+		vignetteLayer.setVignetteforFilter(preview);
+		effectLayer.changeDisplayImage(preview);
+
+	}
 }

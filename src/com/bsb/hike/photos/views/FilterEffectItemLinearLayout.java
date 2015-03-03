@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 
 import com.bsb.hike.R;
 import com.bsb.hike.photos.HikeEffectsFactory;
-import com.bsb.hike.photos.HikeEffectsFactory.OnPreviewReadyListener;
+import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
@@ -18,7 +18,7 @@ import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
  * 
  */
 
-public class FilterEffectItemLinearLayout extends EffectItemLinearLayout implements OnPreviewReadyListener
+public class FilterEffectItemLinearLayout extends EffectItemLinearLayout implements OnFilterAppliedListener
 {
 	private FilterType filter;
 
@@ -67,7 +67,7 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 
 	private void initiateThumbnailCreation()
 	{
-		HikeEffectsFactory.loadPreviewThumbnail(this.getIcon(), this.filter, this);
+		HikeEffectsFactory.loadPreviewThumbnail(this.getContext(),this.getIcon(), this.filter, this);
 	}
 
 	public FilterType getFilter()
@@ -76,7 +76,7 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 	}
 
 	@Override
-	public void onPreviewReady(Bitmap preview)
+	public void onFilterApplied(Bitmap preview)
 	{
 		// TODO Auto-generated method stub
 		setImage(preview);

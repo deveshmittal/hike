@@ -1,12 +1,13 @@
 package com.bsb.hike.photos.views;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
 import com.bsb.hike.photos.HikeEffectsFactory;
+import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 /**
  * @author akhiltripathi
@@ -18,10 +19,10 @@ import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
  *        
  *
  */
-public class EffectsImageView extends ImageView
+public class EffectsImageView extends ImageView 
 {
 
-	private BitmapDrawable currentImage;
+	private Bitmap currentImage;
 
 	public EffectsImageView(Context context)
 	{
@@ -38,21 +39,28 @@ public class EffectsImageView extends ImageView
 		super(context, attrs, defStyleAttr);
 	}
 
-	public BitmapDrawable getBitmapWithEffectsApplied()
+	public Bitmap getBitmapWithEffectsApplied()
 	{
 		return currentImage;
 	}
 
-	public void handleImage(BitmapDrawable image)
+	public void handleImage(Bitmap image)
 	{
 		currentImage = image;
-		this.setImageDrawable(image);
+		this.setImageBitmap(image);
 
 	}
-
-	public ColorMatrixColorFilter applyEffect(FilterType filter, float value)
+	
+	public void changeDisplayImage(Bitmap image)
 	{
-		return HikeEffectsFactory.applyFiltertoBitmapDrawable(currentImage, filter, value);
+		this.setImageBitmap(image);
 	}
+
+	public void applyEffect(FilterType filter, float value,OnFilterAppliedListener listener)
+	{
+		 HikeEffectsFactory.applyFilterToBitmap(currentImage,listener, filter, this.getContext());
+	}
+
+	
 
 }
