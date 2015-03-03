@@ -24,6 +24,8 @@ public class ConvMessage
 	private boolean isBlockAddHeader;
 
 	private long msgID; // this corresponds to msgID stored in sender's DB
+	
+	private long serverID;
 
 	private long mappedMsgId; // this corresponds to msgID stored in receiver's
 								// DB
@@ -236,6 +238,12 @@ public class ConvMessage
 		this.msgID = msgId;
 	}
 	
+//	TODO anu bansal serverId
+/**
+ * serverId	
+ * create a new constructor for serverID
+ * set serverID field in convMessage
+ */
 	public ConvMessage(TypingNotification typingNotification)
 	{
 		this.typingNotification = typingNotification;
@@ -779,6 +787,16 @@ public class ConvMessage
 	public long getMsgID()
 	{
 		return msgID;
+	}
+	
+	public void setServerID(long serverID)
+	{
+		this.serverID = serverID;
+	}
+
+	public long getServerID()
+	{
+		return serverID;
 	}
 
 	public void setMappedMsgID(long msgID)

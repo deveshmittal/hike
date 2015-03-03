@@ -815,9 +815,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return addConversations(l);
 	}
 
-	public int updateMsgStatus(long msgID, int val, String msisdn)
+	public int updateMsgStatus(long serverID, int val, String msisdn)
 	{
-		String initialWhereClause = DBConstants.MESSAGE_ID + " =" + String.valueOf(msgID);
+		String initialWhereClause = DBConstants.SERVER_ID + " =" + String.valueOf(serverID);
 
 		String query = initialWhereClause;
 
@@ -833,14 +833,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return executeUpdateMessageStatusStatement(query, val, msisdn);
 	}
 
-	public long[] setAllDeliveredMessagesReadForMsisdn(String msisdn, JSONArray msgIds)
+	public long[] setAllDeliveredMessagesReadForMsisdn(String msisdn, JSONArray serverIds)
 	{
-		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
+		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.SERVER_ID }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
 				+ State.SENT_DELIVERED_READ.ordinal(), new String[] { msisdn }, null, null, null);
 
-		long[] ids = new long[c.getCount() + msgIds.length()];
+		long[] ids = new long[c.getCount() + serverIds.length()];
 
-		if (ids.length == 0 && msgIds.length() == 0)
+		if (ids.length == 0 && serverIds.length() == 0)
 		{
 			return null;
 		}
@@ -851,13 +851,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		{
 			while (c.moveToNext())
 			{
-				long id = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
+				long id = c.getLong(c.getColumnIndex(DBConstants.SERVER_ID));
 				sb.append(id + ",");
 				ids[i++] = id;
 			}
-			for (i = 0; i < msgIds.length(); i++)
+			for (i = 0; i < serverIds.length(); i++)
 			{
-				long id = msgIds.optLong(i);
+				long id = serverIds.optLong(i);
 				sb.append(id + ",");
 				ids[c.getCount() + i++] = id;
 			}
@@ -871,7 +871,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
 
-		String initialWhereClause = DBConstants.MESSAGE_ID + " in " + sb.toString();
+		String initialWhereClause = DBConstants.SERVER_ID + " in " + sb.toString();
 
 		int status = State.SENT_DELIVERED_READ.ordinal();
 
@@ -1115,9 +1115,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
-	public void setMessageState(String msisdn, long msgId, int status)
+	public void setMessageState(String msisdn, long serverId, int status)
 	{
-		if (msgId == -1)
+		if (serverId == -1)
 		{
 			return;
 		}
@@ -1137,8 +1137,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		long[] ids = null;
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=?  AND " + DBConstants.MSG_STATUS + ">=" + minStatusOrdinal
-					+ " AND " + DBConstants.MSG_STATUS + "<" + maxStatusOrdinal + " AND " + DBConstants.MESSAGE_ID + "<=" + msgId, new String[] { msisdn }, null, null, null);
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.SERVER_ID }, DBConstants.MSISDN + "=?  AND " + DBConstants.MSG_STATUS + ">=" + minStatusOrdinal
+					+ " AND " + DBConstants.MSG_STATUS + "<" + maxStatusOrdinal + " AND " + DBConstants.MESSAGE_ID + "<=" + serverId, new String[] { msisdn }, null, null, null);
 
 			ids = new long[c.getCount()];
 			int i = 0;
@@ -5317,7 +5317,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		{
 			int hikeMessage = c.getInt(isHikeMessageColumn);
 			boolean isHikeMessage = hikeMessage == -1 ? conversation.isOnhike() : (hikeMessage == 0 ? false : true);
-
 			ConvMessage message = new ConvMessage(c.getString(msgColumn), conversation.getMsisdn(), c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)),
 					c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn), !isHikeMessage, c.getInt(typeColumn));
 			//if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT){
