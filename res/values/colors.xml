@@ -369,7 +369,7 @@
     <color name="restore_success_green">#69dd71</color>
     <color name="shop_icon_default_color">#555555</color>
     <color name="shop_icon_color">#008fe1</color>
-    <color name="erase_key_color">#434748</color>
+    <color name="erase_key_color">#555555</color>
     <color name="shop_banner_bg">#39354c</color>
     <color name="sticker_settings_update_color">#60B141</color>
     <color name="white_100">#FFFFFFFF</color>

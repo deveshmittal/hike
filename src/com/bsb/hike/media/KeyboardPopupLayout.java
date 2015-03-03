@@ -7,9 +7,11 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.widget.PopupWindow.OnDismissListener;
+import android.widget.RelativeLayout;
 
 import com.bsb.hike.utils.Logger;
 
@@ -24,6 +26,8 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 	private int firstTimeHeight;
 
 	private int[] mEatTouchEventViewIds;
+	
+	private PopupListener mListener;
 
 	/**
 	 * 
@@ -33,18 +37,19 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 	 *            - This is the height which will be used before keyboard opens
 	 * @param context
 	 */
-	public KeyboardPopupLayout(View mainView, int firstTimeHeight, Context context)
+	public KeyboardPopupLayout(View mainView, int firstTimeHeight, Context context, PopupListener listener)
 	{
 		super(context);
 		this.mainView = mainView;
 		this.firstTimeHeight = firstTimeHeight;
 		originalBottomPadding = mainView.getPaddingBottom();
+		this.mListener = listener;
 		registerOnGlobalLayoutListener();
 	}
 	
-	public KeyboardPopupLayout(View mainView, int firstTimeHeight, Context context, int[] eatTouchEventViewIds)
+	public KeyboardPopupLayout(View mainView, int firstTimeHeight, Context context, int[] eatTouchEventViewIds, PopupListener listener)
 	{
-		this(mainView, firstTimeHeight, context);
+		this(mainView, firstTimeHeight, context, listener);
 		this.mEatTouchEventViewIds = eatTouchEventViewIds;
 	}
 
@@ -77,6 +82,10 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 						possibleKeyboardHeight = temp;
 					}
 					isKeyboardOpen = true;
+					if (isShowing())
+					{
+						updatePadding(0);
+					}
 					updateDimension(LayoutParams.MATCH_PARENT, temp);
 				}
 				else
@@ -93,7 +102,7 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 
 	private void updatePadding(int bottomPadding)
 	{
-		if (mainView.getPaddingBottom() != bottomPadding)
+		if (mainView != null && mainView.getPaddingBottom() != bottomPadding)
 		{
 			Logger.i("chatthread", "resize main height with bottom padding " + bottomPadding);
 			mainView.setPadding(0, 0, 0, bottomPadding);
@@ -108,6 +117,7 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		{
 			height = firstTimeHeight;
 		}
+		
 		if (popup == null)
 		{
 			initPopUpWindow(LayoutParams.MATCH_PARENT, height, view, context);
@@ -122,6 +132,8 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 				popup.setTouchInterceptor(this);
 			}
 		}
+		
+		view.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
 		popup.setHeight(height);
 		setOnDismissListener(this);
 		if (isKeyboardOpen)
@@ -142,6 +154,10 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		 * Whenever this pop up is dismissed, we want bottom padding of mainview to be reset
 		 */
 		updatePadding(originalBottomPadding);
+		if (mListener != null)
+		{
+			mListener.onPopupDismiss();
+		}
 	}
 	
 	@Override
@@ -196,8 +212,9 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		return ((eventX >= xy[0] && eventX <= (xy[0] + st.getWidth())));
 	}
 
-	public void updateMainView(View view)
+	public void updateListenerAndView(PopupListener listener, View view)
 	{
+		this.mListener = listener;
 		this.mainView = view;
 		registerOnGlobalLayoutListener();
 	}
@@ -206,4 +223,11 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 	{
 		return isKeyboardOpen;
 	}
+
+	public void releaseResources()
+	{
+		this.mListener = null;
+		this.mainView = null;
+	}
+	
 }

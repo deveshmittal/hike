@@ -893,4 +893,5 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 	{
 		Utils.emoticonClicked(getApplicationContext(), emoticonIndex, statusTxt);
 	}
+	
 }

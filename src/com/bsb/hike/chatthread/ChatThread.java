@@ -53,7 +53,6 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -90,12 +89,12 @@ import com.bsb.hike.media.AudioRecordView.AudioRecordListener;
 import com.bsb.hike.media.CaptureImageParser;
 import com.bsb.hike.media.CaptureImageParser.CaptureImageListener;
 import com.bsb.hike.media.EmoticonPicker;
-import com.bsb.hike.media.EmoticonPickerListener;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.media.OverflowItemClickListener;
 import com.bsb.hike.media.PickContactParser;
 import com.bsb.hike.media.PickFileParser;
 import com.bsb.hike.media.PickFileParser.PickFileListener;
+import com.bsb.hike.media.PopupListener;
 import com.bsb.hike.media.ShareablePopup;
 import com.bsb.hike.media.ShareablePopupLayout;
 import com.bsb.hike.media.StickerPicker;
@@ -130,6 +129,8 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomFontEditText;
+import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 
 /**
  * 
@@ -137,8 +138,8 @@ import com.bsb.hike.utils.Utils;
  */
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, CaptureImageListener,
-		PickFileListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener,
-		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener
+		PickFileListener, StickerPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener,
+		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, PopupListener, BackKeyListener
 {
 	private static final String TAG = "chatthread";
 
@@ -181,8 +182,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected static final int SET_LABEL = 19;
 
-	protected static final int DISABLE_TRANSCRIPT_MODE = 20;
-
 	protected static final int STICKER_CATEGORY_MAP_UPDATED = 21;
 
 	protected static final int MULTI_SELECT_ACTION_MODE = 22;
@@ -192,7 +191,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static final int STICKER_FTUE_TIP = 24;
 
     protected static final int MULTI_MSG_DB_INSERTED = 25;
-
+    
+    protected static final int SET_WINDOW_BG = 26;
+    
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -239,7 +240,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private int unreadMessageCount = 0;
 
-	protected EditText mComposeView;
+	protected CustomFontEditText mComposeView;
 
 	private GestureDetector mGestureDetector;
 
@@ -296,6 +297,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		switch (msg.what)
 		{
+		case SET_WINDOW_BG:
+			setWindowBackGround();
+			break;
 		case SHOW_TOAST:
 			showToast(msg.arg1);
 			break;
@@ -342,9 +346,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case SET_LABEL:
 			setLabel((String) msg.obj);
-			break;
-		case DISABLE_TRANSCRIPT_MODE:
-			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_DISABLED);
 			break;
 		case STICKER_CATEGORY_MAP_UPDATED:
 			mStickerPicker.updateStickerAdapter();
@@ -410,6 +411,22 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		init();
 		setContentView();
 		fetchConversation(true);
+		uiHandler.sendEmptyMessage(SET_WINDOW_BG);
+	}
+	
+	/**
+	 * Setting window background as black to avoid jarring effect when keyboard or sticker or emoticon pallete is opened.
+	 * Source : http://android-developers.blogspot.ca/2009/03/window-backgrounds-ui-speed.html
+	 * This is purely for user perception 
+	 */
+	private void setWindowBackGround()
+	{
+		android.view.Window window = activity.getWindow();
+		if (window != null)
+		{
+			Logger.d(TAG, "Setting window's background");
+			window.setBackgroundDrawableResource(R.color.black);
+		}
 	}
 	
 	public void onNewIntent()
@@ -431,14 +448,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void initView()
 	{
+		audioRecordView = new AudioRecordView(activity, this);
+		mComposeView = (CustomFontEditText) activity.findViewById(R.id.msg_compose);
+		
 		initShareablePopup();
 
 		initActionMode();
 
 		addOnClickListeners();
-
-		audioRecordView = new AudioRecordView(activity, this);
-		mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
 
 		showNetworkError(ChatThreadUtils.checkNetworkError());
 	}
@@ -460,7 +477,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			sharedPopups.add(mEmoticonPicker);
 			sharedPopups.add(mStickerPicker);
 			mShareablePopupLayout = new ShareablePopupLayout(activity.getApplicationContext(), activity.findViewById(R.id.chatThreadParentLayout),
-					(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)), mEatOuterTouchIds);
+					(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)), mEatOuterTouchIds, this);
 		}
 
 		else
@@ -486,9 +503,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	private void updateSharedPopups()
 	{
-		mShareablePopupLayout.updateMainView(activity.findViewById(R.id.chatThreadParentLayout));
+		mShareablePopupLayout.updateListenerAndView(this, activity.findViewById(R.id.chatThreadParentLayout));
 		mStickerPicker.updateListener(this, activity);
-		mEmoticonPicker.updateListener(this, activity);
+		mEmoticonPicker.updateETAndContext(mComposeView, activity);
 	}
 
 	private void addOnClickListeners()
@@ -508,7 +525,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private void initEmoticonPicker()
 	{
-		mEmoticonPicker = new EmoticonPicker(activity, this);
+		mEmoticonPicker = new EmoticonPicker(activity, mComposeView);
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -621,12 +638,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case R.id.sticker_btn:
 			setEmoticonButtonSelected(false);
-			setStickerButtonSelected(!v.isSelected());
+			setStickerButtonSelected(true);
 			stickerClicked();
 			break;
 		case R.id.emoticon_btn:
 			setStickerButtonSelected(false);
-			setEmoticonButtonSelected(!v.isSelected());
+			setEmoticonButtonSelected(true);
 			emoticonClicked();
 			break;
 		case R.id.send_message:
@@ -658,12 +675,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case R.id.selected_state_overlay:
 			onBlueOverLayClick((ConvMessage) v.getTag(), v);
-			break;
-		case R.id.block_unknown_contact:
-			HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, msisdn);
-			break;
-		case R.id.add_unknown_contact:
-			Utils.addToContacts(activity.getApplicationContext(), msisdn);
 			break;
 		default:
 			Logger.e(TAG, "onClick Registered but not added in onClick : " + v.toString());
@@ -786,7 +797,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			themePicker = new ThemePicker(activity, this, currentTheme);
 		}
-		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme);
 	}
 
 	protected void showAttchmentPicker()
@@ -891,9 +901,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			return true;
 		}
 
-		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
+		if (mShareablePopupLayout.isShowing())
 		{
-			dismissShareablePopup();
+			mShareablePopupLayout.dismiss();
 			return true;
 		}
 
@@ -911,23 +921,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		return false;
 	}
 	
-	private void dismissShareablePopup()
-	{
-		if(activity.findViewById(R.id.sticker_btn).isSelected())
-		{
-			setStickerButtonSelected(false);
-		}
-		if(activity.findViewById(R.id.emoticon_btn).isSelected())
-		{
-			setEmoticonButtonSelected(false);
-		}
-		
-		mShareablePopupLayout.dismiss();
-	}
-
 	private void actionBarBackPressed()
 	{
-		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
+		if (mShareablePopupLayout.isShowing())
 		{
 			mShareablePopupLayout.dismiss();
 		}
@@ -1119,13 +1115,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	}
 
 	@Override
-	public void emoticonSelected(int emoticonIndex)
-	{
-		Logger.i(TAG, " This emoticon was selected : " + emoticonIndex);
-		Utils.emoticonClicked(activity.getApplicationContext(), emoticonIndex, mComposeView);
-	}
-
-	@Override
 	public void audioRecordSuccess(String filePath, long duration)
 	{
 		Logger.i(TAG, "Audio Recorded " + filePath + "--" + duration);
@@ -1252,7 +1241,31 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		setMessagesRead(); // Setting messages as read if there are any unread ones
 
+		setEditTextListeners();
+		
+		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
+
+		// Register broadcasts
+		mBroadCastReceiver = new ChatThreadBroadcasts();
+
+		IntentFilter intentFilter = new IntentFilter(StickerManager.STICKERS_UPDATED);
+		intentFilter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
+		intentFilter.addAction(StickerManager.STICKERS_DOWNLOADED);
+
+		LocalBroadcastManager.getInstance(activity.getBaseContext()).registerReceiver(mBroadCastReceiver, intentFilter);
+		
+		/**
+		 * Adding PubSub, here since all the heavy work related to fetching of messages and setting up UI has been done already.
+		 */
+		addToPubSub();
+
+		takeActionBasedOnIntent();
+	}
+	
+	protected void setEditTextListeners()
+	{
 		mComposeView.addTextChangedListener(this);
+		mComposeView.setBackKeyListener(this);
 
 		/**
 		 * ensure that when the softkeyboard Done button is pressed (different than the send button we have), we send the message.
@@ -1271,23 +1284,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		mComposeView.setOnKeyListener(this);
 
-		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
-
-		// Register broadcasts
-		mBroadCastReceiver = new ChatThreadBroadcasts();
-
-		IntentFilter intentFilter = new IntentFilter(StickerManager.STICKERS_UPDATED);
-		intentFilter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
-		intentFilter.addAction(StickerManager.STICKERS_DOWNLOADED);
-
-		LocalBroadcastManager.getInstance(activity.getBaseContext()).registerReceiver(mBroadCastReceiver, intentFilter);
-		
-		/**
-		 * Adding PubSub, here since all the heavy work related to fetching of messages and setting up UI has been done already.
-		 */
-		addToPubSub();
-
-		takeActionBasedOnIntent();
 	}
 
 	/*
@@ -1924,9 +1920,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void destroyActionMode()
 	{
-		shareableMessagesCount = 0;
-		selectedNonForwadableMsgs = 0;
-		selectedNonForwadableMsgs = 0;
+		resetSelectedMessageCounters();
 		mAdapter.removeSelection();
 		mAdapter.setActionMode(false);
 		mAdapter.notifyDataSetChanged();
@@ -1935,6 +1929,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * if we have hidden tips while initializing action mode we should unhide them
 		 */ 
 		mTips.showHiddenTip();
+	}
+	
+	private void resetSelectedMessageCounters()
+	{
+		shareableMessagesCount = 0;
+		selectedNonForwadableMsgs = 0;
+		selectedNonForwadableMsgs = 0;
+		selectedNonTextMsgs = 0;
 	}
 
 	@Override
@@ -2204,7 +2206,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			onChatBackgroundChanged(object);
 			break;
 		case HikePubSub.CLOSE_CURRENT_STEALTH_CHAT:
-			uiHandler.sendEmptyMessage(CLOSE_CURRENT_STEALTH_CHAT);
+			/**
+			 * Closing only if the current chat thread is stealth
+			 */
+			if (mConversation != null && mConversation.isStealth())
+			{
+				uiHandler.sendEmptyMessage(CLOSE_CURRENT_STEALTH_CHAT);
+			}
 			break;
 		case HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT:
 			uiHandler.sendEmptyMessage(CLOSE_PHOTO_VIEWER_FRAGMENT);
@@ -2428,6 +2436,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	private void releaseStickerAndEmoticon()
 	{
+		/**
+		 * It is important that along with releasing resources for Stickers/Emoticons, we also close their windows to prevent any BadWindow Exceptions later on.
+		 */
+		if (mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
+		
+		mShareablePopupLayout.releaseResources();
 		mStickerPicker.releaseResources();
 		mEmoticonPicker.releaseReources();
 	}
@@ -2494,34 +2511,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	}
 
-	/**
-	 * This method will be called either user is returning after pressing home or screen lock ,
-	 * 
-	 * if user came after pressing home, then soft keyboard respects softinputstate , i.e : if keyboard was visible and softinputmode is set as visible , then soft keyboard will
-	 * become visible
-	 * 
-	 * But if it is called after screen lock , then soft input keyboard maintains its state , it does not change, if it was visible earlier, it will be visible this time as well ,
-	 * so we simply return as it does not effect our sticker pallete -- gauravKhanna
-	 */
-
 	public void onRestart()
 	{
-		/*
-		 * if (wasScreenOffEvent) { wasScreenOffEvent = false; return; }
-		 */
+		isActivityVisible = true;
 
 		Logger.d(TAG, "ChatThread : onRestart called");
-		/**
-		 * Something related to Stickers :
-		 * 
-		 * int softInput = getWindow().getAttributes().softInputMode; if (softInput == WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE || softInput ==
-		 * WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE) { // keyboard will come for sure if (isEmoticonPalleteVisible()) { resizeMainheight(0, false); } return; } //
-		 * mean last time it was above keyboard, so no guarantee of keyboard, simply discard it if (isEmoticonPalleteVisible() && findViewById(R.id.chat_layout).getPaddingBottom()
-		 * == 0) { dismissPopupWindow();
-		 * 
-		 * }
-		 */
-
 	}
 
 	/**
@@ -2531,6 +2525,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		saveDraft();
 		releaseStickerAndEmoticon();
+	}
+	
+	/**
+	 * This method is to be called before onNewIntent to cater to the following : 
+	 * 1. Save drafts for the current chat thread if any. 
+	 * 2. Dismiss stickers and emoticon pallete 
+	 */
+	protected void onPreNewIntent()
+	{
+		saveDraft();
+		if (mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
 	}
 	
 	protected void onStart()
@@ -3462,8 +3470,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void updateOverflowMenuIndicatorCount(int newCount)
 	{
 		MenuItem menuItem = mActionBar.getMenuItem(R.id.overflow_menu);
-
-		if (menuItem != null)
+		
+		if (menuItem != null && menuItem.getActionView() != null)
 		{
 			TextView topBarCounter = (TextView) menuItem.getActionView().findViewById(R.id.top_bar_indicator);
 
@@ -3483,7 +3491,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 
 	}
-
+	
 	private String getUnreadCounterText(int counter)
 	{
 		if (counter >= HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY)
@@ -3544,12 +3552,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		else
 		{
-			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-
-			/*
-			 * Resetting the transcript mode once the list has scrolled to the bottom.
+			/**
+			 * Scrolling to bottom.
 			 */
-			uiHandler.sendEmptyMessage(DISABLE_TRANSCRIPT_MODE);
+			mConversationsView.setSelection(messages.size() - 1);
 		}
 
 	}
@@ -3893,6 +3899,34 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		catch (JSONException e)
 		{
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+	}
+	
+	@Override
+	public void onPopupDismiss()
+	{
+		Logger.i(TAG, "onPopup Dismiss");
+		if(activity.findViewById(R.id.sticker_btn).isSelected())
+		{
+			setStickerButtonSelected(false);
+		}
+		if(activity.findViewById(R.id.emoticon_btn).isSelected())
+		{
+			setEmoticonButtonSelected(false);
+		}
+		
+	}
+	
+	@Override
+	public void onBackKeyPressedET(CustomFontEditText editText)
+	{
+		// on back press - if keyboard was open , now keyboard gone , try to hide emoticons
+		// if keyboard ws not open , onbackpress of activity will get call back, dismiss popup there
+		// if we dismiss here in second case as well, then onbackpress of acitivty will be called and it will finish activity
+		
+		if (mShareablePopupLayout.isKeyboardOpen() && mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
 		}
 	}
 }
