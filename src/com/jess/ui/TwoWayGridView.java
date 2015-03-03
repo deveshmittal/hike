@@ -36,7 +36,8 @@
 package com.jess.ui;
 
 
-import com.jess.demo.R;
+
+import com.bsb.hike.R;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
