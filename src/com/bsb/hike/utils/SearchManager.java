@@ -291,6 +291,11 @@ public class SearchManager
 
 		return position;
 	}
+	
+	public void updateDataSet(Collection<? extends Searchable> collection)
+	{
+		itemList = new ArrayList<>(collection);
+	}
 
 	public void updateIndex(int count)
 	{

@@ -1807,6 +1807,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (messageSearchManager != null)
 		{
 			messageSearchManager.updateIndex(list.size());
+			messageSearchManager.updateDataSet(messages);
 		}
 	}
 	
