@@ -2226,7 +2226,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			onChatBackgroundChanged(object);
 			break;
 		case HikePubSub.CLOSE_CURRENT_STEALTH_CHAT:
-			uiHandler.sendEmptyMessage(CLOSE_CURRENT_STEALTH_CHAT);
+			/**
+			 * Closing only if the current chat thread is stealth
+			 */
+			if (mConversation != null && mConversation.isStealth())
+			{
+				uiHandler.sendEmptyMessage(CLOSE_CURRENT_STEALTH_CHAT);
+			}
 			break;
 		case HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT:
 			uiHandler.sendEmptyMessage(CLOSE_PHOTO_VIEWER_FRAGMENT);
