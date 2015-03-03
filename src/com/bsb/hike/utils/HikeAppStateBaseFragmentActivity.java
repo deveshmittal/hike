@@ -1,11 +1,8 @@
 package com.bsb.hike.utils;
 
 import android.content.Intent;
-import android.net.TrafficStats;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -16,7 +13,6 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.models.HikeAlarmManager;
-import com.bsb.hike.ui.fragments.DataConsumptionFragment;
 import com.bsb.hike.ui.fragments.ImageViewerFragment;
 import com.bsb.hike.voip.view.CallIssuesPopup;
 import com.bsb.hike.voip.view.CallRatePopup;
@@ -203,38 +199,4 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 			}
 		});
 	}
-	
-
-	public void showDataFragment(int viewId)
-	{
-		  //In KB
-        
-		//We only add data fragment for devices where actual statistics is available;
-		if(TrafficStats.getUidTxBytes(HikeMessengerApp.getInstance().getApplicationInfo().uid) == TrafficStats.UNSUPPORTED)
-		{
-	        return;
-		}
-		
-		if(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeMessengerApp.SHOW_DATA_TRACKER, true))
-		{
-	        return;
-		}
-		
-		String tag = "DataFragment";
-		// Check what fragment is currently shown, replace if needed.
-		DataConsumptionFragment fragment = (DataConsumptionFragment)
-				getSupportFragmentManager().findFragmentByTag(tag);
-        if (fragment == null) {
-            // Make new fragment to show this selection.
-        	fragment = DataConsumptionFragment.newInstance();
-
-            // Execute a transaction, replacing any existing fragment
-            // with this one inside the frame.
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.replace(viewId, fragment, tag);
-            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-            ft.commit();
-        }
-
-    } 
 }

@@ -1,7 +1,6 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -74,7 +73,6 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -93,9 +91,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.media.AudioManager;
 import android.media.ExifInterface;
-import android.media.MediaPlayer;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.TrafficStats;
@@ -146,8 +141,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeConstants.ImageQuality;
@@ -156,11 +150,12 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.TrafficsStatsFile;
 import com.bsb.hike.cropimage.CropImage;
-import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
@@ -175,21 +170,17 @@ import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.ConnectionChangeReceiver;
-import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.service.HikeMqttManagerNew;
-import com.bsb.hike.service.HikeService;
+import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.ComposeChatActivity;
-import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -201,9 +192,6 @@ import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPUtils;
-import com.bsb.hike.voip.view.VoIPActivity;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -627,7 +615,7 @@ public class Utils
 	 */
 	public static boolean isUserSignedUp(Context context, boolean launchSignup)
 	{
-		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(context);
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance();
 		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
 			if(launchSignup)
@@ -3415,15 +3403,15 @@ public class Utils
 
 	public static void resetUnseenStatusCount(Context context)
 	{
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 	}
 
 	public static void resetUnseenFriendRequestCount(Context context)
 	{
-		if (HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
+		if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
 		{
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_COUNT_CHANGED, null);
 	}
@@ -3468,7 +3456,7 @@ public class Utils
 
 	public static boolean isVoipActivated(Context context)
 	{
-		int voipActivated = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.VOIP_ACTIVATED, 0);
+		int voipActivated = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.VOIP_ACTIVATED, 1);
 		return (voipActivated == 0)? false : true;
 	}
 
@@ -3479,11 +3467,7 @@ public class Utils
 			Toast.makeText(context, context.getString(R.string.voip_offline_error), Toast.LENGTH_SHORT).show();
 			return;
 		}
-		Intent i = new Intent(context, VoIPService.class);
-		i.putExtra("action", "outgoingcall");
-		i.putExtra("msisdn", mContactNumber);
-		i.putExtra("call_source", source.ordinal());
-		context.startService(i);
+		context.startService(IntentManager.getVoipCallIntent(context, mContactNumber, source));
 	}
 
 	public static String getFormattedDateTimeFromTimestamp(long milliSeconds, Locale current)
@@ -3793,6 +3777,15 @@ public class Utils
 
 	public static void makeNoMediaFile(File root)
 	{
+		makeNoMediaFile(root, false);
+	}
+
+	/*
+	 * Whenever creating a nomedia file in any dirctory and if images/videos are already present in 
+	 * that directory then we need to do re-scan to make them invisible from gallery.
+	 */
+	public static void makeNoMediaFile(File root, boolean reScan)
+	{
 		if (root == null)
 		{
 			return;
@@ -3805,13 +3798,50 @@ public class Utils
 		File file = new File(root, ".nomedia");
 		if (!file.exists())
 		{
+			FileOutputStream dest = null;
 			try
 			{
-				file.createNewFile();
+				dest = new FileOutputStream(file);
+				/*
+				 * File content could be blank (for backwards compatibility), or have one or more of the following values separated by a newline:
+				 * image|sound|video
+				 * Reference - https://code.google.com/p/android/issues/detail?id=35879
+				 */
+				String data = "";
+				dest.write(data.getBytes(), 0, data.getBytes().length);
 			}
 			catch (IOException e)
 			{
-				Logger.d("NoMedia", "failed to make nomedia file");
+				Logger.d("NoMedia", "Failed to make nomedia file");
+			}
+			finally
+			{
+				try
+				{
+					if(dest != null)
+					{
+						dest.flush();
+						dest.getFD().sync();
+						dest.close();
+					}
+				}
+				catch (IOException e)
+				{
+					Logger.d("NoMedia", "Failed to make nomedia file");
+				}
+			}
+			if(reScan)
+			{
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+				{
+					HikeMessengerApp.getInstance().getApplicationContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" +
+							root)));
+				}
+				else
+				{
+					HikeMessengerApp.getInstance().getApplicationContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" +
+							root)));
+				}
 			}
 		}
 	}
@@ -3944,7 +3974,7 @@ public class Utils
 	public static void addFavorite(final Context context, final ContactInfo contactInfo, final boolean isFtueContact)
 	{
 		toggleFavorite(context, contactInfo, isFtueContact);
-		if (!contactInfo.isOnhike() || HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, false))
+		if (!contactInfo.isOnhike() || HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, false))
 		{
 			return;
 		}
@@ -3956,7 +3986,7 @@ public class Utils
 			public void positiveClicked(Dialog dialog)
 			{
 				dialog.dismiss();
-				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
 			}
 
 			@Override
@@ -3968,7 +3998,7 @@ public class Utils
 			public void negativeClicked(Dialog dialog)
 			{
 				dialog.dismiss();
-				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
 			}
 
 			@Override
@@ -4023,7 +4053,7 @@ public class Utils
 
 	public static final void cancelScheduledStealthReset(Context context)
 	{
-		HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
+		HikeSharedPreferenceUtil.getInstance().removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
 	}
 
 	public static long getOldTimestamp(int min)
@@ -5089,7 +5119,7 @@ public class Utils
 	{
 		appContext = appContext.getApplicationContext();
 
-		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(appContext);
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance();
 
 		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
@@ -5263,34 +5293,5 @@ public class Utils
 		}
 		return false;
 	}
-	public static long getTotalDataRecieved(int appId)
-	{
-		long received = TrafficStats.getUidRxBytes(appId);  //In KB
-        
-		if(received != TrafficStats.UNSUPPORTED)
-		{
-	        return received;
-		}
-		else
-		{
-			Logger.d("data", "using manual file for recieved data");
-			return TrafficsStatsFile.getTotalBytesReceivedManual(appId);  //In KB
-		}
-	}
-	
-	public static long getTotalDataSent(int appId)
-	{
-		long sent = TrafficStats.getUidTxBytes(appId);  //In KB
-        
-		if(sent != TrafficStats.UNSUPPORTED)
-		{
-	        return sent;
-		}
-		else
-		{
-			Logger.d("data", "using manual file for sent data");
-			return TrafficsStatsFile.getTotalBytesSentManual(appId);  //In KB
-		}
-	}
-	
+
 }

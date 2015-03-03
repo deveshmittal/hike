@@ -25,6 +25,11 @@ public class TrafficsStatsFile
 		File uidFileDir = new File("/proc/uid_stat/" + String.valueOf(localUid));
 		if(uidFileDir.exists())
 		{
+			BufferedReader brReceivedTcp = null;
+			BufferedReader brSentTcp = null;
+			BufferedReader brReceivedUdp = null;
+			BufferedReader brSentUdp = null;
+			
 			try
 			{
 				File uidActualTCPFileReceived = new File(uidFileDir, "tcp_rcv");
@@ -38,14 +43,11 @@ public class TrafficsStatsFile
 					return FILES_NOT_READABLE;
 				}
 				
-				String textReceived = "0";
-				
-				String textSent = "0";
 
-				BufferedReader brReceivedTcp = new BufferedReader(new FileReader(uidActualTCPFileReceived));
-				BufferedReader brSentTcp = new BufferedReader(new FileReader(uidActualTCPFileSent));
-				BufferedReader brReceivedUdp = new BufferedReader(new FileReader(uidActualUDPFileReceived));
-				BufferedReader brSentUdp = new BufferedReader(new FileReader(uidActualUDPFileSent));
+				brReceivedTcp = new BufferedReader(new FileReader(uidActualTCPFileReceived));
+				brSentTcp = new BufferedReader(new FileReader(uidActualTCPFileSent));
+				brReceivedUdp = new BufferedReader(new FileReader(uidActualUDPFileReceived));
+				brSentUdp = new BufferedReader(new FileReader(uidActualUDPFileSent));
 				String receivedLine;
 				String sentLine;
 				long recvBytes = 0;
@@ -84,104 +86,23 @@ public class TrafficsStatsFile
 				ioex.printStackTrace();
 				Logger.w(LOGGING_TAG, "IOException: ");
 			}
-			return EXCEPTION_READING_FILES;
-
-		}
-		else
-		{
-			return UID_DIRECTORY_DOES_NOT_EXISTS;
-		}
-	}
-	
-	public static long getTotalBytesReceivedManual(int localUid)
-	{
-		File uidFileDir = getUidDataFile(localUid);
-		if(!uidFileDir.exists())
-		{
-			return UID_DIRECTORY_DOES_NOT_EXISTS;
-		}
-		else
-		{
-			long totalTcpRecievedBytes = getTotatalBytesFromUidFile(localUid, "tcp_rcv");
-			long totalUdpRecievedBytes = getTotatalBytesFromUidFile(localUid, "udp_rcv");
-			return totalTcpRecievedBytes + totalUdpRecievedBytes;
-		}
-	}
-	
-	public static long getTotalBytesSentManual(int localUid)
-	{
-		File uidFileDir = getUidDataFile(localUid);
-		if(!uidFileDir.exists())
-		{
-			return UID_DIRECTORY_DOES_NOT_EXISTS;
-		}
-		else
-		{
-			long totalTcpSentBytes = getTotatalBytesFromUidFile(localUid, "tcp_snd");
-			long totalUdpSentBytes = getTotatalBytesFromUidFile(localUid, "udp_snd");
-			return totalTcpSentBytes + totalUdpSentBytes;
-		}
-	}
-	
-	private static File getUidDataFile(int localUid)
-	{
-		return new File("/proc/uid_stat/" + String.valueOf(localUid));
-	}
-	
-	private static long getTotatalBytesFromUidFile(int localUid, String filename)
-	{
-
-		File uidFileDir = new File("/proc/uid_stat/" + String.valueOf(localUid));
-		if(uidFileDir.exists())
-		{
-			BufferedReader bufferReader = null;
-			try
-			{
-				File file = new File(uidFileDir, filename);
-				
-				if(!file.canRead())
-				{
-					return FILES_NOT_READABLE;
-				}
-
-				bufferReader = new BufferedReader(new FileReader(file));
-				String line;
-				long bytes = 0;
-				
-				if ((line = bufferReader.readLine()) != null)
-				{
-					bytes = Long.valueOf(line);
-				}
-				return bytes;
-			}
-			catch(NumberFormatException nfe)
-			{
-				nfe.printStackTrace();
-				Logger.w(LOGGING_TAG, "Number not long: ");
-			}
-			catch (FileNotFoundException fnfex)
-			{
-				fnfex.printStackTrace();
-				Logger.w(LOGGING_TAG, "File not found: ");
-			}
-			catch (IOException ioex)
-			{
-				ioex.printStackTrace();
-				Logger.w(LOGGING_TAG, "IOException: ");
-			}
 			finally
 			{
-				if(bufferReader != null)
-				{
-					try
-					{
-						bufferReader.close();
-					}
-					catch (IOException e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+				try {
+					if(brReceivedTcp != null)
+						brReceivedTcp.close();
+					
+					if(brSentTcp != null)
+						brSentTcp.close();
+					
+					if(brReceivedUdp != null)
+						brReceivedUdp.close();
+					
+					if(brSentUdp != null)
+						brSentUdp.close();
+					
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
 			return EXCEPTION_READING_FILES;
@@ -191,9 +112,6 @@ public class TrafficsStatsFile
 		{
 			return UID_DIRECTORY_DOES_NOT_EXISTS;
 		}
-	
 	}
-	
-	
 
 }

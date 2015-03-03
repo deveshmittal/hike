@@ -67,7 +67,7 @@ public class LastSeenScheduler
 
 	public void start(boolean fetchBulkLastSeen)
 	{
-		if (!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.BULK_LAST_SEEN_PREF, false))
+		if (!HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.BULK_LAST_SEEN_PREF, false))
 		{
 			return;
 		}

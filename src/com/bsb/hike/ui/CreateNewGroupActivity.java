@@ -108,8 +108,6 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 		{
 			groupImage.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(groupId, true));
 		}
-		
-		showDataFragment(R.id.parent_layout);
 	}
 
 	@Override

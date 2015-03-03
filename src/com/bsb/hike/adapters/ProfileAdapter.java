@@ -5,16 +5,12 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -25,7 +21,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -40,7 +35,6 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.smartImageLoader.SharedFileImageLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
@@ -76,8 +70,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	private boolean myProfile;
 
 	private boolean isContactBlocked;
-
-	private boolean lastSeenPref;
 	
 	private IconLoader iconLoader;
 
@@ -127,7 +119,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		this.groupConversation = groupConversation;
 		this.myProfile = myProfile;
 		this.isContactBlocked = isContactBlocked;
-		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		int mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
 		this.bigPicImageLoader = new TimelineImageLoader(context, mBigImageSize);
@@ -622,14 +613,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.infoContainer.setVisibility(View.GONE);
 			}
 
-			int offline = contactInfo.getOffline();
-			String lastSeenString = null;
-			boolean showingLastSeen = false;
-			if (lastSeenPref && contactInfo.getFavoriteType() == FavoriteType.FRIEND && !contactInfo.getMsisdn().equals(contactInfo.getId()))
-			{
-				lastSeenString = Utils.getLastSeenTimeAsString(context, contactInfo.getLastSeenTime(), offline, true);
-				showingLastSeen = !TextUtils.isEmpty(lastSeenString);
-			}
 			String groupParticipantName = groupParticipants.getSecond();
 			if (null == groupParticipantName)
 			{
@@ -751,7 +734,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 	private void disableView(TextView text, TextView count, View background)
 	{
-		// TODO Auto-generated method stub
 		text.setTextColor(context.getResources().getColor(R.color.files_disabled));
 		count.setTextColor(context.getResources().getColor(R.color.files_disabled));
 		background.setBackgroundDrawable(null);   //Removing the pressed state
@@ -759,7 +741,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 	private void loadMediaInProfile(int size, LinearLayout layout, List<HikeSharedFile> sharedMedia)
 	{
-		// TODO Auto-generated method stub
 		int i = 0;
 		while(i<size)
 		{
@@ -807,8 +788,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	private class ViewHolder
 	{
 		TextView text;
-
-		EditText editName;
 
 		TextView subText;
 
