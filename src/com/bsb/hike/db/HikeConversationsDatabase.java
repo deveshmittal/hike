@@ -1496,6 +1496,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					try
 					{
 						msgId = insertStatement.executeInsert();
+						insertServerId(msgId);
 					}
 					catch (Exception e)
 					{
@@ -1517,6 +1518,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 						try
 						{
 							msgId = insertStatement.executeInsert();
+							insertServerId(msgId);
 						}
 						catch (Exception e)
 						{
@@ -1616,6 +1618,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				try
 				{
 					msgId = insertStatement.executeInsert();
+					insertServerId(msgId);
 				}
 				catch (Exception e)
 				{
@@ -1636,6 +1639,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					try
 					{
 						msgId = insertStatement.executeInsert();
+						insertServerId(msgId);
 					}
 					catch (Exception e)
 					{
@@ -1667,7 +1671,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
-    private SQLiteStatement getSqLiteStatementToInsertIntoMessagesTable(boolean createConvIfNotExist) {
+    private void insertServerId(long msgId) {
+    	if (msgId > 0)
+    	{
+    		ContentValues contentValues = new ContentValues();
+    		contentValues.put(DBConstants.SERVER_ID, msgId);
+    		mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { Long.toString(msgId) });
+    	}
+	}
+
+	private SQLiteStatement getSqLiteStatementToInsertIntoMessagesTable(boolean createConvIfNotExist) {
         SQLiteStatement insertStatement = null;
         if(createConvIfNotExist){
             insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
