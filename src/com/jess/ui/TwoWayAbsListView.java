@@ -38,7 +38,7 @@ package com.jess.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jess.demo.R;
+import com.bsb.hike.R;
 
 import android.content.Context;
 import android.content.res.Configuration;
