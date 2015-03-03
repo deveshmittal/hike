@@ -395,7 +395,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			onEditGroupNameClick(null);
 		}
 		setupActionBar();
-		showDataFragment(R.id.data_frag);
 	}
 
 	private void setGroupNameFields(View parent)

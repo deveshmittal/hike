@@ -259,8 +259,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		init();
 		mPubSub = HikeMessengerApp.getPubSub();
 		mPubSub.addListeners(this, hikePubSubListeners);
-		
-		showDataFragment(R.id.parent);
 	}
 
 	boolean isOpened = false;
