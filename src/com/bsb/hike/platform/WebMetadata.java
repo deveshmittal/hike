@@ -74,11 +74,11 @@ public class WebMetadata
 
 	public void setHelperData(JSONObject helperData)
 	{
-		try
+		if (null != helperData)
 		{
 			this.helperData = helperData;
 		}
-		catch (NullPointerException npe)
+		else
 		{
 			this.helperData = new JSONObject();
 		}
