@@ -34,12 +34,14 @@ import android.util.Base64;
 import android.util.Pair;
 import android.util.SparseArray;
 
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
+import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -2027,7 +2029,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				Conversation conv;
 				if (Utils.isGroupConversation(msisdn))
 				{
-					conv = new GroupConversation(msisdn, (contactInfo != null) ? contactInfo.getName() : null, groupOwner, true);
+					if (!(Utils.isBroadcastConversation(msisdn)))
+					{
+						conv = new GroupConversation(msisdn, (contactInfo != null) ? contactInfo.getName() : null, groupOwner, true);
+					}
+					else
+					{
+						conv = new BroadcastConversation(msisdn, (contactInfo != null) ? contactInfo.getName() : null, groupOwner, true);
+					}
 					InsertHelper groupInfoIH = null;
 					try
 					{
@@ -2733,7 +2742,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 						String name = details.getGroupName();
 						boolean groupAlive = details.isGroupAlive();
 						boolean isMuteGroup = details.isGroupMute();
-						conv = new GroupConversation(msisdn, name, null, groupAlive, isMuteGroup);
+						if(!Utils.isBroadcastConversation(msisdn))
+							conv = new GroupConversation(msisdn, name, null, groupAlive, isMuteGroup);
+						else
+						{
+							conv = new BroadcastConversation(msisdn, name, null, groupAlive, isMuteGroup);
+						}					
 					}
 				}
 				else
@@ -2923,7 +2937,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			boolean isGroupAlive = groupCursor.getInt(groupCursor.getColumnIndex(DBConstants.GROUP_ALIVE)) != 0;
 			boolean isMuted = groupCursor.getInt(groupCursor.getColumnIndex(DBConstants.MUTE_GROUP)) != 0;
 
-			GroupConversation conv = new GroupConversation(msisdn, groupName, groupOwner, isGroupAlive);
+			GroupConversation conv;
+			if (Utils.isBroadcastConversation(msisdn))
+			{
+				conv = new BroadcastConversation(msisdn, groupName, groupOwner, isGroupAlive);
+			}
+			else
+			{
+				conv = new GroupConversation(msisdn, groupName, groupOwner, isGroupAlive);
+			}			
 			conv.setGroupParticipantList(ContactManager.getInstance().getGroupParticipants(msisdn, false, false));
 			conv.setGroupMemberAliveCount(getActiveParticipantCount(msisdn));
 			conv.setIsMuted(isMuted);
