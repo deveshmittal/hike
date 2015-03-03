@@ -199,6 +199,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
     protected static final int MULTI_MSG_DB_INSERTED = 25;
     
+    protected static final int SET_WINDOW_BG = 26;
+    
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -302,6 +304,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		switch (msg.what)
 		{
+		case SET_WINDOW_BG:
+			setWindowBackGround();
+			break;
 		case SHOW_TOAST:
 			showToast(msg.arg1);
 			break;
@@ -416,6 +421,22 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		init();
 		setContentView();
 		fetchConversation(true);
+		uiHandler.sendEmptyMessage(SET_WINDOW_BG);
+	}
+	
+	/**
+	 * Setting window background as black to avoid jarring effect when keyboard or sticker or emoticon pallete is opened.
+	 * Source : http://android-developers.blogspot.ca/2009/03/window-backgrounds-ui-speed.html
+	 * This is purely for user perception 
+	 */
+	private void setWindowBackGround()
+	{
+		android.view.Window window = activity.getWindow();
+		if (window != null)
+		{
+			Logger.d(TAG, "Setting window's background");
+			window.setBackgroundDrawableResource(R.color.black);
+		}
 	}
 	
 	public void onNewIntent()
