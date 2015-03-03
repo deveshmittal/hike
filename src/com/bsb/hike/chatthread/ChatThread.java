@@ -187,8 +187,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected static final int SET_LABEL = 19;
 
-	protected static final int DISABLE_TRANSCRIPT_MODE = 20;
-
 	protected static final int STICKER_CATEGORY_MAP_UPDATED = 21;
 
 	protected static final int MULTI_SELECT_ACTION_MODE = 22;
@@ -353,9 +351,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case SET_LABEL:
 			setLabel((String) msg.obj);
-			break;
-		case DISABLE_TRANSCRIPT_MODE:
-			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_DISABLED);
 			break;
 		case STICKER_CATEGORY_MAP_UPDATED:
 			mStickerPicker.updateStickerAdapter();
@@ -3578,13 +3573,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 
 		else
-		{	
-			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-
-			/*
-			 * Resetting the transcript mode once the list has scrolled to the bottom.
+		{
+			/**
+			 * Scrolling to bottom.
 			 */
-			uiHandler.sendEmptyMessageDelayed(DISABLE_TRANSCRIPT_MODE, 500);
+			mConversationsView.setSelection(messages.size() - 1);
 		}
 
 	}
