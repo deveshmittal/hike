@@ -103,6 +103,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 {
 	private static final String SELECT_ALL_MSISDN="all";
 	
+	private final String HORIZONTAL_FRIEND_FRAGMENT = "horizontalFriendFragment";
+	
 	private static int MIN_MEMBERS_GROUP_CHAT = 2;
 
 	private static final int CREATE_GROUP_MODE = 1;
@@ -169,7 +171,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private boolean nuxIncentiveMode;
 
-	 private HorizontalFriendsFragment newFragment =null;
+	 private HorizontalFriendsFragment newFragment;
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -209,21 +211,25 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		setContentView(R.layout.compose_chat);
 
-		if (savedInstanceState == null && nuxIncentiveMode)
-		{
-
+		if (nuxIncentiveMode)
+		{ 
 			FragmentManager fm = getSupportFragmentManager();
-			newFragment = (HorizontalFriendsFragment) fm.findFragmentByTag("chatFragment");
-			if (newFragment == null)
-			{
-				newFragment = new HorizontalFriendsFragment();
-			}
+			newFragment = (HorizontalFriendsFragment) fm.findFragmentByTag(HORIZONTAL_FRIEND_FRAGMENT);
 			FragmentTransaction ft = fm.beginTransaction();
 			ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-			ft.add(R.id.horizontal_friends_placeholder, newFragment, "chatFragment").commit();
+			
+			if(newFragment == null) 
+			{
+				Logger.d("UmangX","creating Frag");
+				newFragment = new HorizontalFriendsFragment();
+				ft.add(R.id.horizontal_friends_placeholder, newFragment, HORIZONTAL_FRIEND_FRAGMENT).commit();
+			} 
+			else 
+			{
+				ft.attach(newFragment).commit();
+			}
 			setListnerToRootView();
-
-		}
+		} 
 		Object object = getLastCustomNonConfigurationInstance();
 
 		if (object instanceof InitiateMultiFileTransferTask)
@@ -393,7 +399,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		String sendingMsisdn = getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN);
 
 		boolean showNujNotif = PreferenceManager.getDefaultSharedPreferences(ComposeChatActivity.this).getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true);
-		boolean fetchRecentlyJoined = HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false) && !isForwardingMessage && showNujNotif;
+		boolean fetchRecentlyJoined = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false) && !isForwardingMessage && showNujNotif;
 		
 		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, (isForwardingMessage && !isSharingFile), fetchRecentlyJoined, existingGroupId, sendingMsisdn, friendsListFetchedCallback);
 		View emptyView = findViewById(android.R.id.empty);
@@ -430,7 +436,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		adapter.executeFetchTask();
 		
-		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
 		
 	}
 
@@ -613,7 +619,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				 */
 				if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
 				{
-					int stealthMode = HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+					int stealthMode = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 					if (stealthMode != HikeConstants.STEALTH_ON)
 					{
 						return;
@@ -1540,7 +1546,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 			platformAnalyticsJson.put(AnalyticsConstants.TO, contactList);
 			platformAnalyticsJson.put(HikeConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
-			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, platformAnalyticsJson, AnalyticsConstants.EVENT_TAG_PLATFORM);
+			HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, platformAnalyticsJson);
 		}
 		catch (JSONException e)
 		{
