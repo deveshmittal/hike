@@ -5,7 +5,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 public interface DBConstants
 {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 35;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 36;
 
 	public static final int USERS_DATABASE_VERSION = 15;
 
@@ -279,5 +279,13 @@ public interface DBConstants
 	public static final String CATEGORY_SIZE = "categorySize";
 
 	public static final String STICKER_SHOP_TABLE = "stickerShopTable";
+	
+	public static final String SERVER_ID = "serverId";
+	
+	public static final String CONVERSATION_TYPE = "conversationType";
+	
+	public static final int NORMAL_TYPE = 0;
+	
+	public static final int BROADCAST_TYPE = 1;
 
 }

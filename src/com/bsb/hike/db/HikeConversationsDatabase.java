@@ -123,7 +123,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ DBConstants.MSISDN + " TEXT, " // The conversation's msisdn. This will be the msisdn for one-to-one and the group id for groups
 				+ DBConstants.MESSAGE_HASH + " TEXT DEFAULT NULL, " // Used for duplication checks.
 				+ DBConstants.MESSAGE_TYPE + " INTEGER" + " INTEGER DEFAULT -1, " // The type of the message.
-				+ DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER DEFAULT -1" // love id applicable to few messages like content
+				+ DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER DEFAULT -1, " // love id applicable to few messages like content
+				+ DBConstants.SERVER_ID + " INTEGER, "
+				+ DBConstants.CONVERSATION_TYPE + " INTEGER DEFAULT 0"
 				+ " ) ";
 
 		db.execSQL(sql);
@@ -666,6 +668,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		{
 			String alter = "ALTER TABLE " + DBConstants.BOT_TABLE + " ADD COLUMN " + DBConstants.IS_MUTE + " INTEGER DEFAULT 0";
 			db.execSQL(alter);
+		}
+		
+		if (oldVersion < 36)
+		{
+			String alter1 = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.SERVER_ID + " INTEGER";
+			String alter2 = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.CONVERSATION_TYPE + " INTEGER DEFAULT 0";
+			String alter3 = "UPDATE " + DBConstants.MESSAGES_TABLE + " SET " + DBConstants.SERVER_ID + " = "  + DBConstants.MESSAGE_ID;
+			db.execSQL(alter1);
+			db.execSQL(alter2);
+			db.execSQL(alter3);
 		}
 	}
 
