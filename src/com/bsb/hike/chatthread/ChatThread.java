@@ -2511,32 +2511,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	}
 
-	/**
-	 * This method will be called either user is returning after pressing home or screen lock ,
-	 * 
-	 * if user came after pressing home, then soft keyboard respects softinputstate , i.e : if keyboard was visible and softinputmode is set as visible , then soft keyboard will
-	 * become visible
-	 * 
-	 * But if it is called after screen lock , then soft input keyboard maintains its state , it does not change, if it was visible earlier, it will be visible this time as well ,
-	 * so we simply return as it does not effect our sticker pallete -- gauravKhanna
-	 */
-
 	public void onRestart()
 	{
 		isActivityVisible = true;
-		/*
-		 * if (wasScreenOffEvent) { wasScreenOffEvent = false; return; }
-		 */
 
 		Logger.d(TAG, "ChatThread : onRestart called");
-		
-		/**
-		 * Last time, the popup was above the keyboard. There's no guarantee of keyboard now, so dismissing it. 
-		 */
-		if (mShareablePopupLayout.isShowing() && activity.findViewById(R.id.chatThreadParentLayout).getPaddingBottom() == 0)
-		{
-			mShareablePopupLayout.dismiss();
-		}
 	}
 
 	/**
