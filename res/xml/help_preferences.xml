@@ -30,13 +30,4 @@
 		android:summary="@string/terms_conditions_hint"
 		android:title="@string/terms_conditions_title" />
      
-    <com.bsb.hike.view.IconCheckBoxPreference
-        icon="@drawable/preference_vibe"
-        android:defaultValue="true"
-        android:key="showDataTracker"
-        android:layout="@layout/icon_preference"
-        android:summary="show data tracker"
-        android:title="Data tracker"
-        android:widgetLayout="@layout/checkbox_widget" />
-    
 </PreferenceScreen>
