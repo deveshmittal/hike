@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.bsb.hike.modules.httpmgr.client.ClientOptions;
 import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
+import com.bsb.hike.modules.httpmgr.interceptor.IResponseInterceptor;
 import com.bsb.hike.modules.httpmgr.interceptor.Pipeline;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
@@ -82,5 +83,10 @@ public class RequestToken
 	public Pipeline<IRequestInterceptor> getRequestInterceptors()
 	{
 		return request.getRequestInterceptors();
+	}
+	
+	public Pipeline<IResponseInterceptor> getResponseInterceptors()
+	{
+		return request.getResponseInterceptors();
 	}
 }
