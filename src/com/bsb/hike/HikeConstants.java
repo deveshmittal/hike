@@ -2283,4 +2283,6 @@ public class HikeConstants
 	public static final String ERROR_MESSAGE = "em";
 	
 	public static final String EXCEPTION_MESSAGE = "exm";
+
+	public static final int DEFAULT_MAX_REPLY_RETRY_NOTIF_COUNT = 3;
 }
