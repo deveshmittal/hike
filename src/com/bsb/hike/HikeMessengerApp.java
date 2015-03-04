@@ -465,6 +465,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String DETAILED_HTTP_LOGGING_ENABLED = "detailedHttpLoggingEnabled";
 	
 	public static final String BULK_LAST_SEEN_PREF = "blsPref";
+	
+	public static final String TOGGLE_OK_HTTP = "toggleOkHttp";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
