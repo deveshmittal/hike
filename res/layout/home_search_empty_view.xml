@@ -6,8 +6,8 @@
     android:orientation="vertical" >
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="86dp"
+        android:layout_height="86dp"
         android:layout_marginTop="36dp"
         android:scaleType="centerInside"
         android:src="@drawable/art_sticker_worried" >
