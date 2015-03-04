@@ -160,8 +160,6 @@ public class VoIPService extends Service {
 	SolicallWrapper solicallAec = null;
 	private boolean aecSpeakerSignal = false, aecMicSignal = false;
 	private int audiotrackFramesWritten = 0;
-	private boolean miscTrigger = false;
-	private int miscCounter = 0;
 	private VoIPDataPacket silentPacket;
 
 	@Override
@@ -936,8 +934,6 @@ public class VoIPService extends Service {
 
 					if (isAudioRunning())
 						chronoBackup++;
-					
-					miscTrigger = true;
 				}
 			}
 		}, "SEND_HEART_BEAT_THREAD").start();
@@ -1411,7 +1407,7 @@ public class VoIPService extends Service {
 						
 						// For streaming mode, we must write data in chunks <= buffer size
 						index = 0;
-						long timer = System.currentTimeMillis();
+//						long timer = System.currentTimeMillis();
 						while (index < dp.getLength()) {
 							size = Math.min(minBufSizePlayback, dp.getLength() - index);
 							audioTrack.write(dp.getData(), index, size);
@@ -1580,13 +1576,6 @@ public class VoIPService extends Service {
 //						Logger.d(VoIPConstants.TAG, "Received something.");
 						totalBytesReceived += packet.getLength();
 						totalPacketsReceived++;
-						
-						miscCounter++;
-						if (miscTrigger == true) {
-							Logger.d(VoIPConstants.TAG, "miscCounter: " + miscCounter);
-							miscTrigger = false;
-							miscCounter = 0;
-						}
 						
 					} catch (IOException e) {
 						Logger.e(VoIPConstants.TAG, "startReceiving() IOException: " + e.toString());
