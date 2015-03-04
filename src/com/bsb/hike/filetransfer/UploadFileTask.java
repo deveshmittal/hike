@@ -293,6 +293,7 @@ public class UploadFileTask extends FileTransferBase
 					// thumbnail.recycle();
 					Logger.d(getClass().getSimpleName(), "Sent Thumbnail Size : " + tBytes.length);
 				}
+				String path = mFile.getPath();
 				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(), (int) mFile.length(), quality);
 			}
 			else

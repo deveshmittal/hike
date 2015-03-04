@@ -136,7 +136,6 @@ public class WifiP2pConnectionManager implements ChannelListener
             @Override
             public void onFailure(int reasonCode) {
                 Log.d(TAG, "Disconnect failed. Reason :" + reasonCode);
-
             }
             
             @Override

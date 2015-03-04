@@ -360,6 +360,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
                 .findFragmentById(R.id.frag_list);
         if (fragmentList != null) {
             fragmentList.clearPeers();
+            fragmentList.clearConnectedDevice();
         }
         
         connectionManager.enableDiscovery();

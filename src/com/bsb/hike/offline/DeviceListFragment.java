@@ -107,7 +107,6 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     public static  WifiP2pGroup groupInfo = null;
     public static Intent intent;
     private Object syncMsisdn;
-    private WifiP2pDevice currentDevice;
     private WifiP2pDevice connectedDevice = null;
     private static int currentSizeReceived = 0;
     private List<String> peers_msisdn = new ArrayList<String>();
@@ -218,7 +217,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     		if(!OfflineFileTransferManager.getInstance().getIsOfflineFileTransferFinished() ||
     				!OfflineFileTransferManager.getInstance().getIsOfflineTextTransferFinished())
     		{
-    			if(peers.get(position).deviceAddress.compareTo(currentDevice.deviceAddress)==0)
+    			if(peers.get(position).deviceAddress.compareTo(connectedDevice.deviceAddress)==0)
     			{
     				ContactInfo deviceContact = ContactManager.getInstance().getContact(peers_msisdn.get(position));
     		    	String phoneNumber = "";
@@ -229,7 +228,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     				
     		    	Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
     	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
-    	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
+    	        	intent.putExtra("OfflineDeviceName", connectedDevice.deviceAddress);
     	        	intent.putExtra("OfflineActivity", "");
     	        	startActivity(intent);
     	        	return;
@@ -241,7 +240,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     			}
     		}
     		
-	        currentDevice = peers.get(position);
+	        WifiP2pDevice currentDevice = peers.get(position);
 	    	ContactInfo deviceContact = ContactManager.getInstance().getContact(peers_msisdn.get(position));
 	    	String phoneNumber = "";
 	    	if(deviceContact == null)
@@ -494,6 +493,10 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		return true;
 	}
 	
+	public void clearConnectedDevice() {
+		connectedDevice = null;
+	}
+	
 	private JSONObject getFileTransferMetadata(String fileName, String fileType, HikeFileType hikeFileType, String thumbnailString, Bitmap thumbnail, long recordingDuration,
 			String sourceFilePath, int fileSize, String img_quality) throws JSONException
 	{
@@ -562,14 +565,20 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		
 		@Override
 		protected void onPostExecute(String result) {
-			for(WifiP2pDevice cpeer: peers)
+			/*for(WifiP2pDevice cpeer: peers)
         	{
         		if(cpeer.status==WifiP2pDevice.CONNECTED || cpeer.status==WifiP2pDevice.UNAVAILABLE)
         		{
         			connectedDevice  = cpeer;  
         		}
         	}
-			
+			*/
+			if(connectedDevice == null)
+            {
+            	Toast.makeText(getActivity(), "Proper Connection could not be established. Disconnecting.. Please Retry!!", Toast.LENGTH_SHORT).show();
+            	((DeviceActionListener) getActivity()).disconnect();
+            	return;
+            }
 			ConvMessage convMessage =  new ConvMessage(result,connectedDevice.deviceName,System.currentTimeMillis()/1000,ConvMessage.State.RECEIVED_UNREAD);
 			convMessage.setMappedMsgID(System.currentTimeMillis());
 			if(convMessage.getMessage().compareTo("Nudge!")==0)
@@ -703,15 +712,6 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 				
 				
 				if (path != null) {
-					connectedDevice = null;
-		            for(WifiP2pDevice cpeer: peers)
-	            	{
-	            		if(cpeer.status==WifiP2pDevice.CONNECTED || cpeer.status==WifiP2pDevice.UNAVAILABLE)
-	            		{
-	            			connectedDevice  = cpeer;  
-	            		}
-	            	}
-					
 		            if(connectedDevice == null)
 		            {
 		            	Toast.makeText(getActivity(), "Proper Connection could not be established. Disconnecting.. Please Retry!!", Toast.LENGTH_SHORT).show();
@@ -753,7 +753,10 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 							try {
 								metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.IMAGE, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
 								convMessage = createConvMessage(f.getName(), metadata, connectedDevice.deviceName, false);
+								convMessage.setMappedMsgID(System.currentTimeMillis());
+								String name = connectedDevice.deviceName;
 								HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
+								long msgId = convMessage.getMsgID();
 							} catch (JSONException e) {
 								e.printStackTrace();
 							}
@@ -784,6 +787,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 							try {
 								metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.VIDEO, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
 								convMessage = createConvMessage(f.getName(), metadata, connectedDevice.deviceName, false);
+								convMessage.setMappedMsgID(System.currentTimeMillis());
 								HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
 								
 							} catch (JSONException e) {
@@ -810,8 +814,6 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 				OfflineFileTransferManager.getInstance().setIsOfflineFileTransferFinished(true);
 				if(publishProgressThread != null)
 					publishProgressThread.interrupt();
-				peersStatus.put(connectedDevice, "Available for file transfer");
-				((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
 				//if(!fileTransferServerRunning)
 				//{
 				//	new FileReceiveServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
@@ -837,10 +839,18 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     			if((percentage*100)>=100)
     				percentage = 1.0;
     			percentage *= 100.0;
-    			DecimalFormat df = new DecimalFormat("#.##");
-    			percentage =  Double.valueOf(df.format(percentage));
-    			peersStatus.put(connectedDevice, "Receiveing file " + (percentage)+ "%");
-				((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+    			if (percentage >= 100)
+    			{
+    				peersStatus.put(connectedDevice, "Available for file transfer");
+    				((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+    			}
+    			else
+    			{
+	    			DecimalFormat df = new DecimalFormat("#.##");
+	    			percentage =  Double.valueOf(df.format(percentage));
+	    			peersStatus.put(connectedDevice, "Receiveing file " + (percentage)+ "%");
+					((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+    			}
 				super.onProgressUpdate(values);
 		}
 
@@ -868,40 +878,24 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    WiFiDirectActivity.connectingDeviceConfig = null;
 	    WiFiDirectActivity.connectingToDevice = null;
 	    WiFiDirectActivity.tries = 0;
+	    if(group != null)
+    	{
+	    	if(group.isGroupOwner())
+	    	{
+	    		for(WifiP2pDevice  client :  group.getClientList()){
+	    			connectedDevice = client;
+				}
+	    	}
+	    	else
+	    	{
+				WifiP2pDevice groupOwner  =  group.getOwner();
+	    		connectedDevice = groupOwner;
+	    	}
+    	}
 	    if(intent != null)
 	    {
 	    	startActivity(intent);
 	    	getActivity().sendBroadcast(new Intent("SHOW_OFFLINE_CONNECTED"));
-	    }
-	    else
-	    {
-	    	//clearPeers();
-	    	if(group != null)
-	    	{
-		    	if(group.isGroupOwner())
-		    	{
-		    		for(WifiP2pDevice  client :  group.getClientList()){
-						//peers.add(client);
-						//peers_msisdn.add(client.deviceName);
-					    //peersStatus.put(client,getDeviceStatus(client.status));
-		    			connectedDevice = client;
-					}
-		    	}
-		    	else
-		    	{
-					WifiP2pDevice groupOwner  =  group.getOwner();
-					//peers.add(groupOwner);
-					//peers_msisdn.add(groupOwner.deviceName);
-					//peersStatus.put(groupOwner,getDeviceStatus(groupOwner.status));
-		    		connectedDevice = groupOwner;
-		    	}
-	    	}
-	    	else
-	    	{
-	    		Logger.d("TestingGroupInfo", "Disconnected");
-	    	}
-	    	//((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-	    	
 	    }
 	}
 
