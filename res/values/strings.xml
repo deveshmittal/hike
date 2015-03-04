@@ -229,6 +229,7 @@
     <string name="hike">hike</string>
     <string name="emoji">Emoji</string>
     <string name="group_profile">Group Info</string>
+    <string name="broadcast_profile">Broadcast List Info</string>
     <string name="group_name">Group Name</string>
     <string name="participants">Participants</string>
     <string name="group_owner">Group Owner</string>
