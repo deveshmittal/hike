@@ -1,6 +1,7 @@
 package com.bsb.hike.voip.view;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +42,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageView.ScaleType;
 
+import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -84,6 +86,22 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 	}
 
 	private CallStatus currentCallStatus;
+
+	private CallFragmentListener activity;
+
+	@Override
+	public void onAttach(Activity activity)
+	{
+		super.onAttach(activity);
+		try
+		{
+			this.activity = (CallFragmentListener) activity;
+		}
+		catch (ClassCastException e)
+		{
+			throw new ClassCastException(activity.toString() + " must implement CallFragmentListener");
+		}
+    }
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -412,7 +430,7 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			callDuration.stop();
 		}
 
-		if(((CallFragmentListener)getSherlockActivity()).isShowingCallFailedFragment())
+		if(activity.isShowingCallFailedFragment())
 		{
 			return;
 		}
@@ -849,7 +867,7 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		bundle.putInt(VoIPConstants.CALL_FAILED_REASON, callFailCode);
 		if(getSherlockActivity() != null)
 		{
-			((CallFragmentListener)getSherlockActivity()).showCallFailedFragment(bundle);
+			activity.showCallFailedFragment(bundle);
 		}
 	}
 }

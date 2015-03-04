@@ -3,6 +3,7 @@ package com.bsb.hike.voip.view;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -27,7 +28,23 @@ public class CallRateDialogFragment extends SherlockDialogFragment
 	
 	private final String TAG = "CallRatePopup";
 
+	private IVoipCallRateListener listener;
+
 	public CallRateDialogFragment(){
+	}
+
+	@Override
+	public void onAttach(Activity activity) 
+	{
+		super.onAttach(activity);
+		try 
+		{
+			listener = (IVoipCallRateListener) activity;
+		}
+		catch (ClassCastException e) 
+		{
+			throw new ClassCastException(activity.toString() + " must implement IVoipCallRateListener");
+		}
 	}
 	
 	@Override
@@ -162,6 +179,6 @@ public class CallRateDialogFragment extends SherlockDialogFragment
 	private void showCallIssuesFragment(Bundle bundle)
 	{
 		bundle.putInt(VoIPConstants.CALL_RATING, rating+1);
-		((IVoipCallRateListener)getSherlockActivity()).showCallIssuesFragment(bundle);
+		listener.showCallIssuesFragment(bundle);
 	}
 }
