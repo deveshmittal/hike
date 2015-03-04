@@ -36,9 +36,7 @@ public class CallRateActivity extends HikeAppStateBaseFragmentActivity implement
 			CallRateDialogFragment callRatePopup = new CallRateDialogFragment();
 			callRatePopup.setArguments(bundle);
 
-			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-			fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
-			fragmentTransaction.commitAllowingStateLoss();
+			addFragment(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
 		}
 	}
 
@@ -50,9 +48,7 @@ public class CallRateActivity extends HikeAppStateBaseFragmentActivity implement
 			CallIssuesDialogFragment callIssuesPopup = new CallIssuesDialogFragment();
 			callIssuesPopup.setArguments(bundle);
 
-			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-			fragmentTransaction.add(callIssuesPopup, HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG);
-			fragmentTransaction.commitAllowingStateLoss();
+			addFragment(callIssuesPopup, HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG);
 		}
 	}
 }

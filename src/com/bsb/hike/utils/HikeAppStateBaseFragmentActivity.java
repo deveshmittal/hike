@@ -145,7 +145,21 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 			});
 		}
 	}
-	
+
+	public void addFragment(Fragment fragment, String tag)
+	{
+		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+		fragmentTransaction.add(fragment, tag);
+		fragmentTransaction.commitAllowingStateLoss();
+	}
+
+	public void addFragment(int containerView, Fragment fragment, String tag)
+	{
+		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+		fragmentTransaction.add(containerView, fragment, tag);
+		fragmentTransaction.commitAllowingStateLoss();
+	}
+
 	public boolean removeFragment(String tag)
 	{
 		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
