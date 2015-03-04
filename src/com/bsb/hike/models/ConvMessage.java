@@ -437,8 +437,8 @@ public class ConvMessage
 		{
 		case PARTICIPANT_JOINED:
 			JSONArray arr = metadata.getGcjParticipantInfo();
-			this.mMessage = context.getString(metadata.isNewGroup() ? R.string.new_group_message : R.string.add_to_group_message,
-					Utils.getGroupJoinHighlightText(arr, (GroupConversation) conversation));
+			String highlight = Utils.getGroupJoinHighlightText(arr, (GroupConversation) conversation);
+			this.mMessage = Utils.getParticipantAddedMessage(this, context, highlight);
 			break;
 		case PARTICIPANT_LEFT:
 			this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn()));

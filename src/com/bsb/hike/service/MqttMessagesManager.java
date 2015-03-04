@@ -361,7 +361,14 @@ public class MqttMessagesManager
 
 			if (groupRevived)
 			{
-				jsonObj.put(HikeConstants.NEW_GROUP, true);
+				if (groupConversation instanceof BroadcastConversation)
+				{
+					jsonObj.put(HikeConstants.NEW_BROADCAST, true);
+				}
+				else if (groupConversation instanceof GroupConversation)
+				{
+					jsonObj.put(HikeConstants.NEW_GROUP, true);
+				}
 				pubSub.publish(HikePubSub.GROUP_REVIVED, groupConversation.getMsisdn());
 			}
 

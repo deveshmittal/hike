@@ -314,7 +314,7 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 			// Adding this boolean value to show a different system message
 			// if its a new group
 			JSONObject gcjPacket = broadcastConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
-			gcjPacket.put(HikeConstants.NEW_GROUP, newBroadcast);
+			gcjPacket.put(HikeConstants.NEW_BROADCAST, newBroadcast);
 			ConvMessage msg = new ConvMessage(gcjPacket, broadcastConversation, this, true);
 			ContactManager.getInstance().updateGroupRecency(groupOrBroadcastId, msg.getTimestamp());
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, msg);
