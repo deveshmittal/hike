@@ -2246,6 +2246,8 @@ public class HikeConstants
 	
 	public static final String REPLY_NOTIFICATION_RETRY_TIMER = "rnrt";
 	
+	public static final String REPLY_NOTIFICATION_RETRY_COUNT = "rnrc";
+	
 	// Intent send to register gcm before and after signup
 	public static final String REGISTER_GCM_SIGNUP = "register_gcm_signup";
 	
