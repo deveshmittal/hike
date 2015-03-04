@@ -8030,7 +8030,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			if(mAdapter.containsMediaMessage(selectedMsgIdsToDelete))
 			{
-				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
+				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard, true);
 			}
 			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
 			deleteConfirmDialog.setCancelButton(R.string.cancel);
