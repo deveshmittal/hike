@@ -802,6 +802,7 @@
     <string name="invite_friends_confirmation_msg">Would you like to invite %1$s of your friends to hike?</string>
     <string name="didnt_get_pin">Didn\'t get the PIN, we will call you</string>
     <string name="maxContactInGroupErr">Max %1$s contacts are allowed in a group</string>
+    <string name="maxContactInBroadcastErr">Max %1$s contacts are allowed in this list</string>
     <string name="cannot_select_zero_byte_file">Cannot select a 0 byte file</string>
     <string name="chatThreadNudgeTutorialText_group">Double tap anywhere to nudge your friends</string>
     <string name="addedYouAsFavorite">Added %1$s to Favorites</string>

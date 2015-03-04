@@ -3018,8 +3018,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		// TODO Auto-generated method stub
 		Intent intent = new Intent(ProfileActivity.this, ComposeChatActivity.class);
-		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mLocalMSISDN);
+		if (this.profileType == ProfileType.GROUP_INFO)
+		{
+			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mLocalMSISDN);
+		}
+		else
+		{
+			intent.putExtra(HikeConstants.Extras.BROADCAST_LIST, true);
+			intent.putExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST, mLocalMSISDN);
+		}
 		startActivity(intent);
 	}
 

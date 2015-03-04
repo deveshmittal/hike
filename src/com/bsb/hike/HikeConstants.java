@@ -1131,9 +1131,13 @@ public class HikeConstants
 
 		public static final String GROUP_CHAT = "groupChat";
 
+		public static final String BROADCAST_LIST = "broadcastList";
+
 		public static final String EMOTICON_SHOWING = "emoticonShowing";
 
 		public static final String EXISTING_GROUP_CHAT = "existingGroupChat";
+
+		public static final String EXISTING_BROADCAST_LIST = "existingBroadcastList";
 
 		public static final String LEAVE_GROUP_CHAT = "leaveGroupChat";
 

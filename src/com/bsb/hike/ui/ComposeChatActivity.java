@@ -114,6 +114,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private static final int MULTIPLE_FWD = 3;
 
     private static final int NUX_INCENTIVE_MODE = 6;
+    
+    private static final int CREATE_BROADCAST_MODE = 7;
 
 	private View multiSelectActionBar, groupChatActionBar;
 
@@ -535,6 +537,28 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
 			break;
 			
+		case CREATE_BROADCAST_MODE:
+			if (adapter.isContactPresentInExistingParticipants(contactInfo))
+			{
+				// basicly it will work when you add participants to existing group via typing numbers
+				showToast("You have already added this contact in broadcast list");
+				return;
+			}
+			else if (adapter.getSelectedContactCount() >= HikeConstants.MAX_CONTACTS_IN_BROADCAST && !adapter.isContactAdded(contactInfo))
+			{
+				showToast(getString(R.string.maxContactInBroadcastErr, HikeConstants.MAX_CONTACTS_IN_BROADCAST));
+				return;
+			}
+			// for SMS users, append SMS text with name
+			viewtype = adapter.getItemViewType(arg2);
+			if (contactInfo.getName() == null)
+			{
+				contactInfo.setName(contactInfo.getMsisdn());
+			}
+			name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
+			tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
+			break;
+			
 		default:
 			Logger.i("composeactivity", contactInfo.getId() + " - id of clicked");
 			if (FriendsAdapter.SECTION_ID.equals(contactInfo.getId()) || FriendsAdapter.EMPTY_ID.equals(contactInfo.getId()))
@@ -716,6 +740,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.clearAllSelection(true);
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
 			break;
+		case CREATE_BROADCAST_MODE:
+			// createGroupHeader.setVisibility(View.GONE);
+			adapter.showCheckBoxAgainstItems(true);
+			tagEditText.clear(false);
+			adapter.removeFilter();
+			adapter.clearAllSelection(true);
+			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
+			setupForSelectAll();	
+			break;
 		case START_CHAT_MODE:
 			// createGroupHeader.setVisibility(View.VISIBLE);
 			tagEditText.clear(false);
@@ -795,6 +828,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		
 	}
 
+	private void createBroadcast(ArrayList<String> selectedContactList)
+	{
+		Intent intent = new Intent(ComposeChatActivity.this, CreateNewGroupOrBroadcastActivity.class);
+		intent.putStringArrayListExtra(HikeConstants.Extras.BROADCAST_RECIPIENTS, selectedContactList);
+		intent.putExtra(HikeConstants.IS_BROADCAST, true);
+		startActivity(intent);
+		finish();
+	}
+	
 	private void createGroup(ArrayList<ContactInfo> selectedContactList)
 	{
 
@@ -936,6 +978,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			title.setText(R.string.new_group);
 		}
+		else if (composeMode == CREATE_BROADCAST_MODE)
+		{
+			title.setText(R.string.new_broadcast);
+		}
 		else if (isSharingFile)
 		{
 			title.setText(R.string.share_file);
@@ -984,7 +1030,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				{
 					forwardConfirmation(adapter.getAllSelectedContacts());
 				}
-				else
+				else if (createGroup)
 				{
 					int selected = adapter.getCurrentSelection();
 					if (selected < MIN_MEMBERS_GROUP_CHAT)
@@ -993,6 +1039,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						return;
 					}
 					createGroup(adapter.getAllSelectedContacts());
+				}
+				else
+				{
+					int selected = adapter.getCurrentSelection();
+					if (selected < MIN_MEMBERS_GROUP_CHAT)
+					{
+						Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to make a broadcast list", Toast.LENGTH_SHORT).show();
+						return;
+					}
+					createBroadcast(adapter.getAllSelectedContactsMsisdns());
 				}
 			}
 		});
