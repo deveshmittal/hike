@@ -873,16 +873,16 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			if (mqtt != null)
 			{
 				/*
-				 * If not already connected no need to disconnect
+				 * If already disconnecting or disconnected no need to disconnect
 				 */
-				if(!mqtt.isConnected())
+				if(mqtt.isDisconnecting() || mqtt.isDisconnected())
 				{
 					Logger.d(TAG, "not connected but disconnecting");
-					if(mqtt.isConnecting())
+					if(mqtt.isDisconnecting())
 					{
 						Logger.d(TAG, "not connected but disconnecting , current state : connecting");
 					}
-					else if(mqtt.isDisconnecting())
+					else if(mqtt.isDisconnected())
 					{
 						Logger.d(TAG, "not connected but disconnecting , current state : disconnecting");
 					}
