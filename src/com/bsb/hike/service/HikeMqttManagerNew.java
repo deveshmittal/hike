@@ -56,6 +56,7 @@ import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -190,7 +191,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	/* publishes a message via mqtt to the server with QoS 0 */
 	public static int MQTT_QOS_ZERO = 0;
-
+	
+	/* represents max amount of time taken by message to process exceeding which we will send analytics to server*/
+	private static final long DEFAULT_MAX_MESSAGE_PROCESS_TIME = 60 * 1000l;
+	
+	private long maxMessageProcessTime = 0;
+	
 	// constants used to define MQTT connection status, this is used by external classes and hardly of any use internally
 	public enum MQTTConnectionStatus
 	{
@@ -205,7 +211,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		@Override
 		public void run()
 		{
-			if (isConnected())
+			if (isConnected() || isConnecting())
 			{
 				try
 				{
@@ -382,6 +388,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		persistence = HikeMqttPersistence.getInstance();
 		mqttMessageManager = MqttMessagesManager.getInstance(context);
 
+		maxMessageProcessTime = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.MAX_MESSAGE_PROCESS_TIME, DEFAULT_MAX_MESSAGE_PROCESS_TIME);
+		
 		createConnectionRunnables();
 
 		initMqttHandlerThread();
@@ -636,7 +644,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		try
 		{
 			// make MQTT thread wait for t ms to attempt reconnect
+			// remove any pending disconnect runnables before making any connection
 			connChkRunnable.setSleepTime(t);
+			mqttThreadHandler.removeCallbacks(disConnectRunnable);
 			mqttThreadHandler.postAtFrontOfQueue(connChkRunnable);
 		}
 		catch (Exception e)
@@ -739,6 +749,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					op.setSocketFactory(null);
 				Logger.d(TAG, "MQTT connecting on : " + mqtt.getServerURI());
 				mqtt.connect(op, null, getConnectListener());
+				scheduleNextActivityCheck();
 			}
 			else
 			{
@@ -869,6 +880,24 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			if (mqtt != null)
 			{
+				/*
+				 * If not already connected no need to disconnect
+				 */
+				if(!mqtt.isConnected())
+				{
+					Logger.d(TAG, "not connected but disconnecting");
+					if(mqtt.isConnecting())
+					{
+						Logger.d(TAG, "not connected but disconnecting , current state : connecting");
+					}
+					else if(mqtt.isDisconnecting())
+					{
+						Logger.d(TAG, "not connected but disconnecting , current state : disconnecting");
+					}
+					if (reconnect)
+						connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME); // try reconnection after 10 ms
+					return ;
+				}
 				forceDisconnect = true;
 				/*
 				 * blocking the mqtt thread, so that no other operation takes place till disconnects completes or timeout This will wait for max 1 secs
@@ -951,7 +980,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						connectUsingIp = false;
 						connectToFallbackPort = false;
 						ipConnectCount = 0;
-						scheduleNextActivityCheck(); // after successfull connect, reschedule for next conn check
 					}
 
 					/*
@@ -1007,6 +1035,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					String messageBody = null;
 					try
 					{
+						long messageProcessTime = System.currentTimeMillis();
+						
 						cancelNetworkErrorTimer();
 						byte[] bytes = arg1.getPayload();
 						bytes = Utils.uncompressByteArray(bytes);
@@ -1014,16 +1044,24 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						Logger.i(TAG, "messageArrived called " + messageBody);
 						JSONObject jsonObj = new JSONObject(messageBody);
 						mqttMessageManager.saveMqttMessage(jsonObj);
+						
+						messageProcessTime = System.currentTimeMillis() - messageProcessTime;
+						
+						if(messageProcessTime > maxMessageProcessTime)
+						{
+							Logger.d(TAG, messageBody + " took long time to process, time : " + messageProcessTime);
+							sendAnalytics(messageProcessTime, null, null);
+						}
 					}
 					catch (JSONException e)
 					{
 						Logger.e(TAG, "invalid JSON message", e);
-						sendError(messageBody, e);
+						sendAnalytics(0, messageBody, e);
 					}
 					catch (Throwable e)
 					{
 						Logger.e(TAG, "Exception when msg arrived : ", e);
-						sendError(messageBody, e);
+						sendAnalytics(0, messageBody, e);
 					}
 				}
 
@@ -1056,13 +1094,20 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		return mqttCallBack;
 	}
 	
-	private void sendError(String message, Throwable throwable)
+	private void sendAnalytics(long time, String message, Throwable throwable)
 	{
 		JSONObject error = new JSONObject();
 		try
 		{
-			error.put(HikeConstants.ERROR_MESSAGE, message);
-			error.put(HikeConstants.EXCEPTION_MESSAGE, throwable.getMessage());
+			if(throwable != null)
+			{
+				error.put(HikeConstants.ERROR_MESSAGE, message);
+				error.put(HikeConstants.EXCEPTION_MESSAGE, throwable.getMessage());
+			}
+			else if(time > 0)
+			{
+				error.put(HikeConstants.MESSAGE_PROCESS_TIME, time);
+			}
 			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, EventPriority.HIGH, error);
 		}
 		catch (JSONException e)
