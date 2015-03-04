@@ -3598,7 +3598,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				if (hasWindowFocus())
 				{
 					message.setState(ConvMessage.State.RECEIVED_READ);
-					mConversationDb.updateMsgStatus(message.getServerID(), ConvMessage.State.RECEIVED_READ.ordinal(), mConversation.getMsisdn());
+					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal(), mConversation.getMsisdn());
 					if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 					{
 						HikeMqttManagerNew.getInstance().sendMessage(message.serializeDeliveryReportRead(), HikeMqttManagerNew.MQTT_QOS_ONE);

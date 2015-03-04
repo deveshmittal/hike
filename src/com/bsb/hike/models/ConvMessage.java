@@ -25,8 +25,6 @@ public class ConvMessage
 
 	private long msgID; // this corresponds to msgID stored in sender's DB
 	
-	private long serverID;
-
 	private long mappedMsgId; // this corresponds to msgID stored in receiver's
 								// DB
 
@@ -787,16 +785,6 @@ public class ConvMessage
 	public long getMsgID()
 	{
 		return msgID;
-	}
-	
-	public void setServerID(long serverID)
-	{
-		this.serverID = serverID;
-	}
-
-	public long getServerID()
-	{
-		return serverID;
 	}
 
 	public void setMappedMsgID(long msgID)
