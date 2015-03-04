@@ -1602,6 +1602,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					if(i==totalMessage){
 					// incrementing timestamp to save different timestamp for each conversation so that we can fetch in order
 					ContentValues contentValues = getContentValueForConversationMessage(conv,lastMessageTimeStamp, sortingTimeStamp++);
+
+					//TODO proper check for broadcast message
+					if(conv.hasBroadcastId() && !Utils.isBroadcastConversation(conv.getMsisdn()))
+					{
+						//We donot update sorting timestamp value if this is broadcast message in normal 1-1 chat
+						contentValues.remove(DBConstants.SORTING_TIMESTAMP);
+					}
 					mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() });
 					}
 				// upgrade groupInfoTable
@@ -1795,6 +1802,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		{
 			String msisdn = conv.getMsisdn();
 			ContentValues contentValues = getContentValueForConversationMessage(conv,conv.getTimestamp());
+			
+			//TODO proper check for broadcast message
+			if(conv.hasBroadcastId() && !Utils.isBroadcastConversation(conv.getMsisdn()))
+			{
+				//We donot update sorting timestamp value if this is broadcast message in normal 1-1 chat
+				contentValues.remove(DBConstants.SORTING_TIMESTAMP);
+			}
 			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
 
 			if (lastPinMap.get(conv.getMsisdn()) != null)
@@ -1869,10 +1883,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			contentValues.put(DBConstants.MESSAGE_ID, conv.getMsgID());
 			contentValues.put(DBConstants.MAPPED_MSG_ID, conv.getMappedMsgID());
 			contentValues.put(DBConstants.MSG_STATUS, conv.getState().ordinal());
-			if (!conv.hasBroadcastId())
-			{
-				contentValues.put(DBConstants.SORTING_TIMESTAMP, sortingTimeStamp);
-			}
+			contentValues.put(DBConstants.SORTING_TIMESTAMP, sortingTimeStamp);
 			contentValues.put(DBConstants.LAST_MESSAGE_TIMESTAMP, lastMessageTimeStamp);
 		}
 		if (conv.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
@@ -2879,7 +2890,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				}
 
 				conv.addMessage(message);
-
+				conv.setTimestamp(sortingTimestamp);
 				Logger.d("HikeConversationDatabase", "conversation msisdn : " + msisdn);
 				conversations.put(msisdn, conv);
 			}
