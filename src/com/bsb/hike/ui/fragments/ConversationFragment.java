@@ -65,6 +65,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -1185,7 +1186,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else
 		{
-			optionsList.add(getString(R.string.group_info));
+				if (conv instanceof BroadcastConversation)
+				{
+					optionsList.add(getString(R.string.broadcast_info));
+				}
+				else
+				{
+					optionsList.add(getString(R.string.group_info));
+				}
 		}
 		if (conv.getContactName() != null)
 		{
@@ -1199,7 +1207,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		if (conv instanceof GroupConversation)
 		{
-			optionsList.add(getString(R.string.delete_leave));
+				if (conv instanceof BroadcastConversation)
+				{
+					optionsList.add(getString(R.string.delete_broadcast));
+				}
+				else
+				{
+					optionsList.add(getString(R.string.delete_leave));
+				}
 		}
 		else
 		{
@@ -1282,6 +1297,28 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					deleteConfirmDialog.setCancelButton(R.string.cancel);
 					deleteConfirmDialog.show();
 				}
+				else if (getString(R.string.delete_broadcast).equals(option))
+				{
+					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
+					deleteConfirmDialog.setHeader(R.string.delete);
+					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_broadcast_msg, conv.getLabel()));
+					
+					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					{
+
+						@Override
+						public void onClick(View v)
+						{
+							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
+							deleteConversation(conv);
+							deleteConfirmDialog.dismiss();
+						}
+					};
+
+					deleteConfirmDialog.setOkButton(android.R.string.ok, dialogOkClickListener);
+					deleteConfirmDialog.setCancelButton(R.string.cancel);
+					deleteConfirmDialog.show();
+				}
 				else if (getString(R.string.email_conversations).equals(option))
 				{
 					EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(getSherlockActivity(), ConversationFragment.this);
@@ -1321,7 +1358,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					addToContactsExisting(conv.getMsisdn());
 				}
 
-				else if (getString(R.string.group_info).equals(option))
+				else if (getString(R.string.group_info).equals(option) || getString(R.string.broadcast_info).equals(option))
 				{
 					if (!((GroupConversation) conv).getIsGroupAlive())
 					{
