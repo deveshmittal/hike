@@ -78,6 +78,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 		items.add(getString(R.string.notifications));
 		items.add(getString(R.string.settings_media));
+		items.add(getString(R.string.settings_chat));
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.FREE_SMS_PREF, true))
 		{
 			int credits = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getInt(HikeMessengerApp.SMS_SETTING, 0);
@@ -117,6 +118,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		final ArrayList<Integer> itemIcons = new ArrayList<Integer>();
 
 		itemIcons.add(R.drawable.ic_notifications_settings);
+		itemIcons.add(R.drawable.ic_auto_download_media_settings);
 		itemIcons.add(R.drawable.ic_auto_download_media_settings);
 		itemIcons.add(R.drawable.ic_sms_settings);
 		if (isConnectedAppsPresent)
@@ -297,18 +299,21 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 				IntentManager.openSettingMedia(this);
 				break;
 			case 3:
-				IntentManager.openSettingSMS(this);
+				IntentManager.openSettingChat(this);
 				break;
 			case 4:
-				IntentManager.openConnectedApps(this);
+				IntentManager.openSettingSMS(this);
 				break;
 			case 5:
-				IntentManager.openSettingAccount(this);
+				IntentManager.openConnectedApps(this);
 				break;
 			case 6:
-				IntentManager.openSettingPrivacy(this);
+				IntentManager.openSettingAccount(this);
 				break;
 			case 7:
+				IntentManager.openSettingPrivacy(this);
+				break;
+			case 8:
 				IntentManager.openSettingHelp(this);
 				break;
 			}
@@ -324,15 +329,18 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 				IntentManager.openSettingMedia(this);
 				break;
 			case 3:
-				IntentManager.openSettingSMS(this);
+				IntentManager.openSettingChat(this);
 				break;
 			case 4:
-				IntentManager.openSettingAccount(this);
+				IntentManager.openSettingSMS(this);
 				break;
 			case 5:
-				IntentManager.openSettingPrivacy(this);
+				IntentManager.openSettingAccount(this);
 				break;
 			case 6:
+				IntentManager.openSettingPrivacy(this);
+				break;
+			case 7:
 				IntentManager.openSettingHelp(this);
 				break;
 			}
