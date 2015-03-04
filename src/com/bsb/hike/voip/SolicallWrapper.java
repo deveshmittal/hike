@@ -21,7 +21,7 @@ public class SolicallWrapper {
 		int init = packageInit();
 		Logger.d(VoIPConstants.TAG, "AEC packageInit: " + init);
 
-		init = AECInit(0, 2, (short)100, (short)8, (short)100, -18);
+		init = AECInit(0, 2, (short)0, (short)4, (short)100, -18);
 		Logger.d(VoIPConstants.TAG, "AEC init: " + init);
 	}
 	

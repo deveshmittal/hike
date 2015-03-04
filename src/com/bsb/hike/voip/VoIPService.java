@@ -160,8 +160,6 @@ public class VoIPService extends Service {
 	SolicallWrapper solicallAec = null;
 	private boolean aecSpeakerSignal = false, aecMicSignal = false;
 	private int audiotrackFramesWritten = 0;
-	private boolean miscTrigger = false;
-	private int miscCounter = 0;
 	private VoIPDataPacket silentPacket;
 
 	@Override
@@ -936,8 +934,6 @@ public class VoIPService extends Service {
 
 					if (isAudioRunning())
 						chronoBackup++;
-					
-					miscTrigger = true;
 				}
 			}
 		}, "SEND_HEART_BEAT_THREAD").start();
@@ -1008,7 +1004,8 @@ public class VoIPService extends Service {
 					}
 
 					while (decodedBuffersQueue.size() > MAX_SAMPLES_BUFFER) {
-						Logger.d(VoIPConstants.TAG, "Dropping decoded packet.");
+//						Logger.d(VoIPConstants.TAG, "Dropping decoded packet.");
+						droppedDecodedPackets++;
 						decodedBuffersQueue.poll();
 					}
 
@@ -1169,13 +1166,12 @@ public class VoIPService extends Service {
 								// Approach (3)
 								if (ret == 0) {
 									if (!lowBitrateTrigger) {
-										Logger.w(VoIPConstants.TAG, "No voice.");
+										// There is no voice signal, bitrate should be lowered
 										lowBitrateTrigger = true;
 										opusWrapper.setEncoderBitrate(OpusWrapper.OPUS_LOWEST_SUPPORTED_BITRATE);
 									}
 								} else if (lowBitrateTrigger) {
 									// Mic signal is reverting to voice
-									Logger.w(VoIPConstants.TAG, "Voice is back.");
 									lowBitrateTrigger = false;
 									opusWrapper.setEncoderBitrate(localBitrate);
 								}
@@ -1411,7 +1407,7 @@ public class VoIPService extends Service {
 						
 						// For streaming mode, we must write data in chunks <= buffer size
 						index = 0;
-						long timer = System.currentTimeMillis();
+//						long timer = System.currentTimeMillis();
 						while (index < dp.getLength()) {
 							size = Math.min(minBufSizePlayback, dp.getLength() - index);
 							audioTrack.write(dp.getData(), index, size);
@@ -1480,7 +1476,7 @@ public class VoIPService extends Service {
 		                	synchronized (decodedBuffersQueue) {
 			                	decodedBuffersQueue.add(silentPacket);
 			                	decodedBuffersQueue.notify();
-			                	Logger.d(VoIPConstants.TAG, "Adding silence");
+//			                	Logger.d(VoIPConstants.TAG, "Adding silence");
 							}
 						}
 
@@ -1580,13 +1576,6 @@ public class VoIPService extends Service {
 //						Logger.d(VoIPConstants.TAG, "Received something.");
 						totalBytesReceived += packet.getLength();
 						totalPacketsReceived++;
-						
-						miscCounter++;
-						if (miscTrigger == true) {
-							Logger.d(VoIPConstants.TAG, "miscCounter: " + miscCounter);
-							miscTrigger = false;
-							miscCounter = 0;
-						}
 						
 					} catch (IOException e) {
 						Logger.e(VoIPConstants.TAG, "startReceiving() IOException: " + e.toString());
