@@ -21,13 +21,13 @@ import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.voip.VoIPConstants;
 
-public class CallRatePopup extends SherlockDialogFragment
+public class CallRateDialogFragment extends SherlockDialogFragment
 {
 	private int rating = -1;
 	
 	private final String TAG = "CallRatePopup";
 
-	public CallRatePopup(){
+	public CallRateDialogFragment(){
 	}
 	
 	@Override

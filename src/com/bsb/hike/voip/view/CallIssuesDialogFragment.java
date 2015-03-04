@@ -26,9 +26,9 @@ import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.voip.VoIPConstants;
 
-public class CallIssuesPopup extends SherlockDialogFragment
+public class CallIssuesDialogFragment extends SherlockDialogFragment
 {
-	public CallIssuesPopup(){
+	public CallIssuesDialogFragment(){
 	}
 
 	private final String TAG = "CallIssuesPopup";

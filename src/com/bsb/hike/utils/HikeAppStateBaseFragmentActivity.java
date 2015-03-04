@@ -14,8 +14,8 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.ui.fragments.ImageViewerFragment;
-import com.bsb.hike.voip.view.CallIssuesPopup;
-import com.bsb.hike.voip.view.CallRatePopup;
+import com.bsb.hike.voip.view.CallIssuesDialogFragment;
+import com.bsb.hike.voip.view.CallRateDialogFragment;
 
 public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity implements Listener
 {
