@@ -613,7 +613,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	public void onQueryChanged(String s)
 	{
-		refinedSearchText = s.toLowerCase().trim();
+		refinedSearchText = s.toLowerCase();
 		contactFilter.filter(refinedSearchText);
 	}
 

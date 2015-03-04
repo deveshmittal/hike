@@ -301,10 +301,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void setSearchEmptyState()
 	{
-		if (emptyView != null)
-		{
-			emptyView.setVisibility(View.GONE);
-		}
 		ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
 		View searchEmptyView = getView().findViewById(R.id.searchEmptyView);
 		searchEmptyView.setVisibility(View.VISIBLE);
@@ -313,8 +309,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (!TextUtils.isEmpty(searchText))
 		{
 			SpannableString spanEmptyText = new SpannableString(emptyText);
-			int start = spanEmptyText.toString().indexOf(searchText) - 1;
-			int end = start + searchText.length() + 2;
+			String darkText = "'" + searchText + "'";
+			int start = spanEmptyText.toString().indexOf(darkText);
+			int end = start + darkText.length();
 			spanEmptyText.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.standard_light_grey2)), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			emptyTextView.setText(spanEmptyText, TextView.BufferType.SPANNABLE);
 		}
@@ -859,20 +856,29 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void setEmptyState()
 	{
-		if(searchMode)
+		// Adding wasViewSetup() safety check for an NPE here.
+		if (wasViewSetup())
 		{
-			setSearchEmptyState();
-			return;
-		}
-
-		if (wasViewSetup() && emptyView == null) /* Adding wasViewSetup() safety check for an NPE here */
-		{
-			ViewGroup emptyHolder = (ViewGroup) getView().findViewById(R.id.emptyViewHolder);
-			emptyView = LayoutInflater.from(getActivity()).inflate(R.layout.conversation_empty_view2, emptyHolder);
-			// emptyHolder.addView(emptyView);
-			getView().findViewById(R.id.searchEmptyView).setVisibility(View.GONE);
-			ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
-			friendsList.setEmptyView(emptyView);
+			if (emptyView == null)
+			{
+				ViewGroup emptyHolder = (ViewGroup) getView().findViewById(R.id.emptyViewHolder);
+				emptyView = LayoutInflater.from(getActivity()).inflate(R.layout.conversation_empty_view2, emptyHolder);
+				//emptyHolder.addView(emptyView);
+			}
+			
+			if (searchMode && !TextUtils.isEmpty(searchText))
+			{
+				emptyView.setVisibility(View.GONE);
+				getView().findViewById(R.id.searchEmptyView).setVisibility(View.VISIBLE);
+				setSearchEmptyState();
+			}
+			else
+			{
+				getView().findViewById(R.id.searchEmptyView).setVisibility(View.GONE);
+				emptyView.setVisibility(View.VISIBLE);
+				ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
+				friendsList.setEmptyView(emptyView);
+			}
 		}
 	}
 
@@ -1065,9 +1071,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	public void onSearchQueryChanged(String s)
 	{
-		searchText = s;
+		searchText = s.trim();
 		setEmptyState();
-		mAdapter.onQueryChanged(s);
+		mAdapter.onQueryChanged(searchText);
 	}
 
 	public void removeSearch()
@@ -1526,6 +1532,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			setEmptyState();
 		}
+	}
+	
+	public boolean isConversationsEmpty()
+	{
+		return displayedConversations.isEmpty();
 	}
 
 	private void ShowTipIfNeeded(boolean hasNoConversation)
