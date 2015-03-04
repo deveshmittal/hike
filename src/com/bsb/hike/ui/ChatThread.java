@@ -181,7 +181,6 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.ShareUtilsModel;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
@@ -7991,7 +7990,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mAdapter.removeSelection();
 		mOptionsList.clear();
 		setupActionBar(false);
-
+		share_type = HikeConstants.Extras.NOT_SHAREABLE;
+		
 		/*
 		 * if we have hidden tips while initializing action mode we should unhide them
 		 */
@@ -8004,6 +8004,59 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			setEnableHikeOfflineNextButton(true);
 		}
 		invalidateOptionsMenu();
+	}
+	
+	public Intent shareFunctionality(Intent intent, ConvMessage message)
+	{
+		boolean showShareFunctionality = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.SHOW_SHARE_FUNCTIONALITY, false);
+		if (mAdapter.getSelectedCount() == 1 && Utils.isPackageInstalled(getApplicationContext(), HikeConstants.Extras.WHATSAPP_PACKAGE)
+				&& showShareFunctionality )
+		{
+			if (message.isStickerMessage())
+			{
+				share_type = HikeConstants.Extras.ShareTypes.STICKER_SHARE;
+			}
+
+			if (message.isImageMsg())
+			{
+				share_type = HikeConstants.Extras.ShareTypes.IMAGE_SHARE;
+			}
+
+			if (message.isTextMsg())
+			{
+				share_type = HikeConstants.Extras.ShareTypes.TEXT_SHARE;
+			}
+
+			switch (share_type)
+			{
+			case HikeConstants.Extras.ShareTypes.STICKER_SHARE:
+				Sticker sticker = message.getMetadata().getSticker();
+				String filePath = StickerManager.getInstance().getStickerDirectoryForCategoryId(sticker.getCategoryId()) + HikeConstants.LARGE_STICKER_ROOT;
+				File stickerFile = new File(filePath, sticker.getStickerId());
+				String filePathBmp = stickerFile.getAbsolutePath();
+				intent.putExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.ShareTypes.STICKER_SHARE);
+				intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, filePathBmp);
+				break;
+
+			case HikeConstants.Extras.ShareTypes.TEXT_SHARE:
+				String text = message.getMessage();
+				intent.putExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.ShareTypes.TEXT_SHARE);
+				intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, text);
+				break;
+
+			case HikeConstants.Extras.ShareTypes.IMAGE_SHARE:
+				if (shareableMessagesCount == 1)
+				{
+					HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+					intent.putExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.ShareTypes.IMAGE_SHARE);
+					intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, hikeFile.getExactFilePath());
+				}
+				break;
+			}
+			
+
+		}
+		return intent;
 	}
 
 	public boolean onActionModeItemClicked(MenuItem item)
@@ -8121,53 +8174,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
 			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 
-			if (selectedMessagesMap.get(selectedMsgIds.get(0)).isStickerMessage())
-			{   
-				share_type = HikeConstants.Extras.ShareTypes.STICKER_SHARE;
-			}
-
-
-			if (selectedMessagesMap.get(selectedMsgIds.get(0)).isImageMsg())
-			{   
-				share_type = HikeConstants.Extras.ShareTypes.IMAGE_SHARE;
-		    }
-			
-			if (selectedMessagesMap.get(selectedMsgIds.get(0)).isTextMsg())
-			{   
-				share_type = HikeConstants.Extras.ShareTypes.TEXT_SHARE;
-		    }
-			
-			boolean showShareFunctionality = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.SHOW_SHARE_FUNCTIONALITY, false);
-			boolean shareFunctionalityPallete = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.SHARE_FUNCTIONALITY_PALETTE, false); 
-			ShareUtilsModel shareUtilsModel = new ShareUtilsModel(showShareFunctionality,shareFunctionalityPallete);
-			if( mAdapter.getSelectedCount() == 1 && Utils.isPackageInstalled(getApplicationContext(), HikeConstants.Extras.WHATSAPP_PACKAGE)  && shareUtilsModel.getShowShareFunctionality() )
-			{   ConvMessage message = selectedMessagesMap.get(selectedMsgIds.get(0));
-				switch(share_type)
-				{ 
-			        case HikeConstants.Extras.ShareTypes.STICKER_SHARE:
-			        	Sticker sticker = message.getMetadata().getSticker();
-			        	intent.putExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.ShareTypes.STICKER_SHARE);
-			        	intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, sticker);
-			        	break;
-			        
-			        case HikeConstants.Extras.ShareTypes.TEXT_SHARE:
-						String text = message.getMessage();
-						intent.putExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.ShareTypes.TEXT_SHARE);
-						intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, text);
-						break;
-			        
-			        case HikeConstants.Extras.ShareTypes.IMAGE_SHARE:
-						 if(shareableMessagesCount == 1)
-						 {
-							 HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-							 intent.putExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.ShareTypes.IMAGE_SHARE);
-							 intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, hikeFile.getExactFilePath());
-						}
-						break; 
-				}
-				
-			}
-			share_type = HikeConstants.Extras.NOT_SHAREABLE;
+			intent = shareFunctionality(intent, selectedMessagesMap.get(selectedMsgIds.get(0)));
 			startActivity(intent);
 			destroyActionMode();
 			return true;

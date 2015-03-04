@@ -367,28 +367,18 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 		}
 		
-		if (item.getItemId() == R.id.whatsapp_share) 
-		{  Object obj = null ;
-			switch(type)
-			{  
-			   case HikeConstants.Extras.ShareTypes.STICKER_SHARE:
-				    obj=(Sticker) getIntent().getSerializableExtra(HikeConstants.Extras.SHARE_CONTENT);
-					break;
-			   case HikeConstants.Extras.ShareTypes.IMAGE_SHARE:
-		 			obj = getIntent().getStringExtra(HikeConstants.Extras.SHARE_CONTENT);
-			        break;
-			   case HikeConstants.Extras.ShareTypes.TEXT_SHARE:
-					obj = getIntent().getStringExtra(HikeConstants.Extras.SHARE_CONTENT);
-                    break;
-  			}
-		    Intent intent = ShareUtils.shareContent(type,obj);
-		    if ( intent != null)
-		    {
-		    startActivity(intent);
-		    } 
-		    this.finish();		
-		}		
-	
+		if (item.getItemId() == R.id.whatsapp_share)
+		{
+			Object obj = null;
+			obj = getIntent().getStringExtra(HikeConstants.Extras.SHARE_CONTENT);
+			Intent intent = ShareUtils.shareContent(type, obj);
+			if (intent != null)
+			{
+				startActivity(intent);
+			}
+			this.finish();
+		}
+
 		return super.onOptionsItemSelected(item);
 	}
 	

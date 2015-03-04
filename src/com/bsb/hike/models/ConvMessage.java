@@ -907,12 +907,10 @@ public class ConvMessage
 
 	public boolean isImageMsg()
 	{
-		if (isFileTransferMessage())
+		if (isFileTransferMessage() && getMetadata() != null && getMetadata().getHikeFiles().get(0).getHikeFileType() == HikeFileType.IMAGE)
 		{
-			if (getMetadata().getHikeFiles().get(0).getHikeFileType() == HikeFileType.IMAGE)
-			{
 				return true;
-			}
+			
 		}
 		return false;
 	}
@@ -925,7 +923,7 @@ public class ConvMessage
 		}
 		
 		//a MESSAGE_TYPE.PLAIN_TEXT type message might be ft, sticker or nudge.So, rolling out these possibilities
-		if (isFileTransferMessage() || isStickerMessage() || getMetadata() != null && getMetadata().isPokeMessage())
+		if (isFileTransferMessage() || isStickerMessage() || (getMetadata() != null && getMetadata().isPokeMessage()))
 		{
 			return false;
 		}

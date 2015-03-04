@@ -24,7 +24,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.ShareUtilsModel;
 import com.bsb.hike.models.Sticker;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -37,9 +36,7 @@ public class ShareUtils
 
 	static Context mContext = HikeMessengerApp.getInstance().getApplicationContext();
     
-	static String imgHead, imgDesc, imgCap, stiHead, stiDesc, stiCap, smsHead, smsCap ; 
-	
-	static ShareUtilsModel shareUtilsModel;
+	static String imgHead, imgDesc, imgCap, stiHead, stiDesc, stiCap, textHead, textCap ; 
 	
 	public static Intent shareContent(int type, Object obj)
 	{ 
@@ -49,32 +46,29 @@ public class ShareUtils
 	    stiHead = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.STICKER_HEADING, mContext.getString(R.string.sticker_share_heading));
 	    stiDesc = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.STICKER_DESCRIPTION, mContext.getString(R.string.sticker_share_description));
 	    stiCap = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.STICKER_CAPTION, mContext.getString(R.string.sticker_share_caption));
-	    smsHead = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.TEXT_HEADING, mContext.getString(R.string.text_share_heading));
-	    smsCap = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.TEXT_CAPTION, mContext.getString(R.string.text_share_caption));
+	    textHead = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.TEXT_HEADING, mContext.getString(R.string.text_share_heading));
+	    textCap = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.TEXT_CAPTION, mContext.getString(R.string.text_share_caption));
 	  
-	    shareUtilsModel = new ShareUtilsModel(stiHead, stiDesc, stiCap, imgHead, imgDesc, imgCap, smsHead, smsCap); 
+	    String path = (String) obj;
 		
 		switch (type)
 		{
+		
 		case HikeConstants.Extras.ShareTypes.STICKER_SHARE:
-			Sticker sticker = (Sticker) obj;
-			intent = stickerShare(sticker, HikeConstants.Extras.ShareTypes.STICKER_SHARE);
+			intent = stickerShare(path, HikeConstants.Extras.ShareTypes.STICKER_SHARE);
 			break;
 
 		case HikeConstants.Extras.ShareTypes.IMAGE_SHARE:
-			String imagePath = (String) obj;
-			intent = imageShare(imagePath);
+			intent = imageShare(path);
 			break;
 
 		case HikeConstants.Extras.ShareTypes.TEXT_SHARE:
-			String text = (String) obj;
-			intent = textShare(text);
+			intent = textShare(path);
 			break;
-            
-			/*STICKER SHARED FROM THE PALLETE AREA TO ANY APP*/
+
+		/* STICKER SHARED FROM THE PALLETE AREA TO ANY APP */
 		case HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE:
-			Sticker stickerpallete = (Sticker) obj;
-			intent = stickerShare(stickerpallete, HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE);
+			intent = stickerShare(path, HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE);
 			break;
 		}
 
@@ -116,9 +110,9 @@ public class ShareUtils
 		Bitmap bmp = HikeBitmapFactory.decodeFile(filePath);
 		image.setImageBitmap(bmp);
 		TextView heading = (TextView) share.findViewById(R.id.imageShareHeading);
-		heading.setText(shareUtilsModel.getImageHeading());
+		heading.setText(imgHead);
 		TextView tv = (TextView) share.findViewById(R.id.imageShareDescription);
-		tv.setText(Html.fromHtml(shareUtilsModel.getImageDescription()));
+		tv.setText(Html.fromHtml(imgDesc));
 
 		return share;
 	}
@@ -139,7 +133,7 @@ public class ShareUtils
 			shB.compress(CompressFormat.JPEG, 100, fos);
 			 
 			fos.flush();
-			imageIntent = IntentManager.shareImageIntentWhatsapp("image/jpeg", "file://" + shareImageFile.getAbsolutePath(), shareUtilsModel.getImageCaption());
+			imageIntent = IntentManager.shareIntent("image/jpeg", "file://" + shareImageFile.getAbsolutePath(), imgCap , HikeConstants.Extras.ShareTypes.IMAGE_SHARE, true);
 			return imageIntent;
 		}
 
@@ -159,35 +153,32 @@ public class ShareUtils
 	private static Intent textShare(String text)
 	{
 		Logger.d("ShareUtils", "smsShare");
-		text = text + "\n\n" + shareUtilsModel.getTextHeading() + "\n" + shareUtilsModel.getTextCaption() ;
-		Intent textIntent = IntentManager.shareTextIntentWhatsapp(text);
+		text = text + "\n\n" + textHead + "\n" + textCap ;
+		Intent textIntent = IntentManager.shareIntent("text/plain", null, text, HikeConstants.Extras.ShareTypes.TEXT_SHARE, true);
 		return textIntent;
 
 	}
 
 	
 	
-	private static View setViewSticker(Sticker sticker)
+	private static View setViewSticker(String stickerFilePath)
 	{   
 		View share = LayoutInflater.from(mContext).inflate(R.layout.sticker_share_layout, null);
 		ImageView image = (ImageView) share.findViewById(R.id.sticker_image);
-		String filePath = StickerManager.getInstance().getStickerDirectoryForCategoryId(sticker.getCategoryId()) + HikeConstants.LARGE_STICKER_ROOT;
-		File stickerFile = new File(filePath, sticker.getStickerId());
-		if (stickerFile.exists())
-		{
-			Bitmap bmp = BitmapFactory.decodeFile(stickerFile.getAbsolutePath());
-			image.setImageBitmap(bmp);
-		}
+		
+		Bitmap bmp = BitmapFactory.decodeFile(stickerFilePath);
+		image.setImageBitmap(bmp);
+		
 		TextView heading = (TextView) share.findViewById(R.id.stickerShareHeading);
-		heading.setText(shareUtilsModel.getStickerHeading());
+		heading.setText(stiHead);
 
 		TextView tv = (TextView) share.findViewById(com.bsb.hike.R.id.stickerShareDescription);
-		tv.setText(Html.fromHtml(shareUtilsModel.getStickerDescription()));
+		tv.setText(Html.fromHtml(stiDesc));
 
 		return share;
 	}
 
-	private static Intent stickerShare(Sticker sticker, int type)
+	private static Intent stickerShare(String stickerPath, int type)
 	{
 		Logger.d("ShareUtils", "stickerShare");
 		File shareStickerFile = null;
@@ -198,7 +189,7 @@ public class ShareUtils
 			shareStickerFile = new File(mContext.getExternalCacheDir(), System.currentTimeMillis() + ".jpg");
 			fos = new FileOutputStream(shareStickerFile);
 
-			View share = setViewSticker(sticker);
+			View share = setViewSticker(stickerPath);
 
 			Bitmap shB = Utils.undrawnViewToBitmap(share);
 			shB.compress(CompressFormat.JPEG, 100, fos);
@@ -206,11 +197,11 @@ public class ShareUtils
 			fos.flush();
 			if (type == HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE)
 			{
-				stickerIntent = IntentManager.shareImageIntent("image/jpeg", "file://" + shareStickerFile.getAbsolutePath(), shareUtilsModel.getStickerCaption());
+				stickerIntent = IntentManager.shareIntent("image/jpeg", "file://" + shareStickerFile.getAbsolutePath(), stiCap, HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE, false);
 			}
 			else
 			{
-				stickerIntent = IntentManager.shareImageIntentWhatsapp("image/jpeg", "file://" + shareStickerFile.getAbsolutePath(), shareUtilsModel.getStickerCaption());
+				stickerIntent = IntentManager.shareIntent("image/jpeg", "file://" + shareStickerFile.getAbsolutePath(), stiCap , HikeConstants.Extras.ShareTypes.STICKER_SHARE, true);
 			}
 			return stickerIntent;
 		}

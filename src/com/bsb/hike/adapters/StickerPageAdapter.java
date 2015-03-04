@@ -1,5 +1,6 @@
 package com.bsb.hike.adapters;
 
+import java.io.File;
 import java.util.List;
 
 import android.app.Activity;
@@ -21,7 +22,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.models.ShareUtilsModel;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
@@ -69,7 +69,6 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener, 
 	public StickerPageAdapter(Activity activity, List<StickerPageAdapterItem> itemList, StickerCategory category, StickerLoader worker, AbsListView absListView )
 	{   
 		shareFunctionalityPalette = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.SHARE_FUNCTIONALITY_PALETTE, false);
-	    showShareFunctionality = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.SHOW_SHARE_FUNCTIONALITY, false);
 	    this.activity = activity;
 		this.itemList = itemList;
 		this.category = category;
@@ -371,12 +370,14 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener, 
 		ViewHolder viewHolder = (ViewHolder) v.getTag();
 		int position = viewHolder.position;
 		StickerPageAdapterItem item = (StickerPageAdapterItem) getItem(position);
-		ShareUtilsModel shareUtilsModel = new ShareUtilsModel(showShareFunctionality,shareFunctionalityPalette);
 		
-		if (item.getType() == StickerPageAdapterItem.STICKER && shareUtilsModel.getShareFunctionalityPalette())
+		if (item.getType() == StickerPageAdapterItem.STICKER && shareFunctionalityPalette )
 		{
 			Sticker sticker = item.getSticker();
-		    Intent intent = ShareUtils.shareContent(HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE,sticker);
+			String filePath = StickerManager.getInstance().getStickerDirectoryForCategoryId(sticker.getCategoryId()) + HikeConstants.LARGE_STICKER_ROOT;
+			File stickerFile = new File(filePath, sticker.getStickerId());
+			String filePathBmp = stickerFile.getAbsolutePath();
+		    Intent intent = ShareUtils.shareContent(HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE,filePathBmp);
 			HikeMessengerApp.getInstance().startActivity(intent); 
 		}
 		return false;
