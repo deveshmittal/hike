@@ -37,4 +37,6 @@
 	<dimen name="welcome_bottom_margin">25dp</dimen>
 	<dimen name="welcome_artwork_padding">10dp</dimen>
 	<dimen name="welcome_with_love_top">30dp</dimen>
+	<dimen name="auth_margin_top">60dp</dimen>
+	<dimen name="sticker_settings_tip_margin">29dp</dimen>
 </resources>

@@ -89,8 +89,6 @@ public class HikePubSub implements Runnable
 
 	public static final String TYPING_CONVERSATION = "typingconv";
 
-	public static final String TOKEN_CREATED = "tokencreated";
-
 	/* sms credits have been modified */
 	public static final String SMS_CREDIT_CHANGED = "smscredits";
 
@@ -107,12 +105,6 @@ public class HikePubSub implements Runnable
 	public static final String MESSAGE_RECEIVED_FROM_SENDER = "messageReceivedFromSender";
 
 	public static final String MSG_READ = "msgRead";
-
-	/* publishes a message via mqtt to the server */
-	public static final String MQTT_PUBLISH = "serviceSend";
-
-	/* publishes a message via mqtt to the server with QoS 0 */
-	public static final String MQTT_PUBLISH_LOW = "serviceSendLow";
 
 	/* published when the app is asked to delete a message */
 	public static final String DELETE_MESSAGE = "deleteMessage";
@@ -280,7 +272,7 @@ public class HikePubSub implements Runnable
 
 	public static final String SEND_SMS_PREF_TOGGLED = "sendSmsPrefToggled";
 
-	public static final String FINISHED_AVTAR_UPGRADE = "finshedAvtarDBUpgrade";
+	public static final String FINISHED_UPGRADE_INTENT_SERVICE = "finshedUpgradeIntentService";
 
 	public static final String FTUE_LIST_FETCHED_OR_UPDATED = "ftueListFetchedOrUpdated";
 
@@ -375,12 +367,26 @@ public class HikePubSub implements Runnable
 	public static String HIKE_TO_OFFLINE_PUSH = "hikeToOfflinePush";
 
 	public static String PROFILE_UPDATE_FINISH = "profileUpdateFinish";
+
+	public static String HIKE_SDK_MESSAGE = "hikeSDKMessage";
 	
 	public static final String CONV_META_DATA_UPDATED = "convMetaDataUpdated";
 	
 	public static final String LATEST_PIN_DELETED = "lastPinDeleted";
 	
 	public static final String UNREAD_PIN_COUNT_RESET = "pinCountReset";
+	
+	public static final String AUTH_TOKEN_RECEIVED = "authTokenReceived";
+	
+	public static final String STICKER_CATEGORY_MAP_UPDATED = "stickerCategoryMapUpdated";
+	
+	public static final String STICKER_FTUE_TIP = "stickerFtueTip";
+	
+	public static final String USER_JOINED_NOTIFICATION = "userJoinedNotification";
+	
+	public static final String CONV_UNREAD_COUNT_MODIFIED = "convUnreadCountModified";
+	
+	public static final String PLATFORM_CARD_ALARM = "platformCardAlarm";
 
 	private final Thread mThread;
 

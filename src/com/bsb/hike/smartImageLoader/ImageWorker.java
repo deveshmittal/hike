@@ -36,8 +36,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.smartcache.HikeLruCache;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.AsyncTask.MyAsyncTask;
@@ -49,8 +49,6 @@ import com.bsb.hike.utils.customClasses.AsyncTask.MyAsyncTask;
 public abstract class ImageWorker
 {
 	private static final String TAG = "ImageWorker";
-
-	public static final String ROUND_SUFFIX = "round";
 
 	private static final int FADE_IN_TIME = 100;
 
@@ -90,13 +88,13 @@ public abstract class ImageWorker
 
 	public void loadImage(String data, boolean rounded, ImageView imageView, boolean runOnUiThread)
 	{
-		String key = data + (rounded ? ROUND_SUFFIX : "");
+		String key = data + (rounded ? ProfileActivity.PROFILE_ROUND_SUFFIX : "");
 		loadImage(key, imageView, false, runOnUiThread);
 	}
 
 	public void loadImage(String data, boolean rounded, ImageView imageView, boolean runOnUiThread, boolean isFlinging, boolean setDefaultAvatarInitially)
 	{
-		String key = data + (rounded ? ROUND_SUFFIX : "");
+		String key = data + (rounded ? ProfileActivity.PROFILE_ROUND_SUFFIX : "");
 		loadImage(key, imageView, isFlinging, runOnUiThread, setDefaultAvatarInitially);
 	}
 
@@ -209,9 +207,9 @@ public abstract class ImageWorker
 		// }
 	}
 
-	private void setDefaultAvatar(ImageView imageView, String data)
+	protected void setDefaultAvatar(ImageView imageView, String data)
 	{
-		int idx = data.indexOf(ROUND_SUFFIX);
+		int idx = data.lastIndexOf(ProfileActivity.PROFILE_ROUND_SUFFIX);
 		boolean rounded = false;
 		if (idx > 0)
 		{
@@ -220,7 +218,7 @@ public abstract class ImageWorker
 		}
 		else
 		{
-			int idx1 = data.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+			int idx1 = data.lastIndexOf(ProfileActivity.PROFILE_PIC_SUFFIX);
 			if (idx1 > 0)
 				data = new String(data.substring(0, idx1));
 		}

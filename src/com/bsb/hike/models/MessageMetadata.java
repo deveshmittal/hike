@@ -2,29 +2,14 @@ package com.bsb.hike.models;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
-import android.text.Spannable;
-import android.text.Spanned;
-import android.text.TextUtils;
-import android.text.style.ClickableSpan;
-import android.view.View;
-
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.ui.CreditsActivity;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.Utils;
 
 public class MessageMetadata
 {
@@ -65,6 +50,18 @@ public class MessageMetadata
 	private boolean oldUser;
 	
 	private boolean isGhostMessage;
+	
+	private int duration;
+	
+	private boolean voipInitiator;
+
+	public boolean isVoipInitiator() {
+		return voipInitiator;
+	}
+
+	public int getDuration() {
+		return duration;
+	}
 
 	public boolean isGhostMessage()
 	{
@@ -128,6 +125,10 @@ public class MessageMetadata
 		case CHAT_BACKGROUND:
 			this.msisdn = metadata.optString(HikeConstants.FROM);
 			break;
+		case VOIP_CALL_SUMMARY:
+			this.duration = metadata.getJSONObject(HikeConstants.DATA).getInt(HikeConstants.VOIP_CALL_DURATION);
+			this.voipInitiator = metadata.getJSONObject(HikeConstants.DATA).getBoolean(HikeConstants.VOIP_CALL_INITIATOR);
+			break;
 		}
 		this.newUser = metadata.optString(HikeConstants.NEW_USER).equals("true");
 		this.dndMissedCallNumber = metadata.optString(HikeConstants.METADATA_DND);
@@ -142,17 +143,8 @@ public class MessageMetadata
 		this.json = metadata;
 		if (metadata.has(StickerManager.STICKER_ID))
 		{
-			if (metadata.has(StickerManager.STICKER_INDEX))
-			{
-				this.sticker = new Sticker(metadata.optString(StickerManager.CATEGORY_ID), metadata.optString(StickerManager.STICKER_ID),
-						metadata.optInt(StickerManager.STICKER_INDEX));
-			}
-			else
-			// this is the case when you receive a sticker from another user
-			{
-				String cat = metadata.optString(StickerManager.CATEGORY_ID);
-				this.sticker = new Sticker(cat, metadata.optString(StickerManager.STICKER_ID));
-			}
+			String cat = metadata.optString(StickerManager.CATEGORY_ID);
+			this.sticker = new Sticker(cat, metadata.optString(StickerManager.STICKER_ID));
 		}
 	}
 
@@ -268,5 +260,20 @@ public class MessageMetadata
 	public void setNudgeAnimationType(NudgeAnimationType type)
 	{
 		this.nudgeAnimationType = type;
+	}
+	
+	/**
+	 * Used to update the sticker object as well as the JSON Object in the message metadata
+	 * 
+	 * @param newCategoryId
+	 * @throws JSONException
+	 */
+	public void updateSticker(String newCategoryId) throws JSONException
+	{
+		if (this.json.has(StickerManager.CATEGORY_ID))
+		{
+			this.json.put(StickerManager.CATEGORY_ID, newCategoryId);
+		}
+		this.sticker.setCategoryId(newCategoryId);
 	}
 }

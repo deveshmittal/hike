@@ -6,10 +6,8 @@ import java.util.ArrayList;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -25,9 +23,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
@@ -36,8 +33,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.adapters.GalleryAdapter;
+import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.GalleryImageLoader;
@@ -45,9 +42,7 @@ import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.CustomFontButton;
 
 public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnScrollListener, OnPageChangeListener, HikePubSub.Listener
 {
@@ -185,7 +180,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	protected void onStop()
 	{
 		int successfulSelections = galleryItems.size();
-		HikeAnalyticsEvent.sendGallerySelectionEvent(totalSelections, successfulSelections);
+		HikeAnalyticsEvent.sendGallerySelectionEvent(totalSelections, successfulSelections, getApplicationContext());
 		super.onStop();
 	}
 
@@ -219,7 +214,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		postText.setText(R.string.send);
 		
 		title.setText(R.string.preview);
-		imageSettingsBtn.setVisibility(View.VISIBLE);
+		imageSettingsBtn.setVisibility(View.GONE);
 		backContainer.setOnClickListener(new OnClickListener()
 		{
 			@Override
@@ -247,14 +242,14 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 				final String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
 				final boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
 				
-				if (!HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false) && !smlDialogShown)
+				if (!smlDialogShown)
 				{
 					HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
 					{
 						@Override
 						public void onSucess(Dialog dialog)
 						{
-							fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+							fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike, FTAnalyticEvents.GALLERY_ATTACHEMENT);
 							Utils.executeAsyncTask(fileTransferTask);
 							progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
 							dialog.dismiss();
@@ -284,7 +279,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 				}
 				else
 				{
-					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike, FTAnalyticEvents.GALLERY_ATTACHEMENT);
 					Utils.executeAsyncTask(fileTransferTask);
 					progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
 				}
@@ -567,12 +562,12 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	
 	private void showTipIfRequired()
 	{
-		final HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this);
+		final HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance();
 		if(pref.getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false) && pref.getData(HikeConstants.SHOW_IMAGE_QUALITY_TIP, true))
 		{
 			View view = LayoutInflater.from(this).inflate(R.layout.tip_right_arrow, null);
 			ImageView arrowPointer = (ImageView) (view.findViewById(R.id.arrow_pointer));
-			arrowPointer.getLayoutParams().width = (int) (74 * Utils.densityMultiplier);
+			arrowPointer.getLayoutParams().width = (int) (74 * Utils.scaledDensityMultiplier);
 			arrowPointer.requestLayout();
 			arrowPointer.setImageResource(R.drawable.ftue_up_arrow);
 			((TextView) view.findViewById(R.id.tip_header)).setText(R.string.image_settings_tip_text);

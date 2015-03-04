@@ -18,6 +18,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,7 +34,6 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
@@ -52,6 +52,7 @@ import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.HikeTip;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
@@ -225,7 +226,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) tipView.getLayoutParams();
 			int screenWidth = getResources().getDisplayMetrics().widthPixels;
 			int buttonWidth = screenWidth / 4;
-			int marginRight = (int) ((buttonWidth / 2) - ((int) 22 * Utils.densityMultiplier));
+			int marginRight = (int) ((buttonWidth / 2) - ((int) 22 * Utils.scaledDensityMultiplier));
 			layoutParams.rightMargin = marginRight;
 
 			tipView.setLayoutParams(layoutParams);
@@ -522,6 +523,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 				editor.putString(HikeMessengerApp.LAST_STATUS, text);
 				editor.putInt(HikeMessengerApp.LAST_MOOD, moodId);
 				editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, ++unseenUserStatusCount);
+				editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
 				editor.commit();
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MY_STATUS_CHANGED, text);
@@ -677,6 +679,19 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		}
 		setupEmoticonLayout(whichSubcategory, tabDrawables);
 		emoticonLayout.setVisibility(View.VISIBLE);
+		
+		View eraseKey = (View) findViewById(R.id.erase_key);
+		eraseKey.setVisibility(View.VISIBLE);
+		eraseKey.setOnClickListener(new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				statusTxt.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
+			}
+		});
+		
 	}
 
 	public void hideEmoticonSelector()

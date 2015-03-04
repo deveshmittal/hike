@@ -27,6 +27,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
@@ -189,6 +190,8 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 			getSupportMenuInflater().inflate(R.menu.multi_select_chat_menu, menu);
 			
 			menu.findItem(R.id.forward_msgs).setVisible(false);
+			
+			menu.findItem(R.id.copy_msgs).setVisible(true);
 		}
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -486,6 +489,21 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 			deleteConfirmDialog.show();
 			return true;
 			
+		case R.id.copy_msgs:
+			Collections.sort(selectedPinIds);
+			StringBuilder pinStr = new StringBuilder();
+			int size = selectedPinIds.size();
+			
+			for (int i = 0; i < size; i++)
+			{
+				pinStr.append(pinAdapter.getSelectedPinsMap().get(selectedPinIds.get(i)).getMessage());
+				pinStr.append("\n");				
+			}
+			Utils.setClipboardText(pinStr.toString(), getApplicationContext());
+			Toast.makeText(PinHistoryActivity.this, R.string.copied, Toast.LENGTH_SHORT).show();
+			destroyActionMode();
+			return true;
+
 		default:
 			destroyActionMode();
 		return false;

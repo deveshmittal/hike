@@ -2,7 +2,6 @@ package com.bsb.hike.models;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,14 +13,14 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.PairModified;
 
 public class MultipleConvMessage
 {
 	
 	private ArrayList<ConvMessage> messageList;
 	private ArrayList<ContactInfo> contactList;
-	
+	private boolean createChatThread;
+	private String source;
 
 	public ArrayList<ConvMessage> getMessageList()
 	{
@@ -55,6 +54,16 @@ public class MultipleConvMessage
 		this.timeStamp = timeStamp;
 	}
 	
+	public void setCreateChatThread(boolean val)
+	{
+		this.createChatThread = val;
+	}
+	
+	public boolean getCreateChatThread()
+	{
+		return createChatThread;
+	}
+	
 	public MultipleConvMessage(ArrayList<ConvMessage> messageList, ArrayList<ContactInfo> contactList)
 	{
 		this.messageList = messageList;
@@ -68,6 +77,16 @@ public class MultipleConvMessage
 		this.timeStamp = timeStamp;
 		this.contactList = contactList;
 	}
+	
+	public MultipleConvMessage(ArrayList<ConvMessage> messageList, ArrayList<ContactInfo> contactList, long timeStamp,boolean createChatThread, String source)
+	{
+		this.messageList = messageList;
+		this.timeStamp = timeStamp;
+		this.contactList = contactList;
+		this.createChatThread = createChatThread;
+		this.source = source;
+	}
+	
 	public JSONObject serialize()
 	{
 		JSONObject object = new JSONObject();
@@ -77,7 +96,14 @@ public class MultipleConvMessage
 		{
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE);
 			object.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.MULTIPLE_FORWARD);
-		
+
+			if(source!=null)
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.SOURCE, source);
+				data.put(HikeConstants.METADATA, metadata);
+			}
+
 			data.put(HikeConstants.TIMESTAMP, timeStamp);
 			data.put(HikeConstants.MESSAGE_ID, messageList.get(0).getMsgID());
 			
@@ -85,9 +111,26 @@ public class MultipleConvMessage
 			for (int i=0; i<messageList.size();i++)
 			{
 				JSONObject msg = new JSONObject();
-				msg.put(HikeConstants.HIKE_MESSAGE, ((ConvMessage)messageList.get(i)).getMessage());
-				if(((ConvMessage)messageList.get(i)).getMetadata()!=null){
-					msg.put(HikeConstants.METADATA,((ConvMessage)messageList.get(i)).getMetadata().getJSON());
+                ConvMessage convMessage = messageList.get(i);
+				msg.put(HikeConstants.HIKE_MESSAGE, (convMessage.getMessage()));
+
+				if((convMessage.getMetadata()!=null)){
+					msg.put(HikeConstants.METADATA,convMessage.getMetadata().getJSON());
+				} else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT)
+				{
+                    msg.put(HikeConstants.METADATA, convMessage.platformMessageMetadata.getJSON());
+                    msg.put(HikeConstants.SUB_TYPE, HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE);
+
+                } else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
+				{
+					msg.put(HikeConstants.METADATA, convMessage.platformWebMessageMetadata.getJSON());
+					msg.put(HikeConstants.SUB_TYPE, HikeConstants.ConvMessagePacketKeys.WEB_CONTENT_TYPE);
+
+				}
+				else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT)
+				{
+					msg.put(HikeConstants.METADATA, convMessage.platformWebMessageMetadata.getJSON());
+					msg.put(HikeConstants.SUB_TYPE, HikeConstants.ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE);
 				}
 				
 				msgArray.put(msg);

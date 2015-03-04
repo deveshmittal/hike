@@ -13,7 +13,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -46,6 +45,12 @@ public class GroupConversation extends Conversation
 		super(msisdn, contactName, true);
 		this.groupOwner = groupOwner;
 		this.isGroupAlive = isGroupAlive;
+	}
+	
+	public GroupConversation(String msisdn, String contactName, String groupOwner, boolean isGroupAlive, boolean isGroupMute)
+	{
+		this(msisdn, contactName, groupOwner, isGroupAlive);
+		this.isMuted = isGroupMute; 
 	}
 
 	public GroupConversation(JSONObject jsonObject, Context context) throws JSONException

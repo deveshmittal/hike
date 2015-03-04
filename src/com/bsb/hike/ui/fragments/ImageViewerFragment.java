@@ -24,12 +24,10 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.smartImageLoader.ImageWorker;
-import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.ProfileImageLoader;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -96,7 +94,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		key = mappedId;
 		if (!isStatusImage)
 		{
-			int idx = key.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+			int idx = key.lastIndexOf(ProfileActivity.PROFILE_PIC_SUFFIX);
 			if (idx > 0)
 				key = new String(key.substring(0, idx));
 			hasCustomImage = ContactManager.getInstance().hasIcon(key);
