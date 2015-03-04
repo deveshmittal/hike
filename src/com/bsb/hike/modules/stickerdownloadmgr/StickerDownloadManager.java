@@ -90,10 +90,19 @@ public class StickerDownloadManager
 			Logger.d(TAG, "DownloadMultipleStickers task for catId : " + cat.getCategoryId() +  " already exists");
 			return;
 		}
-		BaseStickerDownloadTask stickerCategoryTask = new MultiStickerDownloadTask(handler, context, taskId, cat, downloadType, source, callback);
-		Request request = new Request(stickerCategoryTask);
-		request.setPrioity(Request.PRIORITY_HIGH);
-		queue.addTask(taskId, request);
+		
+		if (Utils.isOkHttp())
+		{
+			MultiStickerDownloadTaskOkHttp stickerCategoryTask = new MultiStickerDownloadTaskOkHttp(cat, downloadType, source);
+			stickerCategoryTask.execute();
+		}
+		else
+		{
+			BaseStickerDownloadTask stickerCategoryTask = new MultiStickerDownloadTask(handler, context, taskId, cat, downloadType, source, callback);
+			Request request = new Request(stickerCategoryTask);
+			request.setPrioity(Request.PRIORITY_HIGH);
+			queue.addTask(taskId, request);
+		}
 	}
 	
 	public void DownloadStickerPreviewImage(String categoryId, IStickerResultListener callback)

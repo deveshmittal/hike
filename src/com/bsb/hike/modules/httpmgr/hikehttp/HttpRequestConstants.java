@@ -70,4 +70,9 @@ public class HttpRequestConstants
 	{
 		return BASE_URL + BASE_V1 + "/stickers";
 	}
+	
+	public static String multiStickerDownloadUrl()
+	{
+		return BASE_URL + BASE_V1 + BASE_STICKER;
+	}
 }
