@@ -522,6 +522,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				return true;
 			}
 		});
+		if (mainFragment.isConversationsEmpty())
+		{
+			searchItem.setEnabled(false);
+			searchItem.setVisible(false);
+		}
 		
 		newConversationIndicator = (TextView) menu.findItem(R.id.new_conversation).getActionView().findViewById(R.id.top_bar_indicator);
 		menu.findItem(R.id.new_conversation).getActionView().findViewById(R.id.overflow_icon_image).setContentDescription("Start a new chat");

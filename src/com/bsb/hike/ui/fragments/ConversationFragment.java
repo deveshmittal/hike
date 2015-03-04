@@ -1528,6 +1528,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			setEmptyState();
 		}
 	}
+	
+	public boolean isConversationsEmpty()
+	{
+		return displayedConversations.isEmpty();
+	}
 
 	private void ShowTipIfNeeded(boolean hasNoConversation)
 	{
