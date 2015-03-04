@@ -313,8 +313,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (!TextUtils.isEmpty(searchText))
 		{
 			SpannableString spanEmptyText = new SpannableString(emptyText);
-			int start = spanEmptyText.toString().indexOf(searchText) - 1;
-			int end = start + searchText.length() + 2;
+			String darkText = "'" + searchText + "'";
+			int start = spanEmptyText.toString().indexOf(darkText);
+			int end = start + darkText.length();
 			spanEmptyText.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.standard_light_grey2)), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			emptyTextView.setText(spanEmptyText, TextView.BufferType.SPANNABLE);
 		}
