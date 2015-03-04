@@ -907,7 +907,7 @@ public class ConversationsAdapter extends BaseAdapter
 				participantName = Utils.getFirstName(conversation.getLabel());
 			}
 			try {
-				markedUp = String.format(metadata.getJSON().getJSONObject(HikeConstants.DATA).getString("Txt"), participantName);
+				markedUp = String.format(metadata.getJSON().getJSONObject(HikeConstants.DATA).getString(HikeConstants.UserJoinMsg.NOTIF_TEXT), participantName);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}

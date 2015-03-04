@@ -61,13 +61,11 @@ public class HikeNotificationUtils
 		{
 			if (convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
 			{
-				//FOUND this where the notiifcation Text is set
 				try {
-					message = String.format(convMsg.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).optString("Txt"), contactInfo.getFirstName());
+					message = String.format(convMsg.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).optString(HikeConstants.UserJoinMsg.NOTIF_TEXT), contactInfo.getFirstName());
 				} catch (JSONException e) {
-					Logger.d("UmangH","Not Found data");
+					Logger.d("JSONException", "Exceoption" + e);
 				}
-				Logger.d("UmangH",convMsg.getMetadata().getJSON().toString());
 				
 			}
 			else
@@ -85,7 +83,6 @@ public class HikeNotificationUtils
 			message = SmileyParser.getInstance().replaceEmojiWithCharacter(message, "*");
 		}
 
-		//FOUND this is where notification Title is set
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo.getName())) ? contactInfo.getName() : msisdn;
 		// For showing the name of the contact that sent the message in a group
 		// chat
@@ -123,9 +120,7 @@ public class HikeNotificationUtils
 		else if(convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
 		{
 			try {
-				key = String.format(convMsg.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).getString("Ttl"), key);
-				Logger.d("UmangH", "not : " + convMsg.getMetadata().getJSON().toString());
-				Logger.d("UmangH", "Title : " + key);
+				key = String.format(convMsg.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).getString(HikeConstants.UserJoinMsg.NOTIF_TITLE), key);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}

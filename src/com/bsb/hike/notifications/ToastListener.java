@@ -518,7 +518,7 @@ public class ToastListener implements Listener
 							}
 						}
 
- 						if (HikeMessengerApp.isStealthMsisdn(msisdn))
+						if (HikeMessengerApp.isStealthMsisdn(msisdn))
 						{
 							this.toaster.notifyStealthMessage();
 						}

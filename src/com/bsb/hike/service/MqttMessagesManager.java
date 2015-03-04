@@ -283,7 +283,6 @@ public class MqttMessagesManager
 		//by default the chat shall not persist
 		
 		SharedPreferences settings = context.getSharedPreferences(UJFile, Context.MODE_PRIVATE);
-		// FOUND : store the push details from AC packet in this shared preference
 		if (joined)
 		{
 			joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
@@ -340,7 +339,6 @@ public class MqttMessagesManager
 					{
 						this.pubSub.publish(HikePubSub.USER_JOINED_NOTIFICATION, convMessage);
 					}
-					//FOUND : here is where the pub sub is fired to send a notification
 				}
 			}
 		}

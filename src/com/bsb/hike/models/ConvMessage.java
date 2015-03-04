@@ -415,7 +415,7 @@ public class ConvMessage
 		/**
 		 * This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.
 		 */
-		this.shouldShowPush = obj.getJSONObject(HikeConstants.DATA).optInt("Typ", 2) >= 1;
+		this.shouldShowPush = obj.getJSONObject(HikeConstants.DATA).optInt(HikeConstants.UserJoinMsg.PUSH_SETTING, 2) >= 1;
 
 		this.mMessage = "";
 		this.mTimestamp = System.currentTimeMillis() / 1000;
@@ -449,8 +449,7 @@ public class ConvMessage
 				{
 					name = Utils.getFirstName(conversation.getLabel());
 				}
-				this.mMessage = String.format(metadata.getJSON().getJSONObject(HikeConstants.DATA).optString("Txt"), name);
-				Logger.d("UmangH","in : "+metadata.getJSON().toString());
+				this.mMessage = String.format(metadata.getJSON().getJSONObject(HikeConstants.DATA).optString(HikeConstants.UserJoinMsg.NOTIF_TEXT), name);
 				
 			}
 			break;
@@ -958,9 +957,9 @@ public class ConvMessage
 		
 		int push = 2;
 		try {
-			push = metadata.getJSON().getJSONObject(HikeConstants.DATA).getInt("Typ");
+			push = metadata.getJSON().getJSONObject(HikeConstants.DATA).getInt(HikeConstants.UserJoinMsg.PUSH_SETTING);
 		} catch (JSONException e) {
-			Logger.d("UmangH", "Error in json " + e);
+			Logger.d("JSONException", "Exceoption" + e);
 		}
 		
 		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && platformWebMessageMetadata != null)
