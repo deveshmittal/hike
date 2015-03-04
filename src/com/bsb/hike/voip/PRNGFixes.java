@@ -28,6 +28,7 @@ import java.security.Security;
 import android.os.Build;
 import android.os.Process;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Logger;
 
 /**
  * Fixes for the output of the default PRNG having low entropy.

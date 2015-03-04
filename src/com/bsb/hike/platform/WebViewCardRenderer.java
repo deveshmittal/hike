@@ -182,7 +182,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	@Override
 	public int getCount()
 	{
-		return 0;
+		return convMessages.size();
 	}
 
 	@Override
@@ -288,8 +288,14 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 				public void onComplete(PlatformContentModel content)
 				{
-					viewHolder.id = getItemId(position);
-					fillContent(web, content, convMessage, viewHolder);
+					if(position < getCount())
+					{
+						viewHolder.id = getItemId(position);
+						fillContent(web, content, convMessage, viewHolder);
+					}else
+					{
+						Logger.e(tag, "Platform Content returned data view no more exist");
+					}
 				}
 			});
 		}
