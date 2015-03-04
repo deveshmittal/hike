@@ -77,6 +77,13 @@ public class RequestExecuter
 		{
 			Utils.finish(request, response);
 		}
+		else
+		{
+			if (RequestProcessor.isRequestDuplicateAfterInterceptorsProcessing(request))
+			{
+				return;
+			}
+		}
 	}
 
 	/**

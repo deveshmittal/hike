@@ -4,6 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
@@ -11,6 +14,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.bsb.hike.modules.httpmgr.engine.RequestProcessor;
+import com.coremedia.iso.Hex;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
@@ -140,5 +144,26 @@ public class Utils
 			response.finish();
 		}
 		RequestProcessor.removeRequest(request);
+	}
+	
+	public static String calculateMD5hash(String input)
+	{
+		String output = null;
+		try
+		{
+			byte[] bytesOfMessage = input.getBytes("UTF-8");
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			byte[] thedigest = md.digest(bytesOfMessage);
+			output = new String(Hex.encodeHex(thedigest));
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			e.printStackTrace();
+		}
+		return output;
 	}
 }

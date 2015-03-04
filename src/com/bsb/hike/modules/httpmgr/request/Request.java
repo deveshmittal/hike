@@ -7,6 +7,7 @@ import static com.bsb.hike.modules.httpmgr.request.RequestConstants.GET;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
@@ -15,6 +16,7 @@ import android.text.TextUtils;
 
 import com.bsb.hike.modules.httpmgr.Header;
 import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.Utils;
 import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
 import com.bsb.hike.modules.httpmgr.interceptor.IResponseInterceptor;
 import com.bsb.hike.modules.httpmgr.interceptor.Pipeline;
@@ -35,7 +37,7 @@ public abstract class Request<T> implements IRequestFacade
 
 	public static final short REQUEST_TYPE_SHORT = 0x1;
 
-	private long id;
+	private String id;
 
 	private String method;
 
@@ -107,9 +109,9 @@ public abstract class Request<T> implements IRequestFacade
 			headers = new ArrayList<Header>();
 		}
 
-		if (id < 0)
+		if (TextUtils.isEmpty(id))
 		{
-			id = hashCode();
+			id = generateId();
 		}
 		if (requestInteceptors == null)
 		{
@@ -144,7 +146,7 @@ public abstract class Request<T> implements IRequestFacade
 	 * 
 	 * @return
 	 */
-	public long getId()
+	public String getId()
 	{
 		return id;
 	}
@@ -492,7 +494,7 @@ public abstract class Request<T> implements IRequestFacade
 
 	protected static abstract class Init<S extends Init<S>>
 	{
-		private long id = -1;
+		private String id;
 
 		private String method;
 
@@ -521,7 +523,7 @@ public abstract class Request<T> implements IRequestFacade
 		 * 
 		 * @param id
 		 */
-		public S setId(long id)
+		public S setId(String id)
 		{
 			this.id = id;
 			return self();
@@ -691,6 +693,17 @@ public abstract class Request<T> implements IRequestFacade
 		public abstract RequestToken build();
 	}
 
+	public String generateId()
+	{
+		String input = url;
+		Collections.sort(headers);
+		for (Header header : headers)
+		{
+			input += header.getName() + header.getValue();
+		}
+		return Utils.calculateMD5hash(input);
+	}
+	
 	@Override
 	public int hashCode()
 	{
@@ -700,8 +713,7 @@ public abstract class Request<T> implements IRequestFacade
 		{
 			headersHashCode += header.hashCode();
 		}
-		int requestBodyHashCode = (null != body) ? body.hashCode() : 0;
-		return (31 * urlHashCode) + headersHashCode + requestBodyHashCode;
+		return (31 * urlHashCode) + headersHashCode;
 	}
 
 	@SuppressWarnings("unchecked")
