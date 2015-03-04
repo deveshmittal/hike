@@ -94,13 +94,7 @@ public class VoIPActivity extends HikeAppStateBaseFragmentActivity implements Ca
 	@Override
 	public void removeCallFailedFragment()
 	{
-		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.VOIP_CALL_FAILED_FRAGMENT_TAG);
-		if(fragment!=null)
-		{
-			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-			fragmentTransaction.remove(fragment);
-			fragmentTransaction.commitAllowingStateLoss();
-		}
+		removeFragment(HikeConstants.VOIP_CALL_FAILED_FRAGMENT_TAG);
 	}
 
 	@Override

@@ -2465,7 +2465,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		if(savedInstanceState == null)
 		{
-			removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
+			if(removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
+			{
+				getSupportActionBar().show();
+			}
 		}
 
 		// This prevent the activity from simply finishing and opens up the last
@@ -9085,9 +9088,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public boolean removeFragment(String tag, boolean updateActionBar)
 	{
 		boolean isRemoved = super.removeFragment(tag);
-		if (isRemoved && updateActionBar)
-		{	
-			setupActionBar(false);
+		if (isRemoved)
+		{
+			getSupportActionBar().show();
+			if(updateActionBar)
+			{
+				setupActionBar(false);
+			}
 		}
 		return isRemoved;
 	}

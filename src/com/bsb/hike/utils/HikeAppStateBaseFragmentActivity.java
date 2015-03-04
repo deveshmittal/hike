@@ -56,7 +56,11 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	@Override
 	public void onBackPressed()
 	{
-		if (!removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
+		if (removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
+		{
+			getSupportActionBar().show();
+		}
+		else
 		{
 			HikeAppStateUtils.onBackPressed();
 			super.onBackPressed();
@@ -169,7 +173,6 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		{	
 			fragmentTransaction.remove(fragment);
 			fragmentTransaction.commitAllowingStateLoss();
-			getSupportActionBar().show();
 			return true;
 		}
 		return false;

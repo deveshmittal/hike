@@ -3114,6 +3114,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		boolean isRemoved = super.removeFragment(tag);
 		if(isRemoved)
 		{
+			getSupportActionBar().show();
 			setupActionBar();
 		}
 		return isRemoved;
