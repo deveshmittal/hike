@@ -860,7 +860,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void setEmptyState()
 	{
-		if(searchMode)
+		if(searchMode && !TextUtils.isEmpty(searchText))
 		{
 			setSearchEmptyState();
 			return;
