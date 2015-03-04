@@ -288,4 +288,9 @@ public interface DBConstants
 	
 	public static final int BROADCAST_TYPE = 1;
 
+	//We are just using a different name for old timestamp field here.
+	public static final String LAST_MESSAGE_TIMESTAMP = "timestamp";
+
+	public static final String SORTING_TIMESTAMP = "sortingTimeStamp";
+
 }
