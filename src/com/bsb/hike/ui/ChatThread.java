@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -44,6 +45,9 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
@@ -74,6 +78,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.Editable;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -203,6 +208,7 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.HikeTip.TipType;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
@@ -448,6 +454,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private ScreenOffReceiver screenOffBR;
 
 	private HashSpanWatcher hashWatcher;
+	
+	private int share_type = HikeConstants.Extras.NOT_SHAREABLE ;
 
 	@Override
 	protected void onPause()
@@ -7982,7 +7990,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mAdapter.removeSelection();
 		mOptionsList.clear();
 		setupActionBar(false);
-
+		share_type = HikeConstants.Extras.NOT_SHAREABLE;
+		
 		/*
 		 * if we have hidden tips while initializing action mode we should unhide them
 		 */
@@ -7995,6 +8004,59 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			setEnableHikeOfflineNextButton(true);
 		}
 		invalidateOptionsMenu();
+	}
+	
+	public Intent shareFunctionality(Intent intent, ConvMessage message)
+	{
+		boolean showShareFunctionality = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.SHOW_SHARE_FUNCTIONALITY, false);
+		if (mAdapter.getSelectedCount() == 1 && Utils.isPackageInstalled(getApplicationContext(), HikeConstants.Extras.WHATSAPP_PACKAGE)
+				&& showShareFunctionality )
+		{
+			if (message.isStickerMessage())
+			{
+				share_type = HikeConstants.Extras.ShareTypes.STICKER_SHARE;
+			}
+
+			if (message.isImageMsg())
+			{
+				share_type = HikeConstants.Extras.ShareTypes.IMAGE_SHARE;
+			}
+
+			if (message.isTextMsg())
+			{
+				share_type = HikeConstants.Extras.ShareTypes.TEXT_SHARE;
+			}
+
+			switch (share_type)
+			{
+			case HikeConstants.Extras.ShareTypes.STICKER_SHARE:
+				Sticker sticker = message.getMetadata().getSticker();
+				String filePath = StickerManager.getInstance().getStickerDirectoryForCategoryId(sticker.getCategoryId()) + HikeConstants.LARGE_STICKER_ROOT;
+				File stickerFile = new File(filePath, sticker.getStickerId());
+				String filePathBmp = stickerFile.getAbsolutePath();
+				intent.putExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.ShareTypes.STICKER_SHARE);
+				intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, filePathBmp);
+				break;
+
+			case HikeConstants.Extras.ShareTypes.TEXT_SHARE:
+				String text = message.getMessage();
+				intent.putExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.ShareTypes.TEXT_SHARE);
+				intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, text);
+				break;
+
+			case HikeConstants.Extras.ShareTypes.IMAGE_SHARE:
+				if (shareableMessagesCount == 1)
+				{
+					HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+					intent.putExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.ShareTypes.IMAGE_SHARE);
+					intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, hikeFile.getExactFilePath());
+				}
+				break;
+			}
+			
+
+		}
+		return intent;
 	}
 
 	public boolean onActionModeItemClicked(MenuItem item)
@@ -8111,7 +8173,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
 			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
+
+			intent = shareFunctionality(intent, selectedMessagesMap.get(selectedMsgIds.get(0)));
 			startActivity(intent);
+			destroyActionMode();
 			return true;
 		case R.id.copy_msgs:
 			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());

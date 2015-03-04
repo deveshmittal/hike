@@ -12,6 +12,7 @@ import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
@@ -904,6 +905,29 @@ public class ConvMessage
 		}
 	}
 
+	public boolean isImageMsg()
+	{
+		return isFileTransferMessage() && getMetadata() != null && getMetadata().getHikeFiles().get(0).getHikeFileType() == HikeFileType.IMAGE ;
+		
+	}
+	
+	public boolean isTextMsg()
+	{
+		if(getMessageType() != MESSAGE_TYPE.PLAIN_TEXT)
+		{
+			return false;
+		}
+		
+		//a MESSAGE_TYPE.PLAIN_TEXT type message might be ft, sticker or nudge.So, rolling out these possibilities
+		if (isFileTransferMessage() || isStickerMessage() || (getMetadata() != null && getMetadata().isPokeMessage()))
+		{
+			return false;
+		}
+			
+		return true;
+	}
+
+	
 	public boolean isGroupChat()
 	{
 		return Utils.isGroupConversation(this.mMsisdn);

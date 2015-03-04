@@ -1,5 +1,6 @@
 package com.bsb.hike.adapters;
 
+import java.io.File;
 import java.util.List;
 
 import android.app.Activity;
@@ -8,6 +9,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
@@ -16,6 +18,8 @@ import android.widget.ImageView.ScaleType;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.Sticker;
@@ -25,11 +29,14 @@ import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.utils.RecyclingImageView;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.ShareUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 
-public class StickerPageAdapter extends BaseAdapter implements OnClickListener
+public class StickerPageAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener
 {
 
 	public static enum ViewType
@@ -55,9 +62,14 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	
 	AbsListView absListView;
 	
+	private boolean shareFunctionalityPalette;
+	
+	private boolean showShareFunctionality;
+	
 	public StickerPageAdapter(Activity activity, List<StickerPageAdapterItem> itemList, StickerCategory category, StickerLoader worker, AbsListView absListView )
-	{
-		this.activity = activity;
+	{   
+		shareFunctionalityPalette = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.SHARE_FUNCTIONALITY_PALETTE, false);
+	    this.activity = activity;
 		this.itemList = itemList;
 		this.category = category;
 		this.inflater = LayoutInflater.from(activity);
@@ -195,7 +207,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			Sticker sticker = (Sticker) item.getSticker();
 			stickerLoader.loadImage(sticker.getSmallStickerPath(), ((ImageView) convertView), isListFlinging);
 			convertView.setOnClickListener(this);
-				
+			convertView.setOnLongClickListener(this);	
 			break;
 		case UPDATE:
 			viewHolder.image.setVisibility(View.VISIBLE);
@@ -350,6 +362,25 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		int position;
 		
 		ImageView tickImage;
+	}
+	
+	@Override
+	public boolean onLongClick(View v)
+	{  
+		ViewHolder viewHolder = (ViewHolder) v.getTag();
+		int position = viewHolder.position;
+		StickerPageAdapterItem item = (StickerPageAdapterItem) getItem(position);
+		
+		if (item.getType() == StickerPageAdapterItem.STICKER && shareFunctionalityPalette )
+		{
+			Sticker sticker = item.getSticker();
+			String filePath = StickerManager.getInstance().getStickerDirectoryForCategoryId(sticker.getCategoryId()) + HikeConstants.LARGE_STICKER_ROOT;
+			File stickerFile = new File(filePath, sticker.getStickerId());
+			String filePathBmp = stickerFile.getAbsolutePath();
+		    Intent intent = ShareUtils.shareContent(HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE,filePathBmp);
+			HikeMessengerApp.getInstance().startActivity(intent); 
+		}
+		return false;
 	}
 	
 }
