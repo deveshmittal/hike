@@ -64,6 +64,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.MultipleConvMessage;
@@ -207,6 +208,7 @@ public class UploadFileTask extends FileTransferBase
 		this.mAttachementType = attachement;
 		createConvMessage();
 		stateFile = getStateFile(((ConvMessage) userContext));
+		long msgId = ((ConvMessage) userContext).getMsgID(); 
 		saveFileState(null);
 	}
 

@@ -230,6 +230,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     		    	Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
     	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
     	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
+    	        	intent.putExtra("OfflineActivity", "");
     	        	startActivity(intent);
     	        	return;
     			}
@@ -253,6 +254,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, true);
 	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
 	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
+	        	intent.putExtra("OfflineActivity", "");
 	        	startActivity(intent);
 	    	}
 	    	else
@@ -260,6 +262,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
 	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
 	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
+	        	intent.putExtra("OfflineActivity", "");
 	        	
 	        	WifiP2pConfig config = new WifiP2pConfig();
 	    		config.deviceAddress = currentDevice.deviceAddress;
@@ -505,7 +508,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	private ConvMessage createConvMessage(String fileName, JSONObject metadata, String msisdn, boolean isRecipientOnhike) throws JSONException
 	{
 		long time = System.currentTimeMillis() / 1000;
-		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time, ConvMessage.State.SENT_UNCONFIRMED);
+		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time, ConvMessage.State.RECEIVED_READ);
 		convMessage.setMetadata(metadata);
 		convMessage.setSMS(!isRecipientOnhike);
 		//convMessage.setIsSent(false);
@@ -614,239 +617,216 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 			try {
 				ServerSocket serverSocket = new ServerSocket(fileTransferPort);
                 Log.d(WiFiDirectActivity.TAG, "Server: Socket opened");
-                Socket client = serverSocket.accept();
-
-                OfflineFileTransferManager.getInstance().setIsOfflineFileTransferFinished(false);
-                Log.d("OfflineFileTransferManager", "Reached");
-                InputStream inputstream = client.getInputStream();
-                byte[] typeArr = new byte[1];
-                inputstream.read(typeArr, 0, typeArr.length);
-                byte[] intArray = new byte[4];
-                inputstream.read(intArray, 0, 4);
-                fileSize = com.bsb.hike.offline.Utils.byteArrayToInt(intArray);
-                Log.d(WiFiDirectActivity.TAG, ""+fileSize);
-                currentSizeReceived = 0;
-                numOfIterations = fileSize/1024 + ((fileSize%1024!=0)?1:0);
-                type = typeArr[0];
-                if(publishProgressThread == null)
-	                	publishProgressThread = (new Thread() {
-	                	public void run()
-	                	{
-	                		while(!Thread.interrupted())
-	                		{
-		                		publishProgress();
-		                		try {
-									Thread.sleep(1*1000);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-								}
-	                		}
-	                	}
-	                });
-                if(!(publishProgressThread.isAlive()))
-                	publishProgressThread.start();
-                switch(type){
-                case 1:
-                    f = new File(Environment.getExternalStorageDirectory() + "/"
-                            + "Hike/Media/hike Others" + "/wifip2pshared-" + System.currentTimeMillis() + ".apk");
-                    dirs = new File(f.getParent());
-                    if (!dirs.exists())
-                        dirs.mkdirs();
-                    f.createNewFile();
-                    break;
-                case 2:
-                	 f = new File(Environment.getExternalStorageDirectory() + "/"
-                             + "Hike/Media/hike Images" + "/wifip2pshared-" + System.currentTimeMillis() + ".jpg");
-                     dirs = new File(f.getParent());
-                     if (!dirs.exists())
-                         dirs.mkdirs();
-                     f.createNewFile();
-                     break;
-                case 3:
-                	f = new File(Environment.getExternalStorageDirectory() + "/"
-                            + "Hike/Media/hike Videos" + "/wifip2pshared-" + System.currentTimeMillis() + ".mp4");
-                    dirs = new File(f.getParent());
-                    if (!dirs.exists())
-                        dirs.mkdirs();
-                    f.createNewFile();
-                    break;
-                case 4:
-                	f = new File(Environment.getExternalStorageDirectory() + "/"
-                            + "Hike/Media/hike Audio" + "/wifip2pshared-" + System.currentTimeMillis() + ".mp3");
-                    dirs = new File(f.getParent());
-                    if (!dirs.exists())
-                        dirs.mkdirs();
-                    f.createNewFile();
-                    break;
-                /*
-                case 5:
-                	byte[] msg  =  new byte[fileSize];
-                	inputstream.read(msg,0,fileSize);
-                	serverSocket.close();
-                	fileTransferServerRunning = false;
-                	path = (new String(msg));
-                	break;
-                	*/
-                }
-                
-                //if(type!=5)
+                while(true)
                 {
+	                Socket client = serverSocket.accept();
+	                fileTransferServerRunning = false;
+	    			
+	                OfflineFileTransferManager.getInstance().setIsOfflineFileTransferFinished(false);
+	                Log.d("OfflineFileTransferManager", "Receiving");
+	                InputStream inputstream = client.getInputStream();
+	                byte[] typeArr = new byte[1];
+	                inputstream.read(typeArr, 0, typeArr.length);
+	                byte[] intArray = new byte[4];
+	                inputstream.read(intArray, 0, 4);
+	                fileSize = com.bsb.hike.offline.Utils.byteArrayToInt(intArray);
+	                Log.d(WiFiDirectActivity.TAG, ""+fileSize);
+	                currentSizeReceived = 0;
+	                numOfIterations = fileSize/1024 + ((fileSize%1024!=0)?1:0);
+	                type = typeArr[0];
+	                if(publishProgressThread == null)
+		                	publishProgressThread = (new Thread() {
+		                	public void run()
+		                	{
+		                		while(!Thread.interrupted())
+		                		{
+			                		publishProgress();
+			                		try {
+										Thread.sleep(1*1000);
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}
+		                		}
+		                	}
+		                });
+	                if(!(publishProgressThread.isAlive()))
+	                	publishProgressThread.start();
+	                switch(type){
+	                case 1:
+	                    f = new File(Environment.getExternalStorageDirectory() + "/"
+	                            + "Hike/Media/hike Others" + "/wifip2pshared-" + System.currentTimeMillis() + ".apk");
+	                    dirs = new File(f.getParent());
+	                    if (!dirs.exists())
+	                        dirs.mkdirs();
+	                    f.createNewFile();
+	                    break;
+	                case 2:
+	                	 f = new File(Environment.getExternalStorageDirectory() + "/"
+	                             + "Hike/Media/hike Images" + "/wifip2pshared-" + System.currentTimeMillis() + ".jpg");
+	                     dirs = new File(f.getParent());
+	                     if (!dirs.exists())
+	                         dirs.mkdirs();
+	                     f.createNewFile();
+	                     break;
+	                case 3:
+	                	f = new File(Environment.getExternalStorageDirectory() + "/"
+	                            + "Hike/Media/hike Videos" + "/wifip2pshared-" + System.currentTimeMillis() + ".mp4");
+	                    dirs = new File(f.getParent());
+	                    if (!dirs.exists())
+	                        dirs.mkdirs();
+	                    f.createNewFile();
+	                    break;
+	                case 4:
+	                	f = new File(Environment.getExternalStorageDirectory() + "/"
+	                            + "Hike/Media/hike Audio" + "/wifip2pshared-" + System.currentTimeMillis() + ".mp3");
+	                    dirs = new File(f.getParent());
+	                    if (!dirs.exists())
+	                        dirs.mkdirs();
+	                    f.createNewFile();
+	                    break;
+	                }
+	                
 	                Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
 	                copyFile(inputstream, new FileOutputStream(f));
-	                serverSocket.close();
-	                fileTransferServerRunning = false;
+	                client.close();
+	                //serverSocket.close();
+	                //fileTransferServerRunning = false;
 	                path =  f.getAbsolutePath();
+                
+				
+				
+				
+				
+				
+				
+				String result = path;
+				
+				
+				if (path != null) {
+					connectedDevice = null;
+		            for(WifiP2pDevice cpeer: peers)
+	            	{
+	            		if(cpeer.status==WifiP2pDevice.CONNECTED || cpeer.status==WifiP2pDevice.UNAVAILABLE)
+	            		{
+	            			connectedDevice  = cpeer;  
+	            		}
+	            	}
+					
+		            if(connectedDevice == null)
+		            {
+		            	Toast.makeText(getActivity(), "Proper Connection could not be established. Disconnecting.. Please Retry!!", Toast.LENGTH_SHORT).show();
+		            	((DeviceActionListener) getActivity()).disconnect();
+		            	return null;
+		            }
+		            
+					if(type==1)
+					{
+						Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+						String Foldername =  result.substring(0, result.lastIndexOf("/"));
+						intent.setDataAndType(Uri.parse(Foldername), "*/*");
+						context.startActivity(Intent.createChooser(intent, "Open folder"));
+						
+					}
+					else if(type==2)
+					{
+						 
+						Bitmap thumbnail = null;
+						String thumbnailString = null;
+						String quality = null;
+						Bitmap.Config config = Bitmap.Config.RGB_565;
+						if(Utils.hasJellyBeanMR1()){
+							config = Bitmap.Config.ARGB_8888;
+						}
+						thumbnail = HikeBitmapFactory.scaleDownBitmap(result, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
+								config, false, false);
+						thumbnail = Utils.getRotatedBitmap(result, thumbnail);
+						quality = ImageQuality.IMAGE_QUALITY_MEDIUM;
+						if(thumbnail != null)
+						{
+							int compressQuality = 25;
+							byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
+							thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+							thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+							Logger.d(getClass().getSimpleName(), "Thumbnail fileSize : " + tBytes.length);
+							JSONObject metadata = null;
+							ConvMessage convMessage = null;
+							try {
+								metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.IMAGE, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
+								convMessage = createConvMessage(f.getName(), metadata, connectedDevice.deviceName, false);
+								HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
+						}
+						else
+						{
+							Intent intent = new Intent();
+							intent.setAction(Intent.ACTION_VIEW);
+							intent.setDataAndType(Uri.parse("file://" + result), "image/*");
+							context.startActivity(intent);
+						}
+					}
+					else if(type==3)
+					{
+						Bitmap thumbnail = null;
+						String thumbnailString = null;
+						String quality = null;
+						thumbnail = ThumbnailUtils.createVideoThumbnail(f.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
+						if(thumbnail != null)
+						{
+							int compressQuality = 75;
+							byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
+							thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+							thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+							Logger.d(getClass().getSimpleName(), "Thumbnail fileSize : " + tBytes.length);
+							JSONObject metadata = null;
+							ConvMessage convMessage = null;
+							try {
+								metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.VIDEO, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
+								convMessage = createConvMessage(f.getName(), metadata, connectedDevice.deviceName, false);
+								HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
+								
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
+						}
+						else
+						{
+							Intent intent = new Intent();
+							intent.setAction(Intent.ACTION_VIEW);
+							intent.setDataAndType(Uri.parse("file://" + result), "video/*");
+							context.startActivity(intent);
+						}
+					}
+					else if(type==4)
+					{
+						Intent intent = new Intent();
+						intent.setAction(Intent.ACTION_VIEW);
+						intent.setDataAndType(Uri.parse("file://" + result), "audio/*");
+						context.startActivity(intent);
+					}
+					
+				}
+				OfflineFileTransferManager.getInstance().setIsOfflineFileTransferFinished(true);
+				if(publishProgressThread != null)
+					publishProgressThread.interrupt();
+				peersStatus.put(connectedDevice, "Available for file transfer");
+				((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+				//if(!fileTransferServerRunning)
+				//{
+				//	new FileReceiveServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+				//	fileTransferServerRunning = true;
+				//
+				//				}
                 }
-			} catch (IOException e) {
+			}
+			catch (IOException e) 
+			{
 				Log.e(WiFiDirectActivity.TAG, e.getMessage());
 			}
 			return path;
 		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
-		 */
-		@Override
-		protected void onPostExecute(String result) {
-			if (result != null) {
-				connectedDevice = null;
-	            for(WifiP2pDevice cpeer: peers)
-            	{
-            		if(cpeer.status==WifiP2pDevice.CONNECTED || cpeer.status==WifiP2pDevice.UNAVAILABLE)
-            		{
-            			connectedDevice  = cpeer;  
-            		}
-            	}
-				
-	            if(connectedDevice == null)
-	            {
-	            	Toast.makeText(getActivity(), "Proper Connection could not be established. Disconnecting.. Please Retry!!", Toast.LENGTH_SHORT).show();
-	            	((DeviceActionListener) getActivity()).disconnect();
-	            	return;
-	            }
-	            
-				if(type==1)
-				{
-					Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-					String Foldername =  result.substring(0, result.lastIndexOf("/"));
-					intent.setDataAndType(Uri.parse(Foldername), "*/*");
-					context.startActivity(Intent.createChooser(intent, "Open folder"));
 					
-				}
-				else if(type==2)
-				{
-					 
-					Bitmap thumbnail = null;
-					String thumbnailString = null;
-					String quality = null;
-					Bitmap.Config config = Bitmap.Config.RGB_565;
-					if(Utils.hasJellyBeanMR1()){
-						config = Bitmap.Config.ARGB_8888;
-					}
-					thumbnail = HikeBitmapFactory.scaleDownBitmap(result, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
-							config, false, false);
-					thumbnail = Utils.getRotatedBitmap(result, thumbnail);
-					quality = ImageQuality.IMAGE_QUALITY_MEDIUM;
-					if(thumbnail != null)
-					{
-						int compressQuality = 25;
-						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
-						thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
-						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
-						Logger.d(getClass().getSimpleName(), "Thumbnail fileSize : " + tBytes.length);
-						JSONObject metadata = null;
-						ConvMessage convMessage = null;
-						try {
-							metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.IMAGE, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
-							convMessage = createConvMessage(f.getName(), metadata, connectedDevice.deviceName, false);
-							HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-					}
-					else
-					{
-						Intent intent = new Intent();
-						intent.setAction(Intent.ACTION_VIEW);
-						intent.setDataAndType(Uri.parse("file://" + result), "image/*");
-						context.startActivity(intent);
-					}
-				}
-				else if(type==3)
-				{
-					Bitmap thumbnail = null;
-					String thumbnailString = null;
-					String quality = null;
-					thumbnail = ThumbnailUtils.createVideoThumbnail(f.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
-					if(thumbnail != null)
-					{
-						int compressQuality = 75;
-						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
-						thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
-						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
-						Logger.d(getClass().getSimpleName(), "Thumbnail fileSize : " + tBytes.length);
-						JSONObject metadata = null;
-						ConvMessage convMessage = null;
-						try {
-							metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.VIDEO, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
-							convMessage = createConvMessage(f.getName(), metadata, connectedDevice.deviceName, false);
-							HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
-							
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-					}
-					else
-					{
-						Intent intent = new Intent();
-						intent.setAction(Intent.ACTION_VIEW);
-						intent.setDataAndType(Uri.parse("file://" + result), "video/*");
-						context.startActivity(intent);
-					}
-				}
-				else if(type==4)
-				{
-					Intent intent = new Intent();
-					intent.setAction(Intent.ACTION_VIEW);
-					intent.setDataAndType(Uri.parse("file://" + result), "audio/*");
-					context.startActivity(intent);
-				}
-				/*
-				else if(type==5)
-				{
-					ConvMessage convMessage =  new ConvMessage(result,connectedDevice.deviceName,System.currentTimeMillis()/1000,ConvMessage.State.RECEIVED_UNREAD);
-					convMessage.setMappedMsgID(System.currentTimeMillis());
-					if(convMessage.getMessage().compareTo("Nudge!")==0)
-					{
-						try {
-							JSONObject md = ((convMessage.getMetadata() != null) ? convMessage.getMetadata().getJSON() : new JSONObject());
-							md.put(HikeConstants.POKE, true);
-							convMessage.setMetadata(md);
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-					}
-					
-					HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
-				}*/
-				
-			}
-			OfflineFileTransferManager.getInstance().setIsOfflineFileTransferFinished(true);
-			if(publishProgressThread != null)
-				publishProgressThread.interrupt();
-			peersStatus.put(connectedDevice, "Available for file transfer");
-			((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-			if(!fileTransferServerRunning)
-			{
-				new FileReceiveServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-				fileTransferServerRunning = true;
-
-			}
-			
-		}
-		
 		@Override
 		protected void onProgressUpdate(Void... values) {
         		Double percentage = 0.0;
@@ -870,7 +850,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	public void onGroupInfoAvailable(WifiP2pGroup group) {
 		//Logger.d("Group", group.toString());
 		if (progressDialog != null && progressDialog.isShowing()) {
-		progressDialog.dismiss();
+			progressDialog.dismiss();
 	    }
 	    DeviceListFragment.groupInfo = group;
 	    // No check for HoneyComb since WiFi Direct runs only on devices with Android 4+
@@ -889,29 +869,39 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    WiFiDirectActivity.connectingToDevice = null;
 	    WiFiDirectActivity.tries = 0;
 	    if(intent != null)
+	    {
 	    	startActivity(intent);
+	    	getActivity().sendBroadcast(new Intent("SHOW_OFFLINE_CONNECTED"));
+	    }
 	    else
 	    {
-	    	clearPeers();
+	    	//clearPeers();
 	    	if(group != null)
 	    	{
 		    	if(group.isGroupOwner())
 		    	{
 		    		for(WifiP2pDevice  client :  group.getClientList()){
-						peers.add(client);
-						peers_msisdn.add(client.deviceName);
-					    peersStatus.put(client,getDeviceStatus(client.status));
+						//peers.add(client);
+						//peers_msisdn.add(client.deviceName);
+					    //peersStatus.put(client,getDeviceStatus(client.status));
+		    			connectedDevice = client;
 					}
 		    	}
 		    	else
 		    	{
 					WifiP2pDevice groupOwner  =  group.getOwner();
-					peers.add(groupOwner);
-					peers_msisdn.add(groupOwner.deviceName);
-					peersStatus.put(groupOwner,getDeviceStatus(groupOwner.status));
+					//peers.add(groupOwner);
+					//peers_msisdn.add(groupOwner.deviceName);
+					//peersStatus.put(groupOwner,getDeviceStatus(groupOwner.status));
+		    		connectedDevice = groupOwner;
 		    	}
 	    	}
-	    	((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+	    	else
+	    	{
+	    		Logger.d("TestingGroupInfo", "Disconnected");
+	    	}
+	    	//((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+	    	
 	    }
 	}
 

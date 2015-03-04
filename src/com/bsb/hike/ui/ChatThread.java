@@ -51,7 +51,9 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -450,10 +452,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private ChatThreadReceiver chatThreadReceiver;
 
 	private ScreenOffReceiver screenOffBR;
+	
+	private OfflineIntentBroadCastReceiver offlineIntentBR;
 
 	private HashSpanWatcher hashWatcher;
 	
 	private Intent fromIntent;
+	
 	
 
 	@Override
@@ -612,6 +617,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			unregisterReceiver(screenOffBR);
 		}
+		if (offlineIntentBR != null)
+		{
+			unregisterReceiver(offlineIntentBR);
+		}
 	}
 
 	@Override
@@ -735,7 +744,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			offlineEditor.putString("OfflineDeviceAddress",deviceAddress );
 			offlineEditor.commit(); 
 		}
-			
+		
 		if (fromIntent.getBooleanExtra(HikeConstants.Extras.SHOW_KEYBOARD, false))
 			showKeyboard = true;
 
@@ -883,6 +892,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		screenOffBR = new ScreenOffReceiver();
 		registerReceiver(screenOffBR, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+		
+		offlineIntentBR = new OfflineIntentBroadCastReceiver();
+		IntentFilter intents = new IntentFilter();
+		intents.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+		registerReceiver(offlineIntentBR, intents);
+		
 		final int whichPinEditShowing = savedInstanceState!=null ? savedInstanceState.getInt(HikeConstants.Extras.PIN_TYPE_SHOWING) : 0;
 		if(whichPinEditShowing!=0){
 			mHandler.post(new Runnable()
@@ -895,6 +910,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 			
+		}
+		
+		if(fromIntent.hasExtra("OfflineActivity"))
+		{
+			sendBroadcast(new Intent("SHOW_OFFLINE_CONNECTED"));
 		}
 		Logger.i("chatthread", "on create end");
 
@@ -8712,6 +8732,36 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			Logger.d("chatthread", "on receive called screenoff");
 			screenOffEvent = true;
+		}
+	}
+	
+	private class OfflineIntentBroadCastReceiver extends BroadcastReceiver
+	{
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			if(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action))
+			{
+				NetworkInfo networkInfo = (NetworkInfo) intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
+				TextView networkErrorPopUp = (TextView) findViewById(R.id.network_error_chat);
+				if(networkInfo.isConnected())
+				{
+					networkErrorPopUp.setText("Connected Offline");
+					networkErrorPopUp.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					Toast.makeText(getApplicationContext(), "Disconnected from Offline Network", Toast.LENGTH_SHORT).show();
+					showNetworkError(checkNetworkError());
+				}
+			}
+			else if("SHOW_OFFLINE_CONNECTED".equals(action))
+			{
+				TextView networkErrorPopUp = (TextView) findViewById(R.id.network_error_chat);
+				networkErrorPopUp.setText("Connected Offline");
+				networkErrorPopUp.setVisibility(View.VISIBLE);
+			}
 		}
 	}
 

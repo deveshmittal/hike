@@ -26,7 +26,6 @@ import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.util.Log;
 import android.widget.Toast;
 
-// Singleton class
 public class WifiP2pConnectionManager implements ChannelListener
 {
 	private final String TAG = "WifiP2pConnectionManager";
@@ -187,9 +186,15 @@ public class WifiP2pConnectionManager implements ChannelListener
 		wifiP2pConnectionManagerListener.resetData();
 	}
 	
+	public Context getContext()
+	{
+		return this.context;
+	}
+	
 	public void updateDevice(WifiP2pDevice device)
 	{
-		wifiP2pConnectionManagerListener.updateMyDevice(device);
+		if(device != null)
+			wifiP2pConnectionManagerListener.updateMyDevice(device);
 	}
 	public boolean checkChannel()
 	{

@@ -74,21 +74,22 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
         
         DeviceListFragment fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
         connectionManager = new WifiP2pConnectionManager(this, this, (PeerListListener)fragment, (GroupInfoListener) fragment);
-        receiver = new WiFiDirectBroadcastReceiver(connectionManager);   
+        receiver = new WiFiDirectBroadcastReceiver(connectionManager);
+        registerReceiver(receiver, intentFilter);
     }
 
     /** register the BroadcastReceiver with the intent values to be matched */
     @Override
     public void onResume() {
         super.onResume();
-        registerReceiver(receiver, intentFilter);
+        //registerReceiver(receiver, intentFilter);
         connectionManager.enableDiscovery();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        unregisterReceiver(receiver);
+        //unregisterReceiver(receiver);
     }
     
     @Override
@@ -360,6 +361,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
         if (fragmentList != null) {
             fragmentList.clearPeers();
         }
+        
         connectionManager.enableDiscovery();
 	}
 
@@ -367,5 +369,6 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 	public void updateMyDevice(WifiP2pDevice device) {
 		((DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list)).updateThisDevice(device);
 	}
-	
 }
+
+
