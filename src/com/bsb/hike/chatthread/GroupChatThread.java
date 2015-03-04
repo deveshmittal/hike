@@ -799,7 +799,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		// AFTER PIN MODE, we make sure mComposeView is reinitialized to message composer compose
 
 		mComposeView = (CustomFontEditText) activity.findViewById(R.id.msg_compose);
-		setEditTextListeners();
 		mEmoticonPicker.updateET(mComposeView);
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
 		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
