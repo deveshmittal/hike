@@ -1081,7 +1081,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mComposeView = (CustomFontEditText) activity.findViewById(R.id.msg_compose);
 		mComposeView.requestFocus();
 		mComposeView.removeTextChangedListener(searchTextWatcher);
-		mComposeView.setText("");
+		mEmoticonPicker.updateET(mComposeView);
+		
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
 		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
 		mBottomView.setVisibility(View.VISIBLE);
