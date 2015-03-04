@@ -67,7 +67,7 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 
 	private void initiateThumbnailCreation()
 	{
-		HikeEffectsFactory.loadPreviewThumbnail(this.getContext(),this.getIcon(), this.filter, this);
+		HikeEffectsFactory.loadPreviewThumbnail(this.getIcon(), this.filter, this);
 	}
 
 	public FilterType getFilter()

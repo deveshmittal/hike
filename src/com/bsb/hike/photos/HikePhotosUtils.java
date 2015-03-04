@@ -133,6 +133,7 @@ public class HikePhotosUtils
 					effectfilters.addFilter("X PRO 2", FilterType.X_PRO_2);
 					effectfilters.addFilter("Filter 1", FilterType.FILTER1);
 					effectfilters.addFilter("1977", FilterType.E1977);
+					effectfilters.addFilter("NASHVILLE", FilterType.NASHVILLE);
 					effectfilters.addFilter("CLASSIC", FilterType.CLASSIC);
 					effectfilters.addFilter("KELVIN", FilterType.KELVIN);
 					effectfilters.addFilter("RETRO", FilterType.RETRO);
@@ -141,29 +142,12 @@ public class HikePhotosUtils
 					effectfilters.addFilter("EARLYBIRD", FilterType.EARLYBIRD);
 					effectfilters.addFilter("INKWELL", FilterType.INKWELL);
 					effectfilters.addFilter("LOMO FI", FilterType.LO_FI);
-					effectfilters.addFilter("FADED", FilterType.FADED);
 					effectfilters.addFilter("POLAROID", FilterType.POLAROID);
 					effectfilters.addFilter("BGR", FilterType.BGR);
 					effectfilters.addFilter("SEPIA", FilterType.SEPIA);
 					effectfilters.addFilter("GRAYSCALE", FilterType.GRAYSCALE);
 					
-					// effectfilters.addFilter("Hudson", FilterType.HUDSON);
-					// effectfilters.addFilter("Hefe", FilterType.HEFE);
-					// effectfilters.addFilter("EarlyBird", FilterType.EARLYBIRD);
-					// effectfilters.addFilter("Brannan", FilterType.BRANNAN);
-					// effectfilters.addFilter("Amaro", FilterType.AMARO);
-					// effectfilters.addFilter("E1977", FilterType.E1977);
-
-					/*
-					 * effectfilters.addFilter("Sobel Edge Detection", FilterType.SOBEL_EDGE_DETECTION); effectfilters.addFilter("Emboss", FilterType.EMBOSS);
-					 * effectfilters.addFilter("Posterize", FilterType.POSTERIZE); effectfilters.addFilter("Grouped effectfilters", FilterType.FILTER_GROUP);
-					 * effectfilters.addFilter("Monochrome", FilterType.MONOCHROME); effectfilters.addFilter("RGB", FilterType.RGB); effectfilters.addFilter("Vignette",
-					 * FilterType.VIGNETTE); effectfilters.addFilter("Lookup (Amatorka)", FilterType.LOOKUP_AMATORKA); effectfilters.addFilter("CGA Color Space",
-					 * FilterType.CGA_COLORSPACE); effectfilters.addFilter("Sketch", FilterType.SKETCH); effectfilters.addFilter("Toon", FilterType.TOON);
-					 * effectfilters.addFilter("Smooth Toon", FilterType.SMOOTH_TOON); effectfilters.addFilter("Bulge Distortion", FilterType.BULGE_DISTORTION);
-					 * effectfilters.addFilter("Glass Sphere", FilterType.GLASS_SPHERE); effectfilters.addFilter("Laplacian", FilterType.LAPLACIAN);
-					 * effectfilters.addFilter("Swirl", FilterType.SWIRL); effectfilters.addFilter("Color Balance", FilterType.COLOR_BALANCE);
-					 */
+					
 				}
 				return effectfilters;
 
@@ -178,16 +162,7 @@ public class HikePhotosUtils
 				{
 					qualityfilters = new FilterList();
 
-					/*
-					 * qualityfilters.addFilter("Contrast", FilterType.CONTRAST); qualityfilters.addFilter("Gamma", FilterType.GAMMA); qualityfilters.addFilter("Brightness",
-					 * FilterType.BRIGHTNESS); qualityfilters.addFilter("Sharpness", FilterType.SHARPEN); qualityfilters.addFilter("3x3 Convolution",
-					 * FilterType.THREE_X_THREE_CONVOLUTION); qualityfilters.addFilter("Saturation", FilterType.SATURATION); qualityfilters.addFilter("Exposure",
-					 * FilterType.EXPOSURE); qualityfilters.addFilter("Highlight Shadow", FilterType.HIGHLIGHT_SHADOW); qualityfilters.addFilter("Opacity", FilterType.OPACITY);
-					 * qualityfilters.addFilter("RGB", FilterType.RGB); qualityfilters.addFilter("White Balance", FilterType.WHITE_BALANCE); qualityfilters.addFilter("ToneCurve",
-					 * FilterType.TONE_CURVE); qualityfilters.addFilter("Gaussian Blur", FilterType.GAUSSIAN_BLUR); qualityfilters.addFilter("Crosshatch", FilterType.CROSSHATCH);
-					 * qualityfilters.addFilter("Box Blur", FilterType.BOX_BLUR); qualityfilters.addFilter("Dilation", FilterType.DILATION); qualityfilters.addFilter("Kuwahara",
-					 * FilterType.KUWAHARA); qualityfilters.addFilter("RGB Dilation", FilterType.RGB_DILATION); qualityfilters.addFilter("Haze", FilterType.HAZE);
-					 */
+					
 				}
 				return qualityfilters;
 

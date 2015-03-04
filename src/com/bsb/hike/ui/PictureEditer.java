@@ -6,6 +6,7 @@ import java.io.IOException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -24,6 +25,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.photos.HikeEffectsFactory;
+import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
 import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
@@ -71,7 +74,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		editView = (PhotosEditerFrameLayoutView) findViewById(R.id.editer);
 
 		clickHandler = new EditorClickListener(this);
-
+		
 		Intent intent = getIntent();
 		filename = intent.getStringExtra(HikeConstants.HikePhotos.FILENAME);
 		if (filename == null)
@@ -272,10 +275,27 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 							{
 								if (actionCode == PhotoActionsFragment.ACTION_SEND)
 								{
-									File savedImage = editView.saveImage(HikeFileType.IMAGE, null);
-									Intent forwardIntent = IntentManager.getForwardImageIntent(mContext, savedImage);
-									forwardIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-									startActivity(forwardIntent);
+									editView.saveImage(HikeFileType.IMAGE, null,new HikePhotosListener() {
+										
+										@Override
+										public void onFailure() {
+											// TODO Auto-generated method stub
+											
+										}
+										
+										@Override
+										public void onComplete(Bitmap bmp) {
+											// TODO Auto-generated method stub
+											
+										}
+										
+										@Override
+										public void onComplete(File f) {
+											Intent forwardIntent = IntentManager.getForwardImageIntent(mContext, f);
+											forwardIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+											startActivity(forwardIntent);											
+										}
+									});
 								}
 								else if (actionCode == PhotoActionsFragment.ACTION_SET_DP)
 								{
@@ -284,15 +304,34 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 											.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
 									ContactInfo userInfo = Utils.getUserContactInfo(preferences);
 									String mLocalMSISDN = userInfo.getMsisdn();
-									File savedImage = editView.saveImage(HikeFileType.PROFILE, mLocalMSISDN);
-									getSupportFragmentManager().popBackStackImmediate();
-									ProfilePicFragment profilePicFragment = new ProfilePicFragment();
-									Bundle b = new Bundle();
-									b.putString(HikeConstants.HikePhotos.FILENAME, savedImage.getAbsolutePath());
-									profilePicFragment.setArguments(b);
-									getSupportFragmentManager().beginTransaction()
-											.setCustomAnimations(R.anim.fade_in_animation, R.anim.photo_option_out, R.anim.fade_in_animation, R.anim.photo_option_out)
-											.replace(R.id.overlayFrame, profilePicFragment).addToBackStack(null).commit();
+									editView.saveImage(HikeFileType.PROFILE, mLocalMSISDN,new HikePhotosListener() {
+										
+										@Override
+										public void onFailure() {
+											// TODO Auto-generated method stub
+											
+										}
+										
+										@Override
+										public void onComplete(Bitmap bmp) {
+											// TODO Auto-generated method stub
+											
+										}
+										
+										@Override
+										public void onComplete(File f) {
+											// TODO Auto-generated method stub
+											getSupportFragmentManager().popBackStackImmediate();
+											ProfilePicFragment profilePicFragment = new ProfilePicFragment();
+											Bundle b = new Bundle();
+											b.putString(HikeConstants.HikePhotos.FILENAME, f.getAbsolutePath());
+											profilePicFragment.setArguments(b);
+											getSupportFragmentManager().beginTransaction()
+													.setCustomAnimations(R.anim.fade_in_animation, R.anim.photo_option_out, R.anim.fade_in_animation, R.anim.photo_option_out)
+													.replace(R.id.overlayFrame, profilePicFragment).addToBackStack(null).commit();
+										}
+									});
+									
 								}
 							}
 						});
@@ -356,6 +395,8 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				undoButton.setVisibility(View.VISIBLE);
 			}
 		}
+
+		
 
 	}
 

@@ -79,10 +79,10 @@ uchar4 static applyColorMatrix(uchar4 in,float matrix[])
 	float green = in.g/255.0;
 	float alpha = in.a/255.0;
 
-	float red1=matrix[0]*red+matrix[1]*green+matrix[2]*blue+matrix[3]*alpha;
-	float green1=matrix[5]*red+matrix[6]*green+matrix[7]*blue+matrix[8]*alpha;
-	float blue1=matrix[10]*red+matrix[11]*green+matrix[12]*blue+matrix[13]*alpha;
-	float alpha1=matrix[15]*red+matrix[16]*green+matrix[17]*blue+matrix[18]*alpha;
+	float red1=matrix[0]*red+matrix[1]*green+matrix[2]*blue+matrix[3]*alpha+matrix[4]/255.0;
+	float green1=matrix[5]*red+matrix[6]*green+matrix[7]*blue+matrix[8]*alpha+matrix[9]/255.0;
+	float blue1=matrix[10]*red+matrix[11]*green+matrix[12]*blue+matrix[13]*alpha+matrix[14]/255.0;
+	float alpha1=matrix[15]*red+matrix[16]*green+matrix[17]*blue+matrix[18]*alpha+matrix[19]/255.0;
 
 	if(red1<0) red1 = 0;
 	if(red1>1) red1 = 1;
@@ -93,20 +93,10 @@ uchar4 static applyColorMatrix(uchar4 in,float matrix[])
 	if(alpha1<0) alpha1 = 0;
 	if(alpha1>1) alpha1 = 1;
 
-	in.r=round(red1*255)+matrix[4];
-	in.g=round(green1*255)+matrix[9];
-	in.b=round(blue1*255)+matrix[14];
-	in.a=round(alpha1*255)+matrix[19];
-
-	if(red1<0) red1 = 0;
-	if(red1>255) red1 = 255;
-	if(green1<0) green1 = 0;
-	if(green1>255) green1 = 255;
-	if(blue1<0) blue1 = 0;
-	if(blue1>255) blue1 = 255;
-	if(alpha1<0) alpha1 = 0;
-	if(alpha1>255) alpha1 = 255;
-
+	in.r=round(red1*255);
+	in.g=round(green1*255);
+	in.b=round(blue1*255);
+	in.a=round(alpha1*255);
 
 	return in;
 
@@ -144,6 +134,8 @@ uchar4 __attribute__((kernel)) filter_1977_or_xpro(uchar4 in,uint32_t x,uint32_t
 	in.g=gSpline[in.g];
 
 	in.b=bSpline[in.b];
+	
+	in = applyColorMatrix(in,postMatrix);
 
 	return in;
 }
@@ -213,6 +205,9 @@ uchar4 __attribute__((kernel)) filter_retro(uchar4 in,uint32_t x,uint32_t y) {
 
 uchar4 __attribute__((kernel)) filter_brannan(uchar4 in,uint32_t x,uint32_t y) 
 {
+	
+	in = applyColorMatrix(in,preMatrix);
+	
 	in.r =  ChannelBlend_Alpha(ChannelBlend_Overlay(r[0],in.r),in.r,0.70);
 
 	in.g =  ChannelBlend_Alpha(ChannelBlend_Overlay(g[0],in.g),in.g,0.70);
@@ -220,12 +215,16 @@ uchar4 __attribute__((kernel)) filter_brannan(uchar4 in,uint32_t x,uint32_t y)
 	in.b =  ChannelBlend_Alpha(ChannelBlend_Overlay(b[0],in.b),in.b,0.70);
 
 	in.b = bSpline[in.b];
+	
+	in = applyColorMatrix(in,postMatrix);
 
 	return in;
 }
 
 uchar4 __attribute__((kernel)) filter_earlyBird(uchar4 in,uint32_t x,uint32_t y) 
 {
+	in = applyColorMatrix(in,preMatrix);
+	
 	in.r = ChannelBlend_Multiply(r[0],in.r);
 
 	in.g = ChannelBlend_Multiply(g[0],in.g);
@@ -235,13 +234,53 @@ uchar4 __attribute__((kernel)) filter_earlyBird(uchar4 in,uint32_t x,uint32_t y)
 	return in;
 }
 
-uchar4 __attribute__((kernel)) filter_inkwell_or_lomofi(uchar4 in,uint32_t x,uint32_t y) {
+uchar4 __attribute__((kernel)) filter_inkwell(uchar4 in,uint32_t x,uint32_t y) {
+
+	in = applyColorMatrix(in,preMatrix);
 
 	in.r=compositeSpline[in.r];
 
 	in.g=compositeSpline[in.g];
 
 	in.b=compositeSpline[in.b];
+	
+	in = applyColorMatrix(in,postMatrix);
 
+	return in;
+}
+
+uchar4 __attribute__((kernel)) filter_lomofi(uchar4 in,uint32_t x,uint32_t y) {
+
+	in = applyColorMatrix(in,preMatrix);
+
+	in.r=compositeSpline[in.r];
+
+	in.g=compositeSpline[in.g];
+
+	in.b=compositeSpline[in.b];
+	
+	return in;
+}
+
+uchar4 __attribute__((kernel)) filter_nashville(uchar4 in,uint32_t x,uint32_t y) 
+{
+	in.g = gSpline[in.g];
+	
+	in.b = bSpline[in.b];
+	
+	in.r =  ChannelBlend_Alpha(ChannelBlend_Overlay(r[0],in.r),in.r,0.50);
+
+	in.g =  ChannelBlend_Alpha(ChannelBlend_Overlay(g[0],in.g),in.g,0.50);
+
+	in.b =  ChannelBlend_Alpha(ChannelBlend_Overlay(b[0],in.b),in.b,0.50);
+	
+	in = applyColorMatrix(in,postMatrix);
+	
+	in.r =  ChannelBlend_Alpha(ChannelBlend_Multiply(r[1],in.r),in.r,0.70);
+
+	in.g =  ChannelBlend_Alpha(ChannelBlend_Multiply(g[1],in.g),in.g,0.70);
+
+	in.b =  ChannelBlend_Alpha(ChannelBlend_Multiply(b[1],in.b),in.b,0.70);
+	
 	return in;
 }

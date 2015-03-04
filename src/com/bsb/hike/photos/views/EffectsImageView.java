@@ -22,7 +22,9 @@ import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 public class EffectsImageView extends ImageView 
 {
 
-	private Bitmap currentImage;
+	private Bitmap originalImage,currentImage;
+	private FilterType currentFilter;
+	private boolean isScaled;
 
 	public EffectsImageView(Context context)
 	{
@@ -39,26 +41,33 @@ public class EffectsImageView extends ImageView
 		super(context, attrs, defStyleAttr);
 	}
 
-	public Bitmap getBitmapWithEffectsApplied()
+	public void getBitmapWithEffectsApplied(Bitmap bitmap,OnFilterAppliedListener listener)
 	{
-		return currentImage;
+		if(!isScaled)
+			listener.onFilterApplied(currentImage);
+		else
+			HikeEffectsFactory.applyFilterToBitmap(bitmap,listener, currentFilter);
+			
 	}
 
-	public void handleImage(Bitmap image)
+	public void handleImage(Bitmap image,boolean hasBeenScaled)
 	{
-		currentImage = image;
+		isScaled = hasBeenScaled;
+		originalImage = image;
 		this.setImageBitmap(image);
 
 	}
 	
 	public void changeDisplayImage(Bitmap image)
 	{
+		currentImage = image;
 		this.setImageBitmap(image);
 	}
 
 	public void applyEffect(FilterType filter, float value,OnFilterAppliedListener listener)
 	{
-		 HikeEffectsFactory.applyFilterToBitmap(currentImage,listener, filter, this.getContext());
+		 currentFilter = filter ; 
+		 HikeEffectsFactory.applyFilterToBitmap(originalImage,listener, filter);
 	}
 
 	

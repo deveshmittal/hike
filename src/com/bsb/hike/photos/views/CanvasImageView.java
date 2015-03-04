@@ -99,21 +99,17 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 
 	public void getMeasure(Bitmap source)
 	{
-		if (mBitmap == null)
+		if (mBitmap == null && source!=null)
 		{
-			int measuredWidth = View.MeasureSpec.makeMeasureSpec(this.getWidth(), View.MeasureSpec.UNSPECIFIED);
-			int measuredHeight = View.MeasureSpec.makeMeasureSpec(this.getHeight(), View.MeasureSpec.UNSPECIFIED);
-
-			mBitmap = Bitmap.createBitmap(measuredWidth, measuredHeight, source.getConfig());
+			mBitmap = Bitmap.createBitmap(source.getWidth(), source.getHeight(), source.getConfig());
 			mCanvas = new Canvas(mBitmap);
+			drawDoodle();
 		}
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas)
 	{
-
-		
 			for (PathPoints p : paths)
 			{
 				mPaint.setColor(p.getColor());
@@ -143,7 +139,7 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 	 * @return bitmap with the doodle/text drawn correspondingly.
 	 * 
 	 */
-	public Bitmap getBitmap()
+	public void drawDoodle()
 	{
 		if (mBitmap != null)
 		{
@@ -169,7 +165,10 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 			}
 
 		}
-
+	}
+	
+	public Bitmap getBitmap()
+	{
 		return mBitmap;
 	}
 
