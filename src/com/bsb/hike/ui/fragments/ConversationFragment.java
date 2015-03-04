@@ -1071,9 +1071,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	public void onSearchQueryChanged(String s)
 	{
-		searchText = s;
+		searchText = s.trim();
 		setEmptyState();
-		mAdapter.onQueryChanged(s);
+		mAdapter.onQueryChanged(searchText);
 	}
 
 	public void removeSearch()
