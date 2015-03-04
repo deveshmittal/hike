@@ -1885,6 +1885,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	private void sendMessage(ConvMessage convMessage,boolean playPinAnim)
 	{
+		setSentTo(convMessage);
 		addMessage(convMessage,playPinAnim);
 
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
@@ -1911,6 +1912,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
+	public void setSentTo(ConvMessage convMessage)
+	{
+		ArrayList<String> sentToList = new ArrayList<String>();
+		if (mConversation instanceof GroupConversation)
+		{
+			sentToList.addAll(((GroupConversation) mConversation).getGroupParticipantList().keySet());
+		}
+		else
+		{
+			sentToList.add(mConversation.getMsisdn());
+		}
+		convMessage.setSentToMsisdnsList(sentToList);
+	}
+	
 	public void onSendClick(View v)
 	{
 		if (!mConversation.isOnhike() && mCredits <= 0)
@@ -3801,7 +3816,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			int count = p.second;
 			for(long msgId=baseId; msgId<(baseId+count) ; msgId++)
 			{
-				setStateAndUpdateView(msgId, false);
+				if (msgId == baseId)
+				{
+					setStateAndUpdateView(msgId, true);
+				}
+				else
+				{
+					setStateAndUpdateView(msgId, false);
+				}
 			}
 			if (mAdapter == null)
 			{

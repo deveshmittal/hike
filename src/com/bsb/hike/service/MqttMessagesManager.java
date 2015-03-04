@@ -42,6 +42,7 @@ import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
+import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
@@ -338,8 +339,16 @@ public class MqttMessagesManager
 		{
 			return;
 		}
-		GroupConversation groupConversation = new GroupConversation(jsonObj, this.context);
-
+		GroupConversation groupConversation;
+		String msisdn = jsonObj.getString(HikeConstants.TO);
+		if (Utils.isBroadcastConversation(msisdn))
+		{
+			groupConversation = new BroadcastConversation(jsonObj, this.context);
+		}
+		else
+		{
+			groupConversation = new GroupConversation(jsonObj, this.context);
+		}
 		boolean groupRevived = false;
 
 		if (!ContactManager.getInstance().isGroupAlive(groupConversation.getMsisdn()))

@@ -66,6 +66,7 @@ import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -1434,6 +1435,45 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return msgHash;
 	}
 	
+	public void addBroadcastRecipientConversations(ConvMessage convMessage)
+	{
+		ContactManager contactManager = ContactManager.getInstance();
+		ArrayList<ConvMessage> convMessages= new ArrayList<ConvMessage>(1);
+		convMessages.add(new ConvMessage(convMessage));
+		ArrayList<String> contactMsisdns = convMessage.getSentToMsisdnsList();
+		ArrayList<ContactInfo> contacts = new ArrayList<ContactInfo>();
+		for (String msisdn : contactMsisdns)
+		{
+			ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, contactManager.getName(msisdn), msisdn, true);
+			contacts.add(contactInfo);
+		}
+		
+		addConversations(convMessages, contacts, false);
+		
+		sendPubSubForConvScreenBroadcastMessage(convMessage, contacts);
+        // publishing mqtt packet
+        HikeMqttManagerNew.getInstance().sendMessage(convMessage.serializeDeliveryReportRead(), HikeMqttManagerNew.MQTT_QOS_ONE);
+	}
+	
+	public void sendPubSubForConvScreenBroadcastMessage(ConvMessage convMessage, ArrayList<ContactInfo> recipient)
+	{
+		long msgId = convMessage.getMsgID();
+		int totalRecipient = recipient.size();
+		List<Pair<ContactInfo, ConvMessage>> allPairs = new ArrayList<Pair<ContactInfo,ConvMessage>>(totalRecipient);
+		long timestamp = System.currentTimeMillis()/1000;
+		for(int i=0;i<totalRecipient;i++)
+		{
+			ConvMessage message = new ConvMessage(convMessage);
+			message.setTimestamp(timestamp++);
+			message.setMsgID(msgId+i);
+			ContactInfo contactInfo = recipient.get(i);
+			message.setMsisdn(contactInfo.getMsisdn());
+			Pair<ContactInfo, ConvMessage> pair = new Pair<ContactInfo, ConvMessage>(contactInfo, message);
+			allPairs.add(pair);
+		}
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_DB_INSERTED, allPairs);
+	}
+	
 	public boolean addConversations(List<ConvMessage> convMessages)
 	{
 		if(convMessages.isEmpty())
@@ -1793,7 +1833,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			contentValues.put(DBConstants.MESSAGE_ID, conv.getMsgID());
 			contentValues.put(DBConstants.MAPPED_MSG_ID, conv.getMappedMsgID());
 			contentValues.put(DBConstants.MSG_STATUS, conv.getState().ordinal());
-			contentValues.put(DBConstants.TIMESTAMP, timeStampForMessage);
+			if (!conv.hasBroadcastId())
+			{
+				contentValues.put(DBConstants.TIMESTAMP, timeStampForMessage);
+			}
 		}
 		if (conv.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{

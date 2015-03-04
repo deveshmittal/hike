@@ -3,6 +3,7 @@ package com.bsb.hike.models;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.util.ArrayList;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -61,6 +62,10 @@ public class ConvMessage
 	private boolean isTickSoundPlayed = false;
 	
 	private int  hashMessage= HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE;
+
+	private ArrayList<String> sentToMsisdnsList = new ArrayList<String>();
+	
+	private String messageBroadcastId = null;
 
 	public int getHashMessage()
 	{
@@ -308,6 +313,10 @@ public class ConvMessage
 		this.platformMessageMetadata = other.platformMessageMetadata;
 		this.platformWebMessageMetadata = other.platformWebMessageMetadata;
 		this.contentLove = other.contentLove;
+		if (other.isBroadcastMessage())
+		{
+			this.messageBroadcastId = other.getMsisdn();
+		}
 		try {
 			this.readByArray = other.readByArray !=null? new JSONArray(other.readByArray.toString()) : null;
 		} catch (JSONException e) {
@@ -732,6 +741,18 @@ public class ConvMessage
 				{
 					object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
 				}
+				if (isBroadcastMessage())
+				{
+					ArrayList<String> contactsList = getSentToMsisdnsList();
+					JSONArray msisdnArray = new JSONArray();
+					for (int i=0; i<contactsList.size();i++)
+					{
+						msisdnArray.put((String)contactsList.get(i));
+					}
+					
+					data.put(HikeConstants.LIST, msisdnArray);
+					object.put(HikeConstants.DATA, data);
+				}
 				// TODO : we should add all sub types here and set metadata accordingly
 				switch(messageType){
 				case MESSAGE_TYPE.CONTENT:
@@ -983,4 +1004,26 @@ public class ConvMessage
 	{
 		return participantInfoState == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING;
 	}
+	
+	public boolean isBroadcastMessage() {
+		return Utils.isBroadcastConversation(this.mMsisdn);
+
+	}
+	
+	public ArrayList<String> getSentToMsisdnsList() {
+		return sentToMsisdnsList;
+	}
+
+	public void setSentToMsisdnsList(ArrayList<String> sentToMsisdnsList) {
+		this.sentToMsisdnsList.addAll(sentToMsisdnsList);
+	}
+
+	public boolean hasBroadcastId() {
+		return messageBroadcastId != null;
+	}
+
+	public String getMessageBroadcastId() {
+		return this.messageBroadcastId;
+	}
+
 }

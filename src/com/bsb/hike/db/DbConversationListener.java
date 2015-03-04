@@ -112,6 +112,10 @@ public class DbConversationListener implements Listener
 					{
 						uploadFiksuPerDayMessageEvent();
 					}
+					if (convMessage.isBroadcastMessage())
+					{
+						mConversationDb.addBroadcastRecipientConversations(convMessage);
+					}
 				}
 				// Recency was already updated when the ft message was added.
 				ContactManager.getInstance().updateContactRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
