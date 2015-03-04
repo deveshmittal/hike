@@ -43,6 +43,7 @@ import android.widget.ImageView.ScaleType;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
@@ -108,6 +109,11 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		@Override
 		public void handleMessage(Message msg) {
 			Logger.d(VoIPConstants.TAG, "VoIPCallFragment handler received: " + msg.what);
+			if(!isVisible())
+			{
+				Logger.d(VoIPConstants.TAG, "Fragment not visible, returning");
+				return;
+			}
 			switch (msg.what) {
 			case VoIPConstants.MSG_SHUTDOWN_ACTIVITY:
 				Logger.d(VoIPConstants.TAG, "Shutting down..");
@@ -119,7 +125,6 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 				break;
 			case VoIPConstants.MSG_AUDIO_START:
 				isCallActive = true;
-				voipService.startChrono();
 				showCallStatus(CallStatus.ACTIVE);
 				activateActiveCallButtons();
 				break;
@@ -141,7 +146,6 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 				break;
 			case VoIPConstants.MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE:
 				showCallFailedFragment(VoIPConstants.ConnectionFailCodes.EXTERNAL_SOCKET_RETRIEVAL_FAILURE);
-				voipService.stop();
 				break;
 			case VoIPConstants.MSG_PARTNER_SOCKET_INFO_TIMEOUT:
 				showCallFailedFragment(VoIPConstants.ConnectionFailCodes.PARTNER_SOCKET_INFO_TIMEOUT);
@@ -177,7 +181,6 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			case VoIPConstants.MSG_PHONE_NOT_SUPPORTED:
 				showMessage(getString(R.string.voip_phone_unsupported));
 				isCallActive = false;
-				voipService.hangUp();
 				break;
 			default:
 				super.handleMessage(msg);
@@ -258,6 +261,8 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			callActionsView.stopPing();
 			callActionsView = null;
 		}
+
+		releaseWakeLock();
 
 		// Proximity sensor
 		if (sensorManager != null) 
@@ -396,8 +401,6 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		catch (IllegalArgumentException e) {
 			Logger.d(VoIPConstants.TAG, "shutdown() exception: " + e.toString());
 		}
-		
-		releaseWakeLock();
 
 		if(currentCallStatus!=CallStatus.PARTNER_BUSY)
 		{

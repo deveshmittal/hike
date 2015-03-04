@@ -1255,6 +1255,7 @@ public class VoIPService extends Service {
 		startRecording();
 		startPlayBack();
 		sendHandlerMessage(VoIPConstants.MSG_AUDIO_START);
+		startChrono();
 		audioStarted = true;
 		
 		// When the call has been answered, we will send our network connection class
@@ -1292,12 +1293,14 @@ public class VoIPService extends Service {
 				{
 					Logger.e(VoIPConstants.TAG, "AudioRecord init failed." + e.toString());
 					sendHandlerMessage(VoIPConstants.MSG_PHONE_NOT_SUPPORTED);
+					hangUp();
 					return;
 				}
 				catch (IllegalStateException e)
 				{
 					Logger.e(VoIPConstants.TAG, "Recorder exception: " + e.toString());
 					sendHandlerMessage(VoIPConstants.MSG_PHONE_NOT_SUPPORTED);
+					hangUp();
 					return;
 				}
 				
@@ -2228,6 +2231,7 @@ public class VoIPService extends Service {
 					Logger.d(VoIPConstants.TAG, "Failed to retrieve external socket.");
 					sendHandlerMessage(VoIPConstants.MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE);
 					sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.EXTERNAL_SOCKET_RETRIEVAL_FAILURE);
+					stop();
 				}
 			}
 		}, "ICE_THREAD");
