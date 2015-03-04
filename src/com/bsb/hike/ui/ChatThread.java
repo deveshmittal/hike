@@ -3365,21 +3365,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return;
 		}
-		if (!(mConversation instanceof GroupConversation))
+		if (mConversation instanceof BroadcastConversation)
 		{
-			String userMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, "");
+			if (!((BroadcastConversation) mConversation).getIsGroupAlive())
+			{
+				return;
+			}
 
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
 			Intent intent = new Intent();
 			intent.setClass(ChatThread.this, ProfileActivity.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			if (!userMsisdn.equals(mContactNumber))
-			{
-				intent.putExtra(HikeConstants.Extras.CONTACT_INFO, mContactNumber);
-				intent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
-			}
+			intent.putExtra(HikeConstants.Extras.BROADCAST_LIST, true);
+			intent.putExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST, mConversation.getMsisdn());
 			startActivity(intent);
 		}
-		else
+		else if (mConversation instanceof GroupConversation)
 		{
 			if (!((GroupConversation) mConversation).getIsGroupAlive())
 			{
@@ -3391,6 +3391,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			intent.setClass(ChatThread.this, ProfileActivity.class);
 			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mConversation.getMsisdn());
+			startActivity(intent);
+		}
+		else
+		{
+			String userMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, "");
+
+			Intent intent = new Intent();
+			intent.setClass(ChatThread.this, ProfileActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			if (!userMsisdn.equals(mContactNumber))
+			{
+				intent.putExtra(HikeConstants.Extras.CONTACT_INFO, mContactNumber);
+				intent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
+			}
 			startActivity(intent);
 		}
 	}

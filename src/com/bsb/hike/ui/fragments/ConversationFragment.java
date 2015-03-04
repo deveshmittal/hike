@@ -3119,8 +3119,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	}
 	protected void viewGroupInfo(Conversation conv) {
 		Intent intent = new Intent(getActivity(), ProfileActivity.class);
-		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, conv.getMsisdn());
+		if (Utils.isBroadcastConversation(conv.getMsisdn()))
+		{
+			intent.putExtra(HikeConstants.Extras.BROADCAST_LIST, true);
+			intent.putExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST, conv.getMsisdn());
+		}
+		else
+		{
+			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, conv.getMsisdn());
+		}
 		startActivity(intent);
 	}
 
