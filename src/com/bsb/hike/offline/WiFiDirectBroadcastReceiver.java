@@ -92,6 +92,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             	connectionManager.requestGroupInfo();
             } else 
             {
+
             	//connectionManager.requestGroupInfo();
             	connectionManager.resetData();
             }

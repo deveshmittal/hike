@@ -89,7 +89,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     @Override
     public void onPause() {
         super.onPause();
-        //unregisterReceiver(receiver);
+       // unregisterReceiver(receiver);
     }
     
     @Override
@@ -368,6 +368,13 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 	@Override
 	public void updateMyDevice(WifiP2pDevice device) {
 		((DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list)).updateThisDevice(device);
+	}
+	
+	@Override
+	protected void onDestroy() {
+	    unregisterReceiver(receiver);
+		super.onDestroy();
+		
 	}
 }
 

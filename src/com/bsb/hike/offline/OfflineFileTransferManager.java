@@ -148,7 +148,7 @@ public class OfflineFileTransferManager {
 			byte[] intToBArray = Utils.intToByteArray((int)f.length());
 			int s = intToBArray.length;
 			stream.write(intToBArray, 0, s);
-			DeviceListFragment.copyFile(is, stream);
+			isSent = DeviceListFragment.copyFile(is, stream);
 			//Log.d(TAG, "Client: Data written");
 		} catch (IOException e) {
 			Log.d(TAG, e.getMessage());
