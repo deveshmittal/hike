@@ -301,10 +301,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void setSearchEmptyState()
 	{
-		if (emptyView != null)
-		{
-			emptyView.setVisibility(View.GONE);
-		}
 		ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
 		View searchEmptyView = getView().findViewById(R.id.searchEmptyView);
 		searchEmptyView.setVisibility(View.VISIBLE);
@@ -860,20 +856,29 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void setEmptyState()
 	{
-		if(searchMode && !TextUtils.isEmpty(searchText))
+		// Adding wasViewSetup() safety check for an NPE here.
+		if (wasViewSetup())
 		{
-			setSearchEmptyState();
-			return;
-		}
-
-		if (wasViewSetup() && emptyView == null) /* Adding wasViewSetup() safety check for an NPE here */
-		{
-			ViewGroup emptyHolder = (ViewGroup) getView().findViewById(R.id.emptyViewHolder);
-			emptyView = LayoutInflater.from(getActivity()).inflate(R.layout.conversation_empty_view2, emptyHolder);
-			// emptyHolder.addView(emptyView);
-			getView().findViewById(R.id.searchEmptyView).setVisibility(View.GONE);
-			ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
-			friendsList.setEmptyView(emptyView);
+			if (emptyView == null)
+			{
+				ViewGroup emptyHolder = (ViewGroup) getView().findViewById(R.id.emptyViewHolder);
+				emptyView = LayoutInflater.from(getActivity()).inflate(R.layout.conversation_empty_view2, emptyHolder);
+				//emptyHolder.addView(emptyView);
+			}
+			
+			if (searchMode && !TextUtils.isEmpty(searchText))
+			{
+				emptyView.setVisibility(View.GONE);
+				getView().findViewById(R.id.searchEmptyView).setVisibility(View.VISIBLE);
+				setSearchEmptyState();
+			}
+			else
+			{
+				getView().findViewById(R.id.searchEmptyView).setVisibility(View.GONE);
+				emptyView.setVisibility(View.VISIBLE);
+				ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
+				friendsList.setEmptyView(emptyView);
+			}
 		}
 	}
 
