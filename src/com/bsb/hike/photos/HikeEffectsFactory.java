@@ -44,11 +44,10 @@ public final class HikeEffectsFactory
 	private Allocation mOutAllocations;
 
 	private ScriptC_HikePhotosEffects mScript;
-	
+
 	private boolean isBasicFilter;
 	
 	private boolean isGPUFree = true;
-
 	
 	private void LoadRenderScript(Bitmap image)
 	{
@@ -64,8 +63,6 @@ public final class HikeEffectsFactory
 		mBitmapIn = image;
 		mInAllocation = Allocation.createFromBitmap(mRS, mBitmapIn);
 		// Load script
-				
-		
 	}
 
 	/**
@@ -81,8 +78,8 @@ public final class HikeEffectsFactory
 		instance.beginEffectAsyncTask(listener, type, false);
 
 	}
-	
-	private Bitmap applyColorMatrixToBitmap(Bitmap bitmap,ColorMatrix matrix)
+
+	private Bitmap applyColorMatrixToBitmap(Bitmap bitmap, ColorMatrix matrix)
 	{
 		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
 		ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
@@ -95,7 +92,7 @@ public final class HikeEffectsFactory
 
 	private ColorMatrix getColorMatrixforFilter(FilterType type, boolean pre, float value)
 	{
-		ColorMatrix filterColorMatrix=null;
+		ColorMatrix filterColorMatrix = null;
 		switch (type)
 		{
 
@@ -135,7 +132,7 @@ public final class HikeEffectsFactory
 			}
 			break;
 		case APOLLO:
-			if(pre)
+			if (pre)
 			{
 				filterColorMatrix = getSaturationColorMatrix(0.5f);
 			}
@@ -146,7 +143,7 @@ public final class HikeEffectsFactory
 			}
 			break;
 		case BRANNAN:
-			if(pre)
+			if (pre)
 			{
 				filterColorMatrix = getBrightnessColorMatrix(1.1f);
 				filterColorMatrix.setConcat(getContrastColorMatrix(50f), filterColorMatrix);
@@ -164,15 +161,15 @@ public final class HikeEffectsFactory
 			}
 			break;
 		case EARLYBIRD:
-			if(pre)
+			if (pre)
 			{
 				filterColorMatrix = getSaturationColorMatrix(0.68f);
 				filterColorMatrix.setConcat(getBrightnessColorMatrix(1.15f), filterColorMatrix);
-				
+
 			}
 			break;
 		case INKWELL:
-			if(pre)
+			if (pre)
 			{
 				filterColorMatrix = getSaturationColorMatrix(0);
 			}
@@ -183,7 +180,7 @@ public final class HikeEffectsFactory
 			}
 			break;
 		case LO_FI:
-			if(pre)
+			if (pre)
 			{
 				filterColorMatrix = getBrightnessColorMatrix(1.5f);
 				filterColorMatrix.setConcat(getContrastColorMatrix(30f), filterColorMatrix);
@@ -197,7 +194,8 @@ public final class HikeEffectsFactory
 	}
 
 	/**
-	 * @param filter: ColorMatrix of the filter whose partial matrix is required value: %of filter to be applied.0 return Identity and 100 return the input filter
+	 * @param filter
+	 *            : ColorMatrix of the filter whose partial matrix is required value: %of filter to be applied.0 return Identity and 100 return the input filter
 	 * 
 	 * @return partial filter of specified percentage
 	 */
@@ -224,7 +222,7 @@ public final class HikeEffectsFactory
 	 * @param bitmap
 	 *            : The bitmap to which the filters have to be applied matrix : The Colormatrix object for the filter type to be applied.
 	 * @return Bitmap with the given matrix filter applied to the given bitmap
-	 *
+	 * 
 	 */
 
 	public static void applyFilterToBitmap(Bitmap bitmap, OnFilterAppliedListener listener, FilterType type)
@@ -449,7 +447,6 @@ public final class HikeEffectsFactory
 			int[] ro, ri, go, gi, bo, bi, ci, co;
 			Splines red, green, blue, composite;
 
-			
 			switch (effect)
 			{
 			case FILTER1:
@@ -474,7 +471,7 @@ public final class HikeEffectsFactory
 				mScript.set_gSpline(green.getInterpolationMatrix());
 				mScript.set_bSpline(blue.getInterpolationMatrix());
 				mScript.forEach_filter_1977_or_xpro(mInAllocation, mOutAllocations);
-				
+
 				break;
 			case CLASSIC:
 
@@ -546,12 +543,12 @@ public final class HikeEffectsFactory
 				mScript.forEach_filter_1977_or_xpro(mInAllocation, mOutAllocations);
 				break;
 			case APOLLO:
-				ri = new int[] { 30,120,222,255 };
-				ro = new int[] { 20,137,221,221 };
-				gi = new int[] { 0,117,255 };
-				go = new int[] { 0,141,255 };
-				bi = new int[] { 0,255 };
-				bo = new int[] { 0,255 };
+				ri = new int[] { 30, 120, 222, 255 };
+				ro = new int[] { 20, 137, 221, 221 };
+				gi = new int[] { 0, 117, 255 };
+				go = new int[] { 0, 141, 255 };
+				bi = new int[] { 0, 255 };
+				bo = new int[] { 0, 255 };
 				red = new Splines(ri, ro);
 				green = new Splines(gi, go);
 				blue = new Splines(bi, bo);
@@ -561,8 +558,8 @@ public final class HikeEffectsFactory
 				mScript.forEach_filter_1977_or_xpro(mInAllocation, mOutAllocations);
 				break;
 			case BRANNAN:
-				bi = new int[] { 0,183,255 };
-				bo = new int[] { 0,148,255 };
+				bi = new int[] { 0, 183, 255 };
+				bo = new int[] { 0, 148, 255 };
 				blue = new Splines(bi, bo);
 				mScript.set_r(new int[] { 0x8C, 0, 0 });
 				mScript.set_g(new int[] { 0x8C, 0, 0 });
@@ -577,15 +574,15 @@ public final class HikeEffectsFactory
 				mScript.forEach_filter_earlyBird(mInAllocation, mOutAllocations);
 				break;
 			case INKWELL:
-				ci = new int[] {  0,16,82,151,255};
-				co = new int[] {  0, 0,88,184,224};
+				ci = new int[] { 0, 16, 82, 151, 255 };
+				co = new int[] { 0, 0, 88, 184, 224 };
 				composite = new Splines(ci, co);
 				mScript.set_compositeSpline(composite.getInterpolationMatrix());
 				mScript.forEach_filter_inkwell(mInAllocation, mOutAllocations);
 				break;
 			case LO_FI:
-				ci = new int[] { 0,90,170,255};
-				co = new int[] { 0,47,171,255};
+				ci = new int[] { 0, 90, 170, 255 };
+				co = new int[] { 0, 47, 171, 255 };
 				composite = new Splines(ci, co);
 				mScript.set_compositeSpline(composite.getInterpolationMatrix());
 				mScript.forEach_filter_lomofi(mInAllocation, mOutAllocations);

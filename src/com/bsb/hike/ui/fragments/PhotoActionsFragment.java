@@ -66,7 +66,7 @@ public class PhotoActionsFragment extends SherlockFragment
 			}
 		});
 
-		divider.setBackgroundColor(getResources().getColor(R.color.light_grey_drop_shadow));
+		divider.setBackgroundColor(getResources().getColor(R.color.light_gray));
 
 		divider.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1));
 
@@ -139,8 +139,6 @@ public class PhotoActionsFragment extends SherlockFragment
 
 				holder.titleTv = (TextView) convertView.findViewById(R.id.title);
 
-				holder.descTv = (TextView) convertView.findViewById(R.id.description);
-
 				holder.iconIv = (ImageView) convertView.findViewById(R.id.icon);
 
 				convertView.setTag(holder);
@@ -150,8 +148,6 @@ public class PhotoActionsFragment extends SherlockFragment
 
 			holder.titleTv.setText(mTitles[position]);
 
-			holder.descTv.setText(mDescription[position]);
-
 			holder.iconIv.setImageDrawable(getResources().getDrawable(itemIcons[position]));
 
 			return convertView;
@@ -160,8 +156,6 @@ public class PhotoActionsFragment extends SherlockFragment
 		class PhotosOptionsViewHolder
 		{
 			TextView titleTv;
-
-			TextView descTv;
 
 			ImageView iconIv;
 		}

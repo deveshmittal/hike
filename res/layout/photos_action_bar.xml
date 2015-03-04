@@ -14,8 +14,9 @@
         android:layout_centerVertical="true"
         android:layout_marginRight="8dp"
         android:paddingRight="8dp"
+        android:background="@drawable/camera_button_selector"
         android:gravity="center_vertical"
-        android:src="@drawable/back_button" />
+        android:src="@drawable/ic_back" />
 
     <LinearLayout
         android:layout_width="wrap_content"

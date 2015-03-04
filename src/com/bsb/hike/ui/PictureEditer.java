@@ -338,7 +338,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 					}
 					// Change fragment
 					getSupportFragmentManager().beginTransaction()
-							.setCustomAnimations(R.anim.photo_option_in, R.anim.photo_option_out, R.anim.photo_option_in, R.anim.photo_option_out)
+							.setCustomAnimations(R.anim.fade_in_animation, R.anim.fade_out_animation, R.anim.fade_in_animation, R.anim.fade_out_animation)
 							.replace(R.id.overlayFrame, mPhotosActionsFragment).addToBackStack(null).commit();
 
 					mActionBarDoneContainer.setVisibility(View.INVISIBLE);

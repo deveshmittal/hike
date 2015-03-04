@@ -10,10 +10,11 @@ import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
+import com.bsb.hike.utils.Logger;
 
 /**
  * @author akhiltripathi
- *
+ * 
  *         Custom View for the Filter Preview thumbnails
  * 
  */
@@ -42,7 +43,7 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 		this.setForegroundColor(R.color.white);
 		HikePhotosUtils.FilterTools.setCurrentFilterItem(this);
 	}
-	
+
 	public void unSelect()
 	{
 		this.setForegroundColor(R.color.photos_filters_font_color);
@@ -78,7 +79,6 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 	@Override
 	public void onFilterApplied(Bitmap preview)
 	{
-		// TODO Auto-generated method stub
 		setImage(preview);
 	}
 

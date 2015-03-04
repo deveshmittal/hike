@@ -297,7 +297,7 @@ public class HikeCameraHost implements CameraHost
 
 					// if (scanSavedImage())
 					// {
-					// MediaScannerConnection.scanFile(ctxt, new String[] { photo.getPath() }, SCAN_TYPES, null);
+					 MediaScannerConnection.scanFile(ctxt, new String[] { photo.getPath() }, SCAN_TYPES, null);
 					// }
 				}
 				catch (java.io.IOException e)

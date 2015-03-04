@@ -148,7 +148,6 @@ public final class PreviewFragment extends Fragment
 
 			// Want the width/height of the items
 			// to be 120dp
-
 			switch (myType)
 			{
 			case Effects:
@@ -157,11 +156,11 @@ public final class PreviewFragment extends Fragment
 					convertView = LayoutInflater.from(mContext).inflate(R.layout.filter_preview_item, parent, false);
 				}
 				FilterList myFilters = FilterList.getHikeEffects();
-				FilterEffectItemLinearLayout temp = (FilterEffectItemLinearLayout) convertView;
-				temp.init(mOriginalBitmap, myFilters.names.get(position));
-				temp.setFilter(mContext, myFilters.filters.get(position));
-				temp.setOnClickListener(adapter);
-				return temp;
+				FilterEffectItemLinearLayout filterPreviewView = (FilterEffectItemLinearLayout) convertView;
+				filterPreviewView.init(mOriginalBitmap, myFilters.names.get(position));
+				filterPreviewView.setFilter(mContext, myFilters.filters.get(position));
+				filterPreviewView.setOnClickListener(adapter);
+				return filterPreviewView;
 			case Border:
 				break;
 			case Text:

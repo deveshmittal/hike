@@ -100,6 +100,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 			@Override
 			public void run()
 			{
+				((RoundedImageView) mFragmentView.findViewById(R.id.circular_image_view)).setVisibility(View.VISIBLE);
 				startUpload();
 			}
 		}, 300);
@@ -124,7 +125,6 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		{
 
 			// TODO move this code to network manager refactoring module
-			updateProgress(10f);
 
 			/* the server only needs a smaller version */
 			final Bitmap smallerBitmap = HikeBitmapFactory.scaleDownBitmap(imagePath, HikeConstants.PROFILE_IMAGE_DIMENSIONS, HikeConstants.PROFILE_IMAGE_DIMENSIONS,
@@ -134,8 +134,6 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 			{
 				showErrorState();
 			}
-
-			updateProgress(10f);
 
 			final byte[] bytes = BitmapUtils.bitmapToBytes(smallerBitmap, Bitmap.CompressFormat.JPEG, 100);
 
@@ -151,7 +149,6 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 				public void onSuccess(JSONObject response)
 				{
 
-					updateProgress(10f);
 					// User info is saved in shared preferences
 					SharedPreferences preferences = HikeMessengerApp.getInstance().getApplicationContext()
 							.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
@@ -188,7 +185,6 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 					String destFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT + "/" + mappedId + ".jpg";
 
-					updateProgress(10f);
 					/*
 					 * Making a status update file so we don't need to download this file again.
 					 */
@@ -229,7 +225,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 	private void updateProgressUniformly(final float total, final float interval)
 	{
-		if (total <= 0.0f || failed)
+		if (total <= 0.0f || failed || mCurrentProgress >= 100)
 		{
 			return;
 		}
@@ -298,6 +294,8 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 				@Override
 				public void run()
 				{
+					if (isPaused)
+						return;
 					ProfilePicFragment.this.getActivity().runOnUiThread(new Runnable()
 					{
 						@Override
@@ -308,10 +306,6 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 								Intent in = new Intent(getActivity(), HomeActivity.class);
 								in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 								getActivity().startActivity(in);
-							}
-							else
-							{
-								getActivity().finish();
 							}
 						}
 					});
@@ -330,7 +324,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		{
 			return;
 		}
-		
+
 		mCircularProgress.setProgress(1f);
 
 		changeTextWithAnimation(text1, getString(R.string.photo_dp_save_error));

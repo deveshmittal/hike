@@ -7,9 +7,8 @@ import java.io.OutputStream;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,11 +19,8 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.photos.HikeCameraHost;
 import com.bsb.hike.photos.HikePhotosListener;
-import com.bsb.hike.photos.views.PhotosEditerFrameLayoutView;
 import com.bsb.hike.ui.HikeCameraActivity;
 import com.bsb.hike.ui.PictureEditer;
-import com.bsb.hike.ui.PictureEditer.PhotoEditViewPagerAdapter;
-import com.bsb.hike.utils.Logger;
 import com.commonsware.cwac.camera.CameraView;
 import com.commonsware.cwac.camera.PictureTransaction;
 import com.commonsware.cwac.camera.ZoomTransaction;
@@ -213,10 +209,9 @@ public class CameraFragment extends SherlockFragment
 	 */
 	public void takePicture()
 	{
-		// takePicture(true, true);
 		final PictureTransaction xact = new PictureTransaction(getHost());
 		xact.mirrorFFC(true);
-		xact.useSingleShotMode(true);
+		xact.useSingleShotMode(false);
 		xact.needBitmap(true);
 		xact.needByteArray(true);
 		xact.flashMode(flashMode);
