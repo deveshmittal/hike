@@ -10,6 +10,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.bsb.hike.modules.httpmgr.engine.RequestProcessor;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
@@ -126,5 +127,18 @@ public class Utils
 		builder.append("total time : " + time + " milliseconds \n");
 		builder.append("}");
 		return builder.toString();
+	}
+
+	public static void finish(com.bsb.hike.modules.httpmgr.request.Request<?> request, com.bsb.hike.modules.httpmgr.response.Response response)
+	{
+		if (null != request)
+		{
+			request.finish();
+		}
+		if (null != response)
+		{
+			response.finish();
+		}
+		RequestProcessor.removeRequest(request);
 	}
 }

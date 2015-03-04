@@ -17,7 +17,7 @@ import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListene
  */
 public class RequestProcessor
 {
-	private Map<Long, Request<?>> requestMap;
+	private static Map<Long, Request<?>> requestMap;
 
 	private RequestRunner requestRunner;
 
@@ -25,9 +25,9 @@ public class RequestProcessor
 
 	public RequestProcessor(ClientOptions options, HttpEngine engine, RequestListenerNotifier notifier)
 	{
-		this.requestMap = new ConcurrentHashMap<Long, Request<?>>();
-		this.requestListenerNotifier = notifier;
-		requestRunner = new RequestRunner(options, requestMap, engine, requestListenerNotifier);
+		requestMap = new ConcurrentHashMap<Long, Request<?>>();
+		requestListenerNotifier = notifier;
+		requestRunner = new RequestRunner(options, engine, requestListenerNotifier);
 	}
 
 	/**
@@ -94,7 +94,12 @@ public class RequestProcessor
 		LogFull.d(request.toString() + " is not already running ");
 		return false;
 	}
-
+	
+	public static void removeRequest(Request<?> request)
+	{
+		requestMap.remove(request.getId());
+	}
+	
 	/**
 	 * Shutdown method to close everything (setting all variables to null for easy garbage collection)
 	 */
