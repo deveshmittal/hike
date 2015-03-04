@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -519,6 +520,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		        }
 				toggleMenuItems(menu, true);
 				setupActionBar();
+				searchView.setQueryHint(getSearchQueryHintText());
 				return true;
 			}
 		});
@@ -558,6 +560,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 		
 		return true;
+	}
+	
+	private String getSearchQueryHintText()
+	{
+		switch (new Random().nextInt(4))
+		{
+		case 0:
+			return getString(R.string.home_search_hint1);
+		case 1:
+			return getString(R.string.home_search_hint2);
+		default:
+			return getString(R.string.search_hint);
+		}
 	}
 
 	private void toggleMenuItems(Menu menu, boolean value)
