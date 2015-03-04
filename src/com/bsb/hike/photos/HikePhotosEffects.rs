@@ -65,17 +65,56 @@ int compositeSpline[256];
 
 int r[3],g[3],b[3];
 
+float preMatrix[20],postMatrix[20];
+
 rs_allocation input1;
 rs_allocation input2;
 
 
-uchar4 __attribute__((kernel)) multiply(uchar4 in,uint32_t x,uint32_t y) {
-	in.r =  ChannelBlend_Alpha(ChannelBlend_Multiply(r[0],in.r),in.r,0.50);
+uchar4 static applyColorMatrix(uchar4 in,float matrix[])
+{
 
-	in.g =  ChannelBlend_Alpha(ChannelBlend_Multiply(g[0],in.g),in.g,0.50);
+	float red = in.r/255.0;
+	float blue = in.b/255.0;
+	float green = in.g/255.0;
+	float alpha = in.a/255.0;
 
-	in.b =  ChannelBlend_Alpha(ChannelBlend_Multiply(b[0],in.b),in.b,0.50);
+	float red1=matrix[0]*red+matrix[1]*green+matrix[2]*blue+matrix[3]*alpha;
+	float green1=matrix[5]*red+matrix[6]*green+matrix[7]*blue+matrix[8]*alpha;
+	float blue1=matrix[10]*red+matrix[11]*green+matrix[12]*blue+matrix[13]*alpha;
+	float alpha1=matrix[15]*red+matrix[16]*green+matrix[17]*blue+matrix[18]*alpha;
 
+	if(red1<0) red1 = 0;
+	if(red1>1) red1 = 1;
+	if(green1<0) green1 = 0;
+	if(green1>1) green1 = 1;
+	if(blue1<0) blue1 = 0;
+	if(blue1>1) blue1 = 1;
+	if(alpha1<0) alpha1 = 0;
+	if(alpha1>1) alpha1 = 1;
+
+	in.r=round(red1*255)+matrix[4];
+	in.g=round(green1*255)+matrix[9];
+	in.b=round(blue1*255)+matrix[14];
+	in.a=round(alpha1*255)+matrix[19];
+
+	if(red1<0) red1 = 0;
+	if(red1>255) red1 = 255;
+	if(green1<0) green1 = 0;
+	if(green1>255) green1 = 255;
+	if(blue1<0) blue1 = 0;
+	if(blue1>255) blue1 = 255;
+	if(alpha1<0) alpha1 = 0;
+	if(alpha1>255) alpha1 = 255;
+
+
+	return in;
+
+}
+
+uchar4 __attribute__((kernel)) filter_colorMatrix(uchar4 in,uint32_t x,uint32_t y)
+{
+	in=applyColorMatrix(in,preMatrix);
 	return in;
 }
 
@@ -179,20 +218,20 @@ uchar4 __attribute__((kernel)) filter_brannan(uchar4 in,uint32_t x,uint32_t y)
 	in.g =  ChannelBlend_Alpha(ChannelBlend_Overlay(g[0],in.g),in.g,0.70);
 
 	in.b =  ChannelBlend_Alpha(ChannelBlend_Overlay(b[0],in.b),in.b,0.70);
-	
+
 	in.b = bSpline[in.b];
-	
+
 	return in;
 }
 
 uchar4 __attribute__((kernel)) filter_earlyBird(uchar4 in,uint32_t x,uint32_t y) 
 {
 	in.r = ChannelBlend_Multiply(r[0],in.r);
-	
+
 	in.g = ChannelBlend_Multiply(g[0],in.g);
-	
+
 	in.b = ChannelBlend_Multiply(b[0],in.b);
-	
+
 	return in;
 }
 
