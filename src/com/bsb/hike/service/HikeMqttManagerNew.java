@@ -54,6 +54,7 @@ import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.HikePacket;
+import com.bsb.hike.models.NetInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
@@ -122,8 +123,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private WakeLock wakelock = null;
 
-	private ConnectivityManager cm;
-
 	private volatile MQTTConnectionStatus mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
 
 	private Messenger mMessenger; // this is used to interact with the mqtt thread
@@ -190,6 +189,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	/* publishes a message via mqtt to the server with QoS 0 */
 	public static int MQTT_QOS_ZERO = 0;
+	
+	private NetInfo previousNetInfo;
 
 	// constants used to define MQTT connection status, this is used by external classes and hardly of any use internally
 	public enum MQTTConnectionStatus
@@ -372,7 +373,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 		
 		context = HikeMessengerApp.getInstance();
-		cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 		password = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
@@ -719,7 +719,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 				else
 					op.setSocketFactory(null);
+				
 				Logger.d(TAG, "MQTT connecting on : " + mqtt.getServerURI());
+				
+				previousNetInfo = NetInfo.getNetInfo(Utils.getActiveNetInfo()); // update previous netInfo
+				
 				mqtt.connect(op, null, getConnectListener());
 				scheduleNextActivityCheck();
 			}
@@ -1374,14 +1378,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			Logger.d(TAG, "Network change event happened. Network connected : " + isNetwork);
 			if (isNetwork)
 			{
-				boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
-				boolean isSSLConnected = isSSLAlreadyOn();
-				// reconnect using SSL as currently not connected using SSL
-				if (shouldConnectUsingSSL && !isSSLConnected)
+				if(shouldDisconnectAndReconnect())
+				{
 					disconnectOnMqttThread(true);
-				// reconnect using nonSSL but currently connected using SSL
-				else if (!shouldConnectUsingSSL && isSSLConnected)
-					disconnectOnMqttThread(true);
+				}
 				else
 				{
 					ipConnectCount = 0;
@@ -1410,15 +1410,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			/*
 			 * ssl settings toggled so disconnect and reconnect mqtt
 			 */
-			boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
-			boolean isSSLConnected = isSSLAlreadyOn();
-			Logger.d(TAG, "SSL Preference has changed. OnSSL : " + shouldConnectUsingSSL + " ,isSSLAlreadyOn : " + isSSLConnected);
-			// reconnect using SSL as currently not connected using SSL
-			if (shouldConnectUsingSSL && !isSSLConnected)
+			if(shouldDisconnectAndReconnect())
+			{
 				disconnectOnMqttThread(true);
-			// reconnect using nonSSL but currently connected using SSL
-			else if (!shouldConnectUsingSSL && isSSLConnected)
-				disconnectOnMqttThread(true);
+			}
 		}
 		else if (intent.getAction().equals(HikePubSub.IPS_CHANGED))
 		{
@@ -1427,6 +1422,56 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
+	/**
+	 * Return <b>True</b> if we should disconnect and reconnect in following scenarios
+	 * <li>1. If we should connect using ssl and currently we are not connected to ssl</li>
+	 * <li>2. if we should not connect using ssl and currently we are connected using ssl</li>
+	 * <li>3. if we are not connected and current network is different from previous network</li>
+	 * <p></p>
+	 * <b>False</b> otherwise
+	 * @return
+	 */
+	private boolean shouldDisconnectAndReconnect()
+	{
+		boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
+		boolean isSSLConnected = isSSLAlreadyOn();
+		Logger.d(TAG, "SSL Preference has changed. OnSSL : " + shouldConnectUsingSSL + " ,isSSLAlreadyOn : " + isSSLConnected);
+		// reconnect using SSL as currently not connected using SSL
+		if (shouldConnectUsingSSL && !isSSLConnected)
+		{
+			return true;
+		}
+		// reconnect using nonSSL but currently connected using SSL
+		else if (!shouldConnectUsingSSL && isSSLConnected)
+		{
+			return true;
+		}
+		else
+		{
+			/**
+			 * In else we should handling only cases where we are in connecting state. So if we are already connected we should not disconnect.
+			 */
+			if(isConnected())
+			{
+				return false;
+			}
+			
+			NetInfo currentNetInfo = NetInfo.getNetInfo(Utils.getActiveNetInfo());
+			if(previousNetInfo != null && currentNetInfo != null)
+			{
+				Logger.d(TAG, "previous info : " + previousNetInfo.toString());
+				Logger.d(TAG, "current info : " + currentNetInfo.toString());
+
+				if(!previousNetInfo.equals(currentNetInfo)) // previous network info is not equal to current network info , disconnect and re-connect in this case
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+	
+	
 	private boolean isSSLAlreadyOn()
 	{
 		if (mqtt != null)
