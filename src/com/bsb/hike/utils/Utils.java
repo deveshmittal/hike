@@ -922,12 +922,12 @@ public class Utils
 		Utils.densityMultiplier = displayMetrics.density;
 	}
 
-	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
+	public static CharSequence getFormattedParticipantInfo(String info, String textToHighlight)
 	{
-		if(!info.contains(textToHighight))
+		if(!info.contains(textToHighlight))
 			return info;
 		SpannableStringBuilder ssb = new SpannableStringBuilder(info);
-		ssb.setSpan(new StyleSpan(Typeface.BOLD), info.indexOf(textToHighight), info.indexOf(textToHighight) + textToHighight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		ssb.setSpan(new StyleSpan(Typeface.BOLD), info.indexOf(textToHighlight), info.indexOf(textToHighlight) + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return ssb;
 	}
 

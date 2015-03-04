@@ -2154,6 +2154,10 @@ public class HikeConstants
 		
 		public static final String PERSIST_CHAT = "Cht";
 		
+		public static final int defaultPushSetting = 2;
+		
+		public static final boolean defaultPersistChat = false;
+		
 	}
 
 	public static class MESSAGE_TYPE

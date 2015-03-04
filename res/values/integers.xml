@@ -11,7 +11,5 @@
 	<integer name="incentive_amount">50</integer>
 	<integer name="nux_min_contacts">3</integer>
 	<integer name="nux_max_contacts">3</integer>
-	<integer name="default_ruj_push_type">2</integer>
-	<integer name="default_nuj_push_type">2</integer>
 
 </resources>

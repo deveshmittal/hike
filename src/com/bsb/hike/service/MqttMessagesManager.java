@@ -237,7 +237,7 @@ public class MqttMessagesManager
 		this.pubSub.publish(HikePubSub.SMS_CREDIT_CHANGED, credits);
 	}
 
-	private JSONObject parseNujRuj(JSONObject jsonObj, String userType) throws JSONException
+	private JSONObject parseUserJoinParams(JSONObject jsonObj, String userType) throws JSONException
 	{
 
 		HikeSharedPreferenceUtil ujPrefs = HikeSharedPreferenceUtil.getInstance(UJFile);
@@ -251,17 +251,17 @@ public class MqttMessagesManager
 		} 
 		if(!data.has(HikeConstants.UserJoinMsg.NOTIF_TITLE))
 		{
-			String notificationTitle = ujPrefs.getData(userType + HikeConstants.UserJoinMsg.NOTIF_TITLE, context.getString(isNewUser? R.string.start_thread1 : R.string.start_thread2));
+			String notificationTitle = ujPrefs.getData(userType + HikeConstants.UserJoinMsg.NOTIF_TITLE, context.getString(R.string.last_seen_more_ct));
 			data.put(HikeConstants.UserJoinMsg.NOTIF_TITLE, notificationTitle);
 		} 
 		if(!data.has(HikeConstants.UserJoinMsg.PUSH_SETTING))
 		{
-			int pushType = ujPrefs.getData(userType + HikeConstants.UserJoinMsg.PUSH_SETTING, context.getResources().getInteger(isNewUser? R.integer.default_nuj_push_type : R.integer.default_ruj_push_type));
+			int pushType = ujPrefs.getData(userType + HikeConstants.UserJoinMsg.PUSH_SETTING, HikeConstants.UserJoinMsg.defaultPushSetting);
 			data.put(HikeConstants.UserJoinMsg.PUSH_SETTING, pushType);
 		} 
 		if(!data.has(HikeConstants.UserJoinMsg.PERSIST_CHAT))
 		{
-			boolean persistChat = ujPrefs.getData(userType + HikeConstants.UserJoinMsg.PERSIST_CHAT, false);
+			boolean persistChat = ujPrefs.getData(userType + HikeConstants.UserJoinMsg.PERSIST_CHAT, HikeConstants.UserJoinMsg.defaultPersistChat);
 			data.put(HikeConstants.UserJoinMsg.PERSIST_CHAT, persistChat);
 		} 
 		
@@ -277,14 +277,14 @@ public class MqttMessagesManager
 		boolean joined = HikeConstants.MqttMessageTypes.USER_JOINED.equals(type);
 		String userType = jsonObj.optString(HikeConstants.SUB_TYPE, HikeConstants.NEW_USER);
 		long joinTime = 0;
-		
-		jsonObj = parseNujRuj(jsonObj, userType);
 	
 		//by default the chat shall not persist
 		
 		SharedPreferences settings = context.getSharedPreferences(UJFile, Context.MODE_PRIVATE);
 		if (joined)
 		{
+			jsonObj = parseUserJoinParams(jsonObj, userType);
+			
 			joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
 			long ts = settings.getLong(msisdn, -1);
 			if (ts == -1) // this shows last uj was for some other msisdn or this user has left or pref file do not exist
@@ -331,7 +331,7 @@ public class MqttMessagesManager
 				
 				if (convMessage != null && !isBulkMessage)
 				{
-					if(jsonObj.getJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.UserJoinMsg.PERSIST_CHAT, false))
+					if(jsonObj.getJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.UserJoinMsg.PERSIST_CHAT, HikeConstants.UserJoinMsg.defaultPersistChat))
 					{
 						saveStatusMsg(jsonObj, msisdn);
 					}
@@ -1474,7 +1474,10 @@ public class MqttMessagesManager
 		{
 			boolean enableDetailedHttpLogging = data.getBoolean(HikeConstants.ENABLE_DETAILED_HTTP_LOGGING);
 			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.DETAILED_HTTP_LOGGING_ENABLED, enableDetailedHttpLogging);
-			}	
+		}
+		
+		// this is a PnC of ["nu"/"ru"] and ["Txt"/"Ttl"/"Cht"/"Typ"] 
+		// we also assume that if "nuTxt" field or "nuTyp" field is present then others exist too
 		if(data.has(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.NOTIF_TEXT) || data.has(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.PUSH_SETTING))
 		{
 			HikeSharedPreferenceUtil ujPrefs = HikeSharedPreferenceUtil.getInstance(UJFile);
@@ -1482,15 +1485,16 @@ public class MqttMessagesManager
 			String notificationText = data.optString(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.NOTIF_TEXT, context.getString(R.string.joined_hike));
 			ujPrefs.saveData(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.NOTIF_TEXT, notificationText);
 			
-			String notificationTitle = data.optString(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.NOTIF_TITLE, context.getString(R.string.start_thread1));
+			String notificationTitle = data.optString(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.NOTIF_TITLE, context.getString(R.string.last_seen_more_ct));
 			ujPrefs.saveData(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.NOTIF_TITLE, notificationTitle);
 			
-			int notificationType = data.optInt(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.PUSH_SETTING, context.getResources().getInteger(R.integer.default_nuj_push_type));
+			int notificationType = data.optInt(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.PUSH_SETTING, HikeConstants.UserJoinMsg.defaultPushSetting);
 			ujPrefs.saveData(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.PUSH_SETTING, notificationType);
 			
-			boolean persistChat = data.optBoolean(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.PERSIST_CHAT, false);
+			boolean persistChat = data.optBoolean(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.PERSIST_CHAT, HikeConstants.UserJoinMsg.defaultPersistChat);
 			ujPrefs.saveData(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.PERSIST_CHAT, persistChat);	
 		}
+		// we also assume that if "ruTxt" field or "ruTyp" field is present then others exist too
 		if(data.has(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.NOTIF_TEXT) || data.has(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.PUSH_SETTING))
 		{
 			HikeSharedPreferenceUtil ujPrefs = HikeSharedPreferenceUtil.getInstance(UJFile);
@@ -1498,13 +1502,13 @@ public class MqttMessagesManager
 			String notificationText = data.optString(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.NOTIF_TEXT, context.getString(R.string.user_back_on_hike));
 			ujPrefs.saveData(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.NOTIF_TEXT, notificationText);
 			
-			String notificationTitle = data.optString(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.NOTIF_TITLE, context.getString(R.string.start_thread2));
+			String notificationTitle = data.optString(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.NOTIF_TITLE, context.getString(R.string.last_seen_more_ct));
 			ujPrefs.saveData(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.NOTIF_TITLE, notificationTitle);
 			
-			int notificationType = data.optInt(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.PUSH_SETTING, context.getResources().getInteger(R.integer.default_ruj_push_type));
+			int notificationType = data.optInt(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.PUSH_SETTING, HikeConstants.UserJoinMsg.defaultPushSetting);
 			ujPrefs.saveData(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.PUSH_SETTING, notificationType);
 			
-			boolean persistChat = data.optBoolean(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.PERSIST_CHAT, false);
+			boolean persistChat = data.optBoolean(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.PERSIST_CHAT, HikeConstants.UserJoinMsg.defaultPersistChat);
 			ujPrefs.saveData(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.PERSIST_CHAT, persistChat);	
 
 		}

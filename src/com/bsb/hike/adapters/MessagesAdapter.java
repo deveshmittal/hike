@@ -2086,11 +2086,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					String participantMsisdn = metadata.getMsisdn();
 					name = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
 					if(infoState == ParticipantInfoState.USER_JOIN)
-						try {
-							message = String.format(metadata.getJSON().getJSONObject(HikeConstants.DATA).getString(HikeConstants.UserJoinMsg.NOTIF_TEXT), name);
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
+						message = String.format(convMessage.getMessage(),name);
 					else
 						message = context.getString(R.string.joined_conversation, name);
 					
@@ -2099,11 +2095,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					name = Utils.getFirstName(conversation.getLabel());
 					if(infoState == ParticipantInfoState.USER_JOIN)
-						try {
-							message = String.format(metadata.getJSON().getJSONObject(HikeConstants.DATA).getString(HikeConstants.UserJoinMsg.NOTIF_TEXT), name);
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
+						message = String.format(convMessage.getMessage(),name);
 					else
 						message = context.getString(R.string.optin_one_to_one, name);
 				}

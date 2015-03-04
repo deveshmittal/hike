@@ -323,7 +323,7 @@ public class HikeNotification
 		{
 			if (convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
 			{
-				message = String.format(context.getString(R.string.user_back_on_hike), contactInfo.getFirstName());
+				message = String.format(convMsg.getMessage(), contactInfo.getFirstName());
 			}
 			else
 			{

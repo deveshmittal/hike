@@ -906,11 +906,8 @@ public class ConversationsAdapter extends BaseAdapter
 			{
 				participantName = Utils.getFirstName(conversation.getLabel());
 			}
-			try {
-				markedUp = String.format(metadata.getJSON().getJSONObject(HikeConstants.DATA).getString(HikeConstants.UserJoinMsg.NOTIF_TEXT), participantName);
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			
+			markedUp = String.format(message.getMessage(), participantName);
 
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT || message.getParticipantInfoState() == ParticipantInfoState.GROUP_END)

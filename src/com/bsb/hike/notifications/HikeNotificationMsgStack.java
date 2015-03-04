@@ -15,7 +15,6 @@ import android.net.Uri;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -576,10 +575,11 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		if (isFromSingleMsisdn())
 		{
-			if(getNewMessages() <=1 )
+			String title = mMessagesMap.get(lastAddedMsisdn).getLast().getTitle();
+			
+			if(getNewMessages() <=1 && !TextUtils.isEmpty(title))
 			{
-				String title = mMessagesMap.get(lastAddedMsisdn).getFirst().getTitle();
-				if (title!=null) return title;
+				return title;
 			}
 			
 			return HikeNotificationUtils.getNameForMsisdn(lastAddedMsisdn);

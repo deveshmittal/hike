@@ -11,6 +11,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.NUXConstants.PushTypeEnum;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.platform.ContentLove;
@@ -955,9 +956,9 @@ public class ConvMessage
 	public boolean isSilent()
 	{
 		
-		int push = 2;
+		int pushSetting  = HikeConstants.UserJoinMsg.defaultPushSetting;
 		try {
-			push = metadata.getJSON().getJSONObject(HikeConstants.DATA).getInt(HikeConstants.UserJoinMsg.PUSH_SETTING);
+			pushSetting = metadata.getJSON().getJSONObject(HikeConstants.DATA).getInt(HikeConstants.UserJoinMsg.PUSH_SETTING);
 		} catch (JSONException e) {
 			Logger.d("JSONException", "Exceoption" + e);
 		}
@@ -972,7 +973,7 @@ public class ConvMessage
 		{
 			return true;
 		}
-		else if( push == 1 )
+		else if( pushSetting == 1 )
 		{
 			return true;
 		}
