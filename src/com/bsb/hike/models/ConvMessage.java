@@ -907,12 +907,8 @@ public class ConvMessage
 
 	public boolean isImageMsg()
 	{
-		if (isFileTransferMessage() && getMetadata() != null && getMetadata().getHikeFiles().get(0).getHikeFileType() == HikeFileType.IMAGE)
-		{
-				return true;
-			
-		}
-		return false;
+		return isFileTransferMessage() && getMetadata() != null && getMetadata().getHikeFiles().get(0).getHikeFileType() == HikeFileType.IMAGE ;
+		
 	}
 	
 	public boolean isTextMsg()

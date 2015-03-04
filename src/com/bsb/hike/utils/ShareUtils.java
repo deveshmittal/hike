@@ -36,20 +36,9 @@ public class ShareUtils
 
 	static Context mContext = HikeMessengerApp.getInstance().getApplicationContext();
     
-	static String imgHead, imgDesc, imgCap, stiHead, stiDesc, stiCap, textHead, textCap ; 
 	
-	public static Intent shareContent(int type, Object obj)
+	public static Intent shareContent(int type, String path)
 	{ 
-		imgHead = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.IMAGE_HEADING, mContext.getString(R.string.image_share_heading));
-    	imgDesc = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.IMAGE_DESCRIPTION, mContext.getString(R.string.image_share_description));
-	    imgCap = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.IMAGE_CAPTION, mContext.getString(R.string.image_share_caption));
-	    stiHead = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.STICKER_HEADING, mContext.getString(R.string.sticker_share_heading));
-	    stiDesc = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.STICKER_DESCRIPTION, mContext.getString(R.string.sticker_share_description));
-	    stiCap = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.STICKER_CAPTION, mContext.getString(R.string.sticker_share_caption));
-	    textHead = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.TEXT_HEADING, mContext.getString(R.string.text_share_heading));
-	    textCap = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.TEXT_CAPTION, mContext.getString(R.string.text_share_caption));
-	  
-	    String path = (String) obj;
 		
 		switch (type)
 		{
@@ -105,6 +94,9 @@ public class ShareUtils
 	private static View setViewImage(String filePath)
 	{
 
+		String imgHead = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.IMAGE_HEADING, mContext.getString(R.string.image_share_heading));
+		String imgDesc = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.IMAGE_DESCRIPTION, mContext.getString(R.string.image_share_description));
+	    
 	    View share = LayoutInflater.from(mContext).inflate(R.layout.image_share_layout, null);
 		ImageView image = (ImageView) share.findViewById(R.id.user_image);
 		Bitmap bmp = HikeBitmapFactory.decodeFile(filePath);
@@ -133,6 +125,8 @@ public class ShareUtils
 			shB.compress(CompressFormat.JPEG, 100, fos);
 			 
 			fos.flush();
+			 
+			String imgCap = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.IMAGE_CAPTION, mContext.getString(R.string.image_share_caption));   
 			imageIntent = IntentManager.shareIntent("image/jpeg", "file://" + shareImageFile.getAbsolutePath(), imgCap , HikeConstants.Extras.ShareTypes.IMAGE_SHARE, true);
 			return imageIntent;
 		}
@@ -151,7 +145,9 @@ public class ShareUtils
 	}
 
 	private static Intent textShare(String text)
-	{
+	{   
+		String textHead = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.TEXT_HEADING, mContext.getString(R.string.text_share_heading));
+        String textCap = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.TEXT_CAPTION, mContext.getString(R.string.text_share_caption));
 		Logger.d("ShareUtils", "smsShare");
 		text = text + "\n\n" + textHead + "\n" + textCap ;
 		Intent textIntent = IntentManager.shareIntent("text/plain", null, text, HikeConstants.Extras.ShareTypes.TEXT_SHARE, true);
@@ -162,7 +158,9 @@ public class ShareUtils
 	
 	
 	private static View setViewSticker(String stickerFilePath)
-	{   
+	{   String stiHead = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.STICKER_HEADING, mContext.getString(R.string.sticker_share_heading));
+        String stiDesc = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.STICKER_DESCRIPTION, mContext.getString(R.string.sticker_share_description));
+    
 		View share = LayoutInflater.from(mContext).inflate(R.layout.sticker_share_layout, null);
 		ImageView image = (ImageView) share.findViewById(R.id.sticker_image);
 		
@@ -195,6 +193,8 @@ public class ShareUtils
 			shB.compress(CompressFormat.JPEG, 100, fos);
 
 			fos.flush();
+			String stiCap = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.STICKER_CAPTION, mContext.getString(R.string.sticker_share_caption));
+			  
 			if (type == HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE)
 			{
 				stickerIntent = IntentManager.shareIntent("image/jpeg", "file://" + shareStickerFile.getAbsolutePath(), stiCap, HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE, false);

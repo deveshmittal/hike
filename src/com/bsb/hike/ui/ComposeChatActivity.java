@@ -369,9 +369,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		
 		if (item.getItemId() == R.id.whatsapp_share)
 		{
-			Object obj = null;
-			obj = getIntent().getStringExtra(HikeConstants.Extras.SHARE_CONTENT);
-			Intent intent = ShareUtils.shareContent(type, obj);
+			String str = getIntent().getStringExtra(HikeConstants.Extras.SHARE_CONTENT);
+			Intent intent = ShareUtils.shareContent(type, str);
 			if (intent != null)
 			{
 				startActivity(intent);
