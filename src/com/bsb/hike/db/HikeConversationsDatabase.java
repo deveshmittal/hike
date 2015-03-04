@@ -150,6 +150,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ DBConstants.MAPPED_MSG_ID + " INTEGER, "
 				+ DBConstants.MESSAGE_METADATA + " TEXT, "
 				+ DBConstants.GROUP_PARTICIPANT + " TEXT, "
+				+ DBConstants.SERVER_ID + " INTEGER, "
 				// Messages table columns end
 
 				+ DBConstants.IS_STATUS_MSG + " INTEGER DEFAULT 0, " // Whether the message is a status message.
@@ -674,8 +675,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		{
 			String alter1 = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.SERVER_ID + " INTEGER";
 			String alter2 = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.CONVERSATION_TYPE + " INTEGER DEFAULT 0";
+			String alter3 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.SERVER_ID + " INTEGER";
 			db.execSQL(alter1);
 			db.execSQL(alter2);
+			db.execSQL(alter3);
 			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.UPGRADE_FOR_SERVER_ID_FIELD, 1);
 		}
 	}
@@ -6468,8 +6471,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			
 			long startTime = System.currentTimeMillis();
 			
-			String update = "UPDATE " + DBConstants.MESSAGES_TABLE + " SET " + DBConstants.SERVER_ID + " = "  + DBConstants.MESSAGE_ID;
-			mDb.execSQL(update);
+			String update1 = "UPDATE " + DBConstants.MESSAGES_TABLE + " SET " + DBConstants.SERVER_ID + " = "  + DBConstants.MESSAGE_ID;
+			String update2 = "UPDATE " + DBConstants.CONVERSATIONS_TABLE + " SET " + DBConstants.SERVER_ID + " = "  + DBConstants.MESSAGE_ID;
+			mDb.execSQL(update1);
+			mDb.execSQL(update2);
 			
 			long endTime = System.currentTimeMillis();
 			
