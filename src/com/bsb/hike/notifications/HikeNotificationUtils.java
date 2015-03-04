@@ -20,6 +20,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.NotificationPreview;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
@@ -35,7 +36,7 @@ public class HikeNotificationUtils
 	 * @param convMsg
 	 * @return
 	 */
-	public static Pair<String, String> getNotificationPreview(Context context, ConvMessage convMsg)
+	public static NotificationPreview getNotificationPreview(Context context, ConvMessage convMsg)
 	{
 
 		final String msisdn = convMsg.getMsisdn();
@@ -126,7 +127,7 @@ public class HikeNotificationUtils
 			}
 		}
 
-		return new Pair<String, String>(message, key);
+		return new NotificationPreview(message, key);
 	}
 
 	/**
