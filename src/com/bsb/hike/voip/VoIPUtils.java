@@ -175,6 +175,12 @@ public class VoIPUtils {
 				messageType = HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING;
 		}
 
+		boolean selfGenerated = true;
+		if(messageType.equals(HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING))
+		{
+			selfGenerated = false;
+		}
+
 		try
 		{
 			Logger.d(VoIPConstants.TAG, "Adding message of type: " + messageType + " to chat thread.");
@@ -187,7 +193,7 @@ public class VoIPUtils {
 			jsonObject.put(HikeConstants.TYPE, messageType);
 			jsonObject.put(HikeConstants.TO, clientPartner.getPhoneNumber());
 			
-			ConvMessage convMessage = new ConvMessage(jsonObject, mConversation, context, true);
+			ConvMessage convMessage = new ConvMessage(jsonObject, mConversation, context, selfGenerated);
 			convMessage.setShouldShowPush(shouldShowPush);
 			mConversationDb.addConversationMessages(convMessage);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
