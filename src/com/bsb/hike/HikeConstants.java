@@ -2135,6 +2135,18 @@ public class HikeConstants
 		
 		public static final String IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_SMALL;
 	}
+	
+	public static final class UserJoinMsg
+	{
+		public static final String NOTIF_TITLE = "Ttl";
+		
+		public static final String NOTIF_TEXT = "Txt";
+		
+		public static final String PUSH_SETTING = "Typ";
+		
+		public static final String PERSIST_CHAT = "Cht";
+		
+	}
 
 	public static class MESSAGE_TYPE
 	{
