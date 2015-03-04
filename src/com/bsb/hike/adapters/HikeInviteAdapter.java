@@ -92,7 +92,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
 		if (pair != null)
 		{
-			iconLoader.loadImage(contactInfo.getMsisdn(), imageView, false, false, true);
+			iconLoader.loadImage(contactInfo.getMsisdn(), imageView, false, true, true);
 		}
 		else
 		{
