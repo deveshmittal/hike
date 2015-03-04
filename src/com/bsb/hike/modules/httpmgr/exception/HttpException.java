@@ -25,6 +25,8 @@ public class HttpException extends Exception
 	
 	public static final short REASON_CODE_CANCELLATION = 0x7;
 	
+	public static final short REASON_CODE_OUT_OF_SPACE = 0x08;
+	
 	private int errorCode;
 
 	public HttpException(short errorCode)

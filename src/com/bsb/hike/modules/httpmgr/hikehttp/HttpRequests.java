@@ -9,11 +9,13 @@ import com.bsb.hike.utils.Utils;
 
 public class HttpRequests
 {
-	public static RequestToken SingleStickerDownloadRequest(String stickerId, String categoryId, IRequestListener requestListener)
+	public static RequestToken singleStickerDownloadRequest(String requestId, String stickerId, String categoryId, IRequestListener requestListener)
 	{
 		RequestToken requestToken = new JSONObjectRequest.Builder()
 				.setUrl(singleStickerDownloadBase() + "?catId=" + categoryId + "&stId=" + stickerId + "&resId=" + Utils.getResolutionId())
-				.setRequestListener(requestListener).build();
+				.setId(requestId)
+				.setRequestListener(requestListener)
+				.build();
 		return requestToken;
 	}
 }

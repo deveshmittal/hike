@@ -11,6 +11,7 @@ import com.bsb.hike.modules.stickerdownloadmgr.NetworkHandler.NetworkType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 public class StickerDownloadManager
 {
@@ -67,9 +68,18 @@ public class StickerDownloadManager
 			Logger.d(TAG, "Download SingleStickerTask for catId : " + catId + "  stkId : " + stkId + " alreadyExists");
 			return;
 		}
-		BaseStickerDownloadTask singleTask = new SingleStickerDownloadTask(handler, context, taskId, stkId, catId, callback);
-		Request request = new Request(singleTask);
-		queue.addTask(taskId, request);
+		
+		if(Utils.isOkHttp())
+		{
+			SingleStickerDownloadTaskOkHttp singleTask = new SingleStickerDownloadTaskOkHttp(stkId, catId);
+			singleTask.execute();
+		}
+		else
+		{
+			BaseStickerDownloadTask singleTask = new SingleStickerDownloadTask(handler, context, taskId, stkId, catId, callback);
+			Request request = new Request(singleTask);
+			queue.addTask(taskId, request);
+		}
 	}
 
 	public void DownloadMultipleStickers(StickerCategory cat, StickerConstants.DownloadType downloadType, DownloadSource source, IStickerResultListener callback)
