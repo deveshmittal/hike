@@ -421,26 +421,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
 	}
 
-	private boolean isNetworkAvailable()
-	{
-		if (context == null)
-		{
-			Logger.e(TAG, "Hike service is null!!");
-			return false;
-		}
-		/*
-		 * We've seen NPEs in this method on the dev console but have not been able to figure out the reason so putting this in a try catch block.
-		 */
-		try
-		{
-			return (cm != null && cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected());
-		}
-		catch (NullPointerException e)
-		{
-			return false;
-		}
-	}
-
 	private void setBrokerHostPort(boolean ssl)
 	{
 		Logger.d("SSL", "Switching broker port/host. SSL? " + ssl);
@@ -687,7 +667,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				return;
 			}
 			
-			if (!isNetworkAvailable())
+			if (!Utils.isUserOnline(context))
 			{
 				Logger.d(TAG, "No Network Connection so should not connect");
 				return;
@@ -728,7 +708,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 			mqttConnStatus = MQTTConnectionStatus.CONNECTING;
 			// if any network is available, then only connect, else connect at next check or when network gets available
-			if (isNetworkAvailable())
+			if (Utils.isUserOnline(context))
 			{
 				acquireWakeLock(connectionTimeoutSec);
 				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
@@ -1385,12 +1365,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	{
 		if (intent.getAction().equals(Intent.ACTION_SCREEN_ON))
 		{
-			if (isNetworkAvailable())
+			if (Utils.isUserOnline(context))
 				connectOnMqttThread();
 		}
 		else if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
 		{
-			boolean isNetwork = isNetworkAvailable();
+			boolean isNetwork = Utils.isUserOnline(context);
 			Logger.d(TAG, "Network change event happened. Network connected : " + isNetwork);
 			if (isNetwork)
 			{
