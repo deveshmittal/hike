@@ -112,7 +112,7 @@ public class DbConversationListener implements Listener
 					{
 						uploadFiksuPerDayMessageEvent();
 					}
-					if (convMessage.isBroadcastMessage())
+					if (convMessage.isBroadcastConversation())
 					{
 						mConversationDb.addBroadcastRecipientConversations(convMessage);
 					}

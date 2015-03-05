@@ -1612,7 +1612,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					ContentValues contentValues = getContentValueForConversationMessage(conv,lastMessageTimeStamp, sortingTimeStamp++);
 
 					//TODO proper check for broadcast message
-					if(conv.hasBroadcastId() && !Utils.isBroadcastConversation(conv.getMsisdn()))
+					if(conv.isBroadcastMessage() && !conv.isBroadcastConversation())
 					{
 						//We donot update sorting timestamp value if this is broadcast message in normal 1-1 chat
 						contentValues.remove(DBConstants.SORTING_TIMESTAMP);
@@ -1813,7 +1813,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			ContentValues contentValues = getContentValueForConversationMessage(conv,conv.getTimestamp());
 			
 			//TODO proper check for broadcast message
-			if(conv.hasBroadcastId() && !Utils.isBroadcastConversation(conv.getMsisdn()))
+			if(conv.isBroadcastMessage() && !conv.isBroadcastConversation())
 			{
 				//We donot update sorting timestamp value if this is broadcast message in normal 1-1 chat
 				contentValues.remove(DBConstants.SORTING_TIMESTAMP);

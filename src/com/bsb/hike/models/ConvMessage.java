@@ -328,8 +328,8 @@ public class ConvMessage
 		this.platformMessageMetadata = other.platformMessageMetadata;
 		this.platformWebMessageMetadata = other.platformWebMessageMetadata;
 		this.contentLove = other.contentLove;
-		if (other.isBroadcastMessage())
 		this.messageOriginType  = other.messageOriginType;
+		if (other.isBroadcastConversation())
 		{
 			this.messageBroadcastId = other.getMsisdn();
 		}
@@ -757,7 +757,7 @@ public class ConvMessage
 				{
 					object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
 				}
-				if (isBroadcastMessage())
+				if (isBroadcastConversation())
 				{
 					ArrayList<String> contactsList = getSentToMsisdnsList();
 					JSONArray msisdnArray = new JSONArray();
@@ -1026,9 +1026,13 @@ public class ConvMessage
 		return participantInfoState == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING;
 	}
 	
-	public boolean isBroadcastMessage() {
+	public boolean isBroadcastConversation() {
 		return Utils.isBroadcastConversation(this.mMsisdn);
 
+	}
+	
+	public boolean isBroadcastMessage() {
+		return messageOriginType == OriginType.BROADCAST;
 	}
 	
 	public ArrayList<String> getSentToMsisdnsList() {

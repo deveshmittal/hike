@@ -171,7 +171,7 @@ public class Conversation implements Comparable<Conversation>
 	public void addMessage(ConvMessage message)
 	{
 		this.messages.add(message);
-		if (!message.hasBroadcastId())
+		if (!message.isBroadcastMessage() || !message.isBroadcastConversation())
 		{
 			setTimestamp(message.getTimestamp());
 		}
