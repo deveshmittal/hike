@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.nio.CharBuffer;
 import java.security.KeyStore;
@@ -210,6 +208,7 @@ public class AccountUtils
 	{
 		if (mClient != null)
 		{
+			Logger.d("AccountUtils", "Socket timeout when http client already created = " + mClient.getParams().getIntParameter(CoreConnectionPNames.SO_TIMEOUT, 0));
 			return mClient;
 		}
 		Logger.d("SSL", "Initialising the HTTP CLIENT");
@@ -221,7 +220,9 @@ public class AccountUtils
 		 * set the connection timeout to 6 seconds, and the waiting for data timeout to 30 seconds
 		 */
 		HttpConnectionParams.setConnectionTimeout(params, HikeConstants.CONNECT_TIMEOUT);
-		HttpConnectionParams.setSoTimeout(params, HikeConstants.SOCKET_TIMEOUT);
+		long so_timeout = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.Extras.GENERAL_SO_TIMEOUT, 180 * 1000l);
+		Logger.d("AccountUtils", "Socket timeout while creating client = " + so_timeout);
+		HttpConnectionParams.setSoTimeout(params, (int) so_timeout);
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		if (ssl)
@@ -255,6 +256,12 @@ public class AccountUtils
 
 		mClient = httpClient;
 		return httpClient;
+	}
+
+	public static void setSocketTimeout(int timeout)
+	{
+		if(mClient != null)
+			mClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
 	}
 
 	public static HttpClient getClient(HttpRequestBase request)

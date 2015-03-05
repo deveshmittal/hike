@@ -2,20 +2,18 @@ package com.bsb.hike.db;
 
 import java.net.URISyntaxException;
 
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.db.DBConstants.HIKE_CONTENT;
-import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
-import com.bsb.hike.models.HikeAlarmManager;
-import com.bsb.hike.utils.Logger;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.db.DBConstants.HIKE_CONTENT;
+import com.bsb.hike.models.HikeAlarmManager;
+import com.bsb.hike.utils.Logger;
 
 public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants,HIKE_CONTENT{
 

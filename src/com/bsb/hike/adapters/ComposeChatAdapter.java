@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import android.view.View.OnClickListener;
 import android.content.Context;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -23,9 +23,9 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.models.StatusMessage;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
@@ -38,7 +38,6 @@ import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
 
 public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionListAdapter
 {
-	private static final String TAG = "composeChatAdapter";
 
 	private Map<String, ContactInfo> selectedPeople;
 
@@ -86,7 +85,6 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		this.sendingMsisdn = sendingMsisdn;
 		this.fetchGroups = fetchGroups;
 		this.fetchRecents = fetchRecents;
-		this.showDefaultEmptyList = showDefaultEmptyList;
 		this.fetchRecentlyJoined = fetchRecentlyJoined;
 		
 		groupsList = new ArrayList<ContactInfo>(0);

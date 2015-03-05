@@ -1,24 +1,9 @@
 package com.bsb.hike.providers;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-
-import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.db.DBConstants;
-import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.platform.content.PlatformContentConstants;
-import com.bsb.hike.platform.content.PlatformContentUtils;
-import com.bsb.hike.ui.HikeAuthActivity;
-import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.Utils;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -28,7 +13,17 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
+
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.db.DBConstants;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.platform.content.PlatformContentConstants;
+import com.bsb.hike.ui.HikeAuthActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 /**
  * Provides hike contact's avatar blob data
@@ -148,7 +143,7 @@ public class HikeProvider extends ContentProvider
 						if (selectionArgs[0].equals(HikeConstants.SELF_HIKE_ID))
 						{
 							// self avatar request
-							ContactInfo contactInfo = Utils.getUserContactInfo(HikeSharedPreferenceUtil.getInstance(getContext(), HikeMessengerApp.ACCOUNT_SETTINGS).getPref());
+							ContactInfo contactInfo = Utils.getUserContactInfo(HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.ACCOUNT_SETTINGS).getPref());
 							c = ContactManager
 									.getInstance()
 									.getReadableDatabase()
@@ -190,7 +185,7 @@ public class HikeProvider extends ContentProvider
 						if (selectionArgs[0].equals(HikeConstants.SELF_HIKE_ID))
 						{
 							// self avatar request
-							ContactInfo contactInfo = Utils.getUserContactInfo(HikeSharedPreferenceUtil.getInstance(getContext(), HikeMessengerApp.ACCOUNT_SETTINGS).getPref());
+							ContactInfo contactInfo = Utils.getUserContactInfo(HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.ACCOUNT_SETTINGS).getPref());
 							c = ContactManager
 									.getInstance()
 									.getReadableDatabase()
@@ -277,7 +272,7 @@ public class HikeProvider extends ContentProvider
 	@Override
 	public ParcelFileDescriptor openFile(Uri uri, String mode)
 	{
-		Log.d("FileContentProvider", "fetching: " + uri);
+		Logger.d("FileContentProvider", "fetching: " + uri);
 
 		ParcelFileDescriptor parcel = null;
 
@@ -289,7 +284,7 @@ public class HikeProvider extends ContentProvider
 		}
 		catch (FileNotFoundException e)
 		{
-			Log.e("FileContentProvider", "uri " + uri.toString(), e);
+			Logger.e("FileContentProvider", "uri " + uri.toString(), e);
 		}
 		return parcel;
 	}

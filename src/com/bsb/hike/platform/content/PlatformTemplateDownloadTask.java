@@ -10,10 +10,10 @@ import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.os.AsyncTask;
+
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.platform.content.PlatformContent.EventCode;
-
-import android.os.AsyncTask;
 
 /**
  * Download and store template

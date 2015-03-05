@@ -1,5 +1,10 @@
 package com.bsb.hike.platform;
 
+import java.util.ArrayList;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.annotation.TargetApi;
@@ -11,7 +16,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -44,10 +48,6 @@ import com.bsb.hike.platform.content.PlatformWebClient;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 /**
  * Created by shobhitmandloi on 14/01/15.
@@ -182,7 +182,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	@Override
 	public int getCount()
 	{
-		return 0;
+		return convMessages.size();
 	}
 
 	@Override
@@ -288,8 +288,14 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 				public void onComplete(PlatformContentModel content)
 				{
-					viewHolder.id = getItemId(position);
-					fillContent(web, content, convMessage, viewHolder);
+					if(position < getCount())
+					{
+						viewHolder.id = getItemId(position);
+						fillContent(web, content, convMessage, viewHolder);
+					}else
+					{
+						Logger.e(tag, "Platform Content returned data view no more exist");
+					}
 				}
 			});
 		}
@@ -316,7 +322,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			json.put(HikePlatformConstants.ERROR_CODE, reason.toString());
 			json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.BOT_ERROR);
-			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+			HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, json);
 		}
 		catch (JSONException e)
 		{
@@ -342,7 +348,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 			platformJSON.put(HikePlatformConstants.CARD_TYPE, message.platformWebMessageMetadata.getAppName());
 			platformJSON.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_LOADED);
 			platformJSON.put(HikePlatformConstants.CARD_STATE, state);
-			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.VIEW_EVENT, platformJSON, AnalyticsConstants.EVENT_TAG_PLATFORM);
+			HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.VIEW_EVENT, platformJSON);
 		}
 		catch (JSONException e)
 		{
@@ -409,7 +415,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			super.onPageFinished(view, url);
 			CookieManager.getInstance().setAcceptCookie(true);
-			Log.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
+			Logger.d("HeightAnim", "Height of webView after loading is " + String.valueOf(view.getMeasuredHeight()) + "px");
 			view.loadUrl("javascript:setData('"  + convMessage.getMsisdn() + "','"
 					+ convMessage.platformWebMessageMetadata.getHelperData().toString() + "','" + convMessage.isSent() +  "')");
 			String alarmData = convMessage.platformWebMessageMetadata.getAlarmData();
