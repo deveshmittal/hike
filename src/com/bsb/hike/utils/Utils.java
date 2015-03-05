@@ -5301,7 +5301,7 @@ public class Utils
 	{
 		String participantAddedMessage;
 		MessageMetadata metadata = convMessage.getMetadata();
-		if (convMessage.isBroadcastMessage())
+		if (convMessage.isBroadcastConversation())
 		{
 			if (metadata.isNewBroadcast())
 			{

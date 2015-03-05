@@ -25,7 +25,7 @@ public class ConvMessage
 	private boolean isBlockAddHeader;
 
 	private long msgID; // this corresponds to msgID stored in sender's DB
-
+	
 	private long mappedMsgId; // this corresponds to msgID stored in receiver's
 								// DB
 
@@ -84,6 +84,15 @@ public class ConvMessage
 	public PlatformMessageMetadata platformMessageMetadata;
 
 	public PlatformWebMessageMetadata platformWebMessageMetadata;
+
+	/* Adding entries to the beginning of this list is not backwards compatible */
+	public static enum OriginType
+	{
+		NORMAL, /* message sent to server */
+		BROADCAST, /* message originated from a broadcast */
+	};
+	
+	private OriginType messageOriginType = OriginType.NORMAL;
 
 	public boolean isLovePresent(){
 		return contentLove!=null;
@@ -241,6 +250,12 @@ public class ConvMessage
 		this.msgID = msgId;
 	}
 	
+//	TODO anu bansal serverId
+/**
+ * serverId	
+ * create a new constructor for serverID
+ * set serverID field in convMessage
+ */
 	public ConvMessage(TypingNotification typingNotification)
 	{
 		this.typingNotification = typingNotification;
@@ -313,7 +328,8 @@ public class ConvMessage
 		this.platformMessageMetadata = other.platformMessageMetadata;
 		this.platformWebMessageMetadata = other.platformWebMessageMetadata;
 		this.contentLove = other.contentLove;
-		if (other.isBroadcastMessage())
+		this.messageOriginType  = other.messageOriginType;
+		if (other.isBroadcastConversation())
 		{
 			this.messageBroadcastId = other.getMsisdn();
 		}
@@ -741,7 +757,7 @@ public class ConvMessage
 				{
 					object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
 				}
-				if (isBroadcastMessage())
+				if (isBroadcastConversation())
 				{
 					ArrayList<String> contactsList = getSentToMsisdnsList();
 					JSONArray msisdnArray = new JSONArray();
@@ -820,6 +836,11 @@ public class ConvMessage
 	public static State stateValue(int val)
 	{
 		return State.values()[val];
+	}
+	
+	public static OriginType originTypeValue(int val)
+	{
+		return OriginType.values()[val];
 	}
 
 	public void setState(State state)
@@ -1005,9 +1026,13 @@ public class ConvMessage
 		return participantInfoState == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING;
 	}
 	
-	public boolean isBroadcastMessage() {
+	public boolean isBroadcastConversation() {
 		return Utils.isBroadcastConversation(this.mMsisdn);
 
+	}
+	
+	public boolean isBroadcastMessage() {
+		return messageOriginType == OriginType.BROADCAST;
 	}
 	
 	public ArrayList<String> getSentToMsisdnsList() {
@@ -1024,6 +1049,16 @@ public class ConvMessage
 
 	public String getMessageBroadcastId() {
 		return this.messageBroadcastId;
+	}
+
+	public OriginType getMessageOriginType()
+	{
+		return messageOriginType;
+	}
+
+	public void setMessageOriginType(OriginType messageOriginType)
+	{
+		this.messageOriginType = messageOriginType;
 	}
 
 }
