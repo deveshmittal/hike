@@ -60,6 +60,7 @@ import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient.ConnectionMethods;
 import com.bsb.hike.voip.VoIPConstants.CallQuality;
 import com.bsb.hike.voip.VoIPDataPacket.PacketType;
@@ -155,7 +156,7 @@ public class VoIPService extends Service {
 	
 	// Echo cancellation
 	private boolean resamplerEnabled = false;
-	private final boolean aecEnabled = true;
+	private boolean aecEnabled = true;
 	private boolean useVADToReduceData = true;
 	SolicallWrapper solicallAec = null;
 	private boolean aecSpeakerSignal = false, aecMicSignal = false;
@@ -210,6 +211,12 @@ public class VoIPService extends Service {
 
 		minBufSizePlayback = AudioTrack.getMinBufferSize(playbackSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		minBufSizeRecording = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+		
+		// Disable AEC on <= 2.3 devices
+		if (!Utils.isHoneycombOrHigher()) {
+			Logger.w(VoIPConstants.TAG, "Disabling AEC because device is below API 11.");
+			aecEnabled = false;
+		}
 		
 		if (aecEnabled) {
 			Logger.w(VoIPConstants.TAG, "Old minBufSizeRecording: " + minBufSizeRecording);
