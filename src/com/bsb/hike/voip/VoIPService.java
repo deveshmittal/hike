@@ -1469,27 +1469,23 @@ public class VoIPService extends Service {
 				
 				while (keepRunning) {
 					
-					if (audioTrack != null) {
-//						Logger.d(VoIPConstants.TAG, "Head position: " + audioTrack.getPlaybackHeadPosition() + 
-//								", written: " + audiotrackFramesWritten + 
-//								", decodedBuffersQueue: " + decodedBuffersQueue.size());
-
-						if (audiotrackFramesWritten < audioTrack.getPlaybackHeadPosition() + OpusWrapper.OPUS_FRAME_SIZE &&
-								decodedBuffersQueue.size() == 0) {
-							// We are running low on speaker data
-		                	synchronized (decodedBuffersQueue) {
-			                	decodedBuffersQueue.add(silentPacket);
-			                	decodedBuffersQueue.notify();
-//			                	Logger.d(VoIPConstants.TAG, "Adding silence");
+					try {
+						if (audioTrack != null) {
+							if (audiotrackFramesWritten < audioTrack.getPlaybackHeadPosition() + OpusWrapper.OPUS_FRAME_SIZE &&
+									decodedBuffersQueue.size() == 0) {
+								// We are running low on speaker data
+			                	synchronized (decodedBuffersQueue) {
+				                	decodedBuffersQueue.add(silentPacket);
+				                	decodedBuffersQueue.notify();
+								}
 							}
 						}
-
-					}
-
-					try {
 						Thread.sleep(frameDuration);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
+					} catch (IllegalStateException e) {
+						Logger.d(VoIPConstants.TAG, "startAudioTrackMonitoringThread() IllegalStateException: " + e.toString());
+						break;
 					}
 				}
 				
