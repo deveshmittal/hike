@@ -333,6 +333,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	private void showStickyMessageAtTop(ConvMessage impMessage, boolean playPinAnim)
 	{
 		// Hiding pin tip if open
+		if (impMessage == null)
+		{
+			Logger.wtf(TAG, "Trying to showStickyPinMessage on a null ConvMessage object");
+			return;
+		}
+		
 		mTips.hideTip(ChatThreadTips.PIN_TIP);
 		boolean wasPinViewInflated = false;
 		if (impMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
