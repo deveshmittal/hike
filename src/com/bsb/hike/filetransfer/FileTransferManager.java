@@ -407,6 +407,7 @@ public class FileTransferManager extends BroadcastReceiver
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
 		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, msisdn, sourceFile, fileKey, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike,
 				recordingDuration, attachement,true);
+		//return ((ConvMessage)task.getUserContext()).getMsgID();
    }
 	
 	

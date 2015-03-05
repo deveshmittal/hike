@@ -165,6 +165,7 @@ public class WifiP2pConnectionManager implements ChannelListener
 	public void enableDiscovery()
 	{
 		if (!wifiManager.isWifiEnabled()) {
+			wifiManager.setWifiEnabled(true);
             wifiP2pConnectionManagerListener.notifyWifiNotEnabled();
         }
 		manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
