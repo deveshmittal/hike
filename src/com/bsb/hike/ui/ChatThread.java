@@ -169,6 +169,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
@@ -1888,6 +1889,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		setSentTo(convMessage);
 		addMessage(convMessage,playPinAnim);
 
+		if(mConversation instanceof BroadcastConversation)
+		{
+			convMessage.setMessageOriginType(OriginType.BROADCAST);
+		}
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
