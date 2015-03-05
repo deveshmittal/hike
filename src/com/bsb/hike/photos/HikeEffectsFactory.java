@@ -46,6 +46,8 @@ public final class HikeEffectsFactory
 
 	private ScriptIntrinsicBlur mScriptBlur;
 
+	private int mBlurRadius;
+
 	private void LoadRenderScript(Bitmap image)
 	{
 		// Initialize RS // Load script
@@ -54,6 +56,11 @@ public final class HikeEffectsFactory
 			mRS = RenderScript.create(HikeMessengerApp.getInstance().getApplicationContext());
 			mScript = new ScriptC_HikePhotosEffects(mRS);
 			mScriptBlur = ScriptIntrinsicBlur.create(mRS, Element.U8_4(mRS));
+			mBlurRadius = HikePhotosUtils.dpToPx(HikeMessengerApp.getInstance().getApplicationContext(), 10);
+			if (mBlurRadius > 25)
+			{
+				mBlurRadius = 25;
+			}
 		}
 
 		// Allocate buffer
@@ -419,7 +426,7 @@ public final class HikeEffectsFactory
 		Bitmap mBitmapOut = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), mBitmapIn.getConfig());
 		Allocation output = Allocation.createFromBitmap(mRS, mBitmapOut);
 		mInAllocation = Allocation.createFromBitmap(mRS, originalBitmap);
-		mScriptBlur.setRadius(HikePhotosUtils.dpToPx(HikeMessengerApp.getInstance().getApplicationContext(), 10));
+		mScriptBlur.setRadius(mBlurRadius);
 		mScriptBlur.setInput(mInAllocation);
 		mScriptBlur.forEach(output);
 		output.copyTo(blurredBitmap);
@@ -479,7 +486,7 @@ public final class HikeEffectsFactory
 			if (blurImage)
 			{
 				mInAllocation = Allocation.createFromBitmap(mRS, mBitmapOut);
-				mScriptBlur.setRadius(HikePhotosUtils.dpToPx(HikeMessengerApp.getInstance().getApplicationContext(), 10));
+				mScriptBlur.setRadius(mBlurRadius);
 				mScriptBlur.setInput(mInAllocation);
 				mScriptBlur.forEach(mOutAllocations);
 				mOutAllocations.copyTo(mBitmapOut);
