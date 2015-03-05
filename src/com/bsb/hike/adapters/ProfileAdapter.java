@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -520,7 +521,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				{
 					viewHolder.sharedFiles.setVisibility(View.GONE);
 					viewHolder.timeStamp.setVisibility(View.VISIBLE);
-					viewHolder.timeStamp.setText(context.getResources().getString(R.string.no_file));
+					if (groupConversation instanceof BroadcastConversation)
+					{
+						viewHolder.timeStamp.setText(context.getResources().getString(R.string.no_file_broadcast));
+					}
+					else
+					{
+						viewHolder.timeStamp.setText(context.getResources().getString(R.string.no_file));
+					}
 				}
 			}
 			else
