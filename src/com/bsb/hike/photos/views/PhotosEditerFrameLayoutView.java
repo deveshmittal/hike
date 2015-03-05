@@ -108,10 +108,11 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements
 	}
 
 	public void applyFilter(FilterType filter) {
+		vignetteLayer.setFilter(filter);
 		effectLayer.applyEffect(filter,
 				HikeConstants.HikePhotos.DEFAULT_FILTER_APPLY_PERCENTAGE, this);
 		effectLayer.invalidate();
-		vignetteLayer.setFilter(filter);
+		
 	}
 
 	/**
@@ -161,11 +162,9 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements
 		this.mFileType = fileType;
 		this.mOriginalName = originalName;
 		this.mListener = listener;
-		
+
 		savingFinal = true;
 		effectLayer.getBitmapWithEffectsApplied(imageOriginal, this);
-
-		
 
 	}
 
@@ -237,8 +236,10 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements
 						0, null);
 			}
 			if (doodleLayer.getBitmap() != null) {
-				Bitmap temp = Bitmap.createScaledBitmap(doodleLayer.getBitmap(), imageOriginal.getWidth(), imageOriginal.getHeight(), false);
-				canvasResult.drawBitmap(temp, 0, 0,doodleLayer.getPaint());
+				Bitmap temp = Bitmap.createScaledBitmap(
+						doodleLayer.getBitmap(), imageOriginal.getWidth(),
+						imageOriginal.getHeight(), false);
+				canvasResult.drawBitmap(temp, 0, 0, doodleLayer.getPaint());
 			}
 		}
 

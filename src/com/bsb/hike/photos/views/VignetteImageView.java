@@ -37,16 +37,19 @@ class VignetteImageView extends ImageView
 	public VignetteImageView(Context context)
 	{
 		super(context);
+		this.filter = FilterType.ORIGINAL;
 	}
 
 	public VignetteImageView(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
+		this.filter = FilterType.ORIGINAL;
 	}
 
 	public VignetteImageView(Context context, AttributeSet attrs, int defStyleAttr)
 	{
 		super(context, attrs, defStyleAttr);
+		this.filter = FilterType.ORIGINAL;
 	}
 
 	public void getMeasure(Bitmap bitmap)
@@ -63,7 +66,15 @@ class VignetteImageView extends ImageView
 	{
 		return vignetteBitmap;
 	}
-
+	
+	
+	/**
+	 * @author akhiltripathi
+	 * 
+	 *  Draws a vignette on the layer of provided image size respective to the current set filter.
+	 * 
+	 * @param original
+	 */
 	public void setVignetteforFilter(Bitmap original)
 	{
 
@@ -105,7 +116,8 @@ class VignetteImageView extends ImageView
 			stops = new float[] { 0.0f, 0.72f / 1.2f, 1.0f };
 			makeRadialGradient(1.2f, colors, stops);
 			break;
-
+		default:
+			break;
 		}
 		this.setImageBitmap(vignetteBitmap);
 	}
