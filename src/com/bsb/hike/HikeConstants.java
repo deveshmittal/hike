@@ -1038,6 +1038,19 @@ public class HikeConstants
 
 	public static final String VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION = "scd";
 
+	public static final String VOIP_AEC_CPU_NR = "cpunr";
+
+	public static final String VOIP_AEC_CPU = "cpuaec";
+
+	public static final String VOIP_AEC_MO = "aecmo";
+
+	public static final String VOIP_AEC_TYPE = "aect";
+
+	public static final String VOIP_AEC_CNP = "cnp";
+
+	public static final String VOIP_AEC_TAIL_TYPE = "att";
+	
+	
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
