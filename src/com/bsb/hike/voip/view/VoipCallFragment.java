@@ -89,6 +89,8 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 
 	private CallFragmentListener activity;
 
+	private String partnerName;
+
 	@Override
 	public void onAttach(Activity activity)
 	{
@@ -279,6 +281,8 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			callActionsView.stopPing();
 			callActionsView = null;
 		}
+
+		partnerName = null;
 
 		releaseWakeLock();
 
@@ -803,7 +807,8 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		else
 		{
 			nameOrMsisdn = contactInfo.getNameOrMsisdn();
-			if(contactInfo.getName() != null)
+			partnerName = contactInfo.getName();
+			if(partnerName != null)
 			{
 				contactMsisdnView.setVisibility(View.VISIBLE);
 				contactMsisdnView.setText(contactInfo.getMsisdn());
@@ -869,6 +874,7 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		Bundle bundle = new Bundle();
 		bundle.putString(VoIPConstants.PARTNER_MSISDN, voipService.getPartnerClient().getPhoneNumber());
 		bundle.putInt(VoIPConstants.CALL_FAILED_REASON, callFailCode);
+		bundle.putString(VoIPConstants.PARTNER_NAME, partnerName);
 
 		activity.showCallFailedFragment(bundle);
 	}
