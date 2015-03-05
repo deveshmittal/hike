@@ -1532,8 +1532,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			int unreadMessageCount = 0;
 
             Map<String, Pair<List<String>, Long>> map = new HashMap<String, Pair<List<String>, Long>>();
-            long sortingTimeStamp = System.currentTimeMillis();
-			long lastMessageTimeStamp = System.currentTimeMillis()/1000;
+            long sortingTimeStamp = System.currentTimeMillis()/1000;
+			long lastMessageTimeStamp = sortingTimeStamp;
 			int totalMessage = convMessages.size()-1;
 			long baseId = -1;
 			for (ContactInfo contact : contacts)
