@@ -36,7 +36,7 @@ public class NotificationDismissedReceiver extends BroadcastReceiver
 				 int maxRetryCount = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.MAX_REPLY_RETRY_NOTIF_COUNT, HikeConstants.DEFAULT_MAX_REPLY_RETRY_NOTIF_COUNT);
 				if (retryCount < maxRetryCount && !HikeNotificationMsgStack.getInstance(context).isEmpty())
 				{
-					long retryTime = HikeNotification.getInstance(context).getNextRetryNotificationTime();
+					long retryTime = HikeNotification.getInstance(context).getNextRetryNotificationTime(retryCount);
 					Logger.i("NotificationDismissedReceiver", "NotificationDismissedReceiver called alarm time = "
 							+retryTime  + "retryCount = "+retryCount);
 					
