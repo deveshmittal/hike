@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -60,6 +62,12 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 	private View mActionBarDoneContainer;
 
+	private TabPageIndicator indicator;
+
+	private ViewPager pager;
+
+	private View mActionBarBackButton;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -88,10 +96,10 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		editView.setOnDoodlingStartListener(clickHandler);
 		FragmentPagerAdapter adapter = new PhotoEditViewPagerAdapter(getSupportFragmentManager(), clickHandler);
 
-		ViewPager pager = (ViewPager) findViewById(R.id.pager);
+		pager = (ViewPager) findViewById(R.id.pager);
 		pager.setAdapter(adapter);
 
-		TabPageIndicator indicator = (TabPageIndicator) findViewById(R.id.indicator);
+		indicator = (TabPageIndicator) findViewById(R.id.indicator);
 		indicator.setViewPager(pager);
 
 		undoButton = (ImageView) findViewById(R.id.undo);
@@ -133,7 +141,8 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.photos_action_bar, null);
-		actionBarView.findViewById(R.id.back).setOnClickListener(new OnClickListener()
+		mActionBarBackButton = actionBarView.findViewById(R.id.back);
+		mActionBarBackButton.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -273,6 +282,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 							@Override
 							public void onAction(int actionCode)
 							{
+								getSupportFragmentManager().popBackStackImmediate();
 								if (actionCode == PhotoActionsFragment.ACTION_SEND)
 								{
 									editView.saveImage(HikeFileType.IMAGE, null, new HikePhotosListener()
@@ -326,17 +336,38 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 										}
 
 										@Override
-										public void onComplete(File f)
+										public void onComplete(final File f)
 										{
-											// TODO Auto-generated method stub
-											getSupportFragmentManager().popBackStackImmediate();
-											ProfilePicFragment profilePicFragment = new ProfilePicFragment();
-											Bundle b = new Bundle();
-											b.putString(HikeConstants.HikePhotos.FILENAME, f.getAbsolutePath());
-											profilePicFragment.setArguments(b);
-											getSupportFragmentManager().beginTransaction()
-													.setCustomAnimations(R.anim.fade_in_animation, R.anim.photo_option_out, R.anim.fade_in_animation, R.anim.photo_option_out)
-													.replace(R.id.overlayFrame, profilePicFragment).addToBackStack(null).commit();
+											new Handler(Looper.getMainLooper()).postDelayed(new Runnable()
+											{
+												@Override
+												public void run()
+												{
+													editView.setVisibility(View.VISIBLE);
+													mActionBarBackButton.setVisibility(View.GONE);
+													getSupportFragmentManager().popBackStackImmediate();
+													ProfilePicFragment profilePicFragment = new ProfilePicFragment();
+													Bundle b = new Bundle();
+													b.putString(HikeConstants.HikePhotos.FILENAME, f.getAbsolutePath());
+													profilePicFragment.setArguments(b);
+													getSupportFragmentManager()
+															.beginTransaction()
+															.setCustomAnimations(R.anim.fade_in_animation, R.anim.photo_option_out, R.anim.fade_in_animation,
+																	R.anim.photo_option_out).replace(R.id.overlayFrame, profilePicFragment).addToBackStack(null).commit();
+												}
+											}, 600);
+											
+											new Handler(Looper.getMainLooper()).postDelayed(new Runnable()
+											{
+
+												@Override
+												public void run()
+												{
+													pager.setVisibility(View.GONE);
+													indicator.setVisibility(View.GONE);
+													editView.setVisibility(View.GONE);
+												}
+											}, 200);
 										}
 									});
 

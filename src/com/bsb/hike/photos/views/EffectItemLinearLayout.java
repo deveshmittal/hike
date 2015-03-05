@@ -2,7 +2,6 @@ package com.bsb.hike.photos.views;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -12,11 +11,11 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.view.RoundedDrawable;
+
 /**
  * @author akhiltripathi
- *	
- * Abstract class for thumbnails. 
- * Any Feature added later must extend this thumbnail class to preview its effect on a thumbnail.
+ * 
+ *         Abstract class for thumbnails. Any Feature added later must extend this thumbnail class to preview its effect on a thumbnail.
  * 
  */
 
@@ -36,8 +35,6 @@ public abstract class EffectItemLinearLayout extends LinearLayout
 	public EffectItemLinearLayout(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
-		// TODO Auto-generated constructor stub
-
 	}
 
 	public EffectItemLinearLayout(Context context)

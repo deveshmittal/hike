@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterList;
-import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
 import com.bsb.hike.photos.views.DoodleEffectItemLinearLayout;
 import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
@@ -75,14 +73,20 @@ public final class PreviewFragment extends Fragment
 			inflated.setBrushWidth(HikeConstants.HikePhotos.PREVIEW_BRUSH_WIDTH);
 			inflated.refresh();
 			inflated.setPadding(0, 0, 0, 0);
-
 			inflated.invalidate();
 			handler.setDoodlePreview(inflated);
-
 			break;
 		case Effects:
 			layout.setWeightSum(HikeConstants.HikePhotos.PHOTOS_PAGER_FILTER_WEIGHT_SUM);
 			adjuster.setVisibility(View.GONE);
+			break;
+		case Border:
+			break;
+		case Quality:
+			break;
+		case Text:
+			break;
+		default:
 			break;
 		}
 		layout.invalidate();
@@ -102,13 +106,13 @@ public final class PreviewFragment extends Fragment
 
 		private MenuType itemType;
 
-		private EditorClickListener adapter;
+		private EditorClickListener clickListener;
 
 		public ImageAdapter(Context context, MenuType type, EditorClickListener Adapter)
 		{
 			mContext = context;
 			itemType = type;
-			adapter = Adapter;
+			clickListener = Adapter;
 		}
 
 		@Override
@@ -159,7 +163,7 @@ public final class PreviewFragment extends Fragment
 				FilterEffectItemLinearLayout filterPreviewView = (FilterEffectItemLinearLayout) convertView;
 				filterPreviewView.init(mOriginalBitmap, myFilters.names.get(position));
 				filterPreviewView.setFilter(mContext, myFilters.filters.get(position));
-				filterPreviewView.setOnClickListener(adapter);
+				filterPreviewView.setOnClickListener(clickListener);
 				return filterPreviewView;
 			case Border:
 				break;
@@ -173,7 +177,7 @@ public final class PreviewFragment extends Fragment
 				DoodleEffectItemLinearLayout temp3 = (DoodleEffectItemLinearLayout) convertView;
 				temp3.setBrushColor(HikePhotosUtils.DoodleColors[position]);
 				temp3.refresh();
-				temp3.setOnClickListener(adapter);
+				temp3.setOnClickListener(clickListener);
 				break;
 			case Quality:
 

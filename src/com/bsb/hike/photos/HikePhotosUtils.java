@@ -133,7 +133,7 @@ public class HikePhotosUtils
 					effectfilters = new FilterList();
 					effectfilters.addFilter("ORIGINAL", FilterType.ORIGINAL);
 					effectfilters.addFilter("X PRO 2", FilterType.X_PRO_2);
-					effectfilters.addFilter("Filter 1", FilterType.FILTER1);
+					effectfilters.addFilter("SOLOMON", FilterType.FILTER1);
 					effectfilters.addFilter("1977", FilterType.E1977);
 					effectfilters.addFilter("NASHVILLE", FilterType.NASHVILLE);
 					effectfilters.addFilter("CLASSIC", FilterType.CLASSIC);

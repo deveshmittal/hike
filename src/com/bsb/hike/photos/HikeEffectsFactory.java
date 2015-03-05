@@ -26,7 +26,7 @@ import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
  * @see http://developer.android.com/guide/topics/renderscript/compute.html
  * 
  * @see http://developer.android.com/reference/android/graphics/ColorMatrix.html
- *
+ * 
  */
 
 public final class HikeEffectsFactory
@@ -49,7 +49,7 @@ public final class HikeEffectsFactory
 	private boolean isGPUFree = true;
 
 	private ScriptIntrinsicBlur mScriptBlur;
-    
+
 	private void LoadRenderScript(Bitmap image)
 	{
 		// Initialize RS // Load script
@@ -92,7 +92,7 @@ public final class HikeEffectsFactory
 	 *            value : Float defining the percentage of filter to be applied
 	 * 
 	 * @return Method returns the color matrix to be applied for a particular filter
-	 *
+	 * 
 	 */
 	private ColorMatrix getColorMatrixforFilter(FilterType type, boolean isPreMatrix, float value)
 	{
@@ -263,7 +263,15 @@ public final class HikeEffectsFactory
 	{
 		if (type == FilterType.ORIGINAL)
 		{
-			listener.onFilterApplied(mBitmapIn.copy(mBitmapIn.getConfig(), true));
+			Bitmap mutableBmp = mBitmapIn.copy(mBitmapIn.getConfig(), true);
+			if (blur)
+			{
+				listener.onFilterApplied(createBlurredImage(mutableBmp));
+			}
+			else
+			{
+				listener.onFilterApplied(mutableBmp);
+			}
 		}
 		else
 		{
@@ -409,16 +417,29 @@ public final class HikeEffectsFactory
 		return sepiaMatrix;
 	}
 
+	private Bitmap createBlurredImage(Bitmap originalBitmap)
+	{
+		Bitmap blurredBitmap = Bitmap.createBitmap(originalBitmap);
+		Bitmap mBitmapOut = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), mBitmapIn.getConfig());
+		Allocation output = Allocation.createFromBitmap(mRS, mBitmapOut);
+		mInAllocation = Allocation.createFromBitmap(mRS, originalBitmap);
+		mScriptBlur.setRadius(HikePhotosUtils.dpToPx(HikeMessengerApp.getInstance().getApplicationContext(), 10));
+		mScriptBlur.setInput(mInAllocation);
+		mScriptBlur.forEach(output);
+		output.copyTo(blurredBitmap);
+		return blurredBitmap;
+	}
+
 	// UI thread Handler object to make changes to the UI from a seperate threat
 	private static Handler uiHandler = new Handler(Looper.getMainLooper());
 
 	/**
 	 * @author akhiltripathi
-	 *
+	 * 
 	 *         Class implements Runnable Interface
 	 * 
 	 *         Applies specific Effect to mBitmapIn object on a new thread
-	 *
+	 * 
 	 */
 	public class ApplyFilterTask implements Runnable
 	{
@@ -445,8 +466,6 @@ public final class HikeEffectsFactory
 		@Override
 		public void run()
 		{
-			// TODO Auto-generated method stub
-
 			float[] preMatrix = getPreScriptEffects();
 			if (preMatrix != null)
 			{
@@ -460,8 +479,8 @@ public final class HikeEffectsFactory
 			}
 
 			applyEffect(effect);
-			
-			if(blurImage)
+
+			if (blurImage)
 			{
 				mInAllocation = Allocation.createFromBitmap(mRS, mBitmapOut);
 				mScriptBlur.setRadius(HikePhotosUtils.dpToPx(HikeMessengerApp.getInstance().getApplicationContext(), 10));
@@ -681,11 +700,11 @@ public final class HikeEffectsFactory
 /**
  * 
  * @author akhiltripathi
- *
+ * 
  *         Class implements Curve Fitting Image Processing Technique
- *
+ * 
  *         Only Cubic Spline Curves Implemented
- *
+ * 
  */
 class Splines
 {
