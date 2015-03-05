@@ -1486,6 +1486,9 @@ public class VoIPService extends Service {
 					} catch (IllegalStateException e) {
 						Logger.d(VoIPConstants.TAG, "startAudioTrackMonitoringThread() IllegalStateException: " + e.toString());
 						break;
+					} catch (NullPointerException e) {
+						Logger.d(VoIPConstants.TAG, "startAudioTrackMonitoringThread() NullPointerException: " + e.toString());
+						break;
 					}
 				}
 				
