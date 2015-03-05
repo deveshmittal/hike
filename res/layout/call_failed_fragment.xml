@@ -20,9 +20,10 @@
 	        android:layout_height="wrap_content"
 	        android:layout_marginTop="38dp"
 	        android:layout_centerHorizontal="true"
-	        android:textSize="20dp"
+	        android:textSize="16dp"
+	        android:gravity="center"
 	        android:textColor="@color/standard_black"
-	        android:textStyle="italic" />
+	        android:textStyle="bold|italic" />
 
 		<com.bsb.hike.view.CustomFontTextView
 	        android:id="@+id/subheading"
@@ -31,8 +32,7 @@
 	        android:layout_below="@id/heading"
 	        android:layout_marginTop="6dp"
 	        android:layout_centerHorizontal="true"
-	        android:text="@string/voip_call_failed_frag_subheader"
-	        android:textSize="14dp"
+	        android:textSize="15dp"
 	        android:textColor="@color/standard_light_grey2"
 	        android:textStyle="italic" />
 
