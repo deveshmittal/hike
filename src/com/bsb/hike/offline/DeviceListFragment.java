@@ -100,7 +100,6 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     private WifiP2pDevice device;
     private int mIconImageSize;
     private IconLoader iconLoader;
-    //private WifiP2pInfo info;
     public static  WifiP2pGroup groupInfo = null;
     public static Intent intent;
     private Object syncMsisdn;
