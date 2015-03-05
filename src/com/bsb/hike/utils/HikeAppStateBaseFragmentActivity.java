@@ -136,7 +136,16 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 
 					Bundle arguments = (Bundle) object;
 
-					ImageViewerFragment imageViewerFragment = new ImageViewerFragment();
+					ImageViewerFragment imageViewerFragment = null;
+					
+					if(arguments.containsKey(HikeConstants.CAN_EDIT_DP))
+					{
+						imageViewerFragment = new ImageViewerFragment(true);	
+					}
+					else
+					{
+						imageViewerFragment = new ImageViewerFragment();
+					}
 					imageViewerFragment.setArguments(arguments);
 
 					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();

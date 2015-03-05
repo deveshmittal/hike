@@ -848,6 +848,7 @@ public class AccountUtils
 				
 
 			case DELETE_STATUS:
+			case DELETE_DP:
 				requestBase = new HttpDelete(base + hikeHttpRequest.getPath());
 				break;
 

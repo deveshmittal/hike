@@ -2,7 +2,6 @@ package com.bsb.hike.utils;
 
 import java.io.File;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -11,7 +10,6 @@ import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.view.View;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
@@ -27,18 +25,6 @@ public class ChangeProfileImageBaseActivity extends HikeAppStateBaseFragmentActi
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-	}
-
-	public void onChangeImageClicked(View v)
-	{
-		/*
-		 * The wants to change their profile picture. Open a dialog to allow them pick Camera or Gallery
-		 */
-		final CharSequence[] items = getResources().getStringArray(R.array.profile_pic_dialog);
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(R.string.choose_picture);
-		builder.setItems(items, this);
-		builder.show();
 	}
 
 	@Override
@@ -97,5 +83,5 @@ public class ChangeProfileImageBaseActivity extends HikeAppStateBaseFragmentActi
 			startActivityForResult(intent, HikeConstants.GALLERY_RESULT);
 			break;
 		}
-	}
+	}	
 }
