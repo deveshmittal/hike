@@ -26,9 +26,9 @@ class VignetteImageView extends ImageView
 	private int width;
 
 	private Bitmap vignetteBitmap;
-	
+
 	private FilterType filter;
-	
+
 	public void setFilter(FilterType Type)
 	{
 		this.filter = Type;
@@ -51,10 +51,10 @@ class VignetteImageView extends ImageView
 		super(context, attrs, defStyleAttr);
 		this.filter = FilterType.ORIGINAL;
 	}
-	
+
 	public void getMeasure(Bitmap bitmap)
 	{
-		if(bitmap!=null)
+		if (bitmap != null)
 		{
 			width = bitmap.getWidth();
 			vignetteBitmap = Bitmap.createBitmap(width, width, Config.ARGB_8888);
@@ -66,12 +66,11 @@ class VignetteImageView extends ImageView
 	{
 		return vignetteBitmap;
 	}
-	
-	
+
 	/**
 	 * @author akhiltripathi
 	 * 
-	 *  Draws a vignette on the layer of provided image size respective to the current set filter.
+	 *         Draws a vignette on the layer of provided image size respective to the current set filter.
 	 * 
 	 * @param original
 	 */
@@ -85,34 +84,34 @@ class VignetteImageView extends ImageView
 		switch (filter)
 		{
 		case X_PRO_2:
-			//Vignette: Stop 1 = #000000 84%, Opacity = 0%; Stop 2 = #232443 120%, Opacity = 100%
-			colors = new int[]{0x00000000,0xAA000000,0xFF232443};
-			stops = new float[]{0.0f,0.84f/1.2f,1.0f};
+			// Vignette: Stop 1 = #000000 84%, Opacity = 0%; Stop 2 = #232443 120%, Opacity = 100%
+			colors = new int[] { 0x00000000, 0xAA000000, 0xFF232443 };
+			stops = new float[] { 0.0f, 0.84f / 1.2f, 1.0f };
 			makeRadialGradient(1.2f, colors, stops);
 			break;
 		case POLAROID:
-			colors = new int[]{0x00000000,0xFF232443};
-			stops = new float[]{0.0f,1.0f};
+			colors = new int[] { 0x00000000, 0xFF232443 };
+			stops = new float[] { 0.0f, 1.0f };
 			makeRadialGradient(1.5f, colors, stops);
 			break;
 		case RETRO:
 		case KELVIN:
 		case EARLYBIRD:
 		case BGR:
-			//Vignette: Stop 1 = #000000 74%, Opacity = 0%; Stop 2 = #000000 120%, Opacity = 100%
-			colors = new int[]{0x00000000,0xFF000000};
-			stops = new float[]{0.0f,1.0f};
+			// Vignette: Stop 1 = #000000 74%, Opacity = 0%; Stop 2 = #000000 120%, Opacity = 100%
+			colors = new int[] { 0x00000000, 0xFF000000 };
+			stops = new float[] { 0.0f, 1.0f };
 			makeRadialGradient(1.2f, colors, stops);
 			break;
 		case APOLLO:
-			//Vignette Stop 1: #18363f, Position 72%, Opacity 0% Stop 2: #18363f, Position 120%, Opacity 100%
-			colors = new int[]{0x00000000,0x1118363F,0xFF18363F};
-			stops = new float[]{0.0f,0.72f/1.2f,1.0f};
+			// Vignette Stop 1: #18363f, Position 72%, Opacity 0% Stop 2: #18363f, Position 120%, Opacity 100%
+			colors = new int[] { 0x00000000, 0x1118363F, 0xFF18363F };
+			stops = new float[] { 0.0f, 0.72f / 1.2f, 1.0f };
 			makeRadialGradient(1.2f, colors, stops);
 			break;
 		default:
 			break;
-				
+
 		}
 		this.setImageBitmap(vignetteBitmap);
 	}

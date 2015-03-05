@@ -53,9 +53,5 @@
                 android:src="@drawable/plus" />
         </FrameLayout>
     </LinearLayout>
-	<View 
-	    android:layout_width="match_parent"
-	    android:layout_height="2dp"
-	    android:background="@color/photos_doodle_seperator"
-	    android:layout_alignParentBottom="true"/>
+	
 </RelativeLayout>

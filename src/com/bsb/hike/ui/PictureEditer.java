@@ -48,7 +48,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 	PhotosEditerFrameLayoutView editView;
 
-	private int menuIcons[] = { R.drawable.filters, R.drawable.doodle_icon };
+	private int menuIcons[] = { R.drawable.photos_tabs_filter_selector, R.drawable.photos_tabs_doodle_selector };
 
 	private EditorClickListener clickHandler;
 
@@ -233,10 +233,16 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 			else if (v.getClass() == DoodleEffectItemLinearLayout.class)
 			{
+				DoodleEffectItemLinearLayout prev = HikePhotosUtils.FilterTools.getCurrentDoodleItem();
 				DoodleEffectItemLinearLayout me = (DoodleEffectItemLinearLayout) v;
 				editView.setBrushColor(me.getBrushColor());
 				doodlePreview.setBrushColor(me.getBrushColor());
 				doodlePreview.refresh();
+				me.select();
+				if (prev != null && prev.getBrushColor() != me.getBrushColor())
+				{
+					prev.unSelect();
+				}
 
 			}
 			else

@@ -43,9 +43,9 @@ public final class HikeEffectsFactory
 	private Allocation mOutAllocations;
 
 	private ScriptC_HikePhotosEffects mScript;
-	
+
 	private ScriptIntrinsicBlur mScriptBlur;
-    
+
 	private void LoadRenderScript(Bitmap image)
 	{
 		// Initialize RS // Load script
@@ -54,7 +54,7 @@ public final class HikeEffectsFactory
 			mRS = RenderScript.create(HikeMessengerApp.getInstance().getApplicationContext());
 			mScript = new ScriptC_HikePhotosEffects(mRS);
 			mScriptBlur = ScriptIntrinsicBlur.create(mRS, Element.U8_4(mRS));
-	        
+
 		}
 
 		// Allocate buffer
@@ -454,8 +454,8 @@ public final class HikeEffectsFactory
 			}
 
 			applyEffect(effect);
-			
-			if(blurImage)
+
+			if (blurImage)
 			{
 				mInAllocation = Allocation.createFromBitmap(mRS, mBitmapOut);
 				mScriptBlur.setRadius(HikePhotosUtils.dpToPx(HikeMessengerApp.getInstance().getApplicationContext(), 10));
