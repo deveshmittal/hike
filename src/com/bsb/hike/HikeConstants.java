@@ -2037,6 +2037,8 @@ public class HikeConstants
 		public static final String VOIP_MSG_TYPE_MISSED_CALL_INCOMING = "vmci";
 
 		public static final String VOIP_MSG_TYPE_MISSED_CALL_OUTGOING = "vmco";
+		
+		public static final String OFFLINE_MSG_REQUEST =   "omr";
 	}
 	
 	public static final class SMSNative

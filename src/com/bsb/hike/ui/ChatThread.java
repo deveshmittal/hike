@@ -1676,9 +1676,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					setupThemePicker(null);
 					break;
 				case 8:
-					com.bsb.hike.offline.WiFiDirectActivity.isOfflineFileTransferOn = true;
+					/*com.bsb.hike.offline.WiFiDirectActivity.isOfflineFileTransferOn = true;
 				 	Intent intent = new Intent(getApplicationContext(), com.bsb.hike.offline.WiFiDirectActivity.class);
 				 	startActivity(intent);
+				 	*/
+				    try {
+				    	
+				    	JSONObject message = new JSONObject();
+						message.put(HikeConstants.TO, mContactNumber);
+						message.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0);
+						message.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.OFFLINE_MSG_REQUEST);
+						HikeMqttManagerNew.getInstance().sendMessage(message, HikeMqttManagerNew.MQTT_QOS_ONE);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				 	break;
 				}
 

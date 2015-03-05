@@ -46,8 +46,6 @@ import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
-import android.net.wifi.p2p.WifiP2pInfo;
-import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.net.wifi.p2p.WifiP2pManager.GroupInfoListener;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.AsyncTask;
@@ -156,56 +154,6 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
         }
     }
-
-    /*
-    @Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-		String localIP = com.bsb.hike.offline.Utils.getLocalIPAddress();
-		Log.d(WiFiDirectActivity.TAG,"localip " + localIP);
-		
-		// Trick to find the ip in the file /proc/net/arp
-		try
-		{
-			switch(resultCode)
-			{
-				case RESULT_OK:
-					String client_mac_fixed = new String(currentDevice.deviceAddress).replace("99", "19");
-					String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
-			        Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
-			        Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);
-			        
-					String uri = data.getStringExtra(FileTransferService.EXTRAS_FILE_PATH);
-					//TextView statusText = (TextView) mContentView.findViewById(R.id.status_text);
-					//statusText.setText("Sending: " + uri);
-					Log.d(WiFiDirectActivity.TAG, "Intent----------- " + uri);
-					Intent serviceIntent = new Intent(getActivity(), FileTransferService.class);
-					serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
-					serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, uri.toString());
-			
-					if(localIP.equals(IP_SERVER) || ( (clientIP!=null) && !(clientIP.equals(IP_SERVER)) )){
-						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
-					}else{
-						serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
-					}
-			
-					serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, fileTransferPort);
-					long start = System.currentTimeMillis();
-					getActivity().startService(serviceIntent);
-					long end = System.currentTimeMillis();
-					Toast.makeText(getActivity(), "Time taken: "+(end-start) +"ms", Toast.LENGTH_SHORT).show();
-					break;
-				default:
-					Toast.makeText(getActivity(), "File not selected!", Toast.LENGTH_SHORT).show();
-			}
-		}
-		catch(NullPointerException e)
-		{
-			Log.e("wifidirectdemo", "Something went wrong. Please select the file again!");
-		}
-	}
-	*/
-	
     /**
      * Initiate a connection with the peer.
      */
@@ -816,9 +764,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     				percentage = (currentSizeReceived/(double)numOfIterations);
     			else
     				percentage = 100.0;
+    			
     			if( (percentage*100)>=100)
-    				percentage = 1.0;
-    			percentage *= 100.0;
+    				percentage *= 100.0;
     			if (percentage >= 100)
     			{
     				peersStatus.put(connectedDevice, "Available for file transfer");
