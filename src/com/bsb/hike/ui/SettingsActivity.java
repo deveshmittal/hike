@@ -119,7 +119,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 		itemIcons.add(R.drawable.ic_notifications_settings);
 		itemIcons.add(R.drawable.ic_auto_download_media_settings);
-		itemIcons.add(R.drawable.ic_auto_download_media_settings);
+		itemIcons.add(R.drawable.ic_settings_chat);
 		itemIcons.add(R.drawable.ic_sms_settings);
 		if (isConnectedAppsPresent)
 		{
