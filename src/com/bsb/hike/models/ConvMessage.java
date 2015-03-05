@@ -85,6 +85,15 @@ public class ConvMessage
 
 	public PlatformWebMessageMetadata platformWebMessageMetadata;
 
+	/* Adding entries to the beginning of this list is not backwards compatible */
+	public static enum OriginType
+	{
+		NORMAL, /* message sent to server */
+		BROADCAST, /* message originated from a broadcast */
+	};
+	
+	private OriginType messageOriginType = OriginType.NORMAL;
+
 	public boolean isLovePresent(){
 		return contentLove!=null;
 	}
@@ -320,6 +329,7 @@ public class ConvMessage
 		this.platformWebMessageMetadata = other.platformWebMessageMetadata;
 		this.contentLove = other.contentLove;
 		if (other.isBroadcastMessage())
+		this.messageOriginType  = other.messageOriginType;
 		{
 			this.messageBroadcastId = other.getMsisdn();
 		}
@@ -827,6 +837,11 @@ public class ConvMessage
 	{
 		return State.values()[val];
 	}
+	
+	public static OriginType originTypeValue(int val)
+	{
+		return OriginType.values()[val];
+	}
 
 	public void setState(State state)
 	{
@@ -1030,6 +1045,16 @@ public class ConvMessage
 
 	public String getMessageBroadcastId() {
 		return this.messageBroadcastId;
+	}
+
+	public OriginType getMessageOriginType()
+	{
+		return messageOriginType;
+	}
+
+	public void setMessageOriginType(OriginType messageOriginType)
+	{
+		this.messageOriginType = messageOriginType;
 	}
 
 }

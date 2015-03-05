@@ -128,7 +128,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ DBConstants.MESSAGE_TYPE + " INTEGER" + " INTEGER DEFAULT -1, " // The type of the message.
 				+ DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER DEFAULT -1, " // love id applicable to few messages like content
 				+ DBConstants.SERVER_ID + " INTEGER, "
-				+ DBConstants.MESSAGE_ORIGIN_TYPE + " INTEGER DEFAULT 0"
+				+ DBConstants.MESSAGE_ORIGIN_TYPE + " INTEGER DEFAULT 0" //normal/broadcast/multi-forward
 				+ " ) ";
 
 		db.execSQL(sql);
@@ -154,6 +154,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ DBConstants.MESSAGE_METADATA + " TEXT, "
 				+ DBConstants.GROUP_PARTICIPANT + " TEXT, "
 				+ DBConstants.SERVER_ID + " INTEGER, "
+				+ DBConstants.MESSAGE_ORIGIN_TYPE + " INTEGER DEFAULT 0, " // last message origin type
 				// Messages table columns end
 
 				+ DBConstants.IS_STATUS_MSG + " INTEGER DEFAULT 0, " // Whether the message is a status message.
@@ -682,10 +683,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			String alter3 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.SERVER_ID + " INTEGER";
 			//We are adding a new field sorting timestamp to use this for ordering purpose.
 			String alter4 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.SORTING_TIMESTAMP + " LONG";
+			String alter5 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_ORIGIN_TYPE + " INTEGER DEFAULT 0";
 			db.execSQL(alter1);
 			db.execSQL(alter2);
 			db.execSQL(alter3);
 			db.execSQL(alter4);
+			db.execSQL(alter5);
 			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.UPGRADE_FOR_SERVER_ID_FIELD, 1);
 		}
 	}
@@ -1350,17 +1353,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv,boolean bindForConvId)
 	{
-		final int messageColumn = 1;
-		final int msgStatusColumn = 2;
-		final int timestampColumn = 3;
-		final int mappedMsgIdColumn = 4;
-		final int messageMetadataColumn = 5;
-		final int groupParticipant = 6;
-		final int isHikeMessageColumn = 7;
-		final int messageHash = 8;
-		final int typeColumn = 9;
-		final int msgMsisdnColumn = 10;
-		final int msisdnColumn = 11;
+		final int msgOriginTypeColumn = 1;
+		final int messageColumn = 2;
+		final int msgStatusColumn = 3;
+		final int timestampColumn = 4;
+		final int mappedMsgIdColumn = 5;
+		final int messageMetadataColumn = 6;
+		final int groupParticipant = 7;
+		final int isHikeMessageColumn = 8;
+		final int messageHash = 9;
+		final int typeColumn = 10;
+		final int msgMsisdnColumn = 11;
+		final int msisdnColumn = 12;
 
 		insertStatement.clearBindings();
 		insertStatement.bindString(messageColumn, conv.getMessage());
@@ -1392,6 +1396,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 		insertStatement.bindLong(typeColumn, conv.getMessageType());
 		insertStatement.bindString(msgMsisdnColumn, conv.getMsisdn());
+		insertStatement.bindLong(msgOriginTypeColumn, conv.getMessageOriginType().ordinal());
 	}
 
 	public boolean wasMessageReceived(ConvMessage conv)
@@ -1457,7 +1462,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	{
 		ContactManager contactManager = ContactManager.getInstance();
 		ArrayList<ConvMessage> convMessages= new ArrayList<ConvMessage>(1);
-		convMessages.add(new ConvMessage(convMessage));
+		ConvMessage broadcastConvMessage = new ConvMessage(convMessage);
+		//Here we set origin type of 
+		broadcastConvMessage.setMessageOriginType(ConvMessage.OriginType.BROADCAST);
+		convMessages.add(broadcastConvMessage);
 		ArrayList<String> contactMsisdns = convMessage.getSentToMsisdnsList();
 		ArrayList<ContactInfo> contacts = new ArrayList<ContactInfo>();
 		for (String msisdn : contactMsisdns)
@@ -1738,16 +1746,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 	private SQLiteStatement getSqLiteStatementToInsertIntoMessagesTable(boolean createConvIfNotExist) {
         SQLiteStatement insertStatement = null;
+        //TODO we need to insert messageOrginType field in both of these queries. 
         if(createConvIfNotExist){
-            insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
+            insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE_ORIGIN_TYPE + "," + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
                     + DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
                     + ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) "
-                    + " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ?, ?, ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "."
+                    + " SELECT ?, ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ?, ?, ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "."
                     + DBConstants.MSISDN + "=?");
         }else{
-            insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
+            insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE_ORIGIN_TYPE + "," + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
                     + DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT
-                    + ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) values (?,?,?,?,?,?,?,?,?,?)");
+                    + ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) values (?,?,?,?,?,?,?,?,?,?,?)");
         }
         return insertStatement;
     }
@@ -1885,6 +1894,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			contentValues.put(DBConstants.MSG_STATUS, conv.getState().ordinal());
 			contentValues.put(DBConstants.SORTING_TIMESTAMP, sortingTimeStamp);
 			contentValues.put(DBConstants.LAST_MESSAGE_TIMESTAMP, lastMessageTimeStamp);
+			contentValues.put(DBConstants.MESSAGE_ORIGIN_TYPE, conv.getMessageOriginType().ordinal());
 		}
 		if (conv.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
@@ -2239,7 +2249,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			/* TODO this should be ORDER BY timestamp */
 			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
 					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.IS_HIKE_MESSAGE, DBConstants.READ_BY,
-					DBConstants.MESSAGE_TYPE }, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + " DESC", limitStr);
+					DBConstants.MESSAGE_TYPE, DBConstants.MESSAGE_ORIGIN_TYPE }, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + " DESC", limitStr);
 
 			List<ConvMessage> elements = getMessagesFromDB(c, conversation);
 			Collections.reverse(elements);
@@ -2990,7 +3000,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			
 			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
 					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.IS_HIKE_MESSAGE, DBConstants.READ_BY,
-					DBConstants.MESSAGE_TYPE }, DBConstants.MESSAGE_ID + " =?", new String[] { Long.toString(msgId) }, null, null, null, null);
+					DBConstants.MESSAGE_TYPE, DBConstants.MESSAGE_ORIGIN_TYPE }, DBConstants.MESSAGE_ID + " =?", new String[] { Long.toString(msgId) }, null, null, null, null);
 			List<ConvMessage> elements = getMessagesFromDB(c, conversation);
 			return elements.size() > 0 ? elements.get(elements.size() - 1) : null;
 			}
@@ -5082,7 +5092,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			/* TODO this should be ORDER BY timestamp */
 			String query = "SELECT " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + "," + DBConstants.TIMESTAMP + "," + DBConstants.MESSAGE_ID + ","
 					+ DBConstants.MAPPED_MSG_ID + "," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.IS_HIKE_MESSAGE + ","
-					+ DBConstants.READ_BY + "," + DBConstants.MESSAGE_TYPE + " FROM " + DBConstants.MESSAGES_TABLE + " where " + selection + " order by " + DBConstants.MESSAGE_ID
+					+ DBConstants.READ_BY + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MESSAGE_ORIGIN_TYPE + " FROM " + DBConstants.MESSAGES_TABLE + " where " + selection + " order by " + DBConstants.MESSAGE_ID
 					+ " DESC LIMIT " + limitStr + " OFFSET " + startFrom;
 			c = mDb.rawQuery(query, new String[] { msisdn });
 
@@ -5399,6 +5409,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		final int isHikeMessageColumn = c.getColumnIndex(DBConstants.IS_HIKE_MESSAGE);
 		final int readByColumn = c.getColumnIndex(DBConstants.READ_BY);
 		final int typeColumn = c.getColumnIndex(DBConstants.MESSAGE_TYPE);
+		final int messageOriginTypeColumn = c.getColumnIndex(DBConstants.MESSAGE_ORIGIN_TYPE);
 		final int loveIdColumn = c.getColumnIndex(DBConstants.HIKE_CONV_DB.LOVE_ID_REL);
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
 		SparseArray<ConvMessage> contentMessages = new SparseArray<ConvMessage>();
@@ -5434,6 +5445,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				Logger.w(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
 			}
 			message.setReadByArray(c.getString(readByColumn));
+			message.setMessageOriginType(ConvMessage.originTypeValue(c.getInt(messageOriginTypeColumn)));
 			elements.add(elements.size(), message);
 		}
 		if(contentMessages.size()>0){
