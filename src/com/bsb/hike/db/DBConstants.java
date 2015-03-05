@@ -282,7 +282,7 @@ public interface DBConstants
 	
 	public static final String SERVER_ID = "serverId";
 	
-	public static final String CONVERSATION_TYPE = "conversationType";
+	public static final String MESSAGE_ORIGIN_TYPE = "messageOriginType";
 	
 	public static final int NORMAL_TYPE = 0;
 	
