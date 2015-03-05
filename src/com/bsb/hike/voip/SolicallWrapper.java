@@ -1,5 +1,7 @@
 package com.bsb.hike.voip;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 
 public class SolicallWrapper {
@@ -19,21 +21,35 @@ public class SolicallWrapper {
 	
 	public void init() {
 		int init = packageInit();
-		Logger.d(VoIPConstants.TAG, "AEC packageInit: " + init);
-
-		init = AECInit(0, 2, (short)0, (short)4, (short)100, -18);
+		
+		// Get AEC parameters
+		HikeSharedPreferenceUtil sharedPref = HikeSharedPreferenceUtil.getInstance();
+		int CpuNoiseReduction = sharedPref.getData(HikeConstants.VOIP_AEC_CPU_NR, 2);
+		int CpuAEC = sharedPref.getData(HikeConstants.VOIP_AEC_CPU, 2);
+		short AecMinOutput = (short) sharedPref.getData(HikeConstants.VOIP_AEC_MO, 100);
+		short AecTypeParam = (short) sharedPref.getData(HikeConstants.VOIP_AEC_TYPE, 8);
+		short comfortNoise = (short) sharedPref.getData(HikeConstants.VOIP_AEC_CNP, 100);
+		int AecTailType = sharedPref.getData(HikeConstants.VOIP_AEC_TAIL_TYPE, -18);
+		
+		Logger.d(VoIPConstants.TAG, "AEC parameters: " + CpuNoiseReduction + ", " 
+				+ CpuAEC + ", " 
+				+ AecMinOutput + ", " 
+				+ AecTypeParam + ", " 
+				+ comfortNoise + ", " 
+				+ AecTailType);
+		
+		// Initialize AEC
+		init = AECInit(CpuNoiseReduction, CpuAEC, AecMinOutput, AecTypeParam, comfortNoise, AecTailType);
 		Logger.d(VoIPConstants.TAG, "AEC init: " + init);
 	}
 	
 	public void destroy() {
-		int ret = terminate();
-		Logger.d(VoIPConstants.TAG, "AEC terminate: " + ret);
+		terminate();
 	}
 	
 	public void processSpeaker(byte[] frame) {
-		int ret = 0;
 		synchronized (this) {
-			ret = processSpeakerFrame(frame);
+			processSpeakerFrame(frame);
 		}
 	}
 	

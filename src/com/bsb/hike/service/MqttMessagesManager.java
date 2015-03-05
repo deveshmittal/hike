@@ -1253,6 +1253,36 @@ public class MqttMessagesManager
 			int scd = data.getInt(HikeConstants.VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION);
 			editor.putInt(HikeConstants.VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION, scd);
 		}
+		if (data.has(HikeConstants.VOIP_AEC_CPU_NR))
+		{
+			int scd = data.getInt(HikeConstants.VOIP_AEC_CPU_NR);
+			editor.putInt(HikeConstants.VOIP_AEC_CPU_NR, scd);
+		}
+		if (data.has(HikeConstants.VOIP_AEC_CPU))
+		{
+			int scd = data.getInt(HikeConstants.VOIP_AEC_CPU);
+			editor.putInt(HikeConstants.VOIP_AEC_CPU, scd);
+		}
+		if (data.has(HikeConstants.VOIP_AEC_MO))
+		{
+			int scd = data.getInt(HikeConstants.VOIP_AEC_MO);
+			editor.putInt(HikeConstants.VOIP_AEC_MO, scd);
+		}
+		if (data.has(HikeConstants.VOIP_AEC_TYPE))
+		{
+			int scd = data.getInt(HikeConstants.VOIP_AEC_TYPE);
+			editor.putInt(HikeConstants.VOIP_AEC_TYPE, scd);
+		}
+		if (data.has(HikeConstants.VOIP_AEC_CNP))
+		{
+			int scd = data.getInt(HikeConstants.VOIP_AEC_CNP);
+			editor.putInt(HikeConstants.VOIP_AEC_CNP, scd);
+		}
+		if (data.has(HikeConstants.VOIP_AEC_TAIL_TYPE))
+		{
+			int scd = data.getInt(HikeConstants.VOIP_AEC_TAIL_TYPE);
+			editor.putInt(HikeConstants.VOIP_AEC_TAIL_TYPE, scd);
+		}
 		if (data.has(HikeConstants.REWARDS_TOKEN))
 		{
 			String rewardToken = data.getString(HikeConstants.REWARDS_TOKEN);
