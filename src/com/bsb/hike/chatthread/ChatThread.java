@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
@@ -593,6 +594,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case AttachmentPicker.CONTACT:
 			onShareContact(resultCode, data);
 			break;
+		case AttachmentPicker.GALLERY:
+			if (resultCode == Activity.RESULT_OK)
+			{
+				mConversationsView.requestFocusFromTouch();
+				mConversationsView.setSelection(messages.size() - 1);
+			}
 		}
 	}
 
