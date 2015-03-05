@@ -7,7 +7,6 @@ import java.io.OutputStream;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -390,6 +389,11 @@ public class CameraFragment extends SherlockFragment
 	{
 		// cameraView.setFlashMode(mode);
 		flashMode = mode;
+	}
+	
+	public CameraView getCameraView()
+	{
+		return cameraView;
 	}
 
 }

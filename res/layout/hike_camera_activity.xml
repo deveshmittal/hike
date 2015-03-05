@@ -11,6 +11,14 @@
         android:layout_height="match_parent" >
     </FrameLayout>
 
+    <ImageView
+        android:id="@+id/tempiv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        android:visibility="gone" >
+    </ImageView>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -23,9 +31,9 @@
             layout="@layout/photos_action_bar" />
 
         <RelativeLayout
+            android:id="@+id/previewWindow"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:id="@+id/previewWindow"
             android:layout_weight="@integer/photos_editor_canvas_weight" >
 
             <ImageView
@@ -73,17 +81,17 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
-                android:background="@drawable/camera_button_selector"
                 android:layout_weight="1"
+                android:background="@drawable/camera_button_selector"
                 android:src="@drawable/gallerypick" />
 
             <ImageButton
                 android:id="@+id/btntakepic"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:background="@drawable/camera_button_selector"
                 android:layout_margin="10dp"
                 android:layout_weight="1"
+                android:background="@drawable/camera_button_selector"
                 android:src="@drawable/camerasnap" />
 
             <ImageButton

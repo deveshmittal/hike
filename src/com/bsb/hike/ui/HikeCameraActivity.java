@@ -3,9 +3,9 @@ package com.bsb.hike.ui;
 import java.io.File;
 import java.util.ArrayList;
 
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
@@ -13,8 +13,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.OrientationEventListener;
+import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -120,7 +121,6 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 						anim.setInterpolator(overshootInterp);
 						anim.start();
 						state = statePortrait;
-
 					}
 				}
 				else if (orientation > 45 && orientation < 180)
@@ -133,7 +133,6 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 						anim.setDuration(500); // Duration in milliseconds
 						anim.start();
 						state = stateLandscape1;
-
 					}
 				}
 				else if (orientation > 180 && orientation < 315)
@@ -146,7 +145,6 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 						anim.setInterpolator(overshootInterp);
 						anim.start();
 						state = stateLandscape2;
-
 					}
 				}
 			}
@@ -154,7 +152,6 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		containerView.setOnClickListener(new View.OnClickListener()
 		{
-
 			@Override
 			public void onClick(View v)
 			{
@@ -167,7 +164,6 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				}
 			}
 		});
-
 		setupActionBar();
 	}
 
@@ -181,9 +177,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				onBackPressed();
 			}
 		});
-
 		findViewById(R.id.done_container).setVisibility(View.GONE);
-
 	}
 
 	@Override
@@ -193,11 +187,13 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		orientationListener.enable();
 
-		ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.containerImageView);
+		// ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.containerImageView);
+		//
+		// iv.setVisibility(View.GONE);
 
-		iv.setVisibility(View.GONE);
-		
 		HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(true);
+
+		HikeCameraActivity.this.findViewById(R.id.tempiv).setVisibility(View.GONE);
 	}
 
 	@Override
@@ -218,6 +214,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		case R.id.btntakepic:
 			HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(false);
 			cameraFragment.takePicture();
+			final Bitmap bitmap = ((TextureView) cameraFragment.getCameraView().previewStrategy.getWidget()).getBitmap();
 			final View snapOverlay = findViewById(R.id.snapOverlay);
 			ObjectAnimator invisToVis = ObjectAnimator.ofFloat(snapOverlay, "alpha", 0f, 0.8f);
 			invisToVis.setDuration(200);
@@ -227,6 +224,10 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				@Override
 				public void onAnimationEnd(Animator animation)
 				{
+
+					ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.tempiv);
+					iv.setImageBitmap(bitmap);
+					iv.setVisibility(View.VISIBLE);
 					ObjectAnimator visToInvis = ObjectAnimator.ofFloat(snapOverlay, "alpha", 0.8f, 0f);
 					visToInvis.setDuration(150);
 					visToInvis.setInterpolator(deceleratorInterp);
@@ -235,11 +236,16 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			});
 
 			invisToVis.start();
+
 			snapOverlay.setVisibility(View.VISIBLE);
+
+			// processSquareBitmap(bitmap);
+
+			// cameraFragment.getCameraView().setVisibility(View.INVISIBLE);
+
 			break;
 		case R.id.btngallery:
 			// Open gallery
-
 			Intent galleryPickerIntent = IntentManager.getHikeGalleryPickerIntentForResult(HikeCameraActivity.this, false, false, GalleryActivity.PHOTOS_EDITOR_ACTION_BAR_TYPE,
 					null);
 			startActivityForResult(galleryPickerIntent, GALLERY_PICKER_REQUEST);
@@ -280,12 +286,10 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 	{
 		v.setEnabled(false);
 
-		// ObjectAnimator visToInvis = ObjectAnimator.ofFloat(containerView, "rotationY", 0f, -90f);
 		ObjectAnimator visToInvis = ObjectAnimator.ofFloat(containerView, "alpha", 1f, 0f);
 		visToInvis.setDuration(200);
 		visToInvis.setInterpolator(deceleratorInterp);
 
-		// final ObjectAnimator invisToVis = ObjectAnimator.ofFloat(containerView, "rotationY", 90f, 0f);
 		final ObjectAnimator invisToVis = ObjectAnimator.ofFloat(containerView, "alpha", 0f, 1f);
 		invisToVis.setDuration(1000);
 		invisToVis.setInterpolator(deceleratorInterp);
@@ -311,13 +315,11 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		invisToVis.addListener(new AnimatorListenerAdapter()
 		{
-
 			@Override
 			public void onAnimationEnd(Animator animation)
 			{
 				v.setEnabled(true);
 			}
-
 		});
 
 		visToInvis.start();
@@ -396,11 +398,11 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 			Bitmap dstBmp = Bitmap.createBitmap(srcBmp, srcBmp.getWidth() / 2 - (widthBmp / 2), bmpY, widthBmp, widthBmp);
 
-			ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.containerImageView);
-
-			iv.setImageBitmap(dstBmp);
-
-			iv.setVisibility(View.VISIBLE);
+			// ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.containerImageView);
+			//
+			// iv.setImageBitmap(dstBmp);
+			//
+			// iv.setVisibility(View.VISIBLE);
 
 			return dstBmp;
 		}
