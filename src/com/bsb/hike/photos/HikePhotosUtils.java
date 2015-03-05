@@ -53,8 +53,9 @@ public class HikePhotosUtils
 	0xff18e883, 0xfff31717, 0xfff7d514, 0xff7418f0,
 
 	0xff16efc4, 0xffffffff, 0xff000000, 0xff2ab0fc };
-	
-//	{ 0xFFFF4040, 0xFFA8FA72, 0xFF72A8FA, 0xFFFA72A8, 0xFFFFFFFF, 0xFFECFA72, 0xFFF9B074, 0xFF5A0949, 0xFF000000 };
+
+	// { 0xFFFF4040, 0xFFA8FA72, 0xFF72A8FA, 0xFFFA72A8, 0xFFFFFFFF, 0xFFECFA72,
+	// 0xFFF9B074, 0xFF5A0949, 0xFF000000 };
 
 	/**
 	 * Util method which converts the dp value into float(pixel value) based on the given context resources
@@ -104,7 +105,7 @@ public class HikePhotosUtils
 
 		public enum FilterType
 		{
-			BRIGHTNESS, CONTRAST, SATURATION, HUE, SEPIA, GRAYSCALE, POLAROID, FADED, BGR, INVERSION, X_PRO_2, WILLOW, WALDEN, VALENCIA, TOASTER, SUTRO, SIERRA, RISE, NASHVILLE, MAYFAIR, LO_FI, KELVIN, INKWELL, HUDSON, HEFE, EARLYBIRD, BRANNAN, AMARO, E1977, FILTER1, CLASSIC, RETRO, APOLLO
+			BRIGHTNESS, CONTRAST, SATURATION, HUE, SEPIA, GRAYSCALE, POLAROID, FADED, BGR, INVERSION, X_PRO_2, WILLOW, WALDEN, VALENCIA, TOASTER, SUTRO, SIERRA, RISE, NASHVILLE, MAYFAIR, LO_FI, KELVIN, INKWELL, HUDSON, HEFE, EARLYBIRD, BRANNAN, AMARO, E1977, FILTER1, CLASSIC, RETRO, APOLLO, ORIGINAL
 		}
 
 		public static class FilterList
@@ -130,6 +131,7 @@ public class HikePhotosUtils
 				if (effectfilters == null)
 				{
 					effectfilters = new FilterList();
+					effectfilters.addFilter("ORIGINAL", FilterType.ORIGINAL);
 					effectfilters.addFilter("X PRO 2", FilterType.X_PRO_2);
 					effectfilters.addFilter("Filter 1", FilterType.FILTER1);
 					effectfilters.addFilter("1977", FilterType.E1977);
@@ -146,8 +148,7 @@ public class HikePhotosUtils
 					effectfilters.addFilter("BGR", FilterType.BGR);
 					effectfilters.addFilter("SEPIA", FilterType.SEPIA);
 					effectfilters.addFilter("GRAYSCALE", FilterType.GRAYSCALE);
-					
-					
+
 				}
 				return effectfilters;
 
@@ -162,7 +163,6 @@ public class HikePhotosUtils
 				{
 					qualityfilters = new FilterList();
 
-					
 				}
 				return qualityfilters;
 

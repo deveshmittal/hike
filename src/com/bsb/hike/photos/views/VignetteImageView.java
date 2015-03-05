@@ -64,6 +64,14 @@ class VignetteImageView extends ImageView
 		return vignetteBitmap;
 	}
 	
+	
+	/**
+	 * @author akhiltripathi
+	 * 
+	 *  Draws a vignette on the layer of provided image size respective to the current set filter.
+	 * 
+	 * @param original
+	 */
 	public void setVignetteforFilter(Bitmap original)
 	{
 		width = original.getWidth();
@@ -98,6 +106,8 @@ class VignetteImageView extends ImageView
 			colors = new int[]{0x00000000,0x1118363F,0xFF18363F};
 			stops = new float[]{0.0f,0.72f/1.2f,1.0f};
 			makeRadialGradient(1.2f, colors, stops);
+			break;
+		case ORIGINAL:
 			break;
 				
 		}

@@ -1,12 +1,10 @@
 package com.bsb.hike.photos;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v8.renderscript.Allocation;
@@ -20,12 +18,17 @@ import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 /**
  * @author akhiltripathi
  * 
- *         Factory model class. Effect Filter being applied using ColorMatrix class in android.
+ *         Factory model class. Effect Filter being applied using RenderScript class in android.
+ * 
+ *         To apply the effect blending , color matrix and curve fitting techniques of Image Processing have been implemented.
+ * 
+ *         Vignette is not added onto the image in this class.
+ * 
+ * @see http://developer.android.com/guide/topics/renderscript/compute.html
  * 
  * @see http://developer.android.com/reference/android/graphics/ColorMatrix.html
+ *
  */
-
-
 
 public final class HikeEffectsFactory
 {
@@ -34,9 +37,6 @@ public final class HikeEffectsFactory
 
 	private Bitmap mBitmapIn;
 
-	private Bitmap mBitmapOut;
-	
-	
 	private RenderScript mRS;
 
 	private Allocation mInAllocation;
@@ -45,31 +45,27 @@ public final class HikeEffectsFactory
 
 	private ScriptC_HikePhotosEffects mScript;
 
-	private boolean isBasicFilter;
-	
-	private boolean isGPUFree = true;
-	
 	private void LoadRenderScript(Bitmap image)
 	{
-		// Initialize RS
-		if(mRS==null)
-			{
-				mRS = RenderScript.create(HikeMessengerApp.getInstance().getApplicationContext());
-				mScript = new ScriptC_HikePhotosEffects(mRS);
+		// Initialize RS // Load script
+		if (mRS == null)
+		{
+			mRS = RenderScript.create(HikeMessengerApp.getInstance().getApplicationContext());
+			mScript = new ScriptC_HikePhotosEffects(mRS);
 
-			}
+		}
 
 		// Allocate buffer
 		mBitmapIn = image;
 		mInAllocation = Allocation.createFromBitmap(mRS, mBitmapIn);
-		// Load script
+
 	}
 
 	/**
 	 * Method initiates an async task to apply filter to the provided thumbnail (obtained by scaling the image to be handled). Run on a background since loading preview can take
 	 * some time in case of complex filters or large filter count. Till then the original image is displayed.
 	 */
-	public static void loadPreviewThumbnail( Bitmap scaledOriginal, FilterType type, OnFilterAppliedListener listener)
+	public static void loadPreviewThumbnail(Bitmap scaledOriginal, FilterType type, OnFilterAppliedListener listener)
 	{
 		if (instance == null)
 			instance = new HikeEffectsFactory();
@@ -79,18 +75,21 @@ public final class HikeEffectsFactory
 
 	}
 
-	private Bitmap applyColorMatrixToBitmap(Bitmap bitmap, ColorMatrix matrix)
-	{
-		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
-		ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
-		Canvas canvasResult = new Canvas(output);
-		Paint paint = new Paint();
-		paint.setColorFilter(filter);
-		canvasResult.drawBitmap(bitmap, 0, 0, paint);
-		return output;
-	}
-
-	private ColorMatrix getColorMatrixforFilter(FilterType type, boolean pre, float value)
+	/**
+	 * @author akhiltripathi
+	 * 
+	 * 
+	 * @param type
+	 *            : FilterType enum for the type of effect for which the colormatrix is applied
+	 * 
+	 *            isPreMatrix : boolean value which defines wether the matrix will be applied to the bitmap before or after Blending / Curve Fitting
+	 * 
+	 *            value : Float defining the percentage of filter to be applied
+	 * 
+	 * @return Method returns the color matrix to be applied for a particular filter
+	 *
+	 */
+	private ColorMatrix getColorMatrixforFilter(FilterType type, boolean isPreMatrix, float value)
 	{
 		ColorMatrix filterColorMatrix = null;
 		switch (type)
@@ -112,7 +111,7 @@ public final class HikeEffectsFactory
 			filterColorMatrix = getBGRColorMatrix();
 			break;
 		case E1977:
-			if (pre)
+			if (isPreMatrix)
 			{
 				filterColorMatrix = null;
 			}
@@ -122,7 +121,7 @@ public final class HikeEffectsFactory
 			}
 			break;
 		case X_PRO_2:
-			if (pre)
+			if (isPreMatrix)
 			{
 				return null;
 			}
@@ -132,7 +131,7 @@ public final class HikeEffectsFactory
 			}
 			break;
 		case APOLLO:
-			if (pre)
+			if (isPreMatrix)
 			{
 				filterColorMatrix = getSaturationColorMatrix(0.5f);
 			}
@@ -143,7 +142,7 @@ public final class HikeEffectsFactory
 			}
 			break;
 		case BRANNAN:
-			if (pre)
+			if (isPreMatrix)
 			{
 				filterColorMatrix = getBrightnessColorMatrix(1.1f);
 				filterColorMatrix.setConcat(getContrastColorMatrix(50f), filterColorMatrix);
@@ -154,14 +153,14 @@ public final class HikeEffectsFactory
 			}
 			break;
 		case NASHVILLE:
-			if(!pre)
+			if (!isPreMatrix)
 			{
 				filterColorMatrix = getBrightnessColorMatrix(1.3f);
 				filterColorMatrix.setConcat(getContrastColorMatrix(15f), filterColorMatrix);
 			}
 			break;
 		case EARLYBIRD:
-			if (pre)
+			if (isPreMatrix)
 			{
 				filterColorMatrix = getSaturationColorMatrix(0.68f);
 				filterColorMatrix.setConcat(getBrightnessColorMatrix(1.15f), filterColorMatrix);
@@ -169,7 +168,7 @@ public final class HikeEffectsFactory
 			}
 			break;
 		case INKWELL:
-			if (pre)
+			if (isPreMatrix)
 			{
 				filterColorMatrix = getSaturationColorMatrix(0);
 			}
@@ -180,7 +179,7 @@ public final class HikeEffectsFactory
 			}
 			break;
 		case LO_FI:
-			if (pre)
+			if (isPreMatrix)
 			{
 				filterColorMatrix = getBrightnessColorMatrix(1.5f);
 				filterColorMatrix.setConcat(getContrastColorMatrix(30f), filterColorMatrix);
@@ -230,14 +229,37 @@ public final class HikeEffectsFactory
 		if (instance == null)
 			instance = new HikeEffectsFactory();
 
-		instance.LoadRenderScript( bitmap);
+		instance.LoadRenderScript(bitmap);
 		instance.beginEffectAsyncTask(listener, type, false);
 
 	}
 
+	/**
+	 * Pushes the Image Processing on the looper thread.
+	 * 
+	 * Uses HikeHandlerUtil.java class for thread queuing.
+	 * 
+	 * Ensures all actions occur in a serialized manner
+	 * 
+	 * @param OnFilterAppliedListener
+	 *            : The listener to be called once the filter is applied.
+	 * 
+	 *            type : FilterType enum for thr respective effect.
+	 * 
+	 *            blur : boolean wether to blur the output image or not. It should be true only in case of thumbnails.
+	 * 
+	 */
+
 	private void beginEffectAsyncTask(OnFilterAppliedListener listener, FilterType type, boolean blur)
 	{
-		HikeHandlerUtil.getInstance().postRunnableWithDelay(new ApplyFilterTask(type, listener, blur),0);
+		if (type == FilterType.ORIGINAL)
+		{
+			listener.onFilterApplied(mBitmapIn);
+		}
+		else
+		{
+			HikeHandlerUtil.getInstance().postRunnableWithDelay(new ApplyFilterTask(type, listener, blur), 0);
+		}
 
 	}
 
@@ -362,12 +384,8 @@ public final class HikeEffectsFactory
 	private ColorMatrix getPolaroidColorMatrix()
 	{
 
-		final ColorMatrix matrixA = new ColorMatrix(new float[] { 
-				0.953125f,  0.0f,       0.0f,       0.0f,  0.121f,
-		           0.0f,       0.957031f,  0.0f,       0.0f,  0.0625f,
-		           0.0f,       0.0f,       0.761718f,  0.0f,  0.2461f,
-		           0.0f,       0.0f,       0.0f,       1.0f,  0.0f
-				});
+		final ColorMatrix matrixA = new ColorMatrix(new float[] { 0.953125f, 0.0f, 0.0f, 0.0f, 0.121f, 0.0f, 0.957031f, 0.0f, 0.0f, 0.0625f, 0.0f, 0.0f, 0.761718f, 0.0f, 0.2461f,
+				0.0f, 0.0f, 0.0f, 1.0f, 0.0f });
 
 		return matrixA;
 	}
@@ -382,20 +400,29 @@ public final class HikeEffectsFactory
 		sepiaMatrix.set(sepMat);
 		return sepiaMatrix;
 	}
-	
+
+	// UI thread Handler object to make changes to the UI from a seperate threat
 	private static Handler uiHandler = new Handler(Looper.getMainLooper());
-	
+
+	/**
+	 * @author akhiltripathi
+	 *
+	 *         Class implements Runnable Interface
+	 * 
+	 *         Applies specific Effect to mBitmapIn object on a new thread
+	 *
+	 */
 	public class ApplyFilterTask implements Runnable
 	{
 
 		private FilterType effect;
 
 		private OnFilterAppliedListener readyListener;
-		
+
 		private Bitmap mBitmapOut;
 
 		private boolean blurImage;
-		
+
 		public ApplyFilterTask(FilterType effectType, OnFilterAppliedListener listener, boolean isThumbnail)
 		{
 			// TODO Auto-generated constructor stub
@@ -407,37 +434,31 @@ public final class HikeEffectsFactory
 
 		}
 
-		protected void onPostExecute(Bitmap result)
-		{
-			isGPUFree = true;
-			
-		}
-
 		@Override
-		public void run() {
+		public void run()
+		{
 			// TODO Auto-generated method stub
-			
-			isGPUFree=false;
-			isBasicFilter = false;
-			
+
 			float[] preMatrix = getPreScriptEffects();
 			if (preMatrix != null)
 			{
 				mScript.set_preMatrix(preMatrix);
 			}
-			
+
 			float[] postMatrix = getPostScriptEffects();
 			if (postMatrix != null)
 			{
 				mScript.set_postMatrix(postMatrix);
 			}
-			
+
 			applyEffect(effect);
 
-			uiHandler.post(new Runnable() {
+			uiHandler.post(new Runnable()
+			{
 				@Override
-				public void run() {
-					readyListener.onFilterApplied(mBitmapOut);					
+				public void run()
+				{
+					readyListener.onFilterApplied(mBitmapOut);
 				}
 			});
 		}
@@ -588,10 +609,10 @@ public final class HikeEffectsFactory
 				mScript.forEach_filter_lomofi(mInAllocation, mOutAllocations);
 				break;
 			case NASHVILLE:
-				gi = new int[] { 0,255 };
-				go = new int[] { 38,255 };
-				bi = new int[] { 0,255 };
-				bo = new int[] { 127,255 };
+				gi = new int[] { 0, 255 };
+				go = new int[] { 38, 255 };
+				bi = new int[] { 0, 255 };
+				bo = new int[] { 127, 255 };
 				green = new Splines(gi, go);
 				blue = new Splines(bi, bo);
 				mScript.set_gSpline(green.getInterpolationMatrix());
@@ -601,37 +622,36 @@ public final class HikeEffectsFactory
 				mScript.set_b(new int[] { 0x30, 0xAC, 0 });
 				mScript.forEach_filter_nashville(mInAllocation, mOutAllocations);
 				break;
+
 			default:
-				isBasicFilter = true;
 				mScript.forEach_filter_colorMatrix(mInAllocation, mOutAllocations);
 				break;
 
 			}
 
 			mOutAllocations.copyTo(mBitmapOut);
-			
+
 		}
 
 		float[] getPreScriptEffects()
 		{
 			ColorMatrix matrix = getColorMatrixforFilter(this.effect, true, HikeConstants.HikePhotos.DEFAULT_FILTER_APPLY_PERCENTAGE);
-			if(matrix!=null)
+			if (matrix != null)
 				return matrix.getArray();
-			else 
+			else
 				return null;
 		}
 
 		float[] getPostScriptEffects()
 		{
 			ColorMatrix matrix = getColorMatrixforFilter(this.effect, false, HikeConstants.HikePhotos.DEFAULT_FILTER_APPLY_PERCENTAGE);
-			if(matrix!=null)
+			if (matrix != null)
 				return matrix.getArray();
-			else 
+			else
 				return null;
 
 		}
 
-		
 	}
 
 	public interface OnFilterAppliedListener
@@ -641,6 +661,15 @@ public final class HikeEffectsFactory
 
 }
 
+/**
+ * 
+ * @author akhiltripathi
+ *
+ *         Class implements Curve Fitting Image Processing Technique
+ *
+ *         Only Cubic Spline Curves Implemented
+ *
+ */
 class Splines
 {
 	private int maxLength;

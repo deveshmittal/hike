@@ -7,8 +7,8 @@ import android.graphics.Bitmap;
 public interface HikePhotosListener
 {
 	void onComplete(File f);
-	
+
 	void onComplete(Bitmap bmp);
-	
+
 	void onFailure();
 }
