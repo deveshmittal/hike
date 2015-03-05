@@ -66,6 +66,8 @@ public class ConvMessage
 	private ArrayList<String> sentToMsisdnsList = new ArrayList<String>();
 	
 	private String messageBroadcastId = null;
+	
+	private long serverId = -1;
 
 	public int getHashMessage()
 	{
@@ -1059,6 +1061,23 @@ public class ConvMessage
 	public void setMessageOriginType(OriginType messageOriginType)
 	{
 		this.messageOriginType = messageOriginType;
+	}
+
+	public long getServerId()
+	{
+		if(isBroadcastMessage() && !isBroadcastConversation())
+		{
+			return serverId;
+		}
+		else
+		{
+			return msgID;
+		}
+	}
+
+	public void setServerId(long serverId)
+	{
+		this.serverId = serverId;
 	}
 
 }

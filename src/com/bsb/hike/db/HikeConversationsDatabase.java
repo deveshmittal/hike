@@ -1466,6 +1466,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		ConvMessage broadcastConvMessage = new ConvMessage(convMessage);
 		//Here we set origin type of 
 		broadcastConvMessage.setMessageOriginType(ConvMessage.OriginType.BROADCAST);
+		broadcastConvMessage.setServerId(convMessage.getMsgID());
 		convMessages.add(broadcastConvMessage);
 		ArrayList<String> contactMsisdns = convMessage.getSentToMsisdnsList();
 		ArrayList<ContactInfo> contacts = new ArrayList<ContactInfo>();
@@ -1562,7 +1563,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					try
 					{
 						msgId = insertStatement.executeInsert();
-						insertServerId(msgId);
 					}
 					catch (Exception e)
 					{
@@ -1584,7 +1584,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 						try
 						{
 							msgId = insertStatement.executeInsert();
-							insertServerId(msgId);
 						}
 						catch (Exception e)
 						{
@@ -1600,6 +1599,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					}
 					
 					conv.setMsgID(msgId);
+					insertServerId(conv);
 					ChatThread.addtoMessageMap(conv);
 
 					/*
@@ -1691,7 +1691,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				try
 				{
 					msgId = insertStatement.executeInsert();
-					insertServerId(msgId);
 				}
 				catch (Exception e)
 				{
@@ -1712,7 +1711,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					try
 					{
 						msgId = insertStatement.executeInsert();
-						insertServerId(msgId);
 					}
 					catch (Exception e)
 					{
@@ -1724,6 +1722,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					assert (msgId >= 0);
 				}
 				conv.setMsgID(msgId);
+				insertServerId(conv);
 				ChatThread.addtoMessageMap(conv);
 
 				/*
@@ -1744,12 +1743,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
-    private void insertServerId(long msgId) {
-    	if (msgId > 0)
+    private void insertServerId(ConvMessage convMessage) {
+    	if (convMessage.getMsgID() > 0)
     	{
     		ContentValues contentValues = new ContentValues();
-    		contentValues.put(DBConstants.SERVER_ID, msgId);
-    		mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { Long.toString(msgId) });
+    		contentValues.put(DBConstants.SERVER_ID, convMessage.getServerId());
+    		mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { Long.toString(convMessage.getMsgID()) });
     	}
 	}
 
@@ -1899,6 +1898,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		if (!statusMessage)
 		{
 			contentValues.put(DBConstants.MESSAGE_ID, conv.getMsgID());
+			contentValues.put(DBConstants.SERVER_ID, conv.getServerId());
 			contentValues.put(DBConstants.MAPPED_MSG_ID, conv.getMappedMsgID());
 			contentValues.put(DBConstants.MSG_STATUS, conv.getState().ordinal());
 			contentValues.put(DBConstants.SORTING_TIMESTAMP, sortingTimeStamp);
