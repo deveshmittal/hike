@@ -29,22 +29,27 @@ public class EffectsImageView extends ImageView
 	public EffectsImageView(Context context)
 	{
 		super(context);
+		currentFilter = FilterType.ORIGINAL;
+		
 	}
 
 	public EffectsImageView(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
+		currentFilter = FilterType.ORIGINAL;
 	}
 
 	public EffectsImageView(Context context, AttributeSet attrs, int defStyleAttr)
 	{
 		super(context, attrs, defStyleAttr);
+		currentFilter = FilterType.ORIGINAL;
 	}
 
 	public void getBitmapWithEffectsApplied(Bitmap bitmap,OnFilterAppliedListener listener)
 	{
 		if(!isScaled)
-			listener.onFilterApplied(currentImage);
+			listener.onFilterApplied(currentImage.copy(currentImage.getConfig(), true));
+		
 		else
 			HikeEffectsFactory.applyFilterToBitmap(bitmap,listener, currentFilter);
 			
@@ -54,6 +59,7 @@ public class EffectsImageView extends ImageView
 	{
 		isScaled = hasBeenScaled;
 		originalImage = image;
+		currentImage = image;
 		this.setImageBitmap(image);
 
 	}

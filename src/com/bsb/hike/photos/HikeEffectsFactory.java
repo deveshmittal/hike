@@ -1,14 +1,13 @@
 package com.bsb.hike.photos;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v8.renderscript.Allocation;
+import android.support.v8.renderscript.Element;
 import android.support.v8.renderscript.RenderScript;
+import android.support.v8.renderscript.ScriptIntrinsicBlur;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -44,7 +43,9 @@ public final class HikeEffectsFactory
 	private Allocation mOutAllocations;
 
 	private ScriptC_HikePhotosEffects mScript;
-
+	
+	private ScriptIntrinsicBlur mScriptBlur;
+    
 	private void LoadRenderScript(Bitmap image)
 	{
 		// Initialize RS // Load script
@@ -52,7 +53,8 @@ public final class HikeEffectsFactory
 		{
 			mRS = RenderScript.create(HikeMessengerApp.getInstance().getApplicationContext());
 			mScript = new ScriptC_HikePhotosEffects(mRS);
-
+			mScriptBlur = ScriptIntrinsicBlur.create(mRS, Element.U8_4(mRS));
+	        
 		}
 
 		// Allocate buffer
@@ -71,7 +73,7 @@ public final class HikeEffectsFactory
 			instance = new HikeEffectsFactory();
 
 		instance.LoadRenderScript(scaledOriginal);
-		instance.beginEffectAsyncTask(listener, type, false);
+		instance.beginEffectAsyncTask(listener, type, true);
 
 	}
 
@@ -254,7 +256,7 @@ public final class HikeEffectsFactory
 	{
 		if (type == FilterType.ORIGINAL)
 		{
-			listener.onFilterApplied(mBitmapIn);
+			listener.onFilterApplied(mBitmapIn.copy(mBitmapIn.getConfig(), true));
 		}
 		else
 		{
@@ -452,6 +454,15 @@ public final class HikeEffectsFactory
 			}
 
 			applyEffect(effect);
+			
+			if(blurImage)
+			{
+				mInAllocation = Allocation.createFromBitmap(mRS, mBitmapOut);
+				mScriptBlur.setRadius(HikePhotosUtils.dpToPx(HikeMessengerApp.getInstance().getApplicationContext(), 10));
+				mScriptBlur.setInput(mInAllocation);
+				mScriptBlur.forEach(mOutAllocations);
+				mOutAllocations.copyTo(mBitmapOut);
+			}
 
 			uiHandler.post(new Runnable()
 			{
