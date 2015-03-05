@@ -26,9 +26,9 @@ import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.voip.VoIPConstants;
 
-public class CallIssuesPopup extends SherlockDialogFragment
+public class CallIssuesDialogFragment extends SherlockDialogFragment
 {
-	public CallIssuesPopup(){
+	public CallIssuesDialogFragment(){
 	}
 
 	private final String TAG = "CallIssuesPopup";
@@ -77,11 +77,19 @@ public class CallIssuesPopup extends SherlockDialogFragment
 				{
 					dismiss();
 					Toast.makeText(getSherlockActivity(), R.string.voip_call_issues_submit_toast, Toast.LENGTH_SHORT).show();
+					getSherlockActivity().finish();
 				}
 			}
 		});
 
 		return view;
+	}
+
+	@Override
+	public void onCancel(DialogInterface dialog)
+	{
+		getSherlockActivity().finish();
+		super.onCancel(dialog);
 	}
 
 	private void populateSelectedIssues()

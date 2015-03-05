@@ -14,11 +14,10 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.ui.fragments.ImageViewerFragment;
-import com.bsb.hike.voip.view.CallIssuesPopup;
-import com.bsb.hike.voip.view.CallRatePopup;
-import com.bsb.hike.voip.view.IVoipCallListener;
+import com.bsb.hike.voip.view.CallIssuesDialogFragment;
+import com.bsb.hike.voip.view.CallRateDialogFragment;
 
-public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity implements Listener, IVoipCallListener
+public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity implements Listener
 {
 
 	private static final String TAG = "HikeAppState";
@@ -57,7 +56,11 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	@Override
 	public void onBackPressed()
 	{
-		if (!removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
+		if (removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
+		{
+			getSupportActionBar().show();
+		}
+		else
 		{
 			HikeAppStateUtils.onBackPressed();
 			super.onBackPressed();
@@ -146,7 +149,21 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 			});
 		}
 	}
-	
+
+	public void addFragment(Fragment fragment, String tag)
+	{
+		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+		fragmentTransaction.add(fragment, tag);
+		fragmentTransaction.commitAllowingStateLoss();
+	}
+
+	public void addFragment(int containerView, Fragment fragment, String tag)
+	{
+		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+		fragmentTransaction.add(containerView, fragment, tag);
+		fragmentTransaction.commitAllowingStateLoss();
+	}
+
 	public boolean removeFragment(String tag)
 	{
 		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -156,7 +173,6 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		{	
 			fragmentTransaction.remove(fragment);
 			fragmentTransaction.commitAllowingStateLoss();
-			getSupportActionBar().show();
 			return true;
 		}
 		return false;
@@ -165,38 +181,5 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	public boolean isFragmentAdded(String tag)
 	{
 		return getSupportFragmentManager().findFragmentByTag(tag) != null;
-	}
-
-	@Override
-	public void onVoipCallEnd(final Bundle bundle, final String tag) 
-	{
-		runOnUiThread(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				boolean isCallRateFragShowing = isFragmentAdded(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
-				boolean isCallIssuesFragShowing = isFragmentAdded(HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG);
-				if(tag.equals(HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG) && !isCallRateFragShowing && !isCallIssuesFragShowing)
-				{
-					CallRatePopup callRatePopup = new CallRatePopup();
-					callRatePopup.setArguments(bundle);
-
-					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-					fragmentTransaction.add(callRatePopup, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
-					fragmentTransaction.commitAllowingStateLoss();
-				}
-				else if(tag.equals(HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG) && !isCallIssuesFragShowing)
-				{
-					CallIssuesPopup callIssuesPopup = new CallIssuesPopup();
-					callIssuesPopup.setArguments(bundle);
-
-					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-					fragmentTransaction.add(callIssuesPopup, HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG);
-					fragmentTransaction.commitAllowingStateLoss();
-				}
-			}
-		});
 	}
 }

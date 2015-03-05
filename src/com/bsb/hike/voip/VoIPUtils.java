@@ -45,13 +45,10 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class VoIPUtils {
 
 	private static boolean notificationDisplayed = false; 
-
-	private static IVoipCallListener callListener;
 
 	public static enum ConnectionClass {
 		TwoG,
@@ -63,17 +60,7 @@ public class VoIPUtils {
 
 	public static enum CallSource
 	{
-		CHAT_THREAD, PROFILE_ACTIVITY, MISSED_CALL_NOTIF
-	}
-
-	public static void setCallListener(IVoipCallListener listener)
-	{
-		callListener = listener;
-	}
-
-	public static void removeCallListener()
-	{
-		callListener = null;
+		CHAT_THREAD, PROFILE_ACTIVITY, MISSED_CALL_NOTIF, CALL_FAILED_FRAG
 	}
 	
     public static boolean isWifiConnected(Context context) {
@@ -188,6 +175,12 @@ public class VoIPUtils {
 				messageType = HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING;
 		}
 
+		boolean selfGenerated = true;
+		if(messageType.equals(HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING))
+		{
+			selfGenerated = false;
+		}
+
 		try
 		{
 			Logger.d(VoIPConstants.TAG, "Adding message of type: " + messageType + " to chat thread.");
@@ -200,7 +193,7 @@ public class VoIPUtils {
 			jsonObject.put(HikeConstants.TYPE, messageType);
 			jsonObject.put(HikeConstants.TO, clientPartner.getPhoneNumber());
 			
-			ConvMessage convMessage = new ConvMessage(jsonObject, mConversation, context, true);
+			ConvMessage convMessage = new ConvMessage(jsonObject, mConversation, context, selfGenerated);
 			convMessage.setShouldShowPush(shouldShowPush);
 			mConversationDb.addConversationMessages(convMessage);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
@@ -324,32 +317,18 @@ public class VoIPUtils {
 		notificationDisplayed = false;
 	}
 
-	public static void setupCallRatePopup(Context context, Bundle bundle)
-	{
-		incrementActiveCallCount(context);
-		if(shouldShowCallRatePopupNow(context) && callListener!=null)
-		{
-			callListener.onVoipCallEnd(bundle, HikeConstants.VOIP_CALL_RATE_FRAGMENT_TAG);
-		}
-		setupCallRatePopupNextTime(context);
-	}
-
-	private static boolean shouldShowCallRatePopupNow(Context context)
+	public static boolean shouldShowCallRatePopupNow()
 	{
 		return HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, false);
 	}
 	
-	private static void incrementActiveCallCount(Context context)
-	{
-		int callsCount = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
-		HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, ++callsCount);
-	}
-
-	private static void setupCallRatePopupNextTime(Context context)
+	public static void setupCallRatePopupNextTime()
 	{
 		HikeSharedPreferenceUtil sharedPref = HikeSharedPreferenceUtil.getInstance();
-		int frequency = sharedPref.getData(HikeMessengerApp.VOIP_CALL_RATE_POPUP_FREQUENCY, -1);
 		int callsCount = sharedPref.getData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, 0);
+		sharedPref.saveData(HikeMessengerApp.VOIP_ACTIVE_CALLS_COUNT, ++callsCount);
+
+		int frequency = sharedPref.getData(HikeMessengerApp.VOIP_CALL_RATE_POPUP_FREQUENCY, -1);
 		boolean shownAlready = sharedPref.getData(HikeMessengerApp.SHOW_VOIP_CALL_RATE_POPUP, false);
 
 		if(callsCount == frequency)

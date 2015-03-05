@@ -354,6 +354,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 		if (isRemoved)
 		{
+			getSupportActionBar().show();
 			setupActionBar();
 		}
 		return isRemoved;

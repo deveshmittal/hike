@@ -836,6 +836,7 @@ public class HikeConstants
 
 	public static final String VOIP_CALL_ISSUES_FRAGMENT_TAG = "voipCallIssuesFragmentTag";
 
+	public static final String VOIP_CALL_FAILED_FRAGMENT_TAG = "voipCallFailedFragmentTag";
 	/*
 	 * Contact Type
 	 */
@@ -1277,6 +1278,8 @@ public class HikeConstants
 
 		public static final String SHOW_KEYBOARD = "ShowKeyboard";
 
+		public static final String SHOW_RECORDING_DIALOG = "showRecordingDialog";
+
 		public static final String IS_HOME_POPUP_SHOWING = "isHomePopupShowing";
 
 		public static final String LAST_UPDATE_PACKET_ID = "lastUpdatePacketId";
@@ -1390,6 +1393,8 @@ public class HikeConstants
 		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
 		
 		public static final String NUX_INCENTIVE_MODE = "showNuxIncentiveMode";
+
+		public static final String CALL_RATE_BUNDLE = "callRateBundle";
 
 		public static final String GENERAL_SO_TIMEOUT = "sto";
 
