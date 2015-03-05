@@ -474,7 +474,6 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time, ConvMessage.State.RECEIVED_READ);
 		convMessage.setMetadata(metadata);
 		convMessage.setSMS(!isRecipientOnhike);
-		//convMessage.setIsSent(false);
 		convMessage.setState(ConvMessage.State.RECEIVED_READ);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		return convMessage;
