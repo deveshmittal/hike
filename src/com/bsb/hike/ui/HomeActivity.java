@@ -155,7 +155,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE };
 
-	private boolean photosEnabled;
+	private boolean photosEnabled = true;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -204,7 +204,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			initialiseHomeScreen(savedInstanceState);
 		}
 		
-		photosEnabled = accountPrefs.getBoolean(HikeConstants.Extras.ENABLE_PHOTOS, false);
+//		photosEnabled = accountPrefs.getBoolean(HikeConstants.Extras.ENABLE_PHOTOS, false);
 	}
 
 	private void setupActionBar()
