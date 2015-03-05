@@ -862,12 +862,14 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 
 	public void showCallFailedFragment(int callFailCode)
 	{
+		if(activity == null || voipService == null)
+		{
+			return;
+		}
 		Bundle bundle = new Bundle();
 		bundle.putString(VoIPConstants.PARTNER_MSISDN, voipService.getPartnerClient().getPhoneNumber());
 		bundle.putInt(VoIPConstants.CALL_FAILED_REASON, callFailCode);
-		if(getSherlockActivity() != null)
-		{
-			activity.showCallFailedFragment(bundle);
-		}
+
+		activity.showCallFailedFragment(bundle);
 	}
 }
