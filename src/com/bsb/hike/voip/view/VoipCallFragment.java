@@ -126,7 +126,6 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 
 		@Override
 		public void handleMessage(Message msg) {
-			Logger.d(VoIPConstants.TAG, "VoIPCallFragment handler received: " + msg.what);
 			if(!isVisible())
 			{
 				Logger.d(VoIPConstants.TAG, "Fragment not visible, returning");

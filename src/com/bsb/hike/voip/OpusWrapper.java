@@ -40,7 +40,6 @@ public class OpusWrapper {
 		if (encoder == 0)
 			return;
 		opus_set_bitrate(encoder, bitrate);
-		Logger.d(VoIPConstants.TAG, "Changed bitrate to: " + bitrate);
 	}
 	
 	public void setDecoderGain(int gain) {
