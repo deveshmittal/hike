@@ -115,11 +115,7 @@ public class HikeNotificationUtils
 		}
 		else if(convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
 		{
-			try {
-				key = String.format(convMsg.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).getString(HikeConstants.UserJoinMsg.NOTIF_TITLE), key);
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			key = String.format(convMsg.getMetadata().getKey(), key);
 		}
 
 		return new NotificationPreview(message, key);

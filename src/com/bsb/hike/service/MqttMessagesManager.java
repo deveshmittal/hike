@@ -237,7 +237,7 @@ public class MqttMessagesManager
 		this.pubSub.publish(HikePubSub.SMS_CREDIT_CHANGED, credits);
 	}
 
-	private JSONObject parseUserJoinParams(JSONObject jsonObj, String userType) throws JSONException
+	private JSONObject buildUserJoinParams(JSONObject jsonObj, String userType) throws JSONException
 	{
 
 		HikeSharedPreferenceUtil ujPrefs = HikeSharedPreferenceUtil.getInstance(UJFile);
@@ -256,7 +256,7 @@ public class MqttMessagesManager
 		} 
 		if(!data.has(HikeConstants.UserJoinMsg.PUSH_SETTING))
 		{
-			int pushType = ujPrefs.getData(userType + HikeConstants.UserJoinMsg.PUSH_SETTING, HikeConstants.UserJoinMsg.defaultPushSetting);
+			int pushType = ujPrefs.getData(userType + HikeConstants.UserJoinMsg.PUSH_SETTING, HikeConstants.PushType.silent);
 			data.put(HikeConstants.UserJoinMsg.PUSH_SETTING, pushType);
 		} 
 		if(!data.has(HikeConstants.UserJoinMsg.PERSIST_CHAT))
@@ -283,7 +283,7 @@ public class MqttMessagesManager
 		SharedPreferences settings = context.getSharedPreferences(UJFile, Context.MODE_PRIVATE);
 		if (joined)
 		{
-			jsonObj = parseUserJoinParams(jsonObj, userType);
+			jsonObj = buildUserJoinParams(jsonObj, userType);
 			
 			joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
 			long ts = settings.getLong(msisdn, -1);
@@ -327,9 +327,8 @@ public class MqttMessagesManager
 			
 			if (appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true))
 			{
-				ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
 				
-				if (convMessage != null && !isBulkMessage)
+				if (!isBulkMessage)
 				{
 					if(jsonObj.getJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.UserJoinMsg.PERSIST_CHAT, HikeConstants.UserJoinMsg.defaultPersistChat))
 					{
@@ -337,7 +336,11 @@ public class MqttMessagesManager
 					}
 					else
 					{
-						this.pubSub.publish(HikePubSub.USER_JOINED_NOTIFICATION, convMessage);
+						ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
+						if(convMessage != null)
+						{
+							this.pubSub.publish(HikePubSub.USER_JOINED_NOTIFICATION, convMessage);
+						}
 					}
 				}
 			}
@@ -1488,7 +1491,7 @@ public class MqttMessagesManager
 			String notificationTitle = data.optString(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.NOTIF_TITLE, context.getString(R.string.last_seen_more_ct));
 			ujPrefs.saveData(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.NOTIF_TITLE, notificationTitle);
 			
-			int notificationType = data.optInt(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.PUSH_SETTING, HikeConstants.UserJoinMsg.defaultPushSetting);
+			int notificationType = data.optInt(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.PUSH_SETTING, HikeConstants.PushType.silent);
 			ujPrefs.saveData(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.PUSH_SETTING, notificationType);
 			
 			boolean persistChat = data.optBoolean(HikeConstants.NEW_USER + HikeConstants.UserJoinMsg.PERSIST_CHAT, HikeConstants.UserJoinMsg.defaultPersistChat);
@@ -1505,7 +1508,7 @@ public class MqttMessagesManager
 			String notificationTitle = data.optString(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.NOTIF_TITLE, context.getString(R.string.last_seen_more_ct));
 			ujPrefs.saveData(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.NOTIF_TITLE, notificationTitle);
 			
-			int notificationType = data.optInt(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.PUSH_SETTING, HikeConstants.UserJoinMsg.defaultPushSetting);
+			int notificationType = data.optInt(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.PUSH_SETTING, HikeConstants.PushType.silent);
 			ujPrefs.saveData(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.PUSH_SETTING, notificationType);
 			
 			boolean persistChat = data.optBoolean(HikeConstants.RETURNING_USER + HikeConstants.UserJoinMsg.PERSIST_CHAT, HikeConstants.UserJoinMsg.defaultPersistChat);

@@ -11,9 +11,9 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.NUXConstants.PushTypeEnum;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
@@ -416,7 +416,7 @@ public class ConvMessage
 		/**
 		 * This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.
 		 */
-		this.shouldShowPush = obj.getJSONObject(HikeConstants.DATA).optInt(HikeConstants.UserJoinMsg.PUSH_SETTING, 2) >= 1;
+		this.shouldShowPush = obj.optJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.PUSH, metadata.shouldShowPush());
 
 		this.mMessage = "";
 		this.mTimestamp = System.currentTimeMillis() / 1000;
@@ -439,19 +439,25 @@ public class ConvMessage
 			this.mMessage = context.getString(R.string.group_chat_end);
 			break;
 		case USER_JOIN:
+			String fName = null;
 			if (conversation != null)
 			{
-				String name;
 				if (conversation instanceof GroupConversation)
 				{
-					name = ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn());
+					fName = ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn());
 				}
 				else
 				{
-					name = Utils.getFirstName(conversation.getLabel());
+					fName = Utils.getFirstName(conversation.getLabel());
 				}
-				this.mMessage = String.format(metadata.getJSON().getJSONObject(HikeConstants.DATA).optString(HikeConstants.UserJoinMsg.NOTIF_TEXT), name);
-				
+			}
+			else
+			{
+				fName = ContactManager.getInstance().getContact(metadata.getMsisdn(), false, true).getFirstName();
+			}
+			if(fName != null)
+			{
+				this.mMessage = String.format(metadata.getJSON().getJSONObject(HikeConstants.DATA).optString(HikeConstants.UserJoinMsg.NOTIF_TEXT), fName);	
 			}
 			break;
 		case USER_OPT_IN:
@@ -956,13 +962,6 @@ public class ConvMessage
 	public boolean isSilent()
 	{
 		
-		int pushSetting  = HikeConstants.UserJoinMsg.defaultPushSetting;
-		try {
-			pushSetting = metadata.getJSON().getJSONObject(HikeConstants.DATA).getInt(HikeConstants.UserJoinMsg.PUSH_SETTING);
-		} catch (JSONException e) {
-			Logger.d("JSONException", "Exceoption" + e);
-		}
-		
 		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && platformWebMessageMetadata != null)
 		{
 			return platformWebMessageMetadata.isSilent();
@@ -973,9 +972,9 @@ public class ConvMessage
 		{
 			return true;
 		}
-		else if( pushSetting == 1 )
+		else if(getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
 		{
-			return true;
+			return metadata.isSilent();
 		}
 		else
 		{

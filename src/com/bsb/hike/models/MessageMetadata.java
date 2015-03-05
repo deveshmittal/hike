@@ -62,7 +62,12 @@ public class MessageMetadata
 	public int getDuration() {
 		return duration;
 	}
-
+	
+	// This is used to put Title on the Nuj RUj notification
+	public String getKey()
+	{
+		return 	json.optJSONObject(HikeConstants.DATA).optString(HikeConstants.UserJoinMsg.NOTIF_TITLE,"");
+	}
 	public boolean isGhostMessage()
 	{
 		return isGhostMessage;
@@ -75,6 +80,37 @@ public class MessageMetadata
 	public int getPinMessage()
 	{
 		return pinMessage;
+	}
+	
+	public boolean isSilent()
+	{
+		switch (getPushSetting()) 
+		{
+			case HikeConstants.PushType.loud:
+				return false;
+			case HikeConstants.PushType.silent:
+			case HikeConstants.PushType.none:
+			default:
+				return true;
+		}
+	}
+	
+	private int getPushSetting()
+	{
+		return json.optJSONObject(HikeConstants.DATA).optInt(HikeConstants.UserJoinMsg.PUSH_SETTING, HikeConstants.PushType.silent);
+	}
+	
+	public boolean shouldShowPush()
+	{
+		switch(getPushSetting())
+		{
+			case HikeConstants.PushType.none:
+				return false;
+			case HikeConstants.PushType.silent:
+			case HikeConstants.PushType.loud:
+			default:
+				return true;
+		}
 	}
 
 	public void setPinMessage(int pinMessage)
