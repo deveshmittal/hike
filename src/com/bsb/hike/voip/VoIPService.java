@@ -1483,6 +1483,7 @@ public class VoIPService extends Service {
 						Thread.sleep(frameDuration);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
+						break;
 					} catch (IllegalStateException e) {
 						Logger.d(VoIPConstants.TAG, "startAudioTrackMonitoringThread() IllegalStateException: " + e.toString());
 						break;
