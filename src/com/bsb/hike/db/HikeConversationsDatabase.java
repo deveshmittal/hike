@@ -44,6 +44,7 @@ import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
 import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
@@ -1490,7 +1491,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		for(int i=0;i<totalRecipient;i++)
 		{
 			ConvMessage message = new ConvMessage(convMessage);
-			message.setTimestamp(timestamp++);
+			if(convMessage.isBroadcastConversation())
+			{
+				message.setMessageOriginType(OriginType.BROADCAST);
+			}
+			else
+			{
+				//multi-forward case... in braodcast case we donot need to update timestamp
+				message.setTimestamp(timestamp++);
+			}
 			message.setMsgID(msgId+i);
 			ContactInfo contactInfo = recipient.get(i);
 			message.setMsisdn(contactInfo.getMsisdn());
