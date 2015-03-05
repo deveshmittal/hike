@@ -74,7 +74,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		editView = (PhotosEditerFrameLayoutView) findViewById(R.id.editer);
 
 		clickHandler = new EditorClickListener(this);
-		
+
 		Intent intent = getIntent();
 		filename = intent.getStringExtra(HikeConstants.HikePhotos.FILENAME);
 		if (filename == null)
@@ -275,25 +275,29 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 							{
 								if (actionCode == PhotoActionsFragment.ACTION_SEND)
 								{
-									editView.saveImage(HikeFileType.IMAGE, null,new HikePhotosListener() {
-										
+									editView.saveImage(HikeFileType.IMAGE, null, new HikePhotosListener()
+									{
+
 										@Override
-										public void onFailure() {
+										public void onFailure()
+										{
 											// TODO Auto-generated method stub
-											
+
 										}
-										
+
 										@Override
-										public void onComplete(Bitmap bmp) {
+										public void onComplete(Bitmap bmp)
+										{
 											// TODO Auto-generated method stub
-											
+
 										}
-										
+
 										@Override
-										public void onComplete(File f) {
+										public void onComplete(File f)
+										{
 											Intent forwardIntent = IntentManager.getForwardImageIntent(mContext, f);
 											forwardIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-											startActivity(forwardIntent);											
+											startActivity(forwardIntent);
 										}
 									});
 								}
@@ -304,22 +308,26 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 											.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
 									ContactInfo userInfo = Utils.getUserContactInfo(preferences);
 									String mLocalMSISDN = userInfo.getMsisdn();
-									editView.saveImage(HikeFileType.PROFILE, mLocalMSISDN,new HikePhotosListener() {
-										
+									editView.saveImage(HikeFileType.PROFILE, mLocalMSISDN, new HikePhotosListener()
+									{
+
 										@Override
-										public void onFailure() {
+										public void onFailure()
+										{
 											// TODO Auto-generated method stub
-											
+
 										}
-										
+
 										@Override
-										public void onComplete(Bitmap bmp) {
+										public void onComplete(Bitmap bmp)
+										{
 											// TODO Auto-generated method stub
-											
+
 										}
-										
+
 										@Override
-										public void onComplete(File f) {
+										public void onComplete(File f)
+										{
 											// TODO Auto-generated method stub
 											getSupportFragmentManager().popBackStackImmediate();
 											ProfilePicFragment profilePicFragment = new ProfilePicFragment();
@@ -331,14 +339,14 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 													.replace(R.id.overlayFrame, profilePicFragment).addToBackStack(null).commit();
 										}
 									});
-									
+
 								}
 							}
 						});
 					}
 					// Change fragment
 					getSupportFragmentManager().beginTransaction()
-							.setCustomAnimations(R.anim.fade_in_animation, R.anim.fade_out_animation, R.anim.fade_in_animation, R.anim.fade_out_animation)
+							.setCustomAnimations(R.anim.photo_option_in, R.anim.photo_option_out, R.anim.photo_option_in, R.anim.photo_option_out)
 							.replace(R.id.overlayFrame, mPhotosActionsFragment).addToBackStack(null).commit();
 
 					mActionBarDoneContainer.setVisibility(View.INVISIBLE);
@@ -395,8 +403,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				undoButton.setVisibility(View.VISIBLE);
 			}
 		}
-
-		
 
 	}
 

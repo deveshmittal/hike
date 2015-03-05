@@ -343,7 +343,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback
 
 				if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT)
 				{
-					pictureParams.setRotation(270);
+					pictureParams.setRotation(info.orientation);
 				}
 				else
 				{

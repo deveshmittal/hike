@@ -69,6 +69,10 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 	private boolean failed;
 
+	private RoundedImageView mCircularImageView;
+
+	private boolean finished;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
@@ -77,6 +81,8 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		mCircularProgress = (HoloCircularProgress) mFragmentView.findViewById(R.id.circular_progress);
 
 		mCircularProgress.setProgress(0);
+
+		mCircularImageView = ((RoundedImageView) mFragmentView.findViewById(R.id.circular_image_view));
 
 		Bundle bundle = getArguments();
 
@@ -96,11 +102,17 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 		new Handler().postDelayed(new Runnable()
 		{
-
 			@Override
 			public void run()
 			{
-				((RoundedImageView) mFragmentView.findViewById(R.id.circular_image_view)).setVisibility(View.VISIBLE);
+				ObjectAnimator objectAnimatorButton = ObjectAnimator.ofFloat(mCircularImageView, "translationY", 100f, 0f);
+				objectAnimatorButton.setDuration(500);
+				objectAnimatorButton.start();
+				ObjectAnimator objectAnimatorButton2 = ObjectAnimator.ofFloat(mCircularProgress, "translationY", 100f, 0f);
+				objectAnimatorButton2.setDuration(500);
+				objectAnimatorButton2.start();
+				mCircularImageView.setVisibility(View.VISIBLE);
+				mCircularProgress.setVisibility(View.VISIBLE);
 				startUpload();
 			}
 		}, 300);
@@ -211,7 +223,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 					HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
 
-					updateProgress(100f - mCurrentProgress);
+					updateProgress(90f - mCurrentProgress);
 				}
 			});
 
@@ -272,9 +284,10 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 		mCurrentProgress += i;
 
-		if (mCurrentProgress >= 100f && !failed)
+		if (mCurrentProgress >= 90f && !failed && !finished)
 		{
-
+			finished = true;
+			
 			changeTextWithAnimation(text1, getString(R.string.photo_dp_finishing));
 
 			new Handler(Looper.getMainLooper()).postDelayed(new Runnable()
@@ -283,6 +296,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 				@Override
 				public void run()
 				{
+					updateProgress(10f);
 					changeTextWithAnimation(text1, getString(R.string.photo_dp_saved));
 				}
 			}, 1000);
@@ -310,7 +324,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 						}
 					});
 				}
-			}, 2000);
+			}, 4000);
 		}
 
 	}
