@@ -66,12 +66,11 @@ class VignetteImageView extends ImageView
 	{
 		return vignetteBitmap;
 	}
-	
-	
+
 	/**
 	 * @author akhiltripathi
 	 * 
-	 *  Draws a vignette on the layer of provided image size respective to the current set filter.
+	 *         Draws a vignette on the layer of provided image size respective to the current set filter.
 	 * 
 	 * @param original
 	 */

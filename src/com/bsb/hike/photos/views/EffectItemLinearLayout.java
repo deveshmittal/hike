@@ -42,6 +42,8 @@ public abstract class EffectItemLinearLayout extends LinearLayout
 		super(context);
 	}
 
+
+	
 	public String getText()
 	{
 		return (String) this.label.getText();

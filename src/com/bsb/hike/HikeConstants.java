@@ -2326,9 +2326,9 @@ public class HikeConstants
 
 		public static final int Min_BRUSH_WIDTH = 8;
 
-		public static final int PREVIEW_THUMBNAIL_WIDTH = 76;
+		public static final int PREVIEW_THUMBNAIL_WIDTH = 70;
 
-		public static final int PREVIEW_THUMBNAIL_HEIGHT = 76;
+		public static final int PREVIEW_THUMBNAIL_HEIGHT = 70;
 
 		public static final int DELTA_BRUSH_WIDTH = 10;
 
@@ -2342,7 +2342,9 @@ public class HikeConstants
 
 		public static final int DEFAULT_BRUSH_COLOR = 0xFF000000;
 
-		public static final int DEFAULT_RING_COLOR = 0xFFFFFFFF;
+		public static final int DEFAULT_RING_COLOR = 0x00FFFFFF;
+		
+		public static final int SELECTED_RING_COLOR = 0xFFFFFFFF;
 
 		public static final String EMPTY_TAB_TITLE = "";
 

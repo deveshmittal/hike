@@ -29,6 +29,7 @@ import android.widget.ImageView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
+import com.bsb.hike.photos.views.DoodleEffectItemLinearLayout;
 import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
 
 //public static int[] BasicMenuIcons={R.drawable.effects_effect,R.drawable.effects_color,R.drawable.effects_frame,R.drawable.effects_text,R.drawable.effects_options};
@@ -52,7 +53,7 @@ public class HikePhotosUtils
 
 	0xff18e883, 0xfff31717, 0xfff7d514, 0xff7418f0,
 
-	0xff16efc4, 0xffffffff, 0xff000000, 0xff2ab0fc };
+	0xff16efc4, 0xffffffff, 0xff2ab0fc };
 
 	// { 0xFFFF4040, 0xFFA8FA72, 0xFF72A8FA, 0xFFFA72A8, 0xFFFFFFFF, 0xFFECFA72,
 	// 0xFFF9B074, 0xFF5A0949, 0xFF000000 };
@@ -81,16 +82,40 @@ public class HikePhotosUtils
 
 		private static FilterType selectedFilter = FilterType.AMARO;
 
-		private static FilterEffectItemLinearLayout prev;
+		private static FilterEffectItemLinearLayout prevFilter;
+		
+		private static int selectedColor = 0xFF000000;
 
+		private static DoodleEffectItemLinearLayout prevColor;
+
+		public static void setCurrentDoodleItem(DoodleEffectItemLinearLayout item)
+		{
+			prevColor = item;
+		}
+
+		public static DoodleEffectItemLinearLayout getCurrentDoodleItem()
+		{
+			return prevColor;
+		}
+
+		public static int getSelectedColor()
+		{
+			return selectedColor;
+		}
+
+		public static void setSelectedColor(int color)
+		{
+			selectedColor = color;
+		}
+		
 		public static void setCurrentFilterItem(FilterEffectItemLinearLayout item)
 		{
-			prev = item;
+			prevFilter = item;
 		}
 
 		public static FilterEffectItemLinearLayout getCurrentFilterItem()
 		{
-			return prev;
+			return prevFilter;
 		}
 
 		public static FilterType getSelectedFilter()

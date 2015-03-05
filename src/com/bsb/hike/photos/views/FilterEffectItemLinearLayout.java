@@ -40,13 +40,13 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 	public void select()
 	{
 		HikePhotosUtils.FilterTools.setSelectedFilter(this.filter);
-		this.setForegroundColor(R.color.white);
+		findViewById(R.id.selectionBar).setBackgroundColor(getResources().getColor(R.color.photos_filters_font_color));
 		HikePhotosUtils.FilterTools.setCurrentFilterItem(this);
 	}
 
 	public void unSelect()
 	{
-		this.setForegroundColor(R.color.photos_filters_font_color);
+		findViewById(R.id.selectionBar).setBackgroundColor(getResources().getColor(R.color.photos_pager_background));
 	}
 
 	public void setFilter(Context context, FilterType type)
@@ -56,12 +56,13 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 
 		if (type == HikePhotosUtils.FilterTools.getSelectedFilter())
 		{
-			this.setForegroundColor(R.color.photos_filters_selected_font_color);
+			findViewById(R.id.selectionBar).setBackgroundColor(getResources().getColor(R.color.photos_filters_font_color));
 			HikePhotosUtils.FilterTools.setCurrentFilterItem(this);
 		}
 		else
 		{
-			this.setForegroundColor(R.color.photos_filters_font_color);
+			findViewById(R.id.selectionBar).setBackgroundColor(getResources().getColor(R.color.photos_pager_background));
+
 		}
 
 	}

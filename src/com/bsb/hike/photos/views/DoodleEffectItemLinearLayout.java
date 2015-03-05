@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.photos.HikePhotosUtils;
 
 
@@ -50,7 +51,31 @@ public class DoodleEffectItemLinearLayout extends EffectItemLinearLayout
 	public void setBrushColor(int Color)
 	{
 		this.brushColor = Color;
+		if (Color == HikePhotosUtils.FilterTools.getSelectedColor())
+		{
+			ringColor =  HikeConstants.HikePhotos.SELECTED_RING_COLOR;
+			HikePhotosUtils.FilterTools.setCurrentDoodleItem(this);
+		}
+		else
+		{
+			ringColor =  HikeConstants.HikePhotos.DEFAULT_RING_COLOR;
+		}
 	}
+	
+	public void select()
+	{
+		HikePhotosUtils.FilterTools.setSelectedColor(this.brushColor);
+		ringColor =  HikeConstants.HikePhotos.SELECTED_RING_COLOR;
+		HikePhotosUtils.FilterTools.setCurrentDoodleItem(this);
+		refresh();
+	}
+
+	public void unSelect()
+	{
+		ringColor =  HikeConstants.HikePhotos.DEFAULT_RING_COLOR;
+		refresh();
+	}
+
 
 	public int getRingColor()
 	{

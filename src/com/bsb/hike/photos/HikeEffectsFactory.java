@@ -44,10 +44,6 @@ public final class HikeEffectsFactory
 
 	private ScriptC_HikePhotosEffects mScript;
 
-	private boolean isBasicFilter;
-
-	private boolean isGPUFree = true;
-
 	private ScriptIntrinsicBlur mScriptBlur;
 
 	private void LoadRenderScript(Bitmap image)

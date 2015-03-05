@@ -26,13 +26,11 @@ import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
 import com.bsb.hike.utils.Utils;
 
 /**
- * @author akhiltripathi Custom View extends FrameLayout Packs all the editing
- *         layers <filter layer,vignette layer ,doodle layer> into a single view
- *         ,in same z-order
+ * @author akhiltripathi Custom View extends FrameLayout Packs all the editing layers <filter layer,vignette layer ,doodle layer> into a single view ,in same z-order
  * 
  */
-public class PhotosEditerFrameLayoutView extends FrameLayout implements
-		OnFilterAppliedListener {
+public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilterAppliedListener
+{
 	private CanvasImageView doodleLayer;
 
 	private VignetteImageView vignetteLayer;
@@ -43,14 +41,16 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements
 
 	private boolean enableDoodling, enableText, savingFinal;
 
-	private Bitmap imageOriginal, imageEdited, imageScaled,
-			scaledImageOriginal;
+	private Bitmap imageOriginal, imageEdited, imageScaled, scaledImageOriginal;
 
 	private HikeFileType mFileType;
+
 	private String mOriginalName;
+
 	private HikePhotosListener mListener;
 
-	public PhotosEditerFrameLayoutView(Context context) {
+	public PhotosEditerFrameLayoutView(Context context)
+	{
 		super(context);
 		doodleLayer = new CanvasImageView(context);
 		vignetteLayer = new VignetteImageView(context);
@@ -63,7 +63,8 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements
 		savingFinal = false;
 	}
 
-	public PhotosEditerFrameLayoutView(Context context, AttributeSet attrs) {
+	public PhotosEditerFrameLayoutView(Context context, AttributeSet attrs)
+	{
 		super(context, attrs);
 		doodleLayer = new CanvasImageView(context, attrs);
 		vignetteLayer = new VignetteImageView(context, attrs);
@@ -77,8 +78,8 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements
 		// TODO Auto-generated constructor stub
 	}
 
-	public PhotosEditerFrameLayoutView(Context context, AttributeSet attrs,
-			int defStyleAttr) {
+	public PhotosEditerFrameLayoutView(Context context, AttributeSet attrs, int defStyleAttr)
+	{
 		super(context, attrs, defStyleAttr);
 		doodleLayer = new CanvasImageView(context, attrs, defStyleAttr);
 		vignetteLayer = new VignetteImageView(context, attrs, defStyleAttr);
@@ -91,71 +92,75 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements
 		savingFinal = false;
 	}
 
-	public Bitmap getScaledImageOriginal() {
-		if (scaledImageOriginal == null) {
-			scaledImageOriginal = Bitmap.createScaledBitmap(imageOriginal,
-					HikePhotosUtils.dpToPx(getContext(),
-							HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_WIDTH),
-					HikePhotosUtils.dpToPx(getContext(),
-							HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_HEIGHT),
-					false);
+	public Bitmap getScaledImageOriginal()
+	{
+		if (scaledImageOriginal == null)
+		{
+			scaledImageOriginal = Bitmap.createScaledBitmap(imageOriginal, HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_WIDTH),
+					HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_HEIGHT), false);
 		}
 		return scaledImageOriginal;
 	}
 
-	public void setBrushWidth(int width) {
+	public void setBrushWidth(int width)
+	{
 		doodleLayer.setStrokeWidth(width);
 	}
 
-	public void applyFilter(FilterType filter) {
+	public void applyFilter(FilterType filter)
+	{
 		vignetteLayer.setFilter(filter);
-		effectLayer.applyEffect(filter,
-				HikeConstants.HikePhotos.DEFAULT_FILTER_APPLY_PERCENTAGE, this);
+		effectLayer.applyEffect(filter, HikeConstants.HikePhotos.DEFAULT_FILTER_APPLY_PERCENTAGE, this);
 		effectLayer.invalidate();
-		
+
 	}
 
 	/**
 	 * 
 	 * @param FilePath
-	 *            : absolute address of the file to be handled by the editor
-	 *            object
+	 *            : absolute address of the file to be handled by the editor object
 	 */
 	@SuppressWarnings("deprecation")
-	public void loadImageFromFile(String FilePath) {
+	public void loadImageFromFile(String FilePath)
+	{
 		imageOriginal = BitmapFactory.decodeFile(FilePath);
-		DisplayMetrics metrics = getContext().getResources()
-				.getDisplayMetrics();
+		DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
 		int width = metrics.widthPixels;
-		if (width < imageOriginal.getWidth()) {
-			imageScaled = Bitmap.createScaledBitmap(imageOriginal, width,
-					width, false);
+		if (width < imageOriginal.getWidth())
+		{
+			imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
 			effectLayer.handleImage(imageScaled, true);
-		} else {
+		}
+		else
+		{
 			effectLayer.handleImage(imageOriginal, false);
 			imageScaled = imageOriginal;
 		}
 
 	}
 
-	public void loadImageFromBitmap(Bitmap bmp) {
+	public void loadImageFromBitmap(Bitmap bmp)
+	{
 		effectLayer.handleImage(bmp, false);
 	}
 
-	public void enableDoodling() {
+	public void enableDoodling()
+	{
 		doodleLayer.setDrawEnabled(true);
 	}
 
-	public void disableDoodling() {
+	public void disableDoodling()
+	{
 		doodleLayer.setDrawEnabled(false);
 	}
 
-	public void setBrushColor(int Color) {
+	public void setBrushColor(int Color)
+	{
 		doodleLayer.setColor(Color);
 	}
 
-	public void saveImage(HikeFileType fileType, String originalName,
-			HikePhotosListener listener) {
+	public void saveImage(HikeFileType fileType, String originalName, HikePhotosListener listener)
+	{
 		doodleLayer.getMeasure(imageScaled);
 		vignetteLayer.getMeasure(imageOriginal);
 
@@ -168,77 +173,96 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements
 
 	}
 
-	public void undoLastDoodleDraw() {
+	public void undoLastDoodleDraw()
+	{
 		doodleLayer.onClickUndo();
 
 	}
 
-	public void setOnDoodlingStartListener(OnDoodleStateChangeListener listener) {
+	public void setOnDoodlingStartListener(OnDoodleStateChangeListener listener)
+	{
 		doodleLayer.setOnDoodlingStartListener(listener);
 	}
 
-	private void saveImagetoFile() {
+	private void saveImagetoFile()
+	{
 		File file = null;
-		if (mFileType == HikeFileType.IMAGE) {
-			try {
-				file = File
-						.createTempFile(
-								Utils.getOriginalFile(mFileType, mOriginalName),
-								".jpg");
-			} catch (IOException e) {
+		if (mFileType == HikeFileType.IMAGE)
+		{
+			try
+			{
+				file = File.createTempFile(Utils.getOriginalFile(mFileType, mOriginalName), ".jpg");
+			}
+			catch (IOException e)
+			{
 				e.printStackTrace();
 				mListener.onFailure();
 			}
-		} else {
-			File myDir = Environment
-					.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+		}
+		else
+		{
+			File myDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 			myDir.mkdir();
 			String fname = Utils.getOriginalFile(mFileType, mOriginalName);
 			file = new File(myDir, fname);
 		}
 
-		if (file.exists()) {
+		if (file.exists())
+		{
 			file.delete();
 		}
 
 		FileOutputStream out = null;
-		try {
+		try
+		{
 			out = new FileOutputStream(file);
 			imageEdited.compress(Bitmap.CompressFormat.JPEG, 100, out);
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
-		} finally {
-			if (out != null) {
-				try {
+		}
+		finally
+		{
+			if (out != null)
+			{
+				try
+				{
 					out.flush();
 					out.close();
-				} catch (IOException e) {
+				}
+				catch (IOException e)
+				{
 					// Do nothing
 				}
 			}
 		}
 
-		if (file.exists()) {
+		if (file.exists())
+		{
 			mListener.onComplete(file);
-		} else {
+		}
+		else
+		{
 			mListener.onFailure();
 		}
 
 	}
 
-	private void flattenLayers() {
+	private void flattenLayers()
+	{
 
-		if (imageEdited != null) {
+		if (imageEdited != null)
+		{
 			Canvas canvasResult = new Canvas(imageEdited);
 
-			if (vignetteLayer.getVignetteBitmap() != null) {
-				canvasResult.drawBitmap(vignetteLayer.getVignetteBitmap(), 0,
-						0, null);
+			if (vignetteLayer.getVignetteBitmap() != null)
+			{
+				canvasResult.drawBitmap(vignetteLayer.getVignetteBitmap(), 0, 0, null);
 			}
-			if (doodleLayer.getBitmap() != null) {
-				Bitmap temp = Bitmap.createScaledBitmap(
-						doodleLayer.getBitmap(), imageOriginal.getWidth(),
-						imageOriginal.getHeight(), false);
+			if (doodleLayer.getBitmap() != null)
+			{
+				Bitmap temp = Bitmap.createScaledBitmap(doodleLayer.getBitmap(), imageOriginal.getWidth(), imageOriginal.getHeight(), false);
 				canvasResult.drawBitmap(temp, 0, 0, doodleLayer.getPaint());
 			}
 		}
@@ -248,12 +272,16 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements
 	}
 
 	@Override
-	public void onFilterApplied(Bitmap preview) {
+	public void onFilterApplied(Bitmap preview)
+	{
 		// TODO Auto-generated method stub
-		if (!savingFinal) {
+		if (!savingFinal)
+		{
 			vignetteLayer.setVignetteforFilter(preview);
 			effectLayer.changeDisplayImage(preview);
-		} else {
+		}
+		else
+		{
 			imageEdited = preview;
 			flattenLayers();
 		}

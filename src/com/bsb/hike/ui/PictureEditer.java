@@ -1,7 +1,6 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
-import java.io.IOException;
 
 import android.content.Context;
 import android.content.Intent;
@@ -27,7 +26,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.photos.HikeEffectsFactory;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
@@ -50,7 +48,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 	PhotosEditerFrameLayoutView editView;
 
-	private int menuIcons[] = { R.drawable.filters, R.drawable.doodle_icon };
+	private int menuIcons[] = { R.drawable.photos_tabs_filter_selector, R.drawable.photos_tabs_doodle_selector };
 
 	private EditorClickListener clickHandler;
 
@@ -242,10 +240,16 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 			else if (v.getClass() == DoodleEffectItemLinearLayout.class)
 			{
+				DoodleEffectItemLinearLayout prev = HikePhotosUtils.FilterTools.getCurrentDoodleItem();
 				DoodleEffectItemLinearLayout me = (DoodleEffectItemLinearLayout) v;
 				editView.setBrushColor(me.getBrushColor());
 				doodlePreview.setBrushColor(me.getBrushColor());
 				doodlePreview.refresh();
+				me.select();
+				if (prev != null && prev.getBrushColor() != me.getBrushColor())
+				{
+					prev.unSelect();
+				}
 
 			}
 			else
@@ -283,22 +287,22 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 							public void onAction(int actionCode)
 							{
 								getSupportFragmentManager().popBackStackImmediate();
+								editView.disableDoodling();
 								if (actionCode == PhotoActionsFragment.ACTION_SEND)
 								{
 									editView.saveImage(HikeFileType.IMAGE, null, new HikePhotosListener()
 									{
-
 										@Override
 										public void onFailure()
 										{
-											// TODO Auto-generated method stub
+											// Do nothing
 
 										}
 
 										@Override
 										public void onComplete(Bitmap bmp)
 										{
-											// TODO Auto-generated method stub
+											// Do nothing
 
 										}
 
@@ -324,14 +328,14 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 										@Override
 										public void onFailure()
 										{
-											// TODO Auto-generated method stub
+											// Do nothing
 
 										}
 
 										@Override
 										public void onComplete(Bitmap bmp)
 										{
-											// TODO Auto-generated method stub
+											// Do nothing
 
 										}
 
