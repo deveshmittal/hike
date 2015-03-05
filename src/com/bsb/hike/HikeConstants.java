@@ -293,6 +293,8 @@ public class HikeConstants
 
 	public static final String LAST_SEEN_SETTING = "lastseen";
 
+	public static final String NEW_LAST_SEEN_SETTING = "nls";
+
 	public static final String UJ_NOTIF_SETTING = "ujn";
 
 	public static final String BULK_LAST_SEEN_KEY = "lastseens";
@@ -428,6 +430,8 @@ public class HikeConstants
 	public static final String SEND_UNDELIVERED_AS_NATIVE_SMS_PREF = "sendUndeliveredAsNativeSmsPref";
 
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
+
+	public static final String LAST_SEEN_PREF_LIST = "lastSeenPrefList";
 	
 	public static final String PROFILE_PIC_PREF = "profilePicPref";
 
@@ -436,6 +440,8 @@ public class HikeConstants
 	public static final String RESET_STEALTH_PREF = "resetStealthPref";
 	
 	public static final String CHANGE_STEALTH_PASSCODE = "changeStealthPasscode";
+
+	public static final String STEALTH_PERF_SETTING = "steathPerfCategory";
 
 	public static final String SEND_UNDELIVERED_AS_NATIVE_PREF = "sendUndeliveredAsNativePref";
 
@@ -512,6 +518,8 @@ public class HikeConstants
 	public static final String UNLINK_TWITTER = "unlinkTwitter";
 
 	public static final String BLOKED_LIST_PREF = "blockedList";
+
+	public static final String FAV_LIST_PREF = "favoriteList";
 
 	public static final String SYSTEM_HEALTH_PREF = "systemHealth";
 
@@ -2275,4 +2283,15 @@ public class HikeConstants
 	public static final String ERROR_MESSAGE = "em";
 	
 	public static final String EXCEPTION_MESSAGE = "exm";
+
+	public static class PrivacyOptions
+	{
+		public static final int NOBODY = 0;
+
+		public static final int EVERYONE = 1;
+
+		public static final int FAVORITES = 2;
+
+		public static final int MY_CONTACTS = 3;
+	}
 }

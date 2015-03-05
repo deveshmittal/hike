@@ -249,40 +249,34 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			muteChatBgPreference.setOnPreferenceClickListener(this);
 		}
 
-		Preference resetStealthPreference = getPreferenceScreen().findPreference(HikeConstants.RESET_STEALTH_PREF);
-		if (resetStealthPreference != null)
+		Preference stealthPreference = getPreferenceScreen().findPreference(HikeConstants.STEALTH_PERF_SETTING);
+		if(stealthPreference != null)
 		{
-			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 			{
-				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				Preference resetStealthPreference = getPreferenceScreen().findPreference(HikeConstants.RESET_STEALTH_PREF);
+				if (resetStealthPreference != null)
 				{
-					resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
-					resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
+					if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+					{
+						resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
+						resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
+					}
+					resetStealthPreference.setOnPreferenceClickListener(this);
 				}
-
-				resetStealthPreference.setOnPreferenceClickListener(this);
-			}
-			else
-			{
-				getPreferenceScreen().removePreference(resetStealthPreference);
-			}
-		}
-		Preference resetStealthPassword = getPreferenceScreen().findPreference(HikeConstants.CHANGE_STEALTH_PASSCODE);
-		if (resetStealthPassword != null)
-		{
-			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
-			{
-				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				Preference resetStealthPassword = getPreferenceScreen().findPreference(HikeConstants.CHANGE_STEALTH_PASSCODE);
+				if (resetStealthPassword != null)
 				{
-					resetStealthPassword.setTitle(R.string.change_stealth_password);
-					resetStealthPassword.setSummary(R.string.change_stealth_password_body);
+					if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+					{
+						resetStealthPassword.setTitle(R.string.change_stealth_password);
+						resetStealthPassword.setSummary(R.string.change_stealth_password_body);
+					}
+					resetStealthPassword.setOnPreferenceClickListener(this);
 				}
-
-				resetStealthPassword.setOnPreferenceClickListener(this);
-			}
-			else
+			}else
 			{
-				getPreferenceScreen().removePreference(resetStealthPassword);
+				getPreferenceScreen().removePreference(stealthPreference);
 			}
 		}
 		Preference notificationRingtonePreference = getPreferenceScreen().findPreference(HikeConstants.NOTIF_SOUND_PREF);
@@ -294,6 +288,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if(videoCompressPreference != null && android.os.Build.VERSION.SDK_INT < 18)
 		{
 			getPreferenceScreen().removePreference(videoCompressPreference);
+		}
+
+		Preference favoriteListPreference = getPreferenceScreen().findPreference(HikeConstants.FAV_LIST_PREF);
+		if (favoriteListPreference != null)
+		{
+			favoriteListPreference.setOnPreferenceClickListener(this);
 		}
 		setupActionBar(titleRes);
 
@@ -713,6 +713,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}
 			}
 		}
+		else if (HikeConstants.FAV_LIST_PREF.equals(preference.getKey()))
+		{
+			Intent intent = new Intent(HikePreferences.this, PeopleActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+		}
 		return true;
 	}
 
@@ -903,9 +909,65 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		case R.xml.account_preferences:
 			updateAccountBackupPrefView();
 			break;
+		case R.xml.privacy_preferences:
+			updatePrivacyPrefView();
+			break;
 		}
 	}
-	
+
+	private void updatePrivacyPrefView()
+	{
+		ListPreference lp = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.LAST_SEEN_PREF_LIST);
+		lp.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
+		{
+
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue)
+			{
+				try
+				{
+					int slectedPrivacyId = Integer.parseInt(newValue.toString());
+					String selectedPrivacyValue = "";
+					switch (slectedPrivacyId) {
+						case HikeConstants.PrivacyOptions.NOBODY:
+							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_nobody_key);
+							break;
+						case HikeConstants.PrivacyOptions.EVERYONE:
+							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_everyone_key);
+							break;
+						case HikeConstants.PrivacyOptions.FAVORITES:
+							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_favorites_key);
+							break;
+						case HikeConstants.PrivacyOptions.MY_CONTACTS:
+							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_my_contacts_key);
+							break;
+					}
+					preference.setTitle(getString(R.string.last_seen_header) + " - " + selectedPrivacyValue);
+
+					JSONObject object = new JSONObject();
+					object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+
+					JSONObject data = new JSONObject();
+					data.put(HikeConstants.NEW_LAST_SEEN_SETTING, slectedPrivacyId);
+					if(slectedPrivacyId == HikeConstants.PrivacyOptions.NOBODY)
+						data.put(HikeConstants.LAST_SEEN_SETTING, false);
+					else
+						data.put(HikeConstants.LAST_SEEN_SETTING, true);
+					data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
+					object.put(HikeConstants.DATA, data);
+
+					HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+				return true;
+			}
+		});
+		lp.setTitle(lp.getTitle() + " - " + lp.getEntry());
+	}
+
 	private void updateAccountBackupPrefView()
 	{
 		Preference preference = getPreferenceScreen().findPreference(HikeConstants.BACKUP_PREF);
