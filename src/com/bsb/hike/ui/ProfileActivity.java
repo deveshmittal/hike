@@ -3216,9 +3216,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				Logger.d("ProfileActivity", "delete dp request failed!");
 			}
 		});
-		mActivityState.task = new HikeHTTPTask(this, R.string.delete_dp_error);
+		mActivityState.task = new HikeHTTPTask(this, R.string.remove_dp_error);
 		Utils.executeHttpTask(mActivityState.task, hikeHttpRequest);
-		mDialog = ProgressDialog.show(this, null, getString(R.string.deleting_dp));		
+		mDialog = ProgressDialog.show(this, null, getString(R.string.removing_dp));		
 	}
 	
 	/**
