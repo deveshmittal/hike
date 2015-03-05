@@ -1260,20 +1260,20 @@ public class HikeNotification
 		 */
 		Calendar calendar = Calendar.getInstance();
 		long toDay12AM = Utils.getTimeInMillis(calendar, 0, 0, 0, 0);
-		long toDay8AM = Utils.getTimeInMillis(calendar, 8, 0, 0, 0);
+		long toDay7AM = Utils.getTimeInMillis(calendar, 7, 0, 0, 0);
 		
 		calendar.add(Calendar.DAY_OF_YEAR, 1);
 		long nextDay12AM = Utils.getTimeInMillis(calendar, 0, 0, 0, 0);
-		long nextDay8AM = Utils.getTimeInMillis(calendar, 8, 0, 0, 0);
-		if(nextRetryTime >= toDay12AM && nextRetryTime < toDay8AM)
+		long nextDay7AM = Utils.getTimeInMillis(calendar, 7, 0, 0, 0);
+		if(nextRetryTime >= toDay12AM && nextRetryTime < toDay7AM)
 		{
-			nextRetryTime = toDay8AM;
+			nextRetryTime = toDay7AM;
 		}
-		else if(nextRetryTime >= nextDay12AM && nextRetryTime < nextDay8AM)
+		else if(nextRetryTime >= nextDay12AM && nextRetryTime < nextDay7AM)
 		{
-			nextRetryTime = nextDay8AM;
+			nextRetryTime = nextDay7AM;
 		}
-		Logger.i("HikeNotification", "currtime = "+ System.currentTimeMillis() + "  nextDay12AM = "+nextDay12AM+ "  nextDay8AM = "+nextDay8AM + "  toDay8AM = "+toDay8AM + " finalRetryTime = "+ nextRetryTime);
+		Logger.i("HikeNotification", "currtime = "+ System.currentTimeMillis() + "  nextDay12AM = "+nextDay12AM+ "  nextDay8AM = "+nextDay7AM + "  toDay8AM = "+toDay7AM + " finalRetryTime = "+ nextRetryTime);
 		return nextRetryTime;
 	}
 	
