@@ -1400,7 +1400,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 		addToPubSub();
 
+		checkAndAddTypingNotifications();
+		
 		takeActionBasedOnIntent();
+	}
+	
+	/**
+	 * Checks if there is any typing notification present for the given msisdn, if present, it adds it to the ConvMessages
+	 */
+	protected void checkAndAddTypingNotifications()
+	{
+		if (HikeMessengerApp.getTypingNotificationSet().containsKey(msisdn))
+		{
+			setTypingText(true, HikeMessengerApp.getTypingNotificationSet().get(msisdn));
+		}
 	}
 	
 	protected void setEditTextListeners()
