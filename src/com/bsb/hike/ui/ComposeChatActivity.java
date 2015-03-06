@@ -414,9 +414,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		boolean showNujNotif = PreferenceManager.getDefaultSharedPreferences(ComposeChatActivity.this).getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true);
 		boolean fetchRecentlyJoined = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false) && !isForwardingMessage && showNujNotif;
 		
-		switch (composeMode) {
+		switch (composeMode)
+		{
 		case CREATE_BROADCAST_MODE:
-			//We donot show sms contacts in broadcast mode
+			//We do not show sms contacts in broadcast mode
 			adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, (isForwardingMessage && !isSharingFile), fetchRecentlyJoined, existingBroadcastId, sendingMsisdn, friendsListFetchedCallback, false);
 			break;
 
