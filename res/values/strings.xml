@@ -1164,6 +1164,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="no_media">Photos and videos are shown here</string>
     <string name="add_fav">Add to favorites</string>
     <string name="no_file">Files and pins are shown here</string>
+    <string name="no_file_broadcast">Files are shown here</string>
     <string name="no_file_profile">Files are shown here</string>
     <string name="num_new_conversations">%1$s conversations</string>
     <string name="notifications_contact_join_title">Contact joining hike</string>
