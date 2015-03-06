@@ -187,10 +187,8 @@ public class Conversation implements Comparable<Conversation>
 	public void clearMessageListAndAddMessage(ConvMessage message)
 	{		
 		this.messages.clear();
-		if (!message.isBroadcastMessage())
-		{
-			addMessage(message);
-		}
+		
+		addMessage(message);
 	}
 	
 	public int getUnreadCount()
