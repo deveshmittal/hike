@@ -539,7 +539,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if (adapter.isContactPresentInExistingParticipants(contactInfo))
 			{
 				// basicly it will work when you add participants to existing group via typing numbers
-				showToast("You have already added this contact in group");
+				showToast(getString(R.string.added_in_group));
 				return;
 			}
 			else if (adapter.getSelectedContactCount() >= HikeConstants.MAX_CONTACTS_IN_GROUP && !adapter.isContactAdded(contactInfo))
@@ -561,7 +561,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if (adapter.isContactPresentInExistingParticipants(contactInfo))
 			{
 				// basicly it will work when you add participants to existing group via typing numbers
-				showToast("You have already added this contact in broadcast list");
+				showToast(getString(R.string.added_in_broadcast));
 				return;
 			}
 			else if (adapter.getSelectedContactCount() >= HikeConstants.MAX_CONTACTS_IN_BROADCAST && !adapter.isContactAdded(contactInfo))
@@ -1063,7 +1063,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					int selected = adapter.getCurrentSelection();
 					if (selected < MIN_MEMBERS_GROUP_CHAT)
 					{
-						Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to make a brodacast list", Toast.LENGTH_SHORT).show();
+						Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_GROUP_CHAT), Toast.LENGTH_SHORT).show();
 						return;
 					}
 					createBroadcast(adapter.getAllSelectedContactsMsisdns());
@@ -1073,7 +1073,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					int selected = adapter.getCurrentSelection();
 					if (selected < MIN_MEMBERS_GROUP_CHAT)
 					{
-						Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to start a group chat", Toast.LENGTH_SHORT).show();
+						Toast.makeText(getApplicationContext(), getString(R.string.minContactInGroupErr, MIN_MEMBERS_GROUP_CHAT), Toast.LENGTH_SHORT).show();
 						return;
 					}
 					createGroup(adapter.getAllSelectedContacts());

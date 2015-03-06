@@ -2171,6 +2171,29 @@ public class HikeConstants
 		public static final int FORWARD_WEB_CONTENT = 4;
 	}
 	
+	public static class HOME_ACTIVITY_OVERFLOW
+	{
+		public static final int CREDITS = 1;
+
+		public static final int INVITE_FRIENDS = 2;
+
+		public static final int HIKE_EXTRAS = 3;
+
+		public static final int REWARDS = 4;
+
+		public static final int SETTINGS = 5;
+
+		public static final int  NEW_GROUP = 6;
+		
+		public static final int TIMELINE = 7;
+		
+		public static final int STATUS = 8;
+		
+		public static final int LOGS = 9;
+	
+		public static final int NEW_BROADCAST = 10;
+	}
+	
 	public static interface ConvMessagePacketKeys{
 		public static final String CONTENT_TYPE = "c";
 		public static final String PIN_TYPE = "pin";

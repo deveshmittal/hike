@@ -812,7 +812,9 @@
     <string name="invite_friends_confirmation_msg">Would you like to invite %1$s of your friends to hike?</string>
     <string name="didnt_get_pin">Didn\'t get the PIN, we will call you</string>
     <string name="maxContactInGroupErr">Max %1$s contacts are allowed in a group</string>
-    <string name="maxContactInBroadcastErr">Max %1$s contacts are allowed in this list</string>
+    <string name="maxContactInBroadcastErr">Max %1$s contacts are allowed in this broadcast list</string>
+    <string name="minContactInGroupErr">Select Min %1$s member(s) to start a group chat</string>
+    <string name="minContactInBroadcastErr">Select Min %1$s member(s) to make a broadcast list</string>
     <string name="cannot_select_zero_byte_file">Cannot select a 0 byte file</string>
     <string name="chatThreadNudgeTutorialText_group">Double tap anywhere to nudge your friends</string>
     <string name="addedYouAsFavorite">Added %1$s to Favorites</string>
@@ -1373,4 +1375,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="holi">Happy Holi</string>
     <string name="terms_conditions_hint">Terms &amp; Conditions</string>
 	<string name="terms_conditions_title">Terms</string>
+	<string name="added_in_group">You have already added this contact in group</string>
+	<string name="added_in_broadcast">You have already added this contact in broadcast list</string>
 </resources>
