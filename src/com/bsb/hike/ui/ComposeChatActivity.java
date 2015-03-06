@@ -847,10 +847,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		
 	}
 
-	private void createBroadcast(ArrayList<String> selectedContactList)
+	private void createBroadcast(List<String> selectedContactList)
 	{
 		Intent intent = new Intent(ComposeChatActivity.this, CreateNewGroupOrBroadcastActivity.class);
-		intent.putStringArrayListExtra(HikeConstants.Extras.BROADCAST_RECIPIENTS, selectedContactList);
+		intent.putStringArrayListExtra(HikeConstants.Extras.BROADCAST_RECIPIENTS, (ArrayList<String>)selectedContactList);
 		intent.putExtra(HikeConstants.IS_BROADCAST, true);
 		startActivity(intent);
 		finish();
