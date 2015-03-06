@@ -90,6 +90,7 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
@@ -849,10 +850,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private void createBroadcast(List<String> selectedContactList)
 	{
-		Intent intent = new Intent(ComposeChatActivity.this, CreateNewGroupOrBroadcastActivity.class);
-		intent.putStringArrayListExtra(HikeConstants.Extras.BROADCAST_RECIPIENTS, (ArrayList<String>)selectedContactList);
-		intent.putExtra(HikeConstants.IS_BROADCAST, true);
-		startActivity(intent);
+		IntentManager.createNewBroadcastActivityIntent(ComposeChatActivity.this, selectedContactList);
 		finish();
 	}
 	
