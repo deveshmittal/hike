@@ -37,6 +37,7 @@ import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPUtils;
+import com.bsb.hike.voip.view.CallRateActivity;
 import com.google.android.gms.internal.co;
 
 public class IntentManager
@@ -316,6 +317,13 @@ public class IntentManager
 		intent.putExtra(VoIPConstants.Extras.ACTION, VoIPConstants.Extras.OUTGOING_CALL);
 		intent.putExtra(VoIPConstants.Extras.MSISDN, msisdn);
 		intent.putExtra(VoIPConstants.Extras.CALL_SOURCE, source.ordinal());
+		return intent;
+	}
+
+	public static Intent getVoipCallRateActivityIntent(Context context)
+	{
+		Intent intent = new Intent(context, CallRateActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 		return intent;
 	}
 }

@@ -51,6 +51,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.VoipProfilePicImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient;
@@ -445,10 +446,10 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			{
 				if(isCallActive)
 				{
-					if(VoIPUtils.shouldShowCallRatePopupNow())
+					if(bundle!=null && VoIPUtils.shouldShowCallRatePopupNow())
 					{
-						Intent intent = new Intent(getSherlockActivity(), CallRateActivity.class);
-						intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+						Intent intent = IntentManager.getVoipCallRateActivityIntent(getSherlockActivity());
+						intent.putExtra(VoIPConstants.CALL_RATE_BUNDLE, bundle);
 						startActivity(intent);
 					}
 					VoIPUtils.setupCallRatePopupNextTime();

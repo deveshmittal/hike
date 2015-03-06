@@ -39,6 +39,7 @@ public class VoIPConstants {
 	public static final String PARTNER_MSISDN = "pmsisdn";
 	public static final String CALL_FAILED_REASON = "callfailreason";
 	public static final String PARTNER_NAME = "pname";
+	public static final String CALL_RATE_BUNDLE = "callRateBundle";
 
 	/*
 	 *  Handler Message Constants
