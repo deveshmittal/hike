@@ -706,6 +706,20 @@ public class MqttMessagesManager
 		}
 		Logger.d(getClass().getSimpleName(), "Delivery report received for msgid : " + serverID + "	;	REPORT : DELIVERED");
 
+		saveDeliveryReport(serverID, msisdn, false);
+
+	}
+	
+	private void saveDeliveryReport(long serverID, String msisdn, boolean recursiveCall) throws JSONException
+	{
+		if(!recursiveCall)
+		{
+			String serverIdMsisdn = convDb.getMsisdnForMsgId((int) serverID);
+			if (serverIdMsisdn != null && !serverIdMsisdn.equals(msisdn))
+			{
+				saveDeliveryReport(serverID, serverIdMsisdn, true);
+			}
+		}
 		int rowsUpdated = updateDB(serverID, ConvMessage.State.SENT_DELIVERED, msisdn);
 
 		if (rowsUpdated == 0)

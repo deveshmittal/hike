@@ -6616,4 +6616,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		boolean updated = (rowsUpdated != 0);
 		return (updated);
 	}
+
+	public String getMsisdnForMsgId(int msgId)
+	{
+		String msisdn = null;
+		Cursor c = null;
+
+		try
+		{
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MSISDN }, DBConstants.MESSAGE_ID + "=?", new String[] { String.valueOf(msgId) }, null, null, null);
+
+			final int msisdnColumn = c.getColumnIndex(DBConstants.MSISDN);
+
+			if (c.moveToFirst())
+			{
+				msisdn = c.getString(msisdnColumn);
+			}
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+
+		return msisdn;
+	}
 }
