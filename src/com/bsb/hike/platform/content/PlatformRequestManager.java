@@ -169,6 +169,16 @@ public class PlatformRequestManager
 
 	}
 
+	public static void failure(PlatformContentRequest mRequest, EventCode event, boolean isPriorDownload)
+	{
+
+		reportFailure(mRequest, event);
+		if (!isPriorDownload)
+		{
+			remove(mRequest);
+		}
+	}
+
 	public static void reportFailure(final PlatformContentRequest argRequest, final EventCode error)
 	{
 		PlatformContentLoader.getLoader().post(new Runnable()
