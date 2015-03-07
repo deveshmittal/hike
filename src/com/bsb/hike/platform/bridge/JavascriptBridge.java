@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.os.Handler;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -37,10 +38,13 @@ public abstract class JavascriptBridge
 
 	static final String tag = "JavascriptBridge";
 
+	protected Handler mHandler;
+
 	public JavascriptBridge(WebView mWebView)
 	{
 		this.mWebView = mWebView;
 		this.mContext = HikeMessengerApp.getInstance().getApplicationContext();
+		this.mHandler = new Handler(mContext.getMainLooper());
 	}
 
 	/**
@@ -96,7 +100,11 @@ public abstract class JavascriptBridge
 		Logger.d(tag, "set debuggable enabled called with " + setEnabled);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
 		{
-			mWebView.post(new Runnable()
+			if (null == mHandler)
+			{
+				return;
+			}
+			mHandler.post(new Runnable()
 			{
 				@Override
 				public void run()
@@ -140,7 +148,11 @@ public abstract class JavascriptBridge
 	{
 		Logger.i(tag, "open full page called with title " + title + " , and url = " + url);
 		final Intent intent = IntentManager.getWebViewActivityIntent(mContext, url, title);
-		mWebView.post(new Runnable()
+		if (null == mHandler)
+		{
+			return;
+		}
+		mHandler.post(new Runnable()
 		{
 			@Override
 			public void run()
@@ -241,7 +253,10 @@ public abstract class JavascriptBridge
 		{
 			heightRunnable.mWebView = new WeakReference<WebView>(mWebView);
 			heightRunnable.height = Integer.parseInt(heightS);
-			mWebView.post(heightRunnable);
+			if (null != mHandler)
+			{
+				mHandler.post(heightRunnable);
+			}
 		}
 	}
 

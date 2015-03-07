@@ -219,7 +219,11 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 				message.webMetadata = new WebMetadata(updatedJSON); // the new metadata to inflate in webview
 				if (notifyScreen != null && Boolean.valueOf(notifyScreen))
 				{
-					mWebView.post(new Runnable()
+					if (null == mHandler)
+					{
+						return;
+					}
+					mHandler.post(new Runnable()
 					{
 
 						@Override
@@ -272,10 +276,15 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 					message.webMetadata = new WebMetadata(updatedJSON);
 				}
 			}
-
 			final Intent intent = IntentManager.getForwardIntentForConvMessage(mContext, message,
 					PlatformContent.getForwardCardData(message.webMetadata.JSONtoString()));
-			mWebView.post(new Runnable()
+
+			if (null == mHandler)
+			{
+				return;
+			}
+
+			mHandler.post(new Runnable()
 			{
 				@Override
 				public void run()
