@@ -474,11 +474,21 @@ public class MqttMessagesManager
 
 	private void saveMessage(JSONObject jsonObj) throws JSONException
 	{
-		ConvMessage convMessage = messagePreProcess(jsonObj);
+		final ConvMessage convMessage = messagePreProcess(jsonObj);
 
-		/*
-		 * adding message in db if not duplicate. In case of duplicate message we don't do further processing and return
-		 */
+		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
+		{
+			downloadZipForPlatformMessage(convMessage);
+		}
+		saveMessage(convMessage);
+
+	}
+
+	private void saveMessage(ConvMessage convMessage)
+	{
+	/*
+	 * adding message in db if not duplicate. In case of duplicate message we don't do further processing and return
+	 */
 		if (!convDb.addConversationMessages(convMessage))
 		{
 			return;
@@ -514,7 +524,38 @@ public class MqttMessagesManager
 		}
 
 		removeTypingNotification(convMessage.getMsisdn(), convMessage.getGroupParticipantMsisdn());
+	}
 
+	private void downloadZipForPlatformMessage(final ConvMessage convMessage)
+	{
+		PlatformContentRequest rqst = PlatformContentRequest.make(
+				PlatformContentModel.make(convMessage.webMetadata.JSONtoString()), new PlatformContentListener<PlatformContentModel>()
+		{
+
+			@Override
+			public void onComplete(PlatformContentModel content)
+			{
+				saveMessage(convMessage);
+			}
+
+			@Override
+			public void onEventOccured(PlatformContent.EventCode event)
+			{
+				if (event == PlatformContent.EventCode.DOWNLOADING || event == PlatformContent.EventCode.LOADED)
+				{
+					//do nothing
+					return;
+				}
+
+				else
+				{
+					saveMessage(convMessage);
+					HikeAnalyticsEvent.cardErrorAnalytics(event, convMessage);
+				}
+			}
+		});
+
+		new PlatformZipDownloader(rqst, true).downloadAndUnzip();
 	}
 
 	private void saveMessageBulk(JSONObject jsonObj) throws JSONException
