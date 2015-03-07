@@ -566,9 +566,10 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		return new ArrayList<ContactInfo>(selectedPeople.values());
 	}
 
-	public ArrayList<String> getAllSelectedContactsMsisdns()
+	public List<String> getAllSelectedContactsMsisdns()
 	{
-		return new ArrayList<String>(selectedPeople.keySet());
+		List<String> people = new ArrayList<String>(selectedPeople.keySet());
+		return people;
 	}
 	
 	/**

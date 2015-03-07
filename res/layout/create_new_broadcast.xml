@@ -15,18 +15,8 @@
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_default_avatar_group" />
+            android:src="@drawable/ic_broadcast" />
 
-        <ImageView
-            android:id="@+id/change_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignRight="@id/broadcast_profile_image"
-            android:layout_alignTop="@id/broadcast_profile_image"
-            android:background="@null"
-            android:paddingBottom="10dp"
-            android:paddingLeft="10dp"
-            android:src="@drawable/ic_new_group_image" />
     </RelativeLayout>
 
     <com.bsb.hike.view.CustomFontEditText

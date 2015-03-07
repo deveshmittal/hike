@@ -223,15 +223,17 @@ public abstract class ImageWorker
 				data = new String(data.substring(0, idx1));
 		}
 		boolean isGroupConversation = Utils.isGroupConversation(data);
+		
+		boolean isBroadcastConversation = Utils.isBroadcastConversation(data);
 
 		imageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(data, rounded));
 		if (setHiResDefaultAvatar)
 		{
-			imageView.setImageResource(isGroupConversation ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
+			imageView.setImageResource(isBroadcastConversation? R.drawable.ic_broadcast_chat_thread : (isGroupConversation ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires));
 		}
 		else
 		{
-			imageView.setImageResource(isGroupConversation ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+			imageView.setImageResource(isBroadcastConversation? R.drawable.ic_broadcast_chat_thread : (isGroupConversation ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar));
 		}
 	}
 
