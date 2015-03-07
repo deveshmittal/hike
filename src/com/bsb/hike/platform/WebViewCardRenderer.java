@@ -277,7 +277,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 					else
 					{
 						showConnErrState(viewHolder);
-						cardErrorAnalytics(reason, convMessage);
+						HikeAnalyticsEvent.cardErrorAnalytics(reason, convMessage);
 					}
 				}
 
@@ -310,25 +310,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	}
 
-	private void cardErrorAnalytics(EventCode reason, ConvMessage convMessage)
-	{
-		JSONObject json = new JSONObject();
-		try
-		{
-			json.put(HikePlatformConstants.ERROR_CODE, reason.toString());
-			json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.BOT_ERROR);
-			json.put(AnalyticsConstants.CONTENT_ID, convMessage.getContentId());
-			HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, json);
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
-		catch (NullPointerException e)
-		{
-			e.printStackTrace();
-		}
-	}
+
 
 	private static void cardLoadAnalytics(ConvMessage message)
 	{
