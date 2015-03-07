@@ -88,7 +88,7 @@ public class ConvMessage
 	public PlatformWebMessageMetadata platformWebMessageMetadata;
 
 	/* Adding entries to the beginning of this list is not backwards compatible */
-	public static enum OriginType
+	public enum OriginType
 	{
 		NORMAL, /* message sent to server */
 		BROADCAST, /* message originated from a broadcast */

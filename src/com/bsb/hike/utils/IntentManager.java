@@ -1,5 +1,8 @@
 package com.bsb.hike.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +25,7 @@ import com.bsb.hike.models.NuxCustomMessage;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
+import com.bsb.hike.ui.CreateNewGroupOrBroadcastActivity;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeListActivity;
@@ -195,6 +199,14 @@ public class IntentManager
 
 		return intent;
 
+	}
+	
+	public static void createNewBroadcastActivityIntent(Context appContext, List<String> selectedContactList)
+	{
+		Intent intent = new Intent(appContext.getApplicationContext(), CreateNewGroupOrBroadcastActivity.class);
+		intent.putStringArrayListExtra(HikeConstants.Extras.BROADCAST_RECIPIENTS, (ArrayList<String>)selectedContactList);
+		intent.putExtra(HikeConstants.IS_BROADCAST, true);
+		appContext.startActivity(intent);
 	}
 
 	public static Intent getForwardIntentForConvMessage(Context context, ConvMessage convMessage, String metadata)

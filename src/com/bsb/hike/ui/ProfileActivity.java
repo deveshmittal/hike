@@ -3390,7 +3390,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mLocalMSISDN);
 		}
-		else
+		else if (this.profileType == ProfileType.BROADCAST_INFO)
 		{
 			intent.putExtra(HikeConstants.Extras.BROADCAST_LIST, true);
 			intent.putExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST, mLocalMSISDN);
