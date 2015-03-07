@@ -843,17 +843,8 @@ public class ConversationsAdapter extends BaseAdapter
 		else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
 		{
 			JSONArray participantInfoArray = metadata.getGcjParticipantInfo();
-
 			String highlight = Utils.getGroupJoinHighlightText(participantInfoArray, (GroupConversation) conversation);
-
-			if (metadata.isNewGroup())
-			{
-				markedUp = String.format(context.getString(R.string.new_group_message), highlight);
-			}
-			else
-			{
-				markedUp = String.format(context.getString(R.string.add_to_group_message), highlight);
-			}
+			markedUp = Utils.getParticipantAddedMessage(message, context, highlight);
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.DND_USER)
 		{

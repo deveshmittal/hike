@@ -42,6 +42,7 @@ import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
+import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
@@ -338,8 +339,16 @@ public class MqttMessagesManager
 		{
 			return;
 		}
-		GroupConversation groupConversation = new GroupConversation(jsonObj, this.context);
-
+		GroupConversation groupConversation;
+		String msisdn = jsonObj.getString(HikeConstants.TO);
+		if (Utils.isBroadcastConversation(msisdn))
+		{
+			groupConversation = new BroadcastConversation(jsonObj, this.context);
+		}
+		else
+		{
+			groupConversation = new GroupConversation(jsonObj, this.context);
+		}
 		boolean groupRevived = false;
 
 		if (!ContactManager.getInstance().isGroupAlive(groupConversation.getMsisdn()))
@@ -352,7 +361,14 @@ public class MqttMessagesManager
 
 			if (groupRevived)
 			{
-				jsonObj.put(HikeConstants.NEW_GROUP, true);
+				if (groupConversation instanceof BroadcastConversation)
+				{
+					jsonObj.put(HikeConstants.NEW_BROADCAST, true);
+				}
+				else if (groupConversation instanceof GroupConversation)
+				{
+					jsonObj.put(HikeConstants.NEW_GROUP, true);
+				}
 				pubSub.publish(HikePubSub.GROUP_REVIVED, groupConversation.getMsisdn());
 			}
 
@@ -676,22 +692,35 @@ public class MqttMessagesManager
 
 	private void saveDeliveryReport(JSONObject jsonObj) throws JSONException
 	{
-
 		String id = jsonObj.optString(HikeConstants.DATA);
 		String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
-		long msgID;
+		long serverID;
 		try
 		{
-			msgID = Long.parseLong(id);
+			serverID = Long.parseLong(id);
 		}
 		catch (NumberFormatException e)
 		{
 			Logger.e(getClass().getSimpleName(), "Exception occured while parsing msgId. Exception : " + e);
-			msgID = -1;
+			serverID = -1;
 		}
-		Logger.d(getClass().getSimpleName(), "Delivery report received for msgid : " + msgID + "	;	REPORT : DELIVERED");
+		Logger.d(getClass().getSimpleName(), "Delivery report received for msgid : " + serverID + "	;	REPORT : DELIVERED");
 
-		int rowsUpdated = updateDB(msgID, ConvMessage.State.SENT_DELIVERED, msisdn);
+		saveDeliveryReport(serverID, msisdn, false);
+
+	}
+	
+	private void saveDeliveryReport(long serverID, String msisdn, boolean recursiveCall) throws JSONException
+	{
+		if(!recursiveCall)
+		{
+			String serverIdMsisdn = convDb.getMsisdnForMsgId((int) serverID);
+			if (serverIdMsisdn != null && !serverIdMsisdn.equals(msisdn))
+			{
+				saveDeliveryReport(serverID, serverIdMsisdn, true);
+			}
+		}
+		int rowsUpdated = updateDB(serverID, ConvMessage.State.SENT_DELIVERED, msisdn);
 
 		if (rowsUpdated == 0)
 		{
@@ -699,7 +728,7 @@ public class MqttMessagesManager
 			return;
 		}
 
-		Pair<String, Long> pair = new Pair<String, Long>(msisdn, msgID);
+		Pair<String, Long> pair = new Pair<String, Long>(msisdn, serverID);
 
 		this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, pair);
 
@@ -751,10 +780,10 @@ public class MqttMessagesManager
 
 	private void saveMessageRead(JSONObject jsonObj) throws JSONException
 	{
-		JSONArray msgIds = jsonObj.optJSONArray(HikeConstants.DATA);
+		JSONArray serverIds = jsonObj.optJSONArray(HikeConstants.DATA);
 		String id = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
 
-		if (msgIds == null)
+		if (serverIds == null)
 		{
 			Logger.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
 			return;
@@ -763,7 +792,7 @@ public class MqttMessagesManager
 		long[] ids;
 		if (!Utils.isGroupConversation(id))
 		{
-			ids = convDb.setAllDeliveredMessagesReadForMsisdn(id, msgIds);
+			ids = convDb.setAllDeliveredMessagesReadForMsisdn(id, serverIds);
 			if (ids == null)
 			{
 				return;
@@ -778,10 +807,10 @@ public class MqttMessagesManager
 			{
 				return ;
 			}
-			ids = new long[msgIds.length()];
-			for (int i = 0; i < msgIds.length(); i++)
+			ids = new long[serverIds.length()];
+			for (int i = 0; i < serverIds.length(); i++)
 			{
-				ids[i] = msgIds.optLong(i);
+				ids[i] = serverIds.optLong(i);
 			}
 			long maxMsgId = convDb.setReadByForGroup(id, ids, participantMsisdn);
 
@@ -2655,11 +2684,11 @@ public class MqttMessagesManager
 
 	private int updateDB(Object object, ConvMessage.State status, String msisdn)
 	{
-		long msgID = (Long) object;
+		long serverID = (Long) object;
 		/*
 		 * TODO we should lookup the convid for this user, since otherwise one could set mess with the state for other conversations
 		 */
-		return convDb.updateMsgStatus(msgID, status.ordinal(), msisdn);
+		return convDb.updateMsgStatus(serverID, status.ordinal(), msisdn);
 	}
 	
 	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn) throws JSONException

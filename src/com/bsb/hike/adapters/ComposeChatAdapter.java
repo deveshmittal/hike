@@ -71,7 +71,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	
 	private boolean nuxStateActive = false;
 
-	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, boolean fetchRecents, boolean fetchRecentlyJoined, String existingGroupId, String sendingMsisdn, FriendsListFetchedCallback friendsListFetchedCallback)
+	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, boolean fetchRecents, boolean fetchRecentlyJoined, String existingGroupId, String sendingMsisdn, FriendsListFetchedCallback friendsListFetchedCallback, boolean showSMSContacts)
 	{
 		super(context, listView, friendsListFetchedCallback, ContactInfo.lastSeenTimeComparatorWithoutFav);
 		selectedPeople = new HashMap<String, ContactInfo>();
@@ -100,7 +100,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		/*
 		 * We should show sms contacts section in new compose
 		 */
-		showSMSContacts = true;
+		this.showSMSContacts = showSMSContacts;
 	}
 
 	public void setIsCreatingOrEditingGroup(boolean b)
@@ -154,7 +154,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		} else {
 			fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList,recentlyJoinedHikeContactsList, friendsStealthList, hikeStealthContactsList,
 					smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, null, null, filteredGroupsList, filteredRecentsList,filteredRecentlyJoinedHikeContactsList,
-					existingParticipants, sendingMsisdn, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false, fetchRecents , fetchRecentlyJoined, showDefaultEmptyList, true, true, false , false );
+					existingParticipants, sendingMsisdn, fetchGroups, existingGroupId, isCreatingOrEditingGroup, showSMSContacts, false, fetchRecents , fetchRecentlyJoined, showDefaultEmptyList, true, true, false , false );
 		}
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
@@ -566,6 +566,11 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		return new ArrayList<ContactInfo>(selectedPeople.values());
 	}
 
+	public ArrayList<String> getAllSelectedContactsMsisdns()
+	{
+		return new ArrayList<String>(selectedPeople.keySet());
+	}
+	
 	/**
 	 * It includes contact which are currently selected and existing to group (if applicable)
 	 * 

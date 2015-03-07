@@ -2025,16 +2025,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				JSONArray participantInfoArray = metadata.getGcjParticipantInfo();
 				TextView participantInfo = (TextView) inflater.inflate(layoutRes, null);
-				String message;
 				String highlight = Utils.getGroupJoinHighlightText(participantInfoArray, (GroupConversation) conversation);
-				if (metadata.isNewGroup())
-				{
-					message = String.format(context.getString(R.string.new_group_message), highlight);
-				}
-				else
-				{
-					message = String.format(context.getString(R.string.add_to_group_message), highlight);
-				}
+				String message = Utils.getParticipantAddedMessage(convMessage, context, highlight);
+				
 				setTextAndIconForSystemMessages(participantInfo, Utils.getFormattedParticipantInfo(message, highlight), isDefaultTheme ? R.drawable.ic_joined_chat
 						: R.drawable.ic_joined_chat_custom);
 				((ViewGroup) participantInfoHolder.container).addView(participantInfo);

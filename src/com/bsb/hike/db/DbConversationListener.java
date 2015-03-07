@@ -28,6 +28,7 @@ import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
@@ -89,6 +90,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.MULTI_MESSAGE_SENT, this);
 		mPubSub.addListener(HikePubSub.MULTI_FILE_UPLOADED, this);
 		mPubSub.addListener(HikePubSub.HIKE_SDK_MESSAGE, this);
+		mPubSub.addListener(HikePubSub.CONVERSATION_TS_UPDATED, this);		
 	}
 
 	@Override
@@ -110,6 +112,10 @@ public class DbConversationListener implements Listener
 					if (convMessage.isSent())
 					{
 						uploadFiksuPerDayMessageEvent();
+					}
+					if (convMessage.isBroadcastConversation())
+					{
+						addBroadcastRecipientConversations(convMessage);
 					}
 				}
 				// Recency was already updated when the ft message was added.
@@ -412,6 +418,13 @@ public class DbConversationListener implements Listener
 		}else if(HikePubSub.HIKE_SDK_MESSAGE.equals(type)){
 			handleHikeSdkMessage(object);
 		}
+		else if (HikePubSub.CONVERSATION_TS_UPDATED.equals(type))
+		{
+			Pair<String, Long> p = (Pair<String, Long>) object;
+			String msisdn = p.first;
+			long timestamp = p.second;
+			boolean isUpdated = mConversationDb.updateSortingTimestamp(msisdn, timestamp);
+		}
 	}
 
     private void sendMultiConvMessage(MultipleConvMessage multiConvMessages) {
@@ -593,11 +606,11 @@ public class DbConversationListener implements Listener
 
 	private void updateDB(Object object, int status)
 	{
-		long msgID = (Long) object;
+		long serverID = (Long) object;
 		/*
 		 * TODO we should lookup the convid for this user, since otherwise one could set mess with the state for other conversations
 		 */
-		mConversationDb.updateMsgStatus(msgID, status, null);
+		mConversationDb.updateMsgStatus(serverID, status, null);
 	}
 
 	private void writeToNativeSMSDb(ConvMessage convMessage)
@@ -610,5 +623,55 @@ public class DbConversationListener implements Listener
 
 		context.getContentResolver().insert(HikeConstants.SMSNative.SENTBOX_CONTENT_URI, values);
 	}
+	
+	public void addBroadcastRecipientConversations(ConvMessage convMessage)
+	{
+		ContactManager contactManager = ContactManager.getInstance();
+		ArrayList<ConvMessage> convMessages= new ArrayList<ConvMessage>(1);
+		ConvMessage broadcastConvMessage = new ConvMessage(convMessage);
+		//Here we set origin type of 
+		broadcastConvMessage.setMessageOriginType(ConvMessage.OriginType.BROADCAST);
+		broadcastConvMessage.setServerId(convMessage.getMsgID());
+		convMessages.add(broadcastConvMessage);
+		ArrayList<String> contactMsisdns = convMessage.getSentToMsisdnsList();
+		ArrayList<ContactInfo> contacts = new ArrayList<ContactInfo>();
+		for (String msisdn : contactMsisdns)
+		{
+			ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, contactManager.getName(msisdn), msisdn, true);
+			contacts.add(contactInfo);
+		}
+		
+		mConversationDb.addConversations(convMessages, contacts, false);
+		
+		sendPubSubForConvScreenBroadcastMessage(convMessage, contacts);
+        // publishing mqtt packet
+        HikeMqttManagerNew.getInstance().sendMessage(convMessage.serializeDeliveryReportRead(), HikeMqttManagerNew.MQTT_QOS_ONE);
+	}
 
+	public void sendPubSubForConvScreenBroadcastMessage(ConvMessage convMessage, ArrayList<ContactInfo> recipient)
+	{
+		long msgId = convMessage.getMsgID();
+		int totalRecipient = recipient.size();
+		List<Pair<ContactInfo, ConvMessage>> allPairs = new ArrayList<Pair<ContactInfo,ConvMessage>>(totalRecipient);
+		long timestamp = System.currentTimeMillis()/1000;
+		for(int i=0;i<totalRecipient;i++)
+		{
+			ConvMessage message = new ConvMessage(convMessage);
+			if(convMessage.isBroadcastConversation())
+			{
+				message.setMessageOriginType(OriginType.BROADCAST);
+			}
+			else
+			{
+				//multi-forward case... in braodcast case we donot need to update timestamp
+				message.setTimestamp(timestamp++);
+			}
+			message.setMsgID(msgId+i);
+			ContactInfo contactInfo = recipient.get(i);
+			message.setMsisdn(contactInfo.getMsisdn());
+			Pair<ContactInfo, ConvMessage> pair = new Pair<ContactInfo, ConvMessage>(contactInfo, message);
+			allPairs.add(pair);
+		}
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_DB_INSERTED, allPairs);
+	}
 }

@@ -1475,6 +1475,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
 
+		optionsList.add(new OverFlowMenuItem(getString(R.string.new_broadcast), 10));
+
 		addEmailLogItem(optionsList);
 
 		overFlowWindow = new PopupWindow(this);
@@ -1526,7 +1528,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					intent = new Intent(HomeActivity.this, SettingsActivity.class);
 					break;
 				case 6:
-					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
+					intent = new Intent(HomeActivity.this, CreateNewGroupOrBroadcastActivity.class);
 					break;
 				case 7:
 					try
@@ -1561,6 +1563,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 9:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
+					break;
+				case 10:
+					intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
+					intent.putExtra(HikeConstants.Extras.COMPOSE_MODE, HikeConstants.Extras.CREATE_BROADCAST_MODE);						
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					startActivity(intent);
+					Logger.d("BroadcastActivity1111", "broadcast activity called");
 					break;
 				}
 

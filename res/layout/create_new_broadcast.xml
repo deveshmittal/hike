@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp" >
+
+        <ImageView
+            android:id="@+id/broadcast_profile_image"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/ic_default_avatar_group" />
+
+        <ImageView
+            android:id="@+id/change_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@id/broadcast_profile_image"
+            android:layout_alignTop="@id/broadcast_profile_image"
+            android:background="@null"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:src="@drawable/ic_new_group_image" />
+    </RelativeLayout>
+
+    <com.bsb.hike.view.CustomFontEditText
+        android:id="@+id/broadcast_name"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/bg_country_search_bar"
+        android:drawablePadding="9dp"
+        android:gravity="center_vertical"
+        android:hint="@string/name_broadcast"
+        android:maxLength="@integer/max_length_group_name"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="8dp"
+        android:singleLine="true" />
+     <TextView
+        android:id="@+id/group_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:drawableLeft="@drawable/ic_chat_theme_info"
+        android:drawablePadding="4dp"
+        android:layout_marginTop="20dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:singleLine="true"
+        android:background="#f2f2f2"
+        android:text="@string/broadcast_participant_info"/>
+
+</LinearLayout>

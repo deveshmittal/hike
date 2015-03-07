@@ -65,6 +65,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -197,7 +198,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
-			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.CONV_UNREAD_COUNT_MODIFIED};
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.CONV_UNREAD_COUNT_MODIFIED,
+			HikePubSub.CONVERSATION_TS_UPDATED};
 
 	private ConversationsAdapter mAdapter;
 
@@ -1184,7 +1186,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else
 		{
-			optionsList.add(getString(R.string.group_info));
+				if (conv instanceof BroadcastConversation)
+				{
+					optionsList.add(getString(R.string.broadcast_info));
+				}
+				else
+				{
+					optionsList.add(getString(R.string.group_info));
+				}
 		}
 		if (conv.getContactName() != null)
 		{
@@ -1198,7 +1207,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		if (conv instanceof GroupConversation)
 		{
-			optionsList.add(getString(R.string.delete_leave));
+				if (conv instanceof BroadcastConversation)
+				{
+					optionsList.add(getString(R.string.delete_broadcast));
+				}
+				else
+				{
+					optionsList.add(getString(R.string.delete_leave));
+				}
 		}
 		else
 		{
@@ -1281,6 +1297,28 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					deleteConfirmDialog.setCancelButton(R.string.cancel);
 					deleteConfirmDialog.show();
 				}
+				else if (getString(R.string.delete_broadcast).equals(option))
+				{
+					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
+					deleteConfirmDialog.setHeader(R.string.delete);
+					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_broadcast_msg, conv.getLabel()));
+					
+					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					{
+
+						@Override
+						public void onClick(View v)
+						{
+							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
+							deleteConversation(conv);
+							deleteConfirmDialog.dismiss();
+						}
+					};
+
+					deleteConfirmDialog.setOkButton(android.R.string.ok, dialogOkClickListener);
+					deleteConfirmDialog.setCancelButton(R.string.cancel);
+					deleteConfirmDialog.show();
+				}
 				else if (getString(R.string.email_conversations).equals(option))
 				{
 					EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(getSherlockActivity(), ConversationFragment.this);
@@ -1320,7 +1358,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					addToContactsExisting(conv.getMsisdn());
 				}
 
-				else if (getString(R.string.group_info).equals(option))
+				else if (getString(R.string.group_info).equals(option) || getString(R.string.broadcast_info).equals(option))
 				{
 					if (!((GroupConversation) conv).getIsGroupAlive())
 					{
@@ -1695,16 +1733,44 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		mAdapter.notifyDataSetChanged();
 	}
 
+	public void updateTimestampAndSortConversations(Object object)
+	{
+		Logger.d("ListeningTSPubsub", "listening");
+		Pair<String, Long> p = (Pair<String, Long>) object;
+		String msisdn = p.first;
+		Long ts = p.second;
+		
+		final Conversation conv = mConversationsByMSISDN.get(msisdn);
+		if (conv!= null)
+		{	
+			if (ts>=0)
+			{
+				conv.setTimestamp(ts);
+			}
+			
+			Collections.sort(displayedConversations,
+					mConversationsComparator);
+				getActivity().runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+							notifyDataSetChanged();
+					}
+				});
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
-
 		if (!isAdded())
 		{
 			return;
 		}
 		Logger.d(getClass().getSimpleName(), "Event received: " + type);
+		
 		if ((HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)) )
 		{
 			Logger.d(getClass().getSimpleName(), "New msg event sent or received.");
@@ -1723,7 +1789,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				// messages
 				return;
 			}
-
 			if (Utils.shouldIncrementCounter(message))
 			{
 				conv.setUnreadCount(conv.getUnreadCount() + 1);
@@ -2562,7 +2627,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				((GroupConversation) conv).setGroupAlive(false);
 			}
-		}else if(HikePubSub.MULTI_MESSAGE_DB_INSERTED.equals(type)){
+		}
+		else if(HikePubSub.MULTI_MESSAGE_DB_INSERTED.equals(type)){
 			if (!isAdded())
 			{
 				return;
@@ -2649,6 +2715,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					notifyDataSetChanged();
 				}
 			});
+		}
+		else if(HikePubSub.CONVERSATION_TS_UPDATED.equals(type))
+		{
+			updateTimestampAndSortConversations(object);
 		}
 	}
 	
@@ -3086,8 +3156,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	}
 	protected void viewGroupInfo(Conversation conv) {
 		Intent intent = new Intent(getActivity(), ProfileActivity.class);
-		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, conv.getMsisdn());
+		if (Utils.isBroadcastConversation(conv.getMsisdn()))
+		{
+			intent.putExtra(HikeConstants.Extras.BROADCAST_LIST, true);
+			intent.putExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST, conv.getMsisdn());
+		}
+		else
+		{
+			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, conv.getMsisdn());
+		}
 		startActivity(intent);
 	}
 

@@ -32,7 +32,7 @@ public class GroupConversation extends Conversation
 
 	private boolean hasSmsUser;
 
-	private Map<String, PairModified<GroupParticipant, String>> groupParticipantList;
+	protected Map<String, PairModified<GroupParticipant, String>> groupParticipantList;
 	
 	private long lastSentMsgId = -1;
 	

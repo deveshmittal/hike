@@ -126,6 +126,8 @@ public class HikeConstants
 	public static final String CREDITS = "credits";
 
 	public static final String ON_HIKE = "onhike";
+	
+	public static final String IS_BROADCAST = "isBroadcast";
 
 	public static final String DND = "dnd";
 
@@ -581,6 +583,8 @@ public class HikeConstants
 
 	public static final String NEW_GROUP = "new_group";
 	
+	public static final String NEW_BROADCAST = "new_broadcast";
+
 	public static final String AVATAR = "avatar";
 
 	/* Constant used to name the preference file which saves the drafts */
@@ -651,6 +655,8 @@ public class HikeConstants
 	public static final int MAX_CHAR_IN_NAME = 20;
 
 	public static final int MAX_CONTACTS_IN_GROUP = 100;
+
+	public static final int MAX_CONTACTS_IN_BROADCAST = 500;
 
 	public static final int MAX_SMS_CONTACTS_IN_GROUP = MAX_CONTACTS_IN_GROUP;
 
@@ -1057,6 +1063,8 @@ public class HikeConstants
 		public static final String PREV_MSISDN = "prevMsisdn";
 
 		public static final String PREV_NAME = "prevName";
+		
+		public static final String BROADCAST_RECIPIENTS = "broadcastRecipients";
 
 		public static final String INVITE = "invite";
 
@@ -1125,9 +1133,13 @@ public class HikeConstants
 
 		public static final String GROUP_CHAT = "groupChat";
 
+		public static final String BROADCAST_LIST = "broadcastList";
+
 		public static final String EMOTICON_SHOWING = "emoticonShowing";
 
 		public static final String EXISTING_GROUP_CHAT = "existingGroupChat";
+
+		public static final String EXISTING_BROADCAST_LIST = "existingBroadcastList";
 
 		public static final String LEAVE_GROUP_CHAT = "leaveGroupChat";
 
@@ -1272,6 +1284,10 @@ public class HikeConstants
 		public static final String EMOTICON_TYPE = "emoticonType";
 
 		public static final String CREATE_GROUP = "createGroup";
+		
+		public static final String COMPOSE_MODE = "composeMode";
+
+		public static final int CREATE_BROADCAST_MODE = 7;
 
 		public static final String FROM_CREDITS_SCREEN = "fromCreditsScreen";
 
@@ -1329,7 +1345,7 @@ public class HikeConstants
 
 		public static final String GROUP_NAME = "groupName";
 
-		public static final String GROUP_ID = "groupId";
+		public static final String GROUP_BROADCAST_ID = "groupOrBroadcastId";
 
 		public static final String SHOWING_INVALID_PIN_ERROR = "showingInvalidPinError";
 
@@ -2212,6 +2228,7 @@ public class HikeConstants
 	public static final int NORMAL_MESSAGE_TYPE = 0;
 	public static final int MULTI_FORWARD_MESSAGE_TYPE = 1;
 	public static final int SHARED_PIN_TYPE = 2;
+	public static final int BROADCAST_MESSAGE_TYPE = 3;
 	public static final String SHOWN_MULTI_FORWARD_TIP = "shownMultiForwardTip";
 
 	public static final String VISIBLITY = "visibility";

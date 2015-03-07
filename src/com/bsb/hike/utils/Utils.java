@@ -165,12 +165,14 @@ import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
@@ -754,6 +756,11 @@ public class Utils
 	public static boolean isGroupConversation(String msisdn)
 	{
 		return msisdn!=null && !msisdn.startsWith("+");
+	}
+	
+	public static boolean isBroadcastConversation(String msisdn)
+	{
+		return msisdn!=null && msisdn.startsWith("b:");
 	}
 
 	public static String validateBotMsisdn(String msisdn){
@@ -5288,5 +5295,34 @@ public class Utils
 			}
 		}
 		return false;
+	}
+	
+	public static String getParticipantAddedMessage(ConvMessage convMessage, Context context, String highlight)
+	{
+		String participantAddedMessage;
+		MessageMetadata metadata = convMessage.getMetadata();
+		if (convMessage.isBroadcastConversation())
+		{
+			if (metadata.isNewBroadcast())
+			{
+				participantAddedMessage = String.format(context.getString(R.string.new_broadcast_message), highlight);
+			}
+			else
+			{
+				participantAddedMessage = String.format(context.getString(R.string.add_to_broadcast_message), highlight);
+			}
+		}
+		else
+		{
+			if (metadata.isNewGroup())
+			{
+				participantAddedMessage = String.format(context.getString(R.string.new_group_message), highlight);
+			}
+			else
+			{
+				participantAddedMessage = String.format(context.getString(R.string.add_to_group_message), highlight);
+			}
+		}
+		return participantAddedMessage;
 	}
 }

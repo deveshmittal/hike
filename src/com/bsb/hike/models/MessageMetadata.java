@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 
 public class MessageMetadata
 {
@@ -72,6 +73,8 @@ public class MessageMetadata
 
 	private int pinMessage =0 ;
 
+	private boolean newBroadcast;
+
 	public int getPinMessage()
 	{
 		return pinMessage;
@@ -102,6 +105,7 @@ public class MessageMetadata
 		case PARTICIPANT_JOINED:
 			this.gcjParticipantInfo = metadata.getJSONArray(HikeConstants.DATA);
 			this.newGroup = metadata.optBoolean(HikeConstants.NEW_GROUP);
+			this.newBroadcast = metadata.optBoolean(HikeConstants.NEW_BROADCAST);
 			break;
 
 		case PARTICIPANT_LEFT:
@@ -180,6 +184,11 @@ public class MessageMetadata
 	public boolean isNewGroup()
 	{
 		return newGroup;
+	}
+	
+	public boolean isNewBroadcast()
+	{
+		return newBroadcast;
 	}
 
 	public String getMsisdn()

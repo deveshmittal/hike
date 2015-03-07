@@ -3,6 +3,7 @@ package com.bsb.hike.models;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.util.ArrayList;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -24,7 +25,7 @@ public class ConvMessage
 	private boolean isBlockAddHeader;
 
 	private long msgID; // this corresponds to msgID stored in sender's DB
-
+	
 	private long mappedMsgId; // this corresponds to msgID stored in receiver's
 								// DB
 
@@ -62,6 +63,12 @@ public class ConvMessage
 	
 	private int  hashMessage= HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE;
 
+	private ArrayList<String> sentToMsisdnsList = new ArrayList<String>();
+	
+	private String messageBroadcastId = null;
+	
+	private long serverId = -1;
+
 	public int getHashMessage()
 	{
 		return hashMessage;
@@ -79,6 +86,15 @@ public class ConvMessage
 	public PlatformMessageMetadata platformMessageMetadata;
 
 	public PlatformWebMessageMetadata platformWebMessageMetadata;
+
+	/* Adding entries to the beginning of this list is not backwards compatible */
+	public static enum OriginType
+	{
+		NORMAL, /* message sent to server */
+		BROADCAST, /* message originated from a broadcast */
+	};
+	
+	private OriginType messageOriginType = OriginType.NORMAL;
 
 	public boolean isLovePresent(){
 		return contentLove!=null;
@@ -236,6 +252,12 @@ public class ConvMessage
 		this.msgID = msgId;
 	}
 	
+//	TODO anu bansal serverId
+/**
+ * serverId	
+ * create a new constructor for serverID
+ * set serverID field in convMessage
+ */
 	public ConvMessage(TypingNotification typingNotification)
 	{
 		this.typingNotification = typingNotification;
@@ -308,6 +330,11 @@ public class ConvMessage
 		this.platformMessageMetadata = other.platformMessageMetadata;
 		this.platformWebMessageMetadata = other.platformWebMessageMetadata;
 		this.contentLove = other.contentLove;
+		this.messageOriginType  = other.messageOriginType;
+		if (other.isBroadcastConversation())
+		{
+			this.messageBroadcastId = other.getMsisdn();
+		}
 		try {
 			this.readByArray = other.readByArray !=null? new JSONArray(other.readByArray.toString()) : null;
 		} catch (JSONException e) {
@@ -428,8 +455,8 @@ public class ConvMessage
 		{
 		case PARTICIPANT_JOINED:
 			JSONArray arr = metadata.getGcjParticipantInfo();
-			this.mMessage = context.getString(metadata.isNewGroup() ? R.string.new_group_message : R.string.add_to_group_message,
-					Utils.getGroupJoinHighlightText(arr, (GroupConversation) conversation));
+			String highlight = Utils.getGroupJoinHighlightText(arr, (GroupConversation) conversation);
+			this.mMessage = Utils.getParticipantAddedMessage(this, context, highlight);
 			break;
 		case PARTICIPANT_LEFT:
 			this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn()));
@@ -732,6 +759,18 @@ public class ConvMessage
 				{
 					object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
 				}
+				if (isBroadcastConversation())
+				{
+					ArrayList<String> contactsList = getSentToMsisdnsList();
+					JSONArray msisdnArray = new JSONArray();
+					for (int i=0; i<contactsList.size();i++)
+					{
+						msisdnArray.put((String)contactsList.get(i));
+					}
+					
+					data.put(HikeConstants.LIST, msisdnArray);
+					object.put(HikeConstants.DATA, data);
+				}
 				// TODO : we should add all sub types here and set metadata accordingly
 				switch(messageType){
 				case MESSAGE_TYPE.CONTENT:
@@ -799,6 +838,11 @@ public class ConvMessage
 	public static State stateValue(int val)
 	{
 		return State.values()[val];
+	}
+	
+	public static OriginType originTypeValue(int val)
+	{
+		return OriginType.values()[val];
 	}
 
 	public void setState(State state)
@@ -983,4 +1027,57 @@ public class ConvMessage
 	{
 		return participantInfoState == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING;
 	}
+	
+	public boolean isBroadcastConversation() {
+		return Utils.isBroadcastConversation(this.mMsisdn);
+
+	}
+	
+	public boolean isBroadcastMessage() {
+		return messageOriginType == OriginType.BROADCAST;
+	}
+	
+	public ArrayList<String> getSentToMsisdnsList() {
+		return sentToMsisdnsList;
+	}
+
+	public void setSentToMsisdnsList(ArrayList<String> sentToMsisdnsList) {
+		this.sentToMsisdnsList.addAll(sentToMsisdnsList);
+	}
+
+	public boolean hasBroadcastId() {
+		return messageBroadcastId != null;
+	}
+
+	public String getMessageBroadcastId() {
+		return this.messageBroadcastId;
+	}
+
+	public OriginType getMessageOriginType()
+	{
+		return messageOriginType;
+	}
+
+	public void setMessageOriginType(OriginType messageOriginType)
+	{
+		this.messageOriginType = messageOriginType;
+	}
+
+	public long getServerId()
+	{
+		if(isBroadcastMessage() && !isBroadcastConversation())
+		{
+			return serverId;
+		}
+		else
+		{
+			return msgID;
+		}
+	}
+
+	public void setServerId(long serverId)
+	{
+		this.serverId = serverId;
+	}
+
 }
