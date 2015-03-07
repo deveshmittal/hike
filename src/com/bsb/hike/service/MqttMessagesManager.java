@@ -1440,6 +1440,11 @@ public class MqttMessagesManager
 			HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.Extras.GENERAL_SO_TIMEOUT, timeout);
 			AccountUtils.setSocketTimeout((int) timeout);
 		}
+		if (data.has(HikeConstants.REPLY_NOTIFICATION_RETRY_COUNT))
+		{
+			int replyNotificationRetryCount = data.getInt(HikeConstants.REPLY_NOTIFICATION_RETRY_COUNT);
+			editor.putInt(HikeMessengerApp.MAX_REPLY_RETRY_NOTIF_COUNT, replyNotificationRetryCount);
+		}
 		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);

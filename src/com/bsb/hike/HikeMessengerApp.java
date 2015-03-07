@@ -457,6 +457,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	
 	public static final String BULK_LAST_SEEN_PREF = "blsPref";
 
+	public static final String MAX_REPLY_RETRY_NOTIF_COUNT = "maxReplyRetryNotifCount";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
