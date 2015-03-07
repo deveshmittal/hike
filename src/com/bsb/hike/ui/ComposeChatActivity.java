@@ -108,6 +108,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	
 	private static int MIN_MEMBERS_GROUP_CHAT = 2;
 
+	private static int MIN_MEMBERS_BROADCAST_LIST = 2;
+
 	private static final int CREATE_GROUP_MODE = 1;
 
 	private static final int START_CHAT_MODE = 2;
@@ -136,6 +138,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private boolean createGroup;
 
+	private boolean createBroadcast;
+	
 	private boolean isForwardingMessage;
 
 	private boolean isSharingFile;
@@ -197,6 +201,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		isForwardingMessage = getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false);
 		isSharingFile = getIntent().getType() != null;
 		nuxIncentiveMode = getIntent().getBooleanExtra(HikeConstants.Extras.NUX_INCENTIVE_MODE, false);
+		createBroadcast = getIntent().getBooleanExtra(HikeConstants.Extras.CREATE_BROADCAST, false);
 
 		// Getting the group id. This will be a valid value if the intent
 		// was passed to add group participants.
@@ -443,9 +448,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			MIN_MEMBERS_GROUP_CHAT = 1;
 		}
 
+		if (existingBroadcastId != null)
+		{
+			MIN_MEMBERS_BROADCAST_LIST = 1;
+		}
+		
 		setModeAndUpdateAdapter(composeMode);
 		
-		adapter.setIsCreatingOrEditingGroup(this.composeMode == CREATE_GROUP_MODE);
+		adapter.setIsCreatingOrEditingGroup(this.composeMode == CREATE_GROUP_MODE || this.composeMode == CREATE_BROADCAST_MODE);
 
 		adapter.executeFetchTask();
 		
@@ -729,7 +739,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private void setMode()
 	{
 		int mode = START_CHAT_MODE; 
-		if(getIntent().hasExtra(HikeConstants.Extras.COMPOSE_MODE) || existingBroadcastId != null)
+		if(getIntent().hasExtra(HikeConstants.Extras.COMPOSE_MODE))
 		{
 			mode = getIntent().getIntExtra(HikeConstants.Extras.COMPOSE_MODE, START_CHAT_MODE);
 		}
@@ -859,7 +869,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		String groupId;
 		String groupName = getIntent().getStringExtra(HikeConstants.Extras.GROUP_NAME);
-		if (this.composeMode == CREATE_BROADCAST_MODE)
+		if (getIntent().hasExtra(HikeConstants.Extras.BROADCAST_LIST))
 		{
 			groupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST);
 		}
@@ -1003,7 +1013,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			title.setText(R.string.new_group);
 		}
-		else if (composeMode == CREATE_BROADCAST_MODE)
+		else if (createBroadcast)
 		{
 			title.setText(R.string.new_broadcast);
 		}
@@ -1059,17 +1069,27 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				{
 					forwardConfirmation(adapter.getAllSelectedContacts());
 				}
-				else if (composeMode == CREATE_BROADCAST_MODE && existingBroadcastId == null)
+				else if (createBroadcast)
 				{
 					int selected = adapter.getCurrentSelection();
-					if (selected < MIN_MEMBERS_GROUP_CHAT)
+					if (selected < MIN_MEMBERS_BROADCAST_LIST)
 					{
-						Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_GROUP_CHAT), Toast.LENGTH_SHORT).show();
+						Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_BROADCAST_LIST), Toast.LENGTH_SHORT).show();
 						return;
 					}
 					createBroadcast(adapter.getAllSelectedContactsMsisdns());
 				}
-				else
+				else if (getIntent().hasExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST))
+				{
+					int selected = adapter.getCurrentSelection();
+					if (selected < MIN_MEMBERS_BROADCAST_LIST)
+					{
+						Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_BROADCAST_LIST), Toast.LENGTH_SHORT).show();
+						return;
+					}
+					createGroup(adapter.getAllSelectedContacts());
+				}
+				else if (composeMode == CREATE_GROUP_MODE)
 				{
 					int selected = adapter.getCurrentSelection();
 					if (selected < MIN_MEMBERS_GROUP_CHAT)
@@ -1824,7 +1844,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		if (composeMode == CREATE_BROADCAST_MODE)
 		{
-			if (existingBroadcastId != null || getIntent().hasExtra(HikeConstants.Extras.COMPOSE_MODE))
+			if (existingBroadcastId != null || createBroadcast)
 			{
 				ComposeChatActivity.this.finish();
 				return;

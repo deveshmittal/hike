@@ -1566,7 +1566,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					break;
 				case HikeConstants.HOME_ACTIVITY_OVERFLOW.NEW_BROADCAST:
 					intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
-					intent.putExtra(HikeConstants.Extras.COMPOSE_MODE, HikeConstants.Extras.CREATE_BROADCAST_MODE);						
+					intent.putExtra(HikeConstants.Extras.COMPOSE_MODE, HikeConstants.Extras.CREATE_BROADCAST_MODE);
+					intent.putExtra(HikeConstants.Extras.CREATE_BROADCAST, true);
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(intent);
 					Logger.d("BroadcastActivity1111", "broadcast activity called");
