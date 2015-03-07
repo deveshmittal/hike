@@ -631,6 +631,7 @@ public class DbConversationListener implements Listener
 		ConvMessage broadcastConvMessage = new ConvMessage(convMessage);
 		//Here we set origin type of 
 		broadcastConvMessage.setMessageOriginType(ConvMessage.OriginType.BROADCAST);
+		broadcastConvMessage.setServerId(convMessage.getMsgID());
 		convMessages.add(broadcastConvMessage);
 		ArrayList<String> contactMsisdns = convMessage.getSentToMsisdnsList();
 		ArrayList<ContactInfo> contacts = new ArrayList<ContactInfo>();
