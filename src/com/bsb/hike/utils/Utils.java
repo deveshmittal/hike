@@ -5325,4 +5325,19 @@ public class Utils
 		}
 		return participantAddedMessage;
 	}
+	
+	public static String valuesToCommaSepratedString(ArrayList<Long> entries)
+	{
+		StringBuilder result = new StringBuilder("(");
+		for (Long entry : entries)
+		{
+			result.append(DatabaseUtils.sqlEscapeString(String.valueOf(entry)) + ",");
+		}
+		int idx = result.lastIndexOf(",");
+		if (idx >= 0)
+		{
+			result.replace(idx, result.length(), ")");
+		}
+		return result.toString();
+	}
 }

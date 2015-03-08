@@ -846,33 +846,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return executeUpdateMessageStatusStatement(query, val, msisdn);
 	}
 
-	public long[] setAllDeliveredMessagesReadForMsisdn(String msisdn, JSONArray serverIds)
+	public ArrayList<Long> getCurrentUnreadMessageIdsForMsisdn(String msisdn)
 	{
-		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.SERVER_ID }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
-				+ State.SENT_DELIVERED_READ.ordinal(), new String[] { msisdn }, null, null, null);
+		ArrayList<Long> ids = new ArrayList<Long>();
 
-		long[] ids = new long[c.getCount() + serverIds.length()];
-
-		if (ids.length == 0 && serverIds.length() == 0)
-		{
-			return null;
-		}
-
-		StringBuilder sb = new StringBuilder("(");
-		int i = 0;
+		Cursor c = null;
 		try
 		{
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.SERVER_ID }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
+					+ State.SENT_DELIVERED_READ.ordinal(), new String[] { msisdn }, null, null, null);
+
 			while (c.moveToNext())
 			{
 				long id = c.getLong(c.getColumnIndex(DBConstants.SERVER_ID));
-				sb.append(id + ",");
-				ids[i++] = id;
-			}
-			for (i = 0; i < serverIds.length(); i++)
-			{
-				long id = serverIds.optLong(i);
-				sb.append(id + ",");
-				ids[c.getCount() + i++] = id;
+				ids.add(id);
 			}
 		}
 		finally
@@ -882,9 +869,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				c.close();
 			}
 		}
-		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
+		return ids;
+	}
 
-		String initialWhereClause = DBConstants.SERVER_ID + " in " + sb.toString();
+	public void setAllDeliveredMessagesReadForMsisdn(String msisdn, ArrayList<Long> serverIds)
+	{
+		String initialWhereClause = DBConstants.SERVER_ID + " in " + Utils.valuesToCommaSepratedString(serverIds);
 
 		int status = State.SENT_DELIVERED_READ.ordinal();
 
@@ -892,7 +882,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 		executeUpdateMessageStatusStatement(query, status, msisdn);
 
-		return ids;
 	}
 
 	/**
@@ -905,7 +894,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	 *            -- partipant msisdn from which mr packet came
 	 * @return id -- maxMsgId from list of ids that are sent by user. If ids doesn't contains any id sent by user return -1
 	 */
-	public long setReadByForGroup(String groupId, long[] ids, String msisdn)
+	public long setReadByForGroup(String groupId, ArrayList<Long> ids, String msisdn)
 	{
 		Cursor c = null;
 		Cursor conversationCursor = null;
@@ -5471,28 +5460,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	 *            -- list of message ids that came in "mr" packet
 	 * @return maxMrId from list of ids that are sent by me else -1
 	 */
-	public long getMrIdForGroup(String groupId, long ids[])
+	public long getMrIdForGroup(String groupId, ArrayList<Long> ids)
 	{
-		if (ids == null || ids.length == 0)
+		if (ids == null || ids.isEmpty())
 		{
 			return -1;
 		}
-		StringBuilder sb = new StringBuilder("(");
-
-		for (int i = 0; i < ids.length; i++)
-		{
-			sb.append(ids[i]);
-			if (i != ids.length - 1)
-			{
-				sb.append(",");
-			}
-		}
-		sb.append(")");
+		String inQureyString = Utils.valuesToCommaSepratedString(ids);
 
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { " MAX (" + DBConstants.MESSAGE_ID + ") AS msgid" }, DBConstants.MSISDN + "=?  AND " + DBConstants.MESSAGE_ID + " IN " + sb.toString(),
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { " MAX (" + DBConstants.MESSAGE_ID + ") AS msgid" }, DBConstants.MSISDN + "=?  AND " + DBConstants.MESSAGE_ID + " IN " + inQureyString,
 					new String[] { groupId }, null, null, null);
 			if (c.moveToFirst())
 			{
@@ -6566,30 +6545,55 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return (updated);
 	}
 
-	public String getMsisdnForMsgId(int msgId)
+	public String getMsisdnForMsgId(Long msgId, String excludingMsisdn)
 	{
+		ArrayList<Long> al = new ArrayList<Long>();
+		al.add(msgId);
+		Map<String, ArrayList<Long>> map = getMsisdnMapForMsgIds(al, excludingMsisdn);
+		
 		String msisdn = null;
+		if(!map.isEmpty())
+		{
+			msisdn = map.keySet().iterator().next();
+		}
+		return msisdn;
+	}
+	
+	/*
+	 * return a map from msisdn to list of server ids. for all given msgIds entries in messages table.
+	 */
+	public Map<String, ArrayList<Long>> getMsisdnMapForMsgIds(ArrayList<Long> msgIds, String excludingMsisdn)
+	{
 		Cursor c = null;
-
+		Map<String, ArrayList<Long>> map = new HashMap<String, ArrayList<Long>>();
+		
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MSISDN }, DBConstants.MESSAGE_ID + "=?", new String[] { String.valueOf(msgId) }, null, null, null);
-
-			final int msisdnColumn = c.getColumnIndex(DBConstants.MSISDN);
-
-			if (c.moveToFirst())
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "!= ? AND " + DBConstants.MESSAGE_ID + " IN "
+					+ Utils.valuesToCommaSepratedString(msgIds), new String[] { String.valueOf(excludingMsisdn) }, null, null, null);
+			final int msisdnColumnIdIdx = c.getColumnIndex(DBConstants.MSISDN);
+			final int messageIdColumnIdIdx = c.getColumnIndex(DBConstants.MESSAGE_ID);
+			while (c.moveToNext())
 			{
-				msisdn = c.getString(msisdnColumn);
+				String msisdnIdColumnValue = c.getString(msisdnColumnIdIdx);
+				Long messageIdColumnValue = c.getLong(messageIdColumnIdIdx);
+				ArrayList<Long> msgIdArray = map.get(msisdnIdColumnValue);
+				if(msgIdArray == null)
+				{
+					msgIdArray = new ArrayList<Long>();
+					map.put(msisdnIdColumnValue, msgIdArray);
+				}
+				msgIdArray.add(messageIdColumnValue);
 			}
 		}
 		finally
 		{
-			if (c != null)
+			if (null != c)
 			{
 				c.close();
 			}
-		}
 
-		return msisdn;
+		}
+		return map;
 	}
 }

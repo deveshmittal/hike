@@ -714,7 +714,7 @@ public class MqttMessagesManager
 	{
 		if(!recursiveCall)
 		{
-			String serverIdMsisdn = convDb.getMsisdnForMsgId((int) serverID);
+			String serverIdMsisdn = convDb.getMsisdnForMsgId(serverID, msisdn);
 			if (serverIdMsisdn != null && !serverIdMsisdn.equals(msisdn))
 			{
 				saveDeliveryReport(serverID, serverIdMsisdn, true);
@@ -781,43 +781,72 @@ public class MqttMessagesManager
 	private void saveMessageRead(JSONObject jsonObj) throws JSONException
 	{
 		JSONArray serverIds = jsonObj.optJSONArray(HikeConstants.DATA);
-		String id = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
-
+		
 		if (serverIds == null)
 		{
 			Logger.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
 			return;
 		}
-
-		long[] ids;
-		if (!Utils.isGroupConversation(id))
+		
+		String id = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
+		String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.FROM) : "";
+		
+		ArrayList<Long> serverIdsArrayList = new ArrayList<Long>(serverIds.length());
+		
+		for (int i = 0; i < serverIds.length(); i++)
 		{
-			ids = convDb.setAllDeliveredMessagesReadForMsisdn(id, serverIds);
-			if (ids == null)
+			serverIdsArrayList.add(serverIds.optLong(i));
+		}
+		
+		saveMessageRead(id, serverIdsArrayList, participantMsisdn, false);
+	}
+	
+	private void saveMessageRead(String msisdn, ArrayList<Long> serverIds, String participantMsisdn, boolean recursiveCall) 
+	{
+		if (serverIds == null || serverIds.isEmpty())
+		{
+			Logger.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
+			return;
+		}
+		
+		if(!recursiveCall)
+		{
+			serverIds  = convDb.getCurrentUnreadMessageIdsForMsisdn(msisdn);
+			Map<String, ArrayList<Long>> map = convDb.getMsisdnMapForMsgIds(serverIds, msisdn);
+			if (!map.isEmpty())
 			{
-				return;
+				for (String msisdnKey : map.keySet())
+				{
+					saveMessageRead(msisdnKey, map.get(msisdnKey), msisdn, true);
+				}
 			}
-			Pair<String, long[]> pair = new Pair<String, long[]>(id, ids);
+		}
+
+		long[] serverIdsLongArray= new long[serverIds.size()];
+		for (int i = 0; i < serverIds.size(); i++ )
+		{
+			serverIdsLongArray[i] = serverIds.get(i);
+		}
+		
+		if (!Utils.isGroupConversation(msisdn))
+		{
+			convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, serverIds);
+			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, serverIdsLongArray);
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
 		}
 		else
 		{
-			String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.FROM) : "";
 			if(TextUtils.isEmpty(participantMsisdn))
 			{
 				return ;
 			}
-			ids = new long[serverIds.length()];
-			for (int i = 0; i < serverIds.length(); i++)
-			{
-				ids[i] = serverIds.optLong(i);
-			}
-			long maxMsgId = convDb.setReadByForGroup(id, ids, participantMsisdn);
+
+			long maxMsgId = convDb.setReadByForGroup(msisdn, serverIds, participantMsisdn);
 
 			if (maxMsgId > 0)
 			{
 				Pair<Long, String> pair = new Pair<Long, String>(maxMsgId, participantMsisdn);
-				Pair<String, Pair<Long, String>> groupPair = new Pair<String, Pair<Long, String>>(id, pair);
+				Pair<String, Pair<Long, String>> groupPair = new Pair<String, Pair<Long, String>>(msisdn, pair);
 				this.pubSub.publish(HikePubSub.GROUP_MESSAGE_DELIVERED_READ, groupPair);
 			}
 		}
@@ -872,10 +901,10 @@ public class MqttMessagesManager
 
 		if (Utils.isGroupConversation(id))
 		{
-			long[] ids = new long[msgIds.length()];
+			ArrayList<Long> ids = new ArrayList<Long>(msgIds.length());
 			for (int i = 0; i < msgIds.length(); i++)
 			{
-				ids[i] = msgIds.optLong(i);
+				ids.add(msgIds.optLong(i));
 			}
 
 			msgID = convDb.getMrIdForGroup(id, ids);
