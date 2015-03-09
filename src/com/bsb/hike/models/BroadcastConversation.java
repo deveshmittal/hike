@@ -1,6 +1,7 @@
 package com.bsb.hike.models;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,6 +27,28 @@ public class BroadcastConversation extends GroupConversation {
 	public BroadcastConversation(String msisdn, String contactName, String groupOwner, boolean isGroupAlive, boolean isGroupMute)
 	{
 		super(msisdn, contactName, groupOwner, isGroupAlive, false);
+	}
+	
+	public static String defaultBroadcastName(ArrayList<String> participantList)
+	{
+		List<ContactInfo> broadcastParticipants = new ArrayList<ContactInfo>();
+		for (String msisdn : participantList)
+		{
+			ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
+			broadcastParticipants.add(contactInfo);
+		}
+		
+		switch (broadcastParticipants.size())
+		{
+		case 0:
+			return "";
+		case 1:
+			return broadcastParticipants.get(0).getFirstName();
+		case 2:
+			return broadcastParticipants.get(0).getFirstName() + " and " + broadcastParticipants.get(1).getFirstName();
+		default:
+			return broadcastParticipants.get(0).getFirstName() + " and " + (broadcastParticipants.size() - 1) + " others";
+		}
 	}
 	
 	public String getDefaultBroadcastName()

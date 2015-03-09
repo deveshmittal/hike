@@ -123,6 +123,7 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 
 			groupOrBroadcastImage = (ImageView) findViewById(R.id.broadcast_profile_image);
 			groupOrBroadcastName = (EditText) findViewById(R.id.broadcast_name);
+			groupOrBroadcastName.setHint(BroadcastConversation.defaultBroadcastName(broadcastRecipients));
 			groupOrBroadcastName.addTextChangedListener(new TextWatcher()
 			{
 
