@@ -1308,7 +1308,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
-	public void updateMessageMetadata(long msgID, MessageMetadata metadata)
+	public void updateMessageMetadata(long serverID, MessageMetadata metadata)
 	{
 		String thumbnailString = extractThumbnailFromMetadata(metadata);
 
@@ -1317,9 +1317,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		try
 		{
 			mDb.beginTransaction();
-			mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { String.valueOf(msgID) });
-			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MESSAGE_ID + "=? AND " + DBConstants.IS_STATUS_MSG + " = 0", new String[] { String.valueOf(msgID) });
-			updateSharedMediaTableMetadata(msgID, metadata);
+			mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.SERVER_ID + "=?", new String[] { String.valueOf(serverID) });
+			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.SERVER_ID + "=? AND " + DBConstants.IS_STATUS_MSG + " = 0", new String[] { String.valueOf(serverID) });
+			updateSharedMediaTableMetadata(serverID, metadata);
 			mDb.setTransactionSuccessful();
 		}
 		catch (Exception e)
