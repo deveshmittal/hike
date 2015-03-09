@@ -257,42 +257,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			showLoadingState(viewHolder);
 
-			PlatformContent.getContent(convMessage.webMetadata.JSONtoString(), new PlatformContentListener<PlatformContentModel>()
-			{
-
-				@Override
-				public void onEventOccured(EventCode reason)
-				{
-					Logger.e(tag, "on failure called " + reason);
-
-					if (reason == EventCode.DOWNLOADING)
-					{
-						//do nothing
-						return;
-					}
-					else if (reason == EventCode.LOADED)
-					{
-						cardLoadAnalytics(convMessage);
-					}
-					else
-					{
-						showConnErrState(viewHolder);
-						HikeAnalyticsEvent.cardErrorAnalytics(reason, convMessage);
-					}
-				}
-
-				public void onComplete(PlatformContentModel content)
-				{
-					if(position < getCount())
-					{
-						viewHolder.id = getItemId(position);
-						fillContent(web, content, convMessage, viewHolder);
-					}else
-					{
-						Logger.e(tag, "Platform Content returned data view no more exist");
-					}
-				}
-			});
+			loadContent(position, convMessage, viewHolder, view);
 		}
 		else
 		{
@@ -310,7 +275,54 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	}
 
+	private void loadContent(final int position, final ConvMessage convMessage, final WebViewHolder viewHolder, final View view)
+	{
+		PlatformContent.getContent(convMessage.webMetadata.JSONtoString(), new PlatformContentListener<PlatformContentModel>()
+		{
 
+			@Override
+			public void onEventOccured(EventCode reason)
+			{
+				Logger.e(tag, "on failure called " + reason);
+
+				if (reason == EventCode.DOWNLOADING)
+				{
+					//do nothing
+					return;
+				}
+				else if (reason == EventCode.LOADED)
+				{
+					cardLoadAnalytics(convMessage);
+				}
+				else
+				{
+					showConnErrState(viewHolder);
+					view.setOnClickListener(new View.OnClickListener()
+					{
+						@Override
+						public void onClick(View v)
+						{
+							loadContent(position, convMessage, viewHolder, view);
+						}
+					});
+					HikeAnalyticsEvent.cardErrorAnalytics(reason, convMessage);
+				}
+			}
+
+			public void onComplete(PlatformContentModel content)
+			{
+				if (position < getCount())
+				{
+					viewHolder.id = getItemId(position);
+					fillContent(content, convMessage, viewHolder);
+				}
+				else
+				{
+					Logger.e(tag, "Platform Content returned data view no more exist");
+				}
+			}
+		});
+	}
 
 	private static void cardLoadAnalytics(ConvMessage message)
 	{
@@ -355,12 +367,12 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		}
 	}
 
-	private void fillContent(CustomWebView web, PlatformContentModel content, ConvMessage convMessage,WebViewHolder holder)
+	private void fillContent(PlatformContentModel content, ConvMessage convMessage,WebViewHolder holder)
 	{
 		holder.webViewClient.convMessage = convMessage;
 		holder.platformJavaScriptBridge.updateConvMessage(convMessage);
 		Logger.d("content"+holder.id, content == null ? "CONTENT IS NULL!!":""+content.getFormedData());
-		web.loadDataWithBaseURL("", content.getFormedData(), "text/html", "UTF-8", "");
+		holder.customWebView.loadDataWithBaseURL("", content.getFormedData(), "text/html", "UTF-8", "");
 	}
 
 	private class CustomWebViewClient extends PlatformWebClient
