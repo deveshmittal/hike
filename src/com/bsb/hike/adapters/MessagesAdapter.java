@@ -138,6 +138,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		public ImageView status;
 
+		public ImageView broadcastIndicator;
+		
 		public TextView time;
 
 		public View timeStatus;
@@ -773,6 +775,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					stickerHolder.image = (ImageView) v.findViewById(R.id.image);
 					stickerHolder.time = (TextView) v.findViewById(R.id.time);
 					stickerHolder.status = (ImageView) v.findViewById(R.id.status);
+					stickerHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 					stickerHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 					stickerHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 					stickerHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
@@ -794,6 +797,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					stickerHolder.placeHolder = v.findViewById(R.id.placeholder);
 					stickerHolder.loader = (ProgressBar) v.findViewById(R.id.loading_progress);
 					stickerHolder.image = (ImageView) v.findViewById(R.id.image);
+					stickerHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 					stickerHolder.time = (TextView) v.findViewById(R.id.time);
 					stickerHolder.status = (ImageView) v.findViewById(R.id.status);
 					stickerHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -902,6 +906,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				});
 
 			}
+			displayBroadcastIndicator(convMessage, stickerHolder.broadcastIndicator);
 			setTimeNStatus(position, stickerHolder, true, stickerHolder.placeHolder);
 			setSelection(convMessage, stickerHolder.selectedStateOverlay);
 		}
@@ -1004,6 +1009,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						wtHolder.progress = (HoloCircularProgress) v.findViewById(R.id.play_progress);
 						wtHolder.action = (ImageView) v.findViewById(R.id.action);
 						wtHolder.duration = (TextView) v.findViewById(R.id.duration);
+						wtHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 						wtHolder.time = (TextView) v.findViewById(R.id.time);
 						wtHolder.status = (ImageView) v.findViewById(R.id.status);
 						wtHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1029,6 +1035,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						wtHolder.progress = (HoloCircularProgress) v.findViewById(R.id.play_progress);
 						wtHolder.action = (ImageView) v.findViewById(R.id.action);
 						wtHolder.duration = (TextView) v.findViewById(R.id.duration);
+						wtHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 						wtHolder.time = (TextView) v.findViewById(R.id.time);
 						wtHolder.status = (ImageView) v.findViewById(R.id.status);
 						wtHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1120,6 +1127,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					wtHolder.initialization.setVisibility(View.GONE);
 				}
 
+				displayBroadcastIndicator(convMessage, wtHolder.broadcastIndicator);
 				setTimeNStatus(position, wtHolder, true, wtHolder.placeHolder);
 				setSelection(convMessage, wtHolder.selectedStateOverlay);
 
@@ -1150,6 +1158,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						videoHolder.fileName = (TextView) v.findViewById(R.id.file_name);
 						videoHolder.filmstripLeft = (ImageView) v.findViewById(R.id.filmstrip_left);
 						videoHolder.filmstripRight = (ImageView) v.findViewById(R.id.filmstrip_right);
+						videoHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 						videoHolder.time = (TextView) v.findViewById(R.id.time);
 						videoHolder.status = (ImageView) v.findViewById(R.id.status);
 						videoHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1182,6 +1191,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						videoHolder.filmstripLeft = (ImageView) v.findViewById(R.id.filmstrip_left);
 						videoHolder.filmstripRight = (ImageView) v.findViewById(R.id.filmstrip_right);
 						videoHolder.time = (TextView) v.findViewById(R.id.time);
+						videoHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 						videoHolder.status = (ImageView) v.findViewById(R.id.status);
 						videoHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 						videoHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
@@ -1278,6 +1288,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				videoHolder.filmstripLeft.setVisibility(View.VISIBLE);
 				videoHolder.filmstripRight.setVisibility(View.VISIBLE);
 
+				displayBroadcastIndicator(convMessage, videoHolder.broadcastIndicator);
 				setBubbleColor(convMessage, videoHolder.messageContainer);
 				setupFileState(videoHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, videoHolder, true, videoHolder.fileThumb);
@@ -1308,6 +1319,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder.fileDetails = v.findViewById(R.id.file_details);
 						imageHolder.fileSize = (TextView) v.findViewById(R.id.file_size);
 						imageHolder.fileName = (TextView) v.findViewById(R.id.file_name);
+						imageHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 						imageHolder.time = (TextView) v.findViewById(R.id.time);
 						imageHolder.status = (ImageView) v.findViewById(R.id.status);
 						imageHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1337,6 +1349,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder.fileDetails = v.findViewById(R.id.file_details);
 						imageHolder.fileSize = (TextView) v.findViewById(R.id.file_size);
 						imageHolder.fileName = (TextView) v.findViewById(R.id.file_name);
+						imageHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 						imageHolder.time = (TextView) v.findViewById(R.id.time);
 						imageHolder.status = (ImageView) v.findViewById(R.id.status);
 						imageHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1420,6 +1433,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				imageHolder.fileThumb.setVisibility(View.VISIBLE);
 
+				displayBroadcastIndicator(convMessage, imageHolder.broadcastIndicator);
 				setBubbleColor(convMessage, imageHolder.messageContainer);
 				setupFileState(imageHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, imageHolder, true, imageHolder.fileThumb);
@@ -1446,6 +1460,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder.fileDetails = v.findViewById(R.id.file_details);
 						imageHolder.fileSize = (TextView) v.findViewById(R.id.file_size);
 						imageHolder.fileName = (TextView) v.findViewById(R.id.file_name);
+						imageHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 						imageHolder.time = (TextView) v.findViewById(R.id.time);
 						imageHolder.status = (ImageView) v.findViewById(R.id.status);
 						imageHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1475,6 +1490,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder.fileDetails = v.findViewById(R.id.file_details);
 						imageHolder.fileSize = (TextView) v.findViewById(R.id.file_size);
 						imageHolder.fileName = (TextView) v.findViewById(R.id.file_name);
+						imageHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 						imageHolder.time = (TextView) v.findViewById(R.id.time);
 						imageHolder.status = (ImageView) v.findViewById(R.id.status);
 						imageHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1535,6 +1551,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					imageHolder.circularProgressBg.setVisibility(View.VISIBLE);
 				}
 
+				displayBroadcastIndicator(convMessage, imageHolder.broadcastIndicator);
 				setBubbleColor(convMessage, imageHolder.messageContainer);
 				setTimeNStatus(position, imageHolder, true, imageHolder.fileThumb);
 				setSelection(convMessage, imageHolder.selectedStateOverlay);
@@ -1560,6 +1577,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder.fileDetails = v.findViewById(R.id.file_details);
 						fileHolder.fileSize = (TextView) v.findViewById(R.id.file_size);
 						fileHolder.fileName = (TextView) v.findViewById(R.id.file_name);
+						fileHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 						fileHolder.time = (TextView) v.findViewById(R.id.time);
 						fileHolder.status = (ImageView) v.findViewById(R.id.status);
 						fileHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1589,6 +1607,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder.fileDetails = v.findViewById(R.id.file_details);
 						fileHolder.fileSize = (TextView) v.findViewById(R.id.file_size);
 						fileHolder.fileName = (TextView) v.findViewById(R.id.file_name);
+						fileHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 						fileHolder.time = (TextView) v.findViewById(R.id.time);
 						fileHolder.status = (ImageView) v.findViewById(R.id.status);
 						fileHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1655,6 +1674,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					fileHolder.circularProgressBg.setVisibility(View.VISIBLE);
 				}
 
+				displayBroadcastIndicator(convMessage, fileHolder.broadcastIndicator);
 				setBubbleColor(convMessage, fileHolder.messageContainer);
 				setTimeNStatus(position, fileHolder, false, fileHolder.messageContainer);
 				setSelection(convMessage, fileHolder.selectedStateOverlay);
@@ -1691,6 +1711,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder.fileDetails = v.findViewById(R.id.file_details);
 						fileHolder.fileSize = (TextView) v.findViewById(R.id.file_size);
 						fileHolder.fileName = (TextView) v.findViewById(R.id.file_name);
+						fileHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 						fileHolder.time = (TextView) v.findViewById(R.id.time);
 						fileHolder.status = (ImageView) v.findViewById(R.id.status);
 						fileHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1721,6 +1742,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder.fileDetails = v.findViewById(R.id.file_details);
 						fileHolder.fileSize = (TextView) v.findViewById(R.id.file_size);
 						fileHolder.fileName = (TextView) v.findViewById(R.id.file_name);
+						fileHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 						fileHolder.time = (TextView) v.findViewById(R.id.time);
 						fileHolder.status = (ImageView) v.findViewById(R.id.status);
 						fileHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1766,6 +1788,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				fileHolder.fileExtension.setVisibility(View.VISIBLE);
 				fileHolder.fileDetails.setVisibility(View.VISIBLE);
 
+				displayBroadcastIndicator(convMessage, fileHolder.broadcastIndicator);
 				setBubbleColor(convMessage, fileHolder.messageContainer);
 				setupFileState(fileHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), true);
 				setTimeNStatus(position, fileHolder, false, fileHolder.messageContainer);
@@ -1792,6 +1815,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder = new TextViewHolder();
 					v = inflateView(R.layout.message_sent_text, parent, false);
 					textHolder.text = (TextView) v.findViewById(R.id.text);
+					textHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 					textHolder.time = (TextView) v.findViewById(R.id.time);
 					textHolder.status = (ImageView) v.findViewById(R.id.status);
 					textHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1817,6 +1841,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					Logger.d("MSG_GET_VIEW", "" + (System.currentTimeMillis() - time));
 
 					textHolder.text = (TextView) v.findViewById(R.id.text);
+					textHolder.broadcastIndicator = (ImageView) v.findViewById(R.id.broadcastIndicator);
 					textHolder.time = (TextView) v.findViewById(R.id.time);
 					textHolder.status = (ImageView) v.findViewById(R.id.status);
 					textHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1849,6 +1874,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			Linkify.addLinks(textHolder.text, Linkify.ALL);
 			Linkify.addLinks(textHolder.text, Utils.shortCodeRegex, "tel:");
 
+			displayBroadcastIndicator(convMessage, textHolder.broadcastIndicator);
 			setTimeNStatus(position, textHolder, false, textHolder.messageContainer);
 			setSelection(convMessage, textHolder.selectedStateOverlay);
 
@@ -2318,6 +2344,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		Logger.i("chatthread", "position " + position + " time taken : " + (System.currentTimeMillis() - startTime));
 		return v;
+	}
+
+	private void displayBroadcastIndicator(ConvMessage convMessage, ImageView broadcastIndicator)
+	{
+		if (broadcastIndicator != null)
+		{
+			if (convMessage.isBroadcastMessage() && !convMessage.isBroadcastConversation())
+			{
+				broadcastIndicator.setImageResource(R.drawable.ic_broadcast_system_message);
+				broadcastIndicator.setScaleType(ScaleType.CENTER);
+				broadcastIndicator.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				broadcastIndicator.setVisibility(View.GONE);
+			}
+		}
 	}
 
 	private void setBubbleColor(ConvMessage convMessage, ViewGroup messageContainer)
