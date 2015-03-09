@@ -3013,7 +3013,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			optionsList.add(getString(R.string.send_message));
 			if (isGroupOwner)
 			{
-				optionsList.add(getString(R.string.remove_from_group));
+				optionsList.add(getString(R.string.remove_from_broadcast));
 			}
 
 			final String[] options = new String[optionsList.size()];
@@ -3033,7 +3033,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						openChatThread(contactInfo);
 					}
-					else if (getString(R.string.remove_from_group).equals(option))
+					else if (getString(R.string.remove_from_broadcast).equals(option))
 					{
 						removeFromGroup(contactInfo);
 					}

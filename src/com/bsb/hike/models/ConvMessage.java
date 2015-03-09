@@ -497,8 +497,16 @@ public class ConvMessage
 			String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 			String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
-			this.mMessage = String.format(
-					context.getString(participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name : R.string.change_group_image), participantName);
+			String message;
+			if (getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
+			{
+				message = context.getString(this.isBroadcastConversation()?R.string.change_broadcast_name : R.string.change_group_name);
+			}
+			else
+			{
+				message = context.getString(R.string.change_group_image);
+			}
+			this.mMessage = String.format(message, participantName);
 			break;
 		case BLOCK_INTERNATIONAL_SMS:
 			this.mMessage = context.getString(R.string.block_internation_sms);

@@ -2172,14 +2172,29 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				String userMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
-				String message = String.format(context.getString(convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name
-						: R.string.change_group_image), participantName);
+				String msg;
+				if (infoState == ParticipantInfoState.CHANGED_GROUP_NAME)
+				{
+					msg = context.getString(convMessage.isBroadcastConversation()?R.string.change_broadcast_name : R.string.change_group_name);
+				}
+				else
+				{
+					msg = context.getString(R.string.change_group_image);
+				}
+				String message = String.format(msg, participantName);
 
 				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
 				int icRes;
 				if (infoState == ParticipantInfoState.CHANGED_GROUP_NAME)
 				{
-					icRes = isDefaultTheme ? R.drawable.ic_group_info : R.drawable.ic_group_info_custom;
+					if (convMessage.isBroadcastConversation())
+					{
+						icRes = R.drawable.ic_broadcast_system_message;
+					}
+					else
+					{
+						icRes = isDefaultTheme ? R.drawable.ic_group_info : R.drawable.ic_group_info_custom;
+					}
 				}
 				else
 				{
