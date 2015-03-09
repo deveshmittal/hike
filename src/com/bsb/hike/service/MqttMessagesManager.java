@@ -957,7 +957,7 @@ public class MqttMessagesManager
 			if (account.has(HikeConstants.ACCOUNTS))
 			{
 				JSONObject accounts = account.getJSONObject(HikeConstants.ACCOUNTS);
-				if (accounts.has(HikeConstants.TWITTER))
+				/*if (accounts.has(HikeConstants.TWITTER))
 				{
 					try
 					{
@@ -974,7 +974,7 @@ public class MqttMessagesManager
 					{
 						Logger.w(getClass().getSimpleName(), "Unknown format for twitter", e);
 					}
-				}
+				}*/
 			}
 			if (account.has(HikeMessengerApp.BACKUP_TOKEN_SETTING))
 			{
