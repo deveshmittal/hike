@@ -3318,6 +3318,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if(this.profileType == ProfileType.GROUP_INFO)
 				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, groupConversation);
+			else if(this.profileType == ProfileType.BROADCAST_INFO)
+				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, broadcastConversation);
 			else
 				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, 0, hsf.get(0).getMsisdn(), contactInfo.getFirstNameAndSurname());
 			
