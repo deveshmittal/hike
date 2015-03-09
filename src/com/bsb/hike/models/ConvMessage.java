@@ -412,11 +412,6 @@ public class ConvMessage
 		{
 			this.mMsisdn = obj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN);
 		}
-		
-		/**
-		 * This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.
-		 */
-		this.shouldShowPush = obj.optJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.PUSH, metadata.shouldShowPush());
 
 		this.mMessage = "";
 		this.mTimestamp = System.currentTimeMillis() / 1000;
@@ -439,6 +434,9 @@ public class ConvMessage
 			this.mMessage = context.getString(R.string.group_chat_end);
 			break;
 		case USER_JOIN:
+			//This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.\
+			this.shouldShowPush = obj.optJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.PUSH, metadata.shouldShowPush());
+			
 			String fName = null;
 			if (conversation != null)
 			{
