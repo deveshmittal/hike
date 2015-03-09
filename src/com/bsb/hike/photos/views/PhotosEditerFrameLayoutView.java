@@ -8,7 +8,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.ColorMatrixColorFilter;
 import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.util.AttributeSet;
@@ -38,9 +37,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 
 	private EffectsImageView effectLayer;
 
-	private ColorMatrixColorFilter currentEffect;
-
-	private boolean enableDoodling, enableText, savingFinal;
+	private boolean enableDoodling, savingFinal;
 
 	private Bitmap imageOriginal, imageEdited, imageScaled, scaledImageOriginal;
 
@@ -60,7 +57,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		addView(vignetteLayer);
 		addView(doodleLayer);
 		enableDoodling = false;
-		enableText = false;
 		savingFinal = false;
 	}
 
@@ -74,7 +70,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		addView(vignetteLayer);
 		addView(doodleLayer);
 		enableDoodling = false;
-		enableText = false;
 		savingFinal = false;
 		// TODO Auto-generated constructor stub
 	}
@@ -89,7 +84,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		addView(vignetteLayer);
 		addView(doodleLayer);
 		enableDoodling = false;
-		enableText = false;
 		savingFinal = false;
 	}
 
@@ -121,7 +115,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 	 * @param FilePath
 	 *            : absolute address of the file to be handled by the editor object
 	 */
-	@SuppressWarnings("deprecation")
 	public void loadImageFromFile(String FilePath)
 	{
 		imageOriginal = BitmapFactory.decodeFile(FilePath);
@@ -129,7 +122,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		int width = metrics.widthPixels;
 		if (width < imageOriginal.getWidth())
 		{
-			imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
+			imageScaled = Bitmap.createScaledBitmap(imageOriginal, imageOriginal.getWidth() / 2, imageOriginal.getWidth() / 2, false);
 			effectLayer.handleImage(imageScaled, true);
 		}
 		else
@@ -137,7 +130,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 			effectLayer.handleImage(imageOriginal, false);
 			imageScaled = imageOriginal.copy(imageOriginal.getConfig(), true);
 		}
-
 	}
 
 	public void loadImageFromBitmap(Bitmap bmp)
@@ -149,11 +141,13 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 	
 	public void enableDoodling()
 	{
+		enableDoodling = true;
 		doodleLayer.setDrawEnabled(true);
 	}
 
 	public void disableDoodling()
 	{
+		enableDoodling = false;
 		doodleLayer.setDrawEnabled(false);
 	}
 
@@ -162,9 +156,19 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		doodleLayer.setColor(Color);
 	}
 
+	public void disable()
+	{
+		doodleLayer.setDrawEnabled(false);
+	}
+
+	public void enable()
+	{
+		doodleLayer.setDrawEnabled(enableDoodling);
+	}
+
 	public void saveImage(HikeFileType fileType, String originalName, HikePhotosListener listener)
 	{
-		doodleLayer.getMeasure(imageScaled);
+		doodleLayer.getMeasure();
 		vignetteLayer.getMeasure(imageOriginal);
 
 		this.mFileType = fileType;
@@ -274,7 +278,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 	@Override
 	public void onFilterApplied(Bitmap preview)
 	{
-		// TODO Auto-generated method stub
 		if (!savingFinal)
 		{
 			vignetteLayer.setVignetteforFilter(preview);
@@ -287,4 +290,5 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		}
 
 	}
+
 }

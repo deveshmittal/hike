@@ -92,6 +92,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		editView = (PhotosEditerFrameLayoutView) findViewById(R.id.editer);
 		editView.loadImageFromFile(filename);
 		editView.setOnDoodlingStartListener(clickHandler);
+
 		FragmentPagerAdapter adapter = new PhotoEditViewPagerAdapter(getSupportFragmentManager(), clickHandler);
 
 		pager = (ViewPager) findViewById(R.id.pager);
@@ -230,12 +231,11 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				FilterEffectItemLinearLayout prev = HikePhotosUtils.FilterTools.getCurrentFilterItem();
 				FilterEffectItemLinearLayout me = (FilterEffectItemLinearLayout) v;
 				editView.applyFilter(me.getFilter());
-				me.select();
 				if (prev != null && prev.getFilter() != me.getFilter())
 				{
 					prev.unSelect();
 				}
-
+				me.select();
 			}
 
 			else if (v.getClass() == DoodleEffectItemLinearLayout.class)
@@ -245,11 +245,11 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				editView.setBrushColor(me.getBrushColor());
 				doodlePreview.setBrushColor(me.getBrushColor());
 				doodlePreview.refresh();
-				me.select();
 				if (prev != null && prev.getBrushColor() != me.getBrushColor())
 				{
 					prev.unSelect();
 				}
+				me.select();
 
 			}
 			else
@@ -287,7 +287,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 							public void onAction(int actionCode)
 							{
 								getSupportFragmentManager().popBackStackImmediate();
-								editView.disableDoodling();
 								if (actionCode == PhotoActionsFragment.ACTION_SEND)
 								{
 									editView.saveImage(HikeFileType.IMAGE, null, new HikePhotosListener()
@@ -360,7 +359,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 																	R.anim.photo_option_out).replace(R.id.overlayFrame, profilePicFragment).addToBackStack(null).commit();
 												}
 											}, 600);
-											
+
 											new Handler(Looper.getMainLooper()).postDelayed(new Runnable()
 											{
 
@@ -379,6 +378,9 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 							}
 						});
 					}
+
+					editView.disable();
+
 					// Change fragment
 					getSupportFragmentManager().beginTransaction()
 							.setCustomAnimations(R.anim.photo_option_in, R.anim.photo_option_out, R.anim.photo_option_in, R.anim.photo_option_out)
@@ -444,9 +446,10 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 	@Override
 	public void onBackPressed()
 	{
-		if (getSupportFragmentManager().popBackStackImmediate())
+		if (getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE))
 		{
 			mActionBarDoneContainer.setVisibility(View.VISIBLE);
+			editView.enable();
 		}
 		else
 		{

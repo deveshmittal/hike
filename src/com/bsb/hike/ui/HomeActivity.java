@@ -469,7 +469,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				if (photosEnabled)
 				{
 					showComposeOverflowMenu();
-					accountPrefs.edit().putBoolean(HikeConstants.SHOW_PHOTOS_ENABLED_DOT, true).commit();
+					accountPrefs.edit().putBoolean(HikeConstants.SHOW_PHOTOS_ENABLED_DOT, false).commit();
 					newConversationIndicator.setVisibility(View.GONE);
 				}
 				else

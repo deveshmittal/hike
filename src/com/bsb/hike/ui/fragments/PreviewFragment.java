@@ -33,6 +33,8 @@ public final class PreviewFragment extends Fragment
 
 	private Bitmap mOriginalBitmap;
 
+	private ImageAdapter mAdapter;
+
 	public PreviewFragment(MenuType type, EditorClickListener adapter, Bitmap bitmap)
 	{
 
@@ -57,7 +59,8 @@ public final class PreviewFragment extends Fragment
 		TwoWayGridView gridView = (TwoWayGridView) layout.findViewById(R.id.HorizontalGridView);
 		gridView.setColumnWidth(GridView.AUTO_FIT);
 		gridView.setRowHeight(GridView.AUTO_FIT);
-		gridView.setAdapter(new ImageAdapter(getActivity(), myType, handler));
+		mAdapter = new ImageAdapter(getActivity(), myType, handler);
+		gridView.setAdapter(mAdapter);
 
 		ViewStub adjuster = (ViewStub) layout.findViewById(R.id.sizeBarStub);
 		switch (myType)
@@ -93,7 +96,6 @@ public final class PreviewFragment extends Fragment
 		layout.invalidate();
 		HikePhotosUtils.FilterTools.setSelectedColor(HikePhotosUtils.DoodleColors[0]);
 		HikePhotosUtils.FilterTools.setSelectedFilter(FilterList.getHikeEffects().filters.get(0));
-		
 		return layout;
 	}
 
@@ -184,7 +186,6 @@ public final class PreviewFragment extends Fragment
 				temp3.setOnClickListener(clickListener);
 				break;
 			case Quality:
-
 				break;
 			}
 

@@ -7,6 +7,7 @@ import java.io.OutputStream;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -159,7 +160,7 @@ public class CameraFragment extends SherlockFragment
 						{
 							// make a new bitmap from your file
 							outStream = new FileOutputStream(file);
-							bimp.compress(Bitmap.CompressFormat.JPEG, 90, outStream);
+							bimp.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
 							outStream.flush();
 							outStream.close();
 						}
@@ -190,7 +191,7 @@ public class CameraFragment extends SherlockFragment
 		}
 	};
 
-	private String flashMode;
+	private String flashMode = Camera.Parameters.FLASH_MODE_AUTO;
 
 	/**
 	 * Call this (or override getHost()) to supply the CameraHost used for most of the detailed interaction with the camera.

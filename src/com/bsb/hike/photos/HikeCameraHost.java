@@ -20,6 +20,7 @@ import android.media.CamcorderProfile;
 import android.media.MediaActionSound;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
@@ -40,7 +41,7 @@ import com.commonsware.cwac.camera.SimpleCameraHost.Builder;
 
 public class HikeCameraHost implements CameraHost
 {
-	private static final String[] SCAN_TYPES = { "image/jpeg" };
+	private static final String[] SCAN_TYPES = { "image/jpeg", "image/png" };
 
 	private static HikeCameraHost cameraHost;
 
@@ -295,10 +296,8 @@ public class HikeCameraHost implements CameraHost
 					fos.getFD().sync();
 					bos.close();
 
-					// if (scanSavedImage())
-					// {
-					 MediaScannerConnection.scanFile(ctxt, new String[] { photo.getPath() }, SCAN_TYPES, null);
-					// }
+					//Always scan saved image
+					MediaScannerConnection.scanFile(ctxt, new String[] { photo.getPath() }, SCAN_TYPES, null);
 				}
 				catch (java.io.IOException e)
 				{
