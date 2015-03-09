@@ -42,7 +42,6 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.SocialNetInviteAdapter;
 import com.bsb.hike.http.HikeHttpRequest;
