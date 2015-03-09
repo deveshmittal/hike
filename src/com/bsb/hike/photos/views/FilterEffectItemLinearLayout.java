@@ -3,6 +3,7 @@ package com.bsb.hike.photos.views;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
+import android.view.View;
 
 import com.bsb.hike.R;
 import com.bsb.hike.photos.HikeEffectsFactory;
@@ -46,7 +47,8 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 
 	public void unSelect()
 	{
-		findViewById(R.id.selectionBar).setBackgroundColor(getResources().getColor(R.color.photos_pager_background));
+		findViewById(R.id.selectionBar).setVisibility(View.GONE);
+		invalidate();
 	}
 
 	public void setFilter(Context context, FilterType type)
