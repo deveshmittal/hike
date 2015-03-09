@@ -3943,7 +3943,8 @@ public class Utils
 			}
 			else
 			{
-				iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+				iconDrawable = context.getResources().getDrawable(Utils.isBroadcastConversation(msisdn)? R.drawable.ic_default_avatar_broadcast : 
+					(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar));
 			}
 			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
 		}

@@ -15,7 +15,7 @@
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_broadcast" />
+            android:src="@drawable/ic_default_avatar_broadcast" />
 
     </RelativeLayout>
 
