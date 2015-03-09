@@ -412,4 +412,17 @@ public class VoIPUtils {
 	    }
 	    return sb.toString();
 	}	
+	
+	public static boolean useAEC(Context context) {
+		boolean useAEC = true;
+		
+		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		useAEC = prefs.getBoolean(HikeConstants.VOIP_AEC_ENABLED, true);
+		
+		// Disable AEC on <= 2.3 devices
+		if (!Utils.isHoneycombOrHigher())
+			useAEC = false;
+		
+		return useAEC;
+	}
 }

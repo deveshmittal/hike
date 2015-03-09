@@ -1038,6 +1038,8 @@ public class HikeConstants
 
 	public static final String VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION = "scd";
 
+	public static final String VOIP_AEC_ENABLED = "aec";
+
 	public static final String VOIP_AEC_CPU_NR = "cpunr";
 
 	public static final String VOIP_AEC_CPU = "cpuaec";

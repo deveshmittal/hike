@@ -1253,6 +1253,11 @@ public class MqttMessagesManager
 			int scd = data.getInt(HikeConstants.VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION);
 			editor.putInt(HikeConstants.VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION, scd);
 		}
+		if (data.has(HikeConstants.VOIP_AEC_ENABLED))
+		{
+			boolean aecEnabled = data.getBoolean(HikeConstants.VOIP_AEC_ENABLED);
+			editor.putBoolean(HikeConstants.VOIP_AEC_ENABLED, aecEnabled);
+		}
 		if (data.has(HikeConstants.VOIP_AEC_CPU_NR))
 		{
 			int val = data.getInt(HikeConstants.VOIP_AEC_CPU_NR);
