@@ -551,6 +551,7 @@ public class ConversationsAdapter extends BaseAdapter
 	{
 		isSearchModeOn = false;
 		conversationsMsisdns = null;
+		convSpanStartIndexes.clear();
 		refinedSearchText = null;
 		/*
 		 * Purposely returning conversation list on the UI thread on collapse to avoid showing ftue empty state. 
@@ -871,10 +872,12 @@ public class ConversationsAdapter extends BaseAdapter
 		String name = conversation.getLabel();
 
 		Integer startSpanIndex = convSpanStartIndexes.get(conversation.getMsisdn());
-		if(startSpanIndex!=null)
+		if(isSearchModeOn && startSpanIndex!=null)
 		{
 			SpannableString spanName = new SpannableString(name);
-			spanName.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.blue_color_span)), startSpanIndex, startSpanIndex + refinedSearchText.length(),
+			int start = startSpanIndex;
+			int end = startSpanIndex + refinedSearchText.length();
+			spanName.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.blue_color_span)), start, end,
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			contactView.setText(spanName, TextView.BufferType.SPANNABLE);
 		}
