@@ -4175,7 +4175,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			@Override
 			public void run()
 			{
-				if (convMessage.isSMS())
+				if (convMessage.isSMS() || convMessage.isBroadcastMessage())
 				{
 					return;
 				}
@@ -4260,7 +4260,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		for (ConvMessage convMessage : messages)
 		{
-			if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
+			if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS() && !convMessage.isBroadcastMessage())
 			{
 				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
 			}
