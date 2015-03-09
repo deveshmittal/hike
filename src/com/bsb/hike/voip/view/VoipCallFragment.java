@@ -51,6 +51,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.VoipProfilePicImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient;
@@ -88,6 +89,8 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 	private CallStatus currentCallStatus;
 
 	private CallFragmentListener activity;
+
+	private String partnerName;
 
 	@Override
 	public void onAttach(Activity activity)
@@ -279,6 +282,8 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			callActionsView = null;
 		}
 
+		partnerName = null;
+
 		releaseWakeLock();
 
 		// Proximity sensor
@@ -439,18 +444,10 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			@Override
 			public void run()
 			{
-				if(isCallActive)
+				if(isAdded())
 				{
-					if(VoIPUtils.shouldShowCallRatePopupNow())
-					{
-						Intent intent = new Intent(getSherlockActivity(), CallRateActivity.class);
-						intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-						startActivity(intent);
-					}
-					VoIPUtils.setupCallRatePopupNextTime();
+					startCallRateActivity(bundle);
 				}
-				isCallActive = false;
-				getSherlockActivity().finish();
 			}
 		}, 900);
 	}
@@ -802,7 +799,8 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		else
 		{
 			nameOrMsisdn = contactInfo.getNameOrMsisdn();
-			if(contactInfo.getName() != null)
+			partnerName = contactInfo.getName();
+			if(partnerName != null)
 			{
 				contactMsisdnView.setVisibility(View.VISIBLE);
 				contactMsisdnView.setText(contactInfo.getMsisdn());
@@ -859,14 +857,33 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		signalContainer.setVisibility(View.VISIBLE);
 	}
 
+	private void startCallRateActivity(Bundle bundle)
+	{
+		if(isCallActive)
+		{
+			if(bundle!=null && VoIPUtils.shouldShowCallRatePopupNow())
+			{
+				Intent intent = IntentManager.getVoipCallRateActivityIntent(getSherlockActivity());
+				intent.putExtra(VoIPConstants.CALL_RATE_BUNDLE, bundle);
+				startActivity(intent);
+			}
+			VoIPUtils.setupCallRatePopupNextTime();
+		}
+		isCallActive = false;
+		getSherlockActivity().finish();
+	}
+
 	public void showCallFailedFragment(int callFailCode)
 	{
+		if(activity == null || voipService == null)
+		{
+			return;
+		}
 		Bundle bundle = new Bundle();
 		bundle.putString(VoIPConstants.PARTNER_MSISDN, voipService.getPartnerClient().getPhoneNumber());
 		bundle.putInt(VoIPConstants.CALL_FAILED_REASON, callFailCode);
-		if(getSherlockActivity() != null)
-		{
-			activity.showCallFailedFragment(bundle);
-		}
+		bundle.putString(VoIPConstants.PARTNER_NAME, partnerName);
+
+		activity.showCallFailedFragment(bundle);
 	}
 }

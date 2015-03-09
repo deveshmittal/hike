@@ -402,5 +402,6 @@
     <color name="call_rate_header">#111111</color>
     <color name="call_rate_subheader">#26292d</color>
     <color name="call_issues">#494949</color>
+    <color name="call_rate_bg">#33000000</color>
 </resources>
 	

@@ -44,11 +44,17 @@ public class CallFailedFragment extends SherlockFragment
 	{
 		final String msisdn = getArguments().getString(VoIPConstants.PARTNER_MSISDN);
 		int callFailedCode = getArguments().getInt(VoIPConstants.CALL_FAILED_REASON);
+		String partnerName = getArguments().getString(VoIPConstants.PARTNER_NAME);
+
+		String firstNameOrMsisdn = partnerName == null ? msisdn : getFirstName(partnerName);
 
 		TextView headerView = (TextView) view.findViewById(R.id.heading);
+		TextView subHeaderView = (TextView) view.findViewById(R.id.subheading);
 		Button callAgainButton = (Button) view.findViewById(R.id.call_again);
 
-		final boolean enableRedial = setHeaderText(callFailedCode, headerView);		
+		final boolean enableRedial = setHeaderText(callFailedCode, headerView, firstNameOrMsisdn);
+		subHeaderView.setText(getString(R.string.voip_call_failed_frag_subheader, firstNameOrMsisdn));
+
 		if(!enableRedial)
 		{
 			callAgainButton.setText(R.string.voip_call_failed_native_call);
@@ -115,7 +121,13 @@ public class CallFailedFragment extends SherlockFragment
 		void removeCallFailedFragment();
 	}
 
-	private boolean setHeaderText(int callFailedCode, TextView view)
+	private String getFirstName(String name)
+	{
+		int index = name.indexOf(" ");
+		return index == -1 ? name : name.substring(0, index); 
+	}
+
+	private boolean setHeaderText(int callFailedCode, TextView view, String partnerName)
 	{
 		boolean enableRedial = true;
 
@@ -125,7 +137,7 @@ public class CallFailedFragment extends SherlockFragment
 			case VoIPConstants.ConnectionFailCodes.PARTNER_BUSY:
 			case VoIPConstants.ConnectionFailCodes.PARTNER_ANSWER_TIMEOUT:
 			case VoIPConstants.ConnectionFailCodes.CALLER_IN_NATIVE_CALL:
-				view.setText(getString(R.string.voip_not_reachable));
+				view.setText(getString(R.string.voip_not_reachable, partnerName));
 				break;
 
 			case VoIPConstants.ConnectionFailCodes.PARTNER_INCOMPAT:
@@ -134,17 +146,14 @@ public class CallFailedFragment extends SherlockFragment
 				break;
 
 			case VoIPConstants.ConnectionFailCodes.PARTNER_UPGRADE:
-				view.setText(getString(R.string.voip_older_app));
+				view.setText(getString(R.string.voip_older_app, partnerName));
 				enableRedial = false;
 				break;
 
 			case VoIPConstants.ConnectionFailCodes.EXTERNAL_SOCKET_RETRIEVAL_FAILURE:
 			case VoIPConstants.ConnectionFailCodes.UDP_CONNECTION_FAIL:
-				view.setText(getString(R.string.voip_conn_failure));
-				break;
-
 			case VoIPConstants.ConnectionFailCodes.CALLER_BAD_NETWORK:
-				view.setText(getString(R.string.voip_caller_poor_network));
+				view.setText(getString(R.string.voip_caller_poor_network, partnerName));
 				break;
 
 			default:

@@ -38,6 +38,8 @@ public class VoIPConstants {
 	public static final String CALL_NETWORK_TYPE = "network";
 	public static final String PARTNER_MSISDN = "pmsisdn";
 	public static final String CALL_FAILED_REASON = "callfailreason";
+	public static final String PARTNER_NAME = "pname";
+	public static final String CALL_RATE_BUNDLE = "callRateBundle";
 
 	/*
 	 *  Handler Message Constants
@@ -72,6 +74,8 @@ public class VoIPConstants {
 		public static final String IS_ENDER = "ender";
 
 		public static final String NETWORK_TYPE = "net";
+
+		public static final String CALL_ISSUES = "issues";
 
 		public static final String OLD_NETWORK_TYPE = "oldnet";
 

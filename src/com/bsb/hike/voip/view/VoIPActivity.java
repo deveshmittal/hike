@@ -32,7 +32,7 @@ public class VoIPActivity extends HikeAppStateBaseFragmentActivity implements Ca
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
-		setupMainFragment(savedInstanceState);
+		setupMainFragment();
 		Intent intent = getIntent();
 		if (intent != null) 
 		{
@@ -40,9 +40,9 @@ public class VoIPActivity extends HikeAppStateBaseFragmentActivity implements Ca
 		}
 	}
 
-	private void setupMainFragment(Bundle savedInstancesState)
+	private void setupMainFragment()
 	{
-		if(savedInstancesState!=null)
+		if(mainFragment!=null)
 		{
 			return;
 		}
