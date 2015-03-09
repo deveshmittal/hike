@@ -312,7 +312,7 @@ public class AnalyticsSender
 
 					case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:
 					case HttpURLConnection.HTTP_UNAVAILABLE:
-					case HttpURLConnection.HTTP_SERVER_ERROR:
+					case HttpURLConnection.HTTP_INTERNAL_ERROR:
 					case HttpURLConnection.HTTP_NOT_FOUND:
 					case HttpURLConnection.HTTP_BAD_GATEWAY:
 					//case HttpResponseCode.TOO_MANY_REQUESTS:
