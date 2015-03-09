@@ -56,49 +56,7 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 
 	private void registerOnGlobalLayoutListener()
 	{
-		mainView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener()
-		{
-
-			@Override
-			public void onGlobalLayout()
-			{
-				Log.i("chatthread", "global layout listener");
-
-				Log.i("chatthread", "global layout listener rootHeight " + mainView.getRootView().getHeight() + " new height " + mainView.getHeight());
-				Rect r = new Rect();
-				mainView.getWindowVisibleDisplayFrame(r);
-				// this is height of view which is visible on screen
-				int rootViewHeight = mainView.getRootView().getHeight();
-				int temp = rootViewHeight - r.bottom;
-				Logger.i("chatthread", "keyboard  height " + temp);
-				boolean islandScape = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-				if (temp > 0)
-				{
-					if (islandScape)
-					{
-						possibleKeyboardHeightLand = temp;
-					}
-					else
-					{
-						possibleKeyboardHeight = temp;
-					}
-					isKeyboardOpen = true;
-					if (isShowing())
-					{
-						updatePadding(0);
-					}
-					updateDimension(LayoutParams.MATCH_PARENT, temp);
-				}
-				else
-				{
-					// when we change orientation , from portrait to landscape and keyboard is open , it is possible that screen does adjust its size more than once until it
-					// stabilize
-					if (islandScape)
-						possibleKeyboardHeightLand = 0;
-					isKeyboardOpen = false;
-				}
-			}
-		});
+		mainView.getViewTreeObserver().addOnGlobalLayoutListener(mGlobalLayoutListener);
 	}
 
 	private void updatePadding(int bottomPadding)
@@ -231,7 +189,57 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 	public void releaseResources()
 	{
 		this.mListener = null;
+
+		/**
+		 * Removing the global layout listener
+		 */
+		this.mainView.getViewTreeObserver().removeGlobalOnLayoutListener(mGlobalLayoutListener);
 		this.mainView = null;
 	}
 	
+	private ViewTreeObserver.OnGlobalLayoutListener mGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener()
+	{
+		
+		@Override
+		public void onGlobalLayout()
+		{
+
+			Log.i("chatthread", "global layout listener");
+
+			Log.i("chatthread", "global layout listener rootHeight " + mainView.getRootView().getHeight() + " new height " + mainView.getHeight());
+			Rect r = new Rect();
+			mainView.getWindowVisibleDisplayFrame(r);
+			// this is height of view which is visible on screen
+			int rootViewHeight = mainView.getRootView().getHeight();
+			int temp = rootViewHeight - r.bottom;
+			Logger.i("chatthread", "keyboard  height " + temp);
+			boolean islandScape = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+			if (temp > 0)
+			{
+				if (islandScape)
+				{
+					possibleKeyboardHeightLand = temp;
+				}
+				else
+				{
+					possibleKeyboardHeight = temp;
+				}
+				isKeyboardOpen = true;
+				if (isShowing())
+				{
+					updatePadding(0);
+				}
+				updateDimension(LayoutParams.MATCH_PARENT, temp);
+			}
+			else
+			{
+				// when we change orientation , from portrait to landscape and keyboard is open , it is possible that screen does adjust its size more than once until it
+				// stabilize
+				if (islandScape)
+					possibleKeyboardHeightLand = 0;
+				isKeyboardOpen = false;
+			}
+		
+		}
+	};
 }
