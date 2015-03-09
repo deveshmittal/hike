@@ -229,12 +229,27 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 	{				
 		if(isViewEditable)
 		{
-			// we are using the ProfileActivity's menu for now
-			menu.findItem(R.id.new_update).setVisible(false);
+			// we are using the ProfileActivity's menu for now			
+			MenuItem item = menu.findItem(R.id.new_update);
 			
-			menu.findItem(R.id.overflow_menu).setVisible(false);
+			if(item != null)
+			{
+				item.setVisible(false);
+			}
 			
-			menu.findItem(R.id.edit_dp).setVisible(true);
+			item = menu.findItem(R.id.overflow_menu);
+			
+			if(item != null)
+			{
+				item.setVisible(false);
+			}
+			
+			item = menu.findItem(R.id.edit_dp);
+			
+			if(item != null)
+			{
+				item.setVisible(true);
+			}
 		}	
 		else
 		{
