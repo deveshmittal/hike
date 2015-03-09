@@ -1,17 +1,13 @@
 package com.bsb.hike.voip.view;
 
+import android.os.Bundle;
+import android.view.WindowManager;
+
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.voip.VoIPConstants;
-
-import android.app.Activity;
-import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
-import android.view.WindowManager;
 
 public class CallRateActivity extends HikeAppStateBaseFragmentActivity implements IVoipCallRateListener
 {
@@ -26,7 +22,8 @@ public class CallRateActivity extends HikeAppStateBaseFragmentActivity implement
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
 		setContentView(R.layout.call_rate_activity);
-		showCallRateFragment(new Bundle());
+		Bundle bundle = getIntent().getBundleExtra(VoIPConstants.CALL_RATE_BUNDLE);
+		showCallRateFragment(bundle);
 	}
 
 	private void showCallRateFragment(final Bundle bundle) 
