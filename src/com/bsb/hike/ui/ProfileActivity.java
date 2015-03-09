@@ -702,6 +702,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		case R.id.edit:
 			onEditProfileClicked(null);
 			break;
+		case R.id.add_recipients:
 		case R.id.add_people:
 			openAddToGroup();
 			break;

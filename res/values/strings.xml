@@ -938,7 +938,7 @@
     <string name="add_to_contacts">Add to contacts</string>
     <string name="delete_leave">Delete and exit group</string>
     <string name="group_participant_info">You can add upto 100 people to a group</string>
-    <string name="broadcast_participant_info">You can add upto 500 people to this list</string>
+    <string name="broadcast_participant_info"><b>Note: </b>Only contacts with your number in their address book will receive this broadcast.</string>
     <string name="photo">GALLERY</string>
     <string name="video">VIDEOS</string>
     <string name="location_option">LOCATION</string>
@@ -1127,6 +1127,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="pins">Pins</string>
     <string name="groups">Groups</string>
     <string name="members">MEMBERS</string>
+    <string name="recipients">RECIPIENTS</string>
     <string name="phone_pa">PHONE</string>
     <string name="shared_cont_pa">SHARED CONTENT</string>
     <string name="no_internet_try_again">No internet connection. Please try again later.</string>
@@ -1137,6 +1138,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="team_hike">hike</string>
     <string name="add_fav_msg">Is now sharing last seen and status updates. Would you like to do the same?</string>
     <string name="add_people">ADD A MEMBER</string>
+    <string name="add_recipients">ADD RECIPIENTS</string>
     <string name="stealth_info_tip_header">Hidden Mode</string>
     <string name="file_missing_caps">FILE MISSING</string>
     <string name="status_profile_pic_notification">changed profile picture</string>

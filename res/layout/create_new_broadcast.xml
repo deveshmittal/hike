@@ -41,15 +41,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:drawableLeft="@drawable/ic_chat_theme_info"
         android:drawablePadding="4dp"
         android:layout_marginTop="20dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        android:singleLine="true"
-        android:background="#f2f2f2"
         android:text="@string/broadcast_participant_info"/>
 
 </LinearLayout>

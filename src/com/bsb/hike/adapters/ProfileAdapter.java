@@ -586,13 +586,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			break;
 
 		case MEMBERS:
-			viewHolder.text.setText(context.getResources().getString(R.string.members));
 			if (groupConversation instanceof BroadcastConversation)
 			{
+				viewHolder.text.setText(context.getResources().getString(R.string.recipients));
 				viewHolder.subText.setText(Integer.toString(((ProfileGroupItem)profileItem).getTotalMembers()) + "/" + HikeConstants.MAX_CONTACTS_IN_BROADCAST);
 			}
 			else
 			{
+				viewHolder.text.setText(context.getResources().getString(R.string.members));
 				viewHolder.subText.setText(Integer.toString(((ProfileGroupItem)profileItem).getTotalMembers()) + "/" + HikeConstants.MAX_CONTACTS_IN_GROUP);
 			}
 			break;
@@ -649,7 +650,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			TextView nameTextView_mem = (TextView) groupParticipantParentView_mem.findViewById(R.id.name);
 			ImageView avatar_mem = (ImageView) groupParticipantParentView_mem.findViewById(R.id.add_participant);
 			avatar_mem.setVisibility(View.VISIBLE);
-			nameTextView_mem.setText(R.string.add_people);
+			if (groupConversation instanceof BroadcastConversation)
+			{
+				nameTextView_mem.setText(R.string.add_recipients);
+			}
+			else
+			{
+				nameTextView_mem.setText(R.string.add_people);
+			}
 			nameTextView_mem.setTextColor(context.getResources().getColor(R.color.blue_hike));
 			groupParticipantParentView_mem.setTag(null);
 			groupParticipantParentView_mem.setOnClickListener(profileActivity);
