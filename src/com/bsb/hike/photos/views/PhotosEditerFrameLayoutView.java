@@ -9,18 +9,17 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
+import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.view.View;
 import android.widget.FrameLayout;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.HikePhotosUtils;
-import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
 import com.bsb.hike.utils.Utils;
@@ -241,6 +240,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		if (file.exists())
 		{
 			mListener.onComplete(file);
+			MediaScannerConnection.scanFile(getContext(), new String[] { file.getPath() }, null, null);
 		}
 		else
 		{
