@@ -606,11 +606,11 @@ public class DbConversationListener implements Listener
 
 	private void updateDB(Object object, int status)
 	{
-		long serverID = (Long) object;
+		long msgID = (Long) object;
 		/*
 		 * TODO we should lookup the convid for this user, since otherwise one could set mess with the state for other conversations
 		 */
-		mConversationDb.updateMsgStatus(serverID, status, null);
+		mConversationDb.updateMsgStatus(msgID, status, null);
 	}
 
 	private void writeToNativeSMSDb(ConvMessage convMessage)

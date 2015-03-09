@@ -828,9 +828,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return addConversations(l);
 	}
 
-	public int updateMsgStatus(long serverID, int val, String msisdn)
+	public int updateMsgStatus(long msgID, int val, String msisdn)
 	{
-		String initialWhereClause = DBConstants.SERVER_ID + " =" + String.valueOf(serverID);
+		String initialWhereClause = DBConstants.MESSAGE_ID + " =" + String.valueOf(msgID);
 
 		String query = initialWhereClause;
 
@@ -853,12 +853,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.SERVER_ID }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
 					+ State.SENT_DELIVERED_READ.ordinal(), new String[] { msisdn }, null, null, null);
 
 			while (c.moveToNext())
 			{
-				long id = c.getLong(c.getColumnIndex(DBConstants.SERVER_ID));
+				long id = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
 				ids.add(id);
 			}
 		}
@@ -872,9 +872,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return ids;
 	}
 
-	public void setAllDeliveredMessagesReadForMsisdn(String msisdn, ArrayList<Long> serverIds)
+	public void setAllDeliveredMessagesReadForMsisdn(String msisdn, ArrayList<Long> msgIds)
 	{
-		String initialWhereClause = DBConstants.SERVER_ID + " in " + Utils.valuesToCommaSepratedString(serverIds);
+		String initialWhereClause = DBConstants.MESSAGE_ID + " in " + Utils.valuesToCommaSepratedString(msgIds);
 
 		int status = State.SENT_DELIVERED_READ.ordinal();
 
@@ -1117,9 +1117,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
-	public void setMessageState(String msisdn, long serverId, int status)
+	public void setMessageState(String msisdn, long msgId, int status)
 	{
-		if (serverId == -1)
+		if (msgId == -1)
 		{
 			return;
 		}
@@ -1139,8 +1139,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		long[] ids = null;
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.SERVER_ID }, DBConstants.MSISDN + "=?  AND " + DBConstants.MSG_STATUS + ">=" + minStatusOrdinal
-					+ " AND " + DBConstants.MSG_STATUS + "<" + maxStatusOrdinal + " AND " + DBConstants.MESSAGE_ID + "<=" + serverId, new String[] { msisdn }, null, null, null);
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=?  AND " + DBConstants.MSG_STATUS + ">=" + minStatusOrdinal
+					+ " AND " + DBConstants.MSG_STATUS + "<" + maxStatusOrdinal + " AND " + DBConstants.MESSAGE_ID + "<=" + msgId, new String[] { msisdn }, null, null, null);
 
 			ids = new long[c.getCount()];
 			int i = 0;
@@ -5365,6 +5365,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		{
 			int hikeMessage = c.getInt(isHikeMessageColumn);
 			boolean isHikeMessage = hikeMessage == -1 ? conversation.isOnhike() : (hikeMessage == 0 ? false : true);
+
 			ConvMessage message = new ConvMessage(c.getString(msgColumn), conversation.getMsisdn(), c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)),
 					c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn), !isHikeMessage, c.getInt(typeColumn));
 			//if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT){

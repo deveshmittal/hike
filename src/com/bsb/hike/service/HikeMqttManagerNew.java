@@ -1650,7 +1650,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		if (HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) || (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE))))
 		{
 			JSONObject json = o.optJSONObject(HikeConstants.DATA);
-//			TODO anu : serverId to be sent in 'i' field
 			msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
 		}
 

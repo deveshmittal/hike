@@ -2713,11 +2713,11 @@ public class MqttMessagesManager
 
 	private int updateDB(Object object, ConvMessage.State status, String msisdn)
 	{
-		long serverID = (Long) object;
+		long msgID = (Long) object;
 		/*
 		 * TODO we should lookup the convid for this user, since otherwise one could set mess with the state for other conversations
 		 */
-		return convDb.updateMsgStatus(serverID, status.ordinal(), msisdn);
+		return convDb.updateMsgStatus(msgID, status.ordinal(), msisdn);
 	}
 	
 	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn) throws JSONException

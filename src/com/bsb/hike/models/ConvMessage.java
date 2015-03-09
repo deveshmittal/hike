@@ -252,12 +252,6 @@ public class ConvMessage
 		this.msgID = msgId;
 	}
 	
-//	TODO anu bansal serverId
-/**
- * serverId	
- * create a new constructor for serverID
- * set serverID field in convMessage
- */
 	public ConvMessage(TypingNotification typingNotification)
 	{
 		this.typingNotification = typingNotification;
