@@ -853,13 +853,25 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID,  DBConstants.MSG_STATUS, DBConstants.MESSAGE_ORIGIN_TYPE }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
 					+ State.SENT_DELIVERED_READ.ordinal(), new String[] { msisdn }, null, null, null);
 
 			while (c.moveToNext())
 			{
 				long id = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
-				ids.add(id);
+				int msgStatus = c.getInt(c.getColumnIndex(DBConstants.MSG_STATUS));
+				int msgOriginType = c.getInt(c.getColumnIndex(DBConstants.MESSAGE_ORIGIN_TYPE));
+				/*
+				 * 1. if message is not a broadcast one than its fine this is message is a right candidate for
+				 * force R.
+				 * 2. if message is broadcast then only if its status is Delivered we chhose this as a candidate for
+				 * force R.
+				 */
+				if (ConvMessage.originTypeValue(msgOriginType) != OriginType.BROADCAST 
+						|| ConvMessage.stateValue(msgStatus) == State.SENT_DELIVERED)
+				{
+					ids.add(id);
+				}
 			}
 		}
 		finally
