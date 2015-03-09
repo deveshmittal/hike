@@ -239,6 +239,21 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 					createBroadcast(broadcastRecipients);
 				}
 			});
+			
+			backContainer.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					Intent intent = new Intent(CreateNewGroupOrBroadcastActivity.this, ComposeChatActivity.class);
+					intent.putStringArrayListExtra(HikeConstants.Extras.BROADCAST_RECIPIENTS, broadcastRecipients);
+					intent.putExtra(HikeConstants.Extras.COMPOSE_MODE, HikeConstants.Extras.CREATE_BROADCAST_MODE);
+					intent.putExtra(HikeConstants.Extras.CREATE_BROADCAST, true);
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					startActivity(intent);
+					finish();
+				}
+			});
 		}
 		else
 		{
@@ -259,16 +274,16 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 					startActivity(intent);
 				}
 			});
-		}
-
-		backContainer.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
+			
+			backContainer.setOnClickListener(new OnClickListener()
 			{
-				onBackPressed();
-			}
-		});
+				@Override
+				public void onClick(View v)
+				{
+					onBackPressed();
+				}
+			});
+		}
 
 		actionBar.setCustomView(actionBarView);
 	}

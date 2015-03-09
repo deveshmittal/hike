@@ -742,6 +742,19 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 		}
 	}
-
+	
+	public void selectAllFromList(ArrayList<String> msisdns)
+	{
+		if (msisdns == null || msisdns.isEmpty())
+		{
+			return;
+		}
+		
+		for (String msisdn : msisdns)
+		{
+			ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
+			selectedPeople.put(msisdn, contactInfo);
+		}
+	}
 	
 }

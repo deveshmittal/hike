@@ -274,6 +274,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 
 		init();
+		if (getIntent().hasExtra(HikeConstants.Extras.BROADCAST_RECIPIENTS))
+		{
+			ArrayList<String> initiallySelectedMsisidns = getIntent().getStringArrayListExtra(HikeConstants.Extras.BROADCAST_RECIPIENTS);
+			adapter.selectAllFromList(initiallySelectedMsisidns);
+			adapter.notifyDataSetChanged();
+			if (!(initiallySelectedMsisidns == null || initiallySelectedMsisidns.isEmpty()))
+			{
+				setupMultiSelectActionBar();
+				invalidateOptionsMenu();
+			}
+		}
 		mPubSub = HikeMessengerApp.getPubSub();
 		mPubSub.addListeners(this, hikePubSubListeners);
 	}
