@@ -1336,7 +1336,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		addThumbnailStringToMetadata(metadata, thumbnailString);
 	}
 
-	private void updateSharedMediaTableMetadata(long msgId, MessageMetadata metadata)
+	private void updateSharedMediaTableMetadata(long serverId, MessageMetadata metadata)
 	{
 		ContentValues contentValues = new ContentValues(1);
 		putMetadataAccordingToFileType(contentValues, metadata, false);
@@ -1344,7 +1344,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		{
 			return;
 		}
-		mDb.update(DBConstants.SHARED_MEDIA_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { String.valueOf(msgId) });
+		mDb.update(DBConstants.SHARED_MEDIA_TABLE, contentValues, DBConstants.SERVER_ID + "=?", new String[] { String.valueOf(serverId) });
 	}
 
 	public void updateConversationMetadata(String msisdn, Conversation.MetaData metadata)
@@ -4602,6 +4602,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		ContentValues contentValues = new ContentValues();
 		boolean isSent = ConvMessage.isMessageSent(convMessage.getState());
 		contentValues.put(DBConstants.MESSAGE_ID, convMessage.getMsgID());
+		contentValues.put(DBConstants.SERVER_ID, convMessage.getServerId());
 		contentValues.put(DBConstants.MSISDN, convMessage.getMsisdn());
 		contentValues.put(DBConstants.GROUP_PARTICIPANT, convMessage.getGroupParticipantMsisdn() != null ? convMessage.getGroupParticipantMsisdn() : "");
 		contentValues.put(DBConstants.TIMESTAMP, convMessage.getTimestamp());
