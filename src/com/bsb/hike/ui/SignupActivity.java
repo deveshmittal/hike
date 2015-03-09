@@ -498,10 +498,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				Editor ed = settings.edit();
 				ed.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
 				ed.commit();
-				
-				//Send "fg" packet to MQTT with QOS '1' on SignUp
-				JSONObject sessionDataObject = HAManager.getInstance().recordAndReturnSessionStart();
-				Utils.sendSessionMQTTPacket(SignupActivity.this, HikeConstants.FOREGROUND, sessionDataObject);
 			}
 			else if (mCurrentState != null && mCurrentState.value != null && mCurrentState.value.equals(HikeConstants.CHANGE_NUMBER))
 			{
