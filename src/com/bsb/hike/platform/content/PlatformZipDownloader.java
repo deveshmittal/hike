@@ -22,7 +22,7 @@ public class PlatformZipDownloader
 {
 	private PlatformContentRequest mRequest;
 
-	private boolean isPriorDownload;
+	private boolean isTemplatingEnabled;
 
 	private File zipFile;
 
@@ -30,13 +30,13 @@ public class PlatformZipDownloader
 	 * Instantiates a new platform template download task.
 	 *
 	 * @param argRequest: request
-	 * @param  ignorePlatformQueue: whether the app data is downloaded prior to showing cards or not.
+	 * @param  isTemplatingEnabled: whether the app requires templating or not.
 	 */
-	public PlatformZipDownloader(PlatformContentRequest argRequest, boolean ignorePlatformQueue)
+	public PlatformZipDownloader(PlatformContentRequest argRequest, boolean isTemplatingEnabled)
 	{
 		// Get ID from content and call http
 		mRequest = argRequest;
-		isPriorDownload = ignorePlatformQueue;
+		this.isTemplatingEnabled = isTemplatingEnabled;
 		zipFile = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME, mRequest.getContentData().getId() + ".zip");
 	}
 
@@ -80,7 +80,7 @@ public class PlatformZipDownloader
 			}
 		};
 
-		Utils.executeBoolResultAsyncTask(new AssetsZipMoveTask(zipFile, mRequest, mCallback, isPriorDownload));
+		Utils.executeBoolResultAsyncTask(new AssetsZipMoveTask(zipFile, mRequest, mCallback, isTemplatingEnabled));
 
 	}
 
@@ -94,7 +94,7 @@ public class PlatformZipDownloader
 			@Override
 			public void onRequestFailure(HttpException httpException)
 			{
-				PlatformRequestManager.failure(mRequest, EventCode.LOW_CONNECTIVITY, isPriorDownload);
+				PlatformRequestManager.failure(mRequest, EventCode.LOW_CONNECTIVITY, isTemplatingEnabled);
 			}
 
 			@Override
@@ -126,7 +126,7 @@ public class PlatformZipDownloader
 					// delete temp folder
 					File tempFolder = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME);
 					PlatformContentUtils.deleteDirectory(tempFolder);
-					if (isPriorDownload)
+					if (!isTemplatingEnabled)
 					{
 						mRequest.getListener().onComplete(mRequest.getContentData());
 					}
@@ -140,7 +140,7 @@ public class PlatformZipDownloader
 		catch (IllegalStateException ise)
 		{
 			ise.printStackTrace();
-			PlatformRequestManager.failure(mRequest,EventCode.UNKNOWN, isPriorDownload);
+			PlatformRequestManager.failure(mRequest,EventCode.UNKNOWN, isTemplatingEnabled);
 		}
 	}
 

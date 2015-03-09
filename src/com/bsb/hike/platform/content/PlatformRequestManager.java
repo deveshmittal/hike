@@ -169,11 +169,11 @@ public class PlatformRequestManager
 
 	}
 
-	public static void failure(PlatformContentRequest mRequest, EventCode event, boolean isPriorDownload)
+	public static void failure(PlatformContentRequest mRequest, EventCode event, boolean isTemplatingEnabled)
 	{
 
 		reportFailure(mRequest, event);
-		if (!isPriorDownload)
+		if (isTemplatingEnabled)
 		{
 			remove(mRequest);
 		}

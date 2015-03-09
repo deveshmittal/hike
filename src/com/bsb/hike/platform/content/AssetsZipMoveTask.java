@@ -16,19 +16,19 @@ public class AssetsZipMoveTask extends AsyncTask<Void, Void, Boolean>
 
 	AssetZipMovedCallbackCallback movedCallback;
 
-	boolean isPriorDownload;
+	boolean isTemplatingEnabled;
 
 	public static interface AssetZipMovedCallbackCallback
 	{
 		public void assetZipMoved(boolean hasMoved);
 	}
 
-	public AssetsZipMoveTask(File tempFilePath, PlatformContentRequest request, AssetZipMovedCallbackCallback callback, boolean useQueue)
+	public AssetsZipMoveTask(File tempFilePath, PlatformContentRequest request, AssetZipMovedCallbackCallback callback, boolean isTemplatingEnabled)
 	{
 		zipFilePath = tempFilePath;
 		mRequest = request;
 		movedCallback = callback;
-		isPriorDownload = useQueue;
+		this.isTemplatingEnabled = isTemplatingEnabled;
 	}
 
 	@Override
@@ -71,12 +71,12 @@ public class AssetsZipMoveTask extends AsyncTask<Void, Void, Boolean>
 				catch (IOException ioe)
 				{
 					ioe.printStackTrace();
-					PlatformRequestManager.failure(mRequest, PlatformContent.EventCode.STORAGE_FULL, isPriorDownload);
+					PlatformRequestManager.failure(mRequest, PlatformContent.EventCode.STORAGE_FULL, isTemplatingEnabled);
 				}
 				catch (IllegalStateException ise)
 				{
 					ise.printStackTrace();
-					PlatformRequestManager.failure(mRequest, PlatformContent.EventCode.UNKNOWN, isPriorDownload);
+					PlatformRequestManager.failure(mRequest, PlatformContent.EventCode.UNKNOWN, isTemplatingEnabled);
 				}
 				finally
 				{
