@@ -3,7 +3,7 @@
     package="com.bsb.hike"
     android:installLocation="auto"
     android:versionCode="1125"
-    android:versionName="3.8.0.51" >
+    android:versionName="3.8.0.50.1.gc500change" >
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="17" />
