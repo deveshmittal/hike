@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.bsb.hike.db.DBConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -2008,10 +2009,11 @@ public class MqttMessagesManager
 				String body = data.optString(HikeConstants.BODY);
 				String destination = data.optString("u");
 				String contentId = data.optString(HikeConstants.CONTENT_ID);
+				String nameSpace = data.optString(DBConstants.HIKE_CONTENT.NAMESPACE);
 				if (data.optBoolean(HikeConstants.PUSH, true) && !TextUtils.isEmpty(destination) && !TextUtils.isEmpty(body))
 				{
 					if (!Utils.isConversationMuted(destination) && !ContactManager.getInstance().isBlocked(destination)
-							&& HikeConversationsDatabase.getInstance().isContentMessageExist(destination, contentId))
+							&& HikeConversationsDatabase.getInstance().isContentMessageExist(destination, contentId, nameSpace))
 					{
 						Logger.i("mqttMessageManager", "Play Notification packet from Server " + data.toString());
 						// chat thread -- by default silent is true, so no sound

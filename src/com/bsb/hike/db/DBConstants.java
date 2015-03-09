@@ -234,7 +234,7 @@ public interface DBConstants
 	 *
 	 */
 	public static interface HIKE_CONTENT{
-		public static final int DB_VERSION = 1;
+		public static final int DB_VERSION = 2;
 		public static final String DB_NAME = "hike_content_db";
 		// CONTENT TABLE -> _id,content_id,love_id,channel_id,timestamp,metadata
 		public static final String CONTENT_TABLE = "content";
@@ -264,6 +264,8 @@ public interface DBConstants
 		public static final String ALARM_DATA = "data";
 		// APP ALARM ENDS HERE
 		public static final String CONTENT_ID_INDEX = "contentTableContentIdIndex";
+		public static final String CONTENT_TABLE_NAMESPACE_INDEX = "contentTableNamespaceIndex";
+		String NAMESPACE = "nameSpace";
 	}
 
 	public static final String CATEGORY_NAME = "categoryName";
@@ -281,4 +283,6 @@ public interface DBConstants
 	public static final String STICKER_SHOP_TABLE = "stickerShopTable";
 	
 	public static final String MESSAGE_TABLE_CONTENT_INDEX = "messageContentIndex";
+
+	public static final String MESSAGE_TABLE_NAMESPACE_INDEX = "messageNamespaceIndex";
 }

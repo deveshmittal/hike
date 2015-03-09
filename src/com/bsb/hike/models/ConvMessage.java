@@ -1,5 +1,6 @@
 package com.bsb.hike.models;
 
+import com.bsb.hike.db.DBConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,6 +64,17 @@ public class ConvMessage
 	private int  hashMessage= HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE;
 	
 	private int contentId;
+	private String nameSpace;
+
+	public String getNameSpace()
+	{
+		return nameSpace;
+	}
+
+	public void setNameSpace(String nameSpace)
+	{
+		this.nameSpace = (null == nameSpace ? "": nameSpace);
+	}
 
 	public int getContentId()
 	{
@@ -273,15 +285,15 @@ public class ConvMessage
 	}
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS, int type)
 	{
-		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type,0);
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type,0, "");
 	}
-	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS, int type,int contentId)
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS, int type,int contentId, String nameSpace)
 	{
-		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type,contentId);
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type, contentId, nameSpace);
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS,
-			ParticipantInfoState participantInfoState, int type,int contentId)
+			ParticipantInfoState participantInfoState, int type,int contentId, String nameSpace)
 	{
 		assert (msisdn != null);
 		this.mMsisdn = msisdn;
@@ -299,6 +311,8 @@ public class ConvMessage
 			setTickSoundPlayed(true);
 		}
 		this.participantInfoState = participantInfoState;
+		setContentId(contentId);
+		setNameSpace(nameSpace);
 	}
 	
 	public ConvMessage(ConvMessage other) {
@@ -376,6 +390,7 @@ public class ConvMessage
 			data.put(HikeConstants.METADATA, md);
 		}
 		setContentId(data.optInt(HikeConstants.CONTENT_ID));
+		setNameSpace(data.optString(DBConstants.HIKE_CONTENT.NAMESPACE));
 		if (data.has(HikeConstants.METADATA))
 		{
 			JSONObject mdata = data.getJSONObject(HikeConstants.METADATA);
