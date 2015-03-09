@@ -10,14 +10,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.os.Environment;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.HikePhotosUtils;
-import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
 import com.bsb.hike.utils.Utils;
@@ -115,8 +115,18 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 	public void loadImageFromFile(String FilePath)
 	{
 		imageOriginal = BitmapFactory.decodeFile(FilePath);
-		effectLayer.handleImage(imageOriginal, false);
-		imageScaled = imageOriginal;
+		DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+		int width = metrics.widthPixels;
+		if (width < imageOriginal.getWidth())
+		{
+			imageScaled = Bitmap.createScaledBitmap(imageOriginal, imageOriginal.getWidth() / 2, imageOriginal.getWidth() / 2, false);
+			effectLayer.handleImage(imageScaled, true);
+		}
+		else
+		{
+			effectLayer.handleImage(imageOriginal, false);
+			imageScaled = imageOriginal.copy(imageOriginal.getConfig(), true);
+		}
 	}
 
 	public void loadImageFromBitmap(Bitmap bmp)
@@ -153,7 +163,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 
 	public void saveImage(HikeFileType fileType, String originalName, HikePhotosListener listener)
 	{
-		doodleLayer.getMeasure(imageScaled);
+		doodleLayer.getMeasure();
 		vignetteLayer.getMeasure(imageOriginal);
 
 		this.mFileType = fileType;

@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -97,11 +99,13 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 
 	}
 
-	public void getMeasure(Bitmap source)
+	public void getMeasure()
 	{
-		if (mBitmap == null && source != null)
+		if (mBitmap == null)
 		{
-			mBitmap = Bitmap.createBitmap(source.getWidth(), source.getHeight(), source.getConfig());
+			DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+	        int width = metrics.widthPixels;
+			mBitmap = Bitmap.createBitmap(width, width, Config.ARGB_8888);
 			mCanvas = new Canvas(mBitmap);
 			drawDoodle();
 		}
