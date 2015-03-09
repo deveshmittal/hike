@@ -70,7 +70,7 @@ public final class PreviewFragment extends Fragment
 			DoodleEffectItemLinearLayout inflated = (DoodleEffectItemLinearLayout) stub.inflate();
 			inflated.setRingColor(HikeConstants.HikePhotos.DOODLE_SELECTED_RING_COLOR);
 			inflated.setBrushColor(HikePhotosUtils.DoodleColors[0]);
-			inflated.setBrushWidth(HikeConstants.HikePhotos.PREVIEW_BRUSH_WIDTH);
+			inflated.setBrushWidth(HikePhotosUtils.dpToPx(getActivity().getApplicationContext(),HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH));
 			inflated.refresh();
 			inflated.setPadding(0, 0, 0, 0);
 			inflated.invalidate();

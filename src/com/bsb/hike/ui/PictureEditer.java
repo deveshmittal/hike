@@ -227,30 +227,19 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		{
 			if (v.getClass() == FilterEffectItemLinearLayout.class)
 			{
-				FilterEffectItemLinearLayout prev = HikePhotosUtils.FilterTools.getCurrentFilterItem();
 				FilterEffectItemLinearLayout me = (FilterEffectItemLinearLayout) v;
 				editView.applyFilter(me.getFilter());
-				me.select();
-				if (prev != null && prev.getFilter() != me.getFilter())
-				{
-					prev.unSelect();
-				}
+				
 
 			}
 
 			else if (v.getClass() == DoodleEffectItemLinearLayout.class)
 			{
-				DoodleEffectItemLinearLayout prev = HikePhotosUtils.FilterTools.getCurrentDoodleItem();
 				DoodleEffectItemLinearLayout me = (DoodleEffectItemLinearLayout) v;
 				editView.setBrushColor(me.getBrushColor());
 				doodlePreview.setBrushColor(me.getBrushColor());
 				doodlePreview.refresh();
-				me.select();
-				if (prev != null && prev.getBrushColor() != me.getBrushColor())
-				{
-					prev.unSelect();
-				}
-
+				
 			}
 			else
 			{
