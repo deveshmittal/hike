@@ -872,11 +872,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					Logger.d(TAG, "not connected but disconnecting");
 					if(mqtt.isDisconnecting())
 					{
-						Logger.d(TAG, "not connected but disconnecting , current state : connecting");
+						Logger.d(TAG, "already disconnecting");
 					}
 					else if(mqtt.isDisconnected())
 					{
-						Logger.d(TAG, "not connected but disconnecting , current state : disconnecting");
+						Logger.d(TAG, "already disconnected");
 					}
 					if (reconnect)
 						connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME); // try reconnection after 10 ms
