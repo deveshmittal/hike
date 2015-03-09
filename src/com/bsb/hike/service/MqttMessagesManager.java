@@ -1439,6 +1439,11 @@ public class MqttMessagesManager
 			long timeout = data.getLong(HikeConstants.Extras.GENERAL_SO_TIMEOUT);
 			HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.Extras.GENERAL_SO_TIMEOUT, timeout);
 			AccountUtils.setSocketTimeout((int) timeout);
+		}	
+		if (data.has(HikeConstants.OK_HTTP))
+		{
+			boolean okhttp = data.getBoolean(HikeConstants.OK_HTTP);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.TOGGLE_OK_HTTP, okhttp);
 		}
 		
 		editor.commit();
