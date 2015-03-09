@@ -1,6 +1,9 @@
 package com.bsb.hike.media;
 
+import java.lang.reflect.Field;
+
 import android.content.Context;
+import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -176,5 +179,31 @@ public class PopUpLayout implements OnTouchListener
 	public void setOnDismissListener(OnDismissListener onDismissListener)
 	{
 		popup.setOnDismissListener(onDismissListener);
+	}
+
+	/**
+	 * In Android Lollipop, a new feature called Heads-Up notifications was introduced. Due to this, whenever there was a headsup notification, it would take focus from any other view element that had focus. 
+	 * If there was a popupWindow being displayed with keyboard open, it would behave erratically and it's size calculation would go for a toss. eg: the emoticon popup/sticker popup would come over the kyboard instead of taking the place of keyboard. 
+	 * This is a hacky fix to prevent this issue. 
+	 * 
+	 * Source : Telegram on github ->  https://github.com/DrKLO/Telegram/commit/e5e31e20e46e437dc347e1eea74ec65fb71ddf5a
+	 *  
+	 * @param popup
+	 */
+	public void fixLollipopHeadsUpNotifPopup(PopupWindow popup)
+	{
+		if (Build.VERSION.SDK_INT >= 21)
+		{
+			try
+			{
+				Field field = PopupWindow.class.getDeclaredField("mWindowLayoutType");
+				field.setAccessible(true);
+				field.set(popup, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+			}
+			catch (Exception e)
+			{
+				/* ignored */
+			}
+		}
 	}
 }
