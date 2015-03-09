@@ -13,9 +13,10 @@ import com.bsb.hike.R;
 import com.bsb.hike.view.RoundedDrawable;
 
 /**
- * @author akhiltripathi
+ *   Abstract class for thumbnails. Any Feature added later must extend this thumbnail class to preview its effect on a thumbnail.
  * 
- *         Abstract class for thumbnails. Any Feature added later must extend this thumbnail class to preview its effect on a thumbnail.
+ * 	@author akhiltripathi
+ * 
  * 
  */
 

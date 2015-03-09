@@ -17,8 +17,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.photos.HikePhotosUtils;
 
 /**
- * @author akhiltripathi
- *
+ * 
  *         Custom View Class extends ImageView in android
  * 
  *         An object of CanvasImageView represents a layer on the PhotosEditerView
@@ -26,6 +25,9 @@ import com.bsb.hike.photos.HikePhotosUtils;
  *         The ImageView provides an Canvas for drawing doodles or writing text.
  * 
  *         In Implementation one object handles text and another handles doodling
+ *
+ *	@author akhiltripathi
+ *
  *
  */
 public class CanvasImageView extends ImageView implements OnTouchListener

@@ -11,13 +11,11 @@ import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 
 /**
- * @author akhiltripathi
- *
- *         Custom View Class extends ImageView in android
+ *          Custom View Class extends ImageView in android
  * 
  *         An object of EffectsImageView represents a layer on which the effects filters will be applied
  * 
- * 
+ * @author akhiltripathi
  *
  */
 public class EffectsImageView extends ImageView

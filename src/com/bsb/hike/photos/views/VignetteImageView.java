@@ -13,12 +13,11 @@ import android.widget.ImageView;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 
 /**
- * @author akhiltripathi
- * 
  *         Custom View Class extends ImageView in android
  * 
  *         Used in applying vignette (radial color fill) over the image as a seperate layer.
- * 
+ *         
+ * @author akhiltripathi
  */
 
 class VignetteImageView extends ImageView
@@ -68,9 +67,10 @@ class VignetteImageView extends ImageView
 	}
 
 	/**
-	 * @author akhiltripathi
 	 * 
-	 *         Draws a vignette on the layer of provided image size respective to the current set filter.
+	 * Draws a vignette on the layer of provided image size respective to the current set filter.
+	 * 
+	 * @author akhiltripathi
 	 * 
 	 * @param original
 	 */
@@ -82,7 +82,7 @@ class VignetteImageView extends ImageView
 			return;
 		}
 
-		width = original.getWidth();
+		width = original.getWidth()/2;
 
 		int colors[];
 		float stops[];
@@ -91,7 +91,7 @@ class VignetteImageView extends ImageView
 		{
 		case X_PRO_2:
 			// Vignette: Stop 1 = #000000 84%, Opacity = 0%; Stop 2 = #232443 120%, Opacity = 100%
-			colors = new int[] { 0x00000000, 0xAA000000, 0xFF232443 };
+			colors = new int[] { 0x00000000, 0xDD000000, 0xFF232443 };
 			stops = new float[] { 0.0f, 0.84f / 1.2f, 1.0f };
 			makeRadialGradient(1.2f, colors, stops);
 			break;
@@ -105,13 +105,13 @@ class VignetteImageView extends ImageView
 		case EARLYBIRD:
 		case BGR:
 			// Vignette: Stop 1 = #000000 74%, Opacity = 0%; Stop 2 = #000000 120%, Opacity = 100%
-			colors = new int[] { 0x00000000, 0xFF000000 };
-			stops = new float[] { 0.0f, 1.0f };
+			colors = new int[] { 0x00000000,0xAA000000, 0xFF000000 };
+			stops = new float[] { 0.0f,0.74f/1.2f, 1.0f };
 			makeRadialGradient(1.2f, colors, stops);
 			break;
 		case APOLLO:
 			// Vignette Stop 1: #18363f, Position 72%, Opacity 0% Stop 2: #18363f, Position 120%, Opacity 100%
-			colors = new int[] { 0x00000000, 0x1118363F, 0xFF18363F };
+			colors = new int[] { 0x00000000, 0xAA18363F, 0xFF18363F };
 			stops = new float[] { 0.0f, 0.72f / 1.2f, 1.0f };
 			makeRadialGradient(1.2f, colors, stops);
 			break;

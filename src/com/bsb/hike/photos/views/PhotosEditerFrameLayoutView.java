@@ -26,7 +26,9 @@ import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
 import com.bsb.hike.utils.Utils;
 
 /**
- * @author akhiltripathi Custom View extends FrameLayout Packs all the editing layers <filter layer,vignette layer ,doodle layer> into a single view ,in same z-order
+ * Custom View extends FrameLayout Packs all the editing layers <filter layer,vignette layer ,doodle layer> into a single view ,in same z-order
+ *
+ *  @author akhiltripathi
  * 
  */
 public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilterAppliedListener

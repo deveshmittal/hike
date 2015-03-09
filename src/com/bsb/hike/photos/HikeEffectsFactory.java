@@ -15,7 +15,6 @@ import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 
 /**
- * @author akhiltripathi
  * 
  *         Factory model class. Effect Filter being applied using RenderScript class in android.
  * 
@@ -26,6 +25,9 @@ import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
  * @see http://developer.android.com/guide/topics/renderscript/compute.html
  * 
  * @see http://developer.android.com/reference/android/graphics/ColorMatrix.html
+ * 
+ *  @author akhiltripathi
+ *
  * 
  */
 
@@ -264,22 +266,9 @@ public final class HikeEffectsFactory
 
 	private void beginEffectAsyncTask(OnFilterAppliedListener listener, FilterType type, boolean blur)
 	{
-		if (type == FilterType.ORIGINAL)
-		{
-			Bitmap mutableBmp = mBitmapIn.copy(mBitmapIn.getConfig(), true);
-			if (blur)
-			{
-				listener.onFilterApplied(createBlurredImage(mutableBmp));
-			}
-			else
-			{
-				listener.onFilterApplied(mutableBmp);
-			}
-		}
-		else
-		{
-			HikeHandlerUtil.getInstance().postRunnableWithDelay(new ApplyFilterTask(type, listener, blur), 0);
-		}
+
+		HikeHandlerUtil.getInstance().postRunnableWithDelay(new ApplyFilterTask(type, listener, blur), 0);
+
 	}
 
 	private ColorMatrix getCustomEffectColorMatrix(ColorMatrix[] effects)
@@ -420,28 +409,17 @@ public final class HikeEffectsFactory
 		return sepiaMatrix;
 	}
 
-	private Bitmap createBlurredImage(Bitmap originalBitmap)
-	{
-		Bitmap blurredBitmap = Bitmap.createBitmap(originalBitmap);
-		Bitmap mBitmapOut = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), mBitmapIn.getConfig());
-		Allocation output = Allocation.createFromBitmap(mRS, mBitmapOut);
-		mInAllocation = Allocation.createFromBitmap(mRS, originalBitmap);
-		mScriptBlur.setRadius(mBlurRadius);
-		mScriptBlur.setInput(mInAllocation);
-		mScriptBlur.forEach(output);
-		output.copyTo(blurredBitmap);
-		return blurredBitmap;
-	}
-
 	// UI thread Handler object to make changes to the UI from a seperate threat
 	private static Handler uiHandler = new Handler(Looper.getMainLooper());
 
 	/**
-	 * @author akhiltripathi
 	 * 
 	 *         Class implements Runnable Interface
 	 * 
 	 *         Applies specific Effect to mBitmapIn object on a new thread
+	 * 
+	 * @author akhiltripathi
+	 * 
 	 * 
 	 */
 	public class ApplyFilterTask implements Runnable
@@ -661,14 +639,19 @@ public final class HikeEffectsFactory
 				mScript.set_b(new int[] { 0x30, 0xAC, 0 });
 				mScript.forEach_filter_nashville(mInAllocation, mOutAllocations);
 				break;
-
+			case ORIGINAL:
+				mBitmapOut = mBitmapIn.copy(mBitmapIn.getConfig(), true);
+				break;
 			default:
 				mScript.forEach_filter_colorMatrix(mInAllocation, mOutAllocations);
 				break;
 
 			}
 
-			mOutAllocations.copyTo(mBitmapOut);
+			if (effect != FilterType.ORIGINAL)
+			{
+				mOutAllocations.copyTo(mBitmapOut);
+			}
 
 		}
 
@@ -702,11 +685,11 @@ public final class HikeEffectsFactory
 
 /**
  * 
- * @author akhiltripathi
- * 
  *         Class implements Curve Fitting Image Processing Technique
  * 
  *         Only Cubic Spline Curves Implemented
+ * 
+ * @author akhiltripathi
  * 
  */
 class Splines

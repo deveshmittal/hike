@@ -2348,7 +2348,7 @@ public class HikeConstants
 
 		public static final String EMPTY_TAB_TITLE = "";
 
-		public static final float TOUCH_TOLERANCE = 0;
+		public static final float TOUCH_TOLERANCE = 10;
 
 		public static final int DEFAULT_FILTER_APPLY_PERCENTAGE = 100;
 
