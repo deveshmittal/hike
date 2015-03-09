@@ -685,11 +685,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			//We are adding a new field sorting timestamp to use this for ordering purpose.
 			String alter4 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.SORTING_TIMESTAMP + " LONG";
 			String alter5 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_ORIGIN_TYPE + " INTEGER DEFAULT 0";
+			String alter6 = "ALTER TABLE " + DBConstants.SHARED_MEDIA_TABLE + " ADD COLUMN " + DBConstants.SERVER_ID + " INTEGER";
 			db.execSQL(alter1);
 			db.execSQL(alter2);
 			db.execSQL(alter3);
 			db.execSQL(alter4);
 			db.execSQL(alter5);
+			db.execSQL(alter6);
 			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.UPGRADE_FOR_SERVER_ID_FIELD, 1);
 		}
 	}
@@ -5641,7 +5643,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		 */
 		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.SHARED_MEDIA_TABLE + " (" + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY, "
 				+ DBConstants.MSISDN + " TEXT, " + DBConstants.GROUP_PARTICIPANT + " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.IS_SENT + " INT, " + DBConstants.HIKE_FILE_TYPE + " INTEGER, "
-				+ DBConstants.MESSAGE_METADATA + " TEXT"+ " )";
+				+ DBConstants.MESSAGE_METADATA + " TEXT, "+ DBConstants.SERVER_ID + " INTEGER "+" )";
 		
 		return sql;
 	}
@@ -6546,9 +6548,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			String update1 = "UPDATE " + DBConstants.MESSAGES_TABLE + " SET " + DBConstants.SERVER_ID + " = "  + DBConstants.MESSAGE_ID;
 			String update2 = "UPDATE " + DBConstants.CONVERSATIONS_TABLE + " SET " + DBConstants.SERVER_ID + " = "  + DBConstants.MESSAGE_ID;
 			String update3 = "UPDATE " + DBConstants.CONVERSATIONS_TABLE + " SET " + DBConstants.SORTING_TIMESTAMP + " = "  + DBConstants.LAST_MESSAGE_TIMESTAMP;
+			String update4 = "UPDATE " + DBConstants.SHARED_MEDIA_TABLE + " SET " + DBConstants.SERVER_ID + " = "  + DBConstants.MESSAGE_ID;
 			mDb.execSQL(update1);
 			mDb.execSQL(update2);
 			mDb.execSQL(update3);
+			mDb.execSQL(update4);
 			
 			long endTime = System.currentTimeMillis();
 			
