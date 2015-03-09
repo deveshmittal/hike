@@ -1357,4 +1357,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="holi">Happy Holi</string>
     <string name="terms_conditions_hint">Terms &amp; Conditions</string>
 	<string name="terms_conditions_title">Terms</string>
+    <string name="retry_platform_failure">RETRY</string>
+    <string name="platform_error_text">SOMETHING WENT WRONG</string>
+    <string name="platform_error_subtext">Please Check your Internet Connection</string>
 </resources>
