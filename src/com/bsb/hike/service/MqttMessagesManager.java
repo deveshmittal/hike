@@ -487,7 +487,10 @@ public class MqttMessagesManager
 		{
 			downloadZipForPlatformMessage(convMessage);
 		}
-		saveMessage(convMessage);
+		else
+		{
+			saveMessage(convMessage);
+		}
 
 	}
 
