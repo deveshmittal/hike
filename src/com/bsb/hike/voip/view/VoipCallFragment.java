@@ -444,18 +444,10 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			@Override
 			public void run()
 			{
-				if(isCallActive)
+				if(isAdded())
 				{
-					if(bundle!=null && VoIPUtils.shouldShowCallRatePopupNow())
-					{
-						Intent intent = IntentManager.getVoipCallRateActivityIntent(getSherlockActivity());
-						intent.putExtra(VoIPConstants.CALL_RATE_BUNDLE, bundle);
-						startActivity(intent);
-					}
-					VoIPUtils.setupCallRatePopupNextTime();
+					startCallRateActivity(bundle);
 				}
-				isCallActive = false;
-				getSherlockActivity().finish();
 			}
 		}, 900);
 	}
@@ -863,6 +855,22 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		}
 		signalContainer.startAnimation(anim);
 		signalContainer.setVisibility(View.VISIBLE);
+	}
+
+	private void startCallRateActivity(Bundle bundle)
+	{
+		if(isCallActive)
+		{
+			if(bundle!=null && VoIPUtils.shouldShowCallRatePopupNow())
+			{
+				Intent intent = IntentManager.getVoipCallRateActivityIntent(getSherlockActivity());
+				intent.putExtra(VoIPConstants.CALL_RATE_BUNDLE, bundle);
+				startActivity(intent);
+			}
+			VoIPUtils.setupCallRatePopupNextTime();
+		}
+		isCallActive = false;
+		getSherlockActivity().finish();
 	}
 
 	public void showCallFailedFragment(int callFailCode)
