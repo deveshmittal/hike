@@ -1693,6 +1693,28 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
+	public ArrayList<ContactInfo> addBroadcastRecipientConversations(ConvMessage convMessage)
+	{
+		ContactManager contactManager = ContactManager.getInstance();
+		ArrayList<ConvMessage> convMessages= new ArrayList<ConvMessage>(1);
+		ConvMessage broadcastConvMessage = new ConvMessage(convMessage);
+		//Here we set origin type of 
+		broadcastConvMessage.setMessageOriginType(ConvMessage.OriginType.BROADCAST);
+		broadcastConvMessage.setServerId(convMessage.getMsgID());
+		convMessages.add(broadcastConvMessage);
+		ArrayList<String> contactMsisdns = convMessage.getSentToMsisdnsList();
+		ArrayList<ContactInfo> contacts = new ArrayList<ContactInfo>();
+		for (String msisdn : contactMsisdns)
+		{
+			ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, contactManager.getName(msisdn), msisdn, true);
+			contacts.add(contactInfo);
+		}
+		
+		addConversations(convMessages, contacts, false);
+		
+		return contacts;
+	}
+	
     private void insertServerId(ConvMessage convMessage) {
     	if (convMessage.getMsgID() > 0)
     	{

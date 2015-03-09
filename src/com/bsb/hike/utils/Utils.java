@@ -163,6 +163,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation.MetaData;
@@ -5339,5 +5340,43 @@ public class Utils
 			result.replace(idx, result.length(), ")");
 		}
 		return result.toString();
+	}
+	
+	public static void addBroadcastRecipientConversations(ConvMessage convMessage)
+	{
+		
+		ArrayList<ContactInfo> contacts = HikeConversationsDatabase.getInstance().addBroadcastRecipientConversations(convMessage);
+		
+		sendPubSubForConvScreenBroadcastMessage(convMessage, contacts);
+        // publishing mqtt packet
+        HikeMqttManagerNew.getInstance().sendMessage(convMessage.serializeDeliveryReportRead(), HikeMqttManagerNew.MQTT_QOS_ONE);
+	}
+	
+
+	public static void sendPubSubForConvScreenBroadcastMessage(ConvMessage convMessage, ArrayList<ContactInfo> recipient)
+	{
+		long firstMsgId = convMessage.getMsgID() + 1;
+		int totalRecipient = recipient.size();
+		List<Pair<ContactInfo, ConvMessage>> allPairs = new ArrayList<Pair<ContactInfo,ConvMessage>>(totalRecipient);
+		long timestamp = System.currentTimeMillis()/1000;
+		for(int i=0;i<totalRecipient;i++)
+		{
+			ConvMessage message = new ConvMessage(convMessage);
+			if(convMessage.isBroadcastConversation())
+			{
+				message.setMessageOriginType(OriginType.BROADCAST);
+			}
+			else
+			{
+				//multi-forward case... in braodcast case we donot need to update timestamp
+				message.setTimestamp(timestamp++);
+			}
+			message.setMsgID(firstMsgId+i);
+			ContactInfo contactInfo = recipient.get(i);
+			message.setMsisdn(contactInfo.getMsisdn());
+			Pair<ContactInfo, ConvMessage> pair = new Pair<ContactInfo, ConvMessage>(contactInfo, message);
+			allPairs.add(pair);
+		}
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_DB_INSERTED, allPairs);
 	}
 }
