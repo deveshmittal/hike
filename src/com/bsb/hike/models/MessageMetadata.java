@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 
 public class MessageMetadata
@@ -66,7 +67,14 @@ public class MessageMetadata
 	// This is used to put Title on the Nuj RUj notification
 	public String getKey()
 	{
-		return 	json.optJSONObject(HikeConstants.DATA).optString(HikeConstants.UserJoinMsg.NOTIF_TITLE,"");
+		try 
+		{
+			return 	json.getJSONObject(HikeConstants.DATA).optString(HikeConstants.UserJoinMsg.NOTIF_TITLE,"");
+		}
+		catch (JSONException e) {
+			Logger.d("JSON Exception", "Returning null Title");
+			return null;
+		} 
 	}
 	public boolean isGhostMessage()
 	{
@@ -97,7 +105,14 @@ public class MessageMetadata
 	
 	private int getPushSetting()
 	{
-		return json.optJSONObject(HikeConstants.DATA).optInt(HikeConstants.UserJoinMsg.PUSH_SETTING, HikeConstants.PushType.silent);
+		try 
+		{
+			return json.getJSONObject(HikeConstants.DATA).optInt(HikeConstants.UserJoinMsg.PUSH_SETTING, HikeConstants.PushType.silent);
+		}
+		catch (JSONException e) {
+			Logger.d("JSON Exception", "Returning loud notification");
+			return HikeConstants.PushType.loud;
+		} 
 	}
 	
 	public boolean shouldShowPush()

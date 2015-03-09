@@ -286,17 +286,12 @@ public class MqttMessagesManager
 			jsonObj = buildUserJoinParams(jsonObj, userType);
 			
 			joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
-			long ts = settings.getLong(msisdn, -1);
-			if (ts == -1) // this shows last uj was for some other msisdn or this user has left or pref file do not exist
-			{
-				Editor e = settings.edit();
-				e.clear(); // remove old values if any as we have to keep just one msisdn at a time
-				e.putLong(msisdn, joinTime);
-				e.commit();
-			}
-			else if (ts == joinTime) // this shows UJ is duplicate so ignore
+			long ts = settings.getLong(msisdn, -1); 
+			// -1 shows last uj was for some other msisdn or this user has left or pref file do not exist
+			if (ts != -1 && ts == joinTime) 
+				// this shows UJ is duplicate so ignore 
 				return;
-			else
+			else 
 				// last join time was different from latest time
 				settings.edit().putLong(msisdn, joinTime).commit();
 		}
@@ -315,32 +310,27 @@ public class MqttMessagesManager
 			{
 				joinTime = Utils.applyServerTimeOffset(context, joinTime);
 				ContactManager.getInstance().setHikeJoinTime(msisdn, joinTime);
-				
-				ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, false);
-				if (contact.getHikeJoinTime() > 0 && !contact.isUnknownContact())
-				{
-					Editor e = this.settings.edit();
-					e.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
-					e.commit();
-				}
 			}
 			
-			if (appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true))
+			if (!isBulkMessage && appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true) && !ContactManager.getInstance().isBlocked(msisdn))
 			{
-				
-				if (!isBulkMessage)
+				if(jsonObj.getJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.UserJoinMsg.PERSIST_CHAT, HikeConstants.UserJoinMsg.defaultPersistChat))
 				{
-					if(jsonObj.getJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.UserJoinMsg.PERSIST_CHAT, HikeConstants.UserJoinMsg.defaultPersistChat))
+					saveStatusMsg(jsonObj, msisdn);
+				}
+				else
+				{
+					ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, false);
+					if (contact.getHikeJoinTime() > 0 && !contact.isUnknownContact())
 					{
-						saveStatusMsg(jsonObj, msisdn);
+						Editor e = this.settings.edit();
+						e.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
+						e.commit();
 					}
-					else
+					ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
+					if(convMessage != null)
 					{
-						ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
-						if(convMessage != null)
-						{
-							this.pubSub.publish(HikePubSub.USER_JOINED_NOTIFICATION, convMessage);
-						}
+						this.pubSub.publish(HikePubSub.USER_JOINED_NOTIFICATION, convMessage);
 					}
 				}
 			}
