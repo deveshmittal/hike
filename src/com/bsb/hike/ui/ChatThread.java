@@ -461,6 +461,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private HashSpanWatcher hashWatcher;
 
+	private boolean _doubleTapPref;
+
 	@Override
 	protected void onPause()
 	{
@@ -756,11 +758,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
 		mComposeView.setBackKeyListener(this);
 		if (mComposeView != null) {
+			//Its a workaround to set the multiline editfield when android:imeOptions="actionSend".
 			mComposeView.setHorizontallyScrolling(false);
 			mComposeView.setMaxLines(4);
 			boolean sendOnEnter = PreferenceManager
 					.getDefaultSharedPreferences(this).getBoolean(
 							HikeConstants.SEND_ENTER_PREF, false);
+			//if send on enter setting is unchecked then send button will send the cursor to the next line.
 			if (!sendOnEnter) {
 				mComposeView.setInputType(InputType.TYPE_CLASS_TEXT
 						| InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
@@ -2579,6 +2583,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		});
 
+	    _doubleTapPref = PreferenceManager.getDefaultSharedPreferences(ChatThread.this).getBoolean(HikeConstants.DOUBLE_TAP_PREF, false);
 		gestureDetector = new GestureDetector(this, simpleOnGestureListener);
 		boolean addBlockHeader = false;
 		if (!(mConversation instanceof GroupConversation))
@@ -4842,8 +4847,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						&& (keyEvent.getAction() != KeyEvent.ACTION_UP) && (config.keyboard != Configuration.KEYBOARD_NOKEYS))))
 		{
 			if (!TextUtils.isEmpty(mComposeView.getText())) {
-				boolean ret = mSendBtn.performClick();
-				return ret;
+				return mSendBtn.performClick();
 			}
 			return true;
 		}
@@ -7453,9 +7457,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public boolean onDoubleTap(MotionEvent e)
 		{
-			boolean doubleTapPref = PreferenceManager.getDefaultSharedPreferences(ChatThread.this).getBoolean(HikeConstants.DOUBLE_TAP_PREF, false);
 			Logger.i("chatthread", "double tap");
-			if (isActionModeOn || isHikeToOfflineMode||!doubleTapPref)
+			if (isActionModeOn || isHikeToOfflineMode||!_doubleTapPref)
 			{
 				try
 				{
@@ -7472,7 +7475,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					Toast.makeText(ChatThread.this, R.string.nudge_toast, Toast.LENGTH_SHORT).show();
 					currentNudgeCount=0;
-					return false;
 				}
 				return false;
 			}
