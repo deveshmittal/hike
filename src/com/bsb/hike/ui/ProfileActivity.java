@@ -2889,31 +2889,34 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else if(HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
-			if(groupConversation.getMsisdn().equals(((ConvMessage)object).getMsisdn()))
-			{							
-				if(((ConvMessage)object).getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-				{
-					sharedContentItem.setUnreadPinCount(++currUnreadCount);
-	
-					sharedContentItem.setSharedPinsCount(sharedContentItem.getSharedPinsCount() + 1);
-					
-					sharedPinCount += 1;
-					
-					if(sharedContentItem.getPinAnimation() == false)
+			if (groupConversation != null)
+			{
+				if(groupConversation.getMsisdn().equals(((ConvMessage)object).getMsisdn()))
+				{							
+					if(((ConvMessage)object).getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 					{
-						sharedContentItem.setPinAnimation(true);
-					}
-					
-					runOnUiThread(new Runnable() 
-					{					
-						@Override
-						public void run() 
+						sharedContentItem.setUnreadPinCount(++currUnreadCount);
+		
+						sharedContentItem.setSharedPinsCount(sharedContentItem.getSharedPinsCount() + 1);
+						
+						sharedPinCount += 1;
+						
+						if(sharedContentItem.getPinAnimation() == false)
 						{
-							profileAdapter.notifyDataSetChanged();
+							sharedContentItem.setPinAnimation(true);
 						}
-					});
+						
+						runOnUiThread(new Runnable() 
+						{					
+							@Override
+							public void run() 
+							{
+								profileAdapter.notifyDataSetChanged();
+							}
+						});
+					}
 				}
-			}			
+			}
 		}
 		else if(HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
 		{			

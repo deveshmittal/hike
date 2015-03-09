@@ -298,7 +298,7 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 		ArrayList<ContactInfo> selectedContactList = new ArrayList<ContactInfo>(selectedContactsMsisdns.size());
 		for (String msisdn : selectedContactsMsisdns)
 		{
-			ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, null, null, true);
+			ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
 			selectedContactList.add(contactInfo);
 		}
 		
