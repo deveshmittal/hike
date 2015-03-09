@@ -1039,6 +1039,10 @@ public class ConvMessage
 		this.sentToMsisdnsList.addAll(sentToMsisdnsList);
 	}
 
+	public void addToSentToMsisdnsList(String msisdn) {
+		this.sentToMsisdnsList.add(msisdn);
+	}
+
 	public boolean hasBroadcastId() {
 		return messageBroadcastId != null;
 	}
