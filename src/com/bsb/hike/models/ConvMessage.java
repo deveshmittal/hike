@@ -252,12 +252,6 @@ public class ConvMessage
 		this.msgID = msgId;
 	}
 	
-//	TODO anu bansal serverId
-/**
- * serverId	
- * create a new constructor for serverID
- * set serverID field in convMessage
- */
 	public ConvMessage(TypingNotification typingNotification)
 	{
 		this.typingNotification = typingNotification;
@@ -1051,6 +1045,10 @@ public class ConvMessage
 
 	public void setSentToMsisdnsList(ArrayList<String> sentToMsisdnsList) {
 		this.sentToMsisdnsList.addAll(sentToMsisdnsList);
+	}
+
+	public void addToSentToMsisdnsList(String msisdn) {
+		this.sentToMsisdnsList.add(msisdn);
 	}
 
 	public boolean hasBroadcastId() {

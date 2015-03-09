@@ -706,21 +706,24 @@ public class MqttMessagesManager
 		}
 		Logger.d(getClass().getSimpleName(), "Delivery report received for msgid : " + serverID + "	;	REPORT : DELIVERED");
 
-		saveDeliveryReport(serverID, msisdn, false);
-
-	}
-	
-	private void saveDeliveryReport(long serverID, String msisdn, boolean recursiveCall) throws JSONException
-	{
-		if(!recursiveCall)
+		Map<String, ArrayList<Long>> map = convDb.getMsisdnMapForServerId(serverID, msisdn);
+		if(map != null && !map.isEmpty())
 		{
-			String serverIdMsisdn = convDb.getMsisdnForMsgId((int) serverID);
-			if (serverIdMsisdn != null && !serverIdMsisdn.equals(msisdn))
+			for (String chatMsisdn : map.keySet())
 			{
-				saveDeliveryReport(serverID, serverIdMsisdn, true);
+				ArrayList<Long> values = map.get(chatMsisdn);
+				if(values != null && !values.isEmpty())
+				{
+					long msgId = values.get(0); //max size this list will be of 1 only
+					saveDeliveryReport(msgId, chatMsisdn);
+				}
 			}
 		}
-		int rowsUpdated = updateDB(serverID, ConvMessage.State.SENT_DELIVERED, msisdn);
+	}
+	
+	private void saveDeliveryReport(long msgID, String msisdn)
+	{
+		int rowsUpdated = updateDB(msgID, ConvMessage.State.SENT_DELIVERED, msisdn);
 
 		if (rowsUpdated == 0)
 		{
@@ -728,7 +731,7 @@ public class MqttMessagesManager
 			return;
 		}
 
-		Pair<String, Long> pair = new Pair<String, Long>(msisdn, serverID);
+		Pair<String, Long> pair = new Pair<String, Long>(msisdn, msgID);
 
 		this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, pair);
 
@@ -781,43 +784,67 @@ public class MqttMessagesManager
 	private void saveMessageRead(JSONObject jsonObj) throws JSONException
 	{
 		JSONArray serverIds = jsonObj.optJSONArray(HikeConstants.DATA);
-		String id = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
-
+		
 		if (serverIds == null)
 		{
 			Logger.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
 			return;
 		}
-
-		long[] ids;
-		if (!Utils.isGroupConversation(id))
+		
+		String id = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
+		String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.FROM) : id;
+		
+		ArrayList<Long> serverIdsArrayList = new ArrayList<Long>(serverIds.length());
+		
+		for (int i = 0; i < serverIds.length(); i++)
 		{
-			ids = convDb.setAllDeliveredMessagesReadForMsisdn(id, serverIds);
-			if (ids == null)
+			serverIdsArrayList.add(serverIds.optLong(i));
+		}
+		
+		Map<String, ArrayList<Long>> map = convDb.getMsisdnMapForServerIds(serverIdsArrayList, id);
+		if(map != null && !map.isEmpty())
+		{
+			for (String chatMsisdn : map.keySet())
 			{
-				return;
+				ArrayList<Long> values = map.get(chatMsisdn);
+				saveMessageRead(chatMsisdn, values, participantMsisdn);
 			}
-			Pair<String, long[]> pair = new Pair<String, long[]>(id, ids);
+		}
+	}
+	
+	private void saveMessageRead(String msisdn, ArrayList<Long> msgIds, String participantMsisdn) 
+	{
+		if (msgIds == null || msgIds.isEmpty())
+		{
+			Logger.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
+			return;
+		}
+		
+		long[] msgIdsLongArray= new long[msgIds.size()];
+		for (int i = 0; i < msgIds.size(); i++ )
+		{
+			msgIdsLongArray[i] = msgIds.get(i);
+		}
+		
+		if (!Utils.isGroupConversation(msisdn))
+		{
+			convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, msgIds);
+			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, msgIdsLongArray);
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
 		}
 		else
 		{
-			String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.FROM) : "";
 			if(TextUtils.isEmpty(participantMsisdn))
 			{
 				return ;
 			}
-			ids = new long[serverIds.length()];
-			for (int i = 0; i < serverIds.length(); i++)
-			{
-				ids[i] = serverIds.optLong(i);
-			}
-			long maxMsgId = convDb.setReadByForGroup(id, ids, participantMsisdn);
+
+			long maxMsgId = convDb.setReadByForGroup(msisdn, msgIds, participantMsisdn);
 
 			if (maxMsgId > 0)
 			{
 				Pair<Long, String> pair = new Pair<Long, String>(maxMsgId, participantMsisdn);
-				Pair<String, Pair<Long, String>> groupPair = new Pair<String, Pair<Long, String>>(id, pair);
+				Pair<String, Pair<Long, String>> groupPair = new Pair<String, Pair<Long, String>>(msisdn, pair);
 				this.pubSub.publish(HikePubSub.GROUP_MESSAGE_DELIVERED_READ, groupPair);
 			}
 		}
@@ -872,10 +899,10 @@ public class MqttMessagesManager
 
 		if (Utils.isGroupConversation(id))
 		{
-			long[] ids = new long[msgIds.length()];
+			ArrayList<Long> ids = new ArrayList<Long>(msgIds.length());
 			for (int i = 0; i < msgIds.length(); i++)
 			{
-				ids[i] = msgIds.optLong(i);
+				ids.add(msgIds.optLong(i));
 			}
 
 			msgID = convDb.getMrIdForGroup(id, ids);
@@ -2684,11 +2711,11 @@ public class MqttMessagesManager
 
 	private int updateDB(Object object, ConvMessage.State status, String msisdn)
 	{
-		long serverID = (Long) object;
+		long msgID = (Long) object;
 		/*
 		 * TODO we should lookup the convid for this user, since otherwise one could set mess with the state for other conversations
 		 */
-		return convDb.updateMsgStatus(serverID, status.ordinal(), msisdn);
+		return convDb.updateMsgStatus(msgID, status.ordinal(), msisdn);
 	}
 	
 	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn) throws JSONException
