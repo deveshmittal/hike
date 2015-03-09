@@ -536,8 +536,11 @@ public class ConversationsAdapter extends BaseAdapter
 		conversationsMsisdns = new HashSet<String>();
 		for(Conversation conv : completeList)
 		{
-			conversationList.add(conv);
-			conversationsMsisdns.add(conv.getMsisdn());
+			if (!(conv instanceof ConversationTip))
+			{
+				conversationList.add(conv);
+				conversationsMsisdns.add(conv.getMsisdn());
+			}
 		}
 		FetchPhoneBookContactsTask fetchContactsTask = new FetchPhoneBookContactsTask();
 		Utils.executeAsyncTask(fetchContactsTask);
