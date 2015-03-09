@@ -4843,7 +4843,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (!TextUtils.isEmpty(mComposeView.getText())) {
 				boolean ret = mSendBtn.performClick();
-				Utils.hideSoftKeyboard(this, mComposeView);
 				return ret;
 			}
 			return true;
