@@ -74,6 +74,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -340,6 +341,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private int HIKE_TO_OFFLINE_TIP_STATE_2 = 2;
 
 	private int HIKE_TO_OFFLINE_TIP_STATE_3 = 3;
+	
+	private int NUDGE_TOAST_OCCURENCE = 2;
+	
+	private int currentNudgeCount = 0;
 
 	private int currentCreditsForToast = 0;
 
@@ -448,6 +453,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private ScreenOffReceiver screenOffBR;
 
 	private HashSpanWatcher hashWatcher;
+
+	private boolean _doubleTapPref;
 
 	@Override
 	protected void onPause()
@@ -743,6 +750,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
 		mComposeView.setBackKeyListener(this);
+		if (mComposeView != null) {
+			//Its a workaround to set the multiline editfield when android:imeOptions="actionSend".
+			mComposeView.setHorizontallyScrolling(false);
+			mComposeView.setMaxLines(4);
+			boolean sendOnEnter = PreferenceManager
+					.getDefaultSharedPreferences(this).getBoolean(
+							HikeConstants.SEND_ENTER_PREF, false);
+			//if send on enter setting is unchecked then send button will send the cursor to the next line.
+			if (!sendOnEnter) {
+				mComposeView.setInputType(InputType.TYPE_CLASS_TEXT
+						| InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
+						| InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+						| InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+			}
+
+		}
 		mSendBtn = (ImageButton) findViewById(R.id.send_message);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mOverlayLayout = findViewById(R.id.overlay_layout);
@@ -2553,6 +2576,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		});
 
+	    _doubleTapPref = PreferenceManager.getDefaultSharedPreferences(ChatThread.this).getBoolean(HikeConstants.DOUBLE_TAP_PREF, false);
 		gestureDetector = new GestureDetector(this, simpleOnGestureListener);
 		boolean addBlockHeader = false;
 		if (!(mConversation instanceof GroupConversation))
@@ -4815,9 +4839,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				&& ((actionId == EditorInfo.IME_ACTION_SEND) || ((keyEvent != null) && (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
 						&& (keyEvent.getAction() != KeyEvent.ACTION_UP) && (config.keyboard != Configuration.KEYBOARD_NOKEYS))))
 		{
-			boolean ret = mSendBtn.performClick();
-			Utils.hideSoftKeyboard(this, mComposeView);
-			return ret;
+			if (!TextUtils.isEmpty(mComposeView.getText())) {
+				return mSendBtn.performClick();
+			}
+			return true;
 		}
 		return false;
 	}
@@ -6876,7 +6901,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			 */
 			KeyEvent.changeAction(event, KeyEvent.ACTION_DOWN);
 			return true;
-		}
+		} 
 		return false;
 	}
 
@@ -7426,8 +7451,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		public boolean onDoubleTap(MotionEvent e)
 		{
 			Logger.i("chatthread", "double tap");
-			if (isActionModeOn || isHikeToOfflineMode)
+			if (isActionModeOn || isHikeToOfflineMode||!_doubleTapPref)
 			{
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.UNCHECKED_NUDGE);
+	                HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException ex)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
+				currentNudgeCount++;
+				if(currentNudgeCount>NUDGE_TOAST_OCCURENCE)
+				{
+					Toast.makeText(ChatThread.this, R.string.nudge_toast, Toast.LENGTH_SHORT).show();
+					currentNudgeCount=0;
+				}
 				return false;
 			}
 			if (mConversation instanceof GroupConversation)
