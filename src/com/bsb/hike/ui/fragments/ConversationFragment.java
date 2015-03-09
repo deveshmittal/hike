@@ -1647,6 +1647,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			mAdapter.addToLists(stealthConversations);
 		}
 
+		HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
 		mAdapter.sortLists(mConversationsComparator);
 		notifyDataSetChanged();
 	}

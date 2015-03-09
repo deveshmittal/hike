@@ -160,7 +160,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE };
 
-	private MenuItem searchItem;
+	private static MenuItem searchItem;
 
 	private boolean showingSearchModeActionBar = false;
 
@@ -526,8 +526,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 		if (mainFragment.isConversationsEmpty())
 		{
-			searchItem.setEnabled(false);
-			searchItem.setVisible(false);
+			setSearchOptionAccess(false);
 		}
 		
 		newConversationIndicator = (TextView) menu.findItem(R.id.new_conversation).getActionView().findViewById(R.id.top_bar_indicator);
@@ -560,6 +559,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 		
 		return true;
+	}
+
+	public static void setSearchOptionAccess(boolean setVisible)
+	{
+		searchItem.setEnabled(setVisible);
+		searchItem.setVisible(setVisible);
 	}
 	
 	private String getSearchQueryHintText()
