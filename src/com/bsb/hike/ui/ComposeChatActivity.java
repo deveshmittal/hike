@@ -81,7 +81,7 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
-import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
@@ -1372,11 +1372,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						ConvMessage convMessage = new ConvMessage();
 						convMessage.setIsSent(true);
 						convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
-						convMessage.platformWebMessageMetadata =  new PlatformWebMessageMetadata(PlatformContent.getForwardCardData(metadata));
+						convMessage.webMetadata =  new WebMetadata(PlatformContent.getForwardCardData(metadata));
 
 						try
 						{
-							platformCards.append( TextUtils.isEmpty(platformCards) ? convMessage.platformWebMessageMetadata.getAppName() : "," + convMessage.platformWebMessageMetadata.getAppName());
+							platformCards.append( TextUtils.isEmpty(platformCards) ? convMessage.webMetadata.getAppName() : "," + convMessage.webMetadata.getAppName());
 						}
 						catch (NullPointerException e)
 						{
@@ -1546,7 +1546,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 			platformAnalyticsJson.put(AnalyticsConstants.TO, contactList);
 			platformAnalyticsJson.put(HikeConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
-			HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, platformAnalyticsJson, AnalyticsConstants.EVENT_TAG_PLATFORM);
+			HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, platformAnalyticsJson);
 		}
 		catch (JSONException e)
 		{

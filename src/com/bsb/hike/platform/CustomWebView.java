@@ -20,23 +20,26 @@ public class CustomWebView extends WebView
 	//Custom WebView to stop background calls when moves out of view.
 	public CustomWebView(Context context)
 	{
-		super(context);
+		this(context, null);
 	}
 
 	public CustomWebView(Context context, AttributeSet attrs)
 	{
-		super(context, attrs);
+		this(context, attrs, android.R.attr.webViewStyle);
 	}
 
 	public CustomWebView(Context context, AttributeSet attrs, int defStyleAttr)
 	{
 		super(context, attrs, defStyleAttr);
+		allowUniversalAccess();
+		webViewProperties();
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	public CustomWebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
 	{
 		super(context, attrs, defStyleAttr, defStyleRes);
+		allowUniversalAccess();
 	}
 
 
@@ -89,4 +92,23 @@ public class CustomWebView extends WebView
 			e.printStackTrace();
 		}
 	}
+
+	public void allowUniversalAccess()
+	{
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+		{
+			getSettings().setAllowUniversalAccessFromFileURLs(true);
+			getSettings().setAllowFileAccessFromFileURLs(true);
+
+		}
+	}
+
+	public void webViewProperties()
+	{
+		setVerticalScrollBarEnabled(false);
+		setHorizontalScrollBarEnabled(false);
+		getSettings().setDomStorageEnabled(true);
+		getSettings().setJavaScriptEnabled(true);
+	}
+
 }

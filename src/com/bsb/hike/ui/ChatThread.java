@@ -14,7 +14,12 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
+import com.bsb.hike.platform.CardComponent;
+import com.bsb.hike.platform.HikePlatformConstants;
+import com.bsb.hike.platform.PlatformMessageMetadata;
 
+import com.bsb.hike.platform.WebMetadata;
+import com.bsb.hike.platform.content.PlatformContent;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -183,11 +188,6 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.platform.CardComponent;
-import com.bsb.hike.platform.HikePlatformConstants;
-import com.bsb.hike.platform.PlatformMessageMetadata;
-import com.bsb.hike.platform.PlatformWebMessageMetadata;
-import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -1650,7 +1650,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
             json.put(AnalyticsConstants.EVENT_KEY, key);
             json.put(AnalyticsConstants.ORIGIN, origin);
             json.put(AnalyticsConstants.CHAT_MSISDN, mContactNumber);
-            HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, subType, json, AnalyticsConstants.EVENT_TAG_BOTS);
+            HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.UI_EVENT, subType, json);
         }
         catch (JSONException e)
         {
@@ -1856,11 +1856,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// Sticker message is a non text message.
 			selectedNonTextMsg(isMsgSelected);
 		}
-        else if (message.getMessageType() == MESSAGE_TYPE.CONTENT || message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+        else if (message.getMessageType() == MESSAGE_TYPE.CONTENT )
         {
             // Content card is a non text message.
             selectedNonTextMsg(isMsgSelected);
         }
+		else if (message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+		{
+			if (message.webMetadata.isLongPressDisabled())
+			{
+				return false;
+			}
+
+			selectedNonTextMsg(isMsgSelected);
+		}
 
 		invalidateOptionsMenu();
 		return true;
@@ -2281,14 +2290,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							// as we will be changing msisdn and hike status while inserting in DB
 							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber,msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE), isConversationOnHike());
 							convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
-							convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
+							convMessage.webMetadata = new WebMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
 							JSONObject json = new JSONObject();
 							try
 							{
-								json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+								json.put(HikePlatformConstants.CARD_TYPE, convMessage.webMetadata.getAppName());
 								json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
 								json.put(AnalyticsConstants.TO, mContactNumber);
-								HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+								json.put(AnalyticsConstants.CONTENT_ID, convMessage.getContentId());
+								HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 							}
 							catch (JSONException e)
 							{
@@ -5127,11 +5137,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			JSONObject json = new JSONObject();
 			try
 			{
-				json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+				json.put(HikePlatformConstants.CARD_TYPE, convMessage.webMetadata.getAppName());
 				json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_DELETE);
 				json.put(AnalyticsConstants.ORIGIN, origin);
 				json.put(AnalyticsConstants.CHAT_MSISDN, mContactNumber);
-				HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+				json.put(AnalyticsConstants.CONTENT_ID, convMessage.getContentId());
+				HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 			}
 			catch (JSONException e)
 			{
@@ -8090,8 +8101,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}  else if(message.getMessageType()==MESSAGE_TYPE.WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT){
 						multiMsgFwdObject.put(MESSAGE_TYPE.MESSAGE_TYPE, MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 						multiMsgFwdObject.put(HikeConstants.HIKE_MESSAGE, message.getMessage());
-						if(message.platformWebMessageMetadata!=null){
-							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
+						if(message.webMetadata !=null){
+							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.webMetadata.JSONtoString()));
 
 						}
 					}

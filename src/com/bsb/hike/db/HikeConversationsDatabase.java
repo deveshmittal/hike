@@ -63,7 +63,7 @@ import com.bsb.hike.modules.contactmgr.GroupDetails;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
-import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -1365,7 +1365,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
             insertStatement.bindString(messageMetadataColumn, conv.platformMessageMetadata != null ? conv.platformMessageMetadata.JSONtoString() : "");
 
         } else if(conv.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || conv.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT) {
-			insertStatement.bindString(messageMetadataColumn, conv.platformWebMessageMetadata != null ? conv.platformWebMessageMetadata.JSONtoString() : "");
+			insertStatement.bindString(messageMetadataColumn, conv.webMetadata != null ? conv.webMetadata.JSONtoString() : "");
 
 		}else
         {
@@ -5322,7 +5322,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
                 if(message.getMessageType() == com.bsb.hike.HikeConstants.MESSAGE_TYPE.CONTENT){
                     message.platformMessageMetadata = new PlatformMessageMetadata(metadata, mContext);
                 }else if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || message.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT){
-					message.platformWebMessageMetadata = new PlatformWebMessageMetadata(metadata);
+					message.webMetadata = new WebMetadata(metadata);
 				}else{
                     message.setMetadata(metadata);
                 }

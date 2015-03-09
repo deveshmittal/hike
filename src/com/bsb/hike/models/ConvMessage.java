@@ -15,7 +15,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
-import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -90,7 +90,7 @@ public class ConvMessage
 	public ContentLove contentLove;
 	public PlatformMessageMetadata platformMessageMetadata;
 
-	public PlatformWebMessageMetadata platformWebMessageMetadata;
+	public WebMetadata webMetadata;
 
 	public boolean isLovePresent(){
 		return contentLove!=null;
@@ -322,7 +322,7 @@ public class ConvMessage
 		this.unreadCount = other.unreadCount;
 		this.metadata = other.metadata;
 		this.platformMessageMetadata = other.platformMessageMetadata;
-		this.platformWebMessageMetadata = other.platformWebMessageMetadata;
+		this.webMetadata = other.webMetadata;
 		this.contentLove = other.contentLove;
 		try {
 			this.readByArray = other.readByArray !=null? new JSONArray(other.readByArray.toString()) : null;
@@ -393,12 +393,12 @@ public class ConvMessage
 			else if (ConvMessagePacketKeys.WEB_CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE)))
 			{
 				this.messageType  = MESSAGE_TYPE.WEB_CONTENT;
-				platformWebMessageMetadata  = new PlatformWebMessageMetadata(data.optJSONObject(HikeConstants.METADATA));
+				webMetadata = new WebMetadata(data.optJSONObject(HikeConstants.METADATA));
 			}
 			else if (ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE)))
 			{
 				this.messageType  = MESSAGE_TYPE.FORWARD_WEB_CONTENT;
-				platformWebMessageMetadata  = new PlatformWebMessageMetadata(data.optJSONObject(HikeConstants.METADATA));
+				webMetadata = new WebMetadata(data.optJSONObject(HikeConstants.METADATA));
 			}
 			else
 			{
@@ -755,12 +755,12 @@ public class ConvMessage
 
 				case MESSAGE_TYPE.WEB_CONTENT:
 					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.WEB_CONTENT_TYPE);
-					data.put(HikeConstants.METADATA, platformWebMessageMetadata.getJSON());
+					data.put(HikeConstants.METADATA, webMetadata.getJSON());
 					break;
 
 				case MESSAGE_TYPE.FORWARD_WEB_CONTENT:
 					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE);
-					data.put(HikeConstants.METADATA, platformWebMessageMetadata.getJSON());
+					data.put(HikeConstants.METADATA, webMetadata.getJSON());
 					break;
 
 				}
@@ -967,9 +967,9 @@ public class ConvMessage
 	 */
 	public boolean isSilent()
 	{
-		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && platformWebMessageMetadata != null)
+		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && webMetadata != null)
 		{
-			return platformWebMessageMetadata.isSilent();
+			return webMetadata.isSilent();
 		}
 
 		// Do not play sound in case of bg change, participant joined, nuj/ruj, status updates
