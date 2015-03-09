@@ -6,7 +6,7 @@ import org.json.JSONObject;
 /**
  * Created by shobhitmandloi on 15/01/15.
  */
-public class PlatformWebMessageMetadata
+public class WebMetadata
 {
 	private String notifText = "";
 
@@ -19,7 +19,9 @@ public class PlatformWebMessageMetadata
 	private String appName;
 
 	private String layoutId;
-	
+
+	private boolean longPressDisabled;
+
 	private static final String PUSH_SILENT= "silent";
 	
 
@@ -72,19 +74,26 @@ public class PlatformWebMessageMetadata
 
 	public void setHelperData(JSONObject helperData)
 	{
-		this.helperData = helperData;
+		if (null != helperData)
+		{
+			this.helperData = helperData;
+		}
+		else
+		{
+			this.helperData = new JSONObject();
+		}
 	}
 
 	private JSONObject json;
 
 	private String mPush;
 
-	public PlatformWebMessageMetadata(String jsonString) throws JSONException
+	public WebMetadata(String jsonString) throws JSONException
 	{
 		this(new JSONObject(jsonString));
 	}
 
-	public PlatformWebMessageMetadata(JSONObject metadata)
+	public WebMetadata(JSONObject metadata)
 	{
 		this.json = metadata;
 		if (metadata.has(HikePlatformConstants.CARD_OBJECT))
@@ -126,6 +135,32 @@ public class PlatformWebMessageMetadata
 		{
 			cardobj = new JSONObject();
 		}
+
+		if (metadata.has(HikePlatformConstants.LONG_PRESS_DISABLED))
+		{
+			if (metadata.optBoolean(HikePlatformConstants.LONG_PRESS_DISABLED))
+			{
+				setLongPressDisabled(true);
+			}
+			else
+			{
+				setLongPressDisabled(false);
+			}
+		}
+		else
+		{
+			setLongPressDisabled(false);
+		}
+	}
+
+	public boolean isLongPressDisabled()
+	{
+		return longPressDisabled;
+	}
+
+	private void setLongPressDisabled(boolean longPressDisabled)
+	{
+		this.longPressDisabled = longPressDisabled;
 	}
 
 	private void setPush(String optString)

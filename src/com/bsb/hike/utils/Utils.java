@@ -5138,7 +5138,21 @@ public class Utils
 	}
 	
 	/**
-	 * Tells if User is on Telephonic/Audio/Vedio/Voip Call
+	 * Return whether response received is valid or not.
+	 * @param response
+	 * @return <li>false if either response is null if we get "stat":"fail" in response or "stat" key is missing</li>
+	 * <li>true otherwise</li>
+	 */
+	public static boolean isResponseValid(JSONObject response)
+	{
+		if (response == null || HikeConstants.FAIL.equals(response.optString(HikeConstants.STATUS)))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	 /** Tells if User is on Telephonic/Audio/Vedio/Voip Call
 	 * @param context
 	 * @return
 	 */
@@ -5170,15 +5184,15 @@ public class Utils
 		case -1:
 			networkType = "off";
 			break;
-
+			
 		case 0:
 			networkType = "unknown";
 			break;
-
+			
 		case 1:
 			networkType = "wifi";
 			break;
-
+			
 		case 2:
 			networkType = "2g";
 			break;

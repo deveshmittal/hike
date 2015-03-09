@@ -141,7 +141,7 @@ public class HikeNotificationMsgStack implements Listener
 			{
 				if (conv.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || conv.getMessageType() == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT)
 				{
-					addMessage(conv.getMsisdn(), conv.platformWebMessageMetadata.getNotifText());
+					addMessage(conv.getMsisdn(), conv.webMetadata.getNotifText());
 					mLastInsertedConvMessage = conv;
 					forceBlockNotificationSound = conv.isSilent();
 				}

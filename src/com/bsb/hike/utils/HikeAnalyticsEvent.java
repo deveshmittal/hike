@@ -2,6 +2,9 @@ package com.bsb.hike.utils;
 
 import java.util.List;
 
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.platform.HikePlatformConstants;
+import com.bsb.hike.platform.content.PlatformContent;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -103,6 +106,26 @@ public class HikeAnalyticsEvent
 		catch (JSONException e)
 		{
 			Logger.e("HikeAnalyticsEvent", "Exception is sending analytics event for gallery selections", e);
+		}
+	}
+
+	public static void cardErrorAnalytics(PlatformContent.EventCode reason, ConvMessage convMessage)
+	{
+		JSONObject json = new JSONObject();
+		try
+		{
+			json.put(HikePlatformConstants.ERROR_CODE, reason.toString());
+			json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.BOT_ERROR);
+			json.put(AnalyticsConstants.CONTENT_ID, convMessage.getContentId());
+			HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, json);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NullPointerException e)
+		{
+			e.printStackTrace();
 		}
 	}
 

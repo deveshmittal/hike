@@ -276,6 +276,8 @@ public class HikeConstants
 	public static final String STATUS = "stat";
 
 	public static final String OK = "ok";
+	
+	public static final String FAIL = "fail";
 
 	public static final String REACHED_STICKER_END = "st";
 
@@ -2283,4 +2285,8 @@ public class HikeConstants
 	public static final String ERROR_MESSAGE = "em";
 	
 	public static final String EXCEPTION_MESSAGE = "exm";
+	
+	public static final String REARRANGE_CHAT = "rearrange_chat";
+	
+	public static final String CONTENT_ID = "content_id";
 }
