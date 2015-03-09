@@ -6,10 +6,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.Locale;
@@ -60,7 +58,6 @@ import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient.ConnectionMethods;
 import com.bsb.hike.voip.VoIPConstants.CallQuality;
 import com.bsb.hike.voip.VoIPDataPacket.PacketType;
@@ -212,9 +209,8 @@ public class VoIPService extends Service {
 		minBufSizePlayback = AudioTrack.getMinBufferSize(playbackSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		minBufSizeRecording = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		
-		// Disable AEC on <= 2.3 devices
-		if (!Utils.isHoneycombOrHigher()) {
-			Logger.w(VoIPConstants.TAG, "Disabling AEC because device is below API 11.");
+		if (!VoIPUtils.useAEC(getApplicationContext())) {
+			Logger.w(VoIPConstants.TAG, "AEC disabled.");
 			aecEnabled = false;
 		}
 		
