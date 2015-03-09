@@ -12,11 +12,11 @@ import com.bsb.hike.R;
 import com.bsb.hike.photos.HikePhotosUtils;
 
 
-/**
- * @author akhiltripathi
- *	
+/**	
  * Custom View for the doodle thumbnails
  * 
+ * @author akhiltripathi
+ *
  */
 public class DoodleEffectItemLinearLayout extends EffectItemLinearLayout
 {

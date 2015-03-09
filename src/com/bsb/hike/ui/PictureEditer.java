@@ -92,7 +92,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		editView = (PhotosEditerFrameLayoutView) findViewById(R.id.editer);
 		editView.loadImageFromFile(filename);
 		editView.setOnDoodlingStartListener(clickHandler);
-		
+
 		FragmentPagerAdapter adapter = new PhotoEditViewPagerAdapter(getSupportFragmentManager(), clickHandler);
 
 		pager = (ViewPager) findViewById(R.id.pager);
@@ -231,12 +231,11 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				FilterEffectItemLinearLayout prev = HikePhotosUtils.FilterTools.getCurrentFilterItem();
 				FilterEffectItemLinearLayout me = (FilterEffectItemLinearLayout) v;
 				editView.applyFilter(me.getFilter());
-				me.select();
 				if (prev != null && prev.getFilter() != me.getFilter())
 				{
 					prev.unSelect();
 				}
-
+				me.select();
 			}
 
 			else if (v.getClass() == DoodleEffectItemLinearLayout.class)
@@ -246,11 +245,11 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				editView.setBrushColor(me.getBrushColor());
 				doodlePreview.setBrushColor(me.getBrushColor());
 				doodlePreview.refresh();
-				me.select();
 				if (prev != null && prev.getBrushColor() != me.getBrushColor())
 				{
 					prev.unSelect();
 				}
+				me.select();
 
 			}
 			else
@@ -381,7 +380,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 					}
 
 					editView.disable();
-					
+
 					// Change fragment
 					getSupportFragmentManager().beginTransaction()
 							.setCustomAnimations(R.anim.photo_option_in, R.anim.photo_option_out, R.anim.photo_option_in, R.anim.photo_option_out)

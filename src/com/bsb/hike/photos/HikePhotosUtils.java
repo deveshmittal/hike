@@ -35,9 +35,10 @@ import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
 //public static int[] BasicMenuIcons={R.drawable.effects_effect,R.drawable.effects_color,R.drawable.effects_frame,R.drawable.effects_text,R.drawable.effects_options};
 
 /**
- * @author akhiltripathi
+ * Utility class for picture editing.
  * 
- *         Utility class for picture editing.
+ * @author akhiltripathi
+ *        
  */
 
 public class HikePhotosUtils
@@ -55,14 +56,14 @@ public class HikePhotosUtils
 
 	0xff16efc4, 0xffffffff, 0xff2ab0fc };
 
-	// { 0xFFFF4040, 0xFFA8FA72, 0xFF72A8FA, 0xFFFA72A8, 0xFFFFFFFF, 0xFFECFA72,
-	// 0xFFF9B074, 0xFF5A0949, 0xFF000000 };
 
 	/**
+	 * 
 	 * Util method which converts the dp value into float(pixel value) based on the given context resources
 	 * 
 	 * @param context
 	 *            : Context of the application dps : Value in DP
+	 * 
 	 * @return value in pixel
 	 */
 	public static int dpToPx(Context context, int dps)
@@ -80,11 +81,11 @@ public class HikePhotosUtils
 	public static class FilterTools
 	{
 
-		private static FilterType selectedFilter = FilterType.AMARO;
+		private static FilterType selectedFilter ;
 
 		private static FilterEffectItemLinearLayout prevFilter;
 		
-		private static int selectedColor = 0xFF000000;
+		private static int selectedColor ;
 
 		private static DoodleEffectItemLinearLayout prevColor;
 

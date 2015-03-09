@@ -23,7 +23,9 @@ import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
 import com.bsb.hike.utils.Utils;
 
 /**
- * @author akhiltripathi Custom View extends FrameLayout Packs all the editing layers <filter layer,vignette layer ,doodle layer> into a single view ,in same z-order
+ * Custom View extends FrameLayout Packs all the editing layers <filter layer,vignette layer ,doodle layer> into a single view ,in same z-order
+ *
+ *  @author akhiltripathi
  * 
  */
 public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilterAppliedListener
@@ -134,6 +136,8 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		effectLayer.handleImage(bmp, false);
 	}
 
+	
+	
 	public void enableDoodling()
 	{
 		enableDoodling = true;
@@ -205,15 +209,11 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		{
 			File myDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 			myDir.mkdir();
-			String fname = Utils.getOriginalFile(mFileType, mOriginalName);
+			String fname = Utils.getOriginalFile(mFileType, null);
 			file = new File(myDir, fname);
 		}
 
-		if (file.exists())
-		{
-			file.delete();
-		}
-
+		
 		FileOutputStream out = null;
 		try
 		{

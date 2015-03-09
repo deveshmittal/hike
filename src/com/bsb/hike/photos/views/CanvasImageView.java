@@ -19,16 +19,29 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.photos.HikePhotosUtils;
 
 /**
+<<<<<<< HEAD
  * @author akhiltripathi
  * 
  *         Custom View Class extends ImageView in android
+=======
+>>>>>>> cd4116654e87bb58160d5a6b3065e3a600d78372
  * 
- *         An object of CanvasImageView represents a layer on the PhotosEditerView
+ * Custom View Class extends ImageView in android
  * 
- *         The ImageView provides an Canvas for drawing doodles or writing text.
+ * An object of CanvasImageView represents a layer on the PhotosEditerView
  * 
+ * The ImageView provides an Canvas for drawing doodles or writing text.
+ * 
+<<<<<<< HEAD
  *         In Implementation one object handles text and another handles doodling
  * 
+=======
+ * In Implementation one object handles text and another handles doodling
+ *
+ * @author akhiltripathi
+ *
+ *
+>>>>>>> cd4116654e87bb58160d5a6b3065e3a600d78372
  */
 public class CanvasImageView extends ImageView implements OnTouchListener
 {
@@ -127,7 +140,7 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 				canvas.drawPath(p.getPath(), mPaint);
 			}
 		}
-		if (mPath != null)
+		if  ((mX != sX && mY != sY) && mPath != null)
 		{
 			mPaint.setColor(color);
 			mPaint.setStrokeWidth(brushWidth);
@@ -199,14 +212,14 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 		}
 	}
 
-	private float mX, mY;
+	private float sX, sY, mX, mY;
 
 	private void touchStart(float x, float y)
 	{
 		mPath.reset();
 		mPath.moveTo(x, y);
-		mX = x;
-		mY = y;
+		mX = sX = x;
+		mY = sY = y;
 	}
 
 	private void touchMove(float x, float y)
@@ -223,13 +236,20 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 
 	private void touchUp()
 	{
-		mPath.lineTo(mX, mY);
-		// commit the path to our offscreen
-		if (paths.size() == 0 && mDoodleStateChangeListener != null)
-			mDoodleStateChangeListener.onDoodleStateChanged(false);
-		paths.add(new PathPoints(mPath, color, brushWidth, false));
+		if (mX != sX && mY != sY)
+		{
+			mPath.lineTo(mX, mY);
+			// commit the path to our offscreen
+			if (paths.size() == 0 && mDoodleStateChangeListener != null)
+				mDoodleStateChangeListener.onDoodleStateChanged(false);
+			paths.add(new PathPoints(mPath, color, brushWidth, false));
 
-		mPath = new Path();
+			mPath = new Path();
+		}
+		else
+		{
+			mPath.reset();
+		}
 
 	}
 

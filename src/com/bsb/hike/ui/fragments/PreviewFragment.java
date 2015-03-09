@@ -15,6 +15,7 @@ import android.widget.RelativeLayout;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterList;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
@@ -31,6 +32,8 @@ public final class PreviewFragment extends Fragment
 	private EditorClickListener handler;
 
 	private Bitmap mOriginalBitmap;
+
+	private ImageAdapter mAdapter;
 
 	public PreviewFragment(MenuType type, EditorClickListener adapter, Bitmap bitmap)
 	{
@@ -56,7 +59,8 @@ public final class PreviewFragment extends Fragment
 		TwoWayGridView gridView = (TwoWayGridView) layout.findViewById(R.id.HorizontalGridView);
 		gridView.setColumnWidth(GridView.AUTO_FIT);
 		gridView.setRowHeight(GridView.AUTO_FIT);
-		gridView.setAdapter(new ImageAdapter(getActivity(), myType, handler));
+		mAdapter = new ImageAdapter(getActivity(), myType, handler);
+		gridView.setAdapter(mAdapter);
 
 		ViewStub adjuster = (ViewStub) layout.findViewById(R.id.sizeBarStub);
 		switch (myType)
@@ -70,7 +74,7 @@ public final class PreviewFragment extends Fragment
 			DoodleEffectItemLinearLayout inflated = (DoodleEffectItemLinearLayout) stub.inflate();
 			inflated.setRingColor(HikeConstants.HikePhotos.DOODLE_SELECTED_RING_COLOR);
 			inflated.setBrushColor(HikePhotosUtils.DoodleColors[0]);
-			inflated.setBrushWidth(HikeConstants.HikePhotos.PREVIEW_BRUSH_WIDTH);
+			inflated.setBrushWidth(HikePhotosUtils.dpToPx(getActivity().getApplicationContext(),HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH));
 			inflated.refresh();
 			inflated.setPadding(0, 0, 0, 0);
 			inflated.invalidate();
@@ -90,6 +94,8 @@ public final class PreviewFragment extends Fragment
 			break;
 		}
 		layout.invalidate();
+		HikePhotosUtils.FilterTools.setSelectedColor(HikePhotosUtils.DoodleColors[0]);
+		HikePhotosUtils.FilterTools.setSelectedFilter(FilterList.getHikeEffects().filters.get(0));
 		return layout;
 	}
 
