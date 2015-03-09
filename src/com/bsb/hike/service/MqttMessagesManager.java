@@ -706,21 +706,24 @@ public class MqttMessagesManager
 		}
 		Logger.d(getClass().getSimpleName(), "Delivery report received for msgid : " + serverID + "	;	REPORT : DELIVERED");
 
-		saveDeliveryReport(serverID, msisdn, false);
-
-	}
-	
-	private void saveDeliveryReport(long serverID, String msisdn, boolean recursiveCall) throws JSONException
-	{
-		if(!recursiveCall)
+		Map<String, ArrayList<Long>> map = convDb.getMsisdnMapForServerId(serverID, msisdn);
+		if(map != null && !map.isEmpty())
 		{
-			String serverIdMsisdn = convDb.getMsisdnForMsgId(serverID, msisdn);
-			if (serverIdMsisdn != null && !serverIdMsisdn.equals(msisdn))
+			for (String chatMsisdn : map.keySet())
 			{
-				saveDeliveryReport(serverID, serverIdMsisdn, true);
+				ArrayList<Long> values = map.get(chatMsisdn);
+				if(values != null && !values.isEmpty())
+				{
+					long msgId = values.get(0); //max size this list will be of 1 only
+					saveDeliveryReport(msgId, chatMsisdn);
+				}
 			}
 		}
-		int rowsUpdated = updateDB(serverID, ConvMessage.State.SENT_DELIVERED, msisdn);
+	}
+	
+	private void saveDeliveryReport(long msgID, String msisdn)
+	{
+		int rowsUpdated = updateDB(msgID, ConvMessage.State.SENT_DELIVERED, msisdn);
 
 		if (rowsUpdated == 0)
 		{
@@ -728,7 +731,7 @@ public class MqttMessagesManager
 			return;
 		}
 
-		Pair<String, Long> pair = new Pair<String, Long>(msisdn, serverID);
+		Pair<String, Long> pair = new Pair<String, Long>(msisdn, msgID);
 
 		this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, pair);
 
@@ -789,7 +792,7 @@ public class MqttMessagesManager
 		}
 		
 		String id = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
-		String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.FROM) : "";
+		String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.FROM) : id;
 		
 		ArrayList<Long> serverIdsArrayList = new ArrayList<Long>(serverIds.length());
 		
@@ -798,40 +801,35 @@ public class MqttMessagesManager
 			serverIdsArrayList.add(serverIds.optLong(i));
 		}
 		
-		saveMessageRead(id, serverIdsArrayList, participantMsisdn, false);
+		Map<String, ArrayList<Long>> map = convDb.getMsisdnMapForServerIds(serverIdsArrayList, id);
+		if(map != null && !map.isEmpty())
+		{
+			for (String chatMsisdn : map.keySet())
+			{
+				ArrayList<Long> values = map.get(chatMsisdn);
+				saveMessageRead(chatMsisdn, values, participantMsisdn);
+			}
+		}
 	}
 	
-	private void saveMessageRead(String msisdn, ArrayList<Long> serverIds, String participantMsisdn, boolean recursiveCall) 
+	private void saveMessageRead(String msisdn, ArrayList<Long> msgIds, String participantMsisdn) 
 	{
-		if (serverIds == null || serverIds.isEmpty())
+		if (msgIds == null || msgIds.isEmpty())
 		{
 			Logger.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
 			return;
 		}
 		
-		if(!recursiveCall)
+		long[] msgIdsLongArray= new long[msgIds.size()];
+		for (int i = 0; i < msgIds.size(); i++ )
 		{
-			serverIds  = convDb.getCurrentUnreadMessageIdsForMsisdn(msisdn);
-			Map<String, ArrayList<Long>> map = convDb.getMsisdnMapForMsgIds(serverIds, msisdn);
-			if (!map.isEmpty())
-			{
-				for (String msisdnKey : map.keySet())
-				{
-					saveMessageRead(msisdnKey, map.get(msisdnKey), msisdn, true);
-				}
-			}
-		}
-
-		long[] serverIdsLongArray= new long[serverIds.size()];
-		for (int i = 0; i < serverIds.size(); i++ )
-		{
-			serverIdsLongArray[i] = serverIds.get(i);
+			msgIdsLongArray[i] = msgIds.get(i);
 		}
 		
 		if (!Utils.isGroupConversation(msisdn))
 		{
-			convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, serverIds);
-			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, serverIdsLongArray);
+			convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, msgIds);
+			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, msgIdsLongArray);
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
 		}
 		else
@@ -841,7 +839,7 @@ public class MqttMessagesManager
 				return ;
 			}
 
-			long maxMsgId = convDb.setReadByForGroup(msisdn, serverIds, participantMsisdn);
+			long maxMsgId = convDb.setReadByForGroup(msisdn, msgIds, participantMsisdn);
 
 			if (maxMsgId > 0)
 			{

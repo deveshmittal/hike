@@ -650,7 +650,7 @@ public class DbConversationListener implements Listener
 
 	public void sendPubSubForConvScreenBroadcastMessage(ConvMessage convMessage, ArrayList<ContactInfo> recipient)
 	{
-		long msgId = convMessage.getMsgID();
+		long firstMsgId = convMessage.getMsgID() + 1;
 		int totalRecipient = recipient.size();
 		List<Pair<ContactInfo, ConvMessage>> allPairs = new ArrayList<Pair<ContactInfo,ConvMessage>>(totalRecipient);
 		long timestamp = System.currentTimeMillis()/1000;
@@ -666,7 +666,7 @@ public class DbConversationListener implements Listener
 				//multi-forward case... in braodcast case we donot need to update timestamp
 				message.setTimestamp(timestamp++);
 			}
-			message.setMsgID(msgId+i);
+			message.setMsgID(firstMsgId+i);
 			ContactInfo contactInfo = recipient.get(i);
 			message.setMsisdn(contactInfo.getMsisdn());
 			Pair<ContactInfo, ConvMessage> pair = new Pair<ContactInfo, ConvMessage>(contactInfo, message);

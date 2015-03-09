@@ -6546,45 +6546,56 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return (updated);
 	}
 
-	public String getMsisdnForMsgId(Long msgId, String excludingMsisdn)
+	public Map<String, ArrayList<Long>> getMsisdnMapForServerId(Long serverId, String excludingMsisdn)
 	{
 		ArrayList<Long> al = new ArrayList<Long>();
-		al.add(msgId);
-		Map<String, ArrayList<Long>> map = getMsisdnMapForMsgIds(al, excludingMsisdn);
+		al.add(serverId);
+		Map<String, ArrayList<Long>> map = getMsisdnMapForServerIds(al, excludingMsisdn);
 		
-		String msisdn = null;
-		if(!map.isEmpty())
-		{
-			msisdn = map.keySet().iterator().next();
-		}
-		return msisdn;
+		return map;
 	}
 	
 	/*
 	 * return a map from msisdn to list of server ids. for all given msgIds entries in messages table.
 	 */
-	public Map<String, ArrayList<Long>> getMsisdnMapForMsgIds(ArrayList<Long> msgIds, String excludingMsisdn)
+	public Map<String, ArrayList<Long>> getMsisdnMapForServerIds(ArrayList<Long> serverIds, String userMsisdn)
 	{
 		Cursor c = null;
 		Map<String, ArrayList<Long>> map = new HashMap<String, ArrayList<Long>>();
 		
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "!= ? AND " + DBConstants.MESSAGE_ID + " IN "
-					+ Utils.valuesToCommaSepratedString(msgIds), new String[] { String.valueOf(excludingMsisdn) }, null, null, null);
+			/*
+			 * quering for all rows where serverIds are in set of given serverIds
+			 * 1. msgid = serverid (normal msg case OR msg of the broadcast conversation in case of broadcast)
+			 * 2. OR msisdn = givenMsisdn
+			 */
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE_ID, DBConstants.SERVER_ID },
+					DBConstants.SERVER_ID + " IN " + Utils.valuesToCommaSepratedString(serverIds), null, null, null, null);
 			final int msisdnColumnIdIdx = c.getColumnIndex(DBConstants.MSISDN);
 			final int messageIdColumnIdIdx = c.getColumnIndex(DBConstants.MESSAGE_ID);
+			final int serverIdColumnIdIdx = c.getColumnIndex(DBConstants.SERVER_ID);
 			while (c.moveToNext())
 			{
 				String msisdnIdColumnValue = c.getString(msisdnColumnIdIdx);
-				Long messageIdColumnValue = c.getLong(messageIdColumnIdIdx);
-				ArrayList<Long> msgIdArray = map.get(msisdnIdColumnValue);
-				if(msgIdArray == null)
+				long messageIdColumnValue = c.getLong(messageIdColumnIdIdx);
+				long serverIdColumnValue = c.getLong(serverIdColumnIdIdx);
+				
+				/*
+				 * selecting only items from result set in which either
+				 * 1. msgid = serverid (normal msg case OR msg of the broadcast conversation in case of broadcast)
+				 * 2. OR msisdn = givenMsisdn
+				 */
+				if(messageIdColumnValue == serverIdColumnValue || msisdnIdColumnValue.equals(userMsisdn) )
 				{
-					msgIdArray = new ArrayList<Long>();
-					map.put(msisdnIdColumnValue, msgIdArray);
+					ArrayList<Long> msgIdArray = map.get(msisdnIdColumnValue);
+					if (msgIdArray == null)
+					{
+						msgIdArray = new ArrayList<Long>();
+						map.put(msisdnIdColumnValue, msgIdArray);
+					}
+					msgIdArray.add(messageIdColumnValue);
 				}
-				msgIdArray.add(messageIdColumnValue);
 			}
 		}
 		finally
