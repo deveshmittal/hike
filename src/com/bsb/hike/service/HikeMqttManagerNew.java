@@ -1,6 +1,7 @@
 package com.bsb.hike.service;
 
 import java.net.SocketException;
+
 import java.net.UnknownHostException;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.HikePacket;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequestConstants;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
@@ -1411,6 +1413,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				}
 			}
 			Utils.setupUri(context); // TODO : this should be moved out from here to some other place
+			HttpRequestConstants.toggleSSL();
 		}
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
 		{
