@@ -6,6 +6,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.modules.httpmgr.RequestToken;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
@@ -24,8 +25,6 @@ public class PlatformZipDownloader
 
 	private boolean isTemplatingEnabled;
 
-	private File zipFile;
-
 	/**
 	 * Instantiates a new platform template download task.
 	 *
@@ -37,7 +36,7 @@ public class PlatformZipDownloader
 		// Get ID from content and call http
 		mRequest = argRequest;
 		this.isTemplatingEnabled = isTemplatingEnabled;
-		zipFile = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME, mRequest.getContentData().getId() + ".zip");
+
 	}
 
 	/**
@@ -46,22 +45,24 @@ public class PlatformZipDownloader
 	 */
 	public void downloadAndUnzip()
 	{
-		if (zipFile.exists())
-		{
-			return;
-		}
 		if ((Utils.getExternalStorageState() == Utils.ExternalStorageState.NONE))
 		{
 			return;
 		}
 
+//		PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
+//				+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
 		// Create temp folder
 		File tempFolder = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME);
 
 		tempFolder.mkdirs();
+		final File zipFile = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME, mRequest.getContentData().getId() + ".zip");
 
-		PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
-				+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
+		if (zipFile.exists())
+		{
+			return;
+		}
+
 		//Check if the zip is present in hike app package
 		AssetsZipMoveTask.AssetZipMovedCallbackCallback mCallback = new AssetsZipMoveTask.AssetZipMovedCallbackCallback()
 		{
@@ -71,11 +72,11 @@ public class PlatformZipDownloader
 			{
 				if (hasMoved)
 				{
-					unzipMicroApp();
+					unzipMicroApp(zipFile);
 				}
 				else
 				{
-					getZipFromWeb();
+					getZipFromWeb(zipFile);
 				}
 			}
 		};
@@ -87,9 +88,9 @@ public class PlatformZipDownloader
 	/**
 	 * download the zip from web using 3 retries. On success, will unzip the folder.
 	 */
-	private void getZipFromWeb()
+	private void getZipFromWeb(final File zipFile)
 	{
-		HttpRequests.platformZipDownloadRequest(mRequest.getContentData().getLayout_url(), new IRequestListener()
+		RequestToken token = HttpRequests.platformZipDownloadRequest(zipFile.getAbsolutePath(), mRequest.getContentData().getLayout_url(), new IRequestListener()
 		{
 			@Override
 			public void onRequestFailure(HttpException httpException)
@@ -98,9 +99,9 @@ public class PlatformZipDownloader
 			}
 
 			@Override
-			public void onRequestSuccess(Response result) 
+			public void onRequestSuccess(Response result)
 			{
-				unzipMicroApp();
+				unzipMicroApp(zipFile);
 			}
 
 			@Override
@@ -109,12 +110,18 @@ public class PlatformZipDownloader
 				//do nothing
 			}
 		});
+
+		if (!token.isRequestRunning())
+		{
+			token.execute();
+		}
+
 	}
 
 	/**
 	 * calling this function will unzip the microApp.
 	 */
-	private void unzipMicroApp()
+	private void unzipMicroApp(File zipFile)
 	{
 		try
 		{

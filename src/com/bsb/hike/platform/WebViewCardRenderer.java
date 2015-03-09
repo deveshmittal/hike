@@ -297,11 +297,15 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				else
 				{
 					showConnErrState(viewHolder);
+					viewHolder.loadingFailed.findViewById(R.id.loading_progress_bar).setVisibility(View.GONE);
+					viewHolder.loadingFailed.findViewById(R.id.progress_bar_image).setVisibility(View.VISIBLE);
 					view.setOnClickListener(new View.OnClickListener()
 					{
 						@Override
 						public void onClick(View v)
 						{
+							viewHolder.loadingFailed.findViewById(R.id.loading_progress_bar).setVisibility(View.VISIBLE);
+							viewHolder.loadingFailed.findViewById(R.id.progress_bar_image).setVisibility(View.GONE);
 							loadContent(position, convMessage, viewHolder, view);
 						}
 					});

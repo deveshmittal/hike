@@ -20,11 +20,12 @@ public class HttpRequests
 		return requestToken;
 	}
 
-	public static RequestToken platformZipDownloadRequest(String url, IRequestListener requestListener)
+	public static RequestToken platformZipDownloadRequest(String filePath, String url, IRequestListener requestListener)
 	{
+
 		RequestToken requestToken = new FileRequest.Builder()
 				.setUrl(url)
-				.setFile(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME)
+				.setFile(filePath)
 				.setRequestListener(requestListener)
 				.setRetryPolicy(new DefaultRetryPolicy(3, 1000, 2.0f))
 				.build();
