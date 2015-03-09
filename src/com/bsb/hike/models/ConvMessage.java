@@ -13,6 +13,7 @@ import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
@@ -415,7 +416,7 @@ public class ConvMessage
 		/**
 		 * This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.
 		 */
-//		this.shouldShowPush = obj.getJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.PUSH, true);
+		this.shouldShowPush = obj.optJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.PUSH, metadata.shouldShowPush());
 
 		this.mMessage = "";
 		this.mTimestamp = System.currentTimeMillis() / 1000;
@@ -438,18 +439,25 @@ public class ConvMessage
 			this.mMessage = context.getString(R.string.group_chat_end);
 			break;
 		case USER_JOIN:
+			String fName = null;
 			if (conversation != null)
 			{
-				String name;
 				if (conversation instanceof GroupConversation)
 				{
-					name = ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn());
+					fName = ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn());
 				}
 				else
 				{
-					name = Utils.getFirstName(conversation.getLabel());
+					fName = Utils.getFirstName(conversation.getLabel());
 				}
-				this.mMessage = String.format(context.getString(metadata.isOldUser() ? R.string.user_back_on_hike : R.string.joined_hike_new), name);
+			}
+			else
+			{
+				fName = ContactManager.getInstance().getContact(metadata.getMsisdn(), false, true).getFirstName();
+			}
+			if(fName != null)
+			{
+				this.mMessage = String.format(metadata.getJSON().getJSONObject(HikeConstants.DATA).optString(HikeConstants.UserJoinMsg.NOTIF_TEXT), fName);	
 			}
 			break;
 		case USER_OPT_IN:
@@ -953,16 +961,20 @@ public class ConvMessage
 	 */
 	public boolean isSilent()
 	{
+		
 		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && platformWebMessageMetadata != null)
 		{
 			return platformWebMessageMetadata.isSilent();
 		}
-
-		// Do not play sound in case of bg change, participant joined, nuj/ruj, status updates
+		// Do not play sound in case of bg change, status updates
 		if ((getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) || (getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
-				|| (getParticipantInfoState() == ParticipantInfoState.USER_JOIN) || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+				 || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
 		{
 			return true;
+		}
+		else if(getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
+		{
+			return metadata.isSilent();
 		}
 		else
 		{

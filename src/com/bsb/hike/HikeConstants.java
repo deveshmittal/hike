@@ -3,6 +3,7 @@ package com.bsb.hike;
 import android.net.Uri;
 import android.os.Environment;
 
+import com.bsb.hike.NUXConstants.PushTypeEnum;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 
 public class HikeConstants
@@ -2142,6 +2143,32 @@ public class HikeConstants
 		public static final String IMAGE_QUALITY_SMALL = "S";
 		
 		public static final String IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_SMALL;
+	}
+	
+	public static final class PushType
+	{
+		
+		public static final int loud = 2;
+		
+		public static final int silent = 1;
+		
+		public static final int none = 0;
+		
+	}
+	
+	public static final class UserJoinMsg
+	{
+		
+		public static final String NOTIF_TITLE = "Ttl";
+		
+		public static final String NOTIF_TEXT = "Txt";
+		
+		public static final String PUSH_SETTING = "Typ";
+		
+		public static final String PERSIST_CHAT = "Cht";
+		
+		public static final boolean defaultPersistChat = false;
+		
 	}
 
 	public static class MESSAGE_TYPE

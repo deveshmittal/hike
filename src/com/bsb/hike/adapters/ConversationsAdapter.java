@@ -906,7 +906,8 @@ public class ConversationsAdapter extends BaseAdapter
 			{
 				participantName = Utils.getFirstName(conversation.getLabel());
 			}
-			markedUp = context.getString(metadata.isOldUser() ? R.string.user_back_on_hike : R.string.joined_hike_new, participantName);
+			
+			markedUp = String.format(message.getMessage(), participantName);
 
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT || message.getParticipantInfoState() == ParticipantInfoState.GROUP_END)

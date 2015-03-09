@@ -2080,19 +2080,24 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			else if (infoState == ParticipantInfoState.USER_JOIN || infoState == ParticipantInfoState.USER_OPT_IN)
 			{
 				String name;
-				String message;
+				String message = "";
 				if (conversation instanceof GroupConversation)
 				{
 					String participantMsisdn = metadata.getMsisdn();
 					name = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
-					message = context.getString(infoState == ParticipantInfoState.USER_JOIN ? (metadata.isOldUser() ? R.string.user_back_on_hike : R.string.joined_hike_new)
-							: R.string.joined_conversation, name);
+					if(infoState == ParticipantInfoState.USER_JOIN)
+						message = String.format(convMessage.getMessage(),name);
+					else
+						message = context.getString(R.string.joined_conversation, name);
+					
 				}
 				else
 				{
 					name = Utils.getFirstName(conversation.getLabel());
-					message = context.getString(infoState == ParticipantInfoState.USER_JOIN ? (metadata.isOldUser() ? R.string.user_back_on_hike : R.string.joined_hike_new)
-							: R.string.optin_one_to_one, name);
+					if(infoState == ParticipantInfoState.USER_JOIN)
+						message = String.format(convMessage.getMessage(),name);
+					else
+						message = context.getString(R.string.optin_one_to_one, name);
 				}
 
 				int icRes;
