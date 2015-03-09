@@ -160,7 +160,7 @@ public class CameraFragment extends SherlockFragment
 						{
 							// make a new bitmap from your file
 							outStream = new FileOutputStream(file);
-							bimp.compress(Bitmap.CompressFormat.JPEG, 90, outStream);
+							bimp.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
 							outStream.flush();
 							outStream.close();
 						}

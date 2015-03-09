@@ -11,6 +11,7 @@ import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.view.OrientationEventListener;
@@ -62,6 +63,8 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 	private Interpolator overshootInterp = new OvershootInterpolator();
 
 	private OrientationEventListener orientationListener;
+
+	private Handler autoFocusHandler = new Handler(Looper.getMainLooper());
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -194,6 +197,16 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(true);
 
 		HikeCameraActivity.this.findViewById(R.id.tempiv).setVisibility(View.GONE);
+
+		autoFocusHandler.postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				cameraFragment.autoFocus();
+				autoFocusHandler.postDelayed(this, 6000);
+			}
+		}, 1000);
 	}
 
 	@Override
@@ -202,6 +215,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
 		super.onPause();
 		orientationListener.disable();
+		autoFocusHandler.removeCallbacksAndMessages(null);
 	}
 
 	@Override
@@ -213,6 +227,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		{
 		case R.id.btntakepic:
 			HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(false);
+			cameraFragment.cancelAutoFocus();
 			cameraFragment.takePicture();
 			final Bitmap bitmap = ((TextureView) cameraFragment.getCameraView().previewStrategy.getWidget()).getBitmap();
 			final View snapOverlay = findViewById(R.id.snapOverlay);
