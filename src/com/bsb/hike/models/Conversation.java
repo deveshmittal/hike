@@ -79,6 +79,8 @@ public class Conversation implements Comparable<Conversation>
 	
 	private byte isMuted = -1;
 
+	private long cTimeStamp;
+	
 	public String getLastPin()
 	{
 		return lastPin;
@@ -120,16 +122,17 @@ public class Conversation implements Comparable<Conversation>
 		return TextUtils.isEmpty(contactName) ? msisdn : contactName;
 	}
 
-	public Conversation(String msisdn)
+	public Conversation(String msisdn, long timeStamp)
 	{
 		this(msisdn, null, false);
+		setTimestamp(timeStamp);
 	}
 
 	public Conversation(String msisdn, String contactName, boolean onhike)
 	{
 		this(msisdn, contactName, onhike, false);
 	}
-
+	
 	public Conversation(String msisdn, String contactName, boolean onhike, boolean isStealth)
 	{
 		this.msisdn = msisdn;
@@ -138,6 +141,17 @@ public class Conversation implements Comparable<Conversation>
 		this.isStealth = isStealth;
 		this.messages = new ArrayList<ConvMessage>();
 	}
+
+	public long getTimestamp()
+	{
+		return cTimeStamp;
+	}
+	
+	public void setTimestamp(long timeStamp)
+	{
+		this.cTimeStamp = timeStamp;
+	}
+	
 
 	public boolean isOnhike()
 	{
@@ -148,11 +162,16 @@ public class Conversation implements Comparable<Conversation>
 	public void setMessages(List<ConvMessage> messages)
 	{
 		this.messages = messages;
+		if (messages!=null && !messages.isEmpty())
+		{
+			setTimestamp(messages.get(messages.size()-1).getTimestamp());
+		}
 	}
 
 	public void addMessage(ConvMessage message)
 	{
 		this.messages.add(message);
+		setTimestamp(message.getTimestamp());
 	}
 
 	/**
@@ -165,6 +184,7 @@ public class Conversation implements Comparable<Conversation>
 		this.messages.clear();
 		
 		this.messages.add(message);
+		setTimestamp(message.getTimestamp());
 	}
 	
 	public int getUnreadCount()
@@ -185,13 +205,13 @@ public class Conversation implements Comparable<Conversation>
 			return 0;
 		}
 
-		long ts = messages.isEmpty() ? 0 : messages.get(messages.size() - 1).getTimestamp();
+		long ts = getTimestamp();
 		if (rhs == null)
 		{
 			return 1;
 		}
 
-		long rhsTs = rhs.messages.isEmpty() ? 0 : rhs.messages.get(rhs.messages.size() - 1).getTimestamp();
+		long rhsTs = rhs.getTimestamp();
 
 		if (rhsTs != ts)
 		{

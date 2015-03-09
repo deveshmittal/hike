@@ -2749,7 +2749,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				}
 				else
 				{
-					conv = new Conversation(msisdn);
+					conv = new Conversation(msisdn, timestamp);
 					ContactInfo contact = ContactManager.getInstance().getContact(conv.getMsisdn());
 					ContactManager.getInstance().updateContactRecency(msisdn, timestamp, false);
 					if (null == contact)
@@ -6448,14 +6448,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 	
-	public void updateTimestamp(String msisdn, long timestamp)
+	public boolean updateTimestamp(String msisdn, long timestamp)
 	{
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.TIMESTAMP, timestamp);
-
-		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
+		int rowsUpdated = mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
+		boolean updated = (rowsUpdated != 0);
+		return (updated);
 	}
-	
 	public boolean isContentMessageExist(String msisdn,String contentId)
 	{
 		String where = DBConstants.CONV_ID + "=? and" + DBConstants.HIKE_CONTENT.CONTENT_ID + "=?";

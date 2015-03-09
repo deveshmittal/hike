@@ -197,7 +197,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
-			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.CONV_UNREAD_COUNT_MODIFIED};
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.CONV_UNREAD_COUNT_MODIFIED,
+			HikePubSub.CONVERSATION_TS_UPDATED};
 
 	private ConversationsAdapter mAdapter;
 
@@ -1695,16 +1696,44 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		mAdapter.notifyDataSetChanged();
 	}
 
+	public void updateTimestampAndSortConversations(Object object)
+	{
+		Logger.d("ListeningTSPubsub", "listening");
+		Pair<String, Long> p = (Pair<String, Long>) object;
+		String msisdn = p.first;
+		Long ts = p.second;
+		
+		final Conversation conv = mConversationsByMSISDN.get(msisdn);
+		if (conv!= null)
+		{	
+			if (ts>=0)
+			{
+				conv.setTimestamp(ts);
+			}
+			
+			Collections.sort(displayedConversations,
+					mConversationsComparator);
+				getActivity().runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+							notifyDataSetChanged();
+					}
+				});
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
-
 		if (!isAdded())
 		{
 			return;
 		}
 		Logger.d(getClass().getSimpleName(), "Event received: " + type);
+		
 		if ((HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)) )
 		{
 			Logger.d(getClass().getSimpleName(), "New msg event sent or received.");
@@ -1723,7 +1752,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				// messages
 				return;
 			}
-
 			if (Utils.shouldIncrementCounter(message))
 			{
 				conv.setUnreadCount(conv.getUnreadCount() + 1);
@@ -2562,7 +2590,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				((GroupConversation) conv).setGroupAlive(false);
 			}
-		}else if(HikePubSub.MULTI_MESSAGE_DB_INSERTED.equals(type)){
+		}
+		else if(HikePubSub.MULTI_MESSAGE_DB_INSERTED.equals(type)){
 			if (!isAdded())
 			{
 				return;
@@ -2649,6 +2678,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					notifyDataSetChanged();
 				}
 			});
+		}
+		else if(HikePubSub.CONVERSATION_TS_UPDATED.equals(type))
+		{
+			updateTimestampAndSortConversations(object);
 		}
 	}
 	
