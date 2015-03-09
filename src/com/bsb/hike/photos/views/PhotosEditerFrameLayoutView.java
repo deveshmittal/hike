@@ -120,23 +120,11 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 	 * @param FilePath
 	 *            : absolute address of the file to be handled by the editor object
 	 */
-	@SuppressWarnings("deprecation")
 	public void loadImageFromFile(String FilePath)
 	{
 		imageOriginal = BitmapFactory.decodeFile(FilePath);
-		DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
-		int width = metrics.widthPixels;
-		if (width < imageOriginal.getWidth())
-		{
-			imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
-			effectLayer.handleImage(imageScaled, true);
-		}
-		else
-		{
-			effectLayer.handleImage(imageOriginal, false);
-			imageScaled = imageOriginal;
-		}
-
+		effectLayer.handleImage(imageOriginal, false);
+		imageScaled = imageOriginal;
 	}
 
 	public void loadImageFromBitmap(Bitmap bmp)

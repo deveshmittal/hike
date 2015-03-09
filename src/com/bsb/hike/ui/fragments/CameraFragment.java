@@ -7,6 +7,7 @@ import java.io.OutputStream;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -190,7 +191,7 @@ public class CameraFragment extends SherlockFragment
 		}
 	};
 
-	private String flashMode;
+	private String flashMode = Camera.Parameters.FLASH_MODE_AUTO;
 
 	/**
 	 * Call this (or override getHost()) to supply the CameraHost used for most of the detailed interaction with the camera.
