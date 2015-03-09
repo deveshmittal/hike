@@ -112,6 +112,7 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
+import com.bsb.hike.view.CustomSendMessageTextView;
 import com.bsb.hike.view.HoloCircularProgress;
 
 
@@ -1866,7 +1867,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			dayHolder = textHolder;
 			setSenderDetails(convMessage, position, textHolder, false);
-
+			
+			if (viewType == ViewType.SEND_HIKE)
+			{
+				if (convMessage.isBroadcastMessage() && !convMessage.isBroadcastConversation())
+				{
+					CustomSendMessageTextView tv = (CustomSendMessageTextView) textHolder.text;
+					tv.setBroadcastLength();
+				}
+				else
+				{
+					CustomSendMessageTextView tv = (CustomSendMessageTextView) textHolder.text;
+					tv.setDefaultLength();
+				}
+			}
+			
 			CharSequence markedUp = convMessage.getMessage();
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			markedUp = smileyParser.addSmileySpans(markedUp, false);
