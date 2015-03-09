@@ -62,7 +62,6 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 		else
 		{
 			findViewById(R.id.selectionBar).setBackgroundColor(getResources().getColor(R.color.photos_pager_background));
-
 		}
 
 	}

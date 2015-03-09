@@ -18,7 +18,7 @@ import com.bsb.hike.photos.HikePhotosUtils;
 
 /**
  * @author akhiltripathi
- *
+ * 
  *         Custom View Class extends ImageView in android
  * 
  *         An object of CanvasImageView represents a layer on the PhotosEditerView
@@ -26,7 +26,7 @@ import com.bsb.hike.photos.HikePhotosUtils;
  *         The ImageView provides an Canvas for drawing doodles or writing text.
  * 
  *         In Implementation one object handles text and another handles doodling
- *
+ * 
  */
 public class CanvasImageView extends ImageView implements OnTouchListener
 {
@@ -46,7 +46,7 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 	private int color, brushWidth;
 
 	private boolean drawEnabled;
-	
+
 	private OnDoodleStateChangeListener mDoodleStateChangeListener;
 
 	public CanvasImageView(Context context)
@@ -72,10 +72,10 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 		brushWidth = width;
 
 	}
-	
+
 	public void setOnDoodlingStartListener(OnDoodleStateChangeListener listener)
 	{
-		this.mDoodleStateChangeListener=listener;
+		this.mDoodleStateChangeListener = listener;
 	}
 
 	private void init()
@@ -90,16 +90,16 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 		this.mPaint.setStyle(Paint.Style.STROKE);
 		this.mPaint.setStrokeJoin(Paint.Join.ROUND);
 		this.mPaint.setStrokeCap(Paint.Cap.ROUND);
-		this.brushWidth=HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH);
-		this.color=HikePhotosUtils.DoodleColors[0];
+		this.brushWidth = HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH);
+		this.color = HikePhotosUtils.DoodleColors[0];
 		this.mPath = new Path();
-		this.drawEnabled=false;
+		this.drawEnabled = false;
 
 	}
 
 	public void getMeasure(Bitmap source)
 	{
-		if (mBitmap == null && source!=null)
+		if (mBitmap == null && source != null)
 		{
 			mBitmap = Bitmap.createBitmap(source.getWidth(), source.getHeight(), source.getConfig());
 			mCanvas = new Canvas(mBitmap);
@@ -110,26 +110,25 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 	@Override
 	protected void onDraw(Canvas canvas)
 	{
-			for (PathPoints p : paths)
+		for (PathPoints p : paths)
+		{
+			mPaint.setColor(p.getColor());
+			mPaint.setStrokeWidth(p.getWidth());
+			if (p.isTextToDraw())
 			{
-				mPaint.setColor(p.getColor());
-				mPaint.setStrokeWidth(p.getWidth());
-				if (p.isTextToDraw())
-				{
-					canvas.drawText(p.textToDraw, p.x, p.y, mPaint);
-				}
-				else
-				{
-					canvas.drawPath(p.getPath(), mPaint);
-				}
+				canvas.drawText(p.textToDraw, p.x, p.y, mPaint);
 			}
-			if (mPath != null)
+			else
 			{
-				mPaint.setColor(color);
-				mPaint.setStrokeWidth(brushWidth);
-				canvas.drawPath(mPath, mPaint);
+				canvas.drawPath(p.getPath(), mPaint);
 			}
-		
+		}
+		if (mPath != null)
+		{
+			mPaint.setColor(color);
+			mPaint.setStrokeWidth(brushWidth);
+			canvas.drawPath(mPath, mPaint);
+		}
 
 	}
 
@@ -166,7 +165,7 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 
 		}
 	}
-	
+
 	public Bitmap getBitmap()
 	{
 		return mBitmap;
@@ -186,6 +185,14 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 	public void setDrawEnabled(boolean drawEnabled)
 	{
 		this.drawEnabled = drawEnabled;
+		if (drawEnabled && paths.size() > 0)
+		{
+			mDoodleStateChangeListener.onDoodleStateChanged(false);
+		}
+		else
+		{
+			mDoodleStateChangeListener.onDoodleStateChanged(true);
+		}
 	}
 
 	private float mX, mY;
@@ -214,7 +221,7 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 	{
 		mPath.lineTo(mX, mY);
 		// commit the path to our offscreen
-		if(paths.size()==0 && mDoodleStateChangeListener!=null)
+		if (paths.size() == 0 && mDoodleStateChangeListener != null)
 			mDoodleStateChangeListener.onDoodleStateChanged(false);
 		paths.add(new PathPoints(mPath, color, brushWidth, false));
 
@@ -260,10 +267,10 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 		{
 			undonePaths.add(paths.remove(paths.size() - 1));
 			invalidate();
-			
+
 		}
-		
-		if(paths.size()==0 && mDoodleStateChangeListener!=null)
+
+		if (paths.size() == 0 && mDoodleStateChangeListener != null)
 		{
 			mDoodleStateChangeListener.onDoodleStateChanged(true);
 		}
@@ -276,7 +283,7 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 			paths.add(undonePaths.remove(undonePaths.size() - 1));
 			invalidate();
 		}
-		
+
 	}
 
 	/**
@@ -389,10 +396,10 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 		}
 
 	}
-	
+
 	public interface OnDoodleStateChangeListener
 	{
 		public void onDoodleStateChanged(boolean isCanvasEmpty);
-		
+
 	}
 }

@@ -8,13 +8,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
 import android.os.Environment;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -37,9 +34,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 
 	private EffectsImageView effectLayer;
 
-	private ColorMatrixColorFilter currentEffect;
-
-	private boolean enableDoodling, enableText, savingFinal;
+	private boolean enableDoodling, savingFinal;
 
 	private Bitmap imageOriginal, imageEdited, imageScaled, scaledImageOriginal;
 
@@ -59,7 +54,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		addView(vignetteLayer);
 		addView(doodleLayer);
 		enableDoodling = false;
-		enableText = false;
 		savingFinal = false;
 	}
 
@@ -73,7 +67,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		addView(vignetteLayer);
 		addView(doodleLayer);
 		enableDoodling = false;
-		enableText = false;
 		savingFinal = false;
 		// TODO Auto-generated constructor stub
 	}
@@ -88,7 +81,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		addView(vignetteLayer);
 		addView(doodleLayer);
 		enableDoodling = false;
-		enableText = false;
 		savingFinal = false;
 	}
 
@@ -134,17 +126,29 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 
 	public void enableDoodling()
 	{
+		enableDoodling = true;
 		doodleLayer.setDrawEnabled(true);
 	}
 
 	public void disableDoodling()
 	{
+		enableDoodling = false;
 		doodleLayer.setDrawEnabled(false);
 	}
 
 	public void setBrushColor(int Color)
 	{
 		doodleLayer.setColor(Color);
+	}
+
+	public void disable()
+	{
+		doodleLayer.setDrawEnabled(false);
+	}
+
+	public void enable()
+	{
+		doodleLayer.setDrawEnabled(enableDoodling);
 	}
 
 	public void saveImage(HikeFileType fileType, String originalName, HikePhotosListener listener)
@@ -262,7 +266,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 	@Override
 	public void onFilterApplied(Bitmap preview)
 	{
-		// TODO Auto-generated method stub
 		if (!savingFinal)
 		{
 			vignetteLayer.setVignetteforFilter(preview);
@@ -275,4 +278,5 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		}
 
 	}
+
 }

@@ -180,7 +180,6 @@ public final class PreviewFragment extends Fragment
 				temp3.setOnClickListener(clickListener);
 				break;
 			case Quality:
-
 				break;
 			}
 
