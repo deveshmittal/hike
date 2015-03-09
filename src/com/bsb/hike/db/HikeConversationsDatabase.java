@@ -821,36 +821,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return executeUpdateMessageStatusStatement(query, val, msisdn);
 	}
 
-	public long[] setPreviousMessagesAsReadForMsisdn(String msisdn, JSONArray msgIds)
+	public long[] setAllDeliveredMessagesReadForMsisdn(String msisdn, JSONArray msgIds)
 	{
-		int count = msgIds.length();
-		if(count == 0)
-		{
-			return null;
-		}
-
-		long maxId = msgIds.optLong(0);
-		for (int i = 0; i < count; i++)
-		{
-			long id = msgIds.optLong(i);
-			if(id > maxId)
-			{
-				maxId = id;
-			}
-		}
-
 		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
-				+ State.SENT_DELIVERED_READ.ordinal() + " AND " + DBConstants.MESSAGE_ID + "<=" + maxId, new String[] { msisdn }, null, null, null);
+				+ State.SENT_DELIVERED_READ.ordinal(), new String[] { msisdn }, null, null, null);
 
-		long[] ids = new long[c.getCount()];
+		long[] ids = new long[c.getCount() + msgIds.length()];
 
-		if (ids.length == 0)
+		if (ids.length == 0 && msgIds.length() == 0)
 		{
 			return null;
 		}
 
-		int i = 0;
 		StringBuilder sb = new StringBuilder("(");
+		int i = 0;
 		try
 		{
 			while (c.moveToNext())
@@ -858,6 +842,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				long id = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
 				sb.append(id + ",");
 				ids[i++] = id;
+			}
+			for (i = 0; i < msgIds.length(); i++)
+			{
+				long id = msgIds.optLong(i);
+				sb.append(id + ",");
+				ids[c.getCount() + i++] = id;
 			}
 		}
 		finally

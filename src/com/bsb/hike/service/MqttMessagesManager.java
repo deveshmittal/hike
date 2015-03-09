@@ -763,7 +763,7 @@ public class MqttMessagesManager
 		long[] ids;
 		if (!Utils.isGroupConversation(id))
 		{
-			ids = convDb.setPreviousMessagesAsReadForMsisdn(id, msgIds);
+			ids = convDb.setAllDeliveredMessagesReadForMsisdn(id, msgIds);
 			if (ids == null)
 			{
 				return;
