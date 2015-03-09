@@ -2262,7 +2262,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	 */
 	public int getExtraConvUnreadCount(String msisdn)
 	{
-		return HikeSharedPreferenceUtil.getInstance(mContext, HikeSharedPreferenceUtil.CONV_UNREAD_COUNT).getData(msisdn, 0);
+		return HikeSharedPreferenceUtil.getInstance(HikeSharedPreferenceUtil.CONV_UNREAD_COUNT).getData(msisdn, 0);
 	}
 
 	/*
@@ -2271,7 +2271,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	 */
 	public void setExtraConvUnreadCount(String msisdn, int count)
 	{
-		HikeSharedPreferenceUtil.getInstance(mContext, HikeSharedPreferenceUtil.CONV_UNREAD_COUNT).saveData(msisdn, count);
+		HikeSharedPreferenceUtil.getInstance(HikeSharedPreferenceUtil.CONV_UNREAD_COUNT).saveData(msisdn, count);
 	}
 
 	public Conversation getConversation(String msisdn, int limit)
@@ -2749,7 +2749,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				}
 				else
 				{
-					conv = new Conversation(msisdn, timestamp);
+					conv = new Conversation(msisdn);
 					ContactInfo contact = ContactManager.getInstance().getContact(conv.getMsisdn());
 					ContactManager.getInstance().updateContactRecency(msisdn, timestamp, false);
 					if (null == contact)

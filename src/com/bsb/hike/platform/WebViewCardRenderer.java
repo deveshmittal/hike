@@ -177,7 +177,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	@Override
 	public int getCount()
 	{
-		return 0;
+		return convMessages.size();
 	}
 
 	@Override
@@ -277,14 +277,20 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 					else
 					{
 						showConnErrState(viewHolder);
-						cardErrorAnalytics(reason, convMessage);
+						HikeAnalyticsEvent.cardErrorAnalytics(reason, convMessage);
 					}
 				}
 
 				public void onComplete(PlatformContentModel content)
 				{
-					viewHolder.id = getItemId(position);
-					fillContent(web, content, convMessage, viewHolder);
+					if(position < getCount())
+					{
+						viewHolder.id = getItemId(position);
+						fillContent(web, content, convMessage, viewHolder);
+					}else
+					{
+						Logger.e(tag, "Platform Content returned data view no more exist");
+					}
 				}
 			});
 		}
@@ -304,25 +310,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	}
 
-	private void cardErrorAnalytics(EventCode reason, ConvMessage convMessage)
-	{
-		JSONObject json = new JSONObject();
-		try
-		{
-			json.put(HikePlatformConstants.ERROR_CODE, reason.toString());
-			json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.BOT_ERROR);
-			json.put(AnalyticsConstants.CONTENT_ID, convMessage.getContentId());
-			HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, json);
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
-		catch (NullPointerException e)
-		{
-			e.printStackTrace();
-		}
-	}
+
 
 	private static void cardLoadAnalytics(ConvMessage message)
 	{

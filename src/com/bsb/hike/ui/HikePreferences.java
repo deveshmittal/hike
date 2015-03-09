@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import java.util.Map;
 
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,6 +39,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.service.HikeMqttManagerNew;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequestConstants;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.BackupAccountTask;
 import com.bsb.hike.tasks.BackupAccountTask.BackupAccountListener;
@@ -264,9 +266,9 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Preference resetStealthPreference = getPreferenceScreen().findPreference(HikeConstants.RESET_STEALTH_PREF);
 		if (resetStealthPreference != null)
 		{
-			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+			if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 			{
-				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				if(HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 				{
 					resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
 					resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
@@ -282,9 +284,9 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Preference resetStealthPassword = getPreferenceScreen().findPreference(HikeConstants.CHANGE_STEALTH_PASSCODE);
 		if (resetStealthPassword != null)
 		{
-			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+			if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 			{
-				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				if(HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 				{
 					resetStealthPassword.setTitle(R.string.change_stealth_password);
 					resetStealthPassword.setSummary(R.string.change_stealth_password_body);
@@ -631,7 +633,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.RESET_STEALTH_PREF.equals(preference.getKey()))
 		{
-			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+			if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 			{
 				Utils.cancelScheduledStealthReset(this);
 
@@ -665,7 +667,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					@Override
 					public void positiveClicked(Dialog dialog)
 					{
-						HikeSharedPreferenceUtil.getInstance(getApplicationContext()).saveData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, System.currentTimeMillis());
+						HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, System.currentTimeMillis());
 
 						HikeMessengerApp.getPubSub().publish(HikePubSub.RESET_STEALTH_INITIATED, null);
 
@@ -840,6 +842,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		else if (HikeConstants.SSL_PREF.equals(preference.getKey()))
 		{
 			Utils.setupUri(this.getApplicationContext());
+			HttpRequestConstants.toggleSSL();
 			LocalBroadcastManager.getInstance(this.getApplicationContext()).sendBroadcast(new Intent(HikePubSub.SSL_PREFERENCE_CHANGED));
 		}
 		else if (HikeConstants.STATUS_BOOLEAN_PREF.equals(preference.getKey()))
@@ -990,12 +993,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					preference.setTitle(getString(R.string.led_notification) + " - " + (newValue.toString()));
 					if("None".equals(newValue.toString()))
 					{
-						HikeSharedPreferenceUtil.getInstance(HikePreferences.this).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_NONE_COLOR);
+						HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_NONE_COLOR);
 					}
 					else
 					{
 						int finalColor = Color.parseColor(newValue.toString().toLowerCase());
-						HikeSharedPreferenceUtil.getInstance(HikePreferences.this).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, finalColor);
+						HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, finalColor);
 					}
 					return true;
 				}
