@@ -505,8 +505,15 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				if(totalfiles>0)
 				{
 					viewHolder.sharedFiles.setVisibility(View.VISIBLE);
-					((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.VISIBLE);
-					((LinearLayout) viewHolder.sharedFiles).findViewById(R.id.shared_content_seprator).setVisibility(View.VISIBLE);
+					if (groupConversation instanceof BroadcastConversation)
+					{
+						((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.GONE);
+					}
+					else
+					{
+						((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.VISIBLE);
+						((LinearLayout) viewHolder.sharedFiles).findViewById(R.id.shared_content_seprator).setVisibility(View.VISIBLE);
+					}
 				
 					viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
 					viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_pin_2));
