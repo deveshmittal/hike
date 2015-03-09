@@ -63,6 +63,7 @@ public final class HikeEffectsFactory
 			{
 				mBlurRadius = 25;
 			}
+			
 		}
 
 		// Allocate buffer
@@ -439,7 +440,7 @@ public final class HikeEffectsFactory
 			effect = effectType;
 			readyListener = listener;
 			blurImage = isThumbnail;
-			mBitmapOut = Bitmap.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
+			mBitmapOut = Bitmap.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), Bitmap.Config.ARGB_8888);
 			mOutAllocations = Allocation.createFromBitmap(mRS, mBitmapOut);
 
 		}

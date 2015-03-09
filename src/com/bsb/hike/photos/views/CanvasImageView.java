@@ -74,6 +74,8 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 		brushWidth = width;
 
 	}
+	
+	
 
 	public void setOnDoodlingStartListener(OnDoodleStateChangeListener listener)
 	{

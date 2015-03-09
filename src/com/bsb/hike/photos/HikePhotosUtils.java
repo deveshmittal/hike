@@ -81,7 +81,54 @@ public class HikePhotosUtils
 	public static class FilterTools
 	{
 
+		private static FilterType selectedFilter ;
+
+		private static FilterEffectItemLinearLayout prevFilter;
 		
+		private static int selectedColor ;
+
+		private static DoodleEffectItemLinearLayout prevColor;
+
+		public static void setCurrentDoodleItem(DoodleEffectItemLinearLayout item)
+		{
+			prevColor = item;
+		}
+
+		public static DoodleEffectItemLinearLayout getCurrentDoodleItem()
+		{
+			return prevColor;
+		}
+
+		public static int getSelectedColor()
+		{
+			return selectedColor;
+		}
+
+		public static void setSelectedColor(int color)
+		{
+			selectedColor = color;
+		}
+		
+		public static void setCurrentFilterItem(FilterEffectItemLinearLayout item)
+		{
+			prevFilter = item;
+		}
+
+		public static FilterEffectItemLinearLayout getCurrentFilterItem()
+		{
+			return prevFilter;
+		}
+
+		public static FilterType getSelectedFilter()
+		{
+			return selectedFilter;
+		}
+
+		public static void setSelectedFilter(FilterType type)
+		{
+			selectedFilter = type;
+		}
+
 		public enum FilterType
 		{
 			BRIGHTNESS, CONTRAST, SATURATION, HUE, SEPIA, GRAYSCALE, POLAROID, FADED, BGR, INVERSION, X_PRO_2, WILLOW, WALDEN, VALENCIA, TOASTER, SUTRO, SIERRA, RISE, NASHVILLE, MAYFAIR, LO_FI, KELVIN, INKWELL, HUDSON, HEFE, EARLYBIRD, BRANNAN, AMARO, E1977, FILTER1, CLASSIC, RETRO, APOLLO, ORIGINAL

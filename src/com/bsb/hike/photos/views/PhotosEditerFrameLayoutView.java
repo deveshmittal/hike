@@ -136,7 +136,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		else
 		{
 			effectLayer.handleImage(imageOriginal, false);
-			imageScaled = imageOriginal;
+			imageScaled = imageOriginal.copy(imageOriginal.getConfig(), true);
 		}
 
 	}
@@ -146,6 +146,8 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		effectLayer.handleImage(bmp, false);
 	}
 
+	
+	
 	public void enableDoodling()
 	{
 		doodleLayer.setDrawEnabled(true);
@@ -205,15 +207,11 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		{
 			File myDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 			myDir.mkdir();
-			String fname = Utils.getOriginalFile(mFileType, mOriginalName);
+			String fname = Utils.getOriginalFile(mFileType, null);
 			file = new File(myDir, fname);
 		}
 
-		if (file.exists())
-		{
-			file.delete();
-		}
-
+		
 		FileOutputStream out = null;
 		try
 		{

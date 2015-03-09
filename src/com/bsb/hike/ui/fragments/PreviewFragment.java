@@ -15,6 +15,7 @@ import android.widget.RelativeLayout;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterList;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
@@ -90,6 +91,9 @@ public final class PreviewFragment extends Fragment
 			break;
 		}
 		layout.invalidate();
+		HikePhotosUtils.FilterTools.setSelectedColor(HikePhotosUtils.DoodleColors[0]);
+		HikePhotosUtils.FilterTools.setSelectedFilter(FilterList.getHikeEffects().filters.get(0));
+		
 		return layout;
 	}
 
