@@ -35,9 +35,9 @@ public class PopUpLayout implements OnTouchListener
 	 * @ordered
 	 */
 
-	public void showPopUpWindow(int width, int height, View anchor, View view)
+	public void showPopUpWindow(int width, int height, View anchor, View view, int inputMethodMode)
 	{
-		showPopUpWindow(width, height, 0, 0, anchor, view);
+		showPopUpWindow(width, height, 0, 0, anchor, view, inputMethodMode);
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class PopUpLayout implements OnTouchListener
 	 */
 	public void showPopUpWindowNoDismiss(int xoffset, int yoffset, View anchor, View view)
 	{
-		showPopUpWindow(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, xoffset, yoffset, anchor, view);
+		showPopUpWindow(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, xoffset, yoffset, anchor, view, PopupWindow.INPUT_METHOD_NOT_NEEDED);
 
 		// This is a workaround for not to dismiss popup window if anywhere out
 		// side is touched, for layout below we have made our popup with
@@ -81,6 +81,16 @@ public class PopUpLayout implements OnTouchListener
 	 * @param yoffset
 	 * @param anchor
 	 */
+	public void showPopUpWindow(int width, int height, int xoffset, int yoffset, View anchor, View view, int inputMethodMode)
+	{
+		if (popup == null)
+		{
+			initPopUpWindow(width, height, view, context, inputMethodMode);
+		}
+
+		popup.showAsDropDown(anchor, xoffset, yoffset);
+	}
+	
 	public void showPopUpWindow(int width, int height, int xoffset, int yoffset, View anchor, View view)
 	{
 		if (popup == null)
@@ -94,7 +104,18 @@ public class PopUpLayout implements OnTouchListener
 	/**
 	 * This method is responsible for initializing popup window with given attributes, by default we set {@link android.R.color#transparent} as background color - by default popup
 	 * is dismissed if outside is touched
+	 * 
+	 * @param inputMethodMode
+	 *            : <p>Since the popup is focusable, if displayed along with a keyboard, it can take focus from the keyboard. Thus, if there is a possibility that keyboard could be
+	 *            visible along with the popup, you should use it with {@link PopupWindow#INPUT_METHOD_NOT_NEEDED} flag.</p>
 	 */
+	protected PopupWindow initPopUpWindow(int width, int height, View viewToShow, Context context, int inputMethodMode)
+	{
+		popup = initPopUpWindow(width, height, viewToShow, context);
+		popup.setInputMethodMode(inputMethodMode);
+		return popup;
+	}
+	
 	protected PopupWindow initPopUpWindow(int width, int height, View viewToShow, Context context)
 	{
 		popup = new PopupWindow(context);
@@ -106,6 +127,7 @@ public class PopUpLayout implements OnTouchListener
 		popup.setOutsideTouchable(true);
 		// to gain focus
 		popup.setFocusable(true);
+		
 		return popup;
 	}
 

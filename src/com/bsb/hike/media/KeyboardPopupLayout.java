@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
+import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
 
@@ -120,7 +121,7 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		
 		if (popup == null)
 		{
-			initPopUpWindow(LayoutParams.MATCH_PARENT, height, view, context);
+			initPopUpWindow(LayoutParams.MATCH_PARENT, height, view, context, PopupWindow.INPUT_METHOD_NOT_NEEDED);
 			// this is a strange bug in Android, if we set focusable true, GRAVITY BOTTOM IS NOT working
 			popup.setFocusable(false);
 			
