@@ -2672,7 +2672,10 @@ public class Utils
 		}
 	}
 
-	public static void saveBase64StringToFile(File file, String base64String) throws IOException
+	/*
+	 * returns a decoded byteArray of input base64String. 
+	 */
+	public static byte[] saveBase64StringToFile(File file, String base64String) throws IOException
 	{
 		FileOutputStream fos = new FileOutputStream(file);
 
@@ -2685,6 +2688,7 @@ public class Utils
 		fos.flush();
 		fos.getFD().sync();
 		fos.close();
+		return b;
 	}
 
 	public static void setupFormattedTime(TextView tv, long timeElapsed)
