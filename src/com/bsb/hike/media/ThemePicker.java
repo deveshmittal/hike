@@ -177,16 +177,6 @@ public class ThemePicker implements BackPressListener, OnDismissListener, OnClic
 
 			saveThemeBtn.setOnClickListener(ThemePicker.this);
 
-			/*
-			 * View closeContainer = actionModeView.findViewById(R.id.close_container);
-			 * 
-			 * closeContainer.setOnClickListener(ThemePicker.this);
-			 * 
-			 * View closeBtn = actionModeView.findViewById(R.id.close_action_mode);
-			 * 
-			 * Animation slideIn = AnimationUtils.loadAnimation(sherlockFragmentActivity, R.anim.slide_in_left_noalpha); slideIn.setInterpolator(new
-			 * AccelerateDecelerateInterpolator()); slideIn.setDuration(200); closeBtn.startAnimation(slideIn);
-			 */
 			return true;
 		}
 
