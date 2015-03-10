@@ -313,9 +313,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		}
 		else
 		{
-			boolean isGroupConversation = Utils.isGroupConversation(msisdn);
-			int index = BitmapUtils.iconHash(msisdn) % (HikeConstants.DEFAULT_AVATAR_KEYS.length);
-			String cacheKey = getDefaultAvatarKey(index, isGroupConversation);
+			String cacheKey = getDefaultAvatarKey(msisdn);
 
 			BitmapDrawable bd = get(cacheKey);
 
@@ -328,10 +326,18 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		}
 	}
 	
-	private String getDefaultAvatarKey(int index, boolean isGroupConversation)
+	private String getDefaultAvatarKey(String msisdn)
 	{
+		boolean isGroupConversation = Utils.isGroupConversation(msisdn);
+		boolean isBroadcastConversation = Utils.isBroadcastConversation(msisdn);
+		int index = BitmapUtils.iconHash(msisdn) % (HikeConstants.DEFAULT_AVATAR_KEYS.length);
+		
 		String key = HikeConstants.DEFAULT_AVATAR_KEYS[index];
-		if(isGroupConversation)
+		if(isBroadcastConversation)
+		{
+			key += HikeConstants.IS_BROADCAST;
+		}
+		else if(isGroupConversation)
 		{
 			key += HikeConstants.IS_GROUP;
 		}
