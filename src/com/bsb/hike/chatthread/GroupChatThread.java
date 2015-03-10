@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Message;
 import android.text.Editable;
 import android.text.Spannable;
@@ -1418,6 +1419,20 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	{
 		super.showThemePicker();
 		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip_group);
+	}
+	
+	@Override
+	protected void onConfigurationChanged(Configuration newConfig)
+	{
+		/**
+		 * Handling Pin ActionMode orientation change
+		 */
+		if (mActionMode != null && mActionMode.whichActionModeIsOn() == PIN_CREATE_ACTION_MODE)
+		{
+			mActionMode.reInflateActionMode();
+		}
+		
+		super.onConfigurationChanged(newConfig);
 	}
 	
 }

@@ -2048,7 +2048,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mAdapter.setActionMode(true);
 			v.setVisibility(mAdapter.isSelected(message) ? View.VISIBLE : View.INVISIBLE);
 
-			hideShowActionModeMenus(MULTI_SELECT_ACTION_MODE);
+			hideShowActionModeMenus();
 			/**
 			 * Hiding any open tip
 			 */
@@ -2151,7 +2151,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	}
 
-	private void hideShowActionModeMenus(int actionModeId)
+	/**
+	 * This method is used to hiding/showing multi_select_action_bar_menus
+	 */
+	private void hideShowActionModeMenus()
 	{
 		mActionMode.showHideMenuItem(R.id.copy_msgs, selectedNonTextMsgs == 0);
 
@@ -2702,7 +2705,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		resumeImageLoaders(true);
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
-		
 	}
 
 	/**
@@ -4099,11 +4101,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		
 		/**
-		 * Handle theme image change.
+		 * Handle theme background image change.
 		 */
 		if (getCurrentlTheme() != null && getCurrentlTheme() != ChatTheme.DEFAULT)
 		{
 			setBackground(getCurrentlTheme());
+		}
+		
+		/**
+		 * Handling MULTI_SELECT_ACTION_MODE orientation change
+		 */
+		if (mActionMode != null && mActionMode.whichActionModeIsOn() == MULTI_SELECT_ACTION_MODE)
+		{
+			mActionMode.reInflateActionMode();
+			hideShowActionModeMenus();
 		}
 	}
 	
@@ -4182,7 +4193,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			setEmoticonButtonSelected(false);
 		}
-		
 	}
 	
 	@Override
