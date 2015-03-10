@@ -214,6 +214,8 @@ public class CameraFragment extends SherlockFragment
 		xact.useSingleShotMode(false);
 		xact.needBitmap(true);
 		xact.needByteArray(true);
+		
+		if(!useFFC)
 		xact.flashMode(flashMode);
 
 		try
