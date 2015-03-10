@@ -200,6 +200,12 @@ public final class HikeEffectsFactory
 				filterColorMatrix.setConcat(getContrastColorMatrix(30f), filterColorMatrix);
 			}
 			break;
+		case RETRO:
+			if (isPreMatrix)
+			{
+				filterColorMatrix = getSepiaColorMatrix(50f);
+			}
+			break;
 		default:
 			filterColorMatrix = null;
 

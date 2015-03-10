@@ -21,6 +21,7 @@ import com.bsb.hike.photos.HikePhotosUtils.MenuType;
 import com.bsb.hike.photos.views.DoodleEffectItemLinearLayout;
 import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
 import com.bsb.hike.ui.PictureEditer.EditorClickListener;
+import com.jess.ui.TwoWayAbsListView;
 import com.jess.ui.TwoWayGridView;
 
 public final class PreviewFragment extends Fragment
@@ -55,9 +56,13 @@ public final class PreviewFragment extends Fragment
 
 		LinearLayout layout = (LinearLayout) LayoutInflater.from(getActivity()).inflate(R.layout.photos_pager_layout, container, false);
 
+		
+		int height = container.getMeasuredHeight();
+		
 		TwoWayGridView gridView = (TwoWayGridView) layout.findViewById(R.id.HorizontalGridView);
+		//gridView.setLayoutParams(new TwoWayAbsListView.LayoutParams(TwoWayAbsListView.LayoutParams.MATCH_PARENT, HikePhotosUtils.dpToPx(getActivity().getApplicationContext(), height)));
 		gridView.setColumnWidth(GridView.AUTO_FIT);
-		gridView.setRowHeight(GridView.AUTO_FIT);
+		gridView.setRowHeight(height);
 		mAdapter = new ImageAdapter(getActivity(), myType, handler);
 		gridView.setAdapter(mAdapter);
 		ViewStub adjuster = (ViewStub) layout.findViewById(R.id.sizeBarStub);

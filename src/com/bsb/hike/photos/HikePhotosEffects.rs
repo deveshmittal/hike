@@ -199,6 +199,8 @@ uchar4 __attribute__((kernel)) filter_retro(uchar4 in,uint32_t x,uint32_t y) {
 	in.g =  ChannelBlend_Alpha(ChannelBlend_Multiply(g[0],in.g),in.g,0.60);
 
 	in.b =  ChannelBlend_Alpha(ChannelBlend_Multiply(b[0],in.b),in.b,0.60);
+	 
+	in = applyColorMatrix(in,preMatrix);
 
 	return in;
 }
