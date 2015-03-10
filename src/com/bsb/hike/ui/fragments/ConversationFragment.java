@@ -200,6 +200,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				mAdapter.remove(conversation);
 				mConversationsByMSISDN.remove(conversation.getMsisdn());
 				mConversationsAdded.remove(conversation.getMsisdn());
+				HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
 
 				HikeMessengerApp.removeStealthMsisdn(conversation.getMsisdn(), publishStealthEvent);
 				stealthConversations.remove(conversation);
@@ -1901,6 +1902,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						mConversationsAdded.remove(msisdn);
 						mAdapter.remove(conversation);
 						notifyDataSetChanged();
+						HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
 					}
 					else
 					{
@@ -1952,6 +1954,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					mAdapter.addToLists(conversation);
 					mAdapter.sortLists(mConversationsComparator);
 					notifyDataSetChanged();
+					HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
 				}
 			});
 		}
