@@ -916,8 +916,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		else
 		{
-			backgroundImage.setScaleType(theme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
-			backgroundImage.setImageDrawable(Utils.getChatTheme(theme, activity));
+			backgroundImage.setScaleType(theme.isTiled() ? ScaleType.FIT_XY : ScaleType.MATRIX);
+			Drawable drawable = Utils.getChatTheme(theme, activity);
+			if(!theme.isTiled())
+			{
+				ChatThreadUtils.applyMatrixTransformationToImageView(drawable, backgroundImage);
+			}
+			
+			backgroundImage.setImageDrawable(drawable);
 		}
 	}
 
