@@ -918,13 +918,20 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
 		{
-			String msisdn = metadata.getMsisdn();
+			if (message.isBroadcastConversation())
+			{
+				markedUp = String.format(context.getString(R.string.change_broadcast_name), context.getString(R.string.you));
+			}
+			else
+			{
+				String msisdn = metadata.getMsisdn();
 
-			String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
+				String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-			String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
+				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
 
-			markedUp = String.format(context.getString(R.string.change_group_name), participantName);
+				markedUp = String.format(context.getString(R.string.change_group_name), participantName);
+			}
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS)
 		{

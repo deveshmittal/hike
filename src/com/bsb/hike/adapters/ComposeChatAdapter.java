@@ -3,6 +3,7 @@ package com.bsb.hike.adapters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,7 +75,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, boolean fetchRecents, boolean fetchRecentlyJoined, String existingGroupId, String sendingMsisdn, FriendsListFetchedCallback friendsListFetchedCallback, boolean showSMSContacts)
 	{
 		super(context, listView, friendsListFetchedCallback, ContactInfo.lastSeenTimeComparatorWithoutFav);
-		selectedPeople = new HashMap<String, ContactInfo>();
+		selectedPeople = new LinkedHashMap<String, ContactInfo>();
 		existingParticipants = new HashMap<String, ContactInfo>();
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconloader = new IconLoader(context, mIconImageSize);
@@ -742,6 +743,19 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 		}
 	}
-
+	
+	public void selectAllFromList(ArrayList<String> msisdns)
+	{
+		if (msisdns == null || msisdns.isEmpty())
+		{
+			return;
+		}
+		
+		for (String msisdn : msisdns)
+		{
+			ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
+			selectedPeople.put(msisdn, contactInfo);
+		}
+	}
 	
 }

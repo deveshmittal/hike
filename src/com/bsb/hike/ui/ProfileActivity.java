@@ -702,6 +702,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		case R.id.edit:
 			onEditProfileClicked(null);
 			break;
+		case R.id.add_recipients:
 		case R.id.add_people:
 			openAddToGroup();
 			break;
@@ -2889,31 +2890,34 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else if(HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
-			if(groupConversation.getMsisdn().equals(((ConvMessage)object).getMsisdn()))
-			{							
-				if(((ConvMessage)object).getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-				{
-					sharedContentItem.setUnreadPinCount(++currUnreadCount);
-	
-					sharedContentItem.setSharedPinsCount(sharedContentItem.getSharedPinsCount() + 1);
-					
-					sharedPinCount += 1;
-					
-					if(sharedContentItem.getPinAnimation() == false)
+			if (groupConversation != null)
+			{
+				if(groupConversation.getMsisdn().equals(((ConvMessage)object).getMsisdn()))
+				{							
+					if(((ConvMessage)object).getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 					{
-						sharedContentItem.setPinAnimation(true);
-					}
-					
-					runOnUiThread(new Runnable() 
-					{					
-						@Override
-						public void run() 
+						sharedContentItem.setUnreadPinCount(++currUnreadCount);
+		
+						sharedContentItem.setSharedPinsCount(sharedContentItem.getSharedPinsCount() + 1);
+						
+						sharedPinCount += 1;
+						
+						if(sharedContentItem.getPinAnimation() == false)
 						{
-							profileAdapter.notifyDataSetChanged();
+							sharedContentItem.setPinAnimation(true);
 						}
-					});
+						
+						runOnUiThread(new Runnable() 
+						{					
+							@Override
+							public void run() 
+							{
+								profileAdapter.notifyDataSetChanged();
+							}
+						});
+					}
 				}
-			}			
+			}
 		}
 		else if(HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
 		{			
@@ -3013,7 +3017,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			optionsList.add(getString(R.string.send_message));
 			if (isGroupOwner)
 			{
-				optionsList.add(getString(R.string.remove_from_group));
+				optionsList.add(getString(R.string.remove_from_broadcast));
 			}
 
 			final String[] options = new String[optionsList.size()];
@@ -3033,7 +3037,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						openChatThread(contactInfo);
 					}
-					else if (getString(R.string.remove_from_group).equals(option))
+					else if (getString(R.string.remove_from_broadcast).equals(option))
 					{
 						removeFromGroup(contactInfo);
 					}
@@ -3315,6 +3319,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if(this.profileType == ProfileType.GROUP_INFO)
 				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, groupConversation);
+			else if(this.profileType == ProfileType.BROADCAST_INFO)
+				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, broadcastConversation);
 			else
 				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, 0, hsf.get(0).getMsisdn(), contactInfo.getFirstNameAndSurname());
 			
