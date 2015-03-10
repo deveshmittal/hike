@@ -3377,10 +3377,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public boolean shouldShowLastSeen()
 	{
-		if ((favoriteType == FavoriteType.FRIEND || favoriteType == FavoriteType.REQUEST_RECEIVED || favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED)
-				&& mConversation.isOnhike())
+		if (mConversation.isOnhike())
 		{
-			return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+			return PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		}
 		return false;
 	}

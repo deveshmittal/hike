@@ -614,7 +614,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			int offline = contactInfo.getOffline();
 			String lastSeenString = null;
 			boolean showingLastSeen = false;
-			if (lastSeenPref && contactInfo.getFavoriteType() == FavoriteType.FRIEND && !contactInfo.getMsisdn().equals(contactInfo.getId()))
+			if (lastSeenPref)
 			{
 				lastSeenString = Utils.getLastSeenTimeAsString(context, contactInfo.getLastSeenTime(), offline, true);
 				showingLastSeen = !TextUtils.isEmpty(lastSeenString);

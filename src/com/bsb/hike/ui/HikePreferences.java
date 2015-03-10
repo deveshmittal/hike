@@ -151,11 +151,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			}
 		}
 
-		final IconCheckBoxPreference lastSeenPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.LAST_SEEN_PREF);
-		if (lastSeenPreference != null)
-		{
-			lastSeenPreference.setOnPreferenceChangeListener(this);
-		}
 		final IconCheckBoxPreference profilePicPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.PROFILE_PIC_PREF);
 		if (profilePicPreference != null)
 		{
@@ -769,25 +764,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}
 			}
 		}
-		else if (HikeConstants.LAST_SEEN_PREF.equals(preference.getKey()))
-		{
-			JSONObject object = new JSONObject();
-			try
-			{
-				object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
-
-				JSONObject data = new JSONObject();
-				data.put(HikeConstants.LAST_SEEN_SETTING, isChecked);
-				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
-				object.put(HikeConstants.DATA, data);
-
-				HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
-			}
-			catch (JSONException e)
-			{
-				Logger.w(getClass().getSimpleName(), "Invalid json", e);
-			}
-		}
 		else if (HikeConstants.PROFILE_PIC_PREF.equals(preference.getKey()))
 		{
 			JSONObject object = new JSONObject();
@@ -928,8 +904,10 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				{
 					int slectedPrivacyId = Integer.parseInt(newValue.toString());
 					String selectedPrivacyValue = "";
+					boolean isLSEnabled = true;
 					switch (slectedPrivacyId) {
 						case HikeConstants.PrivacyOptions.NOBODY:
+							isLSEnabled = false;
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_nobody_key);
 							break;
 						case HikeConstants.PrivacyOptions.EVERYONE:
@@ -943,20 +921,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 							break;
 					}
 					preference.setTitle(getString(R.string.last_seen_header) + " - " + selectedPrivacyValue);
-
-					JSONObject object = new JSONObject();
-					object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
-
-					JSONObject data = new JSONObject();
-					data.put(HikeConstants.NEW_LAST_SEEN_SETTING, slectedPrivacyId);
-					if(slectedPrivacyId == HikeConstants.PrivacyOptions.NOBODY)
-						data.put(HikeConstants.LAST_SEEN_SETTING, false);
-					else
-						data.put(HikeConstants.LAST_SEEN_SETTING, true);
-					data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
-					object.put(HikeConstants.DATA, data);
-
-					HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
+					PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean(HikeConstants.LAST_SEEN_PREF, isLSEnabled).commit();
+					sendNLSToServer(slectedPrivacyId, isLSEnabled);
 				}
 				catch (Exception e)
 				{
@@ -1110,5 +1076,20 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			NotificationToneListPreference notifToneListPref = (NotificationToneListPreference) notificationPreference;
 			notifToneListPref.createAndShowDialog(ringtonesNameURIMap);
 		}
+	}
+
+	public static void sendNLSToServer(int slectedPrivacyId, boolean isLSEnabled) throws JSONException
+	{
+		JSONObject object = new JSONObject();
+		object.put(HikeConstants.TYPE,
+				HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+
+		JSONObject data = new JSONObject();
+		data.put(HikeConstants.NEW_LAST_SEEN_SETTING, slectedPrivacyId);
+		data.put(HikeConstants.LAST_SEEN_SETTING, isLSEnabled);
+		data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
+		object.put(HikeConstants.DATA, data);
+
+		HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 	}
 }

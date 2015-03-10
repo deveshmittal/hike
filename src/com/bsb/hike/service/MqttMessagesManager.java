@@ -1046,11 +1046,15 @@ public class MqttMessagesManager
 					newTalkTime = talkTime;
 				}
 			}
-			if (account.has(HikeConstants.LAST_SEEN_SETTING))
+			if (account.has(HikeConstants.NEW_LAST_SEEN_SETTING))
 			{
 				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 				Editor settingEditor = settings.edit();
-				settingEditor.putBoolean(HikeConstants.LAST_SEEN_PREF, account.optBoolean(HikeConstants.LAST_SEEN_SETTING, true));
+				if(account.has(HikeConstants.LAST_SEEN_SETTING))
+				{
+					settingEditor.putBoolean(HikeConstants.LAST_SEEN_PREF, account.optBoolean(HikeConstants.LAST_SEEN_SETTING, true));
+				}
+				settingEditor.putString(HikeConstants.LAST_SEEN_PREF_LIST, Integer.toString(account.optInt(HikeConstants.NEW_LAST_SEEN_SETTING)));
 				settingEditor.commit();
 			}
 			if (account.has(HikeConstants.UJ_NOTIF_SETTING))

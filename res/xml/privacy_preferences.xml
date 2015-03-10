@@ -49,7 +49,7 @@
             android:title="@string/blocked_list" />
         <!-- icon="@drawable/ic_blocked_list" -->
         <com.bsb.hike.view.IconPreference
-            icon="@drawable/ic_favorites"
+            icon="@drawable/ic_add_friend"
             android:key="favoriteList"
             android:layout="@layout/icon_preference"
             android:summary="@string/fav_list_summary"
