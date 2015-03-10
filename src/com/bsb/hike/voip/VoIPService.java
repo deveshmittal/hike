@@ -240,7 +240,9 @@ public class VoIPService extends Service {
 		if (action == null || action.isEmpty()) {
 			return returnInt;
 		}
-		
+
+		setSpeaker(false);
+
 		if (action.equals(VoIPConstants.Extras.SET_PARTNER_INFO)) 
 		{
 			
@@ -524,7 +526,6 @@ public class VoIPService extends Service {
 			Logger.d(VoIPConstants.TAG, "Received audio focus.");
 		
 		initSoundPool();
-		setSpeaker(false);
 
 		// Check vibrator
 		if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT)
