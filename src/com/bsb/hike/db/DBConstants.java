@@ -293,4 +293,6 @@ public interface DBConstants
 
 	public static final String SORTING_TIMESTAMP = "sortingTimeStamp";
 
+	public static final String SERVER_ID_INDEX = "serverid_idx";
+
 }
