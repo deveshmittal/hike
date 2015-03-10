@@ -753,7 +753,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		
 		for (String msisdn : msisdns)
 		{
-			ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
+			ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn, true, false);
 			selectedPeople.put(msisdn, contactInfo);
 		}
 	}

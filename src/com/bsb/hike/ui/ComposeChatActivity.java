@@ -285,8 +285,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				int selected = adapter.getSelectedContactCount();
 				for (String msisdn : initiallySelectedMsisidns)
 				{
-					ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
-					tagEditText.addTag(contactInfo.getName(), msisdn, contactInfo);
+					ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn, true, false);
+					tagEditText.addTag(contactInfo.getNameOrMsisdn(), msisdn, contactInfo);
 				}
 
 
