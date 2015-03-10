@@ -1572,7 +1572,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	
 	public boolean isConversationsEmpty()
 	{
-		return displayedConversations.isEmpty();
+		return (displayedConversations != null && !displayedConversations.isEmpty()) ? false : true;
 	}
 
 	private void ShowTipIfNeeded(boolean hasNoConversation)
