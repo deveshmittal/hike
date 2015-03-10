@@ -416,7 +416,6 @@
             <intent-filter android:priority="999">
                 <action android:name="android.intent.action.ACTION_SHUTDOWN" />
                 <action android:name="android.intent.action.QUICKBOOT_POWEROFF" />
-                <action android:name="com.bsb.hike.testing.data"/>
             </intent-filter>
         </receiver>
 
