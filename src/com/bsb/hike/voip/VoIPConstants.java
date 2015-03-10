@@ -77,6 +77,8 @@ public class VoIPConstants {
 
 		public static final String CALL_ISSUES = "issues";
 
+		public static final String NEW_LOG ="nl";
+
 		public static final String OLD_NETWORK_TYPE = "oldnet";
 
 		public static final String CALL_SOURCE = "source";
@@ -162,7 +164,12 @@ public class VoIPConstants {
 		WEAK,
 		UNKNOWN
 	}
-	
+
+	public static enum CallStatus
+	{
+		OUTGOING_CONNECTING, OUTGOING_RINGING, INCOMING_CALL, PARTNER_BUSY, ON_HOLD, ACTIVE, ENDED
+	}
+
 	/**
 	 * Track packets received for last X seconds
 	 */
