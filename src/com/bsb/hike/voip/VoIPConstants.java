@@ -162,7 +162,12 @@ public class VoIPConstants {
 		WEAK,
 		UNKNOWN
 	}
-	
+
+	public static enum CallStatus
+	{
+		OUTGOING_CONNECTING, OUTGOING_RINGING, INCOMING_CALL, PARTNER_BUSY, ON_HOLD, ACTIVE, ENDED
+	}
+
 	/**
 	 * Track packets received for last X seconds
 	 */

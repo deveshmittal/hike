@@ -162,6 +162,8 @@ public class VoIPService extends Service {
 	private int audiotrackFramesWritten = 0;
 	private VoIPDataPacket silentPacket;
 
+	private VoIPConstants.CallStatus currentCallStatus;
+
 	@Override
 	public IBinder onBind(Intent intent) {
 		return myBinder;
@@ -400,6 +402,18 @@ public class VoIPService extends Service {
 			
 			retrieveExternalSocket();
 			sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CALL_CLICK);
+		}
+
+		if(getCallStatus() == null)
+		{
+			if(isAudioRunning())
+			{
+				setCallStatus(VoIPConstants.CallStatus.ACTIVE);
+			}
+			else
+			{
+				setCallStatus(clientPartner.isInitiator() ? VoIPConstants.CallStatus.INCOMING_CALL : VoIPConstants.CallStatus.OUTGOING_CONNECTING);
+			}
 		}
 
 		return returnInt;
@@ -699,7 +713,12 @@ public class VoIPService extends Service {
 			}
 			keepRunning = false;
 		}
-		
+
+		if(currentCallStatus!=VoIPConstants.CallStatus.PARTNER_BUSY)
+		{
+			setCallStatus(VoIPConstants.CallStatus.ENDED);
+		}
+
 		Logger.d(VoIPConstants.TAG, "VoIPService stop()");
 		
 		Bundle bundle = new Bundle();
@@ -770,6 +789,7 @@ public class VoIPService extends Service {
 		}
 		
 		setCallid(0);
+		setCallStatus(null);
 		
 		if(chronometer != null)
 		{
@@ -1251,6 +1271,7 @@ public class VoIPService extends Service {
 		playFromSoundPool(SOUND_ACCEPT, false);
 		startRecording();
 		startPlayBack();
+		setCallStatus(VoIPConstants.CallStatus.ACTIVE);
 		sendHandlerMessage(VoIPConstants.MSG_AUDIO_START);
 		startChrono();
 		audioStarted = true;
@@ -2042,6 +2063,8 @@ public class VoIPService extends Service {
 			startRecording();
 			startPlayBack();
 		}
+
+		setCallStatus(hold ? VoIPConstants.CallStatus.ON_HOLD : VoIPConstants.CallStatus.ACTIVE);
 		
 		sendHandlerMessage(VoIPConstants.MSG_UPDATE_HOLD_BUTTON);
 		
@@ -2413,6 +2436,7 @@ public class VoIPService extends Service {
 				if (connected == true) {
 					Logger.d(VoIPConstants.TAG, "UDP connection established :) " + clientPartner.getPreferredConnectionMethod());
 					if (clientSelf.isInitiator() && !reconnecting) {
+						setCallStatus(VoIPConstants.CallStatus.OUTGOING_RINGING);
 						sendHandlerMessage(VoIPConstants.CONNECTION_ESTABLISHED_FIRST_TIME);
 						setAudioModeInCall();
 						ringtoneStreamID = playFromSoundPool(SOUND_INCOMING_RINGTONE, true);
@@ -2539,6 +2563,16 @@ public class VoIPService extends Service {
 		clientPartner.setPreferredConnectionMethod(ConnectionMethods.UNKNOWN);
 		
 		return good;
+	}
+
+	public void setCallStatus(VoIPConstants.CallStatus status)
+	{
+		currentCallStatus = status;
+	}
+
+	public VoIPConstants.CallStatus getCallStatus()
+	{
+		return currentCallStatus;
 	}
 
 	public void sendAnalyticsEvent(String ek)

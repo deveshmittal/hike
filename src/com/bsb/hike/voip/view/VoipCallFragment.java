@@ -81,13 +81,6 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 
 	private boolean isCallActive;
 
-	private enum CallStatus
-	{
-		OUTGOING_CONNECTING, OUTGOING_RINGING, INCOMING_CALL, PARTNER_BUSY, ON_HOLD, ACTIVE, ENDED
-	}
-
-	private CallStatus currentCallStatus;
-
 	private CallFragmentListener activity;
 
 	private String partnerName;
@@ -140,12 +133,11 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 				shutdown(msg.getData());
 				break;
 			case VoIPConstants.CONNECTION_ESTABLISHED_FIRST_TIME:
-				showCallStatus(CallStatus.OUTGOING_RINGING);
-//				showMessage("Connection established (" + voipService.getConnectionMethod() + ")");
+				updateCallStatus();
 				break;
 			case VoIPConstants.MSG_AUDIO_START:
 				isCallActive = true;
-				showCallStatus(CallStatus.ACTIVE);
+				updateCallStatus();
 				activateActiveCallButtons();
 				break;
 			case VoIPConstants.MSG_ENCRYPTION_INITIALIZED:
@@ -190,10 +182,7 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			case VoIPConstants.MSG_UPDATE_HOLD_BUTTON:
 				boolean hold = voipService.getHold();
 				holdButton.setSelected(hold);
-				if (hold)
-					showCallStatus(CallStatus.ON_HOLD);
-				else
-					showCallStatus(CallStatus.ACTIVE);
+				updateCallStatus();
 				break;
 			case VoIPConstants.MSG_ALREADY_IN_CALL:
 				showCallFailedFragment(VoIPConstants.ConnectionFailCodes.CALLER_IN_NATIVE_CALL);
@@ -379,9 +368,10 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		if (action.equals(VoIPConstants.PARTNER_IN_CALL)) 
 		{
 			showCallFailedFragment(VoIPConstants.ConnectionFailCodes.PARTNER_BUSY);
-			showCallStatus(CallStatus.PARTNER_BUSY);
 			if (voipService != null)
 			{
+				voipService.setCallStatus(VoIPConstants.CallStatus.PARTNER_BUSY);
+				updateCallStatus();
 				voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_CONNECTION_FAILED, VoIPConstants.ConnectionFailCodes.PARTNER_BUSY);
 				voipService.stop();
 			}
@@ -395,7 +385,6 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 				{
 					showMessage(getString(R.string.voip_call_on_hold));
 					voipService.setHold(true);
-					showCallStatus(CallStatus.ON_HOLD);
 					voipService.sendAnalyticsEvent(HikeConstants.LogEvent.VOIP_NATIVE_CALL_INTERRUPT);
 				}
 				else
@@ -424,10 +413,7 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			Logger.d(VoIPConstants.TAG, "shutdown() exception: " + e.toString());
 		}
 
-		if(currentCallStatus!=CallStatus.PARTNER_BUSY)
-		{
-			showCallStatus(CallStatus.ENDED);
-		}
+		updateCallStatus();
 
 		if(callDuration!=null)
 		{
@@ -552,7 +538,7 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		setAvatar();
 		setContactDetails();
 		showActiveCallButtons();
-		showCallStatus(CallStatus.OUTGOING_CONNECTING);
+		updateCallStatus();
 	}
 
 	private void setupCalleeLayout()
@@ -562,7 +548,7 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		setContactDetails();
 		hideActiveCallButtons();
 		showCallActionsView();
-		showCallStatus(CallStatus.INCOMING_CALL);
+		updateCallStatus();
 	}
 
 	private void setupActiveCallLayout()
@@ -573,14 +559,7 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		showActiveCallButtons();
 
 		// Get hold status from service if activity was destroyed
-		if(voipService.getHold())
-		{
-			showCallStatus(CallStatus.ON_HOLD);
-		}
-		else
-		{
-			showCallStatus(CallStatus.ACTIVE);
-		}
+		updateCallStatus();
 
 		activateActiveCallButtons();
 	}
@@ -706,14 +685,18 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		});
 	}
 
-	private void showCallStatus(CallStatus status)
+	private void updateCallStatus()
 	{
-		if(!isAdded())
+		if(!isAdded() || voipService == null)
 		{
 			return;
 		}
 
-		currentCallStatus = status;
+		VoIPConstants.CallStatus status = voipService.getCallStatus();
+		if(status == null)
+		{
+			return;
+		}
 
 		TextView callStatusView = (TextView) getView().findViewById(R.id.call_status);
 		Chronometer callDurationView = (Chronometer) getView().findViewById(R.id.call_duration);
