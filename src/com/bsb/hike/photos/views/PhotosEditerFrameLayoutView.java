@@ -208,10 +208,19 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		}
 		else
 		{
-			File myDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-			myDir.mkdir();
-			String fname = Utils.getOriginalFile(mFileType, null);
-			file = new File(myDir, fname);
+			String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
+			/*
+			 * Making sure the directory exists before setting a profile image
+			 */
+			File dir = new File(directory);
+			if (!dir.exists())
+			{
+				dir.mkdirs();
+			}
+
+			String fileName = Utils.getTempProfileImageFileName(mOriginalName);
+			final String destFilePath = directory + "/" + fileName;
+			file = new File(destFilePath);
 		}
 
 		
