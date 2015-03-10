@@ -122,7 +122,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		int width = metrics.widthPixels;
 		if (width < imageOriginal.getWidth())
 		{
-			imageScaled = Bitmap.createScaledBitmap(imageOriginal, imageOriginal.getWidth() / 2, imageOriginal.getWidth() / 2, false);
+			imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
 			effectLayer.handleImage(imageScaled, true);
 		}
 		else
