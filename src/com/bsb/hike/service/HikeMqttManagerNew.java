@@ -194,7 +194,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private NetInfo previousNetInfo;
 
 	/* represents max amount of time taken by message to process exceeding which we will send analytics to server*/
-	private static final long DEFAULT_MAX_MESSAGE_PROCESS_TIME = 60 * 1000l;
+	private static final long DEFAULT_MAX_MESSAGE_PROCESS_TIME = 1 * 1000l;
 	
 	private long maxMessageProcessTime = 0;
 	
