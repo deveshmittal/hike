@@ -56,8 +56,6 @@ public class PhotoActionsFragment extends SherlockFragment
 
 		view1.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
 
-		
-
 		divider.setBackgroundColor(getResources().getColor(R.color.file_transfer_pop_up_button));
 
 		divider.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1));

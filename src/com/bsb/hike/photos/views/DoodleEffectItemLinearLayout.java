@@ -48,12 +48,13 @@ public class DoodleEffectItemLinearLayout extends EffectItemLinearLayout
 		return brushColor;
 	}
 
-	public void setBrushColor(int Color)
+	public void setBrushColor(int Color, boolean setCurrentItem)
 	{
 		this.brushColor = Color;
 		if (Color == HikePhotosUtils.FilterTools.getSelectedColor())
 		{
 			ringColor =  HikeConstants.HikePhotos.SELECTED_RING_COLOR;
+			if(setCurrentItem)
 			HikePhotosUtils.FilterTools.setCurrentDoodleItem(this);
 		}
 		else

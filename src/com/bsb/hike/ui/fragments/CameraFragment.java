@@ -318,6 +318,7 @@ public class CameraFragment extends SherlockFragment
 	 */
 	public void autoFocus()
 	{
+		if(cameraView!=null)
 		cameraView.autoFocus();
 	}
 

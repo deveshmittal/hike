@@ -294,6 +294,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		}
 		else
 		{
+			savingFinal = false;
 			imageEdited = preview;
 			flattenLayers();
 		}
