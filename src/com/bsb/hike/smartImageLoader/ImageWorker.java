@@ -229,11 +229,11 @@ public abstract class ImageWorker
 		imageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(data, rounded));
 		if (setHiResDefaultAvatar)
 		{
-			imageView.setImageResource(isBroadcastConversation? R.drawable.ic_broadcast_chat_thread : (isGroupConversation ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires));
+			imageView.setImageResource(isBroadcastConversation? R.drawable.ic_default_avatar_broadcast_hires : (isGroupConversation ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires));
 		}
 		else
 		{
-			imageView.setImageResource(isBroadcastConversation? R.drawable.ic_broadcast_chat_thread : (isGroupConversation ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar));
+			imageView.setImageResource(isBroadcastConversation? R.drawable.ic_default_avatar_broadcast : (isGroupConversation ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar));
 		}
 	}
 

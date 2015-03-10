@@ -252,12 +252,6 @@ public class ConvMessage
 		this.msgID = msgId;
 	}
 	
-//	TODO anu bansal serverId
-/**
- * serverId	
- * create a new constructor for serverID
- * set serverID field in convMessage
- */
 	public ConvMessage(TypingNotification typingNotification)
 	{
 		this.typingNotification = typingNotification;
@@ -459,10 +453,24 @@ public class ConvMessage
 			this.mMessage = Utils.getParticipantAddedMessage(this, context, highlight);
 			break;
 		case PARTICIPANT_LEFT:
-			this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn()));
+			if (conversation instanceof BroadcastConversation)
+			{
+				this.mMessage = String.format(context.getString(R.string.removed_from_broadcast), ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn()));
+			}
+			else
+			{
+				this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn()));
+			}
 			break;
 		case GROUP_END:
-			this.mMessage = context.getString(R.string.group_chat_end);
+			if (conversation instanceof BroadcastConversation)
+			{
+				this.mMessage = context.getString(R.string.broadcast_list_end);
+			}
+			else
+			{
+				this.mMessage = context.getString(R.string.group_chat_end);
+			}
 			break;
 		case USER_JOIN:
 			if (conversation != null)
@@ -497,8 +505,16 @@ public class ConvMessage
 			String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 			String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
-			this.mMessage = String.format(
-					context.getString(participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name : R.string.change_group_image), participantName);
+			String message;
+			if (getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
+			{
+				message = context.getString(this.isBroadcastConversation()?R.string.change_broadcast_name : R.string.change_group_name);
+			}
+			else
+			{
+				message = context.getString(R.string.change_group_image);
+			}
+			this.mMessage = String.format(message, participantName);
 			break;
 		case BLOCK_INTERNATIONAL_SMS:
 			this.mMessage = context.getString(R.string.block_internation_sms);
@@ -1043,6 +1059,10 @@ public class ConvMessage
 
 	public void setSentToMsisdnsList(ArrayList<String> sentToMsisdnsList) {
 		this.sentToMsisdnsList.addAll(sentToMsisdnsList);
+	}
+
+	public void addToSentToMsisdnsList(String msisdn) {
+		this.sentToMsisdnsList.add(msisdn);
 	}
 
 	public boolean hasBroadcastId() {

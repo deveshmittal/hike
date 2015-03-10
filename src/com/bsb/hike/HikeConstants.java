@@ -1285,6 +1285,8 @@ public class HikeConstants
 
 		public static final String CREATE_GROUP = "createGroup";
 		
+		public static final String CREATE_BROADCAST = "createBroadcast";
+		
 		public static final String COMPOSE_MODE = "composeMode";
 
 		public static final int CREATE_BROADCAST_MODE = 7;

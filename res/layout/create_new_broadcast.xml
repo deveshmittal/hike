@@ -15,7 +15,7 @@
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_broadcast" />
+            android:src="@drawable/ic_default_avatar_broadcast" />
 
     </RelativeLayout>
 
@@ -30,7 +30,6 @@
         android:background="@drawable/bg_country_search_bar"
         android:drawablePadding="9dp"
         android:gravity="center_vertical"
-        android:hint="@string/name_broadcast"
         android:maxLength="@integer/max_length_group_name"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
@@ -41,15 +40,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:drawableLeft="@drawable/ic_chat_theme_info"
         android:drawablePadding="4dp"
         android:layout_marginTop="20dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        android:singleLine="true"
-        android:background="#f2f2f2"
         android:text="@string/broadcast_participant_info"/>
 
 </LinearLayout>

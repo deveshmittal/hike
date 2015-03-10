@@ -2,10 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/add_people"
+        android:id="@+id/add_recipients"
         android:icon="@drawable/ic_invitewhite"
         android:showAsAction="always"
-        android:title="@string/add_people"/>
+        android:title="@string/add_recipients"/>
     <item
         android:id="@+id/overflow_menu"
         android:icon="@drawable/ic_overflow"
