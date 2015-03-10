@@ -64,7 +64,7 @@ public class PlatformContentModel
 	{
 		if (mTemplateHash == -1)
 		{
-			mTemplateHash = new String(cardObj.layoutId + cardObj.appVersion).hashCode();
+			mTemplateHash = new String(cardObj.layoutId + cardObj.appVersion + cardObj.appName).hashCode();
 		}
 		return mTemplateHash;
 	}

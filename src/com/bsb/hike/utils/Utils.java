@@ -615,7 +615,7 @@ public class Utils
 	 */
 	public static boolean isUserSignedUp(Context context, boolean launchSignup)
 	{
-		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(context);
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance();
 		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
 			if(launchSignup)
@@ -1496,15 +1496,21 @@ public class Utils
 		}
 	}
 
-	public static boolean copyImage(String srcFilePath, String destFilePath, Context context)
+	public static boolean compressAndCopyImage(String srcFilePath, String destFilePath, Context context)
+	{
+		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+		return compressAndCopyImage(srcFilePath, destFilePath, context, quality);
+	}
+	
+	public static boolean compressAndCopyImage(String srcFilePath, String destFilePath, Context context, int quality)
 	{
 		try
 		{
 			InputStream src;
 			String imageOrientation = Utils.getImageOrientation(srcFilePath);
 			Bitmap tempBmp = null;
-			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+
 			if (quality == ImageQuality.QUALITY_MEDIUM)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
@@ -3393,15 +3399,15 @@ public class Utils
 
 	public static void resetUnseenStatusCount(Context context)
 	{
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 	}
 
 	public static void resetUnseenFriendRequestCount(Context context)
 	{
-		if (HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
+		if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
 		{
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_COUNT_CHANGED, null);
 	}
@@ -3446,7 +3452,7 @@ public class Utils
 
 	public static boolean isVoipActivated(Context context)
 	{
-		int voipActivated = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.VOIP_ACTIVATED, 0);
+		int voipActivated = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.VOIP_ACTIVATED, 1);
 		return (voipActivated == 0)? false : true;
 	}
 
@@ -3457,11 +3463,7 @@ public class Utils
 			Toast.makeText(context, context.getString(R.string.voip_offline_error), Toast.LENGTH_SHORT).show();
 			return;
 		}
-		Intent i = new Intent(context, VoIPService.class);
-		i.putExtra("action", "outgoingcall");
-		i.putExtra("msisdn", mContactNumber);
-		i.putExtra("call_source", source.ordinal());
-		context.startService(i);
+		context.startService(IntentManager.getVoipCallIntent(context, mContactNumber, source));
 	}
 
 	public static String getFormattedDateTimeFromTimestamp(long milliSeconds, Locale current)
@@ -3771,6 +3773,15 @@ public class Utils
 
 	public static void makeNoMediaFile(File root)
 	{
+		makeNoMediaFile(root, false);
+	}
+
+	/*
+	 * Whenever creating a nomedia file in any dirctory and if images/videos are already present in 
+	 * that directory then we need to do re-scan to make them invisible from gallery.
+	 */
+	public static void makeNoMediaFile(File root, boolean reScan)
+	{
 		if (root == null)
 		{
 			return;
@@ -3783,13 +3794,50 @@ public class Utils
 		File file = new File(root, ".nomedia");
 		if (!file.exists())
 		{
+			FileOutputStream dest = null;
 			try
 			{
-				file.createNewFile();
+				dest = new FileOutputStream(file);
+				/*
+				 * File content could be blank (for backwards compatibility), or have one or more of the following values separated by a newline:
+				 * image|sound|video
+				 * Reference - https://code.google.com/p/android/issues/detail?id=35879
+				 */
+				String data = "";
+				dest.write(data.getBytes(), 0, data.getBytes().length);
 			}
 			catch (IOException e)
 			{
-				Logger.d("NoMedia", "failed to make nomedia file");
+				Logger.d("NoMedia", "Failed to make nomedia file");
+			}
+			finally
+			{
+				try
+				{
+					if(dest != null)
+					{
+						dest.flush();
+						dest.getFD().sync();
+						dest.close();
+					}
+				}
+				catch (IOException e)
+				{
+					Logger.d("NoMedia", "Failed to make nomedia file");
+				}
+			}
+			if(reScan)
+			{
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+				{
+					HikeMessengerApp.getInstance().getApplicationContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" +
+							root)));
+				}
+				else
+				{
+					HikeMessengerApp.getInstance().getApplicationContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" +
+							root)));
+				}
 			}
 		}
 	}
@@ -3922,7 +3970,7 @@ public class Utils
 	public static void addFavorite(final Context context, final ContactInfo contactInfo, final boolean isFtueContact)
 	{
 		toggleFavorite(context, contactInfo, isFtueContact);
-		if (!contactInfo.isOnhike() || HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, false))
+		if (!contactInfo.isOnhike() || HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, false))
 		{
 			return;
 		}
@@ -3934,7 +3982,7 @@ public class Utils
 			public void positiveClicked(Dialog dialog)
 			{
 				dialog.dismiss();
-				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
 			}
 
 			@Override
@@ -3946,7 +3994,7 @@ public class Utils
 			public void negativeClicked(Dialog dialog)
 			{
 				dialog.dismiss();
-				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
 			}
 
 			@Override
@@ -4001,7 +4049,7 @@ public class Utils
 
 	public static final void cancelScheduledStealthReset(Context context)
 	{
-		HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
+		HikeSharedPreferenceUtil.getInstance().removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
 	}
 
 	public static long getOldTimestamp(int min)
@@ -5067,7 +5115,7 @@ public class Utils
 	{
 		appContext = appContext.getApplicationContext();
 
-		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(appContext);
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance();
 
 		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
 		{

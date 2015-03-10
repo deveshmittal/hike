@@ -4405,7 +4405,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (convMessage.getMsgID() == msgId && convMessage.isFileTransferMessage())
 				{
 					HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-					if (hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile.getHikeFileType() == HikeFileType.VIDEO)
+					if (hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile.getHikeFileType() == HikeFileType.VIDEO || hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
 					{
 						return true;
 					}
