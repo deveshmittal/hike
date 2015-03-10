@@ -4125,6 +4125,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			handleActionModeOrientationChange(mActionMode.whichActionModeIsOn());
 		}
+		
+		if (themePicker != null && themePicker.isShowing())
+		{
+			themePicker.refreshViews();
+		}
 	}
 	
 	/**

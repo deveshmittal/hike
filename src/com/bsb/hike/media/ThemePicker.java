@@ -47,8 +47,8 @@ public class ThemePicker implements BackPressListener, OnDismissListener, OnClic
 
 	private ThemePickerListener listener;
 
-	private boolean listenerInvoked = false;
-
+	private boolean listenerInvoked = false, reInflation;
+	
 	private PopUpLayout popUpLayout;
 
 	public ThemePicker(SherlockFragmentActivity sherlockFragmentActivity, ThemePickerListener listener, ChatTheme currentTheme)
@@ -184,17 +184,25 @@ public class ThemePicker implements BackPressListener, OnDismissListener, OnClic
 		public void onDestroyActionMode(ActionMode mode)
 		{
 			Logger.i(TAG, "on destroy actionmode");
-			actionMode = null;
-			popUpLayout.dismiss();
-			// we are not getting click event of close button in action bar, so
-			// if action bar is closed because of click there, we fallback
-			// onlistenerInvoked listenerInvoked becomes true if we click on
-			// done button in action bar
-			if (!listenerInvoked)
+			/**
+			 * Proceeding only if there was no reinflation
+			 */
+			if (!reInflation)
 			{
-				listener.themeCancelled();
-				listenerInvoked = false;
+				actionMode = null;
+				popUpLayout.dismiss();
+				// we are not getting click event of close button in action bar, so
+				// if action bar is closed because of click there, we fallback
+				// onlistenerInvoked listenerInvoked becomes true if we click on
+				// done button in action bar
+				if (!listenerInvoked)
+				{
+					listener.themeCancelled();
+					listenerInvoked = false;
+				}
 			}
+			
+			reInflation = false;
 		}
 
 		@Override
@@ -263,5 +271,17 @@ public class ThemePicker implements BackPressListener, OnDismissListener, OnClic
 	{
 		return popUpLayout.isShowing();
 	}
-
+	
+	/**
+	 * This method changes the number of columns field of the grid view and then calls notifyDataSetChanged
+	 */
+	public void refreshViews()
+	{
+		GridView grid = (GridView) viewToDisplay.findViewById(R.id.attachment_grid);
+		grid.setNumColumns(getNumColumnsChatThemes());
+		((ArrayAdapter<ChatTheme>) grid.getAdapter()).notifyDataSetChanged();
+		
+		reInflation = true;
+		sherlockFragmentActivity.startActionMode(actionmodeCallback);
+	}
 }
