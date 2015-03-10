@@ -2993,6 +2993,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				optionsList.add(getString(R.string.add_to_contacts));
 			}
 			optionsList.add(getString(R.string.send_message));
+			if(Utils.isVoipActivated(this) && (tempContactInfo!=null && tempContactInfo.isOnhike()) && !HikeMessengerApp.hikeBotNamesMap.containsKey(tempContactInfo.getMsisdn()))
+			{
+				optionsList.add(getString(R.string.make_call));
+			}
 			if (!tempContactInfo.isOnhike())
 			{
 				optionsList.add(getString(R.string.invite_to_hike));
@@ -3018,6 +3022,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					if (getString(R.string.send_message).equals(option))
 					{
 						openChatThread(contactInfo);
+					}
+					else if (getString(R.string.make_call).equals(option))
+					{
+						Utils.onCallClicked(getApplicationContext(), contactInfo.getMsisdn(), VoIPUtils.CallSource.PROFILE_ACTIVITY);
 					}
 					else if (getString(R.string.invite_to_hike).equals(option))
 					{

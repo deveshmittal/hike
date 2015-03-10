@@ -350,6 +350,7 @@
     <string name="add_member">Add a member</string>
     <string name="invite_all_members">Invite SMS members to hike</string>
     <string name="send_message">Send a message</string>
+    <string name="make_call">Make a call</string>
     <string name="post_status">Post a status</string>
     <string name="owner">Owner</string>
     <string name="on_sms">on SMS</string>
