@@ -22,7 +22,6 @@
         android:maxWidth="192dp"
         android:text="Your search did not match any contacts"
         android:textColor="@color/gray"
-        android:textSize="16dp"
-        android:textStyle="italic" />
+        android:textSize="16dp" />
 
 </LinearLayout>
