@@ -549,6 +549,8 @@ public class HikeConstants
 	public static final String IS_HOME_OVERFLOW_CLICKED = "isHomeOverflowClicked";
 
 	public static final String SHOW_RECENTLY_JOINED_DOT = "showRecentlyJoinedDot";
+	
+	public static final String SHOW_RECENTLY_JOINED = "showRecentlyJoined";
 
 	public static final String SHOW_TIMELINE_RED_DOT = "showTimelineRedDot";
 	
