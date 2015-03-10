@@ -170,16 +170,28 @@ public class UploadContactOrLocationTask extends FileTransferBase
 			Logger.d(getClass().getSimpleName(), "JSON FINAL: " + hikeFile.serialize());
 			metadata.put(HikeConstants.FILES, filesArray);
 
-			((ConvMessage) userContext).setMetadata(metadata);
+			ConvMessage convMessageObject = (ConvMessage) userContext;
+			convMessageObject.setMetadata(metadata);
 
 			// If the file was just uploaded to the servers, we want to publish
 			// this event
 			if (!fileWasAlreadyUploaded)
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, (ConvMessage) userContext);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, convMessageObject);
+			}
+			
+			if(convMessageObject.isBroadcastConversation())
+			{
+				List<PairModified<GroupParticipant, String>> participantList= ContactManager.getInstance().getGroupParticipants(convMessageObject.getMsisdn(), false, false);
+				for (PairModified<GroupParticipant, String> grpParticipant : participantList)
+				{
+					String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
+					convMessageObject.addToSentToMsisdnsList(msisdn);
+				}
+				Utils.addBroadcastRecipientConversations(convMessageObject);
 			}
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessageObject);
 		}
 		catch (Exception e)
 		{
@@ -268,19 +280,6 @@ public class UploadContactOrLocationTask extends FileTransferBase
 			}
 
 			userContext = createConvMessage(msisdn, metadata);
-			
-			ConvMessage convMessageObject =  (ConvMessage) userContext;
-			
-			if(convMessageObject.isBroadcastConversation())
-			{
-				List<PairModified<GroupParticipant, String>> participantList= ContactManager.getInstance().getGroupParticipants(msisdn, false, false);
-				for (PairModified<GroupParticipant, String> grpParticipant : participantList)
-				{
-					String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
-					convMessageObject.addToSentToMsisdnsList(msisdn);
-				}
-				Utils.addBroadcastRecipientConversations(convMessageObject);
-			}
 			
 			if (TextUtils.isEmpty(fileKey))
 			{

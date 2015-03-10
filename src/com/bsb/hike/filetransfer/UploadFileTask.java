@@ -318,16 +318,7 @@ public class UploadFileTask extends FileTransferBase
 
 				HikeConversationsDatabase.getInstance().addConversationMessages(convMessageObject);
 				
-				if(convMessageObject.isBroadcastConversation())
-				{
-					List<PairModified<GroupParticipant, String>> participantList= ContactManager.getInstance().getGroupParticipants(msisdn, false, false);
-					for (PairModified<GroupParticipant, String> grpParticipant : participantList)
-					{
-						String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
-						convMessageObject.addToSentToMsisdnsList(msisdn);
-					}
-					Utils.addBroadcastRecipientConversations(convMessageObject);
-				}
+				//Message sent from here will only do an entry in conversation db it is not actually being sent to server.
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessageObject);
 			}
 		}
@@ -688,14 +679,27 @@ public class UploadFileTask extends FileTransferBase
 			}
 			else
 			{
-				((ConvMessage) userContext).setMetadata(metadata);
+				ConvMessage convMessageObject = (ConvMessage)userContext;
+				convMessageObject.setMetadata(metadata);
 	
 				// The file was just uploaded to the servers, we want to publish
 				// this event
-				((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, ((ConvMessage) userContext));
+				convMessageObject.setTimestamp(System.currentTimeMillis() / 1000);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, convMessageObject);
 	
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, ((ConvMessage) userContext));
+				if(convMessageObject.isBroadcastConversation())
+				{
+					List<PairModified<GroupParticipant, String>> participantList= ContactManager.getInstance().getGroupParticipants(convMessageObject.getMsisdn(), false, false);
+					for (PairModified<GroupParticipant, String> grpParticipant : participantList)
+					{
+						String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
+						convMessageObject.addToSentToMsisdnsList(msisdn);
+					}
+					Utils.addBroadcastRecipientConversations(convMessageObject);
+				}
+				
+				//Message sent from here will contain file key and also message_id ==> this is actually being sent to the server.
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessageObject);
 			}
 			deleteStateFile();
 			Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
