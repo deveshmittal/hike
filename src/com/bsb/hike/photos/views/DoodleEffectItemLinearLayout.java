@@ -5,10 +5,10 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.RadialGradient;
 import android.util.AttributeSet;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.R;
 import com.bsb.hike.photos.HikePhotosUtils;
 
 
@@ -98,6 +98,15 @@ public class DoodleEffectItemLinearLayout extends EffectItemLinearLayout
 		canvas.drawCircle(diameter / 2, diameter / 2, (diameter / 2), paint);
 		paint.setColor(brushColor);
 		canvas.drawCircle(diameter / 2, diameter / 2, (brushWidth / 2), paint);
+		RadialGradient gradient = new RadialGradient(diameter/2,diameter/2, (brushWidth+1)/2, new int[]{0x00000000,0x00000000,0xFF000000}, new float[]{0,0.85f,1}, android.graphics.Shader.TileMode.CLAMP);
+
+		paint = new Paint();
+		paint.setDither(true);
+		paint.setShader(gradient);
+		canvas.drawCircle(diameter / 2, diameter / 2, (brushWidth+1) / 2, paint);
+		
+
+
 		return bitmap;
 	}
 

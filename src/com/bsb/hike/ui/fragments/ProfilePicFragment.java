@@ -14,9 +14,9 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -30,7 +30,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.R.anim;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -44,7 +43,7 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HomeActivity;
-import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.HoloCircularProgress;
 import com.bsb.hike.view.RoundedImageView;
@@ -73,6 +72,8 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 	private boolean finished;
 
+	private ImageView mProfilePicBg;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
@@ -83,6 +84,8 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		mCircularProgress.setProgress(0);
 
 		mCircularImageView = ((RoundedImageView) mFragmentView.findViewById(R.id.circular_image_view));
+		
+		mProfilePicBg = ((ImageView) mFragmentView.findViewById(R.id.profile_pic_bg));
 
 		Bundle bundle = getArguments();
 
@@ -93,8 +96,10 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		Bitmap bmp = BitmapFactory.decodeFile(imagePath, options);
 		if (bmp != null)
 		{
-			((RoundedImageView) mFragmentView.findViewById(R.id.circular_image_view)).setImageBitmap(bmp);
+			mCircularImageView.setImageBitmap(bmp);
 		}
+		
+		mProfilePicBg.setImageBitmap(bmp);
 
 		text1 = (TextView) mFragmentView.findViewById(R.id.text1);
 
@@ -113,6 +118,8 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 				objectAnimatorButton2.start();
 				mCircularImageView.setVisibility(View.VISIBLE);
 				mCircularProgress.setVisibility(View.VISIBLE);
+				mProfilePicBg.setVisibility(View.VISIBLE);
+				((HikeAppStateBaseFragmentActivity)getActivity()).getSupportActionBar().hide();
 				startUpload();
 			}
 		}, 300);
