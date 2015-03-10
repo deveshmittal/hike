@@ -171,7 +171,6 @@ public class HikePhotosUtils
 					effectfilters.addFilter("INKWELL", FilterType.INKWELL);
 					effectfilters.addFilter("LOMO FI", FilterType.LO_FI);
 					effectfilters.addFilter("POLAROID", FilterType.POLAROID);
-					effectfilters.addFilter("BGR", FilterType.BGR);
 					effectfilters.addFilter("SEPIA", FilterType.SEPIA);
 					effectfilters.addFilter("GRAYSCALE", FilterType.GRAYSCALE);
 

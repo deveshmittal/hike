@@ -60,7 +60,6 @@ public final class PreviewFragment extends Fragment
 		gridView.setRowHeight(GridView.AUTO_FIT);
 		mAdapter = new ImageAdapter(getActivity(), myType, handler);
 		gridView.setAdapter(mAdapter);
-
 		ViewStub adjuster = (ViewStub) layout.findViewById(R.id.sizeBarStub);
 		switch (myType)
 		{
@@ -144,7 +143,6 @@ public final class PreviewFragment extends Fragment
 		{
 			return 0;
 		}
-
 		@Override
 		public int getItemViewType(int position)
 		{
