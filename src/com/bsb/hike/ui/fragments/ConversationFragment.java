@@ -1,5 +1,6 @@
 package com.bsb.hike.ui.fragments;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -1090,6 +1092,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), conv);
 		intent.putExtra(HikeConstants.Extras.CONV_SEARCH_QUERY, searchText);
 		startActivity(intent);
+		
+		if (searchMode)
+		{
+			recordSearchItemClicked(conv, position, searchText);
+		}
 
 		SharedPreferences prefs = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		if (conv.getMsisdn().equals(HikeConstants.FTUE_HIKEBOT_MSISDN) && prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.NOTVIEWED.ordinal())
@@ -1097,6 +1104,45 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			Editor editor = prefs.edit();
 			editor.putInt(HikeConstants.HIKEBOT_CONV_STATE, hikeBotConvStat.VIEWED.ordinal());
 			editor.commit();
+		}
+	}
+	
+	private void recordSearchItemClicked(Conversation conv, int position, String text)
+	{
+		String SEARCH_RESULT = "srchRslt";
+		String INDEX = "idx";
+		String SEARCH_TEXT = "srchTxt";
+		String RESULT_TYPE = "rsltType";
+		
+		int resultType;
+		// For existing conversation
+		if (mConversationsByMSISDN.containsKey(conv.getMsisdn()))
+		{
+			resultType = 1;
+		}
+		// For new conversation with hike use
+		else if (conv.isOnhike())
+		{
+			resultType = 2;
+		}
+		// For new conversation with SMS use
+		else
+		{
+			resultType = 3;
+		}
+		JSONObject metadata = new JSONObject();
+		try
+		{
+			metadata
+			.put(HikeConstants.EVENT_KEY, SEARCH_RESULT)
+			.put(SEARCH_TEXT, text)
+			.put(INDEX, position)
+			.put(RESULT_TYPE, resultType);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ANALYTICS_HOME_SEARCH, metadata);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 	}
 

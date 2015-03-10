@@ -1868,6 +1868,10 @@ public class HikeConstants
 		public static final String NUX_FOOTER_NOR_COM="nuxN2C";
 		
 		public static final String NUX_EXPANDED_COM="nuxE2C";		
+
+		// Home search events
+
+		public static final String HOME_SEARCH = "hmSrch";
 	}
 
 	public static final class MqttMessageTypes

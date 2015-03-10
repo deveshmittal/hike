@@ -95,6 +95,8 @@ public class AnalyticsConstants
 
 	public static final String ANALYTICS_BACKUP = "backup";
 
+	public static final String ANALYTICS_HOME_SEARCH = "search";
+
 	public static final String EVENT_SUB_TYPE = "st";
 
 	public static final String EVENT_TAG = "tag";

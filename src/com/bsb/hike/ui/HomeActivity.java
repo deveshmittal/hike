@@ -151,6 +151,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private Handler mHandler = new Handler();
 
 	private SnowFallView snowFallView;
+	
+	private int searchOptionID;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
@@ -490,7 +492,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 
 		final SearchView searchView = new SearchView(getSupportActionBar().getThemedContext());
-		searchView.setQueryHint(getString(R.string.search_hint));
+		searchView.setQueryHint(getSearchQueryHintText());
 		searchView.setIconifiedByDefault(false);
 		searchView.setIconified(false);
 		searchView.setOnQueryTextListener(onQueryTextListener);
@@ -498,6 +500,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		searchView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
 		searchItem = menu.findItem(R.id.search);
+		searchOptionID = searchItem.getItemId();
 		searchItem.setActionView(searchView).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
 
 		searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()
@@ -537,7 +540,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		((ImageView) menu.findItem(R.id.new_conversation).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_new_conversation);
 		showRecentlyJoinedDot(1000);
 
-		menu.findItem(R.id.new_conversation).getActionView().setOnClickListener(new View.OnClickListener()
+		menu.findItem(R.id.new_conversation).getActionView().setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -562,6 +565,20 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 		
 		return true;
+	}
+	
+	private void recordSearchOptionClick()
+	{
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.HOME_SEARCH);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+		}
+		catch (JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
 	}
 
 	public static void setSearchOptionAccess(boolean setVisible)
@@ -619,6 +636,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		case android.R.id.home:
 			hikeLogoClicked();
 			break;
+		}
+
+		if (item.getItemId() == searchOptionID)
+		{
+			recordSearchOptionClick();
 		}
 
 		if (intent != null)

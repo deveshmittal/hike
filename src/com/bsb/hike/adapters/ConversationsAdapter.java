@@ -623,6 +623,8 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private class ContactFilter extends Filter
 	{
+		private boolean noResultRecorded = false;
+
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint)
 		{
@@ -722,6 +724,34 @@ public class ConversationsAdapter extends BaseAdapter
 			completeList.clear();
 			completeList.addAll(filteredSearchList);
 			notifyDataSetChanged();
+			if (completeList.isEmpty() && !noResultRecorded)
+			{
+				recordNoResultsSearch();
+				noResultRecorded = true;
+			}
+			else if (!completeList.isEmpty())
+			{
+				noResultRecorded = false;
+			}
+		}
+	}
+	
+	private void recordNoResultsSearch()
+	{
+		String SEARCH_NO_RESULT = "srchNoRslt";
+		String SEARCH_TEXT = "srchTxt";
+		
+		JSONObject metadata = new JSONObject();
+		try
+		{
+			metadata
+			.put(HikeConstants.EVENT_KEY, SEARCH_NO_RESULT)
+			.put(SEARCH_TEXT, refinedSearchText);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ANALYTICS_HOME_SEARCH, metadata);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 	}
 
