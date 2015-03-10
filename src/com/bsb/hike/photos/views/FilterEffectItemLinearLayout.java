@@ -50,7 +50,7 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 		findViewById(R.id.selectionBar).setBackgroundColor(getResources().getColor(R.color.photos_pager_background));
 	}
 
-	public void setFilter(Context context, FilterType type, String name)
+	public void setFilter(Context context, FilterType type, boolean setFilterItem)
 	{
 		this.filter = type;
 		initiateThumbnailCreation();
@@ -58,6 +58,7 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 		if (type == HikePhotosUtils.FilterTools.getSelectedFilter())
 		{
 			findViewById(R.id.selectionBar).setBackgroundColor(getResources().getColor(R.color.photos_filters_font_color));
+			if(setFilterItem)
 			HikePhotosUtils.FilterTools.setCurrentFilterItem(this);
 		}
 		else

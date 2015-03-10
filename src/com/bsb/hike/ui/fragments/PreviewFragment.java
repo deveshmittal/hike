@@ -76,7 +76,7 @@ public final class PreviewFragment extends Fragment
 			ViewStub stub = (ViewStub) sizeBar.findViewById(R.id.viewStubPreview);
 			DoodleEffectItemLinearLayout inflated = (DoodleEffectItemLinearLayout) stub.inflate();
 			inflated.setRingColor(HikeConstants.HikePhotos.DOODLE_SELECTED_RING_COLOR);
-			inflated.setBrushColor(HikePhotosUtils.DoodleColors[0]);
+			inflated.setBrushColor(HikePhotosUtils.DoodleColors[0],true);
 			inflated.setBrushWidth(HikePhotosUtils.dpToPx(getActivity().getApplicationContext(), HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH));
 			inflated.refresh();
 			inflated.setPadding(0, 0, 0, 0);
@@ -189,12 +189,17 @@ public final class PreviewFragment extends Fragment
 
 						if (existingTag != null && existingTag.equals(filterName))
 						{
-							return HikePhotosUtils.FilterTools.getCurrentFilterItem();
+							FilterEffectItemLinearLayout filterPreviewView = (FilterEffectItemLinearLayout) convertView;
+							filterPreviewView.init(mOriginalBitmap, myFilters.names.get(position));
+							filterPreviewView.setFilter(mContext, myFilters.filters.get(position), false);
+							filterPreviewView.setOnClickListener(clickListener);
+							convertView.setTag(filterName);
+							return convertView;
 						}
 					}
 					FilterEffectItemLinearLayout filterPreviewView = (FilterEffectItemLinearLayout) convertView;
 					filterPreviewView.init(mOriginalBitmap, myFilters.names.get(position));
-					filterPreviewView.setFilter(mContext, myFilters.filters.get(position), myFilters.names.get(position));
+					filterPreviewView.setFilter(mContext, myFilters.filters.get(position), true);
 					filterPreviewView.setOnClickListener(clickListener);
 					convertView.setTag(filterName);
 				}
@@ -223,12 +228,17 @@ public final class PreviewFragment extends Fragment
 
 						if (existingColor != null && existingColor == currentPosColor)
 						{
-							return HikePhotosUtils.FilterTools.getCurrentDoodleItem();
+							DoodleEffectItemLinearLayout doodleItem = (DoodleEffectItemLinearLayout) convertView;
+							doodleItem.setBrushColor(currentPosColor,false);
+							doodleItem.refresh();
+							doodleItem.setOnClickListener(clickListener);
+							convertView.setTag(currentPosColor);
+							return convertView;
 						}
 					}
-					
+
 					DoodleEffectItemLinearLayout doodleItem = (DoodleEffectItemLinearLayout) convertView;
-					doodleItem.setBrushColor(currentPosColor);
+					doodleItem.setBrushColor(currentPosColor,true);
 					doodleItem.refresh();
 					doodleItem.setOnClickListener(clickListener);
 					convertView.setTag(currentPosColor);

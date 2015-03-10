@@ -196,6 +196,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 					long time = (long) System.currentTimeMillis() / 1000;
 
 					StatusMessage statusMessage = new StatusMessage(0, mappedId, msisdn, name, "", StatusMessageType.PROFILE_PIC, time, -1, 0);
+					
 					HikeConversationsDatabase.getInstance().addStatusMessage(statusMessage, true);
 
 					ContactManager.getInstance().setIcon(statusMessage.getMappedId(), bytes, false);

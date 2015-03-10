@@ -67,6 +67,8 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 	private View mActionBarBackButton;
 
+	private View overlayFrame;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -112,6 +114,8 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 		setupActionBar();
 
+		overlayFrame = findViewById(R.id.overlayFrame);
+		
 		try
 		{
 			new File(filename).delete();
@@ -128,17 +132,16 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
 		super.onResume();
 		getSupportActionBar().getCustomView().findViewById(R.id.done_container).setVisibility(View.VISIBLE);
+		editView.enable();
 	}
 
 	@Override
 	protected void onPause()
 	{
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
-		HikePhotosUtils.FilterTools.setCurrentFilterItem(null);
-		HikePhotosUtils.FilterTools.setCurrentDoodleItem(null);
 		super.onPause();
 	}
-
+	
 	private void setupActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
@@ -242,13 +245,12 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				}
 				me.select();
 			}
-
 			else if (v.getClass() == DoodleEffectItemLinearLayout.class)
 			{
 				DoodleEffectItemLinearLayout prev = HikePhotosUtils.FilterTools.getCurrentDoodleItem();
 				DoodleEffectItemLinearLayout me = (DoodleEffectItemLinearLayout) v;
 				editView.setBrushColor(me.getBrushColor());
-				doodlePreview.setBrushColor(me.getBrushColor());
+				doodlePreview.setBrushColor(me.getBrushColor(),true);
 				doodlePreview.refresh();
 				if (prev != null && prev.getBrushColor() != me.getBrushColor())
 				{
@@ -287,7 +289,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 					{
 						mPhotosActionsFragment = new PhotoActionsFragment(new ActionListener()
 						{
-
 							@Override
 							public void onAction(int actionCode)
 							{
@@ -300,14 +301,12 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 										public void onFailure()
 										{
 											// Do nothing
-
 										}
 
 										@Override
 										public void onComplete(Bitmap bmp)
 										{
 											// Do nothing
-
 										}
 
 										@Override
@@ -350,7 +349,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 												{
 													editView.setVisibility(View.VISIBLE);
 													mActionBarBackButton.setVisibility(View.GONE);
-													getSupportFragmentManager().popBackStackImmediate();
 													ProfilePicFragment profilePicFragment = new ProfilePicFragment();
 													Bundle b = new Bundle();
 													b.putString(HikeConstants.HikePhotos.FILENAME, f.getAbsolutePath());
@@ -377,7 +375,9 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 							.replace(R.id.overlayFrame, mPhotosActionsFragment).addToBackStack(null).commit();
 
 					mActionBarDoneContainer.setVisibility(View.INVISIBLE);
-
+					
+					overlayFrame.setVisibility(View.VISIBLE);
+					
 					break;
 				}
 			}
