@@ -2163,48 +2163,21 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		switch (profileType)
 		{
 		case BROADCAST_INFO:
-			builder = new AlertDialog.Builder(this);
-			builder.setMessage(R.string.delete_broadcast_confirm);
-			builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener()
-			{
-
-				@Override
-				public void onClick(DialogInterface dialog, int which)
-				{
-					HikePubSub hikePubSub = HikeMessengerApp.getPubSub();
-					HikeMqttManagerNew.getInstance().sendMessage(broadcastConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_QOS_ONE);
-					hikePubSub.publish(HikePubSub.GROUP_LEFT, broadcastConversation.getMsisdn());
-					Intent intent = new Intent(ProfileActivity.this, HomeActivity.class);
-					intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mLocalMSISDN);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
-					finish();
-				}
-			});
-			builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener()
-			{
-
-				@Override
-				public void onClick(DialogInterface dialog, int which)
-				{
-				}
-			});
-			builder.setCancelable(true);
-			alertDialog = builder.create();
-			alertDialog.show();
-			break;
 		case GROUP_INFO:
+			final boolean isBroadcast = profileType == ProfileType.BROADCAST_INFO;
+			
 			builder = new AlertDialog.Builder(this);
-			builder.setMessage(R.string.leave_group_confirm);
+			builder.setMessage(isBroadcast ? R.string.delete_broadcast_confirm : R.string.leave_group_confirm);
 			builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener()
 			{
 
 				@Override
 				public void onClick(DialogInterface dialog, int which)
 				{
+					Conversation conversation = (isBroadcast ? broadcastConversation : groupConversation);
 					HikePubSub hikePubSub = HikeMessengerApp.getPubSub();
-					HikeMqttManagerNew.getInstance().sendMessage(groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_QOS_ONE);
-					hikePubSub.publish(HikePubSub.GROUP_LEFT, groupConversation.getMsisdn());
+					HikeMqttManagerNew.getInstance().sendMessage(conversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_QOS_ONE);
+					hikePubSub.publish(HikePubSub.GROUP_LEFT, conversation.getMsisdn());
 					Intent intent = new Intent(ProfileActivity.this, HomeActivity.class);
 					intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mLocalMSISDN);
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -2991,65 +2964,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			StatusMessage statusMessage = (StatusMessage) view.getTag();
 			return statusMessageContextMenu(statusMessage);
 		}
-		else if (profileType == ProfileType.BROADCAST_INFO)
+		else if (profileType == ProfileType.GROUP_INFO || profileType == ProfileType.BROADCAST_INFO)
 		{
-			GroupParticipant groupParticipant = (GroupParticipant) view.getTag();
-
-			ArrayList<String> optionsList = new ArrayList<String>();
-
-			ContactInfo tempContactInfo = null;
-
-			if (groupParticipant == null)
-			{
-				return false;
-			}
-
-			String myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
-
-			tempContactInfo = groupParticipant.getContactInfo();
-			if (myMsisdn.equals(tempContactInfo.getMsisdn()))
-			{
-				return false;
-			}
-
-			final ContactInfo contactInfo = tempContactInfo;
-
-			optionsList.add(getString(R.string.send_message));
-			if (isGroupOwner)
-			{
-				optionsList.add(getString(R.string.remove_from_broadcast));
-			}
-
-			final String[] options = new String[optionsList.size()];
-			optionsList.toArray(options);
-
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-			ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this, R.layout.alert_item, R.id.item, options);
-
-			builder.setAdapter(dialogAdapter, new DialogInterface.OnClickListener()
-			{
-				@Override
-				public void onClick(DialogInterface dialog, int which)
-				{
-					String option = options[which];
-					if (getString(R.string.send_message).equals(option))
-					{
-						openChatThread(contactInfo);
-					}
-					else if (getString(R.string.remove_from_broadcast).equals(option))
-					{
-						removeFromGroup(contactInfo);
-					}
-				}
-			});
-
-			AlertDialog alertDialog = builder.show();
-			alertDialog.getListView().setDivider(getResources().getDrawable(R.drawable.ic_thread_divider_profile));
-			return true;
-		}
-		else if (profileType == ProfileType.GROUP_INFO)
-		{
+			boolean isBroadcast  = profileType == ProfileType.BROADCAST_INFO;
 			GroupParticipant groupParticipant = (GroupParticipant) view.getTag();
 
 			ArrayList<String> optionsList = new ArrayList<String>();
@@ -3082,7 +2999,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			}
 			if (isGroupOwner)
 			{
-				optionsList.add(getString(R.string.remove_from_group));
+				optionsList.add(getString(isBroadcast ? R.string.remove_from_broadcast : R.string.remove_from_group ));
 			}
 
 			final String[] options = new String[optionsList.size()];
@@ -3111,6 +3028,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						Utils.addToContacts(ProfileActivity.this, contactInfo.getMsisdn());
 					}
 					else if (getString(R.string.remove_from_group).equals(option))
+					{
+						removeFromGroup(contactInfo);
+					}
+					else if (getString(R.string.remove_from_broadcast).equals(option))
 					{
 						removeFromGroup(contactInfo);
 					}
