@@ -21,6 +21,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
@@ -72,6 +73,8 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
 
 		super.onCreate(savedInstanceState);
+		
+		getWindow().requestFeature((int)Window.FEATURE_ACTION_BAR_OVERLAY);
 
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -355,22 +358,10 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 													profilePicFragment.setArguments(b);
 													getSupportFragmentManager()
 															.beginTransaction()
-															.setCustomAnimations(R.anim.fade_in_animation, R.anim.photo_option_out, R.anim.fade_in_animation,
-																	R.anim.photo_option_out).replace(R.id.overlayFrame, profilePicFragment).addToBackStack(null).commit();
+															.setCustomAnimations(R.anim.fade_in_animation, R.anim.fade_out_animation, R.anim.fade_in_animation,
+																	R.anim.fade_out_animation).replace(R.id.overlayFrame, profilePicFragment).addToBackStack(null).commit();
 												}
 											}, 600);
-
-											new Handler(Looper.getMainLooper()).postDelayed(new Runnable()
-											{
-
-												@Override
-												public void run()
-												{
-													pager.setVisibility(View.GONE);
-													indicator.setVisibility(View.GONE);
-													editView.setVisibility(View.GONE);
-												}
-											}, 200);
 										}
 									});
 
