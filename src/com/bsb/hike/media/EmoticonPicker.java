@@ -34,6 +34,8 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	private View mViewToDisplay;
 
 	private int mLayoutResId = -1;
+	
+	private int currentConfig = Configuration.ORIENTATION_PORTRAIT;
 
 	private static final String TAG = "EmoticonPicker";
 	
@@ -119,13 +121,22 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 		this.mLayoutResId = layoutResId;
 	}
 
-	public void showEmoticonPicker()
+	public void showEmoticonPicker(int screenOrientation)
 	{
-		showEmoticonPicker(0, 0);
+		showEmoticonPicker(0, 0, screenOrientation);
 	}
 
-	public void showEmoticonPicker(int xoffset, int yoffset)
+	public void showEmoticonPicker(int xoffset, int yoffset, int screenOritentation)
 	{
+		/**
+		 * Checking for configuration change
+		 */
+		if (orientationChanged(screenOritentation))
+		{
+			resetView();
+			currentConfig = screenOritentation;
+		}
+		
 		initView();
 
 		mPopUpLayout.showKeyboardPopup(mViewToDisplay);
@@ -221,8 +232,15 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	 */
 
 	@Override
-	public View getView()
+	public View getView(int screenOrientation)
 	{
+		if (orientationChanged(screenOrientation))
+		{
+			Logger.i(TAG, "Orientation Changed");
+			resetView();
+			currentConfig = screenOrientation;
+		}
+		
 		if (mViewToDisplay == null)
 		{
 			initView();
@@ -284,6 +302,16 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 			eraseEmoticon();
 			break;
 		}
+	}
+	
+	private void resetView()
+	{
+		mViewToDisplay = null;
+	}
+	
+	private boolean orientationChanged(int deviceOrientation)
+	{
+		return currentConfig != deviceOrientation;
 	}
 
 }

@@ -2,6 +2,7 @@ package com.bsb.hike.media;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
@@ -42,6 +43,8 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	private View viewToDisplay;
 
 	private int mLayoutResId = -1;
+	
+	private int currentConfig = Configuration.ORIENTATION_PORTRAIT; 
 	
 	private StickerEmoticonIconPageIndicator mIconPageIndicator;
 	
@@ -119,13 +122,22 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 		this(context, listener, mainView, firstTimeHeight, null);
 	}
 
-	public void showStickerPicker()
+	public void showStickerPicker(int screenOrietentation)
 	{
-		showStickerPicker(0, 0);
+		showStickerPicker(0, 0, screenOrietentation);
 	}
 
-	public void showStickerPicker(int xoffset, int yoffset)
+	public void showStickerPicker(int xoffset, int yoffset, int screenOritentation)
 	{
+		/**
+		 * Checking for configuration change
+		 */
+		if (orientationChanged(screenOritentation))
+		{
+			resetView();
+			currentConfig = screenOritentation;
+		}
+		
 		initView();
 
 		popUpLayout.showKeyboardPopup(viewToDisplay);
@@ -190,7 +202,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 */
 
 	@Override
-	public View getView()
+	public View getView(int screenOritentation)
 	{
 		/**
 		 * Exit condition : If there is no external storage, we return null here. 
@@ -200,6 +212,13 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 		{
 			Toast.makeText(mContext, R.string.no_external_storage, Toast.LENGTH_SHORT).show();
 			return null;
+		}
+		
+		if (orientationChanged(screenOritentation))
+		{
+			Logger.i(TAG, "Orientation Changed");
+			resetView();
+			currentConfig = screenOritentation;
 		}
 		
 		if (viewToDisplay == null)
@@ -389,5 +408,16 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 			HikeSharedPreferenceUtil.getInstance(mContext.getApplicationContext()).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
 			viewToDisplay.findViewById(R.id.shop_icon_badge).setVisibility(View.GONE);
 		}
+	}
+	
+	private void resetView()
+	{
+		viewToDisplay = null;
+		stickerAdapter = null;
+	}
+	
+	private boolean orientationChanged(int deviceOrientation)
+	{
+		return currentConfig != deviceOrientation;
 	}
 }

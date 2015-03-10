@@ -47,7 +47,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
-import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
@@ -69,8 +68,6 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.SearchView;
-import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
@@ -115,7 +112,6 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
@@ -128,7 +124,6 @@ import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.utils.ChatTheme;
-import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
@@ -139,8 +134,6 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.CustomLinearLayout;
-import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 
@@ -794,7 +787,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			recordFirstTimeStickerClick();
 		}
 		
-		mShareablePopupLayout.togglePopup(mStickerPicker);
+		mShareablePopupLayout.togglePopup(mStickerPicker, activity.getResources().getConfiguration().orientation);
 	}
 	
 	private void recordFirstTimeStickerClick()
@@ -819,7 +812,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void emoticonClicked()
 	{
-		mShareablePopupLayout.togglePopup(mEmoticonPicker);
+		mShareablePopupLayout.togglePopup(mEmoticonPicker, activity.getResources().getConfiguration().orientation);
 	}
 
 	protected void showThemePicker()
@@ -4099,8 +4092,21 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void onConfigurationChanged(Configuration newConfig)
 	{
 		Logger.d(TAG, "newConfig : " + newConfig.toString());
+		
+		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
+		
+		/**
+		 * Handle theme image change.
+		 */
+		if (getCurrentlTheme() != null && getCurrentlTheme() != ChatTheme.DEFAULT)
+		{
+			setBackground(getCurrentlTheme());
+		}
 	}
-
+	
 	@Override
 	public boolean onEditorAction(TextView view, int actionId, KeyEvent keyEvent)
 	{

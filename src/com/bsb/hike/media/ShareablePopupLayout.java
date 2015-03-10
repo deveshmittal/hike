@@ -70,9 +70,9 @@ public class ShareablePopupLayout
 	 * @param popup
 	 */
 
-	public void togglePopup(ShareablePopup popup)
+	public void togglePopup(ShareablePopup popup, int screenOrientation)
 	{
-		View popupView = popup.getView();
+		View popupView = popup.getView(screenOrientation);
 		
 		/** Exit condition
 		 *  We simply return here.
@@ -87,7 +87,7 @@ public class ShareablePopupLayout
 		 */
 		if (prevVisibleView != popupView || !mKeyboardPopupLayout.isShowing())
 		{
-			showPopup(popup);
+			showPopup(popup, screenOrientation);
 		}
 		
 		else
@@ -105,9 +105,9 @@ public class ShareablePopupLayout
 	 * @param popup
 	 */
 	
-	public void showPopup(ShareablePopup popup)
+	public void showPopup(ShareablePopup popup, int screenOrientation)
 	{
-		View popupView = popup.getView();
+		View popupView = popup.getView(screenOrientation);
 		
 		/**
 		 * Exit condition
