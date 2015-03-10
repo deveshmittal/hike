@@ -3,13 +3,10 @@ package com.bsb.hike.ui;
 import java.io.File;
 
 import java.net.URI;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -94,12 +91,6 @@ import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
-import com.facebook.Request;
-import com.facebook.Request.GraphUserCallback;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.model.GraphUser;
 
 public class SignupActivity extends ChangeProfileImageBaseActivity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, OnClickListener, FinishableEvent,
 		OnCancelListener, Listener
@@ -175,7 +166,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private String countryCode;
 
-	private final String defaultCountryName = "India";
+	//private final String defaultCountryName = "India";
 
 	private boolean showingSecondLoadingTxt = false;
 
@@ -185,7 +176,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private Dialog dialog;
 
-	private Session.StatusCallback statusCallback = new SessionStatusCallback();
+	//private Session.StatusCallback statusCallback = new SessionStatusCallback();
 
 	private CountDownTimer countDownTimer;
 
@@ -984,7 +975,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 		initializeViews(nameLayout);
 
-		Session session = Session.getActiveSession();
+		/*Session session = Session.getActiveSession();
 		if (session == null)
 		{
 			if (savedInstanceState != null)
@@ -1000,7 +991,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
 			}
-		}
+		}*/
 
 		if (!addressBookScanningDone)
 		{
@@ -1038,12 +1029,12 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			mIconView.setImageBitmap(mActivityState.profileBitmap);
 		}
 
-		if (mActivityState.fbConnected)
+		/*if (mActivityState.fbConnected)
 		{
 			Button fbBtn = (Button) findViewById(R.id.connect_fb);
 			fbBtn.setEnabled(false);
 			fbBtn.setText(R.string.connected);
-		}
+		}*/
 		nextBtnContainer.setVisibility(View.VISIBLE);
 		setupActionBarTitle();
 	}
@@ -1840,8 +1831,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	@Override
 	protected void onSaveInstanceState(Bundle outState)
 	{
-		Session session = Session.getActiveSession();
-		Session.saveSession(session, outState);
+		/*Session session = Session.getActiveSession();
+		Session.saveSession(session, outState);*/
 
 		int displayedChild = viewFlipper.getDisplayedChild();
 		if (restoreInitialized)
@@ -2130,29 +2121,29 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	public void onStart()
 	{
 		super.onStart();
-		Session session = Session.getActiveSession();
+		/*Session session = Session.getActiveSession();
 		if (session != null)
 		{
 			session.addCallback(statusCallback);
-		}
+		}*/
 	}
 
 	@Override
 	public void onStop()
 	{
 		super.onStop();
-		Session session = Session.getActiveSession();
+		/*Session session = Session.getActiveSession();
 		if (session != null)
 		{
 			session.removeCallback(statusCallback);
-		}
+		}*/
 	}
 
-	boolean fbClicked = false;
+	/*boolean fbClicked = false;
 
-	boolean fbAuthing = false;
+	boolean fbAuthing = false;*/
 
-	public void onFacebookConnectClick(View v)
+	/*public void onFacebookConnectClick(View v)
 	{
 		fbClicked = true;
 		Session session = Session.getActiveSession();
@@ -2174,9 +2165,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			Session.openActiveSession(this, true, statusCallback);
 			Logger.d(getClass().getSimpleName(), "Opening active session");
 		}
-	}
+	}*/
 
-	private class SessionStatusCallback implements Session.StatusCallback
+	/*private class SessionStatusCallback implements Session.StatusCallback
 	{
 		@Override
 		public void call(Session session, SessionState state, Exception exception)
@@ -2187,14 +2178,14 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				fbClicked = false;
 			}
 		}
-	}
+	}*/
 
 	@Override
 	protected void onResume()
 	{
 		super.onResume();
 		Logger.d(getClass().getSimpleName(), "OnResume Called");
-		if (fbAuthing)
+		/*if (fbAuthing)
 		{
 			Session session = Session.getActiveSession();
 			if (session != null)
@@ -2202,10 +2193,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				Logger.d(getClass().getSimpleName(), "Clearing token");
 				session.closeAndClearTokenInformation();
 			}
-		}
+		}*/
 	}
 
-	public void updateView()
+	/*public void updateView()
 	{
 		Session session = Session.getActiveSession();
 		if (session != null && session.isOpened())
@@ -2288,7 +2279,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			});
 		}
 	}
-
+*/
 	private void downloadImage(final File destFile, Uri picasaUri, ImageDownloadResult imageDownloadResult)
 	{
 		mActivityState.downloadImageTask = new Thread(new DownloadImageTask(getApplicationContext(), destFile, picasaUri, imageDownloadResult));
@@ -2347,7 +2338,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			return;
 		}
 
-		Session session = Session.getActiveSession();
+		/*Session session = Session.getActiveSession();
 		if (session != null)
 		{
 			session.onActivityResult(this, requestCode, resultCode, data);
@@ -2356,7 +2347,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			onFacebookConnectClick(null);
 			fbAuthing = false;
-		}
+		}*/
 
 		File selectedFileIcon;
 		boolean isPicasaImage = false;
@@ -2556,13 +2547,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						Logger.w(getClass().getSimpleName(), "IOOB thrown while setting the name's textbox selection");
 					}
 
-					Button fbBtn = (Button) findViewById(R.id.connect_fb);
+					/*Button fbBtn = (Button) findViewById(R.id.connect_fb);
 					if (fbBtn != null)
 					{
 						fbBtn.setEnabled(false);
 						fbBtn.setText(R.string.connected);
 						mActivityState.fbConnected = true;
-					}
+					}*/
 				}
 			});
 		}

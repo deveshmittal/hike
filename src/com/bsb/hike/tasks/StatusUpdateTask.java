@@ -27,20 +27,14 @@ public class StatusUpdateTask implements IHikeHTTPTask
 {
 	private String status;
 
-	private boolean facebook;
-
-	private boolean twitter;
-
 	private int moodId;
 
 	private RequestToken token;
 
-	public StatusUpdateTask(String status, int moodId, boolean facebook, boolean twitter)
+	public StatusUpdateTask(String status, int moodId)
 	{
 		this.status = status;
 		this.moodId = moodId;
-		this.facebook = facebook;
-		this.twitter = twitter;
 		token = HttpRequests.postStatusRequest(getPostData(), getRequestListener());
 	}
 
@@ -62,8 +56,6 @@ public class StatusUpdateTask implements IHikeHTTPTask
 		try
 		{
 			data.put(HikeConstants.STATUS_MESSAGE_2, status);
-			data.put(HikeConstants.FACEBOOK_STATUS, facebook);
-			data.put(HikeConstants.TWITTER_STATUS, twitter);
 			if (moodId != -1)
 			{
 				data.put(HikeConstants.MOOD, moodId + 1);
