@@ -15,7 +15,6 @@ import android.widget.RelativeLayout;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterList;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
@@ -74,7 +73,7 @@ public final class PreviewFragment extends Fragment
 			DoodleEffectItemLinearLayout inflated = (DoodleEffectItemLinearLayout) stub.inflate();
 			inflated.setRingColor(HikeConstants.HikePhotos.DOODLE_SELECTED_RING_COLOR);
 			inflated.setBrushColor(HikePhotosUtils.DoodleColors[0]);
-			inflated.setBrushWidth(HikePhotosUtils.dpToPx(getActivity().getApplicationContext(),HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH));
+			inflated.setBrushWidth(HikePhotosUtils.dpToPx(getActivity().getApplicationContext(), HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH));
 			inflated.refresh();
 			inflated.setPadding(0, 0, 0, 0);
 			inflated.invalidate();
@@ -110,14 +109,11 @@ public final class PreviewFragment extends Fragment
 
 		private Context mContext;
 
-		private MenuType itemType;
-
 		private EditorClickListener clickListener;
 
 		public ImageAdapter(Context context, MenuType type, EditorClickListener Adapter)
 		{
 			mContext = context;
-			itemType = type;
 			clickListener = Adapter;
 		}
 
@@ -149,15 +145,25 @@ public final class PreviewFragment extends Fragment
 			return 0;
 		}
 
+		@Override
+		public int getItemViewType(int position)
+		{
+			switch (myType)
+			{
+			case Effects:
+				return 0;
+			case Doodle:
+				return 1;
+			}
+			return 0;
+		}
+
 		// Convert DP to PX
 		// Source: http://stackoverflow.com/a/8490361
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent)
 		{
-
-			// Want the width/height of the items
-			// to be 120dp
 			switch (myType)
 			{
 			case Effects:
@@ -166,11 +172,31 @@ public final class PreviewFragment extends Fragment
 					convertView = LayoutInflater.from(mContext).inflate(R.layout.filter_preview_item, parent, false);
 				}
 				FilterList myFilters = FilterList.getHikeEffects();
-				FilterEffectItemLinearLayout filterPreviewView = (FilterEffectItemLinearLayout) convertView;
-				filterPreviewView.init(mOriginalBitmap, myFilters.names.get(position));
-				filterPreviewView.setFilter(mContext, myFilters.filters.get(position));
-				filterPreviewView.setOnClickListener(clickListener);
-				return filterPreviewView;
+				String filterName = myFilters.names.get(position);
+				Object tagFilterName = convertView.getTag();
+				if (tagFilterName != null && ((String) tagFilterName).equals(filterName))
+				{
+					return convertView;
+				}
+				else
+				{
+					if (HikePhotosUtils.FilterTools.getCurrentFilterItem() != null)
+					{
+						String existingTag = ((String) HikePhotosUtils.FilterTools.getCurrentFilterItem().getTag());
+
+						if (existingTag != null && existingTag.equals(filterName))
+						{
+							return HikePhotosUtils.FilterTools.getCurrentFilterItem();
+						}
+					}
+					FilterEffectItemLinearLayout filterPreviewView = (FilterEffectItemLinearLayout) convertView;
+					filterPreviewView.init(mOriginalBitmap, myFilters.names.get(position));
+					filterPreviewView.setFilter(mContext, myFilters.filters.get(position), myFilters.names.get(position));
+					filterPreviewView.setOnClickListener(clickListener);
+					convertView.setTag(filterName);
+				}
+
+				return convertView;
 			case Border:
 				break;
 			case Text:
@@ -180,10 +206,30 @@ public final class PreviewFragment extends Fragment
 				{
 					convertView = LayoutInflater.from(mContext).inflate(R.layout.doodle_preview_item, parent, false);
 				}
-				DoodleEffectItemLinearLayout temp3 = (DoodleEffectItemLinearLayout) convertView;
-				temp3.setBrushColor(HikePhotosUtils.DoodleColors[position]);
-				temp3.refresh();
-				temp3.setOnClickListener(clickListener);
+				int currentPosColor = HikePhotosUtils.DoodleColors[position];
+				Object tagColor = convertView.getTag();
+				if (tagColor != null && ((Integer) tagColor) == currentPosColor)
+				{
+					return convertView;
+				}
+				else
+				{
+					if (HikePhotosUtils.FilterTools.getCurrentDoodleItem() != null)
+					{
+						Integer existingColor = ((Integer) HikePhotosUtils.FilterTools.getCurrentDoodleItem().getTag());
+
+						if (existingColor != null && existingColor == currentPosColor)
+						{
+							return HikePhotosUtils.FilterTools.getCurrentDoodleItem();
+						}
+					}
+					
+					DoodleEffectItemLinearLayout doodleItem = (DoodleEffectItemLinearLayout) convertView;
+					doodleItem.setBrushColor(currentPosColor);
+					doodleItem.refresh();
+					doodleItem.setOnClickListener(clickListener);
+					convertView.setTag(currentPosColor);
+				}
 				break;
 			case Quality:
 				break;

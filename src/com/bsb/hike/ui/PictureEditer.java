@@ -73,8 +73,8 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
 
 		super.onCreate(savedInstanceState);
-		
-		getWindow().requestFeature((int)Window.FEATURE_ACTION_BAR_OVERLAY);
+
+		getWindow().requestFeature((int) Window.FEATURE_ACTION_BAR_OVERLAY);
 
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -134,6 +134,8 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 	protected void onPause()
 	{
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
+		HikePhotosUtils.FilterTools.setCurrentFilterItem(null);
+		HikePhotosUtils.FilterTools.setCurrentDoodleItem(null);
 		super.onPause();
 	}
 
@@ -326,19 +328,16 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 									String mLocalMSISDN = userInfo.getMsisdn();
 									editView.saveImage(HikeFileType.PROFILE, mLocalMSISDN, new HikePhotosListener()
 									{
-
 										@Override
 										public void onFailure()
 										{
 											// Do nothing
-
 										}
 
 										@Override
 										public void onComplete(Bitmap bmp)
 										{
 											// Do nothing
-
 										}
 
 										@Override

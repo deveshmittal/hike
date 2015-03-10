@@ -3,6 +3,7 @@ package com.bsb.hike.photos.views;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
+import android.view.View;
 
 import com.bsb.hike.R;
 import com.bsb.hike.photos.HikeEffectsFactory;
@@ -49,11 +50,11 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 		findViewById(R.id.selectionBar).setBackgroundColor(getResources().getColor(R.color.photos_pager_background));
 	}
 
-	public void setFilter(Context context, FilterType type)
+	public void setFilter(Context context, FilterType type, String name)
 	{
 		this.filter = type;
 		initiateThumbnailCreation();
-		
+
 		if (type == HikePhotosUtils.FilterTools.getSelectedFilter())
 		{
 			findViewById(R.id.selectionBar).setBackgroundColor(getResources().getColor(R.color.photos_filters_font_color));
@@ -63,8 +64,7 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 		{
 			findViewById(R.id.selectionBar).setBackgroundColor(getResources().getColor(R.color.photos_pager_background));
 		}
-		
-	}		
+	}
 
 	private void initiateThumbnailCreation()
 	{
