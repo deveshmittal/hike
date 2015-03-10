@@ -61,6 +61,7 @@ public final class PreviewFragment extends Fragment
 		gridView.setRowHeight(GridView.AUTO_FIT);
 		mAdapter = new ImageAdapter(getActivity(), myType, handler);
 		gridView.setAdapter(mAdapter);
+		gridView.setOnItemClickListener(handler);
 
 		ViewStub adjuster = (ViewStub) layout.findViewById(R.id.sizeBarStub);
 		switch (myType)
@@ -149,15 +150,11 @@ public final class PreviewFragment extends Fragment
 			return 0;
 		}
 
-		// Convert DP to PX
-		// Source: http://stackoverflow.com/a/8490361
-
+	
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent)
 		{
 
-			// Want the width/height of the items
-			// to be 120dp
 			switch (myType)
 			{
 			case Effects:
@@ -169,7 +166,6 @@ public final class PreviewFragment extends Fragment
 				FilterEffectItemLinearLayout filterPreviewView = (FilterEffectItemLinearLayout) convertView;
 				filterPreviewView.init(mOriginalBitmap, myFilters.names.get(position));
 				filterPreviewView.setFilter(mContext, myFilters.filters.get(position));
-				filterPreviewView.setOnClickListener(clickListener);
 				return filterPreviewView;
 			case Border:
 				break;
@@ -183,7 +179,6 @@ public final class PreviewFragment extends Fragment
 				DoodleEffectItemLinearLayout temp3 = (DoodleEffectItemLinearLayout) convertView;
 				temp3.setBrushColor(HikePhotosUtils.DoodleColors[position]);
 				temp3.refresh();
-				temp3.setOnClickListener(clickListener);
 				break;
 			case Quality:
 				break;

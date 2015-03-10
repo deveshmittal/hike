@@ -56,7 +56,6 @@ class VignetteImageView extends ImageView
 		if (bitmap != null)
 		{
 			width = bitmap.getWidth();
-			vignetteBitmap = Bitmap.createBitmap(width, width, Config.ARGB_8888);
 			setVignetteforFilter(bitmap);
 		}
 	}
@@ -92,7 +91,7 @@ class VignetteImageView extends ImageView
 		case X_PRO_2:
 			// Vignette: Stop 1 = #000000 84%, Opacity = 0%; Stop 2 = #232443 120%, Opacity = 100%
 			colors = new int[] { 0x00000000, 0x00000000, 0xFF232443 };
-			stops = new float[] { 0.0f, 0.84f / 1.5f, 1.0f };
+			stops = new float[] { 0.0f, 0.92f / 1.5f, 1.0f };
 			makeRadialGradient(1.5f, colors, stops);
 			break;
 		case POLAROID:
@@ -106,13 +105,13 @@ class VignetteImageView extends ImageView
 		case BGR:
 			// Vignette: Stop 1 = #000000 74%, Opacity = 0%; Stop 2 = #000000 120%, Opacity = 100%
 			colors = new int[] { 0x00000000,0x00000000, 0xFF000000 };
-			stops = new float[] { 0.0f,0.74f/1.5f, 1.0f };
+			stops = new float[] { 0.0f,0.92f/1.5f, 1.0f };
 			makeRadialGradient(1.5f, colors, stops);
 			break;
 		case APOLLO:
 			// Vignette Stop 1: #18363f, Position 72%, Opacity 0% Stop 2: #18363f, Position 120%, Opacity 100%
 			colors = new int[] { 0x00000000, 0x0018363F, 0xFF18363F };
-			stops = new float[] { 0.0f, 0.72f / 1.5f, 1.0f };
+			stops = new float[] { 0.0f, 0.92f / 1.5f, 1.0f };
 			makeRadialGradient(1.5f, colors, stops);
 			break;
 		default:
