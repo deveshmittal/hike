@@ -257,7 +257,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			showLoadingState(viewHolder);
 
-			loadContent(position, convMessage, viewHolder, view);
+			loadContent(position, convMessage, viewHolder);
 		}
 		else
 		{
@@ -275,7 +275,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	}
 
-	private void loadContent(final int position, final ConvMessage convMessage, final WebViewHolder viewHolder, final View view)
+	private void loadContent(final int position, final ConvMessage convMessage, final WebViewHolder viewHolder)
 	{
 		PlatformContent.getContent(convMessage.webMetadata.JSONtoString(), new PlatformContentListener<PlatformContentModel>()
 		{
@@ -288,27 +288,18 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				if (reason == EventCode.DOWNLOADING)
 				{
 					//do nothing
+					Logger.e(tag, "in downloading state");
 					return;
 				}
 				else if (reason == EventCode.LOADED)
 				{
+					Logger.e(tag, "loaded");
 					cardLoadAnalytics(convMessage);
 				}
 				else
 				{
-					showConnErrState(viewHolder);
-					viewHolder.loadingFailed.findViewById(R.id.loading_progress_bar).setVisibility(View.GONE);
-					viewHolder.loadingFailed.findViewById(R.id.progress_bar_image).setVisibility(View.VISIBLE);
-					view.setOnClickListener(new View.OnClickListener()
-					{
-						@Override
-						public void onClick(View v)
-						{
-							viewHolder.loadingFailed.findViewById(R.id.loading_progress_bar).setVisibility(View.VISIBLE);
-							viewHolder.loadingFailed.findViewById(R.id.progress_bar_image).setVisibility(View.GONE);
-							loadContent(position, convMessage, viewHolder, view);
-						}
-					});
+					Logger.e(tag, "error");
+					showConnErrState(viewHolder, convMessage, position);
 					HikeAnalyticsEvent.cardErrorAnalytics(reason, convMessage);
 				}
 			}
@@ -503,7 +494,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	}
 
-	private void showConnErrState(final WebViewHolder argViewHolder)
+	private void showConnErrState(final WebViewHolder argViewHolder, final ConvMessage convMessage, final int position)
 	{
 		if (argViewHolder == null)
 		{
@@ -519,16 +510,24 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
 				{
 					// TODO Add animations here if required
-					argViewHolder.cardFadeScreen.setVisibility(View.VISIBLE);
-					argViewHolder.loadingSpinner.setVisibility(View.GONE);
-					argViewHolder.loadingFailed.setVisibility(View.VISIBLE);
 				}
-				else
+
+				argViewHolder.cardFadeScreen.setVisibility(View.VISIBLE);
+				argViewHolder.loadingSpinner.setVisibility(View.GONE);
+				argViewHolder.loadingFailed.setVisibility(View.VISIBLE);
+
+				argViewHolder.loadingFailed.findViewById(R.id.loading_progress_bar).setVisibility(View.GONE);
+				argViewHolder.loadingFailed.findViewById(R.id.progress_bar_image).setVisibility(View.VISIBLE);
+				argViewHolder.loadingFailed.setOnClickListener(new View.OnClickListener()
 				{
-					argViewHolder.cardFadeScreen.setVisibility(View.VISIBLE);
-					argViewHolder.loadingSpinner.setVisibility(View.GONE);
-					argViewHolder.loadingFailed.setVisibility(View.VISIBLE);
-				}
+					@Override
+					public void onClick(View v)
+					{
+						argViewHolder.loadingFailed.findViewById(R.id.loading_progress_bar).setVisibility(View.VISIBLE);
+						argViewHolder.loadingFailed.findViewById(R.id.progress_bar_image).setVisibility(View.GONE);
+						loadContent(position, convMessage, argViewHolder);
+					}
+				});
 			}
 		});
 
