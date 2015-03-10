@@ -708,6 +708,11 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 
 	private void showCallStatus(CallStatus status)
 	{
+		if(!isAdded())
+		{
+			return;
+		}
+
 		currentCallStatus = status;
 
 		TextView callStatusView = (TextView) getView().findViewById(R.id.call_status);
