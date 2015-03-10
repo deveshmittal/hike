@@ -1014,14 +1014,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		else if (HikePubSub.USER_JOINED_NOTIFICATION.equals(type))
 		{
-			runOnUiThread(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					showRecentlyJoinedDot(1000);
-				}
-			});
+			showRecentlyJoinedDot(1000);
 		}
 		else if (HikePubSub.UPDATE_OF_MENU_NOTIFICATION.equals(type))
 		{

@@ -312,20 +312,24 @@ public class MqttMessagesManager
 				ContactManager.getInstance().setHikeJoinTime(msisdn, joinTime);
 			}
 			
-			if (!isBulkMessage && appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true) && !ContactManager.getInstance().isBlocked(msisdn))
+			ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, false);
+			boolean showRecentlyJoined = contact.getHikeJoinTime() > 0 && !contact.isUnknownContact();
+			
+			if (appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true) && !ContactManager.getInstance().isBlocked(msisdn))
 			{
 				if(jsonObj.getJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.UserJoinMsg.PERSIST_CHAT, HikeConstants.UserJoinMsg.defaultPersistChat))
 				{
+					if(showRecentlyJoined)
+					{
+						this.settings.edit().putBoolean(HikeConstants.SHOW_RECENTLY_JOINED, true).commit();
+					}
 					saveStatusMsg(jsonObj, msisdn);
 				}
 				else
 				{
-					ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, false);
-					if (contact.getHikeJoinTime() > 0 && !contact.isUnknownContact())
+					if(showRecentlyJoined)
 					{
-						Editor e = this.settings.edit();
-						e.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
-						e.commit();
+						this.settings.edit().putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true).commit();
 					}
 					ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
 					if(convMessage != null)
