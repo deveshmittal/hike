@@ -278,6 +278,8 @@ public class HikeConstants
 	public static final String OK = "ok";
 	
 	public static final String FAIL = "fail";
+	
+	public static final String OK_HTTP = "okhttp";
 
 	public static final String REACHED_STICKER_END = "st";
 
