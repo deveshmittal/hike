@@ -137,7 +137,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ " DESC" + " )";
 		db.execSQL(sql);
 		
-		createIndexOverServerIdField();
+		createIndexOverServerIdField(db);
 		
 		sql = "CREATE UNIQUE INDEX IF NOT EXISTS " + DBConstants.MESSAGE_HASH_INDEX + " ON " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE_HASH + " DESC" + " )";
 		db.execSQL(sql);
@@ -256,11 +256,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		db.execSQL(sql);
 		
 	}
-	private void createIndexOverServerIdField()
+	private void createIndexOverServerIdField(SQLiteDatabase db)
 	{
 		//creating index over server Id field
 		String sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.SERVER_ID_INDEX + " ON " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.SERVER_ID + " DESC" + " )";
-		mDb.execSQL(sql);
+		db.execSQL(sql);
 	}
 
 	public void deleteAll()
@@ -6564,7 +6564,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			mDb.execSQL(update2);
 			mDb.execSQL(update3);
 			mDb.execSQL(update4);
-			createIndexOverServerIdField();
+			createIndexOverServerIdField(mDb);
 			
 			long endTime = System.currentTimeMillis();
 			
