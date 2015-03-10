@@ -163,14 +163,17 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
@@ -754,6 +757,11 @@ public class Utils
 	public static boolean isGroupConversation(String msisdn)
 	{
 		return msisdn!=null && !msisdn.startsWith("+");
+	}
+	
+	public static boolean isBroadcastConversation(String msisdn)
+	{
+		return msisdn!=null && msisdn.startsWith("b:");
 	}
 
 	public static String validateBotMsisdn(String msisdn){
@@ -3931,7 +3939,8 @@ public class Utils
 			}
 			else
 			{
-				iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+				iconDrawable = context.getResources().getDrawable(Utils.isBroadcastConversation(msisdn)? R.drawable.ic_default_avatar_broadcast : 
+					(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar));
 			}
 			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
 		}
@@ -5320,5 +5329,87 @@ public class Utils
 			Logger.e("Utils", "Exception :", e);
 		}
 		return null;
+	}
+	
+	public static String getParticipantAddedMessage(ConvMessage convMessage, Context context, String highlight)
+	{
+		String participantAddedMessage;
+		MessageMetadata metadata = convMessage.getMetadata();
+		if (convMessage.isBroadcastConversation())
+		{
+			if (metadata.isNewBroadcast())
+			{
+				participantAddedMessage = String.format(context.getString(R.string.new_broadcast_message), highlight);
+			}
+			else
+			{
+				participantAddedMessage = String.format(context.getString(R.string.add_to_broadcast_message), highlight);
+			}
+		}
+		else
+		{
+			if (metadata.isNewGroup())
+			{
+				participantAddedMessage = String.format(context.getString(R.string.new_group_message), highlight);
+			}
+			else
+			{
+				participantAddedMessage = String.format(context.getString(R.string.add_to_group_message), highlight);
+			}
+		}
+		return participantAddedMessage;
+	}
+	
+	public static String valuesToCommaSepratedString(ArrayList<Long> entries)
+	{
+		StringBuilder result = new StringBuilder("(");
+		for (Long entry : entries)
+		{
+			result.append(DatabaseUtils.sqlEscapeString(String.valueOf(entry)) + ",");
+		}
+		int idx = result.lastIndexOf(",");
+		if (idx >= 0)
+		{
+			result.replace(idx, result.length(), ")");
+		}
+		return result.toString();
+	}
+	
+	public static void addBroadcastRecipientConversations(ConvMessage convMessage)
+	{
+		
+		ArrayList<ContactInfo> contacts = HikeConversationsDatabase.getInstance().addBroadcastRecipientConversations(convMessage);
+		
+		sendPubSubForConvScreenBroadcastMessage(convMessage, contacts);
+        // publishing mqtt packet
+        HikeMqttManagerNew.getInstance().sendMessage(convMessage.serializeDeliveryReportRead(), HikeMqttManagerNew.MQTT_QOS_ONE);
+	}
+	
+
+	public static void sendPubSubForConvScreenBroadcastMessage(ConvMessage convMessage, ArrayList<ContactInfo> recipient)
+	{
+		long firstMsgId = convMessage.getMsgID() + 1;
+		int totalRecipient = recipient.size();
+		List<Pair<ContactInfo, ConvMessage>> allPairs = new ArrayList<Pair<ContactInfo,ConvMessage>>(totalRecipient);
+		long timestamp = System.currentTimeMillis()/1000;
+		for(int i=0;i<totalRecipient;i++)
+		{
+			ConvMessage message = new ConvMessage(convMessage);
+			if(convMessage.isBroadcastConversation())
+			{
+				message.setMessageOriginType(OriginType.BROADCAST);
+			}
+			else
+			{
+				//multi-forward case... in braodcast case we donot need to update timestamp
+				message.setTimestamp(timestamp++);
+			}
+			message.setMsgID(firstMsgId+i);
+			ContactInfo contactInfo = recipient.get(i);
+			message.setMsisdn(contactInfo.getMsisdn());
+			Pair<ContactInfo, ConvMessage> pair = new Pair<ContactInfo, ConvMessage>(contactInfo, message);
+			allPairs.add(pair);
+		}
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_DB_INSERTED, allPairs);
 	}
 }

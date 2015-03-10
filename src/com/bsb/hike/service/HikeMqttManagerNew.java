@@ -1186,6 +1186,22 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 								// Do nothing
 							}
 						}
+						else if(packet.getPacketType() == HikeConstants.BROADCAST_MESSAGE_TYPE)
+						{
+							try
+							{
+								JSONObject jsonObj = new JSONObject(new String(packet.getMessage()));
+
+								JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+								long baseId = data.optLong(HikeConstants.MESSAGE_ID);
+								JSONArray contacts = data.optJSONArray(HikeConstants.LIST);
+
+								int count = contacts.length() + 1;
+								HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MULTI_MSG, new Pair<Long, Integer>(baseId, count));
+							} catch (JSONException e) {
+								// Do nothing
+							}
+						}
 						else
 						{
 							HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
@@ -1691,6 +1707,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		if (HikeConstants.MqttMessageTypes.MULTIPLE_FORWARD.equals(o.optString(HikeConstants.SUB_TYPE)))
 		{
 			type = HikeConstants.MULTI_FORWARD_MESSAGE_TYPE;
+		}
+		else if(Utils.isBroadcastConversation((o.optString(HikeConstants.TO))))
+		{
+			type = HikeConstants.BROADCAST_MESSAGE_TYPE;
 		}
 		else
 		{

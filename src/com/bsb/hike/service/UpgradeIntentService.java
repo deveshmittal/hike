@@ -87,6 +87,17 @@ public class UpgradeIntentService extends IntentService
 			StickerManager.getInstance().doInitialSetup();
 		}
 		
+		if (prefs.getInt(HikeMessengerApp.UPGRADE_FOR_SERVER_ID_FIELD, 1) == 1)
+		{
+			if(upgradeForServerIdField())
+			{
+				Editor editor = prefs.edit();
+				editor.putInt(HikeMessengerApp.UPGRADE_FOR_SERVER_ID_FIELD, 2);
+				editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
+				editor.commit();
+			}
+		}
+		
 		HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.UPGRADING, false);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE, null);
 	}
@@ -117,5 +128,10 @@ public class UpgradeIntentService extends IntentService
 	{
 		HikeConversationsDatabase.getInstance().upgradeForStickerShopVersion1();
 		StickerManager.getInstance().moveStickerPreviewAssetsToSdcard();
+	}
+	
+	private boolean upgradeForServerIdField()
+	{
+		return HikeConversationsDatabase.getInstance().upgradeForServerIdField();
 	}
 }

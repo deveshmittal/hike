@@ -264,7 +264,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
-            android:name=".ui.CreateNewGroupActivity"
+            android:name=".ui.CreateNewGroupOrBroadcastActivity"
             android:windowSoftInputMode="stateVisible" >
         </activity>
         <activity
