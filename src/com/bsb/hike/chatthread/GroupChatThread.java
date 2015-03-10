@@ -1422,17 +1422,15 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	}
 	
 	@Override
-	protected void onConfigurationChanged(Configuration newConfig)
+	protected void handleActionModeOrientationChange(int whichActionMode)
 	{
-		/**
-		 * Handling Pin ActionMode orientation change
-		 */
-		if (mActionMode != null && mActionMode.whichActionModeIsOn() == PIN_CREATE_ACTION_MODE)
+		switch (whichActionMode)
 		{
+		case PIN_CREATE_ACTION_MODE:
 			mActionMode.reInflateActionMode();
+			break;
+		default:
+			super.handleActionModeOrientationChange(whichActionMode);
 		}
-		
-		super.onConfigurationChanged(newConfig);
 	}
-	
 }

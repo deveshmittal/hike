@@ -1000,27 +1000,37 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private void setupSearchMode()
 	{
 		mActionMode.showActionMode(SEARCH_ACTION_MODE, R.layout.search_action_bar);
-		int id = mComposeView.getId();
-		mComposeView = (CustomFontEditText) activity.findViewById(R.id.search_text);
-		mComposeView.setTag(id);
-		View mBottomView = activity.findViewById(R.id.bottom_panel);
-		if (mShareablePopupLayout.isKeyboardOpen())
-		{ // ifkeyboard is not open, then keyboard will come which will make so much animation on screen
-			mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.up_down_lower_part));
-		}
-		mBottomView.setVisibility(View.GONE);
-		mComposeView.requestFocus();
-		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
+		setUpSearchViews();
+		
 		if (messageSearchManager == null)
 		{
 			messageSearchManager = new SearchManager();
 		}
 		messageSearchManager.init(messages);
+	}
+	
+	private void setUpSearchViews()
+	{
+		int id = mComposeView.getId();
+		mComposeView = (CustomFontEditText) activity.findViewById(R.id.search_text);
+		mComposeView.setTag(id);
+		
 		mComposeView.addTextChangedListener(searchTextWatcher);
 		mComposeView.setOnEditorActionListener(this);
 		activity.findViewById(R.id.next).setOnClickListener(this);
 		activity.findViewById(R.id.previous).setOnClickListener(this);
 		activity.findViewById(R.id.search_clear_btn).setOnClickListener(this);
+		
+		View mBottomView = activity.findViewById(R.id.bottom_panel);
+		if (mShareablePopupLayout.isKeyboardOpen())
+		{ 
+			// ifkeyboard is not open, then keyboard will come which will make so much animation on screen
+			mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.up_down_lower_part));
+		}
+		
+		mBottomView.setVisibility(View.GONE);
+		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
+		mComposeView.requestFocus();
 	}
 	
 	TextWatcher searchTextWatcher = new TextWatcher()
@@ -4111,10 +4121,37 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		/**
 		 * Handling MULTI_SELECT_ACTION_MODE orientation change
 		 */
-		if (mActionMode != null && mActionMode.whichActionModeIsOn() == MULTI_SELECT_ACTION_MODE)
+		if (mActionMode != null)
 		{
+			handleActionModeOrientationChange(mActionMode.whichActionModeIsOn());
+		}
+	}
+	
+	/**
+	 * This method is used to handle orientation changes for ActionMode.
+	 * If a lower class has a special actionMode not known to super class, it should override this method
+	 * 
+	 * @param whichActionMode
+	 */
+	protected void handleActionModeOrientationChange(int whichActionMode)
+	{
+		switch (whichActionMode)
+		{
+		case MULTI_SELECT_ACTION_MODE:
 			mActionMode.reInflateActionMode();
 			hideShowActionModeMenus();
+			break;
+			
+		case SEARCH_ACTION_MODE:
+			mActionMode.reInflateActionMode();
+			String oldText = mComposeView.getText().toString();
+			setUpSearchViews();
+			mComposeView.setText(oldText);
+			mComposeView.setSelection(oldText.length());
+			break;
+			
+		default:
+			break;
 		}
 	}
 	
