@@ -281,6 +281,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.notifyDataSetChanged();
 			if (!(initiallySelectedMsisidns == null || initiallySelectedMsisidns.isEmpty()))
 			{
+				tagEditText.clear(false);
+				int selected = adapter.getSelectedContactCount();
+				for (String msisdn : initiallySelectedMsisidns)
+				{
+					ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
+					tagEditText.addTag(contactInfo.getName(), msisdn, contactInfo);
+				}
+
+
 				setupMultiSelectActionBar();
 				invalidateOptionsMenu();
 			}
@@ -1063,7 +1072,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		ViewGroup closeContainer = (ViewGroup) multiSelectActionBar.findViewById(R.id.close_container);
 
 		multiSelectTitle = (TextView) multiSelectActionBar.findViewById(R.id.title);
-		multiSelectTitle.setText(getString(R.string.gallery_num_selected, 1));
+		multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getCurrentSelection()));
 		
 		if (isForwardingMessage)
 		{

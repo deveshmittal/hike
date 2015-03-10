@@ -33,6 +33,7 @@ import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -909,11 +910,25 @@ public class ConversationsAdapter extends BaseAdapter
 				// booted because of that reason
 				String participantMsisdn = metadata.getMsisdn();
 				String participantName = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
-				markedUp = String.format(context.getString(R.string.left_conversation), participantName);
+				if (conversation instanceof BroadcastConversation)
+				{
+					markedUp = String.format(context.getString(R.string.removed_from_broadcast), participantName);
+				}
+				else
+				{
+					markedUp = String.format(context.getString(R.string.left_conversation), participantName);
+				}
 			}
 			else
 			{
-				markedUp = context.getString(R.string.group_chat_end);
+				if (conversation instanceof BroadcastConversation)
+				{
+					markedUp = context.getString(R.string.broadcast_list_end);
+				}
+				else
+				{
+					markedUp = context.getString(R.string.group_chat_end);
+				}
 			}
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)

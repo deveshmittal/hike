@@ -48,9 +48,11 @@
     <string name="invalid_email">Invalid email address</string>
     <string name="joined_conversation">%1$s joined the group chat!</string>
     <string name="left_conversation">%1$s left the group chat.</string>
+    <string name="removed_from_broadcast">%1$s removed from broadcast list</string>
     <string name="leave_group">Leave Group</string>
     <string name="delete_broadcast">Delete Broadcast</string>
     <string name="group_chat_end">This group chat has ended.</string>
+    <string name="broadcast_list_end">This broadcast list has ended.</string>
     <string name="group_info">Group Info</string>
     <string name="broadcast_info">Broadcast Info</string>
     <string name="tap_group_info">Tap this button for group info.</string>
@@ -262,6 +264,7 @@
     <string name="downloading_image">Downloading image...</string>
     <string name="invite_1">Invite</string>
     <string name="invalid_group_chat">Group chat no longer exists</string>
+    <string name="invalid_broadcast_list">Broadcast list no longer exists</string>
     <string name="error_capture">Error capturing image</string>
     <string name="error_play_recording">Error while playing the recording</string>
     <string name="select_invite_contacts">Select the contacts you want to invite</string>
