@@ -637,8 +637,14 @@ public class ConversationsAdapter extends BaseAdapter
 				List<Conversation> filteredConversationsList = new ArrayList<Conversation>();
 				List<Conversation> filteredphoneBookContacts = new ArrayList<Conversation>();
 
-				filterList(conversationList, filteredConversationsList, textToBeFiltered);
-				filterList(phoneBookContacts, filteredphoneBookContacts, textToBeFiltered);
+				if (conversationList != null && !conversationList.isEmpty())
+				{
+					filterList(conversationList, filteredConversationsList, textToBeFiltered);
+				}
+				if (phoneBookContacts != null && !phoneBookContacts.isEmpty())
+				{
+					filterList(phoneBookContacts, filteredphoneBookContacts, textToBeFiltered);
+				}
 
 				List<List<Conversation>> resultList = new ArrayList<List<Conversation>>();
 				resultList.add(filteredConversationsList);
