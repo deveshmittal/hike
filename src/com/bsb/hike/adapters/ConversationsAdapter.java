@@ -657,7 +657,7 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 
 		ImageView avatarView = viewHolder.avatar;
-		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, false, isListFlinging, true);
+		iconLoader.loadImage(conversation.getMsisdn(), avatarView, isListFlinging, false, true);
 	}
 
 	public void updateViewsRelatedToMute(View parentView, Conversation conversation)
