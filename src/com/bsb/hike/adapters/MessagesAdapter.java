@@ -76,6 +76,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
+import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
@@ -2098,11 +2099,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 					String participantMsisdn = metadata.getMsisdn();
 					String name = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
-					message = Utils.getFormattedParticipantInfo(String.format(context.getString(R.string.left_conversation), name), name);
+					if (conversation instanceof BroadcastConversation)
+					{
+						message = Utils.getFormattedParticipantInfo(String.format(context.getString(R.string.removed_from_broadcast), name), name);
+					}
+					else
+					{
+						message = Utils.getFormattedParticipantInfo(String.format(context.getString(R.string.left_conversation), name), name);
+					}
 				}
 				else
 				{
-					message = context.getString(R.string.group_chat_end);
+					if (conversation instanceof BroadcastConversation)
+					{
+						message = context.getString(R.string.broadcast_list_end);
+					}
+					else
+					{
+						message = context.getString(R.string.group_chat_end);
+					}
 				}
 				setTextAndIconForSystemMessages(participantInfo, message, isDefaultTheme ? R.drawable.ic_left_chat : R.drawable.ic_left_chat_custom);
 

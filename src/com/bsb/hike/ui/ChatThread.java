@@ -2517,7 +2517,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		
 		if (mConversation == null)
 		{
-			if (Utils.isGroupConversation(mContactNumber))
+			if (Utils.isBroadcastConversation(mContactNumber))
+			{
+				/* the user must have deleted the chat. */
+				Toast toast = Toast.makeText(this, R.string.invalid_broadcast_list, Toast.LENGTH_LONG);
+				toast.show();
+				onBackPressed();
+				return false;
+			}
+			else if (Utils.isGroupConversation(mContactNumber))
 			{
 				/* the user must have deleted the chat. */
 				Toast toast = Toast.makeText(this, R.string.invalid_group_chat, Toast.LENGTH_LONG);

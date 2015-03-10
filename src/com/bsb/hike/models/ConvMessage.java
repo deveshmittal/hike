@@ -453,10 +453,24 @@ public class ConvMessage
 			this.mMessage = Utils.getParticipantAddedMessage(this, context, highlight);
 			break;
 		case PARTICIPANT_LEFT:
-			this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn()));
+			if (conversation instanceof BroadcastConversation)
+			{
+				this.mMessage = String.format(context.getString(R.string.removed_from_broadcast), ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn()));
+			}
+			else
+			{
+				this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn()));
+			}
 			break;
 		case GROUP_END:
-			this.mMessage = context.getString(R.string.group_chat_end);
+			if (conversation instanceof BroadcastConversation)
+			{
+				this.mMessage = context.getString(R.string.broadcast_list_end);
+			}
+			else
+			{
+				this.mMessage = context.getString(R.string.group_chat_end);
+			}
 			break;
 		case USER_JOIN:
 			if (conversation != null)
