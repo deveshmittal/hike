@@ -95,6 +95,7 @@ public class PlatformZipDownloader
 			@Override
 			public void onRequestFailure(HttpException httpException)
 			{
+				deleteTemporaryFolder();
 				PlatformRequestManager.failure(mRequest, EventCode.LOW_CONNECTIVITY, isTemplatingEnabled);
 			}
 
@@ -118,6 +119,12 @@ public class PlatformZipDownloader
 
 	}
 
+	private void deleteTemporaryFolder()
+	{
+		File tempFolder = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME);
+		PlatformContentUtils.deleteDirectory(tempFolder);
+	}
+
 	/**
 	 * calling this function will unzip the microApp.
 	 */
@@ -131,8 +138,7 @@ public class PlatformZipDownloader
 				public void update(Observable observable, Object data)
 				{
 					// delete temp folder
-					File tempFolder = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME);
-					PlatformContentUtils.deleteDirectory(tempFolder);
+					deleteTemporaryFolder();
 					if (!isTemplatingEnabled)
 					{
 						mRequest.getListener().onComplete(mRequest.getContentData());
