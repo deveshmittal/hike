@@ -587,7 +587,7 @@ public class ConversationsAdapter extends BaseAdapter
 				}
 				else
 				{
-					msg = context.getString(R.string.invite_to_hike);
+					msg = context.getString(R.string.on_sms);
 				}
 				List<ConvMessage> messagesList = new ArrayList<ConvMessage>();
 				ConvMessage message = new ConvMessage(msg, contact.getMsisdn(), 0, State.RECEIVED_READ);
