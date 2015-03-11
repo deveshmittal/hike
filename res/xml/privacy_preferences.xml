@@ -23,7 +23,7 @@
             android:entryValues="@array/privacyPrefValues"
             android:key="lastSeenPrefList"
             android:layout="@layout/list_preference"
-            android:summary="@string/last_seen_favorite_info"
+            android:summary="@string/ls_my_contacts_summary"
             android:title="@string/last_seen_header" />
 
         <com.bsb.hike.view.IconCheckBoxPreference

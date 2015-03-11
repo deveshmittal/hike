@@ -905,22 +905,28 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					int slectedPrivacyId = Integer.parseInt(newValue.toString());
 					String selectedPrivacyValue = "";
 					boolean isLSEnabled = true;
+					String ls_summary = null;
 					switch (slectedPrivacyId) {
 						case HikeConstants.PrivacyOptions.NOBODY:
 							isLSEnabled = false;
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_nobody_key);
+							ls_summary = getApplicationContext().getString(R.string.ls_nobody_summary);
 							break;
 						case HikeConstants.PrivacyOptions.EVERYONE:
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_everyone_key);
+							ls_summary = getApplicationContext().getString(R.string.ls_everyone_summary);
 							break;
 						case HikeConstants.PrivacyOptions.FAVORITES:
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_favorites_key);
+							ls_summary = getApplicationContext().getString(R.string.ls_favorites_summary);
 							break;
 						case HikeConstants.PrivacyOptions.MY_CONTACTS:
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_my_contacts_key);
+							ls_summary = getApplicationContext().getString(R.string.ls_my_contacts_summary);
 							break;
 					}
-					preference.setTitle(getString(R.string.last_seen_header) + " - " + selectedPrivacyValue);
+					preference.setTitle(getString(R.string.last_seen_header) + " : " + selectedPrivacyValue);
+					preference.setSummary(ls_summary);
 					PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean(HikeConstants.LAST_SEEN_PREF, isLSEnabled).commit();
 					sendNLSToServer(slectedPrivacyId, isLSEnabled);
 				}
@@ -931,7 +937,34 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				return true;
 			}
 		});
-		lp.setTitle(lp.getTitle() + " - " + lp.getEntry());
+		String ls_summary = getLSSummaryText();
+		if(ls_summary != null && !ls_summary.isEmpty())
+		{
+			lp.setSummary(ls_summary);
+		}
+		lp.setTitle(lp.getTitle() + " : " + lp.getEntry());
+	}
+
+	private String getLSSummaryText()
+	{
+		String defValue = getApplicationContext().getString(R.string.privacy_my_contacts);
+		String selectedValue = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(HikeConstants.LAST_SEEN_PREF_LIST, defValue);
+		String summaryTxt = null;
+		switch (Integer.parseInt(selectedValue)) {
+			case HikeConstants.PrivacyOptions.NOBODY:
+				summaryTxt = getApplicationContext().getString(R.string.ls_nobody_summary);
+				break;
+			case HikeConstants.PrivacyOptions.EVERYONE:
+				summaryTxt = getApplicationContext().getString(R.string.ls_everyone_summary);
+				break;
+			case HikeConstants.PrivacyOptions.FAVORITES:
+				summaryTxt = getApplicationContext().getString(R.string.ls_favorites_summary);
+				break;
+			case HikeConstants.PrivacyOptions.MY_CONTACTS:
+				summaryTxt = getApplicationContext().getString(R.string.ls_my_contacts_summary);
+				break;
+		}
+		return summaryTxt;
 	}
 
 	private void updateAccountBackupPrefView()
