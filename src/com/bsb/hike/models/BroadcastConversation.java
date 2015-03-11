@@ -1,6 +1,7 @@
 package com.bsb.hike.models;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONException;
@@ -37,7 +38,8 @@ public class BroadcastConversation extends GroupConversation {
 			ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn, true, false);
 			broadcastParticipants.add(contactInfo);
 		}
-		
+		Collections.sort(broadcastParticipants);
+
 		switch (broadcastParticipants.size())
 		{
 		case 0:
