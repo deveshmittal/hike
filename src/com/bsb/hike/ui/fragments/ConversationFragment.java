@@ -892,11 +892,21 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				//emptyHolder.addView(emptyView);
 			}
 			
-			if (searchMode && !TextUtils.isEmpty(searchText))
+			if (searchMode)
 			{
-				emptyView.setVisibility(View.GONE);
-				getView().findViewById(R.id.searchEmptyView).setVisibility(View.VISIBLE);
-				setSearchEmptyState();
+				if (!TextUtils.isEmpty(searchText))
+				{
+					emptyView.setVisibility(View.GONE);
+					getView().findViewById(R.id.searchEmptyView).setVisibility(View.VISIBLE);
+					setSearchEmptyState();
+				}
+				else if (mConversationsByMSISDN.isEmpty())
+				{
+					getView().findViewById(R.id.searchEmptyView).setVisibility(View.GONE);
+					emptyView.setVisibility(View.VISIBLE);
+					ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
+					friendsList.setEmptyView(emptyView);
+				}
 			}
 			else
 			{
