@@ -23,11 +23,6 @@ import org.acra.util.HttpRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import twitter4j.Twitter;
-import twitter4j.TwitterFactory;
-import twitter4j.auth.AccessToken;
-import twitter4j.auth.OAuthAuthorization;
-import twitter4j.conf.ConfigurationContext;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
@@ -37,6 +32,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -197,11 +193,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String FACEBOOK_AUTH_COMPLETE = "facebookAuthComplete";
 
-	public static final String TWITTER_TOKEN = "twitterToken";
+	//public static final String TWITTER_TOKEN = "twitterToken";
 
-	public static final String TWITTER_TOKEN_SECRET = "twitterTokenSecret";
+	//public static final String TWITTER_TOKEN_SECRET = "twitterTokenSecret";
 
-	public static final String TWITTER_AUTH_COMPLETE = "twitterAuthComplete";
+	//public static final String TWITTER_AUTH_COMPLETE = "twitterAuthComplete";
 
 	public static final String MSISDN_ENTERED = "msisdnEntered";
 
@@ -455,9 +451,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String DETAILED_HTTP_LOGGING_ENABLED = "detailedHttpLoggingEnabled";
 
+	public static final String BULK_LAST_SEEN_PREF = "blsPref";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
-	private static Twitter twitter;
+	//private static Twitter twitter;
 
 	private static HikePubSub mPubSubInstance;
 
@@ -623,9 +621,6 @@ public void onTrimMemory(int level)
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		String uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		// this is the setting to check whether the avtar DB migration has
-		// started or not
-		int avtarInt = settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1);
 		// this is the setting to check whether the conv DB migration has
 		// started or not
 		// -1 in both cases means an uninitialized setting, mostly on first
@@ -644,12 +639,11 @@ public void onTrimMemory(int level)
 		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
 
 		// first time or failed DB upgrade.
-		if (avtarInt == -1 && convInt == -1)
+		if (convInt == -1)
 		{
 			Editor mEditor = settings.edit();
 			// set the pref to 0 to indicate we've reached the state to init the
 			// hike conversation database.
-			mEditor.putInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, 0);
 			mEditor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 0);
 			mEditor.commit();
 		}
@@ -711,7 +705,7 @@ public void onTrimMemory(int level)
 		
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
-		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || 
+		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 ) || 
 				settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1 || settings.getInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, -1) == 1 || 
 				settings.getInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1) == 1 || settings.getInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 1) == 1 || TEST)
 		{
@@ -726,9 +720,9 @@ public void onTrimMemory(int level)
 		HikeMqttPersistence.init(this);
 		SmileyParser.init(this);
 
-		String twitterToken = settings.getString(HikeMessengerApp.TWITTER_TOKEN, "");
-		String twitterTokenSecret = settings.getString(HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
-		makeTwitterInstance(twitterToken, twitterTokenSecret);
+		//String twitterToken = settings.getString(HikeMessengerApp.TWITTER_TOKEN, "");
+		//String twitterTokenSecret = settings.getString(HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
+		//makeTwitterInstance(twitterToken, twitterTokenSecret);
 
 		setIndianUser(settings.getString(COUNTRY_CODE, "").equals(HikeConstants.INDIA_COUNTRY_CODE));
 
@@ -816,6 +810,7 @@ public void onTrimMemory(int level)
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_SUPPORT, "hike support");
 		hikeBotNamesMap.put(HikeConstants.NUX_BOT, "Natasha");
+		hikeBotNamesMap.put(HikeConstants.CRICKET_BOT, "Cricket");
 
 		HikeConversationsDatabase.getInstance().addBotToHashMap(hikeBotNamesMap);
 		initHikeLruCache(getApplicationContext());
@@ -991,42 +986,6 @@ public void onTrimMemory(int level)
 	public static void setIndianUser(boolean val)
 	{
 		isIndianUser = val;
-	}
-
-	public static void makeTwitterInstance(String token, String tokenSecret)
-	{
-		AccessToken accessToken = null;
-		try
-		{
-			accessToken = new AccessToken(token, tokenSecret);
-
-			OAuthAuthorization authorization = new OAuthAuthorization(ConfigurationContext.getInstance());
-			authorization.setOAuthAccessToken(accessToken);
-			authorization.setOAuthConsumer(HikeConstants.APP_TWITTER_ID, HikeConstants.APP_TWITTER_SECRET);
-
-			twitter = new TwitterFactory().getInstance(authorization);
-		}
-		catch (IllegalArgumentException e)
-		{
-			Logger.w("HikeMessengerApp", "Invalid format", e);
-			return;
-		}
-	}
-
-	public static Twitter getTwitterInstance(String token, String tokenSecret)
-	{
-
-		try
-		{
-			makeTwitterInstance(token, tokenSecret);
-
-			return twitter;
-		}
-		catch (IllegalArgumentException e)
-		{
-			Logger.w("HikeMessengerApp", "Invalid format", e);
-			return null;
-		}
 	}
 
 	public static Map<String, TypingNotification> getTypingNotificationSet()

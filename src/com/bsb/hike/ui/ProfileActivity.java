@@ -62,6 +62,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
@@ -178,8 +179,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public static final String PROFILE_PIC_SUFFIX = "profilePic";
 
-	public static final String PROFILE_ROUND_SUFFIX = "round";
-	
 	private static enum ProfileType
 	{
 		USER_PROFILE, // The user profile screen
@@ -715,7 +714,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private void updateProfileImageInHeaderView()
 	{
-		HAManager.getInstance().recordDPUpdateEvent("Adding pic via IconLoader ");
 		addProfileHeaderView(true, true);
 	}
 	
@@ -889,7 +887,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			return;
 		}
 		
-		String mappedId = msisdn + PROFILE_ROUND_SUFFIX;
 		if(!isUpdate)
 		{
 			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn + PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(msisdn));
@@ -898,7 +895,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		if(headerViewInitialized || profileImageUpdated )
 		{
 			int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.avatar_profile_size);
-			(new IconLoader(this, mBigImageSize)).loadImage(mappedId, profileImage, false, false, true);
+			(new IconLoader(this, mBigImageSize)).loadImage(msisdn, profileImage, false, false, true);
 		}
 
 		if(headerViewInitialized)
@@ -1482,20 +1479,17 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			{
 				profileAdapter.setProfilePreview(smallerBitmap);
 			}
-			
-			HAManager.getInstance().recordDPUpdateEvent("HikeHTTPRequest RequestType.PROFILE_PIC");
+
 			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL + "/avatar", RequestType.PROFILE_PIC, new HikeHttpRequest.HikeHttpCallback()
 			{
 				public void onFailure()
 				{
 					Logger.d("ProfileActivity", "resetting image");
-					HAManager.getInstance().recordDPUpdateEvent("HikeHTTPRequest Failed" );
 					failureWhileSettingProfilePic();
 				}
 
 				public void onSuccess(JSONObject response)
 				{
-					HAManager.getInstance().recordDPUpdateEvent("HikeHTTPRequest Success");
 					mActivityState.destFilePath = null;
 					ContactManager.getInstance().setIcon(mLocalMSISDN, bytes, false);
 
@@ -1558,7 +1552,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 					HikeMessengerApp.getLruCache().clearIconForMSISDN(mLocalMSISDN);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, mLocalMSISDN);
-					HAManager.getInstance().recordDPUpdateEvent("Published HikePubSub.ICON_CHANGED");
+
 					if (isBackPressed)
 					{
 						HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
@@ -1830,7 +1824,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 				if ((this.profileType == ProfileType.USER_PROFILE) || (this.profileType == ProfileType.GROUP_INFO))
 				{
-					HAManager.getInstance().recordDPUpdateEvent("from crop_result");
+					Utils.compressAndCopyImage(mActivityState.destFilePath, mActivityState.destFilePath, ProfileActivity.this, ImageQuality.QUALITY_MEDIUM);
 					saveChanges();
 				}
 				break;
@@ -2213,11 +2207,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						if(profileType == ProfileType.CONTACT_INFO || profileType == ProfileType.GROUP_INFO)
 						{
-							HAManager.getInstance().recordDPUpdateEvent("recv HikePubSub.ICON_CHANGED");
 							updateProfileImageInHeaderView();
 						}
 						else
 						{
+							profileAdapter.updateHasCustomPhoto();
 							profileAdapter.notifyDataSetChanged();
 						}
 					}

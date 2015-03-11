@@ -527,27 +527,53 @@ public class HAManager
 		return fileNames;
 	}
 	
-	public void recordSessionStart()
+	public JSONObject recordAndReturnSessionStart()
 	{
 		fgSessionInstance.startSession();
-		recordSession(fgSessionInstance, true);
+		
+		JSONObject metadata = getMetaDataForSession(fgSessionInstance, true);
+		
+		/*
+			We are not recording SessionEvent in Analytics File, so commenting it
+			If In future if We uncomment it
+			Check that While Recording Event we add SeesionID, so now it will be added twice
+		*/
+		//HAManager.getInstance().record(AnalyticsConstants.SESSION_EVENT, AnalyticsConstants.FOREGROUND, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_SESSION);
+		
+		return metadata;
 	}
-	
-	public void recordSessionEnd()
+
+	public JSONObject recordAndReturnSessionEnd()
 	{
 		fgSessionInstance.endChatSessions();
 		recordChatSessions();
-		recordSession(fgSessionInstance, false);
-		fgSessionInstance.reset();
+		
+		JSONObject metadata = getMetaDataForSession(fgSessionInstance, false);
+		
+		/*
+			We are not recording SessionEvent in Analytics File, so commenting it
+			If In future if We want to log that as well just uncomment it but
+			Check that While Recording Event we also add SeesionID, so now it will be added twice
+			so remove it before recording
+		 */
+		//HAManager.getInstance().record(AnalyticsConstants.SESSION_EVENT, AnalyticsConstants.BACKGROUND, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_SESSION);
+
 		dumpInMemoryEventsAndTryToUpload(false, false);
+		
+		fgSessionInstance.reset();
+		
+		return metadata; 
 	}
-	
-	private void recordSession( Session session, boolean sessionStart)
+
+	private JSONObject getMetaDataForSession( Session session, boolean sessionStart)
 	{
 		JSONObject metadata = null;
 		try
 		{
 			metadata = new JSONObject();
+			
+			//1)Adding Session Id
+			metadata.put(AnalyticsConstants.SESSION_ID, fgSessionInstance.getSessionId());
 			
 			//2)con:- 2g/3g/4g/wifi/off
 			metadata.put(AnalyticsConstants.CONNECTION_TYPE, Utils.getNetworkType(context));
@@ -566,10 +592,8 @@ public class HAManager
 				// Not sending it for now. We will fix this code in later release when required
 				//metadata.put(AnalyticsConstants.SOURCE_APP_OPEN, session.getAppOpenSource());
 
-				// 4)srcctx :- uid/gid/null(in case of appOpen via Launcher)
+				// 3)srcctx :- uid/gid/null(in case of appOpen via Launcher)
 				metadata.put(AnalyticsConstants.SOURCE_CONTEXT, session.getSrcContext());
-				
-				HAManager.getInstance().record(AnalyticsConstants.SESSION_EVENT, AnalyticsConstants.FOREGROUND, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_SESSION);
 				
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "--session-id :" + session.getSessionId() + "--network-type :" + Utils.getNetworkTypeAsString(context) + "--source-context :" + session.getSrcContext() + "--conv-type :" + session.getConvType() + "--msg-type :" + session.getMsgType());
 			}
@@ -579,8 +603,6 @@ public class HAManager
 
 				metadata.put(AnalyticsConstants.DATA_CONSUMED, fgSessionInstance.getDataConsumedInSession());
 				
-				HAManager.getInstance().record(AnalyticsConstants.SESSION_EVENT, AnalyticsConstants.BACKGROUND, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_SESSION);
-				
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "--session-id :" + session.getSessionId() + "--session-time :" + session.getSessionTime() + "--network-type :" + Utils.getNetworkTypeAsString(context) + "--data-consumed :" + session.getDataConsumedInSession() + "bytes");
 			}
 		}
@@ -588,7 +610,7 @@ public class HAManager
 		{
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
-		
+		return metadata;
 	}
 	
 	public void setMetadatFieldsForSessionEvent(String appOpenSource, String srcContext, ConvMessage convMessage, int convType)
@@ -751,35 +773,6 @@ public class HAManager
 		catch(JSONException e)
 		{
 			Logger.d(AnalyticsConstants.LAST_SEEN_ANALYTICS_TAG, "invalid json");
-		}
-	}
-	
-	public void recordDPUpdateEvent(String msg)
-	{
-		//Comments need to be removed before deploying on prod
-		/*if(!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.DETAILED_HTTP_LOGGING_ENABLED, false))
-		{	
-			return;
-		}*/
-		
-		JSONObject metadata = null;
-		
-		try
-		{
-			metadata = new JSONObject();
-			
-			if(!TextUtils.isEmpty(msg))
-			{
-				metadata.put("m", msg);
-			}
-			
-			record(AnalyticsConstants.DP_UPDATE_ANALYTICS, AnalyticsConstants.UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.DP_UPDATE_ANALYTICS_TAG);
-				
-			Logger.d(AnalyticsConstants.DP_UPDATE_ANALYTICS, " -- msg :" + msg);
-		}
-		catch(JSONException e)
-		{
-			Logger.d(AnalyticsConstants.DP_UPDATE_ANALYTICS, "invalid json");
 		}
 	}
 	

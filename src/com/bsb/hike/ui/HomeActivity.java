@@ -125,8 +125,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	
 	private TextView topBarIndicator;
 
-	private Drawable myProfileImage;
-
 	private View ftueAddFriendWindow;
 
 	private boolean isAddFriendFtueShowing = false;
@@ -184,11 +182,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		// If it's 1, it means we need to show a progress dialog and then wait
 		// for the
 		// pub sub thread event to cancel the dialog once the upgrade is done.
+		HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
+		
 		if ((HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.UPGRADING, false)))
 		{
 			progDialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.HIKE_UPGRADE_DIALOG, null);
 			showingProgress = true;
-			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
+			
 		}
 
 		if (!showingProgress)
@@ -277,7 +277,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private void setupFestivePopup()
 	{
 		final int festivePopupType = accountPrefs.getInt(HikeConstants.SHOW_FESTIVE_POPUP, -1);
-		if (festivePopupType == FestivePopup.VALENTINE_DAY_POPUP)
+		if (festivePopupType == FestivePopup.HOLI_POPUP)
 		{
 			if(FestivePopup.isPastFestiveDate(festivePopupType))
 			{
@@ -384,6 +384,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (overFlowWindow != null && overFlowWindow.isShowing())
 			overFlowWindow.dismiss();
 		HikeMessengerApp.getPubSub().removeListeners(this, homePubSubListeners);
+		HikeMessengerApp.getPubSub().removeListeners(this, progressPubSubListeners);
 		super.onDestroy();
 	}
 
@@ -1364,27 +1365,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
 			itemTextView.setText(item.getName());
 
-			ImageView itemImageView = (ImageView) convertView.findViewById(R.id.item_icon);
-			if (item.getKey() == 0)
-			{
-				if (myProfileImage != null)
-				{
-					itemImageView.setImageDrawable(myProfileImage);
-				}
-				else
-				{
-					itemImageView.setScaleType(ScaleType.CENTER_INSIDE);
-					itemImageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
-					itemImageView.setImageResource(R.drawable.ic_default_avatar);
-				}
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);
-			}
-			else
-			{
-
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
-			}
-
 			int currentCredits = accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0);
 
 			TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
@@ -1435,10 +1415,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
 		final String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
-		myProfileImage = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
-		// myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
-		// msisdn, true);
-
 		/*
 		 * removing out new chat option for now
 		 */

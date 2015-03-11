@@ -1076,23 +1076,12 @@ public class Utils
 
 	public static boolean isUserOnline(Context context)
 	{
-		try
+		if(getActiveNetInfo() != null)
 		{
-			if (context == null)
-			{
-				Logger.e("HikeService", "Hike service is null!!");
-				return false;
-			}
-			ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-			return (cm != null && cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected());
+			return true;
 		}
-		catch (NullPointerException e)
-		{
-			/*
-			 * We were seeing NPEs on the console in this method. Added this since could not find any reason why we would get an NPE here.
-			 */
-			return false;
-		}
+		
+		return false;
 	}
 
 	/**
@@ -1496,15 +1485,21 @@ public class Utils
 		}
 	}
 
-	public static boolean copyImage(String srcFilePath, String destFilePath, Context context)
+	public static boolean compressAndCopyImage(String srcFilePath, String destFilePath, Context context)
+	{
+		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+		return compressAndCopyImage(srcFilePath, destFilePath, context, quality);
+	}
+	
+	public static boolean compressAndCopyImage(String srcFilePath, String destFilePath, Context context, int quality)
 	{
 		try
 		{
 			InputStream src;
 			String imageOrientation = Utils.getImageOrientation(srcFilePath);
 			Bitmap tempBmp = null;
-			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+
 			if (quality == ImageQuality.QUALITY_MEDIUM)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
@@ -2274,14 +2269,16 @@ public class Utils
 		{
 			return false;
 		}
-		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		try
+	
+		NetworkInfo netInfo = getActiveNetInfo();
+		
+		
+		if(netInfo != null && (netInfo.getType() == ConnectivityManager.TYPE_WIFI)) // there is active wifi network
 		{
-			return (cm != null && cm.getActiveNetworkInfo() != null && (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI));
+			return true;
 		}
-		catch (NullPointerException e)
+		else // either there is no active network or current network is not wifi
 		{
-			// TODO Auto-generated catch block
 			return false;
 		}
 	}
@@ -2675,7 +2672,10 @@ public class Utils
 		}
 	}
 
-	public static void saveBase64StringToFile(File file, String base64String) throws IOException
+	/*
+	 * returns a decoded byteArray of input base64String. 
+	 */
+	public static byte[] saveBase64StringToFile(File file, String base64String) throws IOException
 	{
 		FileOutputStream fos = new FileOutputStream(file);
 
@@ -2688,6 +2688,7 @@ public class Utils
 		fos.flush();
 		fos.getFD().sync();
 		fos.close();
+		return b;
 	}
 
 	public static void setupFormattedTime(TextView tv, long timeElapsed)
@@ -2788,7 +2789,8 @@ public class Utils
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
 				if(toLog)
 				{
-					HAManager.getInstance().recordSessionStart();
+					JSONObject sessionDataObject = HAManager.getInstance().recordAndReturnSessionStart();
+					sendSessionMQTTPacket(context, HikeConstants.FOREGROUND, sessionDataObject);
 				}
 			}
 			else if (!dueToConnect)
@@ -2797,7 +2799,8 @@ public class Utils
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_BACKGROUNDED, null);
 				if(toLog)
 				{
-					HAManager.getInstance().recordSessionEnd();
+					JSONObject sessionDataObject = HAManager.getInstance().recordAndReturnSessionEnd();
+					sendSessionMQTTPacket(context, HikeConstants.BACKGROUND, sessionDataObject);
 				}
 			}
 			else
@@ -2812,6 +2815,35 @@ public class Utils
 		}
 	}
 
+	/**
+	 * Sends Session fg/bg Packet With MQTT_QOS_ONE
+	 * @param context
+	 * @param subType
+	 * @param sessionMetaDataObject
+	 */
+	public static void sendSessionMQTTPacket(Context context, String subType, JSONObject sessionMetaDataObject)
+	{
+		JSONObject sessionObject = new JSONObject();
+		JSONObject data = new JSONObject();
+		try
+		{
+			sessionObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.SESSION);
+			sessionObject.put(HikeConstants.SUB_TYPE, subType);
+			
+			data.put(AnalyticsConstants.EVENT_TYPE, AnalyticsConstants.SESSION_EVENT);				
+			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, Utils.applyServerTimeOffset(context, System.currentTimeMillis()));
+			data.put(AnalyticsConstants.METADATA, sessionMetaDataObject);
+			
+			sessionObject.put(HikeConstants.DATA, data);
+			HikeMqttManagerNew.getInstance().sendMessage(sessionObject, HikeMqttManagerNew.MQTT_QOS_ONE);
+			Logger.d("sessionmqtt", "Sesnding Session MQTT Packet with qos 1, and : "+ subType);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	private static void resetStealthMode(Context context)
 	{
 		StealthResetTimer.getInstance(context).resetStealthToggle();
@@ -3446,7 +3478,7 @@ public class Utils
 
 	public static boolean isVoipActivated(Context context)
 	{
-		int voipActivated = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.VOIP_ACTIVATED, 0);
+		int voipActivated = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.VOIP_ACTIVATED, 1);
 		return (voipActivated == 0)? false : true;
 	}
 
@@ -3457,11 +3489,7 @@ public class Utils
 			Toast.makeText(context, context.getString(R.string.voip_offline_error), Toast.LENGTH_SHORT).show();
 			return;
 		}
-		Intent i = new Intent(context, VoIPService.class);
-		i.putExtra("action", "outgoingcall");
-		i.putExtra("msisdn", mContactNumber);
-		i.putExtra("call_source", source.ordinal());
-		context.startService(i);
+		context.startService(IntentManager.getVoipCallIntent(context, mContactNumber, source));
 	}
 
 	public static String getFormattedDateTimeFromTimestamp(long milliSeconds, Locale current)
@@ -4941,6 +4969,7 @@ public class Utils
 	/**
 	 * Fetches the network connection using connectivity manager
 	 * @param context
+	 * @param info -- the network info for which you want to get network type. if null is passed it will give info about active network info
 	 * @return
 	 * <li>-1 in case of no network</li>
 	 * <li> 0 in case of unknown network</li>
@@ -4952,10 +4981,19 @@ public class Utils
 	 */
 	public static short getNetworkType(Context context)
 	{
+		return getNetworkType(context, null);
+	}
+	
+	public static short getNetworkType(Context context, NetworkInfo info)
+	{
 		int networkType = -1;
-		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		
 		// Contains all the information about current connection
-		NetworkInfo info = cm.getActiveNetworkInfo();
+		if(null == info)
+		{
+			info = getActiveNetInfo();
+		}
+		
 		if (info != null)
 		{
 			if (!info.isConnected())
@@ -5286,5 +5324,32 @@ public class Utils
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Returns active network info
+	 * @return
+	 */
+	public static NetworkInfo getActiveNetInfo()
+	{
+		/*
+		 * We've seen NPEs in this method on the dev console but have not been able to figure out the reason so putting this in a try catch block.
+		 */
+		NetworkInfo info = null;
+		try
+		{
+			ConnectivityManager cm = (ConnectivityManager) HikeMessengerApp.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
+			
+			if(cm != null && cm.getActiveNetworkInfo() != null && (cm.getActiveNetworkInfo().isAvailable() || cm.getActiveNetworkInfo().isConnectedOrConnecting()))
+			{
+				info = cm.getActiveNetworkInfo();
+			}
+			return info;
+		}
+		catch (NullPointerException e)
+		{
+			Logger.e("Utils", "Exception :", e);
+		}
+		return null;
 	}
 }

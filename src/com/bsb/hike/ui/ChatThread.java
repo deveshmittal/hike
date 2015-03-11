@@ -1530,8 +1530,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
 				itemTextView.setText(item.getName());
 
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
-
 				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
 				freeSmsCount.setVisibility(View.GONE);
 
@@ -1650,7 +1648,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
             json.put(AnalyticsConstants.EVENT_KEY, key);
             json.put(AnalyticsConstants.ORIGIN, origin);
             json.put(AnalyticsConstants.CHAT_MSISDN, mContactNumber);
-            HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, subType, json, AnalyticsConstants.EVENT_TAG_BOTS);
+            HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.UI_EVENT, subType, json);
         }
         catch (JSONException e)
         {
@@ -2288,7 +2286,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 								json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
 								json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
 								json.put(AnalyticsConstants.TO, mContactNumber);
-								HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+								HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 							}
 							catch (JSONException e)
 							{
@@ -3211,19 +3209,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 
-		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
-		if (drawable != null)
+		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber);
+		if (drawable == null)
 		{
-			avatar.setScaleType(ScaleType.FIT_CENTER);
-			avatar.setImageDrawable(drawable);
-			avatar.setBackgroundDrawable(null);
+			drawable = HikeMessengerApp.getLruCache().getDefaultAvatar(mContactNumber, false);
 		}
-		else
-		{
-			avatar.setScaleType(ScaleType.CENTER_INSIDE);
-			avatar.setImageResource((mConversation instanceof GroupConversation) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
-			avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
-		}
+		avatar.setScaleType(ScaleType.FIT_CENTER);
+		avatar.setImageDrawable(drawable);
 	}
 
 	private void setLabel(String label)
@@ -5131,7 +5123,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_DELETE);
 				json.put(AnalyticsConstants.ORIGIN, origin);
 				json.put(AnalyticsConstants.CHAT_MSISDN, mContactNumber);
-				HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+				HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 			}
 			catch (JSONException e)
 			{
@@ -6452,7 +6444,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				final String fPath = filePath;
 				final int atType = attachementType;
-				
+				getApplicationContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + new File(filePath))));
 				HikeDialog.showDialog(ChatThread.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, new HikeDialog.HikeDialogListener()
 				{
 					@Override
@@ -8030,7 +8022,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			if(mAdapter.containsMediaMessage(selectedMsgIdsToDelete))
 			{
-				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
+				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard, true);
 			}
 			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
 			deleteConfirmDialog.setCancelButton(R.string.cancel);
@@ -8208,8 +8200,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
 				itemTextView.setText(item.getName());
-
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
 
 				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
 				freeSmsCount.setVisibility(View.GONE);
