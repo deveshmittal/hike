@@ -518,6 +518,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					if (profileType == ProfileType.BROADCAST_INFO)
 					{
 						groupName = broadcastConversation.getDefaultBroadcastName();
+						mNameEdit.setText(broadcastConversation.getDefaultBroadcastName());
 					}
 					else
 					{
@@ -1616,55 +1617,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				requests.add(request);
 			}
 		}
-		else
-		{
-			final String newName = broadcastConversation.getDefaultBroadcastName();
-			if (!TextUtils.isEmpty(newName) && !nameTxt.equals(newName))
-			{
-				/* user edited the text, so update the profile */
-				HikeHttpRequest request = new HikeHttpRequest(httpRequestURL + "/name", RequestType.OTHER, new HikeHttpRequest.HikeHttpCallback()
-				{
-					public void onFailure()
-					{
-						if (isBackPressed)
-						{
-							HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
-						}
-					}
-
-					public void onSuccess(JSONObject response)
-					{
-						if (ProfileActivity.this.profileType != ProfileType.BROADCAST_INFO)
-						{
-							/*
-							 * if the request was successful, update the shared preferences and the UI
-							 */
-							String name = newName;
-							Editor editor = preferences.edit();
-							editor.putString(HikeMessengerApp.NAME_SETTING, name);
-							editor.commit();
-							HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_NAME_CHANGED, null);
-						}
-						if (isBackPressed)
-						{
-							HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
-						}
-					}
-				});
-
-				JSONObject json = new JSONObject();
-				try
-				{
-					json.put("name", newName);
-					request.setJSONData(json);
-				}
-				catch (JSONException e)
-				{
-					Logger.e("ProfileActivity", "Could not set name", e);
-				}
-				requests.add(request);
-			}
-		}
 		
 		if (mActivityState.destFilePath != null)
 		{
@@ -2341,6 +2293,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					else
 					{
 						groupName = broadcastConversation.getDefaultBroadcastName();
+						mNameEdit.setText(broadcastConversation.getDefaultBroadcastName());
 					}
 				}
 				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
@@ -2993,13 +2946,27 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				optionsList.add(getString(R.string.add_to_contacts));
 			}
 			optionsList.add(getString(R.string.send_message));
+			if(Utils.isVoipActivated(this) && (tempContactInfo!=null && tempContactInfo.isOnhike()) && !HikeMessengerApp.hikeBotNamesMap.containsKey(tempContactInfo.getMsisdn()))
+			{
+				optionsList.add(getString(R.string.make_call));
+			}
 			if (!tempContactInfo.isOnhike())
 			{
 				optionsList.add(getString(R.string.invite_to_hike));
 			}
 			if (isGroupOwner)
 			{
-				optionsList.add(getString(isBroadcast ? R.string.remove_from_broadcast : R.string.remove_from_group ));
+				if (isBroadcast)
+				{
+					if(broadcastConversation.getGroupMemberAliveCount() > 1)
+					{
+						optionsList.add(getString(R.string.remove_from_broadcast));
+					}
+				}
+				else
+				{
+					optionsList.add(getString(R.string.remove_from_group));
+				}
 			}
 
 			final String[] options = new String[optionsList.size()];
@@ -3018,6 +2985,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					if (getString(R.string.send_message).equals(option))
 					{
 						openChatThread(contactInfo);
+					}
+					else if (getString(R.string.make_call).equals(option))
+					{
+						Utils.onCallClicked(getApplicationContext(), contactInfo.getMsisdn(), VoIPUtils.CallSource.PROFILE_ACTIVITY);
 					}
 					else if (getString(R.string.invite_to_hike).equals(option))
 					{

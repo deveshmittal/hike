@@ -46,6 +46,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
@@ -186,6 +187,7 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 		File file = new File(Utils.getTempProfileImageFileName(groupOrBroadcastId));
 		file.delete();
 
+		onBack();
 		super.onBackPressed();
 	}
 
@@ -224,13 +226,13 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 		postText = (TextView) actionBarView.findViewById(R.id.post_btn);
 
 		doneBtn.setVisibility(View.VISIBLE);
-		postText.setText(R.string.next_signup);
 
 		if (isBroadcast)
 		{
 			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, true);
 			title.setText(R.string.new_broadcast);
-			
+			postText.setText(R.string.done);
+
 			doneBtn.setOnClickListener(new OnClickListener()
 			{
 
@@ -246,13 +248,7 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 				@Override
 				public void onClick(View v)
 				{
-					Intent intent = new Intent(CreateNewGroupOrBroadcastActivity.this, ComposeChatActivity.class);
-					intent.putStringArrayListExtra(HikeConstants.Extras.BROADCAST_RECIPIENTS, broadcastRecipients);
-					intent.putExtra(HikeConstants.Extras.COMPOSE_MODE, HikeConstants.Extras.CREATE_BROADCAST_MODE);
-					intent.putExtra(HikeConstants.Extras.CREATE_BROADCAST, true);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
-					finish();
+					onBack();
 				}
 			});
 		}
@@ -260,7 +256,8 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 		{
 			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
 			title.setText(R.string.new_group);
-			
+			postText.setText(R.string.next_signup);
+
 			doneBtn.setOnClickListener(new OnClickListener()
 			{
 
@@ -289,6 +286,15 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 		actionBar.setCustomView(actionBarView);
 	}
 
+	private void onBack()
+	{
+		if (isBroadcast)
+		{
+			IntentManager.onBackPressedCreateNewBroadcast(CreateNewGroupOrBroadcastActivity.this, broadcastRecipients);
+			finish();
+		}
+	}
+	
 	private void createBroadcast(ArrayList<String> selectedContactsMsisdns)
 	{
 		String broadcastName = groupOrBroadcastName.getText().toString().trim();
@@ -299,7 +305,7 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 		ArrayList<ContactInfo> selectedContactList = new ArrayList<ContactInfo>(selectedContactsMsisdns.size());
 		for (String msisdn : selectedContactsMsisdns)
 		{
-			ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
+			ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn, true, false);
 			selectedContactList.add(contactInfo);
 		}
 		

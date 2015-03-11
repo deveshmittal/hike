@@ -277,6 +277,10 @@
             android:windowSoftInputMode="stateVisible" >
         </activity>
         <activity
+            android:name=".ui.FtueBroadcast"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+        <activity
             android:name=".ui.PeopleActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
