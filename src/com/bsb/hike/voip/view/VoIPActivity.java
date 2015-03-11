@@ -88,6 +88,9 @@ public class VoIPActivity extends HikeAppStateBaseFragmentActivity implements Ca
 			callFailedFragment.setArguments(bundle);
 
 			addFragment(R.id.parent_layout, callFailedFragment, HikeConstants.VOIP_CALL_FAILED_FRAGMENT_TAG);
+
+			// Using this method to ensure fragment commit happens immediately
+			getSupportFragmentManager().executePendingTransactions();
 		}
 	}
 
