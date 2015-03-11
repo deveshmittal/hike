@@ -226,13 +226,13 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 		postText = (TextView) actionBarView.findViewById(R.id.post_btn);
 
 		doneBtn.setVisibility(View.VISIBLE);
-		postText.setText(R.string.next_signup);
 
 		if (isBroadcast)
 		{
 			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, true);
 			title.setText(R.string.new_broadcast);
-			
+			postText.setText(R.string.done);
+
 			doneBtn.setOnClickListener(new OnClickListener()
 			{
 
@@ -256,7 +256,8 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 		{
 			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
 			title.setText(R.string.new_group);
-			
+			postText.setText(R.string.next_signup);
+
 			doneBtn.setOnClickListener(new OnClickListener()
 			{
 
