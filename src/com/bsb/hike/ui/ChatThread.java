@@ -5771,7 +5771,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 0:
 					requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
 					pickIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-					File selectedDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
+					File selectedDir = new File(Utils.getFileParent(HikeFileType.IMAGE, false));
 					if (!selectedDir.exists())
 					{
 						if (!selectedDir.mkdirs())
@@ -5780,7 +5780,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							return;
 						}
 					}
-					String fileName = Utils.getOriginalFile(HikeFileType.IMAGE, null);
+					String fileName = HikeConstants.CAM_IMG_PREFIX + Utils.getOriginalFile(HikeFileType.IMAGE, null);
 					selectedFile = new File(selectedDir.getPath() + File.separator + fileName); 
 
 					pickIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFile));

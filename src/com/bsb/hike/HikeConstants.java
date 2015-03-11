@@ -2289,4 +2289,6 @@ public class HikeConstants
 	public static final String EXCEPTION_MESSAGE = "exm";
 	
 	public static final String MESSAGE_PROCESS_TIME = "mpt";
+
+	public static final String CAM_IMG_PREFIX = "CAM_";
 }
