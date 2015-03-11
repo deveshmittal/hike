@@ -149,7 +149,7 @@ public class VoIPConstants {
 
 		public static final String CALL_ID = "callId";
 
-		public static final String REDIALLING = "redialling";
+		public static final String INCOMING_CALL = "incomingCall";
 	}
 
 	
