@@ -120,7 +120,5 @@ class PlatformContentLoader extends Handler
 		Logger.d(TAG, "fetching template from remote");
 
 		new PlatformZipDownloader(argContentRequest, true).downloadAndUnzip();
-
-		PlatformRequestManager.getCurrentDownloadingTemplates().add(argContentRequest.getContentData().appHashCode());
 	}
 }
