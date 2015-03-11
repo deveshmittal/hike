@@ -144,37 +144,17 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
             
             case R.id.atn_direct_wifinetworks:
             	 WifiNetworksListFragment wififragment = (WifiNetworksListFragment) getFragmentManager().findFragmentById(R.id.wifi_list);
-            	 wififragment.updateWifiNetworks(getdistinctWifiNetworks());  	 
+            	 wififragment.updateWifiNetworks(getDistinctWifiNetworks());  	 
             	 return true ;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-	
-    public HashMap<String , ScanResult> getdistinctWifiNetworks(){
-
-    	 WifiManager  wifiManager ;
-    	 wifiManager =  (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-    	 wifiManager.startScan(); 
-    	 List<ScanResult> results = wifiManager.getScanResults();
-    	
-	   	 HashMap<String,ScanResult>  distinctNetworks =  new HashMap<String, ScanResult> ();
-	   	 for(ScanResult scanResult :  results)
-	   	 {
-	       		 
-	       		 if(!distinctNetworks.containsKey(scanResult))
-	       		 {
-	       			distinctNetworks.put(scanResult.SSID, scanResult); 
-	       		 }
-	       		 else
-	       		 {
-	       			 if(wifiManager.compareSignalLevel(scanResult.level, distinctNetworks.get(scanResult.SSID).level)>0)
-	       			 {
-	       				 distinctNetworks.put(scanResult.SSID, scanResult);
-	       			 }
-	       		 }
-	   	 }
-	   	 return distinctNetworks ;
+    
+    @Override
+    public HashMap<String, ScanResult> getDistinctWifiNetworks()
+    {
+    	return connectionManager.getDistinctWifiNetworks();
     }
     
     @Override

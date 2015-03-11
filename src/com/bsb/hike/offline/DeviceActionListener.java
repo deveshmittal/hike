@@ -1,5 +1,7 @@
 package com.bsb.hike.offline;
 
+import java.util.HashMap;
+
 import android.net.wifi.ScanResult;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -12,4 +14,6 @@ public interface DeviceActionListener {
     void disconnect();
     
     Boolean connectToHotspot(ScanResult scanResult);
+    
+    HashMap<String, ScanResult> getDistinctWifiNetworks();
 }

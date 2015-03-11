@@ -1,5 +1,6 @@
 package com.bsb.hike.offline;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,8 @@ import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,20 +31,69 @@ import android.widget.Toast;
 
 public class WifiNetworksListFragment extends ListFragment {
 
+	private final int POST_TO_FRAGMENT = 0;
+	
 	View mContentView = null;
 	private List<ScanResult> wifipeers = new ArrayList<ScanResult>();
 	private int mIconImageSize;
 	private IconLoader iconLoader;
-	
+	private Handler mHandler;
 
 	@Override
     public void onActivityCreated(Bundle savedInstanceState) {
+		
+		mHandler = new Handler(getActivity().getMainLooper())
+		{
+			@Override
+			public void handleMessage(Message msg)
+			{
+				switch(msg.what)
+				{
+					case POST_TO_FRAGMENT:
+						HashMap<String, ScanResult> nearbyNetworks = (HashMap<String, ScanResult>) msg.obj;
+						updateWifiNetworks(nearbyNetworks);
+						break;
+					default:
+						super.handleMessage(msg);
+				}
+			}
+			
+		};
     	super.onActivityCreated(savedInstanceState);
-    	
+    	this.setListAdapter(new WiFiNetworkListAdapter(getActivity(), R.layout.conversation_item, wifipeers));
     }
 	
+	@Override
+	public void onStart() {
+		runNetworkScan();
+		super.onStart();
+	}
+	// starts a network scan for every 2sec
+	private void runNetworkScan()
+	{
+		new Thread()
+		{
+			@Override
+			public void run() {
+				while(!isInterrupted())
+				{
+					HashMap<String, ScanResult> nearbyNetworks = ((DeviceActionListener) getActivity()).getDistinctWifiNetworks();
+					Message targetMessage = mHandler.obtainMessage(POST_TO_FRAGMENT, nearbyNetworks);
+					targetMessage.sendToTarget();
+					try 
+					{
+						sleep(2*1000);
+					} 
+					catch (InterruptedException e) 
+					{
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		}.start();
+	}
 	
-    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     	mContentView = inflater.inflate(R.layout.wifinetwork_details, null);
@@ -50,10 +102,9 @@ public class WifiNetworksListFragment extends ListFragment {
     
     public void updateWifiNetworks(HashMap<String, ScanResult>  strength)
     {
-    	  this.wifipeers = new ArrayList<ScanResult>( strength.values()); 
-    	  
-    	  this.setListAdapter(new WiFiNetworkListAdapter(getActivity(), R.layout.conversation_item, wifipeers));
-      	
+		wifipeers.clear();
+		wifipeers.addAll(strength.values());
+		((WiFiNetworkListAdapter)getListAdapter()).notifyDataSetChanged();
     }
     
     @Override
@@ -66,6 +117,7 @@ public class WifiNetworksListFragment extends ListFragment {
     		Toast.makeText(getActivity(), "Connection Failed" , Toast.LENGTH_SHORT).show();
     	
     }
+    
     private class WiFiNetworkListAdapter extends ArrayAdapter<ScanResult> {
 
         private List<ScanResult> items;
@@ -96,11 +148,15 @@ public class WifiNetworksListFragment extends ListFragment {
             	mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
         		iconLoader = new IconLoader(context, mIconImageSize);
         		
-        		ContactInfo deviceContact = ContactManager.getInstance().getContact(wifinetwork.SSID);
+        		String senderMsisdn = "";
+        		if(wifinetwork.SSID.startsWith("hike_"))
+        			senderMsisdn = wifinetwork.SSID.split("_")[1];
+        		ContactInfo deviceContact = ContactManager.getInstance().getContact(senderMsisdn);
         		TextView contact_name = (TextView) v.findViewById(R.id.contact);
+        		
         		String phoneName = "";
         		if(deviceContact != null && !(TextUtils.isEmpty(deviceContact.getName())))
-        			phoneName = deviceContact.getName();
+        			phoneName = deviceContact.getName() + " wants to connect";
         		else
         			phoneName = wifinetwork.SSID;
         		
@@ -118,23 +174,5 @@ public class WifiNetworksListFragment extends ListFragment {
             return v;
 
         }
-
-		@Override
-		public ScanResult getItem(int position) {
-			// TODO Auto-generated method stub
-			return super.getItem(position);
-			
-		}
-
-		@Override
-		public int getPosition(ScanResult item) {
-			// TODO Auto-generated method stub
-			return super.getPosition(item);
-		}
     }
-    
-    
-		
-
-
 }
