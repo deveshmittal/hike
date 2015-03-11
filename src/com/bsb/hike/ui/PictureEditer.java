@@ -2,6 +2,9 @@ package com.bsb.hike.ui;
 
 import java.io.File;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,14 +22,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import com.jess.ui.TwoWayAdapterView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.photos.HikePhotosConstants;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
@@ -38,6 +42,7 @@ import com.bsb.hike.ui.fragments.PhotoActionsFragment;
 import com.bsb.hike.ui.fragments.PhotoActionsFragment.ActionListener;
 import com.bsb.hike.ui.fragments.PreviewFragment;
 import com.bsb.hike.ui.fragments.ProfilePicFragment;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Utils;
@@ -68,7 +73,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 	private View mActionBarBackButton;
 
 	private View overlayFrame;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -109,13 +114,12 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		undoButton = (ImageView) findViewById(R.id.undo);
 		undoButton.setOnClickListener(clickHandler);
 
-		TabPageIndicator tabs = (TabPageIndicator) findViewById(R.id.indicator);
-		tabs.setOnPageChangeListener(clickHandler);
+		indicator.setOnPageChangeListener(clickHandler);
 
 		setupActionBar();
 
 		overlayFrame = findViewById(R.id.overlayFrame);
-		
+
 		try
 		{
 			new File(filename).delete();
@@ -141,7 +145,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
 		super.onPause();
 	}
-	
+
 	private void setupActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
@@ -250,14 +254,13 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				DoodleEffectItemLinearLayout prev = HikePhotosUtils.FilterTools.getCurrentDoodleItem();
 				DoodleEffectItemLinearLayout me = (DoodleEffectItemLinearLayout) v;
 				editView.setBrushColor(me.getBrushColor());
-				doodlePreview.setBrushColor(me.getBrushColor(),true);
+				doodlePreview.setBrushColor(me.getBrushColor(), true);
 				doodlePreview.refresh();
 				if (prev != null && prev.getBrushColor() != me.getBrushColor())
 				{
 					prev.unSelect();
 				}
 				me.select();
-
 			}
 			else
 			{
@@ -295,6 +298,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 								getSupportFragmentManager().popBackStackImmediate();
 								if (actionCode == PhotoActionsFragment.ACTION_SEND)
 								{
+									sendAnalyticsSendTo();
 									editView.saveImage(HikeFileType.IMAGE, null, new HikePhotosListener()
 									{
 										@Override
@@ -320,6 +324,8 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 								}
 								else if (actionCode == PhotoActionsFragment.ACTION_SET_DP)
 								{
+									
+									sendAnalyticsSetAsDp();
 									// User info is saved in shared preferences
 									SharedPreferences preferences = HikeMessengerApp.getInstance().getApplicationContext()
 											.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
@@ -375,9 +381,9 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 							.replace(R.id.overlayFrame, mPhotosActionsFragment).addToBackStack(null).commit();
 
 					mActionBarDoneContainer.setVisibility(View.INVISIBLE);
-					
+
 					overlayFrame.setVisibility(View.VISIBLE);
-					
+
 					break;
 				}
 			}
@@ -451,8 +457,36 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 			{
 				File editFile = new File(filename);
 				editFile.delete();
-				
 			}
 		}
 	}
+	
+	private void sendAnalyticsSetAsDp()
+	{
+		try
+		{
+			JSONObject json = new JSONObject();
+			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_SET_AS_DP);
+			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	private void sendAnalyticsSendTo()
+	{
+		try
+		{
+			JSONObject json = new JSONObject();
+			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_SEND_TO);
+			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 }

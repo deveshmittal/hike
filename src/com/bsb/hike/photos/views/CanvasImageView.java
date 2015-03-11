@@ -309,6 +309,11 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 		}
 
 	}
+	
+	public int getColor()
+	{
+		return color;
+	}
 
 	/**
 	 * @author akhiltripathi

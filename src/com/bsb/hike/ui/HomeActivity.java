@@ -73,6 +73,7 @@ import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.FestivePopup;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.HikeTip;
@@ -1579,10 +1580,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
 					break;
-//				case 10:
-//					//Take a photo
-//					IntentManager.openHikeCameraActivity(HomeActivity.this);
-//					break;
 				}
 
 				if (intent != null)
@@ -1675,6 +1672,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 10:
 					//Take a photo
 					IntentManager.openHikeCameraActivity(HomeActivity.this);
+					sendAnalyticsTakePicture();
 					break;
 				}
 
@@ -1993,6 +1991,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		}
 	}
-
+	
+	private void sendAnalyticsTakePicture()
+	{
+		try
+		{
+			JSONObject json = new JSONObject();
+			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_FLOW_OPTION_CLICK);
+			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
 	
 }

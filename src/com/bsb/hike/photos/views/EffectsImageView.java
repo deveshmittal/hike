@@ -76,5 +76,10 @@ public class EffectsImageView extends ImageView
 		currentFilter = filter;
 		HikeEffectsFactory.applyFilterToBitmap(originalImage, listener, filter);
 	}
+	
+	public FilterType getCurrentFilter()
+	{
+		return currentFilter;
+	}
 
 }

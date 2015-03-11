@@ -32,9 +32,14 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorListener
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.ui.fragments.CameraFragment;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
@@ -239,7 +244,6 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				@Override
 				public void onAnimationEnd(Animator animation)
 				{
-
 					ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.tempiv);
 					iv.setImageBitmap(bitmap);
 					iv.setVisibility(View.VISIBLE);
@@ -253,6 +257,13 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			invisToVis.start();
 
 			snapOverlay.setVisibility(View.VISIBLE);
+
+			sendAnalyticsCameraClicked();
+
+			if (isUsingFFC)
+			{
+				sendAnalyticsCameraFFC();
+			}
 
 			// processSquareBitmap(bitmap);
 
@@ -374,7 +385,8 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				Intent intent = new Intent(HikeCameraActivity.this, PictureEditer.class);
 				intent.putExtra(HikeConstants.HikePhotos.FILENAME, data.getStringExtra(MediaStore.EXTRA_OUTPUT));
 				startActivity(intent);
-
+				sendAnalyticsGalleryPic();
+				break;
 			}
 		}
 		else if (resultCode == RESULT_CANCELED)
@@ -422,5 +434,47 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			return dstBmp;
 		}
 		return null;
+	}
+
+	private void sendAnalyticsCameraClicked()
+	{
+		try
+		{
+			JSONObject json = new JSONObject();
+			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_CAMERA_CLICK);
+			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private void sendAnalyticsCameraFFC()
+	{
+		try
+		{
+			JSONObject json = new JSONObject();
+			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_FFC_PIC);
+			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	private void sendAnalyticsGalleryPic()
+	{
+		try
+		{
+			JSONObject json = new JSONObject();
+			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_GALLERY_PICK);
+			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }

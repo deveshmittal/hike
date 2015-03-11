@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,12 +18,15 @@ import android.util.DisplayMetrics;
 import android.widget.FrameLayout;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
+import com.bsb.hike.photos.HikePhotosConstants;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -269,6 +275,8 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		{
 			Canvas canvasResult = new Canvas(imageEdited);
 
+			sendAnalyticsFilterApplied(effectLayer.getCurrentFilter().name());
+			
 			if (vignetteLayer.getVignetteBitmap() != null)
 			{
 				canvasResult.drawBitmap(vignetteLayer.getVignetteBitmap(), 0, 0, null);
@@ -277,11 +285,11 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 			{
 				Bitmap temp = Bitmap.createScaledBitmap(doodleLayer.getBitmap(), imageOriginal.getWidth(), imageOriginal.getHeight(), false);
 				canvasResult.drawBitmap(temp, 0, 0, doodleLayer.getPaint());
+				sendAnalyticsDoodleApplied(doodleLayer.getColor());
 			}
 		}
 
 		saveImagetoFile();
-
 	}
 
 	@Override
@@ -299,6 +307,37 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 			flattenLayers();
 		}
 
+	}
+	
+	private void sendAnalyticsDoodleApplied(int colorHex)
+	{
+		try
+		{
+			JSONObject json = new JSONObject();
+			json.put(HikePhotosConstants.PHOTOS_DOODLE_COLOR_KEY, Integer.toString(colorHex));
+			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_APPLIED_DOODLE);
+			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+
+	private void sendAnalyticsFilterApplied(String filterName)
+	{
+		try
+		{
+			JSONObject json = new JSONObject();
+			json.put(HikePhotosConstants.PHOTOS_FILTER_NAME_KEY, filterName);
+			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_APPLIED_FILTER);
+			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 }

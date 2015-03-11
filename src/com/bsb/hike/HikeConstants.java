@@ -1874,6 +1874,24 @@ public class HikeConstants
 		public static final String NUX_FOOTER_NOR_COM = "nuxN2C";
 
 		public static final String NUX_EXPANDED_COM = "nuxE2C";
+		
+		//Photos 5.0 Events
+		public static final String PHOTOS_FLOW_OPTION_CLICK = "phTake";
+		
+		public static final String PHOTOS_CAMERA_CLICK = "phCamC";
+		
+		public static final String PHOTOS_GALLERY_PICK = "phGalP";
+		
+		public static final String PHOTOS_FFC_PIC = "phFFC";
+		
+		public static final String PHOTOS_APPLIED_FILTER = "phFilA";
+		
+		public static final String PHOTOS_APPLIED_DOODLE = "phDodA";
+		
+		public static final String PHOTOS_SET_AS_DP = "phSetDP";
+		
+		public static final String PHOTOS_SEND_TO = "phSend";
+		
 	}
 
 	public static final class MqttMessageTypes
