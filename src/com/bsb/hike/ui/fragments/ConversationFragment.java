@@ -60,6 +60,8 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -298,9 +300,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-
+		setHasOptionsMenu(true);
 		parent = inflater.inflate(R.layout.conversations, null);
-		
 		return parent;
 	}
 
@@ -1023,6 +1024,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			toggleTypingNotification(true, typingNotification);
 		}
+	}
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+	{
+		super.onCreateOptionsMenu(menu, inflater);
+		HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
 	}
 
 	@Override
