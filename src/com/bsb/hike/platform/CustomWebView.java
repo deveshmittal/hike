@@ -93,6 +93,7 @@ public class CustomWebView extends WebView
 		}
 	}
 
+	@SuppressLint("NewApi")
 	public void allowUniversalAccess()
 	{
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)

@@ -247,7 +247,6 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		{
 			Logger.i(tag, "view reused");
 		}
-
 		final WebViewHolder viewHolder = (WebViewHolder) view.getTag();
 
 		final CustomWebView web = viewHolder.customWebView;
