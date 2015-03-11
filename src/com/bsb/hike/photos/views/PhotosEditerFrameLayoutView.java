@@ -19,6 +19,7 @@ import android.widget.FrameLayout;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
 import com.bsb.hike.photos.HikePhotosConstants;
@@ -26,13 +27,14 @@ import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
+import com.bsb.hike.platform.content.PlatformContentUtils;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.Utils;
 
 /**
  * Custom View extends FrameLayout Packs all the editing layers <filter layer,vignette layer ,doodle layer> into a single view ,in same z-order
- *
- *  @author akhiltripathi
+ * 
+ * @author akhiltripathi
  * 
  */
 public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilterAppliedListener
@@ -143,8 +145,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		effectLayer.handleImage(bmp, false);
 	}
 
-	
-	
 	public void enableDoodling()
 	{
 		enableDoodling = true;
@@ -213,7 +213,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 				mListener.onFailure();
 			}
 		}
-		else
+		else if (mFileType == HikeFileType.PROFILE)
 		{
 			String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
 			/*
@@ -230,7 +230,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 			file = new File(destFilePath);
 		}
 
-		
 		FileOutputStream out = null;
 		try
 		{
@@ -260,7 +259,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		if (file.exists())
 		{
 			mListener.onComplete(file);
-			MediaScannerConnection.scanFile(getContext(), new String[] { file.getPath() }, null, null);
 		}
 		else
 		{
@@ -277,7 +275,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 			Canvas canvasResult = new Canvas(imageEdited);
 
 			sendAnalyticsFilterApplied(effectLayer.getCurrentFilter().name());
-			
+
 			if (vignetteLayer.getVignetteBitmap() != null)
 			{
 				canvasResult.drawBitmap(vignetteLayer.getVignetteBitmap(), 0, 0, null);
@@ -309,7 +307,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		}
 
 	}
-	
+
 	private void sendAnalyticsDoodleApplied(int colorHex)
 	{
 		try
@@ -324,7 +322,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 			e.printStackTrace();
 		}
 	}
-	
 
 	private void sendAnalyticsFilterApplied(String filterName)
 	{

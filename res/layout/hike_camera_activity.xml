@@ -55,6 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_alignParentBottom="true"
+            android:animateLayoutChanges="true"
             android:background="@color/photos_tabs_background"
             android:gravity="center" >
 
@@ -80,7 +81,6 @@
                 android:id="@+id/btngallery"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_margin="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/camera_button_selector"
                 android:src="@drawable/gallerypick" />
@@ -89,7 +89,6 @@
                 android:id="@+id/btntakepic"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_margin="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/camera_button_selector"
                 android:src="@drawable/camerasnap" />
@@ -98,7 +97,6 @@
                 android:id="@+id/btnflip"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_margin="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/camera_button_selector"
                 android:src="@drawable/frontback" />

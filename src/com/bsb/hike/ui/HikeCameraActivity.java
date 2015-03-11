@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.hardware.Camera;
@@ -33,11 +34,8 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.analytics.HAManager;
-import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -71,6 +69,8 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private Bitmap tempBitmap;
 
+	private View flashButton;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -103,7 +103,8 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		ImageButton flipBtn = (ImageButton) findViewById(R.id.btnflip);
 		flipBtn.setOnClickListener(HikeCameraActivity.this);
 
-		findViewById(R.id.btntoggleflash).setOnClickListener(HikeCameraActivity.this);
+		flashButton = findViewById(R.id.btntoggleflash);
+		flashButton.setOnClickListener(HikeCameraActivity.this);
 
 		containerView = findViewById(R.id.container);
 
@@ -173,6 +174,15 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			}
 		});
 		setupActionBar();
+
+		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT))
+		{
+			View ffcBtn = findViewById(R.id.btnflip);
+			ffcBtn.setClickable(false);
+			ffcBtn.setEnabled(false);
+			ffcBtn.setAlpha(0.3f);
+		}
+
 	}
 
 	private void setupActionBar()
@@ -318,6 +328,16 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			public void onAnimationEnd(Animator anim)
 			{
 				isUsingFFC = isUsingFFC ? false : true;
+				if (isUsingFFC)
+				{
+					flashButton.setClickable(false);
+					flashButton.setAlpha(0.3f);
+				}
+				else
+				{
+					flashButton.setClickable(true);
+					flashButton.setAlpha(1f);
+				}
 				cameraFragment = CameraFragment.newInstance(isUsingFFC);
 				replaceFragment(cameraFragment);
 				new Handler().postDelayed(new Runnable()

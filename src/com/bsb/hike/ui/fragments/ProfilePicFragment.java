@@ -74,6 +74,8 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 	private ImageView mProfilePicBg;
 
+	private Bitmap smallerBitmap;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
@@ -84,7 +86,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		mCircularProgress.setProgress(0);
 
 		mCircularImageView = ((RoundedImageView) mFragmentView.findViewById(R.id.circular_image_view));
-		
+
 		mProfilePicBg = ((ImageView) mFragmentView.findViewById(R.id.profile_pic_bg));
 
 		Bundle bundle = getArguments();
@@ -98,7 +100,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		{
 			mCircularImageView.setImageBitmap(bmp);
 		}
-		
+
 		mProfilePicBg.setImageBitmap(bmp);
 
 		text1 = (TextView) mFragmentView.findViewById(R.id.text1);
@@ -119,7 +121,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 				mCircularImageView.setVisibility(View.VISIBLE);
 				mCircularProgress.setVisibility(View.VISIBLE);
 				mProfilePicBg.setVisibility(View.VISIBLE);
-				((HikeAppStateBaseFragmentActivity)getActivity()).getSupportActionBar().hide();
+				((HikeAppStateBaseFragmentActivity) getActivity()).getSupportActionBar().hide();
 				startUpload();
 			}
 		}, 300);
@@ -144,10 +146,12 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		{
 
 			// TODO move this code to network manager refactoring module
-
-			/* the server only needs a smaller version */
-			final Bitmap smallerBitmap = HikeBitmapFactory.scaleDownBitmap(imagePath, HikeConstants.PROFILE_IMAGE_DIMENSIONS, HikeConstants.PROFILE_IMAGE_DIMENSIONS,
-					Bitmap.Config.RGB_565, true, false);
+			if (smallerBitmap == null)
+			{
+				/* the server only needs a smaller version */
+				smallerBitmap = HikeBitmapFactory.scaleDownBitmap(imagePath, HikeConstants.PROFILE_IMAGE_DIMENSIONS, HikeConstants.PROFILE_IMAGE_DIMENSIONS, Bitmap.Config.RGB_565,
+						true, false);
+			}
 
 			if (smallerBitmap == null)
 			{
@@ -196,7 +200,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 					long time = (long) System.currentTimeMillis() / 1000;
 
 					StatusMessage statusMessage = new StatusMessage(0, mappedId, msisdn, name, "", StatusMessageType.PROFILE_PIC, time, -1, 0);
-					
+
 					HikeConversationsDatabase.getInstance().addStatusMessage(statusMessage, true);
 
 					ContactManager.getInstance().setIcon(statusMessage.getMappedId(), bytes, false);
@@ -295,7 +299,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		if (mCurrentProgress >= 90f && !failed && !finished)
 		{
 			finished = true;
-			
+
 			changeTextWithAnimation(text1, getString(R.string.photo_dp_finishing));
 
 			new Handler(Looper.getMainLooper()).postDelayed(new Runnable()
@@ -363,6 +367,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 			public void onClick(View v)
 			{
 				mCurrentProgress = 0.0f;
+				failed = false;
 				startUpload();
 			}
 		});

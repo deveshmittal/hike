@@ -324,7 +324,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 								}
 								else if (actionCode == PhotoActionsFragment.ACTION_SET_DP)
 								{
-									
+
 									sendAnalyticsSetAsDp();
 									// User info is saved in shared preferences
 									SharedPreferences preferences = HikeMessengerApp.getInstance().getApplicationContext()
@@ -462,7 +462,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 			}
 		}
 	}
-	
+
 	private void sendAnalyticsSetAsDp()
 	{
 		try
@@ -476,7 +476,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void sendAnalyticsSendTo()
 	{
 		try
@@ -490,5 +490,5 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 			e.printStackTrace();
 		}
 	}
-	
+
 }
