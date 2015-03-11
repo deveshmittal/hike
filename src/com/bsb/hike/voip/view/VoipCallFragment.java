@@ -401,8 +401,14 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 
 	private void shutdown(final Bundle bundle) 
 	{
-		
-		try 
+		updateCallStatus();
+
+		if(voipService != null)
+		{
+			voipService.setCallStatus(null);
+		}
+
+		try
 		{
 			if (isBound) 
 			{
@@ -412,8 +418,6 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		catch (IllegalArgumentException e) {
 			Logger.d(VoIPConstants.TAG, "shutdown() exception: " + e.toString());
 		}
-
-		updateCallStatus();
 
 		if(callDuration!=null)
 		{

@@ -365,7 +365,7 @@ public class VoIPService extends Service {
 			}
 
 			// Edge case: call button was hit for someone we are already speaking with. 
-			if (getCallId() > 0 && clientPartner.getPhoneNumber().equals(msisdn) && isAudioRunning() == true) 
+			if (getCallId() > 0 && clientPartner.getPhoneNumber().equals(msisdn)) 
 			{
 				// Show activity
 				Logger.d(VoIPConstants.TAG, "Restoring activity..");
@@ -399,7 +399,6 @@ public class VoIPService extends Service {
 			
 			// Show activity
 			Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
-			i.putExtra(VoIPConstants.Extras.REDIALLING, intent.getBooleanExtra(VoIPConstants.Extras.REDIALLING, false));
 			i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(i);
 			
@@ -792,7 +791,6 @@ public class VoIPService extends Service {
 		}
 		
 		setCallid(0);
-		setCallStatus(null);
 		
 		if(chronometer != null)
 		{
@@ -2467,6 +2465,7 @@ public class VoIPService extends Service {
 						// VoIPService was started, and it established a connection. 
 						// Now show the activity so the user can answer / decline the call. 
 						Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
+						i.putExtra(VoIPConstants.Extras.INCOMING_CALL, true);
 						i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 						startActivity(i);
 						playIncomingCallRingtone();
