@@ -492,7 +492,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 
 		final SearchView searchView = new SearchView(getSupportActionBar().getThemedContext());
-		searchView.setQueryHint(getSearchQueryHintText());
+		searchView.setQueryHint(getString(R.string.search_hint));
 		searchView.setIconifiedByDefault(false);
 		searchView.setIconified(false);
 		searchView.setOnQueryTextListener(onQueryTextListener);
@@ -526,7 +526,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		        }
 				toggleMenuItems(menu, true);
 				setupActionBar();
-				searchView.setQueryHint(getSearchQueryHintText());
 				return true;
 			}
 		});
@@ -585,19 +584,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		searchItem.setEnabled(setVisible);
 		searchItem.setVisible(setVisible);
-	}
-	
-	private String getSearchQueryHintText()
-	{
-		switch (new Random().nextInt(4))
-		{
-		case 0:
-			return getString(R.string.home_search_hint1);
-		case 1:
-			return getString(R.string.home_search_hint2);
-		default:
-			return getString(R.string.search_hint);
-		}
 	}
 
 	private void toggleMenuItems(Menu menu, boolean value)
