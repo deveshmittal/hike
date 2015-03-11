@@ -1549,8 +1549,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
 				itemTextView.setText(item.getName());
 
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
-
 				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
 				freeSmsCount.setVisibility(View.GONE);
 
@@ -3240,19 +3238,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 
-		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
-		if (drawable != null)
+		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber);
+		if (drawable == null)
 		{
-			avatar.setScaleType(ScaleType.FIT_CENTER);
-			avatar.setImageDrawable(drawable);
-			avatar.setBackgroundDrawable(null);
+			drawable = HikeMessengerApp.getLruCache().getDefaultAvatar(mContactNumber, false);
 		}
-		else
-		{
-			avatar.setScaleType(ScaleType.CENTER_INSIDE);
-			avatar.setImageResource((mConversation instanceof GroupConversation) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
-			avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
-		}
+		avatar.setScaleType(ScaleType.FIT_CENTER);
+		avatar.setImageDrawable(drawable);
 	}
 
 	private void setLabel(String label)
@@ -8246,8 +8238,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
 				itemTextView.setText(item.getName());
-
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
 
 				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
 				freeSmsCount.setVisibility(View.GONE);
