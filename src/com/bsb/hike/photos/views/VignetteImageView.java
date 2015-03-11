@@ -105,14 +105,14 @@ class VignetteImageView extends ImageView
 		case BGR:
 			// Vignette: Stop 1 = #000000 74%, Opacity = 0%; Stop 2 = #000000 120%, Opacity = 100%
 			colors = new int[] { 0x00000000,0x00000000, 0xFF000000 };
-			stops = new float[] { 0.0f,0.92f/1.5f, 1.0f };
+			stops = new float[] { 0.0f,0.98f/1.5f, 1.0f };
 			makeRadialGradient(1.5f, colors, stops);
 			break;
 		case APOLLO:
 			// Vignette Stop 1: #18363f, Position 72%, Opacity 0% Stop 2: #18363f, Position 120%, Opacity 100%
 			colors = new int[] { 0x00000000, 0x0018363F, 0xFF18363F };
-			stops = new float[] { 0.0f, 0.92f / 1.5f, 1.0f };
-			makeRadialGradient(1.5f, colors, stops);
+			stops = new float[] { 0.0f, 0.92f / 1.6f, 1.0f };
+			makeRadialGradient(1.6f, colors, stops);
 			break;
 		default:
 			break;
@@ -133,7 +133,7 @@ class VignetteImageView extends ImageView
 
 		Canvas c = new Canvas(vignetteBitmap);
 
-		c.drawCircle(width/2, width/2, (float) (radius), p);
+		c.drawCircle(width/2, width/2, (radius), p);
 	}
 
 }

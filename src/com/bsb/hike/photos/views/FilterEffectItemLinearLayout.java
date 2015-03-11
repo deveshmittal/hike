@@ -23,11 +23,12 @@ import com.bsb.hike.utils.Logger;
 public class FilterEffectItemLinearLayout extends EffectItemLinearLayout implements OnFilterAppliedListener
 {
 	private FilterType filter;
+	private int tried;
 
 	public FilterEffectItemLinearLayout(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
-
+		
 	}
 
 	public void init(Bitmap preview, String Title)
@@ -35,7 +36,7 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 
 		this.setImage(preview);
 		this.setText(Title);
-
+		
 	}
 
 	public void select()
@@ -54,7 +55,7 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 	{
 		this.filter = type;
 		initiateThumbnailCreation();
-
+		tried = 0;
 		if (type == HikePhotosUtils.FilterTools.getSelectedFilter())
 		{
 			findViewById(R.id.selectionBar).setBackgroundColor(getResources().getColor(R.color.photos_filters_font_color));
@@ -80,7 +81,21 @@ public class FilterEffectItemLinearLayout extends EffectItemLinearLayout impleme
 	@Override
 	public void onFilterApplied(Bitmap preview)
 	{
-		setImage(preview);
+		if(preview==null && tried == 0)
+		{
+			tried = 1;
+			initiateThumbnailCreation();
+			return;
+		}
+		else if(preview!=null)
+		{
+			setImage(preview);
+			return;
+		}
+		else
+		{
+			//Do Nothing
+		}
 	}
 
 }

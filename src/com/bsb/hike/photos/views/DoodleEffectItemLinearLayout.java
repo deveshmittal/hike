@@ -99,8 +99,7 @@ public class DoodleEffectItemLinearLayout extends EffectItemLinearLayout
 		canvas.drawCircle(diameter / 2, diameter / 2, (diameter / 2), paint);
 		paint.setColor(brushColor);
 		canvas.drawCircle(diameter / 2, diameter / 2, (brushWidth / 2), paint);
-		RadialGradient gradient = new RadialGradient(diameter/2,diameter/2, (brushWidth+1)/2, new int[]{0x00000000,0x00000000,0x55000000}, new float[]{0,0.9f,1}, android.graphics.Shader.TileMode.CLAMP);
-
+		RadialGradient gradient = new RadialGradient(diameter/2,diameter/2, (brushWidth+1)/2, new int[]{0x00000000,0x00000000,0x45000000}, new float[]{0,0.86f,1}, android.graphics.Shader.TileMode.CLAMP);
 		paint = new Paint();
 		paint.setDither(true);
 		paint.setShader(gradient);
