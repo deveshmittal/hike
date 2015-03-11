@@ -1,6 +1,5 @@
 package com.bsb.hike.platform.content;
 
-import com.bsb.hike.utils.Logger;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,6 +13,8 @@ import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+
+import com.bsb.hike.utils.Logger;
 
 public class PlatformContentUtils
 {

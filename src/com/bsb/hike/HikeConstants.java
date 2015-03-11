@@ -1,19 +1,13 @@
 package com.bsb.hike;
 
-import com.bsb.hike.models.StatusMessage.StatusMessageType;
-
 import android.net.Uri;
 import android.os.Environment;
+
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 
 public class HikeConstants
 {
 	public static final String APP_PUSH_ID = "297726274089";
-
-	public static final String APP_FACEBOOK_ID = "425850510764995";
-
-	public static final String APP_TWITTER_ID = "7LFaGIe5QXj05WN1YDDVaA";
-
-	public static final String APP_TWITTER_SECRET = "LhgJVQ9eAmbb3EGdXpLD8B4RHf9SGPrzSqaOjuKL5o4";
 
 	public static final String MAP_API_KEY_DEBUG = "0Luu6V6IYSC0UpLSUZe7oO-bvd392OgrXSnY8aA";
 
@@ -215,7 +209,7 @@ public class HikeConstants
 
 	public static final String FACEBOOK_STATUS = "fb";
 
-	public static final String TWITTER_STATUS = "twitter";
+	//public static final String TWITTER_STATUS = "twitter";
 
 	public static final String TIME_OF_DAY = "timeofday";
 
@@ -507,9 +501,9 @@ public class HikeConstants
 
 	public static final String DELETE_PREF = "deleteAccount";
 
-	public static final String UNLINK_FB = "unlinkFacebook";
+	//public static final String UNLINK_FB = "unlinkFacebook";
 
-	public static final String UNLINK_TWITTER = "unlinkTwitter";
+	//public static final String UNLINK_TWITTER = "unlinkTwitter";
 
 	public static final String BLOKED_LIST_PREF = "blockedList";
 
@@ -518,6 +512,8 @@ public class HikeConstants
 	public static final String HELP_FAQS_PREF = "helpFaqs";
 
 	public static final String HELP_FEEDBACK_PREF = "helpFeedback";
+	
+	public static final String HELP_TNC_PREF = "helpTnc";
 
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
 	
@@ -525,8 +521,6 @@ public class HikeConstants
 	
 	public static final String H2O_NOTIF_BOOLEAN_PREF = "hikeOfflineNotificationPref";
 
-	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
-	
 	public static final String UPGRADING = "upgrading";
 
 	public static final String UPGRADE_MSG_HASH_GROUP_READBY = "upgradeMsgHashGroupReadby";
@@ -724,16 +718,16 @@ public class HikeConstants
 	// Fiksu Usernames
 	public static final String FACEBOOK = "facebook";
 
-	public static final String TWITTER = "twitter";
+	//public static final String TWITTER = "twitter";
 
 	public static final String INVITE = "invite";
 
 	public static final String FIRST_MESSAGE = "first_message";
 
 	// Fiksu Prices
-	public static final int FACEBOOK_CONNECT = 100;
+	//public static final int FACEBOOK_CONNECT = 100;
 
-	public static final int TWITTER_CONNECT = 100;
+	//public static final int TWITTER_CONNECT = 100;
 
 	public static final int INVITE_SENT = 50;
 
@@ -880,9 +874,9 @@ public class HikeConstants
 
 	public static final int MAX_PRECHECKED_CONTACTS = 15;
 
-	public static final int MAX_TWITTER_POST_LENGTH = 140;
+	//public static final int MAX_TWITTER_POST_LENGTH = 140;
 
-	public static final int MAX_MOOD_TWITTER_POST_LENGTH = 130;
+	//public static final int MAX_MOOD_TWITTER_POST_LENGTH = 130;
 
 	public static final int MAX_NUM_STICKER_REQUEST = 10;
 
@@ -989,7 +983,7 @@ public class HikeConstants
 	
 	public static final String SHOW_FESTIVE_POPUP = "showFestivePopup";
 
-	public static final String VALENTINE_DAY_POPUP = "valentine";
+	public static final String HOLI_POPUP = "holi";
 
 	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
 
@@ -1249,7 +1243,7 @@ public class HikeConstants
 
 		public static final String SHOW_FRIENDS_TUTORIAL = "showFriendsTutorial";
 
-		public static final String POST_TO_TWITTER = "postToTwitter";
+		//public static final String POST_TO_TWITTER = "postToTwitter";
 
 		public static final String RECORDING_TIME = "recordingTime";
 
@@ -1388,6 +1382,14 @@ public class HikeConstants
 		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
 		
 		public static final String NUX_INCENTIVE_MODE = "showNuxIncentiveMode";
+
+		public static final String GENERAL_SO_TIMEOUT = "sto";
+
+		public static final String FT_UPLOAD_SO_TIMEOUT = "ftsto";
+		
+		public static final String MAX_MESSAGE_PROCESS_TIME = "mmpt";
+		
+		public static final String CHANGE_MAX_MESSAGE_PROCESS_TIME = "cmpt";
 	}
 
 	public static final class LogEvent
@@ -2034,6 +2036,8 @@ public class HikeConstants
 		public static final String VOIP_MSG_TYPE_MISSED_CALL_OUTGOING = "vmco";
 		
 		public static final String PRODUCT_POPUP="productpopup";
+		
+		public static final String SESSION = "sess";
 	}
 	
 	public static final class SMSNative
@@ -2257,6 +2261,8 @@ public class HikeConstants
 	
 	public static final int LED_DEFAULT_WHITE_COLOR = 0xffffffff;
 	
+	public static final String GET_BULK_LAST_SEEN = "bls"; 
+	
 	public static final int LED_NONE_COLOR = -2; /**
 													Any Change In this Value Should be double checked 
 													as this may coincide with any other color value
@@ -2278,5 +2284,15 @@ public class HikeConstants
 	
 	public static final String EXCEPTION_MESSAGE = "exm";
 	
+	public static final String TIMESTAMP_MILLIS = "msec";
+	
+	public static final String EVENT_TAG_SESSION = "sess";
 
+	public static final String MESSAGE_PROCESS_TIME = "mpt";
+
+	public static int DEFAULT_AVATARS[] = {R.drawable.avatar_01, R.drawable.avatar_02, R.drawable.avatar_03, R.drawable.avatar_04, R.drawable.avatar_05};
+
+	public static String DEFAULT_AVATAR_KEYS[] = {"avatar_01","avatar_02", "avatar_03", "avatar_04", "avatar_05"};
+	
+	public static String IS_GROUP = "isGroup";
 }

@@ -5,7 +5,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
@@ -216,7 +215,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 					}
 				}
 
-				iconLoader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
+				iconLoader.loadImage(contactInfo.getMsisdn(), avatar, false, true);
 
 				name.setText(contactInfo.getName());
 				status.setText(contactInfo.getMsisdn());

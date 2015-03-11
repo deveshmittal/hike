@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import com.bsb.hike.utils.Logger;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -63,7 +64,7 @@ public class PlatformContentModel
 	{
 		if (mTemplateHash == -1)
 		{
-			mTemplateHash = new String(cardObj.layoutId + cardObj.appVersion).hashCode();
+			mTemplateHash = new String(cardObj.layoutId + cardObj.appVersion + cardObj.appName).hashCode();
 		}
 		return mTemplateHash;
 	}

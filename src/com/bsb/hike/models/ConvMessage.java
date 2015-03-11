@@ -1,26 +1,23 @@
 package com.bsb.hike.models;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class ConvMessage
 {
@@ -513,6 +510,9 @@ public class ConvMessage
 				;
 			}
 			break;
+		case VOIP_MISSED_CALL_INCOMING:
+			this.mMessage = context.getString(R.string.voip_missed_call_notif);
+			break;
 		}
 		setState(isSelfGenerated ? State.RECEIVED_READ : State.RECEIVED_UNREAD);
 	}
@@ -974,10 +974,13 @@ public class ConvMessage
 	{
 		return !(msgState==State.RECEIVED_READ || msgState == State.RECEIVED_UNREAD);
 	}
-	
+
 	public void setMsisdn(String msisdn){
 		this.mMsisdn = msisdn;
 	}
-	
-	
+
+	public boolean isVoipMissedCallMsg()
+	{
+		return participantInfoState == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING;
+	}
 }

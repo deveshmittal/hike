@@ -28,17 +28,14 @@ public class UpgradeIntentService extends IntentService
 	{
 		context = this;
 		prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if (prefs.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && prefs.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1)
+		if (prefs.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1)
 		{
-			makeRoundedThumbsForUserDb();
-
 			initialiseSharedMediaAndFileThumbnailTable();
 
 			// setting the preferences to 2 to indicate we're done with the
 			// migration !
 			Editor editor = prefs.edit();
 			editor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 2);
-			editor.putInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, 2);
 			editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
 			editor.commit();
 
@@ -90,7 +87,7 @@ public class UpgradeIntentService extends IntentService
 			StickerManager.getInstance().doInitialSetup();
 		}
 		
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.UPGRADING, false);
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.UPGRADING, false);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE, null);
 	}
 
@@ -99,11 +96,6 @@ public class UpgradeIntentService extends IntentService
 
 		super(TAG);
 
-	}
-
-	private void makeRoundedThumbsForUserDb()
-	{
-		ContactManager.getInstance().makeOlderAvatarsRounded();
 	}
 
 	private void initialiseSharedMediaAndFileThumbnailTable()

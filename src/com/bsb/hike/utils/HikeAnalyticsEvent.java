@@ -9,9 +9,9 @@ import org.json.JSONObject;
 import android.content.Context;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.service.HikeMqttManagerNew;
 
 public class HikeAnalyticsEvent
 {
@@ -106,7 +106,20 @@ public class HikeAnalyticsEvent
 		}
 	}
 
-    public static void analyticsForPlatformAndBots(String type, String subType, JSONObject json, String tag)
+	public static void analyticsForBots(String type, String subType, JSONObject json)
+	{
+		try
+		{
+			Logger.d("HikeAnalyticsEvent", json.toString());
+			HAManager.getInstance().record(type, subType, HAManager.EventPriority.NORMAL, json, AnalyticsConstants.EVENT_TAG_BOTS);
+		}
+		catch (NullPointerException npe)
+		{
+			npe.printStackTrace();
+		}
+	}
+
+    public static void analyticsForCards(String type, String subType, JSONObject json)
     {
         try
         {

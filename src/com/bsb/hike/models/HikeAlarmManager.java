@@ -4,17 +4,6 @@ package com.bsb.hike.models;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.bsb.hike.HikeConstants;
-import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.analytics.AnalyticsSender;
-import com.bsb.hike.analytics.HAManager;
-import com.bsb.hike.analytics.HAManager.EventPriority;
-import com.bsb.hike.db.DBBackupRestore;
-import com.bsb.hike.notifications.HikeNotification;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.Utils;
-
-import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -22,18 +11,18 @@ import android.content.Intent;
 import android.os.Handler;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.AnalyticsSender;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeContentDatabase;
-import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.notifications.HikeNotification;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.platform.PlatformAlarmManager;
 import com.bsb.hike.productpopup.NotificationContentModel;
 import com.bsb.hike.productpopup.ProductInfoManager;
 import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.PreloadNotificationSchedular;
-import com.bsb.hike.service.SimpleWakefulService;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -86,8 +75,6 @@ public class HikeAlarmManager
 	
 	// ******************************************************//
 	
-	private static final long TIME_ALARM_BOOT_SERVICE = 1 * 60 * 1000;// (1 min)
-
 	public static final String INTENT_EXTRA = "intent_extra";
 
 	public static final String TAG = "HikeAlarmManager";

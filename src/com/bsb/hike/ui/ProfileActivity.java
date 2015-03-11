@@ -22,14 +22,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.Gravity;
@@ -63,8 +61,8 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.SubMenu;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
@@ -88,8 +86,6 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
-import com.bsb.hike.models.ProfileItem.ProfileContactItem.contactType;
-import com.bsb.hike.models.ProfileItem.ProfileSharedContent;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
@@ -102,7 +98,6 @@ import com.bsb.hike.productpopup.ProductInfoManager;
 import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -118,8 +113,6 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.voip.VoIPUtils;
-import com.bsb.hike.voip.view.CallRatePopup;
-import com.bsb.hike.voip.view.IVoipCallListener;
 
 public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
 		View.OnClickListener
@@ -192,8 +185,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public static final String PROFILE_PIC_SUFFIX = "profilePic";
 
-	public static final String PROFILE_ROUND_SUFFIX = "round";
-	
 	private static enum ProfileType
 	{
 		USER_PROFILE, // The user profile screen
@@ -916,7 +907,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			return;
 		}
 		
-		String mappedId = msisdn + PROFILE_ROUND_SUFFIX;
 		if(!isUpdate)
 		{
 			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn + PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(msisdn));
@@ -925,7 +915,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		if(headerViewInitialized || profileImageUpdated )
 		{
 			int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.avatar_profile_size);
-			(new IconLoader(this, mBigImageSize)).loadImage(mappedId, profileImage, false, false, true);
+			(new IconLoader(this, mBigImageSize)).loadImage(msisdn, profileImage, false, false, true);
 		}
 
 		if(headerViewInitialized)
@@ -1854,6 +1844,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 				if ((this.profileType == ProfileType.USER_PROFILE) || (this.profileType == ProfileType.GROUP_INFO))
 				{
+					Utils.compressAndCopyImage(mActivityState.destFilePath, mActivityState.destFilePath, ProfileActivity.this, ImageQuality.QUALITY_MEDIUM);
 					saveChanges();
 				}
 				break;
@@ -2240,6 +2231,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						}
 						else
 						{
+							profileAdapter.updateHasCustomPhoto();
 							profileAdapter.notifyDataSetChanged();
 						}
 					}
@@ -3015,7 +3007,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
 			{
-				int stealthMode = HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+				int stealthMode = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 				if (stealthMode != HikeConstants.STEALTH_ON)
 				{
 					return;

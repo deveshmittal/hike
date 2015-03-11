@@ -340,7 +340,7 @@ public class ProductInfoManager
 	 */
 	private String getUrl(String metaData)
 	{
-		HikeSharedPreferenceUtil mmHikeSharedPreferenceUtil = HikeSharedPreferenceUtil.getInstance(context);
+		HikeSharedPreferenceUtil mmHikeSharedPreferenceUtil = HikeSharedPreferenceUtil.getInstance();
 		try
 		{
 			JSONObject mmObject = new JSONObject(metaData);

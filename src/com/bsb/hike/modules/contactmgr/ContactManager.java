@@ -38,14 +38,13 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.modules.iface.ITransientCache;
 import com.bsb.hike.utils.AccountUtils;
@@ -1084,35 +1083,26 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		return transientCache.doesContactExist(msisdn);
 	}
 
-	public void makeOlderAvatarsRounded()
-	{
-		hDb.makeOlderAvatarsRounded();
-	}
-
 	/**
 	 * This method returns a drawable of an icon from the database
 	 * 
 	 * @param msisdn
-	 * @param rounded
-	 *            if true returns rounded drawable from rounded thumbnails table
 	 * @return
 	 */
-	public Drawable getIcon(String msisdn, boolean rounded)
+	public Drawable getIcon(String msisdn)
 	{
-		return hDb.getIcon(msisdn, rounded);
+		return hDb.getIcon(msisdn);
 	}
 
 	/**
 	 * This method returns a byte array of an icon from the database
 	 * 
 	 * @param id
-	 * @param rounded
-	 *            if true returns rounded thumbnail byte array from rounded thumbnails table
 	 * @return
 	 */
-	public byte[] getIconByteArray(String id, boolean rounded)
+	public byte[] getIconByteArray(String id)
 	{
-		return hDb.getIconByteArray(id, rounded);
+		return hDb.getIconByteArray(id);
 	}
 
 	/**
