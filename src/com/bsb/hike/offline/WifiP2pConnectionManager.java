@@ -2,12 +2,14 @@ package com.bsb.hike.offline;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Logger;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
@@ -136,6 +138,49 @@ public class WifiP2pConnectionManager implements ChannelListener
         });
 	}
 	
+	public Boolean createhotspot(WifiP2pDevice wifiP2pDevice)
+	{
+		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+        myMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+		String targetMsisdn =  wifiP2pDevice.deviceName;   
+		try{
+			Method method = wifiManager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
+			WifiConfiguration wc = new WifiConfiguration();
+			String ssid  =   "h_" +  myMsisdn + "_" + targetMsisdn;
+			String pass  =   new StringBuffer(ssid).reverse().toString();
+			wc.SSID = ssid;
+			wc.preSharedKey  = pass ;
+			wc.status =   WifiConfiguration.Status.ENABLED;
+			wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+			wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+			wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+			wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP); 
+			wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP); 
+			wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP); 
+			wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+			return (Boolean) method.invoke(wifiManager, wc, true);
+		} catch (Exception e) {
+			Log.e(this.getClass().toString(), "", e);
+			return false;
+		}
+	}
+	
+	public Boolean connectToHotspot(String ssid) {	
+		WifiConfiguration wc = new WifiConfiguration();
+		wc.SSID = "\"" +ssid +"\"";
+		wc.preSharedKey  = "\"" + new StringBuffer(ssid).reverse().toString()  +  "\"";
+		wifiManager.addNetwork(wc);
+		List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+		for( WifiConfiguration i : list ) {
+		    if(i!=null && i.SSID != null && i.SSID.equals(wc.SSID)) {
+		         wifiManager.disconnect();
+		         boolean status  =  wifiManager.enableNetwork(i.networkId, true);
+		         wifiManager.reconnect();               
+		         return status;
+		    }           
+		 }
+		return false;
+	}
 	public void disconnect()
 	{
 		manager.removeGroup(channel, new ActionListener() {
@@ -171,8 +216,8 @@ public class WifiP2pConnectionManager implements ChannelListener
 	public void enableDiscovery()
 	{
 		if (!wifiManager.isWifiEnabled()) {
-			wifiManager.setWifiEnabled(true);
-            wifiP2pConnectionManagerListener.notifyWifiNotEnabled();
+			//wifiManager.setWifiEnabled(true);
+            //wifiP2pConnectionManagerListener.notifyWifiNotEnabled();
         }
 		manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
         	

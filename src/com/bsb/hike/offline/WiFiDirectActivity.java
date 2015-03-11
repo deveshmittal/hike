@@ -17,6 +17,7 @@ cfcf * Copyright (C) 2011 The Android Open Source Project
 package com.bsb.hike.offline;
 
 import java.util.HashMap;
+
 import java.util.HashSet;
 import java.util.List;
 
@@ -44,7 +45,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.bsb.hike.R;
-import com.bsb.hike.offline.DeviceListFragment.DeviceActionListener;
 import com.bsb.hike.utils.Logger;
 /**
  * An activity that uses WiFi Direct APIs to discover and connect with available
@@ -191,21 +191,28 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     }
     
     @Override
-    public void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice ConnectingToDevice) {
-    	if(numOfTries >= MAXTRIES)
-    	{
-    		Toast.makeText(WiFiDirectActivity.this, "Connect failed. Retry.",
-                    Toast.LENGTH_SHORT).show();
-    		DeviceListFragment fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
-    		if(fragment.progressDialog!=null && fragment.progressDialog.isShowing())
-    			fragment.progressDialog.dismiss();
-    		return;
-    	}
-    	WiFiDirectActivity.connectingToDevice = ConnectingToDevice;
-    	WiFiDirectActivity.connectingDeviceConfig = config;
-    	WiFiDirectActivity.tries = numOfTries;
-    	new CheckInvitedStuckTask(connectingToDevice).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-        connectionManager.connect(config);    
+    public void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice ConnectingToDevice,int mode) {
+	    if(mode==0)
+	    {
+	    	if(numOfTries >= MAXTRIES)
+	    	{
+	    		Toast.makeText(WiFiDirectActivity.this, "Connect failed. Retry.",
+	                    Toast.LENGTH_SHORT).show();
+	    		DeviceListFragment fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
+	    		if(fragment.progressDialog!=null && fragment.progressDialog.isShowing())
+	    			fragment.progressDialog.dismiss();
+	    		return;
+	    	}
+	    	WiFiDirectActivity.connectingToDevice = ConnectingToDevice;
+	    	WiFiDirectActivity.connectingDeviceConfig = config;
+	    	WiFiDirectActivity.tries = numOfTries;
+	    	new CheckInvitedStuckTask(connectingToDevice).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+	        connectionManager.connect(config);    
+	    }
+	    else
+	    {
+	          connectionManager.createhotspot(ConnectingToDevice);  
+	    }
     }
 
     @Override
@@ -426,6 +433,11 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 	    unregisterReceiver(receiver);
 		super.onDestroy();
 		
+	}
+
+	@Override
+	public void connectToHotspot(ScanResult result) {
+		connectionManager.connectToHotspot(result.SSID);
 	}
 }
 

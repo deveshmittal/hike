@@ -24,6 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class WifiNetworksListFragment extends ListFragment {
 
@@ -39,7 +40,8 @@ public class WifiNetworksListFragment extends ListFragment {
     	
     }
 	
-
+	
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     	mContentView = inflater.inflate(R.layout.wifinetwork_details, null);
@@ -56,8 +58,13 @@ public class WifiNetworksListFragment extends ListFragment {
     
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
+    	ScanResult scanResult  =   wifipeers.get(position);
+    	Boolean status  =  ((DeviceActionListener)getActivity()).connectToHotspot(scanResult);
+    	if(status)
+    		Toast.makeText(getActivity(), "Connected to" +  scanResult.SSID, Toast.LENGTH_SHORT).show();
+    	else
+    		Toast.makeText(getActivity(), "Connection Failed" , Toast.LENGTH_SHORT).show();
     	
-    	//super.onListItemClick(l, v, position, id);
     }
     private class WiFiNetworkListAdapter extends ArrayAdapter<ScanResult> {
 

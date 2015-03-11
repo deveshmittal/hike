@@ -82,6 +82,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     private int fileSize = 0;
     private int textSize = 0;
     public static boolean isReconnecting = false;
+    private int mode  =   0;
     private boolean isConnected = false;
 
     @Override
@@ -185,7 +186,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    		config.deviceAddress = currentDevice.deviceAddress;
 	    		config.wps.setup = WpsInfo.PBC;
 	    		config.groupOwnerIntent = 0;
-	    		if (progressDialog != null && progressDialog.isShowing()) {
+	    		/*if (progressDialog != null && progressDialog.isShowing()) {
 	    			progressDialog.dismiss();
 	    		}
 	    		progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
@@ -196,8 +197,11 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	                    Log.d("wifidirectdemo", "Hello cancelled");
 	                }
 	            });
-	    		
-	    		((DeviceActionListener) getActivity()).connect(config, 0, currentDevice);
+	            */
+	    		//  mode - 0  wifi-direct 
+	    		//  mode  - 1 wifi hotspot 
+	    		mode = 1;
+	    		((DeviceActionListener) getActivity()).connect(config, 0, currentDevice,mode);
     	     }
     	}
     }
@@ -341,7 +345,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         		isReconnecting = false;
         		if(peers.contains(WiFiDirectActivity.connectingToDevice))
         			((DeviceActionListener) getActivity()).connect(WiFiDirectActivity.connectingDeviceConfig,
-        															++(WiFiDirectActivity.tries), WiFiDirectActivity.connectingToDevice);
+        															++(WiFiDirectActivity.tries), WiFiDirectActivity.connectingToDevice, mode);
         		else
         			Toast.makeText(getActivity(), "Device not present in peer list!!", Toast.LENGTH_SHORT).show();
         	}
@@ -381,13 +385,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
      * An interface-callback for the activity to listen to fragment interaction
      * events.
      */
-    public interface DeviceActionListener {
-        void callDisconnect();
-
-        void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice ConnectingToDevice);
-
-        void disconnect();
-    }
+   
 	
 	public void clearConnectionDetails() {
 		connectedDevice = null;

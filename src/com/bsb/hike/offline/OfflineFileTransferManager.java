@@ -30,7 +30,6 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.offline.DeviceListFragment.DeviceActionListener;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
