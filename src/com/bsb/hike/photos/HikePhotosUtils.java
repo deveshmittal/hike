@@ -151,26 +151,24 @@ public class HikePhotosUtils
 			/**
 			 * @return returns list having complex filters obtained from applying sequence of quality filterson the image
 			 */
-
 			public static FilterList getHikeEffects()
 			{
 				if (effectfilters == null)
 				{
 					effectfilters = new FilterList();
 					effectfilters.addFilter("ORIGINAL", FilterType.ORIGINAL);
-					effectfilters.addFilter("X PRO 2", FilterType.X_PRO_2);
 					effectfilters.addFilter("SOLOMON", FilterType.FILTER1);
-					effectfilters.addFilter("1977", FilterType.E1977);
-					effectfilters.addFilter("NASHVILLE", FilterType.NASHVILLE);
 					effectfilters.addFilter("CLASSIC", FilterType.CLASSIC);
+					effectfilters.addFilter("NASHVILLE", FilterType.NASHVILLE);
 					effectfilters.addFilter("KELVIN", FilterType.KELVIN);
+					effectfilters.addFilter("X PRO 2", FilterType.X_PRO_2);
 					effectfilters.addFilter("RETRO", FilterType.RETRO);
 					effectfilters.addFilter("APOLLO", FilterType.APOLLO);
-					effectfilters.addFilter("BRANNAN", FilterType.BRANNAN);
 					effectfilters.addFilter("EARLYBIRD", FilterType.EARLYBIRD);
-					effectfilters.addFilter("INKWELL", FilterType.INKWELL);
+					effectfilters.addFilter("1977", FilterType.E1977);
+					effectfilters.addFilter("BRANNAN", FilterType.BRANNAN);
 					effectfilters.addFilter("LOMO FI", FilterType.LO_FI);
-					effectfilters.addFilter("POLAROID", FilterType.POLAROID);
+					effectfilters.addFilter("INKWELL", FilterType.INKWELL);
 					effectfilters.addFilter("SEPIA", FilterType.SEPIA);
 					effectfilters.addFilter("GRAYSCALE", FilterType.GRAYSCALE);
 

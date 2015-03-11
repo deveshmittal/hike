@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.media.MediaScannerConnection;
-import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.widget.FrameLayout;
@@ -22,7 +21,6 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
-import com.bsb.hike.photos.HikePhotosConstants;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
@@ -313,7 +311,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		try
 		{
 			JSONObject json = new JSONObject();
-			json.put(HikePhotosConstants.PHOTOS_DOODLE_COLOR_KEY, Integer.toString(colorHex));
+			json.put(HikeConstants.HikePhotos.PHOTOS_DOODLE_COLOR_KEY, Integer.toString(colorHex));
 			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_APPLIED_DOODLE);
 			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 		}
@@ -328,7 +326,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		try
 		{
 			JSONObject json = new JSONObject();
-			json.put(HikePhotosConstants.PHOTOS_FILTER_NAME_KEY, filterName);
+			json.put(HikeConstants.HikePhotos.PHOTOS_FILTER_NAME_KEY, filterName);
 			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_APPLIED_FILTER);
 			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 		}

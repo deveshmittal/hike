@@ -75,11 +75,12 @@ public final class PreviewFragment extends Fragment
 			sizeBar.findViewById(R.id.minusWidth).setOnClickListener(handler);
 			ViewStub stub = (ViewStub) sizeBar.findViewById(R.id.viewStubPreview);
 			DoodleEffectItemLinearLayout inflated = (DoodleEffectItemLinearLayout) stub.inflate();
-			inflated.setRingColor(HikeConstants.HikePhotos.DOODLE_SELECTED_RING_COLOR);
-			inflated.setBrushColor(HikePhotosUtils.DoodleColors[0],true);
+			inflated.setBrushColor(HikePhotosUtils.DoodleColors[0]);
 			inflated.setBrushWidth(HikePhotosUtils.dpToPx(getActivity().getApplicationContext(), HikeConstants.HikePhotos.DEFAULT_BRUSH_WIDTH));
-			inflated.refresh();
+			
 			inflated.setPadding(0, 0, 0, 0);
+			inflated.setRingColor(HikeConstants.HikePhotos.DEFAULT_RING_COLOR);
+			inflated.refresh();
 			inflated.invalidate();
 			handler.setDoodlePreview(inflated);
 			break;

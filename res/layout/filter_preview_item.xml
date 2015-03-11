@@ -16,12 +16,13 @@
         android:scaleType="centerCrop"
         android:src="@drawable/ic_launcher"
         android:layout_margin="4dp"
-        app:riv_corner_radius="9dp" />
+        app:riv_corner_radius="5dp" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/previewText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:textColor="@color/photos_filters_font_color"
         android:textSize="@dimen/photos_filter_preview_font_size"
         android:textStyle="bold" />
