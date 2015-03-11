@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="1125"
-    android:versionName="3.8.0.51" >
+    android:versionCode="1117"
+    android:versionName="3.7.9.0.SessionMQTT" >
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="17" />
@@ -408,6 +408,14 @@
             android:exported="true" >
             <intent-filter>
                 <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+        
+        <receiver android:name="com.bsb.hike.service.DeviceShutDownReceiver" 
+            android:enabled="true">
+            <intent-filter android:priority="999">
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+                <action android:name="android.intent.action.QUICKBOOT_POWEROFF" />
             </intent-filter>
         </receiver>
 
