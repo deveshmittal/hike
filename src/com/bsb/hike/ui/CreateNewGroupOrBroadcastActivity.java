@@ -36,6 +36,9 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
@@ -239,6 +242,7 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 				@Override
 				public void onClick(View v)
 				{
+					sendBroadCastAnalytics();
 					createBroadcast(broadcastRecipients);
 				}
 			});
@@ -509,6 +513,20 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 			ContactManager.getInstance().setIcon(groupOrBroadcastId, bytes, false);
 
 			break;
+		}
+	}
+	
+	private void sendBroadCastAnalytics()
+	{
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.BROADCAST_DONE);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 	}
 }
