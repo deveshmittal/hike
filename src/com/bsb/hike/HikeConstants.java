@@ -1883,7 +1883,16 @@ public class HikeConstants
 		
 		public static final String NUX_FOOTER_NOR_COM="nuxN2C";
 		
-		public static final String NUX_EXPANDED_COM="nuxE2C";		
+		public static final String NUX_EXPANDED_COM="nuxE2C";
+		
+		//Broadcast
+		public static final String NEW_BROADCAST_VIA_OVERFLOW = "nbcOf";
+		
+		public static final String BROADCAST_NEXT_MULTI_CONTACT = "bcnxt";
+		
+		public static final String BROADCAST_DONE = "bcdn";
+		
+		public static final String BROADCAST_SELECT_ALL_NEXT = "bcAll";
 	}
 
 	public static final class MqttMessageTypes

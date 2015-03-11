@@ -67,6 +67,7 @@ import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -1119,6 +1120,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						toast.show();
 						return;
 					}
+					sendBroadCastAnalytics();
 					createBroadcast(adapter.getAllSelectedContactsMsisdns());
 				}
 				else if (getIntent().hasExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST))
@@ -2101,4 +2103,35 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
               }
       }
    }
+	
+	private void sendBroadCastAnalytics()
+	{
+		if(selectAllMode)
+		{
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.BROADCAST_SELECT_ALL_NEXT);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+
+		}
+		else
+		{
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.BROADCAST_NEXT_MULTI_CONTACT);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+		}
+	}
 }
