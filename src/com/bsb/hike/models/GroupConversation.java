@@ -175,12 +175,12 @@ public class GroupConversation extends Conversation
 		
 		String fullName = getGroupParticipantName(msisdn);
 		
-		if(fullName.contains(" "))
+		String[] args = fullName.trim().split(" ", 3);
+
+		if(args.length > 1)
 		{
-			String[] args = fullName.trim().split(" ", 3);
-			
 			// if contact has some prefix, name would be prefix + first-name else first-name + first word of last name		
-			fullFirstName = args[0] + " " + args[1]; 
+			fullFirstName = args[0] + " " + args[1];
 		}
 		else
 		{
