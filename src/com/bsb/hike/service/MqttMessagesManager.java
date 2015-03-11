@@ -763,7 +763,7 @@ public class MqttMessagesManager
 		long[] ids;
 		if (!Utils.isGroupConversation(id))
 		{
-			ids = convDb.setPreviousMessagesAsReadForMsisdn(id, msgIds);
+			ids = convDb.setAllDeliveredMessagesReadForMsisdn(id, msgIds);
 			if (ids == null)
 			{
 				return;
@@ -957,7 +957,7 @@ public class MqttMessagesManager
 			if (account.has(HikeConstants.ACCOUNTS))
 			{
 				JSONObject accounts = account.getJSONObject(HikeConstants.ACCOUNTS);
-				if (accounts.has(HikeConstants.TWITTER))
+				/*if (accounts.has(HikeConstants.TWITTER))
 				{
 					try
 					{
@@ -974,7 +974,7 @@ public class MqttMessagesManager
 					{
 						Logger.w(getClass().getSimpleName(), "Unknown format for twitter", e);
 					}
-				}
+				}*/
 			}
 			if (account.has(HikeMessengerApp.BACKUP_TOKEN_SETTING))
 			{
@@ -1439,6 +1439,11 @@ public class MqttMessagesManager
 			long timeout = data.getLong(HikeConstants.Extras.GENERAL_SO_TIMEOUT);
 			HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.Extras.GENERAL_SO_TIMEOUT, timeout);
 			AccountUtils.setSocketTimeout((int) timeout);
+		}	
+		if (data.has(HikeConstants.OK_HTTP))
+		{
+			boolean okhttp = data.getBoolean(HikeConstants.OK_HTTP);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.TOGGLE_OK_HTTP, okhttp);
 		}
 		
 		if(data.has(HikeConstants.Extras.CHANGE_MAX_MESSAGE_PROCESS_TIME))
@@ -1739,13 +1744,19 @@ public class MqttMessagesManager
 
 	private void saveServerTimestamp(JSONObject jsonObj) throws JSONException
 	{
-		long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
-		long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;
+		JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+		long serverTimeMillis = data.optLong(HikeConstants.TIMESTAMP_MILLIS);
+		long diffInMillis = System.currentTimeMillis() - serverTimeMillis;
+		Logger.d(getClass().getSimpleName(), "Diff b/w server and client in ms: " + diffInMillis);
+		
+		//long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
+		//long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;
 
-		Logger.d(getClass().getSimpleName(), "Diff b/w server and client: " + diff);
-
+		//Logger.d(getClass().getSimpleName(), "Diff b/w server and client: " + diff);
+		
 		Editor editor = settings.edit();
-		editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
+		//editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
+		editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diffInMillis);
 		editor.commit();
 	}
 
