@@ -607,7 +607,26 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				contactInfo.setName(contactInfo.getMsisdn());
 			}
 			name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
-			tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
+			if(selectAllMode){
+				tagEditText.clear(false);
+				if(adapter.isContactAdded(contactInfo)){
+					adapter.removeContact(contactInfo);
+
+				}else{
+					adapter.addContact(contactInfo);
+
+				}
+				int selected = adapter.getSelectedContactCount();
+				if(selected>0){
+				tagEditText.toggleTag(getString(selected==1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
+				}else{
+					((CheckBox)findViewById(R.id.select_all_cb)).setChecked(false); // very rare case
+				}
+			}
+			else
+			{
+				tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
+			}
 			break;
 			
 		default:
