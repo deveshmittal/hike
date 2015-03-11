@@ -7,7 +7,9 @@ import org.json.JSONObject;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -66,7 +68,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 
 	private static final int WEBVIEW_CARD_COUNT = 3;
 
-	Context mContext;
+	Activity mContext;
 
 	ArrayList<ConvMessage> convMessages;
 
@@ -77,9 +79,9 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	// usually we have seen 3 cards will be inflated, so 3 holders will be initiated (just an optimizations)
 	ArrayList<WebViewHolder> holderList = new ArrayList<WebViewCardRenderer.WebViewHolder>(3);
 
-	public WebViewCardRenderer(Context context, ArrayList<ConvMessage> convMessages, BaseAdapter adapter)
+	public WebViewCardRenderer(Activity context, ArrayList<ConvMessage> convMessages, BaseAdapter adapter)
 	{
-		this.mContext = context.getApplicationContext();
+		this.mContext = context;
 		this.adapter = adapter;
 		this.convMessages = convMessages;
 		cardAlarms = new SparseArray<String>(3);
@@ -131,7 +133,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 	{
 		holder.main = view;
 		holder.customWebView = (CustomWebView) view.findViewById(R.id.webcontent);
-		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(holder.customWebView, convMessage, adapter);
+		holder.platformJavaScriptBridge = new PlatformJavaScriptBridge(mContext,holder.customWebView, convMessage, adapter);
 		holder.selectedStateOverlay = view.findViewById(R.id.selected_state_overlay);
 		holder.loadingSpinner = view.findViewById(R.id.loading_data);
 		holder.cardFadeScreen = view.findViewById(R.id.card_fade_screen);
@@ -143,6 +145,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		return holder;
 	}
 
+	@SuppressLint("NewApi")
 	private void webViewStates(WebViewHolder holder)
 	{
 		holder.customWebView.addJavascriptInterface(holder.platformJavaScriptBridge, HikePlatformConstants.PLATFORM_BRIDGE_NAME);
