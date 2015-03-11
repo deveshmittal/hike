@@ -2425,7 +2425,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void setAvatar(String msisdn, ImageView imageView)
 	{
-		iconLoader.loadImage(msisdn, true, imageView, true);
+		iconLoader.loadImage(msisdn, imageView, false, true, false);
 	}
 
 	private void setNudgeImageResource(ChatTheme chatTheme, ImageView iv, boolean isMessageSent)

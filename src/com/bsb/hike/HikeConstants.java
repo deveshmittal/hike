@@ -525,8 +525,6 @@ public class HikeConstants
 	
 	public static final String H2O_NOTIF_BOOLEAN_PREF = "hikeOfflineNotificationPref";
 
-	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
-	
 	public static final String UPGRADING = "upgrading";
 
 	public static final String UPGRADE_MSG_HASH_GROUP_READBY = "upgradeMsgHashGroupReadby";
@@ -2040,6 +2038,8 @@ public class HikeConstants
 		public static final String VOIP_MSG_TYPE_MISSED_CALL_INCOMING = "vmci";
 
 		public static final String VOIP_MSG_TYPE_MISSED_CALL_OUTGOING = "vmco";
+		
+		public static final String SESSION = "sess";
 	}
 	
 	public static final class SMSNative
@@ -2286,5 +2286,13 @@ public class HikeConstants
 	
 	public static final String EXCEPTION_MESSAGE = "exm";
 	
+	public static final String TIMESTAMP_MILLIS = "msec";
+	
+	public static final String EVENT_TAG_SESSION = "sess";
+
 	public static final String MESSAGE_PROCESS_TIME = "mpt";
+
+	public static int DEFAULT_AVATARS[] = {R.drawable.avatar_01, R.drawable.avatar_02, R.drawable.avatar_03, R.drawable.avatar_04, R.drawable.avatar_05};
+	public static String DEFAULT_AVATAR_KEYS[] = {"avatar_01","avatar_02", "avatar_03", "avatar_04", "avatar_05"};
+	public static String IS_GROUP = "isGroup";
 }

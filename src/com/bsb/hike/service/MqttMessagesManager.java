@@ -763,7 +763,7 @@ public class MqttMessagesManager
 		long[] ids;
 		if (!Utils.isGroupConversation(id))
 		{
-			ids = convDb.setPreviousMessagesAsReadForMsisdn(id, msgIds);
+			ids = convDb.setAllDeliveredMessagesReadForMsisdn(id, msgIds);
 			if (ids == null)
 			{
 				return;
@@ -1744,13 +1744,19 @@ public class MqttMessagesManager
 
 	private void saveServerTimestamp(JSONObject jsonObj) throws JSONException
 	{
-		long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
-		long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;
+		JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+		long serverTimeMillis = data.optLong(HikeConstants.TIMESTAMP_MILLIS);
+		long diffInMillis = System.currentTimeMillis() - serverTimeMillis;
+		Logger.d(getClass().getSimpleName(), "Diff b/w server and client in ms: " + diffInMillis);
+		
+		//long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
+		//long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;
 
-		Logger.d(getClass().getSimpleName(), "Diff b/w server and client: " + diff);
-
+		//Logger.d(getClass().getSimpleName(), "Diff b/w server and client: " + diff);
+		
 		Editor editor = settings.edit();
-		editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
+		//editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
+		editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diffInMillis);
 		editor.commit();
 	}
 
