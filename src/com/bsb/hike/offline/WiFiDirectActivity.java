@@ -131,7 +131,6 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
                     Log.e(TAG, "channel or manager is null");
                 }
                 return true;
-
             case R.id.atn_direct_discover:
                 connectionManager.enableDiscovery();
             default:
@@ -182,8 +181,8 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
         {
             final DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
                     .findFragmentById(R.id.frag_list);
-            if (fragment != null && fragment.getDevice() == null
-                    || fragment.getDevice().status == WifiP2pDevice.CONNECTED) 
+            if (fragment != null && (fragment.getDevice() == null
+                    || fragment.getDevice().status == WifiP2pDevice.CONNECTED)) 
             {
                 connectionManager.disconnect();
             }

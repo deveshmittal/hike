@@ -2,19 +2,14 @@ package com.bsb.hike.offline;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.R;
 import com.bsb.hike.utils.Logger;
 
-import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -24,7 +19,6 @@ import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
 import android.net.wifi.p2p.WifiP2pManager.GroupInfoListener;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.util.Log;
-import android.widget.Toast;
 
 public class WifiP2pConnectionManager implements ChannelListener
 {
@@ -33,7 +27,6 @@ public class WifiP2pConnectionManager implements ChannelListener
 	private WifiP2pManager manager;
 	private WifiManager wifiManager;
 	private Channel channel;
-    private BroadcastReceiver receiver = null;
     private SharedPreferences settings;
     private String myMsisdn;
     private boolean retryChannel = false;
@@ -64,7 +57,20 @@ public class WifiP2pConnectionManager implements ChannelListener
         wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         if(wifiManager.isWifiEnabled() == false)
         	wifiManager.setWifiEnabled(true);
-        
+        /*manager.createGroup(channel, new ActionListener() {
+			
+			@Override
+			public void onSuccess() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onFailure(int reason) {
+				// TODO Auto-generated method stub
+				
+			}
+		});*/
         setDeviceNameAsMsisdn();   
 	}
 	

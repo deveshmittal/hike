@@ -4,6 +4,8 @@ package com.bsb.hike.offline;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -104,7 +106,7 @@ public class Utils {
 		}
 		return null;
 	}
-
+	
 	private static String getDottedDecimalIP(byte[] ipAddr) {
 		/*
 		 * ripped from:

@@ -80,7 +80,7 @@ public class FileTransferService extends IntentService {
 				byte[] intToBArray = Utils.intToByteArray((int)f.length());
 				int s = intToBArray.length;
 				stream.write(intToBArray, 0, s);
-				DeviceListFragment.copyFile(is, stream);
+				OfflineFileTransferManager.copyFile(is, stream);
 				Log.d(WiFiDirectActivity.TAG, "Client: Data written");
 			} catch (IOException e) {
 				Log.e(WiFiDirectActivity.TAG, e.getMessage());
@@ -123,7 +123,7 @@ public class FileTransferService extends IntentService {
 				byte[] intToBArray = Utils.intToByteArray((int)message.length());
 				int s = intToBArray.length;
 				stream.write(intToBArray, 0, s);
-				DeviceListFragment.copyFile(is, stream);
+				OfflineFileTransferManager.copyFile(is, stream);
 				Log.d(WiFiDirectActivity.TAG, "Client: Data written");
 			} catch (IOException e) {
 				Log.e(WiFiDirectActivity.TAG, e.getMessage());
