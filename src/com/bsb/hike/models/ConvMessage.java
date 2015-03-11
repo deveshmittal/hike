@@ -428,7 +428,7 @@ public class ConvMessage
 					Utils.getGroupJoinHighlightText(arr, (GroupConversation) conversation));
 			break;
 		case PARTICIPANT_LEFT:
-			this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn()));
+			this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn()));
 			break;
 		case GROUP_END:
 			this.mMessage = context.getString(R.string.group_chat_end);
@@ -442,7 +442,7 @@ public class ConvMessage
 			{
 				if (conversation instanceof GroupConversation)
 				{
-					fName = ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn());
+					fName = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn());
 				}
 				else
 				{
@@ -462,7 +462,7 @@ public class ConvMessage
 			String name;
 			if (conversation instanceof GroupConversation)
 			{
-				name = ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn());
+				name = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn());
 			}
 			else
 			{
@@ -475,7 +475,7 @@ public class ConvMessage
 			String msisdn = metadata.getMsisdn();
 			String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-			String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
+			String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
 			this.mMessage = String.format(
 					context.getString(participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name : R.string.change_group_image), participantName);
 			break;
@@ -506,7 +506,7 @@ public class ConvMessage
 				String nameString;
 				if (conversation instanceof GroupConversation)
 				{
-					nameString = ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn());
+					nameString = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn());
 				}
 				else
 				{
