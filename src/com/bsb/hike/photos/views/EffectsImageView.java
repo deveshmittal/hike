@@ -69,6 +69,7 @@ public class EffectsImageView extends ImageView
 	{
 		currentImage = image;
 		this.setImageBitmap(image);
+		HikeEffectsFactory.clearCache();
 	}
 
 	public void applyEffect(FilterType filter, float value, OnFilterAppliedListener listener)

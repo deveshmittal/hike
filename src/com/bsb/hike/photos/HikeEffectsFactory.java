@@ -38,6 +38,8 @@ public final class HikeEffectsFactory
 
 	private Bitmap mBitmapIn, mBitmapOut;
 
+	public  Bitmap toBeRecycled;
+
 	private RenderScript mRS;
 
 	private Allocation mInAllocation;
@@ -70,11 +72,24 @@ public final class HikeEffectsFactory
 		// Allocate buffer
 		mBitmapIn = image;
 		mInAllocation = Allocation.createFromBitmap(mRS, mBitmapIn);
-		if ((mBitmapOut == null || mBitmapOut.getWidth() != mBitmapIn.getWidth()) && !isThumbnail)
+		if (!isThumbnail)
 		{
+			toBeRecycled = mBitmapOut;
 			mBitmapOut = mBitmapOut.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
 		}
 
+	}
+
+	public static void clearCache()
+	{
+		if (instance == null)
+			instance = new HikeEffectsFactory();
+
+
+		if (instance.toBeRecycled != null)
+		{
+			instance.toBeRecycled.recycle();
+		}
 	}
 
 	/**
@@ -495,6 +510,7 @@ public final class HikeEffectsFactory
 				public void run()
 				{
 					readyListener.onFilterApplied(blurImage ? inBitmapOut : mBitmapOut);
+
 				}
 			});
 		}
