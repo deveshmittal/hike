@@ -3003,7 +3003,17 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			}
 			if (isGroupOwner)
 			{
-				optionsList.add(getString(isBroadcast ? R.string.remove_from_broadcast : R.string.remove_from_group ));
+				if (isBroadcast)
+				{
+					if(broadcastConversation.getGroupMemberAliveCount() > 1)
+					{
+						optionsList.add(getString(R.string.remove_from_broadcast));
+					}
+				}
+				else
+				{
+					optionsList.add(getString(R.string.remove_from_group));
+				}
 			}
 
 			final String[] options = new String[optionsList.size()];
