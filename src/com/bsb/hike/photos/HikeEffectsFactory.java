@@ -16,17 +16,17 @@ import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 
 /**
  * 
- *         Factory model class. Effect Filter being applied using RenderScript class in android.
+ * Factory model class. Effect Filter being applied using RenderScript class in android.
  * 
- *         To apply the effect blending , color matrix and curve fitting techniques of Image Processing have been implemented.
+ * To apply the effect blending , color matrix and curve fitting techniques of Image Processing have been implemented.
  * 
- *         Vignette is not added onto the image in this class.
+ * Vignette is not added onto the image in this class.
  * 
  * @see http://developer.android.com/guide/topics/renderscript/compute.html
  * 
  * @see http://developer.android.com/reference/android/graphics/ColorMatrix.html
  * 
- *  @author akhiltripathi
+ * @author akhiltripathi
  *
  * 
  */
@@ -36,7 +36,7 @@ public final class HikeEffectsFactory
 
 	private static HikeEffectsFactory instance;// singleton instance
 
-	private Bitmap mBitmapIn;
+	private Bitmap mBitmapIn, mBitmapOut;
 
 	private RenderScript mRS;
 
@@ -50,7 +50,8 @@ public final class HikeEffectsFactory
 
 	private int mBlurRadius;
 
-	private void LoadRenderScript(Bitmap image)
+	@SuppressWarnings("static-access")
+	private void LoadRenderScript(Bitmap image, boolean isThumbnail)
 	{
 		// Initialize RS // Load script
 		if (mRS == null)
@@ -63,12 +64,16 @@ public final class HikeEffectsFactory
 			{
 				mBlurRadius = 25;
 			}
-			
+
 		}
 
 		// Allocate buffer
 		mBitmapIn = image;
 		mInAllocation = Allocation.createFromBitmap(mRS, mBitmapIn);
+		if ((mBitmapOut == null || mBitmapOut.getWidth() != mBitmapIn.getWidth()) && !isThumbnail)
+		{
+			mBitmapOut = mBitmapOut.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
+		}
 
 	}
 
@@ -81,7 +86,7 @@ public final class HikeEffectsFactory
 		if (instance == null)
 			instance = new HikeEffectsFactory();
 
-		instance.LoadRenderScript(scaledOriginal);
+		instance.LoadRenderScript(scaledOriginal, true);
 		instance.beginEffectAsyncTask(listener, type, true);
 
 	}
@@ -250,7 +255,7 @@ public final class HikeEffectsFactory
 		if (instance == null)
 			instance = new HikeEffectsFactory();
 
-		instance.LoadRenderScript(bitmap);
+		instance.LoadRenderScript(bitmap, false);
 		instance.beginEffectAsyncTask(listener, type, false);
 
 	}
@@ -421,9 +426,9 @@ public final class HikeEffectsFactory
 
 	/**
 	 * 
-	 *         Class implements Runnable Interface
+	 * Class implements Runnable Interface
 	 * 
-	 *         Applies specific Effect to mBitmapIn object on a new thread
+	 * Applies specific Effect to mBitmapIn object on a new thread
 	 * 
 	 * @author akhiltripathi
 	 * 
@@ -436,7 +441,7 @@ public final class HikeEffectsFactory
 
 		private OnFilterAppliedListener readyListener;
 
-		private Bitmap mBitmapOut;
+		private Bitmap inBitmapOut;
 
 		private boolean blurImage;
 
@@ -446,8 +451,15 @@ public final class HikeEffectsFactory
 			effect = effectType;
 			readyListener = listener;
 			blurImage = isThumbnail;
-			mBitmapOut = Bitmap.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), Bitmap.Config.ARGB_8888);
-			mOutAllocations = Allocation.createFromBitmap(mRS, mBitmapOut);
+			if (blurImage)
+			{
+				inBitmapOut = Bitmap.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), Bitmap.Config.ARGB_8888);
+				mOutAllocations = Allocation.createFromBitmap(mRS, inBitmapOut);
+			}
+			else
+			{
+				mOutAllocations = Allocation.createFromBitmap(mRS, mBitmapOut);
+			}
 
 		}
 
@@ -470,11 +482,11 @@ public final class HikeEffectsFactory
 
 			if (blurImage)
 			{
-				mInAllocation = Allocation.createFromBitmap(mRS, mBitmapOut);
+				mInAllocation = Allocation.createFromBitmap(mRS, inBitmapOut);
 				mScriptBlur.setRadius(mBlurRadius);
 				mScriptBlur.setInput(mInAllocation);
 				mScriptBlur.forEach(mOutAllocations);
-				mOutAllocations.copyTo(mBitmapOut);
+				mOutAllocations.copyTo(inBitmapOut);
 			}
 
 			uiHandler.post(new Runnable()
@@ -482,7 +494,7 @@ public final class HikeEffectsFactory
 				@Override
 				public void run()
 				{
-					readyListener.onFilterApplied(mBitmapOut);
+					readyListener.onFilterApplied(blurImage ? inBitmapOut : mBitmapOut);
 				}
 			});
 		}
@@ -647,7 +659,14 @@ public final class HikeEffectsFactory
 				mScript.forEach_filter_nashville(mInAllocation, mOutAllocations);
 				break;
 			case ORIGINAL:
-				mBitmapOut = mBitmapIn.copy(mBitmapIn.getConfig(), true);
+				if (blurImage)
+				{
+					inBitmapOut = mBitmapIn.copy(mBitmapIn.getConfig(), true);
+				}
+				else
+				{
+					mBitmapOut = mBitmapIn.copy(mBitmapIn.getConfig(), true);
+				}
 				break;
 			default:
 				mScript.forEach_filter_colorMatrix(mInAllocation, mOutAllocations);
@@ -657,7 +676,7 @@ public final class HikeEffectsFactory
 
 			if (effect != FilterType.ORIGINAL)
 			{
-				mOutAllocations.copyTo(mBitmapOut);
+				mOutAllocations.copyTo(blurImage ? inBitmapOut : mBitmapOut);
 			}
 
 		}
@@ -692,9 +711,9 @@ public final class HikeEffectsFactory
 
 /**
  * 
- *         Class implements Curve Fitting Image Processing Technique
+ * Class implements Curve Fitting Image Processing Technique
  * 
- *         Only Cubic Spline Curves Implemented
+ * Only Cubic Spline Curves Implemented
  * 
  * @author akhiltripathi
  * 

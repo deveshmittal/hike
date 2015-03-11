@@ -47,6 +47,11 @@ public class DoodleEffectItemLinearLayout extends EffectItemLinearLayout
 	{
 		return brushColor;
 	}
+	
+	public void setBrushColor(int Color)
+	{
+		this.brushColor = Color;
+	}
 
 	public void setBrushColor(int Color, boolean setCurrentItem)
 	{

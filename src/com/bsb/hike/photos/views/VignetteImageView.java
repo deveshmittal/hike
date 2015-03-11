@@ -13,10 +13,10 @@ import android.widget.ImageView;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 
 /**
- *         Custom View Class extends ImageView in android
+ * Custom View Class extends ImageView in android
  * 
- *         Used in applying vignette (radial color fill) over the image as a seperate layer.
- *         
+ * Used in applying vignette (radial color fill) over the image as a seperate layer.
+ * 
  * @author akhiltripathi
  */
 
@@ -76,6 +76,8 @@ class VignetteImageView extends ImageView
 	public void setVignetteforFilter(Bitmap original)
 	{
 
+		boolean noVignette = false;
+
 		if (filter == null)
 		{
 			return;
@@ -85,7 +87,7 @@ class VignetteImageView extends ImageView
 		int colors[];
 		float stops[];
 		vignetteBitmap = Bitmap.createBitmap(width, width, Config.ARGB_8888);
-		
+
 		switch (filter)
 		{
 		case X_PRO_2:
@@ -104,8 +106,8 @@ class VignetteImageView extends ImageView
 		case EARLYBIRD:
 		case BGR:
 			// Vignette: Stop 1 = #000000 74%, Opacity = 0%; Stop 2 = #000000 120%, Opacity = 100%
-			colors = new int[] { 0x00000000,0x00000000, 0xFF000000 };
-			stops = new float[] { 0.0f,0.98f/1.5f, 1.0f };
+			colors = new int[] { 0x00000000, 0x00000000, 0xFF000000 };
+			stops = new float[] { 0.0f, 0.98f / 1.5f, 1.0f };
 			makeRadialGradient(1.5f, colors, stops);
 			break;
 		case APOLLO:
@@ -115,17 +117,26 @@ class VignetteImageView extends ImageView
 			makeRadialGradient(1.6f, colors, stops);
 			break;
 		default:
+			noVignette = true;
 			break;
 		}
-		this.setImageBitmap(vignetteBitmap);
+		if (noVignette)
+		{
+			vignetteBitmap.recycle();
+			vignetteBitmap = null;
+		}
+		else
+		{
+			this.setImageBitmap(vignetteBitmap);
+		}
 	}
 
 	private void makeRadialGradient(float radiusRatio, int[] colors, float[] stops)
 	{
 
-		float radius = radiusRatio * width/2;
+		float radius = radiusRatio * width / 2;
 
-		RadialGradient gradient = new RadialGradient(width/2,width/2, radius, colors, stops, android.graphics.Shader.TileMode.CLAMP);
+		RadialGradient gradient = new RadialGradient(width / 2, width / 2, radius, colors, stops, android.graphics.Shader.TileMode.CLAMP);
 
 		Paint p = new Paint();
 		p.setDither(true);
@@ -133,7 +144,7 @@ class VignetteImageView extends ImageView
 
 		Canvas c = new Canvas(vignetteBitmap);
 
-		c.drawCircle(width/2, width/2, (radius), p);
+		c.drawCircle(width / 2, width / 2, (radius), p);
 	}
 
 }

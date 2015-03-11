@@ -19,12 +19,9 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.photos.HikePhotosUtils;
 
 /**
-<<<<<<< HEAD
  * @author akhiltripathi
  * 
  *         Custom View Class extends ImageView in android
-=======
->>>>>>> cd4116654e87bb58160d5a6b3065e3a600d78372
  * 
  * Custom View Class extends ImageView in android
  * 
@@ -32,16 +29,13 @@ import com.bsb.hike.photos.HikePhotosUtils;
  * 
  * The ImageView provides an Canvas for drawing doodles or writing text.
  * 
-<<<<<<< HEAD
  *         In Implementation one object handles text and another handles doodling
  * 
-=======
  * In Implementation one object handles text and another handles doodling
  *
  * @author akhiltripathi
  *
  *
->>>>>>> cd4116654e87bb58160d5a6b3065e3a600d78372
  */
 public class CanvasImageView extends ImageView implements OnTouchListener
 {
@@ -122,8 +116,9 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 			mCanvas = new Canvas(mBitmap);
 			drawDoodle();
 		}
-		else
+		else if(mBitmap!=null)
 		{
+			mBitmap.recycle();
 			mBitmap = null;
 		}
 	}
