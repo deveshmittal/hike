@@ -24,10 +24,10 @@ public class SolicallWrapper {
 		
 		// Get AEC parameters
 		HikeSharedPreferenceUtil sharedPref = HikeSharedPreferenceUtil.getInstance();
-		int CpuNoiseReduction = sharedPref.getData(HikeConstants.VOIP_AEC_CPU_NR, 2);
+		int CpuNoiseReduction = sharedPref.getData(HikeConstants.VOIP_AEC_CPU_NR, 0);
 		int CpuAEC = sharedPref.getData(HikeConstants.VOIP_AEC_CPU, 2);
-		short AecMinOutput = (short) sharedPref.getData(HikeConstants.VOIP_AEC_MO, 100);
-		short AecTypeParam = (short) sharedPref.getData(HikeConstants.VOIP_AEC_TYPE, 8);
+		short AecMinOutput = (short) sharedPref.getData(HikeConstants.VOIP_AEC_MO, 0);
+		short AecTypeParam = (short) sharedPref.getData(HikeConstants.VOIP_AEC_TYPE, 4);
 		short comfortNoise = (short) sharedPref.getData(HikeConstants.VOIP_AEC_CNP, 100);
 		int AecTailType = sharedPref.getData(HikeConstants.VOIP_AEC_TAIL_TYPE, -18);
 		
