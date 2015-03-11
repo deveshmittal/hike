@@ -1850,6 +1850,9 @@ public class VoIPService extends Service {
 		// Serialize everything except for P2P voice data packets
 		byte[] packetData = getUDPDataFromPacket(dp);
 		
+		if (packetData == null)
+			return;
+		
 		try {
 			DatagramPacket packet = null;
 			if (dp.getType() == PacketType.RELAY_INIT)
@@ -1884,6 +1887,9 @@ public class VoIPService extends Service {
 			packetData = VoIPSerializer.serialize(dp);
 			prefix = PP_PROTOCOL_BUFFER;
 		}
+		
+		if (packetData == null)
+			return null;
 		
 		byte[] finalData = new byte[packetData.length + 1];	
 		finalData[0] = prefix;
