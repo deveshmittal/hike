@@ -33,6 +33,8 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import java.io.IOException;
+import java.util.List;
+
 import com.commonsware.cwac.camera.CameraHost.FailureReason;
 
 public class CameraView extends ViewGroup implements AutoFocusCallback
@@ -613,6 +615,13 @@ public class CameraView extends ViewGroup implements AutoFocusCallback
 
 			requestLayout();
 
+
+			List<String> modes = parameters.getSupportedFocusModes();
+			
+			if (parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+				parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+			}
+			
 			camera.setParameters(getHost().adjustPreviewParameters(parameters));
 			startPreview();
 		}

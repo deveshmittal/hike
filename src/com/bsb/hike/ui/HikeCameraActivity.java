@@ -3,19 +3,19 @@ package com.bsb.hike.ui;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.view.OrientationEventListener;
-import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -64,7 +64,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private OrientationEventListener orientationListener;
 
-	private Handler autoFocusHandler = new Handler(Looper.getMainLooper());
+	// private Handler autoFocusHandler = new Handler(Looper.getMainLooper());
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -198,15 +198,15 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		HikeCameraActivity.this.findViewById(R.id.tempiv).setVisibility(View.GONE);
 
-		autoFocusHandler.postDelayed(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				cameraFragment.autoFocus();
-				autoFocusHandler.postDelayed(this, 6000);
-			}
-		}, 1000);
+		// autoFocusHandler.postDelayed(new Runnable()
+		// {
+		// @Override
+		// public void run()
+		// {
+		// cameraFragment.autoFocus();
+		// autoFocusHandler.postDelayed(this, 6000);
+		// }
+		// }, 1000);
 	}
 
 	@Override
@@ -215,7 +215,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
 		super.onPause();
 		orientationListener.disable();
-		autoFocusHandler.removeCallbacksAndMessages(null);
+		// autoFocusHandler.removeCallbacksAndMessages(null);
 	}
 
 	@Override
