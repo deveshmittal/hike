@@ -1509,6 +1509,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 
+		if (mConversation instanceof BroadcastConversation)
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.add_shortcut), 8));
+		}
+		
 		if (!(mConversation instanceof GroupConversation) && contactInfo.isOnhike() && (!mConversation.isBotConv()))
 		{
 			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED
@@ -1643,6 +1648,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					break;
 				case 4:
 					setupThemePicker(null);
+					break;
+				case 8:
+					Utils.createShortcut(ChatThread.this, mConversation);
 					break;
 				}
 
