@@ -922,10 +922,12 @@ public class Utils
 		Utils.densityMultiplier = displayMetrics.density;
 	}
 
-	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
+	public static CharSequence getFormattedParticipantInfo(String info, String textToHighlight)
 	{
+		if(!info.contains(textToHighlight))
+			return info;
 		SpannableStringBuilder ssb = new SpannableStringBuilder(info);
-		ssb.setSpan(new StyleSpan(Typeface.BOLD), info.indexOf(textToHighight), info.indexOf(textToHighight) + textToHighight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		ssb.setSpan(new StyleSpan(Typeface.BOLD), info.indexOf(textToHighlight), info.indexOf(textToHighlight) + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return ssb;
 	}
 
@@ -5174,7 +5176,21 @@ public class Utils
 	}
 	
 	/**
-	 * Tells if User is on Telephonic/Audio/Vedio/Voip Call
+	 * Return whether response received is valid or not.
+	 * @param response
+	 * @return <li>false if either response is null if we get "stat":"fail" in response or "stat" key is missing</li>
+	 * <li>true otherwise</li>
+	 */
+	public static boolean isResponseValid(JSONObject response)
+	{
+		if (response == null || HikeConstants.FAIL.equals(response.optString(HikeConstants.STATUS)))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	 /** Tells if User is on Telephonic/Audio/Vedio/Voip Call
 	 * @param context
 	 * @return
 	 */
@@ -5206,15 +5222,15 @@ public class Utils
 		case -1:
 			networkType = "off";
 			break;
-
+			
 		case 0:
 			networkType = "unknown";
 			break;
-
+			
 		case 1:
 			networkType = "wifi";
 			break;
-
+			
 		case 2:
 			networkType = "2g";
 			break;
@@ -5326,6 +5342,11 @@ public class Utils
 		return false;
 	}
 	
+	public static boolean isOkHttp()
+	{
+		return HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.TOGGLE_OK_HTTP, true);
+	}
+
 	/**
 	 * Returns active network info
 	 * @return

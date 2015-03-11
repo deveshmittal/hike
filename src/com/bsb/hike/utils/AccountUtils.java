@@ -160,7 +160,7 @@ public class AccountUtils
 
 	public static String mUid = null;
 
-	private static String appVersion = null;
+	public static String appVersion = null;
 	
 	public static final String SDK_AUTH_BASE_URL_STAGING = "http://stagingoauth.im.hike.in/o/oauth2/";
 
