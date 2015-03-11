@@ -12,4 +12,12 @@
         android:icon="@drawable/ic_action_discover"
         android:title="@string/discover_peers_button"
         android:showAsAction="ifRoom|withText" />
+    
+    <item
+        android:id="@+id/atn_direct_wifinetworks"
+        android:icon="@drawable/ic_action_discover"
+        android:title="discover_wifi_networks"
+        android:showAsAction="ifRoom|withText" />
+    
+ 
 </menu>

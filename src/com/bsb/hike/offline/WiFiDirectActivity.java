@@ -16,10 +16,18 @@ cfcf * Copyright (C) 2011 The Android Open Source Project
 
 package com.bsb.hike.offline;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -38,7 +46,6 @@ import android.widget.Toast;
 import com.bsb.hike.R;
 import com.bsb.hike.offline.DeviceListFragment.DeviceActionListener;
 import com.bsb.hike.utils.Logger;
-
 /**
  * An activity that uses WiFi Direct APIs to discover and connect with available
  * devices. WiFi Direct APIs are asynchronous and rely on callback mechanism
@@ -133,11 +140,56 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
                 return true;
             case R.id.atn_direct_discover:
                 connectionManager.enableDiscovery();
+                return true ;
+            
+            case R.id.atn_direct_wifinetworks:
+            	 WifiManager  wifiManager ;
+            	 wifiManager =  (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+            	 wifiManager.startScan(); 
+            	 List<ScanResult> results = wifiManager.getScanResults();
+            	 
+            	 
+            	 WifiNetworksListFragment wififragment = (WifiNetworksListFragment) getFragmentManager().findFragmentById(R.id.wifi_list);
+            	
+            	 HashMap<String,ScanResult>  strength =  new HashMap<String, ScanResult> ();
+            	 for(ScanResult scanResult :  results)
+            	 {
+            		 if(!strength.containsKey(scanResult))
+            		 {
+            			strength.put(scanResult.SSID, scanResult); 
+            		 }
+            		 else
+            		 {
+            			 if(wifiManager.compareSignalLevel(scanResult.level, strength.get(scanResult.SSID).level)>0)
+            			 {
+            				 strength.put(scanResult.SSID, scanResult);
+            			 }
+            		 }
+            	 }
+            	 int size =  strength.size();
+         		 wififragment.updateWifiNetworks(strength); 
+            	return true ;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 	
+    public ScanResult calculateBestAP(List<ScanResult> sResults){
+
+        ScanResult bestSignal = null;
+           for (ScanResult result : sResults) {
+             if (bestSignal == null
+                 || WifiManager.compareSignalLevel(bestSignal.level, result.level) < 0)
+               bestSignal = result;
+           }
+
+           String message = String.format("%s networks found. %s is the strongest. %s is the bsid",
+                   sResults.size(), bestSignal.SSID, bestSignal.BSSID);
+
+           Log.d("sResult", message);
+           return bestSignal;
+    }
+    
     @Override
     public void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice ConnectingToDevice) {
     	if(numOfTries >= MAXTRIES)

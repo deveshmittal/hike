@@ -14,12 +14,21 @@
         <fragment
             android:id="@+id/frag_list"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/phone_list_height"
-            android:layout_weight="0.44"
+            android:layout_height="0dp"
+            android:layout_weight="0.6"
             class="com.bsb.hike.offline.DeviceListFragment" >
 
             <!-- Preview: layout=@layout/row_devices -->
         </fragment>
+
+        <fragment
+            android:id="@+id/wifi_list"
+            android:name="com.bsb.hike.offline.WifiNetworksListFragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.4" 
+         />
+         
     </LinearLayout>
 
 </LinearLayout>
