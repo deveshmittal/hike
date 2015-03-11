@@ -10,8 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        android:visibility="gone"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -41,6 +41,16 @@
             android:scaleType="fitXY"
             android:src="@drawable/bg_ct_creepy_tile"
             android:visibility="gone"
+            app:riv_corner_radius="100dp" />
+
+        <com.bsb.hike.view.RoundedImageView
+            android:id="@+id/rounded_mask"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:visibility="gone"
+            android:layout_centerInParent="true"
+            android:scaleType="fitXY"
+            android:src="@drawable/photos_error_mask"
             app:riv_corner_radius="100dp" />
 
         <ImageButton
