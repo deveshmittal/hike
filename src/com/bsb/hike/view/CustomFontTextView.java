@@ -15,7 +15,6 @@ public class CustomFontTextView extends TextView implements ViewTreeObserver.OnG
     private int maxLines;
     private void setFont(AttributeSet attrs)
     {
-        attrs.getAttributeValue(HikeConstants.NAMESPACE, HikeConstants.FONT);
         setTypeface(getTypeface(), style);
     }
 

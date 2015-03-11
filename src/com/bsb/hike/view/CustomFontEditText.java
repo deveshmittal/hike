@@ -6,8 +6,6 @@ import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.widget.EditText;
 
-import com.bsb.hike.HikeConstants;
-
 public class CustomFontEditText extends EditText
 {
 	private int style;
@@ -16,7 +14,6 @@ public class CustomFontEditText extends EditText
 
 	private void setFont(AttributeSet attrs)
 	{
-		attrs.getAttributeValue(HikeConstants.NAMESPACE, HikeConstants.FONT);
 		setTypeface(getTypeface(), style);
 	}
 

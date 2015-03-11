@@ -5,15 +5,12 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.widget.Button;
 
-import com.bsb.hike.HikeConstants;
-
 public class CustomFontButton extends Button
 {
 	private int style;
 
 	private void setFont(AttributeSet attrs)
 	{
-		attrs.getAttributeValue(HikeConstants.NAMESPACE, HikeConstants.FONT);
 		setTypeface(getTypeface(), style);
 	}
 
