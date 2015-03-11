@@ -365,7 +365,7 @@ public class VoIPService extends Service {
 			}
 
 			// Edge case: call button was hit for someone we are already speaking with. 
-			if (getCallId() > 0 && clientPartner.getPhoneNumber().equals(msisdn) && isAudioRunning() == true) 
+			if (getCallId() > 0 && clientPartner.getPhoneNumber().equals(msisdn)) 
 			{
 				// Show activity
 				Logger.d(VoIPConstants.TAG, "Restoring activity..");
