@@ -60,7 +60,7 @@ public class VoIPActivity extends HikeAppStateBaseFragmentActivity implements Ca
 			mainFragment.handleIntent(intent);
 		}
 
-		if(!intent.getBooleanExtra(VoIPConstants.Extras.REDIALLING, false))
+		if(intent.getBooleanExtra(VoIPConstants.Extras.INCOMING_CALL, false))
 		{
 			removeCallFailedFragment();
 		}

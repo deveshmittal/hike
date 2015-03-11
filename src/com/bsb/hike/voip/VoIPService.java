@@ -399,7 +399,6 @@ public class VoIPService extends Service {
 			
 			// Show activity
 			Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
-			i.putExtra(VoIPConstants.Extras.REDIALLING, intent.getBooleanExtra(VoIPConstants.Extras.REDIALLING, false));
 			i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(i);
 			
@@ -2459,6 +2458,7 @@ public class VoIPService extends Service {
 						// VoIPService was started, and it established a connection. 
 						// Now show the activity so the user can answer / decline the call. 
 						Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
+						i.putExtra(VoIPConstants.Extras.INCOMING_CALL, true);
 						i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 						startActivity(i);
 						playIncomingCallRingtone();
