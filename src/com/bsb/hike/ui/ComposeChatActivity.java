@@ -468,11 +468,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			MIN_MEMBERS_GROUP_CHAT = 1;
 		}
-
-		if (existingBroadcastId != null)
-		{
-			MIN_MEMBERS_BROADCAST_LIST = 1;
-		}
 		
 		setModeAndUpdateAdapter(composeMode);
 		
@@ -1123,12 +1118,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 				else if (getIntent().hasExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST))
 				{
-					int selected = adapter.getCurrentSelection();
-					if (selected < MIN_MEMBERS_BROADCAST_LIST)
-					{
-						Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_BROADCAST_LIST), Toast.LENGTH_SHORT).show();
-						return;
-					}
 					createGroup(adapter.getAllSelectedContacts());
 				}
 				else if (composeMode == CREATE_GROUP_MODE)
