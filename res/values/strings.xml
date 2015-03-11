@@ -813,6 +813,7 @@
     <string name="delivered_txt">Delivered</string>
     <string name="read_txt">Read</string>
     <string name="no_results">No results</string>
+    <string name="no_hike_contacts">No hike contacts</string>
     <string name="num_unread_messages">%1$s Unread Messages</string>
     <string name="one_unread_message">1 Unread Message</string>
     <string name="file_transfer_pop_up_text">Send all files including pdf, ppt, docs upto <b>100MB</b> each. You can also send multiple files in one go!</string>
@@ -821,7 +822,7 @@
     <string name="maxContactInGroupErr">Max %1$s contacts are allowed in a group</string>
     <string name="maxContactInBroadcastErr">Max %1$s contacts are allowed in this broadcast list</string>
     <string name="minContactInGroupErr">Select Min %1$s member(s) to start a group chat</string>
-    <string name="minContactInBroadcastErr">Select Min %1$s member(s) to make a broadcast list</string>
+    <string name="minContactInBroadcastErr">Atleast %1$s contacts must be selected</string>
     <string name="cannot_select_zero_byte_file">Cannot select a 0 byte file</string>
     <string name="chatThreadNudgeTutorialText_group">Double tap anywhere to nudge your friends</string>
     <string name="addedYouAsFavorite">Added %1$s to Favorites</string>
@@ -1264,7 +1265,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="pack_visible">Visible in sticker palette</string>
     <string name="pack_hidden">Hidden from sticker palette</string>
     <string name="pack_rank">%1$d.</string>
-    <string name="hike_upgrade_string">We need a few moments to set up your brand new sticker shop. It won\'t be long</string>
+    <string name="hike_upgrade_string">Making hike faster and better for you</string>
     <string name="some_error">Some error occured!</string>
     <string name="nux_fwd_search_hint">Names go here...</string>
     <string name="recently_joined_hike">RECENTLY JOINED HIKE</string>
