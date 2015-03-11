@@ -69,7 +69,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private OrientationEventListener orientationListener;
 
-	// private Handler autoFocusHandler = new Handler(Looper.getMainLooper());
+	private Bitmap tempBitmap;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -194,24 +194,6 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		super.onResume();
 
 		orientationListener.enable();
-
-		// ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.containerImageView);
-		//
-		// iv.setVisibility(View.GONE);
-
-		HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(true);
-
-		HikeCameraActivity.this.findViewById(R.id.tempiv).setVisibility(View.GONE);
-
-		// autoFocusHandler.postDelayed(new Runnable()
-		// {
-		// @Override
-		// public void run()
-		// {
-		// cameraFragment.autoFocus();
-		// autoFocusHandler.postDelayed(this, 6000);
-		// }
-		// }, 1000);
 	}
 
 	@Override
@@ -220,7 +202,17 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
 		super.onPause();
 		orientationListener.disable();
-		// autoFocusHandler.removeCallbacksAndMessages(null);
+		ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.tempiv);
+
+		iv.setVisibility(View.GONE);
+
+		if (tempBitmap != null)
+		{
+			tempBitmap.recycle();
+			tempBitmap = null;
+		}
+
+		HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(true);
 	}
 
 	@Override
@@ -234,7 +226,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(false);
 			cameraFragment.cancelAutoFocus();
 			cameraFragment.takePicture();
-			final Bitmap bitmap = ((TextureView) cameraFragment.getCameraView().previewStrategy.getWidget()).getBitmap();
+			tempBitmap = ((TextureView) cameraFragment.getCameraView().previewStrategy.getWidget()).getBitmap();
 			final View snapOverlay = findViewById(R.id.snapOverlay);
 			ObjectAnimator invisToVis = ObjectAnimator.ofFloat(snapOverlay, "alpha", 0f, 0.8f);
 			invisToVis.setDuration(200);
@@ -245,7 +237,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				public void onAnimationEnd(Animator animation)
 				{
 					ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.tempiv);
-					iv.setImageBitmap(bitmap);
+					iv.setImageBitmap(tempBitmap);
 					iv.setVisibility(View.VISIBLE);
 					ObjectAnimator visToInvis = ObjectAnimator.ofFloat(snapOverlay, "alpha", 0.8f, 0f);
 					visToInvis.setDuration(150);
@@ -463,7 +455,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void sendAnalyticsGalleryPic()
 	{
 		try

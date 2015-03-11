@@ -394,6 +394,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 	{
 		super.onPause();
 		isPaused = true;
+		getActivity().getSupportFragmentManager().popBackStack();
 	}
 
 	@Override

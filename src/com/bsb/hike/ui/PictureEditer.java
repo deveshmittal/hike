@@ -444,7 +444,9 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 	{
 		if (getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE))
 		{
+			getSupportActionBar().show();
 			mActionBarDoneContainer.setVisibility(View.VISIBLE);
+			mActionBarBackButton.setVisibility(View.VISIBLE);
 			editView.enable();
 		}
 		else
