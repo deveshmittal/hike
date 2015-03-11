@@ -112,6 +112,10 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 		{
 			DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
 	        int width = metrics.widthPixels;
+	        if(mBitmap!=null)
+	        {
+	        	mBitmap.recycle();
+	        }
 			mBitmap = Bitmap.createBitmap(width, width, Config.ARGB_8888);
 			mCanvas = new Canvas(mBitmap);
 			drawDoodle();

@@ -24,7 +24,7 @@ class VignetteImageView extends ImageView
 {
 	private int width;
 
-	private Bitmap vignetteBitmap;
+	private Bitmap vignetteBitmap,toBeRecycled;
 
 	private FilterType filter;
 
@@ -86,6 +86,8 @@ class VignetteImageView extends ImageView
 		width = original.getWidth();
 		int colors[];
 		float stops[];
+		
+		toBeRecycled = vignetteBitmap;
 		vignetteBitmap = Bitmap.createBitmap(width, width, Config.ARGB_8888);
 
 		switch (filter)
@@ -96,18 +98,16 @@ class VignetteImageView extends ImageView
 			stops = new float[] { 0.0f, 0.92f / 1.5f, 1.0f };
 			makeRadialGradient(1.5f, colors, stops);
 			break;
-		case POLAROID:
-			colors = new int[] { 0x00000000, 0xBB232443 };
-			stops = new float[] { 0.0f, 1.0f };
+		case EARLYBIRD:
+			colors = new int[] { 0x00000000, 0x00000000, 0xFF000000 };
+			stops = new float[] { 0.0f, 0.85f / 1.5f, 1.0f };
 			makeRadialGradient(1.5f, colors, stops);
 			break;
 		case RETRO:
 		case KELVIN:
-		case EARLYBIRD:
-		case BGR:
 			// Vignette: Stop 1 = #000000 74%, Opacity = 0%; Stop 2 = #000000 120%, Opacity = 100%
 			colors = new int[] { 0x00000000, 0x00000000, 0xFF000000 };
-			stops = new float[] { 0.0f, 0.98f / 1.5f, 1.0f };
+			stops = new float[] { 0.0f, 0.98f / 1.8f, 1.0f };
 			makeRadialGradient(1.5f, colors, stops);
 			break;
 		case APOLLO:
@@ -122,12 +122,18 @@ class VignetteImageView extends ImageView
 		}
 		if (noVignette)
 		{
+			this.setImageBitmap(null);
 			vignetteBitmap.recycle();
 			vignetteBitmap = null;
+			
 		}
 		else
 		{
 			this.setImageBitmap(vignetteBitmap);
+		}
+		if(toBeRecycled!=null)
+		{
+			toBeRecycled.recycle();
 		}
 	}
 
