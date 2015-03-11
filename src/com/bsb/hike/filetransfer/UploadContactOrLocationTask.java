@@ -21,7 +21,6 @@ import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
@@ -264,7 +263,6 @@ public class UploadContactOrLocationTask extends FileTransferBase
 			}
 
 			userContext = createConvMessage(msisdn, metadata);
-			long id = ((ConvMessage) userContext).getMsgID();
 			if (TextUtils.isEmpty(fileKey))
 			{
 				// Called so that the UI in the Conversation lists screen is
