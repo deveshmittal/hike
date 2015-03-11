@@ -65,6 +65,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.providers.HikeProvider;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.tasks.SendLogsTask;
@@ -126,8 +127,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	
 	private TextView topBarIndicator;
 
-	private Drawable myProfileImage;
-
 	private View ftueAddFriendWindow;
 
 	private boolean isAddFriendFtueShowing = false;
@@ -152,7 +151,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
 			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FAVORITE_COUNT_CHANGED,
-			HikePubSub.STEALTH_UNREAD_TIP_CLICKED,HikePubSub. FTUE_LIST_FETCHED_OR_UPDATED };
+			HikePubSub.STEALTH_UNREAD_TIP_CLICKED,HikePubSub. FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.USER_JOINED_NOTIFICATION };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE };
 
@@ -1016,15 +1015,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			
 			String msisdn = (String) object;
 			
-			runOnUiThread(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					showRecentlyJoinedDot(1000);
-				}
-			});
-			
 			for (ContactInfo contactInfo : ftueContactsData.getCompleteList())
 			{
 				if (contactInfo.getMsisdn().equals(msisdn))
@@ -1034,6 +1024,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					break;
 				}
 			}
+		}
+		else if (HikePubSub.USER_JOINED_NOTIFICATION.equals(type))
+		{
+			showRecentlyJoinedDot(1000);
 		}
 		else if (HikePubSub.UPDATE_OF_MENU_NOTIFICATION.equals(type))
 		{
@@ -1382,27 +1376,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
 			itemTextView.setText(item.getName());
 
-			ImageView itemImageView = (ImageView) convertView.findViewById(R.id.item_icon);
-			if (item.getKey() == 0)
-			{
-				if (myProfileImage != null)
-				{
-					itemImageView.setImageDrawable(myProfileImage);
-				}
-				else
-				{
-					itemImageView.setScaleType(ScaleType.CENTER_INSIDE);
-					itemImageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
-					itemImageView.setImageResource(R.drawable.ic_default_avatar);
-				}
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);
-			}
-			else
-			{
-
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
-			}
-
 			int currentCredits = accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0);
 
 			TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
@@ -1453,10 +1426,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
 		final String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
-		myProfileImage = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
-		// myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
-		// msisdn, true);
-
 		/*
 		 * removing out new chat option for now
 		 */
@@ -1623,8 +1592,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		final String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		
-		myProfileImage = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
-
 		optionsList.add(new OverFlowMenuItem(getString(R.string.compose_chat), 11));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.take_photo), 10));
