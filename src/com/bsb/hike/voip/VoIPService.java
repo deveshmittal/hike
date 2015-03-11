@@ -791,7 +791,6 @@ public class VoIPService extends Service {
 		}
 		
 		setCallid(0);
-		setCallStatus(null);
 		
 		if(chronometer != null)
 		{
