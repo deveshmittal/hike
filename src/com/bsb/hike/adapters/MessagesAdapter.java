@@ -1869,7 +1869,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			dayHolder = textHolder;
 			setSenderDetails(convMessage, position, textHolder, false);
 			
-			if (viewType == ViewType.SEND_HIKE)
+			if (viewType == ViewType.SEND_HIKE || viewType == ViewType.SEND_SMS)
 			{
 				if (convMessage.isBroadcastMessage() && !convMessage.isBroadcastConversation())
 				{
