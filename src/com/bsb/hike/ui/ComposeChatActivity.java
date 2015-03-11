@@ -865,7 +865,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					adapter.clearAllSelection(true);
 					adapter.selectAllContacts(true);
 					tagEditText.clear(false);
-					int selected = adapter.getSelectedContactCount();
+					int selected = adapter.getCurrentSelection();
 					tagEditText.toggleTag( getString(selected <=1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
 					
 					try
