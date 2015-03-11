@@ -1330,8 +1330,10 @@ public class VoIPService extends Service {
             	int newSize = 0;
 				while (keepRunning == true) {
 					retVal = recorder.read(recordedData, 0, recordedData.length);
-					if (retVal != recordedData.length)
+					if (retVal != recordedData.length) {
 						Logger.w(VoIPConstants.TAG, "Unexpected recorded data length. Expected: " + recordedData.length + ", Recorded: " + retVal);
+						continue;
+					}
 					
 					if (mute == true)
 						continue;

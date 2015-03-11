@@ -6066,6 +6066,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						recordingError(true);
 						Logger.e(getClass().getSimpleName(), "Failed to start recording", e);
 					}
+					catch (IllegalStateException e)
+					{
+						stopRecorder();
+						recordingError(true);
+						recordingDialog.dismiss();
+						Logger.e(getClass().getSimpleName(), "Failed to start recording", e);
+					}
 					recording = true;
 
 					Utils.blockOrientationChange(ChatThread.this);
