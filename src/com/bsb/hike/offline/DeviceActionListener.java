@@ -11,5 +11,5 @@ public interface DeviceActionListener {
 
     void disconnect();
     
-    void connectToHotspot(ScanResult scanResult);
+    Boolean connectToHotspot(ScanResult scanResult);
 }

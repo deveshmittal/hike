@@ -143,51 +143,38 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
                 return true ;
             
             case R.id.atn_direct_wifinetworks:
-            	 WifiManager  wifiManager ;
-            	 wifiManager =  (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-            	 wifiManager.startScan(); 
-            	 List<ScanResult> results = wifiManager.getScanResults();
-            	 
-            	 
             	 WifiNetworksListFragment wififragment = (WifiNetworksListFragment) getFragmentManager().findFragmentById(R.id.wifi_list);
-            	
-            	 HashMap<String,ScanResult>  strength =  new HashMap<String, ScanResult> ();
-            	 for(ScanResult scanResult :  results)
-            	 {
-            		 if(!strength.containsKey(scanResult))
-            		 {
-            			strength.put(scanResult.SSID, scanResult); 
-            		 }
-            		 else
-            		 {
-            			 if(wifiManager.compareSignalLevel(scanResult.level, strength.get(scanResult.SSID).level)>0)
-            			 {
-            				 strength.put(scanResult.SSID, scanResult);
-            			 }
-            		 }
-            	 }
-            	 int size =  strength.size();
-         		 wififragment.updateWifiNetworks(strength); 
-            	return true ;
+            	 wififragment.updateWifiNetworks(getdistinctWifiNetworks());  	 
+            	 return true ;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 	
-    public ScanResult calculateBestAP(List<ScanResult> sResults){
+    public HashMap<String , ScanResult> getdistinctWifiNetworks(){
 
-        ScanResult bestSignal = null;
-           for (ScanResult result : sResults) {
-             if (bestSignal == null
-                 || WifiManager.compareSignalLevel(bestSignal.level, result.level) < 0)
-               bestSignal = result;
-           }
-
-           String message = String.format("%s networks found. %s is the strongest. %s is the bsid",
-                   sResults.size(), bestSignal.SSID, bestSignal.BSSID);
-
-           Log.d("sResult", message);
-           return bestSignal;
+    	 WifiManager  wifiManager ;
+    	 wifiManager =  (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+    	 wifiManager.startScan(); 
+    	 List<ScanResult> results = wifiManager.getScanResults();
+    	
+	   	 HashMap<String,ScanResult>  distinctNetworks =  new HashMap<String, ScanResult> ();
+	   	 for(ScanResult scanResult :  results)
+	   	 {
+	       		 
+	       		 if(!distinctNetworks.containsKey(scanResult))
+	       		 {
+	       			distinctNetworks.put(scanResult.SSID, scanResult); 
+	       		 }
+	       		 else
+	       		 {
+	       			 if(wifiManager.compareSignalLevel(scanResult.level, distinctNetworks.get(scanResult.SSID).level)>0)
+	       			 {
+	       				 distinctNetworks.put(scanResult.SSID, scanResult);
+	       			 }
+	       		 }
+	   	 }
+	   	 return distinctNetworks ;
     }
     
     @Override
@@ -436,8 +423,8 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 	}
 
 	@Override
-	public void connectToHotspot(ScanResult result) {
-		connectionManager.connectToHotspot(result.SSID);
+	public Boolean connectToHotspot(ScanResult result) {
+		return connectionManager.connectToHotspot(result.SSID);
 	}
 }
 
