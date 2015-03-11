@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformAlarmManager;
 import com.bsb.hike.platform.WebMetadata;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -39,20 +41,18 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 
 	private static final String tag = "platformbridge";
 
-	Context mContext;
-
 	ConvMessage message;
 
 	BaseAdapter adapter;
 
-	public PlatformJavaScriptBridge(WebView mWebView)
+	public PlatformJavaScriptBridge(Activity activity,WebView mWebView)
 	{
-		super(mWebView);
+		super(activity,mWebView);
 	}
 
-	public PlatformJavaScriptBridge(WebView webView, ConvMessage convMessage, BaseAdapter adapter)
+	public PlatformJavaScriptBridge(Activity activity,WebView webView, ConvMessage convMessage, BaseAdapter adapter)
 	{
-		super(webView);
+		super(activity,webView);
 		this.message = convMessage;
 		this.adapter = adapter;
 	}
@@ -138,7 +138,14 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 		try
 		{
 			Logger.i(tag, "set alarm called " + json + " , mId " + message.getMsgID() + " , time " + timeInMills);
-			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), (int) message.getMsgID(), Long.valueOf(timeInMills));
+			if(weakActivity.get()!=null)
+			{
+				PlatformAlarmManager.setAlarm(weakActivity.get().getApplicationContext(), new JSONObject(json), (int) message.getMsgID(), Long.valueOf(timeInMills));
+			}
+		}
+		catch(NumberFormatException ne)
+		{
+			ne.printStackTrace();
 		}
 		catch (JSONException e)
 		{
@@ -276,8 +283,7 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 					message.webMetadata = new WebMetadata(updatedJSON);
 				}
 			}
-			final Intent intent = IntentManager.getForwardIntentForConvMessage(mContext, message,
-					PlatformContent.getForwardCardData(message.webMetadata.JSONtoString()));
+			
 
 			if (null == mHandler)
 			{
@@ -289,7 +295,13 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 				@Override
 				public void run()
 				{
-					mContext.startActivity(intent);
+					Activity mContext = weakActivity.get();
+					if(mContext!=null)
+					{
+						final Intent intent = IntentManager.getForwardIntentForConvMessage(mContext, message,
+							PlatformContent.getForwardCardData(message.webMetadata.JSONtoString()));
+						mContext.startActivity(intent);
+					}
 				}
 			});
 

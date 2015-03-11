@@ -18,6 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
@@ -332,7 +333,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	 */
 	private ConvMessage firstPendingConvMessage = null;
 
-	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
+	public MessagesAdapter(Activity context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		// this.largeStickerLoader = new StickerLoader(context);

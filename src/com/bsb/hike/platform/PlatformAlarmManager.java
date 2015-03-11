@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
+import android.util.Pair;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -97,7 +98,8 @@ public class PlatformAlarmManager implements HikePlatformConstants
 				ms.arg1 = count + dbUnreadCount; // db + extra unread
 				ms.obj = msisdn;
 				HikeMessengerApp.getPubSub().publish(HikePubSub.CONV_UNREAD_COUNT_MODIFIED, ms);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.CONVERSATION_TS_UPDATED, System.currentTimeMillis() / 1000);
+				Pair<String, Long> pair = new Pair<String, Long>(msisdn, System.currentTimeMillis() / 1000);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CONVERSATION_TS_UPDATED, pair);
 			}
 		}
 	}

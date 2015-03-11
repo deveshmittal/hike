@@ -60,6 +60,7 @@ public class PlatformZipDownloader
 
 		if (zipFile.exists())
 		{
+			unzipMicroApp(zipFile);
 			return;
 		}
 
@@ -97,12 +98,16 @@ public class PlatformZipDownloader
 			{
 				deleteTemporaryFolder();
 				PlatformRequestManager.failure(mRequest, EventCode.LOW_CONNECTIVITY, isTemplatingEnabled);
+				File tempFolder = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME);
+				PlatformRequestManager.getCurrentDownloadingTemplates().remove(mRequest.getContentData().appHashCode());
+		        PlatformContentUtils.deleteDirectory(tempFolder);
 			}
 
 			@Override
 			public void onRequestSuccess(Response result)
 			{
 				unzipMicroApp(zipFile);
+				PlatformRequestManager.getCurrentDownloadingTemplates().remove(mRequest.getContentData().appHashCode());
 			}
 
 			@Override
@@ -115,6 +120,7 @@ public class PlatformZipDownloader
 		if (!token.isRequestRunning())
 		{
 			token.execute();
+			PlatformRequestManager.getCurrentDownloadingTemplates().add(mRequest.getContentData().appHashCode());
 		}
 
 	}
