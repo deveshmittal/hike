@@ -21,6 +21,7 @@ import android.webkit.WebView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
+import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.platform.bridge.JavascriptBridge;
 import com.bsb.hike.productpopup.ProductPopupsConstants.PopUpAction;
 import com.bsb.hike.service.HikeService;
@@ -127,6 +128,7 @@ public class ProductJavaScriptBridge extends JavascriptBridge
 		if (mHikeDialogFragment != null && mHikeDialogFragment.get() != null)
 		{
 			 mHikeDialogFragment.get().dismiss();
+			 HikeAlarmManager.cancelAlarm(mHikeDialogFragment.get().getActivity(), HikeAlarmManager.REQUESTCODE_PRODUCT_POPUP);
 		}
 
 	}

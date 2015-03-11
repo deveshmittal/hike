@@ -109,7 +109,7 @@ public class IntentManager
 		}
 		catch (android.content.ActivityNotFoundException ex)
 		{
-			Toast.makeText(context.getApplicationContext(), "Could not find WatsApp in System", Toast.LENGTH_SHORT).show();
+			Toast.makeText(context.getApplicationContext(), "Could not find WhatsApp in System", Toast.LENGTH_SHORT).show();
 		}
 	}
 

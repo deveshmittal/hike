@@ -111,13 +111,7 @@ public class HikeDialogFragment extends DialogFragment
 	public void showDialog(FragmentManager supportFragmentManager)
 	{
 		FragmentTransaction ft = supportFragmentManager.beginTransaction();
-		Fragment prev = supportFragmentManager.findFragmentByTag("dialog");
-		if (prev != null)
-		{
-			supportFragmentManager.beginTransaction().remove(prev);
-		}
-		ft.addToBackStack(null);
-
+		
 		show(ft, "dialog");
 
 	}

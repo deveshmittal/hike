@@ -507,6 +507,10 @@ public abstract class JavascriptBridge
 					Utils.launchPlayStore(url, context);
 				}
 			}
+			if (activityName.equals(HIKESCREEN.HELP.toString()))
+			{
+				IntentManager.openSettingHelp(context);
+			}
 		}
 		catch (JSONException e)
 		{
