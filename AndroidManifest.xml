@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="1117"
-    android:versionName="3.7.9.0.SessionMQTT" >
+    android:versionCode="1118"
+    android:versionName="3.8.0.52" >
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="17" />
