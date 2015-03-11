@@ -985,7 +985,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				name="You: ";
 			}else{
 				if(mConversation instanceof GroupConversation){
-				name = ((GroupConversation) mConversation).getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()) + ": ";
+				name = ((GroupConversation) mConversation).getGroupParticipantFirstNameAndSurname(impMessage.getGroupParticipantMsisdn()) + ": ";
 				}
 			}
 		
@@ -5236,7 +5236,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		ImageView overlayImg = (ImageView) mOverlayLayout.findViewById(R.id.overlay_image);
 
 		mComposeView.setEnabled(false);
-		String label = mConversation instanceof GroupConversation ? ((GroupConversation) mConversation).getGroupParticipantFirstName(getMsisdnMainUser()) : mLabel;
+		String label = mConversation instanceof GroupConversation ? ((GroupConversation) mConversation).getGroupParticipantFirstNameAndSurname(getMsisdnMainUser()) : mLabel;
 		String formatString;
 		if (blockOverlay)
 		{
