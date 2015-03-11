@@ -114,7 +114,7 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 
 	public void getMeasure()
 	{
-		if (mBitmap == null)
+		if (mBitmap == null && paths.size()>0)
 		{
 			DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
 	        int width = metrics.widthPixels;
