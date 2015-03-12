@@ -349,7 +349,7 @@ public class ProductInfoManager
 			{
 				url = url.replace("$reward_token", mmHikeSharedPreferenceUtil.getData(HikeMessengerApp.REWARDS_TOKEN, ""));
 				url = url.replace("$msisdn", mmHikeSharedPreferenceUtil.getData(HikeMessengerApp.MSISDN_SETTING, ""));
-				url = url.replace("$uid", mmHikeSharedPreferenceUtil.getData(HikeMessengerApp.TOKEN_SETTING, ""));
+				url = url.replace("$uid", mmHikeSharedPreferenceUtil.getData(HikeMessengerApp.UID_SETTING, ""));
 				url = url.replace("$invite_token", mmHikeSharedPreferenceUtil.getData(HikeConstants.INVITE_TOKEN, ""));
 			}
 			return url;
