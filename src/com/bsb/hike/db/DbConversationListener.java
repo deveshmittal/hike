@@ -28,6 +28,7 @@ import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
@@ -111,6 +112,10 @@ public class DbConversationListener implements Listener
 					if (convMessage.isSent())
 					{
 						uploadFiksuPerDayMessageEvent();
+					}
+					if (convMessage.isBroadcastConversation())
+					{
+						Utils.addBroadcastRecipientConversations(convMessage);
 					}
 				}
 				// Recency was already updated when the ft message was added.
@@ -418,7 +423,7 @@ public class DbConversationListener implements Listener
 			Pair<String, Long> p = (Pair<String, Long>) object;
 			String msisdn = p.first;
 			long timestamp = p.second;
-			boolean isUpdated = mConversationDb.updateTimestamp(msisdn, timestamp);
+			boolean isUpdated = mConversationDb.updateSortingTimestamp(msisdn, timestamp);
 		}
 	}
 
@@ -618,5 +623,5 @@ public class DbConversationListener implements Listener
 
 		context.getContentResolver().insert(HikeConstants.SMSNative.SENTBOX_CONTENT_URI, values);
 	}
-
+	
 }

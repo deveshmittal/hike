@@ -18,6 +18,7 @@ import java.util.Iterator;
 import org.apache.http.conn.ConnectTimeoutException;
 
 import com.bsb.hike.modules.httpmgr.DefaultHeaders;
+import com.bsb.hike.modules.httpmgr.Utils;
 import com.bsb.hike.modules.httpmgr.client.IClient;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
 import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
@@ -47,6 +48,8 @@ public class RequestExecuter
 	private IResponseListener listener;
 
 	private Response response;
+	
+	private boolean allInterceptorsExecuted;
 
 	public RequestExecuter(IClient client, HttpEngine engine, Request<?> request, IResponseListener listener)
 	{
@@ -66,6 +69,21 @@ public class RequestExecuter
 		Iterator<IRequestInterceptor> iterator = requestFacade.getRequestInterceptors().iterator();
 		RequestInterceptorChain chain = new RequestInterceptorChain(iterator, requestFacade);
 		chain.proceed();
+		/**
+		 * This is to handle the case in which one of interceptor in the pipeline do not chain.proceed() then we have to clear request and response objects and also remove this
+		 * request from map
+		 */
+		if (!allInterceptorsExecuted)
+		{
+			Utils.finish(request, response);
+		}
+		else
+		{
+			if (RequestProcessor.isRequestDuplicateAfterInterceptorsProcessing(request))
+			{
+				return;
+			}
+		}
 	}
 
 	/**
@@ -110,16 +128,19 @@ public class RequestExecuter
 		{
 			preProcess();
 		}
-		try
+		else
 		{
-			LogFull.d("retrying " + request.toString() + "sleeping for delay : " + delay);
-			Thread.sleep(delay);
-			processRequest();
-		}
-		catch (InterruptedException e)
-		{
-			LogFull.e(e, "excetion : ");
-			e.printStackTrace();
+			try
+			{
+				LogFull.d("retrying " + request.toString() + "sleeping for delay : " + delay);
+				Thread.sleep(delay);
+				processRequest();
+			}
+			catch (InterruptedException e)
+			{
+				LogFull.e(e, "excetion : ");
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -142,7 +163,10 @@ public class RequestExecuter
 					{
 						preProcess();
 					}
-					processRequest();
+					else
+					{
+						processRequest();
+					}
 				}
 				finally
 				{
@@ -319,6 +343,8 @@ public class RequestExecuter
 			else
 			{
 				LogFull.d("Pre-processing completed for " + request.toString());
+				allInterceptorsExecuted = true;
+				processRequest();
 			}
 		}
 	}

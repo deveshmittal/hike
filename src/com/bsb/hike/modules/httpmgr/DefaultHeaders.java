@@ -19,7 +19,6 @@ public final class DefaultHeaders
 		List<Header> headers = new ArrayList<Header>(2);
 
 		if (AccountUtils.appVersion != null && !Utils.containsHeader(request.getHeaders(), "User-Agent"))
-			;
 		{
 			headers.add(new Header("User-Agent", "android-" + AccountUtils.appVersion));
 		}

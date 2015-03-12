@@ -163,14 +163,17 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
@@ -755,6 +758,11 @@ public class Utils
 	{
 		return msisdn!=null && !msisdn.startsWith("+");
 	}
+	
+	public static boolean isBroadcastConversation(String msisdn)
+	{
+		return msisdn!=null && msisdn.startsWith("b:");
+	}
 
 	public static String validateBotMsisdn(String msisdn){
 		if (!msisdn.startsWith("+")){
@@ -792,12 +800,12 @@ public class Utils
 	public static String getGroupJoinHighlightText(JSONArray participantInfoArray, GroupConversation conversation)
 	{
 		JSONObject participant = (JSONObject) participantInfoArray.opt(0);
-		String highlight = ((GroupConversation) conversation).getGroupParticipantFirstName(participant.optString(HikeConstants.MSISDN));
+		String highlight = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participant.optString(HikeConstants.MSISDN));
 
 		if (participantInfoArray.length() == 2)
 		{
 			JSONObject participant2 = (JSONObject) participantInfoArray.opt(1);
-			String name2 = ((GroupConversation) conversation).getGroupParticipantFirstName(participant2.optString(HikeConstants.MSISDN));
+			String name2 = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participant2.optString(HikeConstants.MSISDN));
 
 			highlight += " and " + name2;
 		}
@@ -922,10 +930,12 @@ public class Utils
 		Utils.densityMultiplier = displayMetrics.density;
 	}
 
-	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
+	public static CharSequence getFormattedParticipantInfo(String info, String textToHighlight)
 	{
+		if(!info.contains(textToHighlight))
+			return info;
 		SpannableStringBuilder ssb = new SpannableStringBuilder(info);
-		ssb.setSpan(new StyleSpan(Typeface.BOLD), info.indexOf(textToHighight), info.indexOf(textToHighight) + textToHighight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		ssb.setSpan(new StyleSpan(Typeface.BOLD), info.indexOf(textToHighlight), info.indexOf(textToHighlight) + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return ssb;
 	}
 
@@ -1076,23 +1086,12 @@ public class Utils
 
 	public static boolean isUserOnline(Context context)
 	{
-		try
+		if(getActiveNetInfo() != null)
 		{
-			if (context == null)
-			{
-				Logger.e("HikeService", "Hike service is null!!");
-				return false;
-			}
-			ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-			return (cm != null && cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected());
+			return true;
 		}
-		catch (NullPointerException e)
-		{
-			/*
-			 * We were seeing NPEs on the console in this method. Added this since could not find any reason why we would get an NPE here.
-			 */
-			return false;
-		}
+		
+		return false;
 	}
 
 	/**
@@ -2280,14 +2279,16 @@ public class Utils
 		{
 			return false;
 		}
-		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		try
+	
+		NetworkInfo netInfo = getActiveNetInfo();
+		
+		
+		if(netInfo != null && (netInfo.getType() == ConnectivityManager.TYPE_WIFI)) // there is active wifi network
 		{
-			return (cm != null && cm.getActiveNetworkInfo() != null && (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI));
+			return true;
 		}
-		catch (NullPointerException e)
+		else // either there is no active network or current network is not wifi
 		{
-			// TODO Auto-generated catch block
 			return false;
 		}
 	}
@@ -2681,7 +2682,10 @@ public class Utils
 		}
 	}
 
-	public static void saveBase64StringToFile(File file, String base64String) throws IOException
+	/*
+	 * returns a decoded byteArray of input base64String. 
+	 */
+	public static byte[] saveBase64StringToFile(File file, String base64String) throws IOException
 	{
 		FileOutputStream fos = new FileOutputStream(file);
 
@@ -2694,6 +2698,7 @@ public class Utils
 		fos.flush();
 		fos.getFD().sync();
 		fos.close();
+		return b;
 	}
 
 	public static void setupFormattedTime(TextView tv, long timeElapsed)
@@ -2794,7 +2799,8 @@ public class Utils
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
 				if(toLog)
 				{
-					HAManager.getInstance().recordSessionStart();
+					JSONObject sessionDataObject = HAManager.getInstance().recordAndReturnSessionStart();
+					sendSessionMQTTPacket(context, HikeConstants.FOREGROUND, sessionDataObject);
 				}
 			}
 			else if (!dueToConnect)
@@ -2803,7 +2809,8 @@ public class Utils
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_BACKGROUNDED, null);
 				if(toLog)
 				{
-					HAManager.getInstance().recordSessionEnd();
+					JSONObject sessionDataObject = HAManager.getInstance().recordAndReturnSessionEnd();
+					sendSessionMQTTPacket(context, HikeConstants.BACKGROUND, sessionDataObject);
 				}
 			}
 			else
@@ -2818,6 +2825,35 @@ public class Utils
 		}
 	}
 
+	/**
+	 * Sends Session fg/bg Packet With MQTT_QOS_ONE
+	 * @param context
+	 * @param subType
+	 * @param sessionMetaDataObject
+	 */
+	public static void sendSessionMQTTPacket(Context context, String subType, JSONObject sessionMetaDataObject)
+	{
+		JSONObject sessionObject = new JSONObject();
+		JSONObject data = new JSONObject();
+		try
+		{
+			sessionObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.SESSION);
+			sessionObject.put(HikeConstants.SUB_TYPE, subType);
+			
+			data.put(AnalyticsConstants.EVENT_TYPE, AnalyticsConstants.SESSION_EVENT);				
+			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, Utils.applyServerTimeOffset(context, System.currentTimeMillis()));
+			data.put(AnalyticsConstants.METADATA, sessionMetaDataObject);
+			
+			sessionObject.put(HikeConstants.DATA, data);
+			HikeMqttManagerNew.getInstance().sendMessage(sessionObject, HikeMqttManagerNew.MQTT_QOS_ONE);
+			Logger.d("sessionmqtt", "Sesnding Session MQTT Packet with qos 1, and : "+ subType);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	private static void resetStealthMode(Context context)
 	{
 		StealthResetTimer.getInstance(context).resetStealthToggle();
@@ -3936,7 +3972,8 @@ public class Utils
 			}
 			else
 			{
-				iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+				iconDrawable = context.getResources().getDrawable(Utils.isBroadcastConversation(msisdn)? R.drawable.ic_default_avatar_broadcast : 
+					(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar));
 			}
 			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
 		}
@@ -4943,6 +4980,7 @@ public class Utils
 	/**
 	 * Fetches the network connection using connectivity manager
 	 * @param context
+	 * @param info -- the network info for which you want to get network type. if null is passed it will give info about active network info
 	 * @return
 	 * <li>-1 in case of no network</li>
 	 * <li> 0 in case of unknown network</li>
@@ -4954,10 +4992,19 @@ public class Utils
 	 */
 	public static short getNetworkType(Context context)
 	{
+		return getNetworkType(context, null);
+	}
+	
+	public static short getNetworkType(Context context, NetworkInfo info)
+	{
 		int networkType = -1;
-		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		
 		// Contains all the information about current connection
-		NetworkInfo info = cm.getActiveNetworkInfo();
+		if(null == info)
+		{
+			info = getActiveNetInfo();
+		}
+		
 		if (info != null)
 		{
 			if (!info.isConnected())
@@ -5302,5 +5349,119 @@ public class Utils
 			}
 		}
 		return false;
+	}
+	
+	public static boolean isOkHttp()
+	{
+		return HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.TOGGLE_OK_HTTP, true);
+	}
+
+	/**
+	 * Returns active network info
+	 * @return
+	 */
+	public static NetworkInfo getActiveNetInfo()
+	{
+		/*
+		 * We've seen NPEs in this method on the dev console but have not been able to figure out the reason so putting this in a try catch block.
+		 */
+		NetworkInfo info = null;
+		try
+		{
+			ConnectivityManager cm = (ConnectivityManager) HikeMessengerApp.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
+			
+			if(cm != null && cm.getActiveNetworkInfo() != null && (cm.getActiveNetworkInfo().isAvailable() || cm.getActiveNetworkInfo().isConnectedOrConnecting()))
+			{
+				info = cm.getActiveNetworkInfo();
+			}
+			return info;
+		}
+		catch (NullPointerException e)
+		{
+			Logger.e("Utils", "Exception :", e);
+		}
+		return null;
+	}
+	
+	public static String getParticipantAddedMessage(ConvMessage convMessage, Context context, String highlight)
+	{
+		String participantAddedMessage;
+		MessageMetadata metadata = convMessage.getMetadata();
+		if (convMessage.isBroadcastConversation())
+		{
+			if (metadata.isNewBroadcast())
+			{
+				participantAddedMessage = String.format(context.getString(R.string.new_broadcast_message), highlight);
+			}
+			else
+			{
+				participantAddedMessage = String.format(context.getString(R.string.add_to_broadcast_message), highlight);
+			}
+		}
+		else
+		{
+			if (metadata.isNewGroup())
+			{
+				participantAddedMessage = String.format(context.getString(R.string.new_group_message), highlight);
+			}
+			else
+			{
+				participantAddedMessage = String.format(context.getString(R.string.add_to_group_message), highlight);
+			}
+		}
+		return participantAddedMessage;
+	}
+	
+	public static String valuesToCommaSepratedString(ArrayList<Long> entries)
+	{
+		StringBuilder result = new StringBuilder("(");
+		for (Long entry : entries)
+		{
+			result.append(DatabaseUtils.sqlEscapeString(String.valueOf(entry)) + ",");
+		}
+		int idx = result.lastIndexOf(",");
+		if (idx >= 0)
+		{
+			result.replace(idx, result.length(), ")");
+		}
+		return result.toString();
+	}
+	
+	public static void addBroadcastRecipientConversations(ConvMessage convMessage)
+	{
+		
+		ArrayList<ContactInfo> contacts = HikeConversationsDatabase.getInstance().addBroadcastRecipientConversations(convMessage);
+		
+		sendPubSubForConvScreenBroadcastMessage(convMessage, contacts);
+        // publishing mqtt packet
+        HikeMqttManagerNew.getInstance().sendMessage(convMessage.serializeDeliveryReportRead(), HikeMqttManagerNew.MQTT_QOS_ONE);
+	}
+	
+
+	public static void sendPubSubForConvScreenBroadcastMessage(ConvMessage convMessage, ArrayList<ContactInfo> recipient)
+	{
+		long firstMsgId = convMessage.getMsgID() + 1;
+		int totalRecipient = recipient.size();
+		List<Pair<ContactInfo, ConvMessage>> allPairs = new ArrayList<Pair<ContactInfo,ConvMessage>>(totalRecipient);
+		long timestamp = System.currentTimeMillis()/1000;
+		for(int i=0;i<totalRecipient;i++)
+		{
+			ConvMessage message = new ConvMessage(convMessage);
+			if(convMessage.isBroadcastConversation())
+			{
+				message.setMessageOriginType(OriginType.BROADCAST);
+			}
+			else
+			{
+				//multi-forward case... in braodcast case we donot need to update timestamp
+				message.setTimestamp(timestamp++);
+			}
+			message.setMsgID(firstMsgId+i);
+			ContactInfo contactInfo = recipient.get(i);
+			message.setMsisdn(contactInfo.getMsisdn());
+			Pair<ContactInfo, ConvMessage> pair = new Pair<ContactInfo, ConvMessage>(contactInfo, message);
+			allPairs.add(pair);
+		}
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_DB_INSERTED, allPairs);
 	}
 }
