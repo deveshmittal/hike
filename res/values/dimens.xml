@@ -177,6 +177,7 @@
 	<dimen name="photos_doodle_size_bar_height">66dp</dimen>
 	<dimen name="photos_doodle_color_bar_height">70dp</dimen>
 	<dimen name="photos_filter_preview_font_size">12sp</dimen>
+	<dimen name="photos_filter_selector_size">2dp</dimen>
 	<dimen name="photos_doodle_preview_width">75dp</dimen>
 	<dimen name="photos_doodle_preview_padding">16dp</dimen>
 	<dimen name="photos_action_bar_left_right_padding">16dp</dimen>

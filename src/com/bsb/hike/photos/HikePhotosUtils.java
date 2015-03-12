@@ -73,6 +73,8 @@ public class HikePhotosUtils
 
 		return pixels;
 	}
+	
+	
 
 	/**
 	 * Utility class for Filters
