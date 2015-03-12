@@ -91,7 +91,7 @@ public class ShareUtils
 		}
 		
 	}
-
+//will give the scale ratio based on the screen width and screen height
 	private static float scaleRatio(int imgWidth, int imgHeight)
 	{
 		float sRatio;
