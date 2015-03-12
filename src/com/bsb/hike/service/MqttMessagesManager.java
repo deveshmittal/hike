@@ -571,7 +571,15 @@ public class MqttMessagesManager
 			}
 		});
 
-		new PlatformZipDownloader(rqst, false).downloadAndUnzip();
+		PlatformZipDownloader downloader = new PlatformZipDownloader(rqst, false);
+		if (!downloader.isMicroAppExist())
+		{
+			downloader.downloadAndUnzip();
+		}
+		else
+		{
+			saveMessage(convMessage);
+		}
 	}
 
 	private void saveMessageBulk(JSONObject jsonObj) throws JSONException
@@ -2079,7 +2087,8 @@ public class MqttMessagesManager
 						HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
 						if(data.optBoolean(HikeConstants.REARRANGE_CHAT,false))
 						{
-							HikeMessengerApp.getPubSub().publish(HikePubSub.CONVERSATION_TS_UPDATED, System.currentTimeMillis() / 1000);
+							Pair<String, Long> pair = new Pair<String, Long>(destination, System.currentTimeMillis() / 1000);
+							HikeMessengerApp.getPubSub().publish(HikePubSub.CONVERSATION_TS_UPDATED, pair);
 						}
 					}
 				}
