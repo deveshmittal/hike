@@ -53,7 +53,8 @@
 					android:layout_marginLeft="10dp"
 					android:layout_alignParentRight="true"
 					android:layout_alignBottom="@id/contact_msisdn"
-					android:textColor="@color/white" />
+					android:textColor="@color/white"
+					android:visibility="invisible" />
 	      </RelativeLayout>
 
 		<com.bsb.hike.ui.utils.RecyclingImageView
