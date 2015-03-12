@@ -2073,6 +2073,8 @@ public class HikeConstants
 
 		public static final String VOIP_MSG_TYPE_MISSED_CALL_OUTGOING = "vmco";
 		
+		public static final String PRODUCT_POPUP="productpopup";
+		
 		public static final String SESSION = "sess";
 	}
 	
@@ -2380,7 +2382,9 @@ public class HikeConstants
 	public static final String MESSAGE_PROCESS_TIME = "mpt";
 
 	public static int DEFAULT_AVATARS[] = {R.drawable.avatar_01, R.drawable.avatar_02, R.drawable.avatar_03, R.drawable.avatar_04, R.drawable.avatar_05};
+
 	public static String DEFAULT_AVATAR_KEYS[] = {"avatar_01","avatar_02", "avatar_03", "avatar_04", "avatar_05"};
+	
 	public static String IS_GROUP = "isGroup";
 
 	public static final String CAM_IMG_PREFIX = "CAM_";

@@ -43,6 +43,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
+import com.bsb.hike.db.HikeContentDatabase;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
@@ -67,6 +68,10 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.notifications.HikeNotificationUtils;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.platform.content.PlatformContentListener;
 import com.bsb.hike.platform.content.PlatformContentModel;
@@ -93,6 +98,7 @@ import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPUtils;
 import com.bsb.hike.voip.view.VoIPActivity;
+import com.google.gson.JsonObject;
 
 /**
  * 
@@ -2682,6 +2688,19 @@ public class MqttMessagesManager
 		}else if (HikeConstants.MqttMessageTypes.PACKET_ECHO.equals(type))
 		{
 			handlePacketEcho(jsonObj);
+		}
+		else if(HikeConstants.MqttMessageTypes.PRODUCT_POPUP.equals(type))
+		{
+			if(jsonObj.has(HikeConstants.DATA))
+			{
+				JSONObject mmData=jsonObj.getJSONObject(HikeConstants.DATA);
+				
+				if (mmData.has(HikeConstants.METADATA))
+				{
+					JSONObject mmMetaData = mmData.getJSONObject(HikeConstants.METADATA);
+					ProductInfoManager.getInstance().parsePopupPacket(mmMetaData);
+				}
+			}
 		}
 
 	}

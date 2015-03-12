@@ -1284,4 +1284,12 @@ public class HikeNotification
 	{
 		HikeAlarmManager.cancelAlarm(context, HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION);
 	}
+	
+	public  void notifyUserAndOpenHomeActivity(String text, String title, boolean shouldNotPlaySound)
+	{
+		Drawable drawable =context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		Intent intent=Utils.getHomeActivityIntent(context);
+		HikeNotification.getInstance(context).showBigTextStyleNotification(intent, 0, System.currentTimeMillis(), HikeNotification.HIKE_SUMMARY_NOTIFICATION_ID, title, text,
+				title, "", null, drawable, shouldNotPlaySound, 0);
+	}
 }

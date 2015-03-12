@@ -23,6 +23,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -66,6 +67,13 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.providers.HikeProvider;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
@@ -143,8 +151,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private ConversationFragment mainFragment;
 
-	private Handler mHandler = new Handler();
-
 	private SnowFallView snowFallView;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
@@ -201,7 +207,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 			initialiseHomeScreen(savedInstanceState);
 		}
-		
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());
 	}
 
 	private void setupActionBar()
@@ -411,6 +417,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			mainFragment.onNewintent(intent);
 		}
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());
 	}
 
 	@Override
@@ -1489,6 +1496,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					editor.commit();
 					updateOverFlowMenuNotification();
 					intent = IntentManager.getGamingIntent(HomeActivity.this);
+					
 					break;
 				case HikeConstants.HOME_ACTIVITY_OVERFLOW.REWARDS:
 					editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true);
@@ -1786,7 +1794,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}, delayTime);
 	}
 
-	private void hikeLogoClicked()
+	public void hikeLogoClicked()
 	{
 		if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
 		{

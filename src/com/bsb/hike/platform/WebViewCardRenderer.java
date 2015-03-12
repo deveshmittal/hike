@@ -47,7 +47,7 @@ import com.bsb.hike.platform.content.PlatformContent.EventCode;
 import com.bsb.hike.platform.content.PlatformContentListener;
 import com.bsb.hike.platform.content.PlatformContentModel;
 import com.bsb.hike.platform.content.PlatformRequestManager;
-import com.bsb.hike.platform.content.PlatformWebClient;
+import com.bsb.hike.platform.content.HikeWebClient;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -372,7 +372,7 @@ public class WebViewCardRenderer extends BaseAdapter implements Listener
 		holder.customWebView.loadDataWithBaseURL("", content.getFormedData(), "text/html", "UTF-8", "");
 	}
 
-	private class CustomWebViewClient extends PlatformWebClient
+	private class CustomWebViewClient extends HikeWebClient
 	{
 
 		ConvMessage convMessage;

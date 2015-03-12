@@ -16,7 +16,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import com.bsb.hike.utils.Logger;
 
-public class PlatformWebClient extends WebViewClient
+public class HikeWebClient extends WebViewClient
 {
 
 	@SuppressLint("NewApi")
