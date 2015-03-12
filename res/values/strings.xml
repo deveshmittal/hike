@@ -1348,7 +1348,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="valentine_day">Happy Valentine\'s Day</string>
     <string name="terms_conditions_hint">Terms and Conditions</string>
 	<string name="terms_conditions_title">T &amp; C</string>
-	<string name="home_search_empty_text">Your search \'%1$s\' did not match any contacts.</string>
+	<string name="home_search_empty_text">Your search for \'%1$s\' did not match any contacts.</string>
     <string name="voip_phone_unsupported">Your phone is not supported.</string>
     <string name="voip_unable_to_connect_call">Unable to connect your call</string>
     <string name="voip_unable_to_connect_to_network">Unable to connect to network</string>
