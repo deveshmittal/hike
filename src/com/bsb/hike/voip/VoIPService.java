@@ -57,6 +57,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.service.HikeMqttManagerNew;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.voip.VoIPClient.ConnectionMethods;
 import com.bsb.hike.voip.VoIPConstants.CallQuality;
@@ -2464,10 +2465,8 @@ public class VoIPService extends Service {
 						// We are receiving a call. 
 						// VoIPService was started, and it established a connection. 
 						// Now show the activity so the user can answer / decline the call. 
-						Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
-						i.putExtra(VoIPConstants.Extras.INCOMING_CALL, true);
-						i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-						startActivity(i);
+						Intent intent = IntentManager.getVoipIncomingCallIntent(VoIPService.this);
+						startActivity(intent);
 						playIncomingCallRingtone();
 						// playOnSpeaker(R.raw.ringtone_incoming, true);
 					}

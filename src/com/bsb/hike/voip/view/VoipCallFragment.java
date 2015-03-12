@@ -702,7 +702,11 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			return;
 		}
 
-		callDuration = (Chronometer) getView().findViewById(R.id.call_duration);
+		if(callDuration == null)
+		{
+			callDuration = (Chronometer) getView().findViewById(R.id.call_duration);
+			callDuration.setVisibility(View.VISIBLE);
+		}
 
 		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
 		anim.setDuration(1000);
