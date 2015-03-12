@@ -80,19 +80,19 @@ public final class HikeEffectsFactory
 			mBitmapOut1 = mBitmapOut1.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
 			mBitmapOut2 = mBitmapOut2.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
 			currentOut = mBitmapOut1;
-			Log.e("com.bsb.hike","2 new bitmap created");
+			//Log.e("com.bsb.hike","2 new bitmap created");
 		}
 		else if(!isFinal && (currentOut != null && (currentOut.getHeight() == mBitmapIn.getHeight() || finalBitmap != null)) && !isThumbnail)
 		{
 			if(currentOut == mBitmapOut1)
 			{
 				currentOut = mBitmapOut2;
-				Log.e("com.bsb.hike","using out 2");
+				//Log.e("com.bsb.hike","using out 2");
 			}
 			else
 			{
 				currentOut = mBitmapOut1;
-				Log.e("com.bsb.hike","using out 1");
+				//Log.e("com.bsb.hike","using out 1");
 			}
 		}
 		else if(isFinal)
@@ -100,7 +100,7 @@ public final class HikeEffectsFactory
 			if(finalBitmap == null)
 			{
 				finalBitmap = finalBitmap.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
-				Log.e("com.bsb.hike","new final bitmap created");
+				//Log.e("com.bsb.hike","new final bitmap created");
 			}
 			currentOut = finalBitmap;
 		}
