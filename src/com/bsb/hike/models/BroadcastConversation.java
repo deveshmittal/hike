@@ -49,7 +49,7 @@ public class BroadcastConversation extends GroupConversation {
 		case 2:
 			return broadcastParticipants.get(0).getFirstName() + " and " + broadcastParticipants.get(1).getFirstName();
 		default:
-			return broadcastParticipants.get(0).getFirstName() + " and " + (broadcastParticipants.size() - 1) + " others";
+			return broadcastParticipants.get(0).getFirstName() + ", " + broadcastParticipants.get(1).getFirstName() + " and " + (broadcastParticipants.size() - 2) + " others";
 		}
 	}
 	
