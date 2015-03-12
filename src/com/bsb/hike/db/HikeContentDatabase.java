@@ -55,7 +55,7 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 	}
 	
 	private String[] getCreateQueries(){
-		String[] createAndIndexes = new String[3];
+		String[] createAndIndexes = new String[4];
 		int i=0;
 		// CREATE TABLE
 		//CONTENT TABLE -> _id,content_id,love_id,channel_id,timestamp,metadata
@@ -63,6 +63,7 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 				+ "("
 				+_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "
 				+ CONTENT_ID+" INTEGER UNIQUE, "
+				+ NAMESPACE + " TEXT, "
 				+ LOVE_ID+ " INTEGER, "
 				+CHANNEL_ID+" INTEGER, "
 				+HIKE_CONTENT.TIMESTAMP+" INTEGER, "
@@ -86,9 +87,11 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 		
 		// APP_ALARM TABLE - > id, data
 		String contentIndex = CREATE_INDEX + CONTENT_ID_INDEX + " ON "+CONTENT_TABLE +" ("+CONTENT_ID+")";
-		
+		String nameSpaceIndex = CREATE_INDEX + CONTENT_TABLE_NAMESPACE_INDEX + " ON " + CONTENT_TABLE + " (" + NAMESPACE + ")";
+
 		
 		createAndIndexes[i++] = contentIndex;
+		createAndIndexes[i++] = nameSpaceIndex;
 		// INDEX ENDS HERE
 		
 		return createAndIndexes;

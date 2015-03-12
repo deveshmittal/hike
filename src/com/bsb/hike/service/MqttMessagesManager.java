@@ -11,6 +11,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.bsb.hike.db.DBConstants;
+import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.platform.content.PlatformContentListener;
+import com.bsb.hike.platform.content.PlatformContentModel;
+import com.bsb.hike.platform.content.PlatformContentRequest;
+import com.bsb.hike.platform.content.PlatformZipDownloader;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +67,11 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.platform.content.PlatformContentListener;
+import com.bsb.hike.platform.content.PlatformContentModel;
+import com.bsb.hike.platform.content.PlatformContentRequest;
+import com.bsb.hike.platform.content.PlatformZipDownloader;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HomeActivity;
@@ -69,6 +81,7 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.FestivePopup;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
@@ -533,11 +546,24 @@ public class MqttMessagesManager
 
 	private void saveMessage(JSONObject jsonObj) throws JSONException
 	{
-		ConvMessage convMessage = messagePreProcess(jsonObj);
+		final ConvMessage convMessage = messagePreProcess(jsonObj);
 
-		/*
-		 * adding message in db if not duplicate. In case of duplicate message we don't do further processing and return
-		 */
+		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
+		{
+			downloadZipForPlatformMessage(convMessage);
+		}
+		else
+		{
+			saveMessage(convMessage);
+		}
+
+	}
+
+	private void saveMessage(ConvMessage convMessage)
+	{
+	/*
+	 * adding message in db if not duplicate. In case of duplicate message we don't do further processing and return
+	 */
 		if (!convDb.addConversationMessages(convMessage))
 		{
 			return;
@@ -573,7 +599,46 @@ public class MqttMessagesManager
 		}
 
 		removeTypingNotification(convMessage.getMsisdn(), convMessage.getGroupParticipantMsisdn());
+	}
 
+	private void downloadZipForPlatformMessage(final ConvMessage convMessage)
+	{
+		PlatformContentRequest rqst = PlatformContentRequest.make(
+				PlatformContentModel.make(convMessage.webMetadata.JSONtoString()), new PlatformContentListener<PlatformContentModel>()
+		{
+
+			@Override
+			public void onComplete(PlatformContentModel content)
+			{
+				saveMessage(convMessage);
+			}
+
+			@Override
+			public void onEventOccured(PlatformContent.EventCode event)
+			{
+				if (event == PlatformContent.EventCode.DOWNLOADING || event == PlatformContent.EventCode.LOADED)
+				{
+					//do nothing
+					return;
+				}
+
+				else
+				{
+					saveMessage(convMessage);
+					HikeAnalyticsEvent.cardErrorAnalytics(event, convMessage);
+				}
+			}
+		});
+
+		PlatformZipDownloader downloader = new PlatformZipDownloader(rqst, false);
+		if (!downloader.isMicroAppExist())
+		{
+			downloader.downloadAndUnzip();
+		}
+		else
+		{
+			saveMessage(convMessage);
+		}
 	}
 
 	private void saveMessageBulk(JSONObject jsonObj) throws JSONException
@@ -2168,10 +2233,12 @@ public class MqttMessagesManager
 				lastNotifPacket = hash;
 				String body = data.optString(HikeConstants.BODY);
 				String destination = data.optString("u");
-				
+				String contentId = data.optString(HikeConstants.CONTENT_ID);
+				String nameSpace = data.optString(DBConstants.HIKE_CONTENT.NAMESPACE);
 				if (data.optBoolean(HikeConstants.PUSH, true) && !TextUtils.isEmpty(destination) && !TextUtils.isEmpty(body))
 				{
-					if(!Utils.isConversationMuted(destination) && !ContactManager.getInstance().isBlocked(destination))
+					if (!Utils.isConversationMuted(destination) && !ContactManager.getInstance().isBlocked(destination)
+							&& HikeConversationsDatabase.getInstance().isContentMessageExist(destination, contentId, nameSpace))
 					{
 						Logger.i("mqttMessageManager", "Play Notification packet from Server " + data.toString());
 						// chat thread -- by default silent is true, so no sound
@@ -2179,6 +2246,11 @@ public class MqttMessagesManager
 
 						// open respective chat thread
 						HikeNotification.getInstance(context).notifyStringMessage(destination, body, silent);
+						if(data.optBoolean(HikeConstants.REARRANGE_CHAT,false))
+						{
+							Pair<String, Long> pair = new Pair<String, Long>(destination, System.currentTimeMillis() / 1000);
+							HikeMessengerApp.getPubSub().publish(HikePubSub.CONVERSATION_TS_UPDATED, pair);
+						}
 					}
 				}
 			}
