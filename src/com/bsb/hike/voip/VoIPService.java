@@ -42,9 +42,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.os.PowerManager.WakeLock;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.SparseIntArray;
@@ -160,6 +162,9 @@ public class VoIPService extends Service {
 	private int audiotrackFramesWritten = 0;
 	private VoIPDataPacket silentPacket;
 
+	// Wakelock
+	private WakeLock wakeLock = null;
+
 	private VoIPConstants.CallStatus currentCallStatus;
 
 	@Override
@@ -181,6 +186,7 @@ public class VoIPService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		Logger.d(VoIPConstants.TAG, "VoIPService onCreate()");
+		acquireWakeLock();
 		
 		clientPartner = new VoIPClient();
 		clientSelf = new VoIPClient();
@@ -426,7 +432,30 @@ public class VoIPService extends Service {
 		super.onDestroy();
 		stop();
 		dismissNotification();
+		releaseWakeLock();
 		Logger.d(VoIPConstants.TAG, "VoIP Service destroyed.");
+	}
+	
+	private void acquireWakeLock() 
+	{
+		if (wakeLock == null) {
+			PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+			wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "HikeWL");
+			wakeLock.setReferenceCounted(false);
+		}
+		
+		if (!wakeLock.isHeld()) {
+			wakeLock.acquire();
+			Logger.d(VoIPConstants.TAG, "Wakelock acquired.");
+		}
+	}
+
+	private void releaseWakeLock() 
+	{
+		if (wakeLock != null && wakeLock.isHeld()) {
+			wakeLock.release();
+			Logger.d(VoIPConstants.TAG, "Wakelock released.");
+		}
 	}
 	
 	private void startNotificationThread() {
