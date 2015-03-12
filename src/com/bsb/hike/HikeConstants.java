@@ -3,17 +3,12 @@ package com.bsb.hike;
 import android.net.Uri;
 import android.os.Environment;
 
+import com.bsb.hike.NUXConstants.PushTypeEnum;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 
 public class HikeConstants
 {
 	public static final String APP_PUSH_ID = "297726274089";
-
-	public static final String APP_FACEBOOK_ID = "425850510764995";
-
-	public static final String APP_TWITTER_ID = "7LFaGIe5QXj05WN1YDDVaA";
-
-	public static final String APP_TWITTER_SECRET = "LhgJVQ9eAmbb3EGdXpLD8B4RHf9SGPrzSqaOjuKL5o4";
 
 	public static final String MAP_API_KEY_DEBUG = "0Luu6V6IYSC0UpLSUZe7oO-bvd392OgrXSnY8aA";
 
@@ -126,6 +121,8 @@ public class HikeConstants
 	public static final String CREDITS = "credits";
 
 	public static final String ON_HIKE = "onhike";
+	
+	public static final String IS_BROADCAST = "isBroadcast";
 
 	public static final String DND = "dnd";
 
@@ -172,6 +169,8 @@ public class HikeConstants
 	public static final String GAMES_TOKEN = "games_token";
 
 	public static final String SHOW_GAMES = "show_games";
+	
+	public static final String SHOW_BROADCAST = "show_broadcast";
 
 	public static final String GAMES = "games";
 
@@ -215,7 +214,7 @@ public class HikeConstants
 
 	public static final String FACEBOOK_STATUS = "fb";
 
-	public static final String TWITTER_STATUS = "twitter";
+	//public static final String TWITTER_STATUS = "twitter";
 
 	public static final String TIME_OF_DAY = "timeofday";
 
@@ -278,6 +277,8 @@ public class HikeConstants
 	public static final String OK = "ok";
 	
 	public static final String FAIL = "fail";
+	
+	public static final String OK_HTTP = "okhttp";
 
 	public static final String REACHED_STICKER_END = "st";
 
@@ -509,9 +510,9 @@ public class HikeConstants
 
 	public static final String DELETE_PREF = "deleteAccount";
 
-	public static final String UNLINK_FB = "unlinkFacebook";
+	//public static final String UNLINK_FB = "unlinkFacebook";
 
-	public static final String UNLINK_TWITTER = "unlinkTwitter";
+	//public static final String UNLINK_TWITTER = "unlinkTwitter";
 
 	public static final String BLOKED_LIST_PREF = "blockedList";
 
@@ -529,8 +530,6 @@ public class HikeConstants
 	
 	public static final String H2O_NOTIF_BOOLEAN_PREF = "hikeOfflineNotificationPref";
 
-	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
-	
 	public static final String UPGRADING = "upgrading";
 
 	public static final String UPGRADE_MSG_HASH_GROUP_READBY = "upgradeMsgHashGroupReadby";
@@ -556,8 +555,12 @@ public class HikeConstants
 	public static final String IS_HOME_OVERFLOW_CLICKED = "isHomeOverflowClicked";
 
 	public static final String SHOW_RECENTLY_JOINED_DOT = "showRecentlyJoinedDot";
+	
+	public static final String SHOW_RECENTLY_JOINED = "showRecentlyJoined";
 
 	public static final String SHOW_TIMELINE_RED_DOT = "showTimelineRedDot";
+	
+	public static final String SHOW_NEW_BROADCAST_RED_DOT = "showBroadcastRedDot";
 	
 	public static final String IS_OF_ICON_CLICKED = "isOfIconClicked";
 
@@ -583,6 +586,8 @@ public class HikeConstants
 
 	public static final String NEW_GROUP = "new_group";
 	
+	public static final String NEW_BROADCAST = "new_broadcast";
+
 	public static final String AVATAR = "avatar";
 
 	/* Constant used to name the preference file which saves the drafts */
@@ -653,6 +658,8 @@ public class HikeConstants
 	public static final int MAX_CHAR_IN_NAME = 20;
 
 	public static final int MAX_CONTACTS_IN_GROUP = 100;
+
+	public static final int MAX_CONTACTS_IN_BROADCAST = 500;
 
 	public static final int MAX_SMS_CONTACTS_IN_GROUP = MAX_CONTACTS_IN_GROUP;
 
@@ -728,16 +735,16 @@ public class HikeConstants
 	// Fiksu Usernames
 	public static final String FACEBOOK = "facebook";
 
-	public static final String TWITTER = "twitter";
+	//public static final String TWITTER = "twitter";
 
 	public static final String INVITE = "invite";
 
 	public static final String FIRST_MESSAGE = "first_message";
 
 	// Fiksu Prices
-	public static final int FACEBOOK_CONNECT = 100;
+	//public static final int FACEBOOK_CONNECT = 100;
 
-	public static final int TWITTER_CONNECT = 100;
+	//public static final int TWITTER_CONNECT = 100;
 
 	public static final int INVITE_SENT = 50;
 
@@ -884,9 +891,9 @@ public class HikeConstants
 
 	public static final int MAX_PRECHECKED_CONTACTS = 15;
 
-	public static final int MAX_TWITTER_POST_LENGTH = 140;
+	//public static final int MAX_TWITTER_POST_LENGTH = 140;
 
-	public static final int MAX_MOOD_TWITTER_POST_LENGTH = 130;
+	//public static final int MAX_MOOD_TWITTER_POST_LENGTH = 130;
 
 	public static final int MAX_NUM_STICKER_REQUEST = 10;
 
@@ -1059,6 +1066,8 @@ public class HikeConstants
 		public static final String PREV_MSISDN = "prevMsisdn";
 
 		public static final String PREV_NAME = "prevName";
+		
+		public static final String BROADCAST_RECIPIENTS = "broadcastRecipients";
 
 		public static final String INVITE = "invite";
 
@@ -1127,9 +1136,13 @@ public class HikeConstants
 
 		public static final String GROUP_CHAT = "groupChat";
 
+		public static final String BROADCAST_LIST = "broadcastList";
+
 		public static final String EMOTICON_SHOWING = "emoticonShowing";
 
 		public static final String EXISTING_GROUP_CHAT = "existingGroupChat";
+
+		public static final String EXISTING_BROADCAST_LIST = "existingBroadcastList";
 
 		public static final String LEAVE_GROUP_CHAT = "leaveGroupChat";
 
@@ -1253,7 +1266,7 @@ public class HikeConstants
 
 		public static final String SHOW_FRIENDS_TUTORIAL = "showFriendsTutorial";
 
-		public static final String POST_TO_TWITTER = "postToTwitter";
+		//public static final String POST_TO_TWITTER = "postToTwitter";
 
 		public static final String RECORDING_TIME = "recordingTime";
 
@@ -1274,6 +1287,12 @@ public class HikeConstants
 		public static final String EMOTICON_TYPE = "emoticonType";
 
 		public static final String CREATE_GROUP = "createGroup";
+		
+		public static final String CREATE_BROADCAST = "createBroadcast";
+		
+		public static final String COMPOSE_MODE = "composeMode";
+
+		public static final int CREATE_BROADCAST_MODE = 7;
 
 		public static final String FROM_CREDITS_SCREEN = "fromCreditsScreen";
 
@@ -1331,7 +1350,7 @@ public class HikeConstants
 
 		public static final String GROUP_NAME = "groupName";
 
-		public static final String GROUP_ID = "groupId";
+		public static final String GROUP_BROADCAST_ID = "groupOrBroadcastId";
 
 		public static final String SHOWING_INVALID_PIN_ERROR = "showingInvalidPinError";
 
@@ -1396,6 +1415,10 @@ public class HikeConstants
 		public static final String GENERAL_SO_TIMEOUT = "sto";
 
 		public static final String FT_UPLOAD_SO_TIMEOUT = "ftsto";
+		
+		public static final String MAX_MESSAGE_PROCESS_TIME = "mmpt";
+		
+		public static final String CHANGE_MAX_MESSAGE_PROCESS_TIME = "cmpt";
 	}
 
 	public static final class LogEvent
@@ -1867,7 +1890,16 @@ public class HikeConstants
 		
 		public static final String NUX_FOOTER_NOR_COM="nuxN2C";
 		
-		public static final String NUX_EXPANDED_COM="nuxE2C";		
+		public static final String NUX_EXPANDED_COM="nuxE2C";
+		
+		//Broadcast
+		public static final String NEW_BROADCAST_VIA_OVERFLOW = "nbcOf";
+		
+		public static final String BROADCAST_NEXT_MULTI_CONTACT = "bcnxt";
+		
+		public static final String BROADCAST_DONE = "bcdn";
+		
+		public static final String BROADCAST_SELECT_ALL_NEXT = "bcAll";
 	}
 
 	public static final class MqttMessageTypes
@@ -2040,6 +2072,8 @@ public class HikeConstants
 		public static final String VOIP_MSG_TYPE_MISSED_CALL_INCOMING = "vmci";
 
 		public static final String VOIP_MSG_TYPE_MISSED_CALL_OUTGOING = "vmco";
+		
+		public static final String SESSION = "sess";
 	}
 	
 	public static final class SMSNative
@@ -2141,6 +2175,32 @@ public class HikeConstants
 		
 		public static final String IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_SMALL;
 	}
+	
+	public static final class PushType
+	{
+		
+		public static final int loud = 2;
+		
+		public static final int silent = 1;
+		
+		public static final int none = 0;
+		
+	}
+	
+	public static final class UserJoinMsg
+	{
+		
+		public static final String NOTIF_TITLE = "Ttl";
+		
+		public static final String NOTIF_TEXT = "Txt";
+		
+		public static final String PUSH_SETTING = "Typ";
+		
+		public static final String PERSIST_CHAT = "Cht";
+		
+		public static final boolean defaultPersistChat = false;
+		
+	}
 
 	public static class MESSAGE_TYPE
 	{
@@ -2155,6 +2215,29 @@ public class HikeConstants
 		public static final int WEB_CONTENT = 3;
 
 		public static final int FORWARD_WEB_CONTENT = 4;
+	}
+	
+	public static class HOME_ACTIVITY_OVERFLOW
+	{
+		public static final int CREDITS = 1;
+
+		public static final int INVITE_FRIENDS = 2;
+
+		public static final int HIKE_EXTRAS = 3;
+
+		public static final int REWARDS = 4;
+
+		public static final int SETTINGS = 5;
+
+		public static final int  NEW_GROUP = 6;
+		
+		public static final int TIMELINE = 7;
+		
+		public static final int STATUS = 8;
+		
+		public static final int LOGS = 9;
+	
+		public static final int NEW_BROADCAST = 10;
 	}
 	
 	public static interface ConvMessagePacketKeys{
@@ -2214,6 +2297,7 @@ public class HikeConstants
 	public static final int NORMAL_MESSAGE_TYPE = 0;
 	public static final int MULTI_FORWARD_MESSAGE_TYPE = 1;
 	public static final int SHARED_PIN_TYPE = 2;
+	public static final int BROADCAST_MESSAGE_TYPE = 3;
 	public static final String SHOWN_MULTI_FORWARD_TIP = "shownMultiForwardTip";
 
 	public static final String VISIBLITY = "visibility";
@@ -2289,4 +2373,15 @@ public class HikeConstants
 	public static final String REARRANGE_CHAT = "rearrange_chat";
 	
 	public static final String CONTENT_ID = "content_id";
+	public static final String TIMESTAMP_MILLIS = "msec";
+	
+	public static final String EVENT_TAG_SESSION = "sess";
+
+	public static final String MESSAGE_PROCESS_TIME = "mpt";
+
+	public static int DEFAULT_AVATARS[] = {R.drawable.avatar_01, R.drawable.avatar_02, R.drawable.avatar_03, R.drawable.avatar_04, R.drawable.avatar_05};
+	public static String DEFAULT_AVATAR_KEYS[] = {"avatar_01","avatar_02", "avatar_03", "avatar_04", "avatar_05"};
+	public static String IS_GROUP = "isGroup";
+
+	public static final String CAM_IMG_PREFIX = "CAM_";
 }

@@ -1269,7 +1269,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			return;
 		}
 
-		iconloader.loadImage(contactInfo.getMsisdn(), true, holder.avatar, false, isListFlinging, true);
+		iconloader.loadImage(contactInfo.getMsisdn(), holder.avatar, isListFlinging, false, true);
 	}
 
 	private void setInviteButton(ContactInfo contactInfo, TextView inviteBtn, ImageView inviteIcon)

@@ -65,6 +65,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -502,8 +503,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			// Changing the footer state to halfOpen when the reward is unlocked.
 			setFooterHalfOpen();
 			
-
-			llChatReward.setOnClickListener(null);
+			
+			//llChatReward.setOnClickListener(null);
 			
 			progressNux.setVisibility(View.GONE);
 		}
@@ -676,6 +677,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			 * On click of Reward Bar to open the footer to expanded view.
 			 */
 			
+			if (mmNuxManager.getCurrentState() == NUXConstants.NUX_KILLED||mmNuxManager.getCurrentState()==NUXConstants.NUX_NEW)
+			{
+				Toast.makeText(getActivity(), getActivity().getString(R.string.nux_expired), Toast.LENGTH_SHORT).show();
+			}
+			else if(mmNuxManager.getCurrentState()==NUXConstants.COMPLETED)
+			{
+				onClick(chatProgress);
+			}
+			else
+			{
 			chatProgress.setText(NUXManager.getInstance().getNuxChatRewardPojo().getDetailsText());
 
 		
@@ -700,6 +711,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			catch (JSONException e)
 			{
 				e.printStackTrace();
+			}
 			}
 			break;
 
@@ -1185,7 +1197,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else
 		{
-			optionsList.add(getString(R.string.group_info));
+				if (conv instanceof BroadcastConversation)
+				{
+					optionsList.add(getString(R.string.broadcast_info));
+				}
+				else
+				{
+					optionsList.add(getString(R.string.group_info));
+				}
 		}
 		if (conv.getContactName() != null)
 		{
@@ -1199,7 +1218,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		if (conv instanceof GroupConversation)
 		{
-			optionsList.add(getString(R.string.delete_leave));
+				if (conv instanceof BroadcastConversation)
+				{
+					optionsList.add(getString(R.string.delete_broadcast));
+				}
+				else
+				{
+					optionsList.add(getString(R.string.delete_leave));
+				}
 		}
 		else
 		{
@@ -1282,6 +1308,28 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					deleteConfirmDialog.setCancelButton(R.string.cancel);
 					deleteConfirmDialog.show();
 				}
+				else if (getString(R.string.delete_broadcast).equals(option))
+				{
+					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
+					deleteConfirmDialog.setHeader(R.string.delete);
+					deleteConfirmDialog.setBody(getString(R.string.delete_broadcast_confirm));
+					
+					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					{
+
+						@Override
+						public void onClick(View v)
+						{
+							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
+							deleteConversation(conv);
+							deleteConfirmDialog.dismiss();
+						}
+					};
+
+					deleteConfirmDialog.setOkButton(android.R.string.ok, dialogOkClickListener);
+					deleteConfirmDialog.setCancelButton(R.string.cancel);
+					deleteConfirmDialog.show();
+				}
 				else if (getString(R.string.email_conversations).equals(option))
 				{
 					EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(getSherlockActivity(), ConversationFragment.this);
@@ -1321,7 +1369,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					addToContactsExisting(conv.getMsisdn());
 				}
 
-				else if (getString(R.string.group_info).equals(option))
+				else if (getString(R.string.group_info).equals(option) || getString(R.string.broadcast_info).equals(option))
 				{
 					if (!((GroupConversation) conv).getIsGroupAlive())
 					{
@@ -3119,8 +3167,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	}
 	protected void viewGroupInfo(Conversation conv) {
 		Intent intent = new Intent(getActivity(), ProfileActivity.class);
-		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, conv.getMsisdn());
+		if (Utils.isBroadcastConversation(conv.getMsisdn()))
+		{
+			intent.putExtra(HikeConstants.Extras.BROADCAST_LIST, true);
+			intent.putExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST, conv.getMsisdn());
+		}
+		else
+		{
+			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, conv.getMsisdn());
+		}
 		startActivity(intent);
 	}
 

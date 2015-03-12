@@ -17,7 +17,7 @@ import com.bsb.hike.modules.httpmgr.request.listener.IRequestCancellationListene
  */
 public class RequestProcessor
 {
-	private Map<Long, Request<?>> requestMap;
+	private static Map<String, Request<?>> requestMap;
 
 	private RequestRunner requestRunner;
 
@@ -25,9 +25,9 @@ public class RequestProcessor
 
 	public RequestProcessor(ClientOptions options, HttpEngine engine, RequestListenerNotifier notifier)
 	{
-		this.requestMap = new ConcurrentHashMap<Long, Request<?>>();
-		this.requestListenerNotifier = notifier;
-		requestRunner = new RequestRunner(options, requestMap, engine, requestListenerNotifier);
+		requestMap = new ConcurrentHashMap<String, Request<?>>();
+		requestListenerNotifier = notifier;
+		requestRunner = new RequestRunner(options, engine, requestListenerNotifier);
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class RequestProcessor
 	 */
 	public void addRequest(final Request<?> request, ClientOptions options)
 	{
-		long requestId = request.getId();
+		String requestId = request.getId();
 		if (requestMap.containsKey(requestId))
 		{
 			LogFull.i(request.toString() + " already exists");
@@ -85,7 +85,7 @@ public class RequestProcessor
 	 */
 	public boolean isRequestRunning(Request<?> request)
 	{
-		long requestId = request.getId();
+		String requestId = request.getId();
 		if (requestMap.containsKey(requestId))
 		{
 			LogFull.d(request.toString() + " is already running ");
@@ -93,6 +93,44 @@ public class RequestProcessor
 		}
 		LogFull.d(request.toString() + " is not already running ");
 		return false;
+	}
+
+	/**
+	 * This method calculates the id of the request and compares it with previous calculated request id (this is needed because headers can be added inside the interceptors and
+	 * original id calculated during request build up don't know about these headers added in interceptors, So we calculate again to see if this type of request is already in the
+	 * http manager system or not). If request is already in system then we add the listeners of request to previous request object and also update the
+	 * {@link RequestProcessor#requestMap} accordingly
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static boolean isRequestDuplicateAfterInterceptorsProcessing(Request<?> request)
+	{
+		String reqId = request.getId();
+		String newRequestId = request.generateId();
+		if (reqId.equals(newRequestId))
+		{
+			return false;
+		}
+
+		if (requestMap.containsKey(newRequestId))
+		{
+			LogFull.i(request.toString() + " already exists");
+			Request<?> req = requestMap.get(newRequestId);
+			req.addRequestListeners(request.getRequestListeners());
+			return true;
+		}
+		else
+		{
+			requestMap.put(newRequestId, request);
+		}
+		requestMap.remove(reqId);
+		return false;
+	}
+
+	public static void removeRequest(Request<?> request)
+	{
+		requestMap.remove(request.getId());
 	}
 
 	/**

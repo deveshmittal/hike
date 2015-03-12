@@ -171,7 +171,12 @@ public class Conversation implements Comparable<Conversation>
 	public void addMessage(ConvMessage message)
 	{
 		this.messages.add(message);
-		setTimestamp(message.getTimestamp());
+		// if message is not broadcast we surely need to update timestamp. otherwise if it is a
+		// broadcast message of a broadcast conversation then also we need to update timestamp
+		if (!message.isBroadcastMessage() || message.isBroadcastConversation())
+		{
+			setTimestamp(message.getTimestamp());
+		}
 	}
 
 	/**
@@ -183,8 +188,7 @@ public class Conversation implements Comparable<Conversation>
 	{		
 		this.messages.clear();
 		
-		this.messages.add(message);
-		setTimestamp(message.getTimestamp());
+		addMessage(message);
 	}
 	
 	public int getUnreadCount()

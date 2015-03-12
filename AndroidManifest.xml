@@ -2,8 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="1127"
-    android:versionName="3.8.4" >
+
+    android:versionCode="1130"
+    android:versionName="3.8.0.56" >
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="17" />
@@ -238,16 +239,7 @@
 			  </intent-filter>
         </activity>
         <activity
-            android:name=".ui.TwitterAuthActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize" >
-        </activity>
-        <activity
             android:name=".ui.StatusUpdate"
-            android:windowSoftInputMode="adjustResize" >
-        </activity>
-        <activity
-            android:name=".ui.SocialNetInviteActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity android:name=".ui.GalleryActivity" >
@@ -273,8 +265,12 @@
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
-            android:name=".ui.CreateNewGroupActivity"
+            android:name=".ui.CreateNewGroupOrBroadcastActivity"
             android:windowSoftInputMode="stateVisible" >
+        </activity>
+        <activity
+            android:name=".ui.FtueBroadcast"
+            android:configChanges="keyboardHidden|screenSize" >
         </activity>
         <activity
             android:name=".ui.PeopleActivity"
@@ -368,14 +364,6 @@
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateHidden" >
         </activity>
-        <activity
-            android:name="com.facebook.LoginActivity"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
-        <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/fb_app_id" />
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/unobfuscated_map_api" />
@@ -425,6 +413,14 @@
             android:exported="true" >
             <intent-filter>
                 <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+        
+        <receiver android:name="com.bsb.hike.service.DeviceShutDownReceiver" 
+            android:enabled="true">
+            <intent-filter android:priority="999">
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+                <action android:name="android.intent.action.QUICKBOOT_POWEROFF" />
             </intent-filter>
         </receiver>
 

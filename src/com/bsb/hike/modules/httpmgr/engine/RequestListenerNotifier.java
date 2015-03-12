@@ -1,12 +1,16 @@
 package com.bsb.hike.modules.httpmgr.engine;
 
+import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.bsb.hike.modules.httpmgr.Utils;
 import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.interceptor.IResponseInterceptor;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.modules.httpmgr.response.Response;
 import com.bsb.hike.modules.httpmgr.response.ResponseCall;
+import com.bsb.hike.modules.httpmgr.response.ResponseFacade;
 
 /**
  * This class is responsible for notifying the request listeners of the request about the success or failure of the request. The response is either sent synchronously i.e on same
@@ -69,21 +73,35 @@ public class RequestListenerNotifier
 
 	private void sendSuccess(Request<?> request, Response response)
 	{
-		if (request.isCancelled())
+		try
 		{
-			return;
-		}
+			if (request.isCancelled())
+			{
+				return;
+			}
 
-		CopyOnWriteArrayList<IRequestListener> listeners = request.getRequestListeners();
-		for (IRequestListener listener : listeners)
+			postProcessResponse(request, response);
+
+			CopyOnWriteArrayList<IRequestListener> listeners = request.getRequestListeners();
+			for (IRequestListener listener : listeners)
+			{
+				listener.onRequestSuccess(response);
+			}
+		}
+		finally
 		{
-			listener.onRequestSuccess(response);
+			Utils.finish(request, response);
 		}
-
-		request.finish();
-		response.finish();
 	}
 
+	private void postProcessResponse(Request<?> request, Response response)
+	{
+		ResponseFacade responseFacade = new ResponseFacade(response);
+		Iterator<IResponseInterceptor> iterator = responseFacade.getResponseInterceptors().iterator();
+		ResponseInterceptorChain chain = new ResponseInterceptorChain(iterator, request, responseFacade);
+		chain.proceed();
+	}
+	
 	/**
 	 * This method notifies the listeners about the request cancellation. Calls {@link IRequestListener#onRequestFailure(HttpException)} for each listener of the request,
 	 * cancellation exception is given to the listeners
@@ -137,18 +155,23 @@ public class RequestListenerNotifier
 
 	private void sendFailure(Request<?> request, HttpException ex)
 	{
-		if (request.isCancelled())
+		try
 		{
-			return;
-		}
+			if (request.isCancelled())
+			{
+				return;
+			}
 
-		CopyOnWriteArrayList<IRequestListener> listeners = request.getRequestListeners();
-		for (IRequestListener listener : listeners)
+			CopyOnWriteArrayList<IRequestListener> listeners = request.getRequestListeners();
+			for (IRequestListener listener : listeners)
+			{
+				listener.onRequestFailure(ex);
+			}
+		}
+		finally
 		{
-			listener.onRequestFailure(ex);
+			Utils.finish(request, null);
 		}
-
-		request.finish();
 	}
 
 	/**
@@ -203,6 +226,43 @@ public class RequestListenerNotifier
 			}
 		};
 		return call;
+	}
+
+	/**
+	 * This class implements {@link IResponseInterceptor.Chain} and executes {@link IResponseInterceptor#intercept(IResponseInterceptor.Chain) for each node present in the interceptor chain
+	 * @author sidharth
+	 *
+	 */
+	public class ResponseInterceptorChain implements IResponseInterceptor.Chain
+	{
+		private Iterator<IResponseInterceptor> iterator;
+
+		private Request<?> request;
+
+		private ResponseFacade responseFacade;
+
+		public ResponseInterceptorChain(Iterator<IResponseInterceptor> iterator, Request<?> request, ResponseFacade responseFacade)
+		{
+			this.iterator = iterator;
+			this.request = request;
+			this.responseFacade = responseFacade;
+		}
+
+		@Override
+		public ResponseFacade getResponseFacade()
+		{
+			return responseFacade;
+		}
+
+		@Override
+		public void proceed()
+		{
+			if (iterator.hasNext())
+			{
+				ResponseInterceptorChain chain = new ResponseInterceptorChain(iterator, request, responseFacade);
+				iterator.next().intercept(chain);
+			}
+		}
 	}
 
 	public void shutdown()

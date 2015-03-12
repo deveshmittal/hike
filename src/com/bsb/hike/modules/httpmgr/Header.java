@@ -1,5 +1,8 @@
 package com.bsb.hike.modules.httpmgr;
 
+import android.text.TextUtils;
+
+import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.response.Response;
 
 /**
@@ -8,7 +11,7 @@ import com.bsb.hike.modules.httpmgr.response.Response;
  * @author sidharth
  * 
  */
-public class Header
+public class Header implements Comparable<Header>
 {
 	private String name;
 
@@ -72,5 +75,20 @@ public class Header
 	public String toString()
 	{
 		return (name != null ? name : "") + ": " + (value != null ? value : "");
+	}
+
+	@Override
+	public int compareTo(Header another)
+	{
+		if (another == null)
+		{
+			return -1;
+		}
+		String name = this.getName();
+		if (TextUtils.isEmpty(name))
+		{
+			return 1;
+		}
+		return name.compareTo(another.getName());
 	}
 }
