@@ -1,8 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:animateLayoutChanges="true"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:background="@color/photos_tabs_background"
     android:orientation="vertical"
     tools:context=".PictureEditer$PictureEditerFragment" >
@@ -16,8 +16,8 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:animateLayoutChanges="true"
-            android:layout_weight="@integer/photos_editor_canvas_weight" >
+            android:layout_weight="@integer/photos_editor_canvas_weight"
+            android:animateLayoutChanges="true" >
 
             <com.bsb.hike.photos.views.PhotosEditerFrameLayoutView
                 android:id="@+id/editer"
@@ -36,11 +36,13 @@
                 android:visibility="gone" />
         </RelativeLayout>
 
-        <com.viewpagerindicator.TabPageIndicator
+        <com.viewpagerindicator.PhotosTabPageIndicator
             android:id="@+id/indicator"
+            style="@style/AppTheme.Home.Photos"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:background="@color/photos_tabs_background" />
+            android:background="@color/photos_tabs_background"
+            android:theme="@style/AppTheme.Home.Photos" />
 
         <android.support.v4.view.ViewPager
             android:id="@+id/pager"

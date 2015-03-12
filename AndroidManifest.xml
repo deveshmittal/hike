@@ -323,6 +323,7 @@
         <activity
            	  android:name="com.bsb.hike.ui.PictureEditer"
               android:launchMode="singleTop"
+              android:theme="@style/AppTheme.Home.Photos"
               android:screenOrientation="portrait">
         </activity> 
         <activity
