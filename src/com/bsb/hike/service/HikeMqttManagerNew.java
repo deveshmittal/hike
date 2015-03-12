@@ -1701,6 +1701,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			type = HikeConstants.NORMAL_MESSAGE_TYPE;
 		}
 
+		if (!initialised.get())
+		{
+			Logger.d(TAG, "Not initialised, initializing...");
+			init();
+		}
+
 		HikePacket packet = new HikePacket(data.getBytes(), msgId, System.currentTimeMillis(), type);
 		addToPersistence(packet, qos);
 
@@ -1710,12 +1716,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 		Bundle bundle = new Bundle();
 		bundle.putParcelable(HikeConstants.MESSAGE, packet);
-
-		if (!initialised.get())
-		{
-			Logger.d(TAG, "Not initialised, initializing...");
-			init();
-		}
 
 		msg.setData(bundle);
 		msg.replyTo = this.mMessenger;
