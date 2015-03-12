@@ -1350,9 +1350,9 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="photo_dp_saving">Saving as profile photo..</string>
     <string name="photo_dp_saved">All set!</string>
     <string name="photo_dp_finishing">Finishing up..</string>
-    <string name="photo_dp_saved_sub">Lookin\' good.</string>
-    <string name="photo_dp_save_error">Couldn\'t set profile photo.</string>
-    <string name="photo_dp_save_error_sub">Touch anywhere to retry.</string>
+    <string name="photo_dp_saved_sub">Lookin\' good</string>
+    <string name="photo_dp_save_error">Couldn\'t set profile photo</string>
+    <string name="photo_dp_save_error_sub">Tap to retry</string>
     <string name="photo_gallery_choose_pic">Choose a photo</string>
     <string name="cropping_image">Cropping image..</string>
     <string name="compose_chat">New chat</string>

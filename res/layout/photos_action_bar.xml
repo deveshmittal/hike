@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
-         android:orientation="horizontal" >
+        android:orientation="horizontal" >
 
         <ImageView
             android:layout_width="wrap_content"
@@ -61,19 +61,22 @@
         android:gravity="center_vertical"
         android:orientation="horizontal" >
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/next_signup"
-            android:textColor="@color/photos_action_bar_font"
-            android:textSize="16sp" />
-
         <ImageView
             android:id="@+id/next_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/photos_action_internal_padding"
-            android:src="@drawable/next_button" />
+            android:layout_marginRight="8dp"
+            android:src="@drawable/action_bar_arrow" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            style="@style/ActionBarText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/next_signup"
+            android:textColor="@color/photos_action_bar_font" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -23,15 +24,15 @@ import com.bsb.hike.photos.HikePhotosUtils;
  * 
  *         Custom View Class extends ImageView in android
  * 
- * Custom View Class extends ImageView in android
+ *         Custom View Class extends ImageView in android
  * 
- * An object of CanvasImageView represents a layer on the PhotosEditerView
+ *         An object of CanvasImageView represents a layer on the PhotosEditerView
  * 
- * The ImageView provides an Canvas for drawing doodles or writing text.
+ *         The ImageView provides an Canvas for drawing doodles or writing text.
  * 
  *         In Implementation one object handles text and another handles doodling
  * 
- * In Implementation one object handles text and another handles doodling
+ *         In Implementation one object handles text and another handles doodling
  *
  * @author akhiltripathi
  *
@@ -108,15 +109,16 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 
 	public void getMeasure()
 	{
-		if (paths.size()>0)
+		if (paths.size() > 0)
 		{
 			DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
-	        int width = metrics.widthPixels;
+			int width = metrics.widthPixels;
+
 			mBitmap = Bitmap.createBitmap(width, width, Config.ARGB_8888);
 			mCanvas = new Canvas(mBitmap);
 			drawDoodle();
 		}
-		else if(mBitmap!=null)
+		else if (mBitmap != null)
 		{
 			mBitmap.recycle();
 			mBitmap = null;
@@ -139,7 +141,7 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 				canvas.drawPath(p.getPath(), mPaint);
 			}
 		}
-		if  ((mX != sX && mY != sY) && mPath != null)
+		if ((mX != sX && mY != sY) && mPath != null)
 		{
 			mPaint.setColor(color);
 			mPaint.setStrokeWidth(brushWidth);
@@ -308,7 +310,7 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 		}
 
 	}
-	
+
 	public int getColor()
 	{
 		return color;

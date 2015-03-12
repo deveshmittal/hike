@@ -126,21 +126,15 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		imageOriginal = BitmapFactory.decodeFile(FilePath);
 		DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
 		int width = metrics.widthPixels;
-		if (width < imageOriginal.getWidth())
-		{
-			imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
-			effectLayer.handleImage(imageScaled, true);
-		}
-		else
-		{
-			effectLayer.handleImage(imageOriginal, false);
-			imageScaled = imageOriginal.copy(imageOriginal.getConfig(), true);
-		}
+
+		imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
+		effectLayer.handleImage(imageScaled);
+
 	}
 
 	public void loadImageFromBitmap(Bitmap bmp)
 	{
-		effectLayer.handleImage(bmp, false);
+		effectLayer.handleImage(bmp);
 	}
 
 	public void enableDoodling()
@@ -283,6 +277,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 				Bitmap temp = Bitmap.createScaledBitmap(doodleLayer.getBitmap(), imageOriginal.getWidth(), imageOriginal.getHeight(), false);
 				canvasResult.drawBitmap(temp, 0, 0, doodleLayer.getPaint());
 				sendAnalyticsDoodleApplied(doodleLayer.getColor());
+				temp.recycle();
 			}
 		}
 
@@ -311,7 +306,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		try
 		{
 			JSONObject json = new JSONObject();
-			json.put(HikeConstants.HikePhotos.PHOTOS_DOODLE_COLOR_KEY, Integer.toString(colorHex));
+			json.put(HikeConstants.HikePhotos.PHOTOS_DOODLE_COLOR_KEY, Integer.toHexString(colorHex));
 			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_APPLIED_DOODLE);
 			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 		}

@@ -141,6 +141,8 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		mCircularProgress.resetProgress();
 
 		mFragmentView.findViewById(R.id.retryButton).setVisibility(View.GONE);
+		
+		mFragmentView.findViewById(R.id.rounded_mask).setVisibility(View.GONE);
 
 		if (imagePath != null)
 		{
@@ -360,6 +362,8 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		mCircularProgress.setProgressColor(getResources().getColor(R.color.photos_circular_progress_red));
 
 		mFragmentView.findViewById(R.id.retryButton).setVisibility(View.VISIBLE);
+		
+		mFragmentView.findViewById(R.id.rounded_mask).setVisibility(View.VISIBLE);
 
 		mFragmentView.findViewById(R.id.retryButton).setOnClickListener(new View.OnClickListener()
 		{
@@ -400,6 +404,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		super.onPause();
 		isPaused = true;
 		getActivity().getSupportFragmentManager().popBackStack();
+		getActivity().getActionBar().show();
 	}
 
 	@Override

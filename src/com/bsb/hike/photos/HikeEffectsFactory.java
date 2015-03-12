@@ -8,6 +8,7 @@ import android.support.v8.renderscript.Allocation;
 import android.support.v8.renderscript.Element;
 import android.support.v8.renderscript.RenderScript;
 import android.support.v8.renderscript.ScriptIntrinsicBlur;
+import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -36,7 +37,9 @@ public final class HikeEffectsFactory
 
 	private static HikeEffectsFactory instance;// singleton instance
 
-	private Bitmap mBitmapIn, mBitmapOut;
+	private Bitmap mBitmapIn,currentOut,mBitmapOut2,mBitmapOut1,finalBitmap;
+
+	public  Bitmap toBeRecycled1,toBeRecycled2;
 
 	private RenderScript mRS;
 
@@ -49,9 +52,9 @@ public final class HikeEffectsFactory
 	private ScriptIntrinsicBlur mScriptBlur;
 
 	private int mBlurRadius;
-
+	
 	@SuppressWarnings("static-access")
-	private void LoadRenderScript(Bitmap image, boolean isThumbnail)
+	private void LoadRenderScript(Bitmap image, boolean isThumbnail,boolean isFinal)
 	{
 		// Initialize RS // Load script
 		if (mRS == null)
@@ -70,11 +73,56 @@ public final class HikeEffectsFactory
 		// Allocate buffer
 		mBitmapIn = image;
 		mInAllocation = Allocation.createFromBitmap(mRS, mBitmapIn);
-		if ((mBitmapOut == null || mBitmapOut.getWidth() != mBitmapIn.getWidth()) && !isThumbnail)
+		if (!isFinal && (currentOut == null || (finalBitmap == null && currentOut.getHeight() != mBitmapIn.getHeight())) && !isThumbnail)
 		{
-			mBitmapOut = mBitmapOut.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
+			toBeRecycled1 = mBitmapOut1;
+			toBeRecycled2 = mBitmapOut2;
+			mBitmapOut1 = mBitmapOut1.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
+			mBitmapOut2 = mBitmapOut2.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
+			currentOut = mBitmapOut1;
+			//Log.e("com.bsb.hike","2 new bitmap created");
 		}
+		else if(!isFinal && (currentOut != null && (currentOut.getHeight() == mBitmapIn.getHeight() || finalBitmap != null)) && !isThumbnail)
+		{
+			if(currentOut == mBitmapOut1)
+			{
+				currentOut = mBitmapOut2;
+				//Log.e("com.bsb.hike","using out 2");
+			}
+			else
+			{
+				currentOut = mBitmapOut1;
+				//Log.e("com.bsb.hike","using out 1");
+			}
+		}
+		else if(isFinal)
+		{
+			if(finalBitmap == null)
+			{
+				finalBitmap = finalBitmap.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
+				//Log.e("com.bsb.hike","new final bitmap created");
+			}
+			currentOut = finalBitmap;
+		}
+		
+		
 
+	}
+
+	public static void clearCache()
+	{
+		if (instance == null)
+			instance = new HikeEffectsFactory();
+
+
+		if (instance.toBeRecycled1 != null)
+		{
+			instance.toBeRecycled1.recycle();
+		}
+		if (instance.toBeRecycled2 != null)
+		{
+			instance.toBeRecycled2.recycle();
+		}
 	}
 
 	/**
@@ -86,7 +134,7 @@ public final class HikeEffectsFactory
 		if (instance == null)
 			instance = new HikeEffectsFactory();
 
-		instance.LoadRenderScript(scaledOriginal, true);
+		instance.LoadRenderScript(scaledOriginal, true,false);
 		instance.beginEffectAsyncTask(listener, type, true);
 
 	}
@@ -250,12 +298,12 @@ public final class HikeEffectsFactory
 	 * 
 	 */
 
-	public static void applyFilterToBitmap(Bitmap bitmap, OnFilterAppliedListener listener, FilterType type)
+	public static void applyFilterToBitmap(Bitmap bitmap, OnFilterAppliedListener listener, FilterType type,boolean isFinal)
 	{
 		if (instance == null)
 			instance = new HikeEffectsFactory();
 
-		instance.LoadRenderScript(bitmap, false);
+		instance.LoadRenderScript(bitmap, false,isFinal);
 		instance.beginEffectAsyncTask(listener, type, false);
 
 	}
@@ -458,7 +506,7 @@ public final class HikeEffectsFactory
 			}
 			else
 			{
-				mOutAllocations = Allocation.createFromBitmap(mRS, mBitmapOut);
+				mOutAllocations = Allocation.createFromBitmap(mRS, currentOut);
 			}
 
 		}
@@ -494,7 +542,8 @@ public final class HikeEffectsFactory
 				@Override
 				public void run()
 				{
-					readyListener.onFilterApplied(blurImage ? inBitmapOut : mBitmapOut);
+					readyListener.onFilterApplied(blurImage ? inBitmapOut : currentOut);
+
 				}
 			});
 		}
@@ -665,7 +714,7 @@ public final class HikeEffectsFactory
 				}
 				else
 				{
-					mBitmapOut = mBitmapIn.copy(mBitmapIn.getConfig(), true);
+					currentOut = mBitmapIn.copy(mBitmapIn.getConfig(), true);
 				}
 				break;
 			default:
@@ -676,7 +725,7 @@ public final class HikeEffectsFactory
 
 			if (effect != FilterType.ORIGINAL)
 			{
-				mOutAllocations.copyTo(blurImage ? inBitmapOut : mBitmapOut);
+				mOutAllocations.copyTo(blurImage ? inBitmapOut : currentOut);
 			}
 
 		}

@@ -58,30 +58,29 @@ public class DoodleEffectItemLinearLayout extends EffectItemLinearLayout
 		this.brushColor = Color;
 		if (Color == HikePhotosUtils.FilterTools.getSelectedColor())
 		{
-			ringColor =  HikeConstants.HikePhotos.SELECTED_RING_COLOR;
-			if(setCurrentItem)
-			HikePhotosUtils.FilterTools.setCurrentDoodleItem(this);
+			ringColor = HikeConstants.HikePhotos.SELECTED_RING_COLOR;
+			if (setCurrentItem)
+				HikePhotosUtils.FilterTools.setCurrentDoodleItem(this);
 		}
 		else
 		{
-			ringColor =  HikeConstants.HikePhotos.DEFAULT_RING_COLOR;
+			ringColor = HikeConstants.HikePhotos.DEFAULT_RING_COLOR;
 		}
 	}
-	
+
 	public void select()
 	{
 		HikePhotosUtils.FilterTools.setSelectedColor(this.brushColor);
-		ringColor =  HikeConstants.HikePhotos.SELECTED_RING_COLOR;
+		ringColor = HikeConstants.HikePhotos.SELECTED_RING_COLOR;
 		HikePhotosUtils.FilterTools.setCurrentDoodleItem(this);
 		refresh();
 	}
 
 	public void unSelect()
 	{
-		ringColor =  HikeConstants.HikePhotos.DEFAULT_RING_COLOR;
+		ringColor = HikeConstants.HikePhotos.DEFAULT_RING_COLOR;
 		refresh();
 	}
-
 
 	public int getRingColor()
 	{
@@ -104,13 +103,12 @@ public class DoodleEffectItemLinearLayout extends EffectItemLinearLayout
 		canvas.drawCircle(diameter / 2, diameter / 2, (diameter / 2), paint);
 		paint.setColor(brushColor);
 		canvas.drawCircle(diameter / 2, diameter / 2, (brushWidth / 2), paint);
-		RadialGradient gradient = new RadialGradient(diameter/2,diameter/2, (brushWidth+1)/2, new int[]{0x00000000,0x00000000,0x45000000}, new float[]{0,0.86f,1}, android.graphics.Shader.TileMode.CLAMP);
+		RadialGradient gradient = new RadialGradient(diameter / 2, diameter / 2, (brushWidth + 1) / 2, new int[] { 0x00000000, 0x00000000, 0x55000000 },
+				new float[] { 0, 0.86f, 1 }, android.graphics.Shader.TileMode.CLAMP);
 		paint = new Paint();
 		paint.setDither(true);
 		paint.setShader(gradient);
-		canvas.drawCircle(diameter / 2, diameter / 2, (brushWidth+1) / 2, paint);
-		
-
+		canvas.drawCircle((diameter - 4) / 2, diameter / 2, (brushWidth + 1) / 2, paint);
 
 		return bitmap;
 	}

@@ -260,16 +260,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 			snapOverlay.setVisibility(View.VISIBLE);
 
-			sendAnalyticsCameraClicked();
-
-			if (isUsingFFC)
-			{
-				sendAnalyticsCameraFFC();
-			}
-
-			// processSquareBitmap(bitmap);
-
-			// cameraFragment.getCameraView().setVisibility(View.INVISIBLE);
+			sendAnalyticsCameraClicked(isUsingFFC);
 
 			break;
 		case R.id.btngallery:
@@ -448,26 +439,13 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		return null;
 	}
 
-	private void sendAnalyticsCameraClicked()
+	private void sendAnalyticsCameraClicked(boolean ffc)
 	{
 		try
 		{
 			JSONObject json = new JSONObject();
+			json.put(HikeConstants.HikePhotos.PHOTOS_IS_FFC_MODE, ffc);
 			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_CAMERA_CLICK);
-			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	private void sendAnalyticsCameraFFC()
-	{
-		try
-		{
-			JSONObject json = new JSONObject();
-			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_FFC_PIC);
 			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 		}
 		catch (JSONException e)

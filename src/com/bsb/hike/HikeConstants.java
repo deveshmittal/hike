@@ -2374,6 +2374,8 @@ public class HikeConstants
 		public static final String PHOTOS_FILTER_NAME_KEY = "phFilName";
 		
 		public static final String PHOTOS_DOODLE_COLOR_KEY = "phDodCol";
+		
+		public static final String PHOTOS_IS_FFC_MODE = "isFFC";
 
 		public static final String FILENAME = "FilePath";
 
@@ -2381,9 +2383,9 @@ public class HikeConstants
 
 		public static final int Min_BRUSH_WIDTH = 8;
 
-		public static final int PREVIEW_THUMBNAIL_WIDTH = 70;
+		public static final int PREVIEW_THUMBNAIL_WIDTH = 60;
 
-		public static final int PREVIEW_THUMBNAIL_HEIGHT = 70;
+		public static final int PREVIEW_THUMBNAIL_HEIGHT = 60;
 
 		public static final int DELTA_BRUSH_WIDTH = 10;
 

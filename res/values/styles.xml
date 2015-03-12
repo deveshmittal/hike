@@ -333,6 +333,7 @@
         <item name="android:actionModeBackground">@drawable/bg_header_transparent</item>
         
     </style>
+    
     <style name="ActivityAnimation">
         <item name="android:windowExitAnimation">@anim/fade_out_animation</item>
     	<item name="android:windowEnterAnimation">@anim/fade_in_animation</item>
@@ -342,6 +343,10 @@
         <item name="homeAsUpIndicator">@drawable/home_screen_top_bar_up</item>
         <item name="vpiTabPageIndicatorStyle">@style/CustomTabPageIndicator</item>
         <item name="vpiTabTextIndicatorStyle">@style/TabText</item>
+    </style>
+    
+    <style name="AppTheme.Home.Photos">
+        <item name="vpiTabPageIndicatorStyle">@style/PhotosTabPageIndicator</item>
     </style>
     
     <style name="Widget.Styled.ActionBar" parent="Widget.Sherlock.Light.ActionBar.Solid.Inverse">
@@ -367,11 +372,23 @@
         <item name="android:fadingEdge">horizontal</item>
         <item name="android:fadingEdgeLength">8dp</item>
     </style>
+    
+    <style name="PhotosTabPageIndicator" parent="Widget.TabPageIndicator">
+        <item name="android:background">@drawable/photos_tab_selector</item>
+        <item name="android:dividerPadding">0dp</item>
+        <item name="android:divider">@drawable/home_tab_divider</item>
+        <item name="android:showDividers">none</item>
+        <item name="android:fadingEdge">horizontal</item>
+        <item name="android:fadingEdgeLength">8dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+    </style>
 
     <style name="CustomIconPageIndicator" parent="Widget.IconPageIndicator">
         <item name="android:background">@drawable/emoticon_tab_indicator</item>
         <item name="android:divider">@drawable/emoticon_tab_divider</item>
         <item name="android:showDividers">middle</item>
+        <item name="android:tabStripEnabled">false</item>
         <item name="android:layout_marginLeft">0dp</item>
         <item name="android:layout_marginRight">0dp</item>
     </style>
