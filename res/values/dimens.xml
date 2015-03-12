@@ -100,7 +100,7 @@
     <dimen name="gift_card_height">220dp</dimen>
     <dimen name="timeine_big_picture_size">200dp</dimen>
     <dimen name="icon_picture_size">50dp</dimen>
-    <dimen name="gallery_grid_spacing">1dp</dimen>
+    <dimen name="gallery_grid_spacing">5dp</dimen>
     <dimen name="gallery_cover_item_size">179dp</dimen>
     <dimen name="gallery_album_item_size">119dp</dimen>
     <dimen name="gallery_selection_item_size">89dp</dimen>
@@ -169,4 +169,5 @@
 	<dimen name="sticker_grid_horizontal_padding">8dp</dimen>
 	<dimen name="drag_shadow_height">8dp</dimen>
 	<dimen name="sticker_settings_tip_margin">18dp</dimen>
+	<dimen name="call_failed_fragment_height">274dp</dimen>
 </resources>

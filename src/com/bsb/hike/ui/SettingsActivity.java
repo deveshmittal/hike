@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -53,10 +54,6 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 	private TextView statusView;
 
-	private String profileName;
-
-	private IconLoader profileImageLoader;
-
 	private String[] profilePubSubListeners = { HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_UPDATE_FINISH };
 
 	private boolean isConnectedAppsPresent;
@@ -71,7 +68,6 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.settings);
-		profileImageLoader = new IconLoader(this, getResources().getDimensionPixelSize(R.dimen.avatar_profile_size));
 
 		ArrayList<String> items = new ArrayList<String>();
 
@@ -354,6 +350,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 		if (isRemoved)
 		{
+			getSupportActionBar().show();
 			setupActionBar();
 		}
 		return isRemoved;
@@ -361,11 +358,14 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 	private void addProfileImgInHeader()
 	{
-		String mappedId = contactInfo.getMsisdn() + ProfileActivity.PROFILE_ROUND_SUFFIX;
-
 		// set profile picture
-		profileImageLoader.loadImage(mappedId, profileImgView, false, false, true);
-
+		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(contactInfo.getMsisdn());
+		if (drawable == null)
+		{
+			drawable = HikeMessengerApp.getLruCache().getDefaultAvatar(contactInfo.getMsisdn(), false);
+		}
+		profileImgView.setImageDrawable(drawable);
+		
 		ImageViewerInfo imageViewerInfo = new ImageViewerInfo(contactInfo.getMsisdn() + ProfileActivity.PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(
 				contactInfo.getMsisdn()));
 		profileImgView.setTag(imageViewerInfo);
