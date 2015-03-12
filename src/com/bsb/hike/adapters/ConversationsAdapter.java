@@ -553,7 +553,7 @@ public class ConversationsAdapter extends BaseAdapter
 	public void removeSearch()
 	{
 		isSearchModeOn = false;
-		conversationsMsisdns = null;
+		conversationsMsisdns.clear();
 		convSpanStartIndexes.clear();
 		refinedSearchText = null;
 		/*
