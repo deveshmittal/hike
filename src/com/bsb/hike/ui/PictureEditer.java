@@ -48,6 +48,7 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
+import com.viewpagerindicator.PhotosTabPageIndicator;
 import com.viewpagerindicator.TabPageIndicator;
 
 public class PictureEditer extends HikeAppStateBaseFragmentActivity
@@ -67,7 +68,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 
 	private View mActionBarDoneContainer;
 
-	private TabPageIndicator indicator;
+	private PhotosTabPageIndicator indicator;
 
 	private ViewPager pager;
 
@@ -109,7 +110,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		pager = (ViewPager) findViewById(R.id.pager);
 		pager.setAdapter(adapter);
 
-		indicator = (TabPageIndicator) findViewById(R.id.indicator);
+		indicator = (PhotosTabPageIndicator) findViewById(R.id.indicator);
 		indicator.setViewPager(pager);
 
 		  int density= getResources().getDisplayMetrics().densityDpi;

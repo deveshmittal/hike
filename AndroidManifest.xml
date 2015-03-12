@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="1130"
-    android:versionName="3.8.0.7.photos" >
+    android:versionCode="1131"
+    android:versionName="3.8.0.8.photos" >
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="17" />
@@ -110,7 +110,6 @@
         android:name=".HikeMessengerApp"
         android:icon="@drawable/ic_launcher"
         android:largeHeap="true"
-        android:hardwareAccelerated="true"
         android:allowBackup="true"
         android:label="@string/app_name"
         android:logo="@drawable/hike_logo_top_bar"
@@ -318,11 +317,14 @@
          <activity
            	  android:name="com.bsb.hike.ui.HikeCameraActivity"
               android:launchMode="singleTop"
+              android:hardwareAccelerated="true"
               android:screenOrientation="portrait">
         </activity>
         <activity
            	  android:name="com.bsb.hike.ui.PictureEditer"
               android:launchMode="singleTop"
+              android:hardwareAccelerated="true"
+              android:theme="@style/AppTheme.Home.Photos"
               android:screenOrientation="portrait">
         </activity> 
         <activity

@@ -337,7 +337,9 @@ public class CameraFragment extends SherlockFragment
 	 */
 	public boolean isAutoFocusAvailable()
 	{
+		if(cameraView!=null)
 		return (cameraView.isAutoFocusAvailable());
+		else return false;
 	}
 
 	/**
