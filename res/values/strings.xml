@@ -1367,5 +1367,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="holi">Happy Holi</string>
     <string name="terms_conditions_hint">Terms &amp; Conditions</string>
 	<string name="terms_conditions_title">Terms</string>
-
+    <string name="whatsapp_uninstalled">Application Not Found</string>
+	
 </resources>

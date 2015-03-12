@@ -126,7 +126,9 @@ public class ShareUtils
 		Bitmap bmp = HikeBitmapFactory.decodeFile(filePath);
 		int imgWidth  = bmp.getWidth();
 		int imgHeight = bmp.getHeight();
+		//gives the scaling ratio for the image
 		float sRatio = scaleRatio(imgWidth,imgHeight);
+        // will scale the image to the 0.7 of the screen size proportionally for width and height
 		bmp = Bitmap.createScaledBitmap(bmp,(int)(imgWidth * sRatio * 0.7) , (int)(imgHeight * sRatio * 0.7), true);
 		image.setImageBitmap(bmp);
 		TextView heading = (TextView) share.findViewById(R.id.imageShareHeading);

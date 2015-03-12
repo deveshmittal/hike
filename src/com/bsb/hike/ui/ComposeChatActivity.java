@@ -374,55 +374,20 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if (Utils.isPackageInstalled(getApplicationContext(), HikeConstants.Extras.WHATSAPP_PACKAGE))
 			{
 				String str = getIntent().getStringExtra(HikeConstants.Extras.SHARE_CONTENT);
-				JSONObject metadata = new JSONObject();
-				
+
 				switch (type)
 				{
 				case HikeConstants.Extras.ShareTypes.STICKER_SHARE:
-
-					try
-					{
-						metadata.put(HikeConstants.Extras.SHR_TYPE, HikeConstants.Extras.STKR_SHR);
-						metadata.put(HikeConstants.Extras.MD1,getIntent().getStringExtra(HikeConstants.Extras.CAT_ID));
-						metadata.put(HikeConstants.Extras.MD2,getIntent().getStringExtra(HikeConstants.Extras.STKR_ID));
-						metadata.put(HikeConstants.Extras.MD3,str);	
-						metadata.put(HikeConstants.Extras.MD4,HikeConstants.Extras.SHR_STKR_CHAT);	
-						
-					}
-					catch (JSONException e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					HAManager.getInstance().record(HikeConstants.Extras.WHATSAPP_SHARE, HikeConstants.LogEvent.CLICK, EventPriority.HIGH, metadata);	
+					HAManager.getInstance().shareWhatsappAnalyticsMethod(HikeConstants.Extras.STKR_SHR, getIntent().getStringExtra(StickerManager.CATEGORY_ID),
+							getIntent().getStringExtra(StickerManager.STICKER_ID), str, HikeConstants.Extras.SHR_STKR_CHAT);
 					break;
 
 				case HikeConstants.Extras.ShareTypes.IMAGE_SHARE:
-					try
-					{
-						metadata.put(HikeConstants.Extras.SHR_TYPE, HikeConstants.Extras.IMG_SHR);
-						
-					}
-					catch (JSONException e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					HAManager.getInstance().record(HikeConstants.Extras.WHATSAPP_SHARE, HikeConstants.LogEvent.CLICK, EventPriority.HIGH, metadata);
+					HAManager.getInstance().shareWhatsappAnalyticsMethod(HikeConstants.Extras.IMG_SHR);
 					break;
 
 				case HikeConstants.Extras.ShareTypes.TEXT_SHARE:
-					try
-					{
-						metadata.put(HikeConstants.Extras.SHR_TYPE, HikeConstants.Extras.TEXT_SHR);
-						
-					}
-					catch (JSONException e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					HAManager.getInstance().record(HikeConstants.Extras.WHATSAPP_SHARE, HikeConstants.LogEvent.CLICK, EventPriority.HIGH, metadata);
+					HAManager.getInstance().shareWhatsappAnalyticsMethod(HikeConstants.Extras.TEXT_SHR);
 					break;
 
 				}
@@ -435,9 +400,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 
 			else
-			{   	
+			{
 				invalidateOptionsMenu();
-			
+
 			}
 		}
 

@@ -1449,23 +1449,21 @@ public class HikeConstants
 		
 		public static final String STKR_SHR_PLT = "stkrShrPlt";
 		
-		public static final String MD1 = "md1";
-
-		public static final String MD2 = "md2";
-
-		public static final String MD3 = "md3";
-
-		public static final String MD4 = "md4";
-
 		public static final String SHR_STKR_CHAT = "c";
 		
 		public static final String WHATSAPP_SHARE = "whatsappShare";
 
 		public static final String SHR_TYPE = "shrType";
 
-		public static final String STKR_ID = "stkrId";
-		
-		public static final String CAT_ID = "catId";
+		//required for analytics
+		public static final String CATID = "md1";
+
+		public static final String STKRID = "md2";
+
+		public static final String PATH = "md3";
+
+		public static final String SOURCE = "md4";
+
 	}
 
 	public static final class LogEvent
