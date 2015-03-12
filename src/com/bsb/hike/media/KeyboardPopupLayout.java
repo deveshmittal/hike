@@ -203,6 +203,11 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		@Override
 		public void onGlobalLayout()
 		{
+			if (mainView == null)
+			{
+				Logger.wtf("chatthread", "Getting null view inside global layout listener");
+				return;
+			}
 
 			Log.i("chatthread", "global layout listener");
 
