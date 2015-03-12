@@ -6,34 +6,27 @@ package com.bsb.hike.analytics;
  */
 public class AnalyticsConstants 
 {	
-	public static final long ONE_DAY = 24 * 60 * 60 * 1000;
+	/** one minute in milliseconds */
+	public static final long ONE_MINUTE =  60 * 1000;
 	
-	public static final long ONE_HOUR =  60 * 60 * 1000;
-	
-	//TODO: changed from 500 to 5 for testing
-	public static long MAX_FILE_SIZE = 5 * 1024;
+	/** one day in seconds */
+	public static final int DAY_IN_SECONDS = 24 * 60 * 60;
 
-	//TODO: changed from 500 to 10 for testing
-	public static long MAX_ANALYTICS_SIZE = 10 * 1024;
-	
-	/** time of first attempt to send analytics data */ 
-	public static int HOUR_OF_DAY_TO_SEND = 8;
-	
-	/** number of times upload should be tried in one day */
-	public static int ANALYTICS_UPLOAD_FREQUENCY = 3;
-	
-	/** try sending analytics data every 4 hours */
-	public static int UPLOAD_TIME_MULTIPLE = 4;
-	
+	/** Default maximum size per file in kilobytes */ 
+	public static long MAX_FILE_SIZE = 200; // 200KB
+
+	/** Default maximum analytics size on the client in kilobytes */
+	public static long MAX_ANALYTICS_SIZE = 1000; // 1MB
+			
+	/** Default analytics service status */ 
 	public static boolean IS_ANALYTICS_ENABLED = true;
-	
-	//TODO: changed from 50 to 10 for testing
+
+	/** Default maximum events count in memory before they are saved on the disk */
 	public static final int MAX_EVENTS_IN_MEMORY = 10;
 	
-	public static final int DEFAULT_SEND_FREQUENCY = 24;
-	
-	public static final String HTTP_UPLOAD_URL = "http://staging.im.hike.in/v1/logs/analytics"; 
-	
+	/** Default frequency at which logs should be tried to be sent to server */
+	public static final int DEFAULT_SEND_FREQUENCY = 30; // 30 minutes
+
 	public static final String EVENT_FILE_DIR = "/Analytics";
 	
 	public static final String NEW_LINE = "\n";
@@ -64,6 +57,16 @@ public class AnalyticsConstants
 
 	public static String CLICK_EVENT = "click";
 
+	public static String VIEW_EVENT = "view";
+
+	public static String ERROR_EVENT = "error";
+
+    public static String MICROAPP_UI_EVENT = "muiEvent";
+
+    public static String MICROAPP_NON_UI_EVENT = "mNonUiEvent";
+
+    public static String LONG_PRESS_EVENT = "longClick";
+
 	public static String SUB_TYPE = "st";
 
 	public static String EVENT_TYPE = "et";
@@ -72,6 +75,10 @@ public class AnalyticsConstants
 
 	public static String TO = "to";
 
+    public static String ORIGIN = "org";
+
+    public static String UNREAD_COUNT = "uc";
+
 	public static final String ANALYTICS = "analytics";
 
 	public static final String ANALYTICS_FILESIZE = "analyticsfs";
@@ -79,8 +86,14 @@ public class AnalyticsConstants
 	public static final String ANALYTICS_TOTAL_SIZE = "totalfs";
 
 	public static final String ANALYTICS_SEND_FREQUENCY = "analyticsfreq";
+
+	public static final String ANALYTICS_IN_MEMORY_SIZE = "mem_size";
+
+	public static final String ANALYTICS_ALARM_TIME = "alarmsetting";
 	
-	public static final String ANALYTICS_ALARM_TIME = "analyticsalarmtime";
+	public static final String SEND_WHEN_CONNECTED = "issendwhenconnected";
+
+	public static final String ANALYTICS_BACKUP = "backup";
 
 	public static final String EVENT_SUB_TYPE = "st";
 
@@ -89,6 +102,12 @@ public class AnalyticsConstants
 	public static final String CURRENT_TIME_STAMP = "cts";
 
 	public static final String EVENT_TAG_MOB = "mob";
+
+    public static final String EVENT_TAG_PLATFORM = "plf";
+
+	public static final String EVENT_TAG_BOTS = "bot";
+
+	public static final String CHAT_MSISDN = "chat_msisdn";
 
 	public static final String EVENT_TAG_CBS = "cbs";
 
@@ -173,5 +192,8 @@ public class AnalyticsConstants
 	
 	public static final String TO_USER = "to_user";
 	
-	public static final String EVENT_TAG_CHAT_SESSION = "ctal";
+	//Added For Last seen Event
+	public static final String LAST_SEEN_ANALYTICS_TAG = "last_seen_analytics";
+
+	public static final String LAST_SEEN_ANALYTICS = "last_seen_analytics";
 }

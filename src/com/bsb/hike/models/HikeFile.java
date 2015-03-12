@@ -587,7 +587,7 @@ public class HikeFile
 		 */
 		String currentFileSelectionPath = HikeConstants.FILE_SHARE_PREFIX + getExactFilePath();
 		String currentFileSelectionMimeType = getFileTypeString();
-		Utils.startShareImageIntent(context, currentFileSelectionMimeType, currentFileSelectionPath);
+		Utils.startShareImageIntent(currentFileSelectionMimeType, currentFileSelectionPath);
 	}
 
 	public static void openFile(File file, String fileTypeString, Context context)

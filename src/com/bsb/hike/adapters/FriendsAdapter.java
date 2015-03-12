@@ -2,7 +2,6 @@ package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -14,11 +13,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.ImageSpan;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,8 +34,8 @@ import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
 import com.bsb.hike.ui.HomeActivity;
@@ -59,8 +54,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	{
 		public void listFetched();
 	}
-
-	private static final String TAG = "FreindsAdapter";
 
 	public static final int FRIEND_INDEX = 0;
 
@@ -87,10 +80,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public static final String RECENT_PHONE_NUM = "-128";
 	
 	public static final String RECENTLY_JOINED = "-129";
+	
+	public static final String RECOMMENDED = "-130";
 
 	public enum ViewType
 	{
-		SECTION, FRIEND, NOT_FRIEND_HIKE, NOT_FRIEND_SMS, FRIEND_REQUEST, EXTRA, EMPTY, FTUE_CONTACT, REMOVE_SUGGESTIONS, NEW_CONTACT
+		SECTION, FRIEND, NOT_FRIEND_HIKE, NOT_FRIEND_SMS, FRIEND_REQUEST, EXTRA, EMPTY, FTUE_CONTACT, REMOVE_SUGGESTIONS, NEW_CONTACT, RECOMMENDED
 	}
 
 	private LayoutInflater layoutInflater;
@@ -130,6 +125,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected List<ContactInfo> filteredGroupsList;
 	
 	protected List<ContactInfo> filteredRecentsList;
+	
+	protected List<ContactInfo> nuxRecommendedList;
+	
+	protected List<ContactInfo> nuxFilteredRecoList;
 
 	protected Context context;
 
@@ -194,6 +193,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		hikeContactsList = new ArrayList<ContactInfo>(0);
 		smsContactsList = new ArrayList<ContactInfo>(0);
 		recentlyJoinedHikeContactsList = new ArrayList<ContactInfo>(0);
+		nuxRecommendedList = new ArrayList<ContactInfo>(0);
 		
 		friendsStealthList = new ArrayList<ContactInfo>(0);
 		hikeStealthContactsList = new ArrayList<ContactInfo>(0);
@@ -203,6 +203,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		filteredHikeContactsList = new ArrayList<ContactInfo>(0);
 		filteredSmsContactsList = new ArrayList<ContactInfo>(0);
 		filteredRecentlyJoinedHikeContactsList = new ArrayList<ContactInfo>(0);
+		nuxFilteredRecoList = new ArrayList<ContactInfo>(0);
 		lastStatusMessagesMap = new HashMap<String, StatusMessage>();
 
 		listFetchedOnce = false;
@@ -250,7 +251,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				List<ContactInfo> filteredGroupList = new ArrayList<ContactInfo>();
 				List<ContactInfo> filteredRecentsList = new ArrayList<ContactInfo>();
 				List<ContactInfo> filteredRecentlyJoinedList = new ArrayList<ContactInfo>();
-
+				List<ContactInfo> nuxFilteredRecoList = new ArrayList<ContactInfo>();
+ 
 				filterList(friendsList, filteredFriendsList, textToBeFiltered);
 				filterList(hikeContactsList, filteredHikeContactsList, textToBeFiltered);
 				filterList(smsContactsList, filteredSmsContactsList, textToBeFiltered);
@@ -269,6 +271,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				{
 					filterList(recentlyJoinedHikeContactsList, filteredRecentlyJoinedList, textToBeFiltered);
 				}
+				
+				if(nuxRecommendedList != null && !nuxRecommendedList.isEmpty())
+				{
+
+					Logger.d("UmngR", "nux list :" +  nuxRecommendedList.toString());
+					filterList(nuxRecommendedList, nuxFilteredRecoList, textToBeFiltered);
+					Logger.d("UmngR", "nux  filter list :" +  nuxFilteredRecoList.toString());
+				}
 				List<List<ContactInfo>> resultList = new ArrayList<List<ContactInfo>>(3);
 				resultList.add(filteredFriendsList);
 				resultList.add(filteredHikeContactsList);
@@ -276,6 +286,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				resultList.add(filteredGroupList);
 				resultList.add(filteredRecentsList);
 				resultList.add(filteredRecentlyJoinedList);
+				Logger.d("UmngR", nuxFilteredRecoList.toString());
+				resultList.add(nuxFilteredRecoList);
 
 				results.values = resultList;
 				isFiltered = true;
@@ -345,6 +357,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				filteredRecentlyJoinedHikeContactsList.clear();
 				filteredRecentlyJoinedHikeContactsList.addAll(resultList.get(5));
 			}
+			if(nuxRecommendedList != null && !nuxRecommendedList.isEmpty())
+			{
+				nuxFilteredRecoList.clear();
+				nuxFilteredRecoList.addAll(resultList.get(6));
+			}
 			makeCompleteList(true);
 		}
 	}
@@ -358,6 +375,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		resultList.add(groupsList);
 		resultList.add(recentContactsList);
 		resultList.add(recentlyJoinedHikeContactsList);
+		resultList.add(nuxRecommendedList);
 
 		return resultList;
 	}
@@ -780,7 +798,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			break;
 		}
 
-		return HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF) == HikeConstants.STEALTH_ON;
+		return HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF) == HikeConstants.STEALTH_ON;
 	}
 
 	public void refreshGroupList(List<ContactInfo> newGroupList, int groupIndex)
@@ -813,7 +831,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	private void setupStealthListAndRemoveFromActualList(List<ContactInfo> contactList, List<ContactInfo> stealthList)
 	{
-		int stealthMode = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+		int stealthMode = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 		for(Iterator<ContactInfo> iterator = contactList.iterator(); iterator.hasNext();)
 		{
 			ContactInfo contactInfo = iterator.next();

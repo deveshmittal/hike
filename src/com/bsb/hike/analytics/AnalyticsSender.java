@@ -13,10 +13,15 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
 
 import twitter4j.internal.http.HttpResponseCode;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.HikeAlarmManager;
@@ -79,17 +84,18 @@ public class AnalyticsSender
 	 * Used to check if there is analytics data logged on client
 	 * @return true if there is analytics data logged, false otherwise
 	 */
-	public boolean isAnalyticsUploadReady()
+	private boolean isAnalyticsUploadReady()
 	{
 		boolean isPossible = true;
 		
 		// get files absolute paths
 		String[] fileNames = HAManager.getFileNames(context);
 		
-		if(fileNames == null)
-			isPossible = false;	
-		
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Checking if analytics data exists or user is offline :" + isPossible);
+		if(fileNames == null || fileNames.length == 0)
+		{
+			isPossible = false;
+		}
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "DO FILES EXIT :" + isPossible);
 		return isPossible;
 	}
 	
@@ -102,17 +108,40 @@ public class AnalyticsSender
 		// get files absolute paths
 		String[] fileNames = HAManager.getFileNames(this.context);
 		
-		if(fileNames == null || !(Utils.isUserOnline(this.context)))
+		if(fileNames == null)
 			return;
 		
-		int size = fileNames.length;
-		
+		int size = fileNames.length;		
 		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Number of files to send :" + Integer.toString(size));
+		
+		boolean success = false;
 		
 		for(int i=0; i<size; i++)
 		{
-			upload(fileNames[i]);
-		}		
+			success = upload(fileNames[i]);			
+		}
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Upload state :" + success);
+		HAManager instance = HAManager.getInstance();
+		instance.setIsSendAnalyticsDataWhenConnected(!success);
+		
+		if(success)
+		{
+			long nextSchedule = instance.getWhenToSend();
+			nextSchedule = System.currentTimeMillis() + instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_MINUTE;
+			instance.setNextSendTimeToPrefs(nextSchedule);
+			HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, true);		
+	
+			// don't remove! added for testing purpose. 
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(nextSchedule);
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOAD WAS SUCCESSFUL---");
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm Date :" + cal.get(Calendar.DATE));
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm time :" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));			
+		}
+		else
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOAD FAILED---");			
+		}
 	}
 	
 	/**
@@ -161,78 +190,48 @@ public class AnalyticsSender
 	 */
 	public void startUploadAndScheduleNextAlarm()
 	{
-		if(!isAnalyticsUploadReady())
-			return;
-		
 		HAManager instance = HAManager.getInstance();
 
-		long nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend(), 0, 0, 0);
-
+		// if user is offline, save true to prefs so that logs could be sent when Internet is available
 		if(!Utils.isUserOnline(context))
-		{			
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "User is offline.....");
-
-			int freq = instance.getAnalyticsUploadRetryCount();
-
-			// set alarm for post 4 hours if there is no network
-			if(freq < AnalyticsConstants.ANALYTICS_UPLOAD_FREQUENCY)
-			{
-				instance.incrementAnalyticsUploadRetryCount();
-//				freq = instance.getAnalyticsUploadRetryCount();
-				nextSchedule = System.currentTimeMillis() + AnalyticsConstants.UPLOAD_TIME_MULTIPLE * AnalyticsConstants.ONE_HOUR;
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "UPLOAD RETRY COUNT :" + freq);
-				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Alarm set for next 4 hours from current time.");
-				
-				// don't remove! added for testing purpose. 
-//				Calendar cal = Calendar.getInstance();
-//				cal.setTimeInMillis(nextSchedule);
-//								
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Day :" + cal.get(Calendar.DATE));
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Hour :" + cal.get(Calendar.HOUR_OF_DAY));				
-			}
-			else
-			{
-				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Retries finished. Set alarm as per frequency now.");
-				instance.resetAnalyticsUploadRetryCount();
-				
-				// don't remove! added for testing purpose. 
-//				Calendar cal = Calendar.getInstance();
-//				cal.setTimeInMillis(nextSchedule);
-//								
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Day :" + cal.get(Calendar.DATE));
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Hour :" + cal.get(Calendar.HOUR_OF_DAY));
-				
-				nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;
-				
-				// don't remove! added for testing purpose. 
-//				cal = Calendar.getInstance();
-//				cal.setTimeInMillis(nextSchedule);
-//								
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Day :" + cal.get(Calendar.DATE));
-//				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Hour :" + cal.get(Calendar.HOUR_OF_DAY));
-			}
+		{		
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "User is offline, set true in prefs and return");
+			HAManager.getInstance().setIsSendAnalyticsDataWhenConnected(true);			
 		}
-		// regular path will set alarm for same time next day
+		// user is connected
 		else
 		{
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "User is online.....");
-
-			nextSchedule += instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;
-
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM ALARM ROUTE---");
 			
-			instance.sendAnalyticsData(false);			
+			long nextSchedule = instance.getWhenToSend();
+
+			// if there are no logs on disk, set next alarm and return 
+			if(!isAnalyticsUploadReady())
+			{
+				nextSchedule = System.currentTimeMillis() + instance.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_MINUTE;
+				
+				// don't remove! added for testing purpose. 
+				Calendar cal = Calendar.getInstance();
+				cal.setTimeInMillis(nextSchedule);
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm Date :" + cal.get(Calendar.DATE));
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm time :" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));			
+				instance.setNextSendTimeToPrefs(nextSchedule);
+				HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);		
+				return;
+			}
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "---UPLOADING FROM ALARM ROUTE---");			
+			instance.sendAnalyticsData(true, false);
 		}
-		
-		HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);		
 	}
 	
 	/**
 	 * This method actually uploads a specific event file to the server
 	 * @param fileName name of the file to be sent to the server
 	 */
-	private void upload(String fileName)
+	private boolean upload(String fileName)
 	{
+		boolean wasUploadSuccessful = true;
+		
 		while(true)
 		{
 			String absolutePath = HAManager.getInstance().getAnalyticsDirectory() + File.separator + fileName;
@@ -244,6 +243,7 @@ public class AnalyticsSender
 			String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
 	
 			httpClient = new DefaultHttpClient();
+			httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + AccountUtils.getAppVersion());
 			
 			HttpPost postCall = new HttpPost(AccountUtils.analyticsUploadUrl);
 	
@@ -264,7 +264,8 @@ public class AnalyticsSender
 				if(!retryUpload())
 				{
 					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Exiting upload process....");
-					return;
+					wasUploadSuccessful = false;
+					return wasUploadSuccessful;
 				}
 			}
 			catch(ConnectTimeoutException e)
@@ -272,49 +273,63 @@ public class AnalyticsSender
 				if(!retryUpload())
 				{
 					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Exiting upload process....");
-					return;
+					wasUploadSuccessful = false;
+					return wasUploadSuccessful;
 				}
 			}
 			catch (FileNotFoundException e) 
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File not found during upload.");
-				return;
+				wasUploadSuccessful = false;
+				return wasUploadSuccessful;
 			}
 			catch(ClientProtocolException e)
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "ClientProtocol exception during upload.");
-				return;
+				wasUploadSuccessful = false;
+				return wasUploadSuccessful;
 			}
 			catch(IOException e)
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception during upload.");
-				return;
+				wasUploadSuccessful = false;
+				return wasUploadSuccessful;
 			}
 			if (response != null)
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "http response :" + response.getStatusLine());
 				switch (response.getStatusLine().getStatusCode())
 				{
-				case HttpResponseCode.OK:
-				{
-					resetRetryParams();
+					case HttpResponseCode.OK:
+					{
+						resetRetryParams();
+	
+						new File(absolutePath).delete();
+	
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "deleted file :" + fileName);
+					}				
+					return wasUploadSuccessful;
 
-					new File(absolutePath).delete();
-
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "deleted file :" + fileName);
-				}
-					return;
-
-				case HttpResponseCode.GATEWAY_TIMEOUT:
-				case HttpResponseCode.SERVICE_UNAVAILABLE:
-				case HttpResponseCode.INTERNAL_SERVER_ERROR:
-				case HttpResponseCode.NOT_FOUND:
+					case HttpResponseCode.GATEWAY_TIMEOUT:
+					case HttpResponseCode.SERVICE_UNAVAILABLE:
+					case HttpResponseCode.INTERNAL_SERVER_ERROR:
+					case HttpResponseCode.NOT_FOUND:
+					case HttpResponseCode.BAD_GATEWAY:
+					case HttpResponseCode.TOO_MANY_REQUESTS:
 
 					if (!retryUpload())
 					{
 						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Exiting upload process....");
-						return;
+						wasUploadSuccessful = false;
 					}
+					return wasUploadSuccessful;
+					
+					case HttpResponseCode.FORBIDDEN:
+					case HttpResponseCode.UNAUTHORIZED:
+					{
+						wasUploadSuccessful = true;
+					}
+					return wasUploadSuccessful;
 				}
 			}
 			else
@@ -322,42 +337,40 @@ public class AnalyticsSender
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "null response while uploading file to server.");
 				
 				if(!retryUpload())
-					return;
+				{
+					wasUploadSuccessful = false;
+				}
+				return wasUploadSuccessful;
 			}
 		}
 	}		
 }
 
-//class NetworkListener extends BroadcastReceiver 
-//{
-//	Context context;
-//		
-//	public NetworkListener(Context context) 
-//	{
-//		this.context = context;
-//		
-//		this.context.registerReceiver(this, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));		
-//	}
-//
-//	@Override
-//	public void onReceive(Context context, Intent intent) 
-//	{		
-//		if(intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
-//		{
-//			if(Utils.isUserOnline(context))
-//			{
-//				NetworkType networkType = FileTransferManager.getInstance(this.context).getNetworkType();
-//				
-//				if(networkType == NetworkType.WIFI)
-//				{
-//					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Wifi connectivity changed!");
-//
-//					if(AnalyticsSender.getFileNames(context) != null && Utils.isUserOnline(context))
-//					{
-//						new Thread(AnalyticsSender.getInstance(context)).start();
-//					}
-//				}
-//			}
-//		}				
-//	}
-//}
+class NetworkListener extends BroadcastReceiver 
+{
+	Context context;
+		
+	public NetworkListener(Context context) 
+	{
+		this.context = context;
+		
+		this.context.registerReceiver(this, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));		
+	}
+
+	@Override
+	public void onReceive(Context context, Intent intent) 
+	{		
+		if(intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
+		{
+			if(Utils.isUserOnline(context))
+			{
+				HAManager instance = HAManager.getInstance();
+				
+				if(instance.isSendAnalyticsDataWhenConnected())
+				{
+					instance.sendAnalyticsData(true, false);
+				}
+			}
+		}				
+	}
+}
