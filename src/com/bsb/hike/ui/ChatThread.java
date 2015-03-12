@@ -1774,6 +1774,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return false;
 		}
+		if (message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+		{
+			if (message.webMetadata.isLongPressDisabled())
+			{
+				return false;
+			}
+		}
 		mAdapter.toggleSelection(message);
 		boolean isMsgSelected = mAdapter.isSelected(message);
 
@@ -1860,14 +1867,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
         {
             // Content card is a non text message.
             selectedNonTextMsg(isMsgSelected);
-        }
-		else if (message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+        }if (message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
 		{
-			if (message.webMetadata.isLongPressDisabled())
-			{
-				return false;
-			}
-
 			selectedNonTextMsg(isMsgSelected);
 		}
 
