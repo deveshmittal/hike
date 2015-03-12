@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="1129"
-    android:versionName="3.8.0.55" >
+    android:versionCode="1130"
+    android:versionName="3.8.0.56" >
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="17" />
@@ -269,7 +269,7 @@
         </activity>
         <activity
             android:name=".ui.FtueBroadcast"
-            android:configChanges="orientation|keyboardHidden|screenSize" >
+            android:configChanges="keyboardHidden|screenSize" >
         </activity>
         <activity
             android:name=".ui.PeopleActivity"

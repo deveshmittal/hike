@@ -1384,6 +1384,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			boolean isGamesClicked = accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, false);
 			boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
 			boolean showTimelineRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_TIMELINE_RED_DOT, true);
+			boolean showBroadcastRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_NEW_BROADCAST_RED_DOT, true);
+			
 			int count = 0;
 			if (item.getKey() == 7)
 			{
@@ -1393,7 +1395,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				else if (count > 0)
 					newGamesIndicator.setText(String.valueOf(count));
 			}
-			if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked) || (item.getKey() == 7 && (count > 0 || showTimelineRedDot)))
+			if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked) || (item.getKey() == 7 && (count > 0 || showTimelineRedDot)) || (item.getKey() == 10 && showBroadcastRedDot))
 			{
 				newGamesIndicator.setVisibility(View.VISIBLE);
 			}
@@ -1416,6 +1418,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 * removing out new chat option for now
 		 */
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.new_broadcast), 10));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.timeline), 7));
 
@@ -1444,8 +1448,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
-
-		optionsList.add(new OverFlowMenuItem(getString(R.string.new_broadcast), 10));
 
 		addEmailLogItem(optionsList);
 
@@ -1537,6 +1539,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case HikeConstants.HOME_ACTIVITY_OVERFLOW.NEW_BROADCAST:
 					
 					sendBroadCastAnalytics();
+					HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.SHOW_NEW_BROADCAST_RED_DOT, false);
 					if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOW_BROADCAST_FTUE_SCREEN, true))
 					{
 						IntentManager.createBroadcastFtue(HomeActivity.this);

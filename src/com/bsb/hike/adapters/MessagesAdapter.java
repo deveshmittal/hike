@@ -908,7 +908,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				});
 
 			}
-			displayBroadcastIndicator(convMessage, stickerHolder.broadcastIndicator);
+			displayBroadcastIndicator(convMessage, stickerHolder.broadcastIndicator, false);
 			setTimeNStatus(position, stickerHolder, true, stickerHolder.placeHolder);
 			setSelection(convMessage, stickerHolder.selectedStateOverlay);
 		}
@@ -1129,7 +1129,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					wtHolder.initialization.setVisibility(View.GONE);
 				}
 
-				displayBroadcastIndicator(convMessage, wtHolder.broadcastIndicator);
+				displayBroadcastIndicator(convMessage, wtHolder.broadcastIndicator, true);
 				setTimeNStatus(position, wtHolder, true, wtHolder.placeHolder);
 				setSelection(convMessage, wtHolder.selectedStateOverlay);
 
@@ -1290,7 +1290,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				videoHolder.filmstripLeft.setVisibility(View.VISIBLE);
 				videoHolder.filmstripRight.setVisibility(View.VISIBLE);
 
-				displayBroadcastIndicator(convMessage, videoHolder.broadcastIndicator);
+				displayBroadcastIndicator(convMessage, videoHolder.broadcastIndicator, false);
 				setBubbleColor(convMessage, videoHolder.messageContainer);
 				setupFileState(videoHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, videoHolder, true, videoHolder.fileThumb);
@@ -1435,7 +1435,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				imageHolder.fileThumb.setVisibility(View.VISIBLE);
 
-				displayBroadcastIndicator(convMessage, imageHolder.broadcastIndicator);
+				displayBroadcastIndicator(convMessage, imageHolder.broadcastIndicator, false);
 				setBubbleColor(convMessage, imageHolder.messageContainer);
 				setupFileState(imageHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, imageHolder, true, imageHolder.fileThumb);
@@ -1553,7 +1553,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					imageHolder.circularProgressBg.setVisibility(View.VISIBLE);
 				}
 
-				displayBroadcastIndicator(convMessage, imageHolder.broadcastIndicator);
+				displayBroadcastIndicator(convMessage, imageHolder.broadcastIndicator, false);
 				setBubbleColor(convMessage, imageHolder.messageContainer);
 				setTimeNStatus(position, imageHolder, true, imageHolder.fileThumb);
 				setSelection(convMessage, imageHolder.selectedStateOverlay);
@@ -1676,7 +1676,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					fileHolder.circularProgressBg.setVisibility(View.VISIBLE);
 				}
 
-				displayBroadcastIndicator(convMessage, fileHolder.broadcastIndicator);
+				displayBroadcastIndicator(convMessage, fileHolder.broadcastIndicator, true);
 				setBubbleColor(convMessage, fileHolder.messageContainer);
 				setTimeNStatus(position, fileHolder, false, fileHolder.messageContainer);
 				setSelection(convMessage, fileHolder.selectedStateOverlay);
@@ -1790,7 +1790,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				fileHolder.fileExtension.setVisibility(View.VISIBLE);
 				fileHolder.fileDetails.setVisibility(View.VISIBLE);
 
-				displayBroadcastIndicator(convMessage, fileHolder.broadcastIndicator);
+				displayBroadcastIndicator(convMessage, fileHolder.broadcastIndicator, true);
 				setBubbleColor(convMessage, fileHolder.messageContainer);
 				setupFileState(fileHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), true);
 				setTimeNStatus(position, fileHolder, false, fileHolder.messageContainer);
@@ -1890,7 +1890,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			Linkify.addLinks(textHolder.text, Linkify.ALL);
 			Linkify.addLinks(textHolder.text, Utils.shortCodeRegex, "tel:");
 
-			displayBroadcastIndicator(convMessage, textHolder.broadcastIndicator);
+			displayBroadcastIndicator(convMessage, textHolder.broadcastIndicator, true);
 			setTimeNStatus(position, textHolder, false, textHolder.messageContainer);
 			setSelection(convMessage, textHolder.selectedStateOverlay);
 
@@ -2378,15 +2378,24 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return v;
 	}
 
-	private void displayBroadcastIndicator(ConvMessage convMessage, ImageView broadcastIndicator)
+	private void displayBroadcastIndicator(ConvMessage convMessage, ImageView broadcastIndicator, boolean showBlackIcon)
 	{
 		if (broadcastIndicator != null)
 		{
 			if (convMessage.isBroadcastMessage() && !convMessage.isBroadcastConversation())
 			{
-				broadcastIndicator.setImageResource(R.drawable.ic_broadcast_icondark);
-				broadcastIndicator.setScaleType(ScaleType.CENTER);
-				broadcastIndicator.setVisibility(View.VISIBLE);
+				if (showBlackIcon)
+				{
+					broadcastIndicator.setImageResource(R.drawable.ic_broadcast_icondark);
+					broadcastIndicator.setScaleType(ScaleType.CENTER);
+					broadcastIndicator.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					broadcastIndicator.setImageResource(R.drawable.ic_broadcast_ft);
+					broadcastIndicator.setScaleType(ScaleType.CENTER);
+					broadcastIndicator.setVisibility(View.VISIBLE);
+				}
 			}
 			else
 			{

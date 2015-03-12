@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <LinearLayout 
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+	        
+	        <com.bsb.hike.ui.utils.RecyclingImageView
+            android:id="@+id/group_profile_image"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_marginLeft="122dp"
+            android:background="@drawable/ftue_broadcast_bg"
+            android:src="@drawable/ic_default_avatar_broadcast"
+            android:scaleType="centerInside" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/broadcast_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="27dp"
+        android:text="@string/broadcast_ftue_message"
+        android:layout_marginRight="122dp"
+        android:textSize="17sp"
+        android:layout_gravity="center"
+        android:textStyle="italic"
+        android:textColor="#333333" />
+    
+    </LinearLayout>
+
+    <com.bsb.hike.view.CustomFontButton
+        android:id="@+id/btn_broadcast_ftue"
+        android:layout_width="120dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="27dp"
+        android:background="@drawable/signup_button"
+        android:text="@string/got_it"
+        android:textColor="#ffffff"
+        android:textSize="13sp"
+        android:textStyle="bold|italic" />
+	           
+</LinearLayout>

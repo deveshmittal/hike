@@ -30,7 +30,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Pair;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -869,7 +868,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					adapter.clearAllSelection(true);
 					adapter.selectAllContacts(true);
 					tagEditText.clear(false);
-					int selected = adapter.getSelectedContactCount();
+					int selected = adapter.getCurrentSelection();
 					tagEditText.toggleTag( getString(selected <=1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
 					
 					try
@@ -1118,9 +1117,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					int selected = adapter.getCurrentSelection();
 					if (selected < MIN_MEMBERS_BROADCAST_LIST)
 					{
-						Toast toast = Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_BROADCAST_LIST), Toast.LENGTH_SHORT);
-						toast.setGravity(Gravity.CENTER, 0, 0);
-						toast.show();
+						Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_BROADCAST_LIST), Toast.LENGTH_SHORT).show();;
 						return;
 					}
 					sendBroadCastAnalytics();
@@ -1888,6 +1885,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if (existingBroadcastId != null || createBroadcast)
 			{
 				ComposeChatActivity.this.finish();
+				final InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputMethodManager.hideSoftInputFromWindow(tagEditText.getWindowToken(), 0);
 				return;
 			}
 			setModeAndUpdateAdapter(START_CHAT_MODE);

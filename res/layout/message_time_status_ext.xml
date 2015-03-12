@@ -13,7 +13,7 @@
         android:id="@+id/broadcastIndicator"
         android:layout_width="21dp"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_broadcast_icondark"
+        android:src="@drawable/ic_broadcast_ft"
         android:layout_marginLeft="3dp"
         android:visibility="gone" />
     

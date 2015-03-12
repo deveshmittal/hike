@@ -169,6 +169,8 @@ public class HikeConstants
 	public static final String GAMES_TOKEN = "games_token";
 
 	public static final String SHOW_GAMES = "show_games";
+	
+	public static final String SHOW_BROADCAST = "show_broadcast";
 
 	public static final String GAMES = "games";
 
@@ -557,6 +559,8 @@ public class HikeConstants
 	public static final String SHOW_RECENTLY_JOINED = "showRecentlyJoined";
 
 	public static final String SHOW_TIMELINE_RED_DOT = "showTimelineRedDot";
+	
+	public static final String SHOW_NEW_BROADCAST_RED_DOT = "showBroadcastRedDot";
 	
 	public static final String IS_OF_ICON_CLICKED = "isOfIconClicked";
 
