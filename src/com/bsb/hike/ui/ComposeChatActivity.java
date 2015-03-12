@@ -1882,6 +1882,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if (existingBroadcastId != null || createBroadcast)
 			{
 				ComposeChatActivity.this.finish();
+				final InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputMethodManager.hideSoftInputFromWindow(tagEditText.getWindowToken(), 0);
 				return;
 			}
 			setModeAndUpdateAdapter(START_CHAT_MODE);
