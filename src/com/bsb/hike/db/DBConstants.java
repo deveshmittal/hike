@@ -5,7 +5,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 public interface DBConstants
 {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 35;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 36;
 
 	public static final int USERS_DATABASE_VERSION = 16;
 
@@ -279,5 +279,20 @@ public interface DBConstants
 	public static final String CATEGORY_SIZE = "categorySize";
 
 	public static final String STICKER_SHOP_TABLE = "stickerShopTable";
+	
+	public static final String SERVER_ID = "serverId";
+	
+	public static final String MESSAGE_ORIGIN_TYPE = "messageOriginType";
+	
+	public static final int NORMAL_TYPE = 0;
+	
+	public static final int BROADCAST_TYPE = 1;
+
+	//We are just using a different name for old timestamp field here.
+	public static final String LAST_MESSAGE_TIMESTAMP = "timestamp";
+
+	public static final String SORTING_TIMESTAMP = "sortingTimeStamp";
+
+	public static final String SERVER_ID_INDEX = "serverid_idx";
 
 }

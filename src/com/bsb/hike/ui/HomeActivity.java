@@ -60,6 +60,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
@@ -1444,6 +1445,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
 
+		optionsList.add(new OverFlowMenuItem(getString(R.string.new_broadcast), 10));
+
 		addEmailLogItem(optionsList);
 
 		overFlowWindow = new PopupWindow(this);
@@ -1473,31 +1476,31 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 				switch (item.getKey())
 				{
-				case 1:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.CREDITS:
 					intent = new Intent(HomeActivity.this, CreditsActivity.class);
 					break;
-				case 2:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.INVITE_FRIENDS:
 					intent = new Intent(HomeActivity.this, TellAFriend.class);
 					break;
-				case 3:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.HIKE_EXTRAS:
 					editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true);
 					editor.commit();
 					updateOverFlowMenuNotification();
 					intent = IntentManager.getGamingIntent(HomeActivity.this);
 					break;
-				case 4:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.REWARDS:
 					editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true);
 					editor.commit();
 					updateOverFlowMenuNotification();
 					intent = IntentManager.getRewardsIntent(HomeActivity.this);
 					break;
-				case 5:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.SETTINGS:
 					intent = new Intent(HomeActivity.this, SettingsActivity.class);
 					break;
-				case 6:
-					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.NEW_GROUP:
+					intent = new Intent(HomeActivity.this, CreateNewGroupOrBroadcastActivity.class);
 					break;
-				case 7:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.TIMELINE:
 					try
 					{
 						JSONObject md = new JSONObject();
@@ -1513,7 +1516,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					editor.commit();
 					intent = new Intent(HomeActivity.this, TimelineActivity.class);
 					break;
-				case 8:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.STATUS:
 					try
 					{
 						JSONObject metadata = new JSONObject();
@@ -1527,9 +1530,21 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 					intent = new Intent(HomeActivity.this, StatusUpdate.class);
 					break;
-				case 9:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.LOGS:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
+					break;
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.NEW_BROADCAST:
+					
+					sendBroadCastAnalytics();
+					if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOW_BROADCAST_FTUE_SCREEN, true))
+					{
+						IntentManager.createBroadcastFtue(HomeActivity.this);
+					}
+					else
+					{
+						IntentManager.createBroadcastDefault(HomeActivity.this);
+					}
 					break;
 				}
 
@@ -1843,5 +1858,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 	}
 
+	private void sendBroadCastAnalytics()
+	{
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_BROADCAST_VIA_OVERFLOW);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+	}
 	
 }
