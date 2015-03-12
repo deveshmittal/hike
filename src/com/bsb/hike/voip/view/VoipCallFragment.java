@@ -702,43 +702,49 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 			return;
 		}
 
-		TextView callStatusView = (TextView) getView().findViewById(R.id.call_status);
-		Chronometer callDurationView = (Chronometer) getView().findViewById(R.id.call_duration);
+		callDuration = (Chronometer) getView().findViewById(R.id.call_duration);
 
 		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
 		anim.setDuration(1000);
 
 		switch(status)
 		{
-			case OUTGOING_CONNECTING: callStatusView.startAnimation(anim);
-									  callStatusView.setText(getString(R.string.voip_connecting));
-									  break;
+			case OUTGOING_CONNECTING:
+				callDuration.startAnimation(anim);
+				callDuration.setText(getString(R.string.voip_connecting));
+				break;
 
-			case OUTGOING_RINGING:	  callStatusView.startAnimation(anim);
-									  callStatusView.setText(getString(R.string.voip_ringing));
-									  break;
+			case OUTGOING_RINGING:
+				callDuration.startAnimation(anim);
+				callDuration.setText(getString(R.string.voip_ringing));
+				break;
 
-			case INCOMING_CALL:		  callStatusView.startAnimation(anim);
-									  callStatusView.setText(getString(R.string.voip_incoming));
-									  break;
+			case INCOMING_CALL:
+				callDuration.startAnimation(anim);
+				callDuration.setText(getString(R.string.voip_incoming));
+				break;
 
-			case PARTNER_BUSY:		  callStatusView.startAnimation(anim);
-									  callStatusView.setText(getString(R.string.voip_partner_busy));
-									  break;
+			case PARTNER_BUSY:
+				callDuration.startAnimation(anim);
+				callDuration.setText(getString(R.string.voip_partner_busy));
+				break;
 
-			case ACTIVE: 			  startCallDuration();
-									  callStatusView.setVisibility(View.GONE);
-									  callDurationView.setVisibility(View.VISIBLE);
-									  break;
+			case ACTIVE:
+				startCallDuration();
+				break;
 
-			case ON_HOLD:			  callDurationView.setVisibility(View.GONE);
-									  callStatusView.setVisibility(View.VISIBLE);
-									  callStatusView.startAnimation(anim);
-									  callStatusView.setText(getString(R.string.voip_on_hold));
-									  break;
+			case ON_HOLD:
+				callDuration.stop();
+				callDuration.startAnimation(anim);
+				callDuration.setText(getString(R.string.voip_on_hold));
+				break;
 
-			case ENDED: 			  callStatusView.setText(getString(R.string.voip_call_ended));
-									  break;
+			case ENDED:
+				if(!isCallActive)
+				{
+					callDuration.setText(getString(R.string.voip_call_ended));
+				}
+				break;
 		}
 	}
 	
@@ -747,7 +753,6 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
 		anim.setDuration(500);
 
-		callDuration = (Chronometer) getView().findViewById(R.id.call_duration);
 		callDuration.startAnimation(anim);
 		callDuration.setBase((SystemClock.elapsedRealtime() - 1000*voipService.getCallDuration()));
 		callDuration.start();

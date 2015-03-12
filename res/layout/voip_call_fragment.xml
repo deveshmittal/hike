@@ -53,18 +53,6 @@
 					android:layout_marginLeft="10dp"
 					android:layout_alignParentRight="true"
 					android:layout_alignBottom="@id/contact_msisdn"
-					android:textColor="@color/white"
-					android:visibility="gone" />
-
-				  <com.bsb.hike.view.CustomFontTextView
-					android:id="@+id/call_status"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:textSize="14dp"
-					android:text=""
-					android:layout_marginLeft="10dp"
-					android:layout_alignParentRight="true"
-					android:layout_alignBottom="@id/contact_msisdn"
 					android:textColor="@color/white" />
 	      </RelativeLayout>
 
