@@ -204,7 +204,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				mAdapter.remove(conversation);
 				mConversationsByMSISDN.remove(conversation.getMsisdn());
 				mConversationsAdded.remove(conversation.getMsisdn());
-				HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
+				resetSearchIcon();
 
 				HikeMessengerApp.removeStealthMsisdn(conversation.getMsisdn(), publishStealthEvent);
 				stealthConversations.remove(conversation);
@@ -1030,7 +1030,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 	{
 		super.onCreateOptionsMenu(menu, inflater);
+		resetSearchIcon();
+	}
+
+	private void resetSearchIcon()
+	{
 		HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
+	}
+
+	public boolean isConversationsEmpty()
+	{
+		return (mConversationsByMSISDN != null && !mConversationsByMSISDN.isEmpty()) ? false : true;
 	}
 
 	@Override
@@ -1166,23 +1176,32 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	public void setupSearch()
 	{
-		searchMode = true;
-		mAdapter.setupSearch();
+		if (mAdapter != null)
+		{
+			searchMode = true;
+			mAdapter.setupSearch();
+		}
 	}
 
 	public void onSearchQueryChanged(String s)
 	{
-		searchText = s.trim();
-		setEmptyState();
-		mAdapter.onQueryChanged(searchText);
+		if (searchMode && mAdapter != null)
+		{
+			searchText = s.trim();
+			setEmptyState();
+			mAdapter.onQueryChanged(searchText);
+		}
 	}
 
 	public void removeSearch()
 	{
-		searchText = null;
-		searchMode = false;
-		setEmptyState();
-		mAdapter.removeSearch();
+		if (mAdapter != null)
+		{
+			searchText = null;
+			searchMode = false;
+			setEmptyState();
+			mAdapter.removeSearch();
+		}
 	}
 
 	private void resetStealthTipClicked()
@@ -1613,6 +1632,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		mConversationsAdded = new HashSet<String>();
 
 		setupConversationLists();
+		resetSearchIcon();
 
 		if (mAdapter != null)
 		{
@@ -1633,11 +1653,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			setEmptyState();
 		}
-	}
-	
-	public boolean isConversationsEmpty()
-	{
-		return (mConversationsByMSISDN != null && !mConversationsByMSISDN.isEmpty()) ? false : true;
 	}
 
 	private void ShowTipIfNeeded(boolean hasNoConversation)
@@ -1748,7 +1763,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			mAdapter.addToLists(stealthConversations);
 		}
 
-		HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
+		resetSearchIcon();
 		mAdapter.sortLists(mConversationsComparator);
 		notifyDataSetChanged();
 	}
@@ -1966,7 +1981,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						mConversationsAdded.remove(msisdn);
 						mAdapter.remove(conversation);
 						notifyDataSetChanged();
-						HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
+						resetSearchIcon();
 					}
 					else
 					{
@@ -2018,7 +2033,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					mAdapter.addToLists(conversation);
 					mAdapter.sortLists(mConversationsComparator);
 					notifyDataSetChanged();
-					HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
+					resetSearchIcon();
 				}
 			});
 		}
