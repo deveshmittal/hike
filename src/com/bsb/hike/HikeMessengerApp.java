@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.acra.ACRA;
@@ -44,6 +45,8 @@ import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.httpmgr.HttpManager;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequestConstants;
 import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.productpopup.ProductInfoManager;
@@ -57,11 +60,17 @@ import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
+import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+import com.squareup.okhttp.ResponseBody;
 
 @ReportsCrashes(formKey = "", customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
 		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE, ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
@@ -454,7 +463,13 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String DETAILED_HTTP_LOGGING_ENABLED = "detailedHttpLoggingEnabled";
 
 	public static final String BULK_LAST_SEEN_PREF = "blsPref";
+	
+	public static final String TOGGLE_OK_HTTP = "toggleOkHttp";
 
+	public static final String UPGRADE_FOR_SERVER_ID_FIELD = "upgradeForServerIdField";
+
+	public static final String SHOW_BROADCAST_FTUE_SCREEN = "showBroadcastFtueScreen";
+	
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	//private static Twitter twitter;
@@ -709,7 +724,8 @@ public void onTrimMemory(int level)
 		// successfully.
 		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 ) || 
 				settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1 || settings.getInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, -1) == 1 || 
-				settings.getInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1) == 1 || settings.getInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 1) == 1 || TEST)
+				settings.getInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1) == 1 || settings.getInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 1) == 1 ||
+				settings.getInt(UPGRADE_FOR_SERVER_ID_FIELD, 0) == 1|| TEST)
 		{
 			startUpdgradeIntent();
 		}
@@ -771,7 +787,8 @@ public void onTrimMemory(int level)
 			editor.commit();
 		}
 		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), Utils.switchSSLOn(getApplicationContext()));
-
+		HttpRequestConstants.setUpBase();
+		
 		typingNotificationMap = new HashMap<String, TypingNotification>();
 
 		stealthMsisdn = new HashSet<String>();
@@ -827,6 +844,8 @@ public void onTrimMemory(int level)
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
 		
 		registerReceivers();
+		
+		HttpManager.init();
 
 		if (!HikeSharedPreferenceUtil.getInstance().getData(HikePlatformConstants.CRICKET_PREF_NAME, false))
 		{
@@ -925,7 +944,7 @@ public void onTrimMemory(int level)
 	{
 		ImageCacheParams params = new ImageCacheParams();
 		params.setMemCacheSizePercent(0.15f);
-		cache = new HikeLruCache(params, getApplicationContext());
+		cache = HikeLruCache.getInstance(params, getApplicationContext());
 	}
 
 	public static HikeLruCache getLruCache()

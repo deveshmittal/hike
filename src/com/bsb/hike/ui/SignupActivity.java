@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
+
 import java.net.URI;
 import java.util.ArrayList;
 
@@ -77,6 +78,11 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.exception.HttpException;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequestConstants;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequests;
+import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
@@ -482,6 +488,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				 * Update the urls to use ssl or not.
 				 */
 				Utils.setupUri(this.getApplicationContext());
+				HttpRequestConstants.toggleSSL();
 
 				mHandler.removeCallbacks(startWelcomeScreen);
 				mHandler.postDelayed(startWelcomeScreen, 2500);
@@ -490,6 +497,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				Editor ed = settings.edit();
 				ed.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
 				ed.commit();
+				
+				JSONObject sessionDataObject = HAManager.getInstance().recordAndReturnSessionStart();
+				Utils.sendSessionMQTTPacket(SignupActivity.this, HikeConstants.FOREGROUND, sessionDataObject);
 			}
 			else if (mCurrentState != null && mCurrentState.value != null && mCurrentState.value.equals(HikeConstants.CHANGE_NUMBER))
 			{

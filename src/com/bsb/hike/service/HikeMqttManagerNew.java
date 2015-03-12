@@ -1,6 +1,8 @@
 package com.bsb.hike.service;
 
 import java.net.SocketException;
+
+
 import java.net.UnknownHostException;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.ArrayList;
@@ -54,6 +56,7 @@ import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.HikePacket;
+import com.bsb.hike.modules.httpmgr.hikehttp.HttpRequestConstants;
 import com.bsb.hike.models.NetInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
@@ -1186,6 +1189,22 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 								// Do nothing
 							}
 						}
+						else if(packet.getPacketType() == HikeConstants.BROADCAST_MESSAGE_TYPE)
+						{
+							try
+							{
+								JSONObject jsonObj = new JSONObject(new String(packet.getMessage()));
+
+								JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+								long baseId = data.optLong(HikeConstants.MESSAGE_ID);
+								JSONArray contacts = data.optJSONArray(HikeConstants.LIST);
+
+								int count = contacts.length() + 1;
+								HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MULTI_MSG, new Pair<Long, Integer>(baseId, count));
+							} catch (JSONException e) {
+								// Do nothing
+							}
+						}
 						else
 						{
 							HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
@@ -1416,6 +1435,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				}
 			}
 			Utils.setupUri(context); // TODO : this should be moved out from here to some other place
+			HttpRequestConstants.toggleSSL();
 		}
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
 		{
@@ -1692,9 +1712,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			type = HikeConstants.MULTI_FORWARD_MESSAGE_TYPE;
 		}
+		else if(Utils.isBroadcastConversation((o.optString(HikeConstants.TO))))
+		{
+			type = HikeConstants.BROADCAST_MESSAGE_TYPE;
+		}
 		else
 		{
 			type = HikeConstants.NORMAL_MESSAGE_TYPE;
+		}
+
+		if (!initialised.get())
+		{
+			Logger.d(TAG, "Not initialised, initializing...");
+			init();
 		}
 
 		HikePacket packet = new HikePacket(data.getBytes(), msgId, System.currentTimeMillis(), type);
@@ -1706,12 +1736,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 		Bundle bundle = new Bundle();
 		bundle.putParcelable(HikeConstants.MESSAGE, packet);
-
-		if (!initialised.get())
-		{
-			Logger.d(TAG, "Not initialised, initializing...");
-			init();
-		}
 
 		msg.setData(bundle);
 		msg.replyTo = this.mMessenger;

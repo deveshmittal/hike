@@ -25,7 +25,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.productpopup.ProductPopupsConstants.HIKESCREEN;
 import com.bsb.hike.ui.ComposeChatActivity;
-import com.bsb.hike.ui.CreateNewGroupActivity;
+import com.bsb.hike.ui.CreateNewGroupOrBroadcastActivity;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HomeActivity;
@@ -409,7 +409,7 @@ public abstract class JavascriptBridge
 			}
 			if (activityName.equals(HIKESCREEN.NEWGRP.toString()))
 			{
-				context.startActivity(new Intent(context, CreateNewGroupActivity.class));
+				context.startActivity(new Intent(context, CreateNewGroupOrBroadcastActivity.class));
 			}
 			if (activityName.equals(HIKESCREEN.INVITEFRNDS.toString()))
 			{

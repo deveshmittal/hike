@@ -61,6 +61,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
@@ -73,6 +74,7 @@ import com.bsb.hike.productpopup.ProductContentModel;
 import com.bsb.hike.productpopup.ProductInfoManager;
 import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
+import com.bsb.hike.providers.HikeProvider;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.tasks.SendLogsTask;
@@ -155,7 +157,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
 			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FAVORITE_COUNT_CHANGED,
-			HikePubSub.STEALTH_UNREAD_TIP_CLICKED,HikePubSub. FTUE_LIST_FETCHED_OR_UPDATED };
+			HikePubSub.STEALTH_UNREAD_TIP_CLICKED,HikePubSub. FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.USER_JOINED_NOTIFICATION };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE };
 
@@ -1006,15 +1008,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			
 			String msisdn = (String) object;
 			
-			runOnUiThread(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					showRecentlyJoinedDot(1000);
-				}
-			});
-			
 			for (ContactInfo contactInfo : ftueContactsData.getCompleteList())
 			{
 				if (contactInfo.getMsisdn().equals(msisdn))
@@ -1024,6 +1017,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					break;
 				}
 			}
+		}
+		else if (HikePubSub.USER_JOINED_NOTIFICATION.equals(type))
+		{
+			showRecentlyJoinedDot(1000);
 		}
 		else if (HikePubSub.UPDATE_OF_MENU_NOTIFICATION.equals(type))
 		{
@@ -1394,6 +1391,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			boolean isGamesClicked = accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, false);
 			boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
 			boolean showTimelineRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_TIMELINE_RED_DOT, true);
+			boolean showBroadcastRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_NEW_BROADCAST_RED_DOT, true);
+			
 			int count = 0;
 			if (item.getKey() == 7)
 			{
@@ -1403,7 +1402,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				else if (count > 0)
 					newGamesIndicator.setText(String.valueOf(count));
 			}
-			if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked) || (item.getKey() == 7 && (count > 0 || showTimelineRedDot)))
+			if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked) || (item.getKey() == 7 && (count > 0 || showTimelineRedDot)) || (item.getKey() == 10 && showBroadcastRedDot))
 			{
 				newGamesIndicator.setVisibility(View.VISIBLE);
 			}
@@ -1426,6 +1425,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 * removing out new chat option for now
 		 */
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.new_broadcast), 10));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.timeline), 7));
 
@@ -1484,32 +1485,32 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 				switch (item.getKey())
 				{
-				case 1:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.CREDITS:
 					intent = new Intent(HomeActivity.this, CreditsActivity.class);
 					break;
-				case 2:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.INVITE_FRIENDS:
 					intent = new Intent(HomeActivity.this, TellAFriend.class);
 					break;
-				case 3:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.HIKE_EXTRAS:
 					editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true);
 					editor.commit();
 					updateOverFlowMenuNotification();
 					intent = IntentManager.getGamingIntent(HomeActivity.this);
 					
 					break;
-				case 4:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.REWARDS:
 					editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true);
 					editor.commit();
 					updateOverFlowMenuNotification();
 					intent = IntentManager.getRewardsIntent(HomeActivity.this);
 					break;
-				case 5:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.SETTINGS:
 					intent = new Intent(HomeActivity.this, SettingsActivity.class);
 					break;
-				case 6:
-					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.NEW_GROUP:
+					intent = new Intent(HomeActivity.this, CreateNewGroupOrBroadcastActivity.class);
 					break;
-				case 7:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.TIMELINE:
 					try
 					{
 						JSONObject md = new JSONObject();
@@ -1525,7 +1526,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					editor.commit();
 					intent = new Intent(HomeActivity.this, TimelineActivity.class);
 					break;
-				case 8:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.STATUS:
 					try
 					{
 						JSONObject metadata = new JSONObject();
@@ -1539,9 +1540,22 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 					intent = new Intent(HomeActivity.this, StatusUpdate.class);
 					break;
-				case 9:
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.LOGS:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
+					break;
+				case HikeConstants.HOME_ACTIVITY_OVERFLOW.NEW_BROADCAST:
+					
+					sendBroadCastAnalytics();
+					HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.SHOW_NEW_BROADCAST_RED_DOT, false);
+					if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOW_BROADCAST_FTUE_SCREEN, true))
+					{
+						IntentManager.createBroadcastFtue(HomeActivity.this);
+					}
+					else
+					{
+						IntentManager.createBroadcastDefault(HomeActivity.this);
+					}
 					break;
 				}
 
@@ -1855,5 +1869,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 	}
 
+	private void sendBroadCastAnalytics()
+	{
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_BROADCAST_VIA_OVERFLOW);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+	}
 	
 }
