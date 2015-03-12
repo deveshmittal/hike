@@ -125,7 +125,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ DBConstants.MESSAGE_TYPE + " INTEGER" + " INTEGER DEFAULT -1, " // The type of the message.
 				+ DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER DEFAULT -1, " // love id applicable to few messages like content
 				+ DBConstants.HIKE_CONTENT.CONTENT_ID + " INTEGER DEFAULT -1, " // content id applicable to few messages like content
-				+ DBConstants.HIKE_CONTENT.NAMESPACE + " TEXT"  //namespace for uniqueness of content
+				+ DBConstants.HIKE_CONTENT.NAMESPACE + " TEXT DEFAULT 'message'"  //namespace for uniqueness of content
 				+ " ) ";
 
 		db.execSQL(sql);
@@ -681,7 +681,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.HIKE_CONTENT.CONTENT_ID + " INTEGER DEFAULT -1"; // content id applicable to few messages
 			db.execSQL(alter);
 
-			String alter2 = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + HIKE_CONTENT.NAMESPACE + " INTEGER DEFAULT -1"; // namespace for uniqueness applicable to few messages
+			String alter2 = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + HIKE_CONTENT.NAMESPACE + " TEXT DEFAULT 'message'"; // namespace for uniqueness applicable to few messages
 			db.execSQL(alter2);
 		}
 	}
