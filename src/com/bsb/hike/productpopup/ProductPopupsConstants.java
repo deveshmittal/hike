@@ -320,7 +320,8 @@ public class ProductPopupsConstants
 			{
 				return "cancel";
 			}
-		};
+		}
+		
 		
 	}
 

@@ -338,7 +338,7 @@ public class ProductInfoManager
 	 * @param metaData
 	 * @return
 	 */
-	private String getUrl(String metaData)
+	public String getFormedUrl(String metaData)
 	{
 		HikeSharedPreferenceUtil mmHikeSharedPreferenceUtil = HikeSharedPreferenceUtil.getInstance();
 		try
@@ -350,6 +350,7 @@ public class ProductInfoManager
 				url = url.replace("$reward_token", mmHikeSharedPreferenceUtil.getData(HikeMessengerApp.REWARDS_TOKEN, ""));
 				url = url.replace("$msisdn", mmHikeSharedPreferenceUtil.getData(HikeMessengerApp.MSISDN_SETTING, ""));
 				url = url.replace("$uid", mmHikeSharedPreferenceUtil.getData(HikeMessengerApp.TOKEN_SETTING, ""));
+				url = url.replace("$invite_token", mmHikeSharedPreferenceUtil.getData(HikeConstants.INVITE_TOKEN, ""));
 			}
 			return url;
 
@@ -377,7 +378,7 @@ public class ProductInfoManager
 			{
 				try
 				{
-					String host = getUrl(metaData);
+					String host = getFormedUrl(metaData);
 					if (!TextUtils.isEmpty(host))
 					{
 						URL url = new URL(host);

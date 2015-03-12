@@ -479,15 +479,6 @@ public abstract class JavascriptBridge
 			{
 				IntentManager.openInviteWatsApp(context);
 			}
-			
-			if (activityName.equals(HIKESCREEN.OPEN_WEB_VIEW.toString()))
-			{
-				String url = mmObject.optString(HikeConstants.URL);
-
-				if (!TextUtils.isEmpty(url))
-					Utils.startWebViewActivity(context, url, "hike");
-			}
-
 			if (activityName.equals(HIKESCREEN.OPENINBROWSER.toString()))
 			{
 				String url = mmObject.optString(HikeConstants.URL);

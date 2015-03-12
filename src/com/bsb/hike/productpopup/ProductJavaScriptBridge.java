@@ -30,6 +30,7 @@ import com.bsb.hike.productpopup.ProductPopupsConstants.HIKESCREEN;
 import com.bsb.hike.productpopup.ProductPopupsConstants.PopUpAction;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 public class ProductJavaScriptBridge extends JavascriptBridge
 {
@@ -153,6 +154,13 @@ public class ProductJavaScriptBridge extends JavascriptBridge
 					{
 						multiFwdStickers(activity, stickerId, categoryId, selectAll);
 					}
+				}
+				else if (activityName.equals(HIKESCREEN.OPEN_WEB_VIEW.toString()))
+				{
+					String url = ProductInfoManager.getInstance().getFormedUrl(metaData);
+
+					if (!TextUtils.isEmpty(url))
+						Utils.startWebViewActivity(activity, url, "hike");
 				}
 				else
 				{
