@@ -502,6 +502,14 @@ public abstract class JavascriptBridge
 			{
 				IntentManager.openSettingHelp(context);
 			}
+			if (activityName.equals(HIKESCREEN.NUXINVITE.toString()))
+			{
+				context.startActivity(IntentManager.openNuxFriendSelector(context));
+			}
+			if (activityName.equals(HIKESCREEN.NUXREMIND.toString()))
+			{
+				context.startActivity(IntentManager.openNuxCustomMessage(context));
+			}
 		}
 		catch (JSONException e)
 		{

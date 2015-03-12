@@ -320,7 +320,26 @@ public class ProductPopupsConstants
 			{
 				return "cancel";
 			}
-		}
+		},
+		NUXINVITE
+		{
+			@Override
+			public String toString()
+			{
+				// TODO Auto-generated method stub
+				return "nuxinvite";
+			}
+		},
+		NUXREMIND
+		{
+			@Override
+			public String toString()
+			{
+				// TODO Auto-generated method stub
+				return "nuxremind";
+			}
+		};
+		
 		
 		
 	}
