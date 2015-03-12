@@ -567,7 +567,6 @@ public class ConversationsAdapter extends BaseAdapter
 	private class FetchPhoneBookContactsTask extends AsyncTask<Void, Void, Void>
 	{
 		List<Conversation> hikeContacts = new ArrayList<Conversation>();
-		List<Conversation> nonHikeContacts = new ArrayList<Conversation>();
 
 		@Override
 		protected Void doInBackground(Void... arg0)
@@ -597,10 +596,6 @@ public class ConversationsAdapter extends BaseAdapter
 				{
 					hikeContacts.add(conv);
 				}
-				else
-				{
-					nonHikeContacts.add(conv);
-				}
 			}
 			return null;
 		}
@@ -610,7 +605,6 @@ public class ConversationsAdapter extends BaseAdapter
 		{
 			phoneBookContacts = new ArrayList<Conversation>();
 			phoneBookContacts.addAll(hikeContacts);
-			phoneBookContacts.addAll(nonHikeContacts);
 			super.onPostExecute(result);
 		}
 	}
