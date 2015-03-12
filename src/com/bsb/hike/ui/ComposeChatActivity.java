@@ -401,8 +401,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 			else
 			{
-				invalidateOptionsMenu();
-
+				Toast.makeText(getApplicationContext(),getString(R.string.whatsapp_uninstalled), Toast.LENGTH_SHORT);
 			}
 		}
 
