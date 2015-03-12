@@ -1448,6 +1448,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 */
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
 
+		optionsList.add(new OverFlowMenuItem(getString(R.string.new_broadcast), 10));
+
 		optionsList.add(new OverFlowMenuItem(getString(R.string.timeline), 7));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
@@ -1475,8 +1477,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
-
-		optionsList.add(new OverFlowMenuItem(getString(R.string.new_broadcast), 10));
 
 		addEmailLogItem(optionsList);
 

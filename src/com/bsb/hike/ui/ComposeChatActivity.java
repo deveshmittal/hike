@@ -30,7 +30,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Pair;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -469,11 +468,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			MIN_MEMBERS_GROUP_CHAT = 1;
 		}
-
-		if (existingBroadcastId != null)
-		{
-			MIN_MEMBERS_BROADCAST_LIST = 1;
-		}
 		
 		setModeAndUpdateAdapter(composeMode);
 		
@@ -871,7 +865,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					adapter.clearAllSelection(true);
 					adapter.selectAllContacts(true);
 					tagEditText.clear(false);
-					int selected = adapter.getSelectedContactCount();
+					int selected = adapter.getCurrentSelection();
 					tagEditText.toggleTag( getString(selected <=1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
 					
 					try
@@ -1089,6 +1083,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			multiSelectActionBar = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
 		}
 		View sendBtn = multiSelectActionBar.findViewById(R.id.done_container);
+		TextView save = (TextView) multiSelectActionBar.findViewById(R.id.save);
+		if (createBroadcast)
+		{
+			save.setText(R.string.next_signup);
+		}
 		View closeBtn = multiSelectActionBar.findViewById(R.id.close_action_mode);
 		ViewGroup closeContainer = (ViewGroup) multiSelectActionBar.findViewById(R.id.close_container);
 
@@ -1115,9 +1114,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					int selected = adapter.getCurrentSelection();
 					if (selected < MIN_MEMBERS_BROADCAST_LIST)
 					{
-						Toast toast = Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_BROADCAST_LIST), Toast.LENGTH_SHORT);
-						toast.setGravity(Gravity.CENTER, 0, 0);
-						toast.show();
+						Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_BROADCAST_LIST), Toast.LENGTH_SHORT).show();;
 						return;
 					}
 					sendBroadCastAnalytics();
@@ -1125,12 +1122,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 				else if (getIntent().hasExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST))
 				{
-					int selected = adapter.getCurrentSelection();
-					if (selected < MIN_MEMBERS_BROADCAST_LIST)
-					{
-						Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_BROADCAST_LIST), Toast.LENGTH_SHORT).show();
-						return;
-					}
 					createGroup(adapter.getAllSelectedContacts());
 				}
 				else if (composeMode == CREATE_GROUP_MODE)
@@ -1891,6 +1882,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if (existingBroadcastId != null || createBroadcast)
 			{
 				ComposeChatActivity.this.finish();
+				final InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputMethodManager.hideSoftInputFromWindow(tagEditText.getWindowToken(), 0);
 				return;
 			}
 			setModeAndUpdateAdapter(START_CHAT_MODE);
