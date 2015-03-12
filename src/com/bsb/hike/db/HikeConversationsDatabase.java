@@ -6471,11 +6471,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	public boolean isContentMessageExist(String msisdn, String contentId, String nameSpace)
 
 	{
-		String where = DBConstants.CONV_ID + "=? and" + DBConstants.HIKE_CONTENT.CONTENT_ID + "=? and" + HIKE_CONTENT.NAMESPACE + "=?";
+		String where = DBConstants.MSISDN + "=? and " + DBConstants.HIKE_CONTENT.CONTENT_ID + "=? and " + HIKE_CONTENT.NAMESPACE + "=?";
 		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, where, new String[] { msisdn, contentId, nameSpace }, null, null, null);
 		try
 		{
-			return c.moveToFirst();
+			boolean toReturn =  c.moveToFirst();
+			return toReturn;
 		}
 		finally
 		{
