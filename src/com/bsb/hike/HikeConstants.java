@@ -3,6 +3,7 @@ package com.bsb.hike;
 import android.net.Uri;
 import android.os.Environment;
 
+import com.bsb.hike.NUXConstants.PushTypeEnum;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 
 public class HikeConstants
@@ -272,6 +273,10 @@ public class HikeConstants
 	public static final String STATUS = "stat";
 
 	public static final String OK = "ok";
+	
+	public static final String FAIL = "fail";
+	
+	public static final String OK_HTTP = "okhttp";
 
 	public static final String REACHED_STICKER_END = "st";
 
@@ -548,6 +553,8 @@ public class HikeConstants
 	public static final String IS_HOME_OVERFLOW_CLICKED = "isHomeOverflowClicked";
 
 	public static final String SHOW_RECENTLY_JOINED_DOT = "showRecentlyJoinedDot";
+	
+	public static final String SHOW_RECENTLY_JOINED = "showRecentlyJoined";
 
 	public static final String SHOW_TIMELINE_RED_DOT = "showTimelineRedDot";
 	
@@ -2052,6 +2059,8 @@ public class HikeConstants
 		public static final String VOIP_MSG_TYPE_MISSED_CALL_INCOMING = "vmci";
 
 		public static final String VOIP_MSG_TYPE_MISSED_CALL_OUTGOING = "vmco";
+		
+		public static final String SESSION = "sess";
 	}
 	
 	public static final class SMSNative
@@ -2152,6 +2161,32 @@ public class HikeConstants
 		public static final String IMAGE_QUALITY_SMALL = "S";
 		
 		public static final String IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_SMALL;
+	}
+	
+	public static final class PushType
+	{
+		
+		public static final int loud = 2;
+		
+		public static final int silent = 1;
+		
+		public static final int none = 0;
+		
+	}
+	
+	public static final class UserJoinMsg
+	{
+		
+		public static final String NOTIF_TITLE = "Ttl";
+		
+		public static final String NOTIF_TEXT = "Txt";
+		
+		public static final String PUSH_SETTING = "Typ";
+		
+		public static final String PERSIST_CHAT = "Cht";
+		
+		public static final boolean defaultPersistChat = false;
+		
 	}
 
 	public static class MESSAGE_TYPE
@@ -2322,9 +2357,15 @@ public class HikeConstants
 	
 	public static final String EXCEPTION_MESSAGE = "exm";
 	
+	public static final String TIMESTAMP_MILLIS = "msec";
+	
+	public static final String EVENT_TAG_SESSION = "sess";
+
 	public static final String MESSAGE_PROCESS_TIME = "mpt";
 
 	public static int DEFAULT_AVATARS[] = {R.drawable.avatar_01, R.drawable.avatar_02, R.drawable.avatar_03, R.drawable.avatar_04, R.drawable.avatar_05};
 	public static String DEFAULT_AVATAR_KEYS[] = {"avatar_01","avatar_02", "avatar_03", "avatar_04", "avatar_05"};
 	public static String IS_GROUP = "isGroup";
+
+	public static final String CAM_IMG_PREFIX = "CAM_";
 }

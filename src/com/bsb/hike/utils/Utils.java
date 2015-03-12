@@ -800,12 +800,12 @@ public class Utils
 	public static String getGroupJoinHighlightText(JSONArray participantInfoArray, GroupConversation conversation)
 	{
 		JSONObject participant = (JSONObject) participantInfoArray.opt(0);
-		String highlight = ((GroupConversation) conversation).getGroupParticipantFirstName(participant.optString(HikeConstants.MSISDN));
+		String highlight = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participant.optString(HikeConstants.MSISDN));
 
 		if (participantInfoArray.length() == 2)
 		{
 			JSONObject participant2 = (JSONObject) participantInfoArray.opt(1);
-			String name2 = ((GroupConversation) conversation).getGroupParticipantFirstName(participant2.optString(HikeConstants.MSISDN));
+			String name2 = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participant2.optString(HikeConstants.MSISDN));
 
 			highlight += " and " + name2;
 		}
@@ -930,10 +930,12 @@ public class Utils
 		Utils.densityMultiplier = displayMetrics.density;
 	}
 
-	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
+	public static CharSequence getFormattedParticipantInfo(String info, String textToHighlight)
 	{
+		if(!info.contains(textToHighlight))
+			return info;
 		SpannableStringBuilder ssb = new SpannableStringBuilder(info);
-		ssb.setSpan(new StyleSpan(Typeface.BOLD), info.indexOf(textToHighight), info.indexOf(textToHighight) + textToHighight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		ssb.setSpan(new StyleSpan(Typeface.BOLD), info.indexOf(textToHighlight), info.indexOf(textToHighlight) + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return ssb;
 	}
 
@@ -2797,7 +2799,8 @@ public class Utils
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
 				if(toLog)
 				{
-					HAManager.getInstance().recordSessionStart();
+					JSONObject sessionDataObject = HAManager.getInstance().recordAndReturnSessionStart();
+					sendSessionMQTTPacket(context, HikeConstants.FOREGROUND, sessionDataObject);
 				}
 			}
 			else if (!dueToConnect)
@@ -2806,7 +2809,8 @@ public class Utils
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_BACKGROUNDED, null);
 				if(toLog)
 				{
-					HAManager.getInstance().recordSessionEnd();
+					JSONObject sessionDataObject = HAManager.getInstance().recordAndReturnSessionEnd();
+					sendSessionMQTTPacket(context, HikeConstants.BACKGROUND, sessionDataObject);
 				}
 			}
 			else
@@ -2821,6 +2825,35 @@ public class Utils
 		}
 	}
 
+	/**
+	 * Sends Session fg/bg Packet With MQTT_QOS_ONE
+	 * @param context
+	 * @param subType
+	 * @param sessionMetaDataObject
+	 */
+	public static void sendSessionMQTTPacket(Context context, String subType, JSONObject sessionMetaDataObject)
+	{
+		JSONObject sessionObject = new JSONObject();
+		JSONObject data = new JSONObject();
+		try
+		{
+			sessionObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.SESSION);
+			sessionObject.put(HikeConstants.SUB_TYPE, subType);
+			
+			data.put(AnalyticsConstants.EVENT_TYPE, AnalyticsConstants.SESSION_EVENT);				
+			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, Utils.applyServerTimeOffset(context, System.currentTimeMillis()));
+			data.put(AnalyticsConstants.METADATA, sessionMetaDataObject);
+			
+			sessionObject.put(HikeConstants.DATA, data);
+			HikeMqttManagerNew.getInstance().sendMessage(sessionObject, HikeMqttManagerNew.MQTT_QOS_ONE);
+			Logger.d("sessionmqtt", "Sesnding Session MQTT Packet with qos 1, and : "+ subType);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	private static void resetStealthMode(Context context)
 	{
 		StealthResetTimer.getInstance(context).resetStealthToggle();
@@ -5152,7 +5185,21 @@ public class Utils
 	}
 	
 	/**
-	 * Tells if User is on Telephonic/Audio/Vedio/Voip Call
+	 * Return whether response received is valid or not.
+	 * @param response
+	 * @return <li>false if either response is null if we get "stat":"fail" in response or "stat" key is missing</li>
+	 * <li>true otherwise</li>
+	 */
+	public static boolean isResponseValid(JSONObject response)
+	{
+		if (response == null || HikeConstants.FAIL.equals(response.optString(HikeConstants.STATUS)))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	 /** Tells if User is on Telephonic/Audio/Vedio/Voip Call
 	 * @param context
 	 * @return
 	 */
@@ -5184,15 +5231,15 @@ public class Utils
 		case -1:
 			networkType = "off";
 			break;
-
+			
 		case 0:
 			networkType = "unknown";
 			break;
-
+			
 		case 1:
 			networkType = "wifi";
 			break;
-
+			
 		case 2:
 			networkType = "2g";
 			break;
@@ -5304,6 +5351,11 @@ public class Utils
 		return false;
 	}
 	
+	public static boolean isOkHttp()
+	{
+		return HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.TOGGLE_OK_HTTP, true);
+	}
+
 	/**
 	 * Returns active network info
 	 * @return
