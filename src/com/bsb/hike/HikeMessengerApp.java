@@ -464,6 +464,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	
 	public static final String TOGGLE_OK_HTTP = "toggleOkHttp";
 
+	public static final String UPGRADE_FOR_SERVER_ID_FIELD = "upgradeForServerIdField";
+
+	public static final String SHOW_BROADCAST_FTUE_SCREEN = "showBroadcastFtueScreen";
+	
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	//private static Twitter twitter;
@@ -718,7 +722,8 @@ public void onTrimMemory(int level)
 		// successfully.
 		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 ) || 
 				settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1 || settings.getInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, -1) == 1 || 
-				settings.getInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1) == 1 || settings.getInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 1) == 1 || TEST)
+				settings.getInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1) == 1 || settings.getInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 1) == 1 ||
+				settings.getInt(UPGRADE_FOR_SERVER_ID_FIELD, 0) == 1|| TEST)
 		{
 			startUpdgradeIntent();
 		}

@@ -80,6 +80,8 @@ public class AnalyticsConstants
 
     public static String ORIGIN = "org";
 
+	public static String CONTENT_ID = "content_id";
+
     public static String UNREAD_COUNT = "uc";
 
 	public static final String ANALYTICS = "analytics";
