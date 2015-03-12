@@ -185,6 +185,8 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.lastseenmgr.FetchLastSeenTask;
 import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
@@ -451,6 +453,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private ScreenOffReceiver screenOffBR;
 
 	private HashSpanWatcher hashWatcher;
+	
+	private RequestToken lastSeenRequestToken;
 
 	@Override
 	protected void onPause()
@@ -670,9 +674,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			attachmentWindow.dismiss();
 			attachmentWindow = null;
 		}
-
-		resetLastSeenScheduler();
-
+ 
+		if (Utils.isOkHttp())
+		{
+			cancelFetchLastseenTask();
+		}
+		else
+		{
+			resetLastSeenScheduler();
+		}
+		
 		StickerManager.getInstance().saveCustomCategories();
 		if (messageMap != null)
 		{
@@ -691,6 +702,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
+	private void cancelFetchLastseenTask()
+	{
+		if (lastSeenRequestToken != null)
+		{
+			lastSeenRequestToken.cancel();
+		}
+	}
+	
 	@Override
 	public Object onRetainCustomNonConfigurationInstance()
 	{
@@ -969,7 +988,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				name="You: ";
 			}else{
 				if(mConversation instanceof GroupConversation){
-				name = ((GroupConversation) mConversation).getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()) + ": ";
+				name = ((GroupConversation) mConversation).getGroupParticipantFirstNameAndSurname(impMessage.getGroupParticipantMsisdn()) + ": ";
 				}
 			}
 		
@@ -1548,8 +1567,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
 				itemTextView.setText(item.getName());
-
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
 
 				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
 				freeSmsCount.setVisibility(View.GONE);
@@ -2664,11 +2681,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				/*
 				 * Making sure nothing is already scheduled wrt last seen.
-				 */
-				resetLastSeenScheduler();
-
-				lastSeenScheduler = LastSeenScheduler.getInstance(this);
-				lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
+				 */	
+				if (Utils.isOkHttp())
+				{
+					cancelFetchLastseenTask();
+					FetchLastSeenTask fetchLastseenTask = new FetchLastSeenTask(contactInfo.getMsisdn());
+					lastSeenRequestToken = fetchLastseenTask.start();
+				}
+				else
+				{
+					resetLastSeenScheduler();
+					lastSeenScheduler = LastSeenScheduler.getInstance(this);
+					lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
+				}
+				
+				
 				HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "createConversation", null, mContactNumber);
 			}
 		}
@@ -3264,20 +3291,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 
-		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
-		if (drawable != null)
+		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber);
+		if (drawable == null)
 		{
-			avatar.setScaleType(ScaleType.FIT_CENTER);
-			avatar.setImageDrawable(drawable);
-			avatar.setBackgroundDrawable(null);
+			drawable = HikeMessengerApp.getLruCache().getDefaultAvatar(mContactNumber, false);
 		}
-		else
-		{
-			avatar.setScaleType(ScaleType.CENTER_INSIDE);
-			avatar.setImageResource(mConversation instanceof BroadcastConversation? R.drawable.ic_broadcast_chat_thread : 
-				((mConversation instanceof GroupConversation) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar));
-			avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
-		}
+		avatar.setScaleType(ScaleType.FIT_CENTER);
+		avatar.setImageDrawable(drawable);
 	}
 
 	private void setLabel(String label)
@@ -4339,15 +4359,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						return;
 					}
 
-					if (lastSeenScheduler == null)
+					if (Utils.isOkHttp())
 					{
-						lastSeenScheduler = LastSeenScheduler.getInstance(ChatThread.this);
+						cancelFetchLastseenTask();
+						FetchLastSeenTask fetchLastseenTask = new FetchLastSeenTask(contactInfo.getMsisdn());
+						lastSeenRequestToken = fetchLastseenTask.start();
 					}
 					else
 					{
-						lastSeenScheduler.stop(false);
+						if (lastSeenScheduler == null)
+						{
+							lastSeenScheduler = LastSeenScheduler.getInstance(ChatThread.this);
+						}
+						else
+						{
+							lastSeenScheduler.stop(false);
+						}
+						lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
 					}
-					lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
 					HAManager.getInstance().recordLastSeenEvent(ChatThread.class.getName(), "onEventRecv", "recv pubsub APP_FOREGROUNDED", mContactNumber);
 				}
 			});
@@ -5288,7 +5317,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		ImageView overlayImg = (ImageView) mOverlayLayout.findViewById(R.id.overlay_image);
 
 		mComposeView.setEnabled(false);
-		String label = mConversation instanceof GroupConversation ? ((GroupConversation) mConversation).getGroupParticipantFirstName(getMsisdnMainUser()) : mLabel;
+		String label = mConversation instanceof GroupConversation ? ((GroupConversation) mConversation).getGroupParticipantFirstNameAndSurname(getMsisdnMainUser()) : mLabel;
 		String formatString;
 		if (blockOverlay)
 		{
@@ -5853,7 +5882,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 0:
 					requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
 					pickIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-					File selectedDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
+					File selectedDir = new File(Utils.getFileParent(HikeFileType.IMAGE, false));
 					if (!selectedDir.exists())
 					{
 						if (!selectedDir.mkdirs())
@@ -5862,7 +5891,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							return;
 						}
 					}
-					String fileName = Utils.getOriginalFile(HikeFileType.IMAGE, null);
+					String fileName = HikeConstants.CAM_IMG_PREFIX + Utils.getOriginalFile(HikeFileType.IMAGE, null);
 					selectedFile = new File(selectedDir.getPath() + File.separator + fileName); 
 
 					pickIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFile));
@@ -6534,7 +6563,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				final String fPath = filePath;
 				final int atType = attachementType;
-				
+				getApplicationContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + new File(filePath))));
 				HikeDialog.showDialog(ChatThread.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, new HikeDialog.HikeDialogListener()
 				{
 					@Override
@@ -8116,7 +8145,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			if(mAdapter.containsMediaMessage(selectedMsgIdsToDelete))
 			{
-				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
+				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard, true);
 			}
 			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
 			deleteConfirmDialog.setCancelButton(R.string.cancel);
@@ -8294,8 +8323,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
 				itemTextView.setText(item.getName());
-
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
 
 				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
 				freeSmsCount.setVisibility(View.GONE);

@@ -7,7 +7,7 @@ public interface DBConstants
 
 	public static final int CONVERSATIONS_DATABASE_VERSION = 36;
 
-	public static final int USERS_DATABASE_VERSION = 15;
+	public static final int USERS_DATABASE_VERSION = 16;
 
 	public static final String HAS_CUSTOM_PHOTO = "hascustomphoto";
 

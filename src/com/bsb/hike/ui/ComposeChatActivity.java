@@ -438,7 +438,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		String sendingMsisdn = getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN);
 
 		boolean showNujNotif = PreferenceManager.getDefaultSharedPreferences(ComposeChatActivity.this).getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true);
-		boolean fetchRecentlyJoined = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false) && !isForwardingMessage && showNujNotif;
+		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance();
+		boolean fetchRecentlyJoined = pref.getData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false) || pref.getData(HikeConstants.SHOW_RECENTLY_JOINED, false);
+		fetchRecentlyJoined = fetchRecentlyJoined && !isForwardingMessage && showNujNotif;
 		
 		switch (composeMode)
 		{
@@ -475,7 +477,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		adapter.executeFetchTask();
 		
-		HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
+		pref.saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
+		pref.saveData(HikeConstants.SHOW_RECENTLY_JOINED, false);
 		
 	}
 

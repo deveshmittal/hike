@@ -14,6 +14,7 @@ import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.PlatformWebMessageMetadata;
@@ -432,11 +433,6 @@ public class ConvMessage
 		{
 			this.mMsisdn = obj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN);
 		}
-		
-		/**
-		 * This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.
-		 */
-//		this.shouldShowPush = obj.getJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.PUSH, true);
 
 		this.mMessage = "";
 		this.mTimestamp = System.currentTimeMillis() / 1000;
@@ -453,14 +449,7 @@ public class ConvMessage
 			this.mMessage = Utils.getParticipantAddedMessage(this, context, highlight);
 			break;
 		case PARTICIPANT_LEFT:
-			if (conversation instanceof BroadcastConversation)
-			{
-				this.mMessage = String.format(context.getString(R.string.removed_from_broadcast), ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn()));
-			}
-			else
-			{
-				this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn()));
-			}
+			this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn()));
 			break;
 		case GROUP_END:
 			if (conversation instanceof BroadcastConversation)
@@ -473,25 +462,35 @@ public class ConvMessage
 			}
 			break;
 		case USER_JOIN:
+			//This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.\
+			this.shouldShowPush = obj.optJSONObject(HikeConstants.DATA).optBoolean(HikeConstants.PUSH, metadata.shouldShowPush());
+			
+			String fName = null;
 			if (conversation != null)
 			{
-				String name;
 				if (conversation instanceof GroupConversation)
 				{
-					name = ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn());
+					fName = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn());
 				}
 				else
 				{
-					name = Utils.getFirstName(conversation.getLabel());
+					fName = Utils.getFirstName(conversation.getLabel());
 				}
-				this.mMessage = String.format(context.getString(metadata.isOldUser() ? R.string.user_back_on_hike : R.string.joined_hike_new), name);
+			}
+			else
+			{
+				fName = ContactManager.getInstance().getContact(metadata.getMsisdn(), false, true).getFirstName();
+			}
+			if(fName != null)
+			{
+				this.mMessage = String.format(metadata.getJSON().getJSONObject(HikeConstants.DATA).optString(HikeConstants.UserJoinMsg.NOTIF_TEXT), fName);	
 			}
 			break;
 		case USER_OPT_IN:
 			String name;
 			if (conversation instanceof GroupConversation)
 			{
-				name = ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn());
+				name = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn());
 			}
 			else
 			{
@@ -504,17 +503,9 @@ public class ConvMessage
 			String msisdn = metadata.getMsisdn();
 			String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-			String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
-			String message;
-			if (getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
-			{
-				message = context.getString(this.isBroadcastConversation()?R.string.change_broadcast_name : R.string.change_group_name);
-			}
-			else
-			{
-				message = context.getString(R.string.change_group_image);
-			}
-			this.mMessage = String.format(message, participantName);
+			String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
+			this.mMessage = String.format(
+					context.getString(participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name : R.string.change_group_image), participantName);
 			break;
 		case BLOCK_INTERNATIONAL_SMS:
 			this.mMessage = context.getString(R.string.block_internation_sms);
@@ -543,7 +534,7 @@ public class ConvMessage
 				String nameString;
 				if (conversation instanceof GroupConversation)
 				{
-					nameString = ((GroupConversation) conversation).getGroupParticipantFirstName(metadata.getMsisdn());
+					nameString = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn());
 				}
 				else
 				{
@@ -1013,16 +1004,20 @@ public class ConvMessage
 	 */
 	public boolean isSilent()
 	{
+		
 		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && platformWebMessageMetadata != null)
 		{
 			return platformWebMessageMetadata.isSilent();
 		}
-
-		// Do not play sound in case of bg change, participant joined, nuj/ruj, status updates
+		// Do not play sound in case of bg change, status updates
 		if ((getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) || (getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
-				|| (getParticipantInfoState() == ParticipantInfoState.USER_JOIN) || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+				 || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
 		{
 			return true;
+		}
+		else if(getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
+		{
+			return metadata.isSilent();
 		}
 		else
 		{
