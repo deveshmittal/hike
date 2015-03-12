@@ -69,7 +69,6 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 	private VoIPService voipService;
 	private boolean isBound = false;
 	private final Messenger mMessenger = new Messenger(new IncomingHandler());
-	private WakeLock wakeLock = null;
 	private WakeLock proximityWakeLock;
 	private SensorManager sensorManager;
 	private float proximitySensorMaximumRange;
@@ -103,7 +102,6 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		acquireWakeLock();
 	}
 
 	@Override
@@ -442,25 +440,8 @@ public class VoipCallFragment extends SherlockFragment implements CallActions
 		}, 900);
 	}
 
-	private void acquireWakeLock() 
-	{
-		PowerManager powerManager = (PowerManager) getSherlockActivity().getSystemService(getSherlockActivity().POWER_SERVICE);
-		if (wakeLock == null) {
-			wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "HikeWL");
-			wakeLock.setReferenceCounted(false);
-		}
-		if (!wakeLock.isHeld()) {
-			wakeLock.acquire();
-			Logger.d(VoIPConstants.TAG, "Wakelock acquired.");
-		}
-	}
-
 	private void releaseWakeLock() 
 	{
-		if (wakeLock != null && wakeLock.isHeld()) {
-			wakeLock.release();
-			Logger.d(VoIPConstants.TAG, "Wakelock released.");
-		}
 		if (proximityWakeLock != null && proximityWakeLock.isHeld())
 			proximityWakeLock.release();
 	}
