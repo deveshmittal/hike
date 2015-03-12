@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.text.TextUtils;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.analytics.AnalyticsConstants.AppOpenSource;
 import com.bsb.hike.models.ConvMessage;
@@ -597,6 +598,44 @@ public class HAManager
 		fgSessionInstance.setMsgType(getMsgType(convMessage));
 		fgSessionInstance.setSrcContext(srcContext);
 		fgSessionInstance.setConvType(convType);
+	}
+	
+	public void shareWhatsappAnalyticsMethod(String shrType, String catId, String stkrId, String str, String shrStkrChat)
+	{
+		JSONObject metadata = new JSONObject();
+		try
+		{
+			metadata.put(HikeConstants.Extras.SHARE_TYPE, shrType);
+			metadata.put(HikeConstants.Extras.CATEGORYID, catId);
+			metadata.put(HikeConstants.Extras.STICKERID, stkrId);
+			metadata.put(HikeConstants.Extras.PATH, str);
+			metadata.put(HikeConstants.Extras.SOURCE, shrStkrChat);
+			record(HikeConstants.Extras.WHATSAPP_SHARE, HikeConstants.LogEvent.CLICK, EventPriority.HIGH, metadata);
+
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public void shareWhatsappAnalyticsMethod(String shr)
+	{
+		JSONObject metadata = new JSONObject();
+
+		try
+		{
+			metadata.put(HikeConstants.Extras.SHARE_TYPE, shr);
+			record(HikeConstants.Extras.WHATSAPP_SHARE, HikeConstants.LogEvent.CLICK, EventPriority.HIGH, metadata);
+
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void setAppOpenSource(String appOpenSource)

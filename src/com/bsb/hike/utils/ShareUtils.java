@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -90,7 +91,30 @@ public class ShareUtils
 		}
 		
 	}
+//will give the scale ratio based on the screen width and screen height
+	private static float scaleRatio(int imgWidth, int imgHeight)
+	{
+		float sRatio;
+		int screenWidth = HikeMessengerApp.getInstance().getApplicationContext().getResources().getDisplayMetrics().widthPixels;
+		int screenHeight = HikeMessengerApp.getInstance().getApplicationContext().getResources().getDisplayMetrics().heightPixels;
+		if (screenHeight < screenWidth )
+		{
+			sRatio = (float) screenHeight / imgHeight;
 
+		}
+		else
+		{
+			sRatio = (float) screenWidth / imgWidth;
+
+		}
+		if (sRatio > 1)
+		{
+			sRatio = 1;
+		}
+		return sRatio;
+
+	}
+	
 	private static View setViewImage(String filePath)
 	{
 
@@ -100,6 +124,12 @@ public class ShareUtils
 	    View share = LayoutInflater.from(mContext).inflate(R.layout.image_share_layout, null);
 		ImageView image = (ImageView) share.findViewById(R.id.user_image);
 		Bitmap bmp = HikeBitmapFactory.decodeFile(filePath);
+		int imgWidth  = bmp.getWidth();
+		int imgHeight = bmp.getHeight();
+		//gives the scaling ratio for the image
+		float sRatio = scaleRatio(imgWidth,imgHeight);
+        // will scale the image to the 0.7 of the screen size proportionally for width and height
+		bmp = Bitmap.createScaledBitmap(bmp,(int)(imgWidth * sRatio * 0.7) , (int)(imgHeight * sRatio * 0.7), true);
 		image.setImageBitmap(bmp);
 		TextView heading = (TextView) share.findViewById(R.id.imageShareHeading);
 		heading.setText(imgHead);

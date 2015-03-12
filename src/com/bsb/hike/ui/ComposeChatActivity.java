@@ -80,6 +80,7 @@ import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -115,6 +116,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
+import com.google.gson.JsonObject;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener, OnScrollListener
 {
@@ -327,7 +329,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
  
 		if (!showingMultiSelectActionBar)
 			getSupportMenuInflater().inflate(R.menu.compose_chat_menu, menu);
-		if (type != HikeConstants.Extras.NOT_SHAREABLE)
+		if (type != HikeConstants.Extras.NOT_SHAREABLE && Utils.isPackageInstalled(getApplicationContext(), HikeConstants.Extras.WHATSAPP_PACKAGE))
 		{
 			if (menu.hasVisibleItems())
 			{
@@ -369,13 +371,38 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		
 		if (item.getItemId() == R.id.whatsapp_share)
 		{
-			String str = getIntent().getStringExtra(HikeConstants.Extras.SHARE_CONTENT);
-			Intent intent = ShareUtils.shareContent(type, str);
-			if (intent != null)
+			if (Utils.isPackageInstalled(getApplicationContext(), HikeConstants.Extras.WHATSAPP_PACKAGE))
 			{
-				startActivity(intent);
+				String str = getIntent().getStringExtra(HikeConstants.Extras.SHARE_CONTENT);
+
+				switch (type)
+				{
+				case HikeConstants.Extras.ShareTypes.STICKER_SHARE:
+					HAManager.getInstance().shareWhatsappAnalyticsMethod(HikeConstants.Extras.STICKER_SHARE, getIntent().getStringExtra(StickerManager.CATEGORY_ID),
+							getIntent().getStringExtra(StickerManager.STICKER_ID), str, HikeConstants.Extras.SHARE_STICKER_CHATTHREAD);
+					break;
+
+				case HikeConstants.Extras.ShareTypes.IMAGE_SHARE:
+					HAManager.getInstance().shareWhatsappAnalyticsMethod(HikeConstants.Extras.IMAGE_SHARE);
+					break;
+
+				case HikeConstants.Extras.ShareTypes.TEXT_SHARE:
+					HAManager.getInstance().shareWhatsappAnalyticsMethod(HikeConstants.Extras.TEXT_SHARE);
+					break;
+
+				}
+				Intent intent = ShareUtils.shareContent(type, str);
+				if (intent != null)
+				{
+					startActivity(intent);
+				}
+				this.finish();
 			}
-			this.finish();
+
+			else
+			{
+				Toast.makeText(getApplicationContext(),getString(R.string.whatsapp_uninstalled), Toast.LENGTH_SHORT).show();
+			}
 		}
 
 		return super.onOptionsItemSelected(item);

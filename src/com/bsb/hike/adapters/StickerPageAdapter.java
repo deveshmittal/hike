@@ -3,6 +3,9 @@ package com.bsb.hike.adapters;
 import java.io.File;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
@@ -22,6 +25,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
@@ -377,7 +382,9 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener, 
 			String filePath = StickerManager.getInstance().getStickerDirectoryForCategoryId(sticker.getCategoryId()) + HikeConstants.LARGE_STICKER_ROOT;
 			File stickerFile = new File(filePath, sticker.getStickerId());
 			String filePathBmp = stickerFile.getAbsolutePath();
-		    Intent intent = ShareUtils.shareContent(HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE,filePathBmp);
+			String source = category.isCustom() ? StickerManager.FROM_RECENT : StickerManager.FROM_OTHER;
+			HAManager.getInstance().shareWhatsappAnalyticsMethod(HikeConstants.Extras.STICKER_SHARE_PALLETTE, sticker.getCategoryId(), sticker.getStickerId(), filePathBmp, source);
+			Intent intent = ShareUtils.shareContent(HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE,filePathBmp );
 			HikeMessengerApp.getInstance().startActivity(intent); 
 		}
 		return false;

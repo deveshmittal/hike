@@ -8036,6 +8036,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				String filePathBmp = stickerFile.getAbsolutePath();
 				intent.putExtra(HikeConstants.Extras.SHARE_TYPE, HikeConstants.Extras.ShareTypes.STICKER_SHARE);
 				intent.putExtra(HikeConstants.Extras.SHARE_CONTENT, filePathBmp);
+				intent.putExtra(StickerManager.STICKER_ID, sticker.getStickerId());
+				intent.putExtra(StickerManager.CATEGORY_ID, sticker.getCategoryId());
 				break;
 
 			case HikeConstants.Extras.ShareTypes.TEXT_SHARE:
