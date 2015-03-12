@@ -39,6 +39,24 @@ public class PlatformZipDownloader
 
 	}
 
+	public  boolean isMicroAppExist()
+	{
+		try
+		{
+			File microAppFolder = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR, mRequest.getContentData().getId());
+			if (microAppFolder.exists())
+			{
+				return true;
+			}
+		}
+		catch (NullPointerException npe)
+		{
+			npe.printStackTrace();
+		}
+		
+		return false;
+	}
+
 	/**
 	 * Calling this function will download and unzip the micro app. Download will be terminated if the folder already exists and then will try to
 	 * get the folder from assets and then will download it from web.

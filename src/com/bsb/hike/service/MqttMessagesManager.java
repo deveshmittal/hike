@@ -571,7 +571,15 @@ public class MqttMessagesManager
 			}
 		});
 
-		new PlatformZipDownloader(rqst, false).downloadAndUnzip();
+		PlatformZipDownloader downloader = new PlatformZipDownloader(rqst, false);
+		if (!downloader.isMicroAppExist())
+		{
+			downloader.downloadAndUnzip();
+		}
+		else
+		{
+			saveMessage(convMessage);
+		}
 	}
 
 	private void saveMessageBulk(JSONObject jsonObj) throws JSONException
