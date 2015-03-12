@@ -430,7 +430,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		init();
 		setContentView();
-		fetchConversation(true);
+		fetchConversation(false);
 		uiHandler.sendEmptyMessage(SET_WINDOW_BG);
 	}
 	
