@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
@@ -29,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
@@ -141,8 +143,6 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
     private void addEmptyView(){
     	View emptyView = getLayoutInflater(null).inflate(R.layout.friends_horizontal_item,null);
     	ImageView iv = (ImageView ) emptyView.findViewById(R.id.profile_image);
-		iv.setScaleType(ScaleType.CENTER_INSIDE);
-		iv.setBackgroundResource(R.drawable.avatar_empty);
 		iv.setImageResource(R.drawable.ic_question_mark);
     	emptyView.setTag(emptyTag);
     	viewStack.addView(emptyView);
@@ -155,15 +155,12 @@ public class HorizontalFriendsFragment extends Fragment implements OnClickListen
         	TextView tv = (TextView)contactView.findViewById(R.id.msisdn);
         	ImageView iv = (ImageView ) contactView.findViewById(R.id.profile_image);
         	
-			if(ContactManager.getInstance().getIcon(contactInfo.getMsisdn(), true) ==null){
-				iv.setScaleType(ScaleType.CENTER_INSIDE);
-				iv.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
-				iv.setImageResource(R.drawable.ic_profile);
-			}
-			else
+			Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(contactInfo.getMsisdn());
+			if (drawable == null)
 			{
-				iv.setImageDrawable(ContactManager.getInstance().getIcon(contactInfo.getMsisdn(), true));
+				drawable = HikeMessengerApp.getLruCache().getDefaultAvatar(contactInfo.getMsisdn(), false);
 			}
+			iv.setImageDrawable(drawable);
         	
         	tv.setText(contactInfo.getFirstNameAndSurname());
         	viewStack.addView(contactView, index);

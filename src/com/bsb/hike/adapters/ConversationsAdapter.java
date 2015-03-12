@@ -665,7 +665,7 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 
 		ImageView avatarView = viewHolder.avatar;
-		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, false, isListFlinging, true);
+		iconLoader.loadImage(conversation.getMsisdn(), avatarView, isListFlinging, false, true);
 	}
 
 	public void updateViewsRelatedToMute(View parentView, Conversation conversation)
@@ -845,7 +845,7 @@ public class ConversationsAdapter extends BaseAdapter
 			markedUp = HikeFileType.getFileTypeMessage(context, metadata.getHikeFiles().get(0).getHikeFileType(), message.isSent());
 			if ((conversation instanceof GroupConversation) && !message.isSent())
 			{
-				markedUp = Utils.addContactName(((GroupConversation) conversation).getGroupParticipantFirstName(message.getGroupParticipantMsisdn()), markedUp);
+				markedUp = Utils.addContactName(((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(message.getGroupParticipantMsisdn()), markedUp);
 			}
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
@@ -863,7 +863,7 @@ public class ConversationsAdapter extends BaseAdapter
 				for (int i = 0; i < dndNumbers.length(); i++)
 				{
 					String dndName;
-					dndName = conversation instanceof GroupConversation ? ((GroupConversation) conversation).getGroupParticipantFirstName(dndNumbers.optString(i)) : Utils
+					dndName = conversation instanceof GroupConversation ? ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(dndNumbers.optString(i)) : Utils
 							.getFirstName(conversation.getLabel());
 					if (i < dndNumbers.length() - 2)
 					{
@@ -899,13 +899,14 @@ public class ConversationsAdapter extends BaseAdapter
 			if (conversation instanceof GroupConversation)
 			{
 				String participantMsisdn = metadata.getMsisdn();
-				participantName = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
+				participantName = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participantMsisdn);
 			}
 			else
 			{
 				participantName = Utils.getFirstName(conversation.getLabel());
 			}
-			markedUp = context.getString(metadata.isOldUser() ? R.string.user_back_on_hike : R.string.joined_hike_new, participantName);
+			
+			markedUp = String.format(message.getMessage(), participantName);
 
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT || message.getParticipantInfoState() == ParticipantInfoState.GROUP_END)
@@ -916,15 +917,8 @@ public class ConversationsAdapter extends BaseAdapter
 				// Showing the block internation sms message if the user was
 				// booted because of that reason
 				String participantMsisdn = metadata.getMsisdn();
-				String participantName = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
-				if (conversation instanceof BroadcastConversation)
-				{
-					markedUp = String.format(context.getString(R.string.removed_from_broadcast), participantName);
-				}
-				else
-				{
-					markedUp = String.format(context.getString(R.string.left_conversation), participantName);
-				}
+				String participantName = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participantMsisdn);
+				markedUp = String.format(context.getString(R.string.left_conversation), participantName);
 			}
 			else
 			{
@@ -950,7 +944,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 				String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
+				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
 
 				markedUp = String.format(context.getString(R.string.change_group_name), participantName);
 			}
@@ -967,7 +961,7 @@ public class ConversationsAdapter extends BaseAdapter
 			String nameString;
 			if (conversation instanceof GroupConversation)
 			{
-				nameString = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
+				nameString = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
 			}
 			else
 			{
@@ -992,7 +986,7 @@ public class ConversationsAdapter extends BaseAdapter
 			if (conversation instanceof GroupConversation && !TextUtils.isEmpty(message.getGroupParticipantMsisdn())
 					&& message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 			{
-				markedUp = Utils.addContactName(((GroupConversation) conversation).getGroupParticipantFirstName(message.getGroupParticipantMsisdn()), markedUp);
+				markedUp = Utils.addContactName(((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(message.getGroupParticipantMsisdn()), markedUp);
 			}
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			markedUp = smileyParser.addSmileySpans(markedUp, true);
