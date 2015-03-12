@@ -220,6 +220,7 @@ import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 import com.bsb.hike.voip.VoIPUtils;
+import com.googlecode.mp4parser.boxes.dece.ContentInformationBox.BrandEntry;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener
@@ -1991,7 +1992,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else
 		{
-			if (mConversation instanceof GroupConversation)
+			if (mConversation instanceof GroupConversation && !(mConversation instanceof BroadcastConversation))
 			{
 				if (!checkMessageTypeFromHash(convMessage)){
 					return;
@@ -2550,9 +2551,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * Setting a flag which tells us whether the group contains sms users or not.
 		 * Set participant ready by list
 		 */
-		if (mConversation instanceof GroupConversation)
+		if ((mConversation instanceof GroupConversation))
 		{
-			hashWatcher = new HashSpanWatcher(mComposeView, HASH_PIN, getResources().getColor(R.color.sticky_yellow));
+			if(!(mConversation instanceof BroadcastConversation))
+			{
+				hashWatcher = new HashSpanWatcher(mComposeView, HASH_PIN, getResources().getColor(R.color.sticky_yellow));
+			}
+			
 			boolean hasSmsUser = false;
 			for (Entry<String, PairModified<GroupParticipant,String>> entry : ((GroupConversation) mConversation).getGroupParticipantList().entrySet())
 			{
