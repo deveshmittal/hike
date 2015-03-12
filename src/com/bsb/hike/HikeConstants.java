@@ -1391,8 +1391,6 @@ public class HikeConstants
 		
 		public static final String NUX_INCENTIVE_MODE = "showNuxIncentiveMode";
 		
-		public static final String CONV_SEARCH_QUERY = "convSearchText";
-
 		public static final String GENERAL_SO_TIMEOUT = "sto";
 
 		public static final String FT_UPLOAD_SO_TIMEOUT = "ftsto";

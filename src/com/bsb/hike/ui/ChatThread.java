@@ -1230,7 +1230,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		selectedFile = null;
 
 		Intent intent = new Intent(this, HomeActivity.class);
-		intent.putExtra(HikeConstants.Extras.CONV_SEARCH_QUERY, getIntent().getStringExtra(HikeConstants.Extras.CONV_SEARCH_QUERY));
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 
@@ -3179,7 +3178,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Utils.hideSoftKeyboard(ChatThread.this, mComposeView);
 
 				Intent intent = new Intent(ChatThread.this, HomeActivity.class);
-				intent.putExtra(HikeConstants.Extras.CONV_SEARCH_QUERY, getIntent().getStringExtra(HikeConstants.Extras.CONV_SEARCH_QUERY));
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 

@@ -444,13 +444,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			searchItem.getActionView().clearFocus();
 			searchItem.collapseActionView();
 		}
-		String searchQuery = intent.getStringExtra(HikeConstants.Extras.CONV_SEARCH_QUERY);
-		if (!TextUtils.isEmpty(searchQuery))
-		{
-			searchItem.expandActionView();
-			SearchView searchView = (SearchView) searchItem.getActionView();
-			searchView.setQuery(searchQuery, true);
-		}
 	}
 
 	@Override

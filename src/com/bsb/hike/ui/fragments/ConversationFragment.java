@@ -1118,7 +1118,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), conv);
-		intent.putExtra(HikeConstants.Extras.CONV_SEARCH_QUERY, searchText);
 		startActivity(intent);
 		
 		if (searchMode)
