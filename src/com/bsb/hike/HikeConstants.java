@@ -1440,7 +1440,32 @@ public class HikeConstants
 		public static final String SHOW_SHARE_FUNCTIONALITY = "shareWA";
 
 		public static final String SHARE_FUNCTIONALITY_PALETTE = "shareStkrPlt";
+
+		public static final String STKR_SHR = "stkrShr";
 		
+		public static final String TEXT_SHR = "textShr";
+		
+		public static final String IMG_SHR = "imgShr";
+		
+		public static final String STKR_SHR_PLT = "stkrShrPlt";
+		
+		public static final String MD1 = "md1";
+
+		public static final String MD2 = "md2";
+
+		public static final String MD3 = "md3";
+
+		public static final String MD4 = "md4";
+
+		public static final String SHR_STKR_CHAT = "c";
+		
+		public static final String WHATSAPP_SHARE = "whatsappShare";
+
+		public static final String SHR_TYPE = "shrType";
+
+		public static final String STKR_ID = "stkrId";
+		
+		public static final String CAT_ID = "catId";
 	}
 
 	public static final class LogEvent

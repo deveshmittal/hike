@@ -10,8 +10,9 @@
         android:id="@+id/user_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scaleType="fitCenter"
-        android:padding="5dp" />
+        android:scaleType="centerInside"
+        android:padding="5dp" 
+        android:layout_weight="1"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,11 +20,13 @@
         android:layout_gravity="center_vertical"
         android:layout_marginBottom="6dp"
         android:layout_marginTop="6dp"
-        android:orientation="horizontal" >
+        android:orientation="horizontal" 
+        
+        android:layout_weight="1">
 
         <com.bsb.hike.ui.utils.RecyclingImageView
-            android:layout_width="19dp"
-            android:layout_height="19dp"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             android:layout_marginBottom="4dp"
             android:layout_marginLeft="5dp"
             android:layout_marginTop="4dp"
@@ -44,7 +47,7 @@
                 android:maxLines="3"
                 android:text="@string/image_share_heading"
                 android:textColor="@color/white"
-                android:textSize="7sp"
+                android:textSize="10sp"
                 android:textStyle="bold" />
 
             <com.bsb.hike.view.CustomFontTextView
@@ -55,7 +58,7 @@
                 android:maxLines="2"
                 android:text="@string/image_share_description"
                 android:textColor="@color/white"
-                android:textSize="5sp"
+                android:textSize="8sp"
                 android:textStyle="normal" />
         </LinearLayout>
     </LinearLayout>
