@@ -2,6 +2,7 @@ package com.bsb.hike.analytics;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
@@ -11,16 +12,17 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.os.Environment;
+import android.text.TextUtils;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.analytics.AnalyticsConstants.AppOpenSource;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.platform.HikePlatformConstants;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gms.internal.fs;
 
 /**
  * @author rajesh
@@ -45,33 +47,31 @@ public class HAManager
 
 	private boolean isAnalyticsEnabled = true;
 	
-	private long fileMaxSize = AnalyticsConstants.MAX_FILE_SIZE;
-	
-	private long analyticsMaxSize = AnalyticsConstants.MAX_ANALYTICS_SIZE;
-
 	private int analyticsSendFreq = AnalyticsConstants.DEFAULT_SEND_FREQUENCY;
+	
+	private int maxInMemorySize = AnalyticsConstants.MAX_EVENTS_IN_MEMORY;
 
-	private int hourToSend;
+	private long hourToSend;
+	
+	private boolean shouldSendLogs = false;
 	
 	private int analyticsUploadFrequency = 0;
 		
 	private String analyticsDirectory;
 
-//	private NetworkListener listner;
+	private NetworkListener listner;
 	
 	private Session fgSessionInstance;
-	
+		
 	/**
 	 * Constructor
 	 */
 	private HAManager() 
-	{		
-		this.context = HikeMessengerApp.getInstance().getApplicationContext(); 
+	{				
+		this.context = HikeMessengerApp.getInstance().getApplicationContext();
 		
-//		analyticsDirectory = context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
-
-		// analytics data moved to external storage for QA to manually check the files
-		analyticsDirectory = Environment.getExternalStorageDirectory() + AnalyticsConstants.EVENT_FILE_DIR;
+		analyticsDirectory = context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Storage dir :" + analyticsDirectory);
 
 		eventsList = new ArrayList<JSONObject>();
 						
@@ -79,33 +79,46 @@ public class HAManager
 		
 		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Analytics service status :"+ isAnalyticsEnabled);
 
-		fileMaxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_FILESIZE, AnalyticsConstants.MAX_FILE_SIZE);
+		long fileMaxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_FILESIZE, AnalyticsConstants.MAX_FILE_SIZE);
 		
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File max size :" + fileMaxSize);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "File max size :" + fileMaxSize + " KBs");
 		
-		analyticsMaxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, AnalyticsConstants.MAX_ANALYTICS_SIZE);
+		long analyticsMaxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, AnalyticsConstants.MAX_ANALYTICS_SIZE);
+
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Total analytics size :" + analyticsMaxSize + " KBs");
+
+		maxInMemorySize = getPrefs().getInt(AnalyticsConstants.ANALYTICS_IN_MEMORY_SIZE, AnalyticsConstants.MAX_EVENTS_IN_MEMORY);
+
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Max events in memory before they get dumped to file :" + maxInMemorySize);
+
+		shouldSendLogs = getPrefs().getBoolean(AnalyticsConstants.SEND_WHEN_CONNECTED, false);
 		
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Total analytics size :" + analyticsMaxSize);
-		
-		hourToSend = getPrefs().getInt(AnalyticsConstants.ANALYTICS_ALARM_TIME, -1);
-		
+		hourToSend = getPrefs().getLong(AnalyticsConstants.ANALYTICS_ALARM_TIME, -1);
+
+		Calendar cal = Calendar.getInstance();
+
 		if(hourToSend == -1)
 		{
-			hourToSend = getRandomTime();
+			int rndHour = getRandomTime();
+			hourToSend = Utils.getTimeInMillis(cal, 0, 0, rndHour, 0);
 			
 			Editor editor = getPrefs().edit();		
-			editor.putInt(AnalyticsConstants.ANALYTICS_ALARM_TIME, hourToSend);		
+			editor.putLong(AnalyticsConstants.ANALYTICS_ALARM_TIME, hourToSend);		
 			editor.commit();
 		}		
 		
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Current alarm time :" + hourToSend);
+		cal.setTimeInMillis(hourToSend);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm date(Constructor) :" + cal.get(Calendar.DAY_OF_MONTH));
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm time(Constructor) :" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));
 
 		analyticsSendFreq = getPrefs().getInt(AnalyticsConstants.ANALYTICS_SEND_FREQUENCY, AnalyticsConstants.DEFAULT_SEND_FREQUENCY);
 
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Send frequency :" + analyticsSendFreq + " mins");
+
 		fgSessionInstance = new Session();
 		
-		// set wifi listener
-//		listner = new NetworkListener(this.context);
+		// set network listener
+		listner = new NetworkListener(this.context);
 	}
 	
 	/**
@@ -228,7 +241,7 @@ public class HAManager
 		}
 		eventsList.add(generateAnalticsJson(type, eventContext, priority, metadata, tag));
 
-		if (AnalyticsConstants.MAX_EVENTS_IN_MEMORY == eventsList.size()) 
+		if (maxInMemorySize == eventsList.size()) 
 		{			
 			// clone a local copy and send for writing
 			ArrayList<JSONObject> jsons = (ArrayList<JSONObject>) eventsList.clone();
@@ -241,14 +254,14 @@ public class HAManager
 		}
 	}
 
-	private synchronized void dumpMostRecentEventsAndSendToServer(boolean isOnDemandFromServer)
+	private synchronized void dumpInMemoryEventsAndTryToUpload(boolean sendNow, boolean isOnDemandFromServer)
 	{
 		ArrayList<JSONObject> jsons = (ArrayList<JSONObject>) eventsList.clone();
 		
 		eventsList.clear();
 		
 		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Dumping in-memory events :" + jsons.size());
-		AnalyticsStore.getInstance(this.context).dumpEvents(jsons, true, isOnDemandFromServer);
+		AnalyticsStore.getInstance(this.context).dumpEvents(jsons, sendNow, isOnDemandFromServer);
 	}
 	
 	/**
@@ -257,14 +270,16 @@ public class HAManager
 	 */
 	public long getMaxFileSize()	
 	{
-		return fileMaxSize;
+		long maxFileSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_FILESIZE, AnalyticsConstants.MAX_FILE_SIZE);
+		maxFileSize *= 1024;		
+		return maxFileSize;
 	}
 	
 	/**
 	 * Returns the hour of the day when log file should be sent to the server
 	 * @return hour of the day(0-23)
 	 */
-	public int getWhenToSend()
+	public long getWhenToSend()
 	{		
 		return hourToSend;
 	}
@@ -276,6 +291,27 @@ public class HAManager
 	public boolean isAnalyticsEnabled()
 	{
 		return isAnalyticsEnabled;
+	}
+	
+	/**
+	 * Used to check if analytics data can be sent based on network availability 
+	 * @return true if data can be sent, false otherwise
+	 */
+	public boolean isSendAnalyticsDataWhenConnected()
+	{
+		return shouldSendLogs;
+	}
+	
+	/**
+	 * Used to set whether logs should be sent next time alarm is triggered and user is connected 
+	 * @param value to set
+	 */
+	public void setIsSendAnalyticsDataWhenConnected(boolean value)
+	{
+		Editor edit = getPrefs().edit(); 
+		edit.putBoolean(AnalyticsConstants.SEND_WHEN_CONNECTED, value);
+		edit.commit();
+		this.shouldSendLogs = value;
 	}
 	
 	/**
@@ -291,6 +327,18 @@ public class HAManager
 	}
 	
 	/**
+	 * Used to set the next alarm time for sending analytics data
+	 * @param alarmTime in milliseconds
+	 */
+	public void setNextSendTimeToPrefs(long alarmTime)
+	{
+		Editor editor = getPrefs().edit();		
+		editor.putLong(AnalyticsConstants.ANALYTICS_ALARM_TIME, alarmTime);		
+		editor.commit();
+		hourToSend = alarmTime;
+	}
+	
+	/**
 	 * Used to set the maximum event file size
 	 * @param size size in Kb
 	 */
@@ -299,19 +347,17 @@ public class HAManager
 		Editor edit = getPrefs().edit(); 
 		edit.putLong(AnalyticsConstants.ANALYTICS_FILESIZE, size);
 		edit.commit();
-		fileMaxSize = size;		
 	}
 	
 	/**
 	 * Used to set the maximum analytics size on the client
-	 * @param size
+	 * @param size in kilobytes
 	 */
 	public void setAnalyticsMaxSizeOnClient(long size)
 	{
 		Editor edit = getPrefs().edit(); 
 		edit.putLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, size);
 		edit.commit();
-		analyticsMaxSize = size;
 	}
 
 	/**
@@ -335,11 +381,34 @@ public class HAManager
 	}
 	/**
 	 * Used to get the maximum analytics size on the client
-	 * @return size of analytics in Kbs
+	 * @return size of analytics in bytes
 	 */
 	public long getMaxAnalyticsSizeOnClient()	
 	{
-		return analyticsMaxSize;
+		long maxSize = getPrefs().getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, AnalyticsConstants.MAX_ANALYTICS_SIZE);
+		maxSize *= 1024;
+		return maxSize;
+	}
+	
+	/**
+	 * Used to get the maximum value of in memory events before they are written to file
+	 * @return count of in memory events
+	 */
+	public int getMaxInMemoryEventsSize()
+	{
+		return maxInMemorySize;
+	}
+	
+	/**
+	 * Used to set the maximum number of in memory events before we write them to file
+	 * @param size number of in memory events
+	 */
+	public void setMaxInMemoryEventsSize(int size)
+	{
+		Editor edit = getPrefs().edit(); 
+		edit.putInt(AnalyticsConstants.ANALYTICS_IN_MEMORY_SIZE, size);
+		edit.commit();
+		maxInMemorySize = size;		
 	}
 	
 	/**
@@ -420,9 +489,9 @@ public class HAManager
 	/**
 	 * Used to send the analytics data to the server
 	 */
-	public void sendAnalyticsData(boolean isOnDemandFromServer)
+	public void sendAnalyticsData(boolean sendNow, boolean isOnDemandFromServer)
 	{
-		dumpMostRecentEventsAndSendToServer(isOnDemandFromServer);		
+		dumpInMemoryEventsAndTryToUpload(sendNow, isOnDemandFromServer);		
 	}	
 	
 	/**
@@ -432,7 +501,7 @@ public class HAManager
 	private int getRandomTime()
 	{
 		Random rand = new Random();		
-		int time = rand.nextInt(24);				
+		int time = rand.nextInt(AnalyticsConstants.DAY_IN_SECONDS);				
 		return time;
 	}
 	
@@ -450,9 +519,7 @@ public class HAManager
 	 * @return array of strings with file names 
 	 */
 	protected static String[] getFileNames(Context context)
-	{
-		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Looking files in directory :" + context.getFilesDir() + "/Analytics/");
-		
+	{		
 		File dir = new File(HAManager.getInstance().getAnalyticsDirectory() + File.separator);
 
 		String[] fileNames = dir.list();
@@ -472,6 +539,7 @@ public class HAManager
 		recordChatSessions();
 		recordSession(fgSessionInstance, false);
 		fgSessionInstance.reset();
+		dumpInMemoryEventsAndTryToUpload(false, false);
 	}
 	
 	private void recordSession( Session session, boolean sessionStart)
@@ -482,15 +550,12 @@ public class HAManager
 			metadata = new JSONObject();
 			
 			//2)con:- 2g/3g/4g/wifi/off
-			metadata.put(AnalyticsConstants.CONNECTION_TYPE, Utils.getNetworkTypeAsString(context));
+			metadata.put(AnalyticsConstants.CONNECTION_TYPE, Utils.getNetworkType(context));
 			
 			if (sessionStart)
 			{
 				if (fgSessionInstance.getAppOpenSource() == AppOpenSource.FROM_NOTIFICATION)
 				{
-					// 4)srcctx :- uid/gid
-					metadata.put(AnalyticsConstants.SOURCE_CONTEXT, session.getSrcContext());
-
 					// 5)con-type :- normal/stleath 0/1
 					//metadata.put(AnalyticsConstants.CONVERSATION_TYPE, session.getConvType());
 
@@ -500,6 +565,9 @@ public class HAManager
 
 				// Not sending it for now. We will fix this code in later release when required
 				//metadata.put(AnalyticsConstants.SOURCE_APP_OPEN, session.getAppOpenSource());
+
+				// 4)srcctx :- uid/gid/null(in case of appOpen via Launcher)
+				metadata.put(AnalyticsConstants.SOURCE_CONTEXT, session.getSrcContext());
 				
 				HAManager.getInstance().record(AnalyticsConstants.SESSION_EVENT, AnalyticsConstants.FOREGROUND, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_SESSION);
 				
@@ -618,7 +686,10 @@ public class HAManager
 					//2)duration:-Total time of Chat Session in whole session
 					metadata.put(AnalyticsConstants.SESSION_TIME, chatSession.getChatSessionTotalTime());
 					
-					HAManager.getInstance().record(AnalyticsConstants.CHAT_ANALYTICS, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_CHAT_SESSION);
+					//3)putting event key (ek) as bot_open
+					metadata.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.BOT_OPEN);
+					
+					HAManager.getInstance().record(AnalyticsConstants.CHAT_ANALYTICS, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.EVENT_TAG_BOTS);
 						
 					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "--session-id :" + fgSessionInstance.getSessionId() + "--to_user :" + chatSession.getMsisdn() + "--session-time :" + chatSession.getChatSessionTotalTime());
 				}
@@ -645,6 +716,42 @@ public class HAManager
 	public void endChatSession(String msisdn)
 	{
 		fgSessionInstance.endChatSesion(msisdn);
+	}
+
+	public void recordLastSeenEvent(String screen, String api, String msg, String toUser)
+	{
+		if(!HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.DETAILED_HTTP_LOGGING_ENABLED, false))
+		{	
+			return;
+		}
+		JSONObject metadata = null;
+		
+		try
+		{
+			metadata = new JSONObject();
+			
+			metadata.put("screen", screen);
+			
+			metadata.put("api", api);
+			
+			if(!TextUtils.isEmpty(msg))
+			{
+				metadata.put("m", msg);
+			}
+			
+			if(!TextUtils.isEmpty(toUser))
+			{
+				metadata.put("to_user", toUser);
+			}
+			
+			HAManager.getInstance().record(AnalyticsConstants.LAST_SEEN_ANALYTICS, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.LAST_SEEN_ANALYTICS);
+				
+			Logger.d(AnalyticsConstants.LAST_SEEN_ANALYTICS_TAG, " --screen :"+ screen + " --api :"+ api + " -- msg :" + msg + " --to_user "+ toUser);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.LAST_SEEN_ANALYTICS_TAG, "invalid json");
+		}
 	}
 	
 }

@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttActionListenerNew;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
@@ -17,7 +18,6 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
-import org.eclipse.paho.client.mqttv3.IMqttActionListenerNew;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,10 +30,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,7 +37,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.Parcelable;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
@@ -53,14 +48,12 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikePubSub.Listener;
-import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.MqttPersistenceException;
-import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.HikePacket;
-import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
@@ -152,6 +145,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private static final int STAGING_BROKER_PORT_NUMBER_SSL = 8883;
 
+	private static final int DEV_STAGING_BROKER_PORT_NUMBER = 1883;
+
+	private static final int DEV_STAGING_BROKER_PORT_NUMBER_SSL = 8883;
+
 	private static final int FALLBACK_BROKER_PORT_NUMBER = 5222;
 	
 	// this represents number of msgs published whose callback is not yet arrived
@@ -208,7 +205,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		@Override
 		public void run()
 		{
-			if (isConnected())
+			if (isConnected() || isConnecting())
 			{
 				try
 				{
@@ -459,12 +456,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			return;
 		}
 
-		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION, true);
+		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION,true);
 
 		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
 
 		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
-				: STAGING_BROKER_PORT_NUMBER);
+						: STAGING_BROKER_PORT_NUMBER);
+
 
 		Logger.d(TAG, "Broker host name: " + brokerHostName);
 		Logger.d(TAG, "Broker port: " + brokerPortNumber);
@@ -638,7 +636,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		try
 		{
 			// make MQTT thread wait for t ms to attempt reconnect
+			// remove any pending disconnect runnables before making any connection
 			connChkRunnable.setSleepTime(t);
+			mqttThreadHandler.removeCallbacks(disConnectRunnable);
 			mqttThreadHandler.postAtFrontOfQueue(connChkRunnable);
 		}
 		catch (Exception e)
@@ -741,6 +741,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					op.setSocketFactory(null);
 				Logger.d(TAG, "MQTT connecting on : " + mqtt.getServerURI());
 				mqtt.connect(op, null, getConnectListener());
+				scheduleNextActivityCheck();
 			}
 			else
 			{
@@ -827,7 +828,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
 
 		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
-				: STAGING_BROKER_PORT_NUMBER);
+		                                : STAGING_BROKER_PORT_NUMBER);
 
 		if (!production)
 		{
@@ -871,6 +872,24 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			if (mqtt != null)
 			{
+				/*
+				 * If not already connected no need to disconnect
+				 */
+				if(!mqtt.isConnected())
+				{
+					Logger.d(TAG, "not connected but disconnecting");
+					if(mqtt.isConnecting())
+					{
+						Logger.d(TAG, "not connected but disconnecting , current state : connecting");
+					}
+					else if(mqtt.isDisconnecting())
+					{
+						Logger.d(TAG, "not connected but disconnecting , current state : disconnecting");
+					}
+					if (reconnect)
+						connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME); // try reconnection after 10 ms
+					return ;
+				}
 				forceDisconnect = true;
 				/*
 				 * blocking the mqtt thread, so that no other operation takes place till disconnects completes or timeout This will wait for max 1 secs
@@ -953,7 +972,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						connectUsingIp = false;
 						connectToFallbackPort = false;
 						ipConnectCount = 0;
-						scheduleNextActivityCheck(); // after successfull connect, reschedule for next conn check
 					}
 
 					/*
@@ -1006,12 +1024,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				@Override
 				public void messageArrived(String arg0, MqttMessage arg1) throws Exception
 				{
+					String messageBody = null;
 					try
 					{
 						cancelNetworkErrorTimer();
 						byte[] bytes = arg1.getPayload();
 						bytes = Utils.uncompressByteArray(bytes);
-						String messageBody = new String(bytes, "UTF-8");
+						messageBody = new String(bytes, "UTF-8");
 						Logger.i(TAG, "messageArrived called " + messageBody);
 						JSONObject jsonObj = new JSONObject(messageBody);
 						mqttMessageManager.saveMqttMessage(jsonObj);
@@ -1019,10 +1038,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					catch (JSONException e)
 					{
 						Logger.e(TAG, "invalid JSON message", e);
+						sendError(messageBody, e);
 					}
 					catch (Throwable e)
 					{
 						Logger.e(TAG, "Exception when msg arrived : ", e);
+						sendError(messageBody, e);
 					}
 				}
 
@@ -1053,6 +1074,21 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			};
 		}
 		return mqttCallBack;
+	}
+	
+	private void sendError(String message, Throwable throwable)
+	{
+		JSONObject error = new JSONObject();
+		try
+		{
+			error.put(HikeConstants.ERROR_MESSAGE, message);
+			error.put(HikeConstants.EXCEPTION_MESSAGE, throwable.getMessage());
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.ERROR_EVENT, EventPriority.HIGH, error);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	// this should always run on MQTT Thread
@@ -1581,9 +1617,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	 * @param object - Message
 	 * @param qos level (MQTT_PUBLISH or MQTT_PUBLISH_LOW)
 	 */
-	public void sendMessage(Object object, int qos)
+	public void sendMessage(JSONObject o, int qos)
 	{
-		JSONObject o = (JSONObject) object;
+		// added check
+		if(o == null)
+		{
+			return ;
+		}
+		
 		String data = o.toString();
 
 		long msgId = -1;

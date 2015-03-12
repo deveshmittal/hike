@@ -195,7 +195,7 @@ public class HikeService extends Service
 	{
 		Logger.d("TestUpdate", "Service started");
 
-		HikeSharedPreferenceUtil mprefs = HikeSharedPreferenceUtil.getInstance(getApplicationContext());
+		HikeSharedPreferenceUtil mprefs = HikeSharedPreferenceUtil.getInstance();
 
 		if (!(mprefs.getData(HikeConstants.REGISTER_GCM_SIGNUP, -1) == (HikeConstants.REGISTEM_GCM_AFTER_SIGNUP)))
 		{
@@ -204,6 +204,9 @@ public class HikeService extends Service
 
 		}
 
+		// Repopulating the alarms on close // force close,System GC ,Device Reboot //other reason
+		HikeAlarmManager.repopulateAlarm(getApplicationContext());
+		
 		LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(REGISTER_TO_GCM_ACTION));
 		Logger.d("HikeService", "onCreate called");
 
@@ -745,7 +748,7 @@ public class HikeService extends Service
 			if (profilePicPath == null)
 			{
 				Logger.d(getClass().getSimpleName(), "Signup profile pic already uploaded");
-				HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
+				HikeSharedPreferenceUtil.getInstance().removeData(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
 				return;
 			}
 
@@ -753,7 +756,7 @@ public class HikeService extends Service
 			if (!(f.exists() && f.length() > 0))
 			{
 				Logger.d(getClass().getSimpleName(), "Signup profile pic does not exists or it's length is zero");
-				HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
+				HikeSharedPreferenceUtil.getInstance().removeData(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
 				f.delete();
 				return;
 			}
@@ -764,8 +767,8 @@ public class HikeService extends Service
 			{
 				public void onSuccess(JSONObject response)
 				{
-					String msisdn = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.MSISDN_SETTING, null);
-					HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
+					String msisdn = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.MSISDN_SETTING, null);
+					HikeSharedPreferenceUtil.getInstance().removeData(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
 					Utils.renameTempProfileImage(msisdn);
 					// clearing cache for this msisdn because if user go to profile before rename (above line) executes then icon blurred image will be set in cache
 					HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
@@ -781,7 +784,7 @@ public class HikeService extends Service
 					}
 					else
 					{
-						HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
+						HikeSharedPreferenceUtil.getInstance().removeData(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
 						f.delete();
 					}
 				}
@@ -809,14 +812,14 @@ public class HikeService extends Service
 	 */
 	private void scheduleNextAnalyticsSendAlarm()
 	{
-		HAManager obj = HAManager.getInstance();
-		long nextAlarm = Utils.getTimeInMillis(Calendar.getInstance(), obj.getWhenToSend(), 0, 0, 0);
- 		
-		// if next alarm time is less than the current time, add frequency to the current time itself
-		if(System.currentTimeMillis() > nextAlarm)
- 		{
-			nextAlarm = System.currentTimeMillis() + obj.getAnalyticsSendFrequency() * AnalyticsConstants.ONE_HOUR;;			
- 		}
+		long nextAlarm = HAManager.getInstance().getWhenToSend(); 		
+		
+		// please do not remove the following logs, for QA testing
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(nextAlarm);
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm date(service boot up) :" + cal.get(Calendar.DAY_OF_MONTH));
+		Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Next alarm time(service boot up) :" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));
+		
 		HikeAlarmManager.setAlarm(getApplicationContext(), nextAlarm, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
  	}
 }

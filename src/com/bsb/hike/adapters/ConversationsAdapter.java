@@ -9,8 +9,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.CountDownTimer;
 import android.text.Html;
 import android.text.TextUtils;
@@ -31,6 +29,7 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
@@ -43,21 +42,16 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.ui.HikeListActivity;
-import com.bsb.hike.ui.HikePreferences;
-import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gms.internal.co;
-import com.google.android.gms.internal.ed;
 
 public class ConversationsAdapter extends BaseAdapter
 {
@@ -279,7 +273,7 @@ public class ConversationsAdapter extends BaseAdapter
 			if(!stealthFtueTipAnimated)
 			{
 				stealthFtueTipAnimated = true;
-				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.densityMultiplier, 0);
+				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.scaledDensityMultiplier, 0);
 				animation.setDuration(300);
 				parent.startAnimation(animation);
 			}
@@ -288,7 +282,7 @@ public class ConversationsAdapter extends BaseAdapter
 		else if (viewType == ViewType.RESET_STEALTH_TIP)
 		{
 			long remainingTime = HikeConstants.RESET_COMPLETE_STEALTH_TIME_MS
-					- (System.currentTimeMillis() - HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l));
+					- (System.currentTimeMillis() - HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l));
 
 			if (remainingTime <= 0)
 			{
@@ -339,7 +333,7 @@ public class ConversationsAdapter extends BaseAdapter
 			if(!resetStealthTipAnimated)
 			{
 				resetStealthTipAnimated = true;
-				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.densityMultiplier, 0);
+				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.scaledDensityMultiplier, 0);
 				animation.setDuration(300);
 				parent.startAnimation(animation);
 			}
@@ -377,8 +371,8 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 		else if (viewType == ViewType.STEALTH_UNREAD_TIP)
 		{
-			String headerTxt = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_UNREAD_TIP_HEADER, "");
-			String msgTxt = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_UNREAD_TIP_MESSAGE, "");
+			String headerTxt = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_UNREAD_TIP_HEADER, "");
+			String msgTxt = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_UNREAD_TIP_MESSAGE, "");
 			viewHolder.headerText.setText(headerTxt);
 			viewHolder.subText.setText(msgTxt);
 			viewHolder.parent.setOnClickListener(new OnClickListener()
@@ -405,7 +399,7 @@ public class ConversationsAdapter extends BaseAdapter
 		else if (viewType == ViewType.ATOMIC_PROFILE_PIC_TIP || viewType == ViewType.ATOMIC_FAVOURITE_TIP || viewType == ViewType.ATOMIC_INVITE_TIP
 				|| viewType == ViewType.ATOMIC_STATUS_TIP || viewType == ViewType.ATOMIC_INFO_TIP || viewType == ViewType.ATOMIC_HTTP_TIP || viewType == ViewType.ATOMIC_APP_GENERIC_TIP)
 		{
-			HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(context);
+			HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance();
 			String headerTxt = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_MAIN, "");
 			String message = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_MESSAGE_MAIN, "");
 			viewHolder.headerText.setText(headerTxt);
@@ -445,7 +439,7 @@ public class ConversationsAdapter extends BaseAdapter
 				public void onClick(View v)
 				{
 					Logger.i("tip", "on cross click ");
-					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
+					HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
 					// make sure it is on 0 position
 					conversationList.remove((int) ((Integer) v.getTag()));
 					notifyDataSetChanged();
@@ -496,7 +490,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private void resetAtomicPopUpKey(int position)
 	{
-		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(context);
+		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance();
 		Conversation con = conversationList.get(position);
 		JSONObject metadata = new JSONObject();		
 		
@@ -682,7 +676,18 @@ public class ConversationsAdapter extends BaseAdapter
 				muteIcon.setVisibility(View.GONE);
 			}
 		}
-		else if(muteIcon != null)
+		else if (conversation.isBotConv() && muteIcon != null)
+		{
+			if (conversation.isMutedBotConv(false))
+			{
+				muteIcon.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				muteIcon.setVisibility(View.GONE);
+			}
+		}
+		else if (muteIcon != null)
 		{
 			muteIcon.setVisibility(View.GONE);
 		}
@@ -702,12 +707,12 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 
 		TextView messageView = viewHolder.subText;
-		CharSequence markedUp = getConversationText(conversation, message);
 		messageView.setVisibility(View.VISIBLE);
+		CharSequence markedUp = getConversationText(conversation, message);
 		messageView.setText(markedUp);
-
+		
 		updateViewsRelatedToMessageState(parentView, message, conversation);
-
+		
 		TextView tsView = viewHolder.timeStamp;
 		tsView.setText(message.getTimestampFormatted(true, context));
 	}
@@ -737,12 +742,13 @@ public class ConversationsAdapter extends BaseAdapter
 		TextView messageView = viewHolder.subText;
 
 		TextView unreadIndicator = viewHolder.unreadIndicator;
+		boolean isNuxLocked = NUXManager.getInstance().getCurrentState() == NUXConstants.NUX_IS_ACTIVE && NUXManager.getInstance().isContactLocked(message.getMsisdn());
 		unreadIndicator.setVisibility(View.GONE);
 		imgStatus.setVisibility(View.GONE);
 		
-		if (message.getParticipantInfoState() == ParticipantInfoState.VOIP_CALL_SUMMARY ||
+		if (!isNuxLocked && (message.getParticipantInfoState() == ParticipantInfoState.VOIP_CALL_SUMMARY ||
 				message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING ||
-						message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING)
+						message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING))
 		{
 			String messageText = null;
 			int imageId = R.drawable.ic_voip_conv_miss;
@@ -784,13 +790,13 @@ public class ConversationsAdapter extends BaseAdapter
 		 */
 		else if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE || message.getState() == State.RECEIVED_UNREAD)
 		{
-			int resId = message.getImageState();
-			if (resId > 0)
+			
+			if (message.isSent())
 			{
-				imgStatus.setImageResource(resId);
+				imgStatus.setImageResource(message.getImageState());
 				imgStatus.setVisibility(View.VISIBLE);
 			}
-			else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0)
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0 && !message.isSent())
 			{
 				unreadIndicator.setVisibility(View.VISIBLE);
 
@@ -798,8 +804,11 @@ public class ConversationsAdapter extends BaseAdapter
 
 				unreadIndicator.setText(Integer.toString(conversation.getUnreadCount()));
 			}
-			else
-			{
+			if(isNuxLocked)
+			{ 
+				imgStatus.setVisibility(View.VISIBLE);
+				imgStatus.setImageBitmap(NUXManager.getInstance().getNuxChatRewardPojo().getPendingChatIcon());
+				messageView.setText(NUXManager.getInstance().getNuxChatRewardPojo().getChatWaitingText());		
 			}
 			
 			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) messageView.getLayoutParams();
@@ -807,9 +816,9 @@ public class ConversationsAdapter extends BaseAdapter
 			messageView.setLayoutParams(lp);
 		}
 
-		if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+		if (message.getState() == ConvMessage.State.RECEIVED_UNREAD || isNuxLocked)
 		{
-			/* set unread messages to BLUE */
+			/* set NUX waiting or unread messages to BLUE */
 			messageView.setTextColor(context.getResources().getColor(R.color.unread_message));
 		}
 		else

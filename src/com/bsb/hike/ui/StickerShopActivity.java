@@ -19,7 +19,6 @@ import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.ui.fragments.StickerShopFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.Utils;
 
 public class StickerShopActivity extends HikeAppStateBaseFragmentActivity
 {

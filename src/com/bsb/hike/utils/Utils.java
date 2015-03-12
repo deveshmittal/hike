@@ -73,13 +73,14 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Shader.TileMode;
 import android.graphics.Typeface;
@@ -90,9 +91,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.media.AudioManager;
 import android.media.ExifInterface;
-import android.media.MediaPlayer;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.TrafficStats;
@@ -178,15 +176,11 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.ConnectionChangeReceiver;
 import com.bsb.hike.service.HikeMqttManagerNew;
-import com.bsb.hike.service.HikeService;
+import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
-import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.FtueActivity;
-import com.bsb.hike.ui.ComposeChatActivity;
-import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -198,9 +192,6 @@ import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPUtils;
-import com.bsb.hike.voip.view.VoIPActivity;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -221,6 +212,8 @@ public class Utils
 
 	private static TranslateAnimation mInFromRight;
 
+	public static float scaledDensityMultiplier = 1.0f;
+	
 	public static float densityMultiplier = 1.0f;
 
 	public static int densityDpi;
@@ -622,7 +615,7 @@ public class Utils
 	 */
 	public static boolean isUserSignedUp(Context context, boolean launchSignup)
 	{
-		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(context);
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance();
 		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
 			if(launchSignup)
@@ -682,18 +675,6 @@ public class Utils
 		}
 		if (!currentAppVersion.equals("") && !currentAppVersion.equals(actualAppVersion))
 		{
-			return true;
-		}
-		return false;
-	}
-
-	public static boolean showNuxScreen(Activity activity)
-	{
-		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if (settings.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false))
-		{
-			activity.startActivity(new Intent(activity, FtueActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-			activity.finish();
 			return true;
 		}
 		return false;
@@ -774,6 +755,14 @@ public class Utils
 	{
 		return msisdn!=null && !msisdn.startsWith("+");
 	}
+
+	public static String validateBotMsisdn(String msisdn){
+		if (!msisdn.startsWith("+")){
+			msisdn = "+" + msisdn;
+		}
+		return msisdn;
+	}
+
 
 	public static String defaultGroupName(List<PairModified<GroupParticipant, String>> participantList)
 	{
@@ -928,8 +917,9 @@ public class Utils
 	 */
 	public static void setDensityMultiplier(DisplayMetrics displayMetrics)
 	{
-		Utils.densityMultiplier = displayMetrics.scaledDensity;
+		Utils.scaledDensityMultiplier = displayMetrics.scaledDensity;
 		Utils.densityDpi = displayMetrics.densityDpi;
+		Utils.densityMultiplier = displayMetrics.density;
 	}
 
 	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
@@ -1120,7 +1110,7 @@ public class Utils
 			data.put(HikeConstants.UPGRADE, upgrade);
 			data.put(HikeConstants.SENDBOT, sendbot);
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-
+			data.put(HikeConstants.RESOLUTION_ID, Utils.getResolutionId());
 			requestAccountInfo.put(HikeConstants.DATA, data);
 			HikeMqttManagerNew.getInstance().sendMessage(requestAccountInfo, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
@@ -1153,12 +1143,23 @@ public class Utils
 		context.startActivity(s);
 	}
 
-	public static void startShareImageIntent(Context context, String mimeType, String imagePath)
+	public static void startShareImageIntent(String mimeType, String imagePath,String text)
 	{
 		Intent s = new Intent(android.content.Intent.ACTION_SEND);
 		s.setType(mimeType);
 		s.putExtra(Intent.EXTRA_STREAM, Uri.parse(imagePath));
-		context.startActivity(s);
+		if(!TextUtils.isEmpty(text))
+		{
+			s.putExtra(Intent.EXTRA_TEXT, text);
+		}
+		s.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		Logger.i("imageShare", "shared image with "+s.getExtras());
+		HikeMessengerApp.getInstance().getApplicationContext().startActivity(s);
+		
+	}
+	public static void startShareImageIntent(String mimeType, String imagePath)
+	{
+		startShareImageIntent(mimeType, imagePath, null);
 	}
 
 	public static void bytesToFile(byte[] bytes, File dst)
@@ -1230,6 +1231,19 @@ public class Utils
 		}
 		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
 		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
+	}
+
+	public static String drawableToString(Drawable ic)
+	{
+		if (ic != null)
+		{
+			Bitmap bitmap = ((BitmapDrawable) ic).getBitmap();
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			bitmap.compress(CompressFormat.PNG, 100, outputStream);
+			byte[] bitmapByte = outputStream.toByteArray();
+			return Base64.encodeToString(bitmapByte,Base64.DEFAULT);
+		}
+		return null;
 	}
 
 	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
@@ -1353,6 +1367,7 @@ public class Utils
 		}
 	    return result;
 	}
+
 
 	public static enum ExternalStorageState
 	{
@@ -1481,15 +1496,21 @@ public class Utils
 		}
 	}
 
-	public static boolean copyImage(String srcFilePath, String destFilePath, Context context)
+	public static boolean compressAndCopyImage(String srcFilePath, String destFilePath, Context context)
+	{
+		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+		return compressAndCopyImage(srcFilePath, destFilePath, context, quality);
+	}
+	
+	public static boolean compressAndCopyImage(String srcFilePath, String destFilePath, Context context, int quality)
 	{
 		try
 		{
 			InputStream src;
 			String imageOrientation = Utils.getImageOrientation(srcFilePath);
 			Bitmap tempBmp = null;
-			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+
 			if (quality == ImageQuality.QUALITY_MEDIUM)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
@@ -1613,8 +1634,9 @@ public class Utils
 		boolean connectUsingSSL = Utils.switchSSLOn(ctx);
 		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), connectUsingSSL);
 	}
-
+		
 	public static void setupServerURL(boolean isProductionServer, boolean ssl)
+	
 	{
 		Logger.d("SSL", "Switching SSL on? " + ssl);
 
@@ -1625,9 +1647,10 @@ public class Utils
 
 		AccountUtils.host = isProductionServer ? AccountUtils.PRODUCTION_HOST : AccountUtils.STAGING_HOST;
 		AccountUtils.port = isProductionServer ? (ssl ? AccountUtils.PRODUCTION_PORT_SSL : AccountUtils.PRODUCTION_PORT) : (ssl ? AccountUtils.STAGING_PORT_SSL
-				: AccountUtils.STAGING_PORT);
+						: AccountUtils.STAGING_PORT);
 
 		if (isProductionServer)
+
 		{
 			AccountUtils.base = httpString + AccountUtils.host + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + "/v2";
@@ -1641,12 +1664,12 @@ public class Utils
 		}
 
 		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
-		AccountUtils.fileTransferUploadBase = httpString + AccountUtils.fileTransferHost + ":" + Integer.toString(AccountUtils.port) + "/v1";
-
+		AccountUtils.fileTransferBase = httpString + AccountUtils.fileTransferHost + ":" + Integer.toString(AccountUtils.port) + "/v1";
+		 
 		CheckForUpdateTask.UPDATE_CHECK_URL = httpString + (isProductionServer ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL);
-
-		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
-		AccountUtils.fastFileUploadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
+		 
+		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.fileTransferBase + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
+		AccountUtils.fastFileUploadUrl = AccountUtils.fileTransferBase + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
 
@@ -1658,10 +1681,33 @@ public class Utils
 		AccountUtils.h2oTutorialUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.H2O_TUTORIAL_PRODUCTION_BASE : AccountUtils.H2O_TUTORIAL_STAGING_BASE);
 		Logger.d("SSL", "Base: " + AccountUtils.base);
 		Logger.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
-		Logger.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferUploadBase);
+		Logger.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferBase);
 		Logger.d("SSL", "UpdateCheck: " + CheckForUpdateTask.UPDATE_CHECK_URL);
 		Logger.d("SSL", "FTDloadBase: " + AccountUtils.fileTransferBaseDownloadUrl);
 		Logger.d("SSL", "FTViewBase: " + AccountUtils.fileTransferBaseViewUrl);
+	}
+
+	private static void setHostAndPort(int whichServer, boolean ssl)
+	{
+		switch (whichServer)
+		{
+
+		case AccountUtils._PRODUCTION_HOST:
+			AccountUtils.host = AccountUtils.PRODUCTION_HOST;
+			AccountUtils.port = ssl ? AccountUtils.PRODUCTION_PORT_SSL : AccountUtils.PRODUCTION_PORT;
+			break;
+			
+		case AccountUtils._STAGING_HOST:
+			AccountUtils.host = AccountUtils.STAGING_HOST;
+			AccountUtils.port = ssl ? AccountUtils.STAGING_PORT_SSL : AccountUtils.STAGING_PORT;
+			break;
+			
+		case AccountUtils._DEV_STAGING_HOST:
+			AccountUtils.host = AccountUtils.DEV_STAGING_HOST;
+			AccountUtils.port = ssl ? AccountUtils.STAGING_PORT_SSL : AccountUtils.STAGING_PORT;
+			break;
+		}
+
 	}
 
 	public static boolean shouldChangeMessageState(ConvMessage convMessage, int stateOrdinal)
@@ -2299,9 +2345,16 @@ public class Utils
 
 		if (ringerMode != AudioManager.RINGER_MODE_SILENT && !Utils.isUserInAnyTypeOfCall(context))
 		{
-			Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-			if (vibrator != null)
-				vibrator.vibrate(100);
+			vibrate(100);
+		}
+	}
+
+	public static void vibrate(int msecs)
+	{
+		Vibrator vibrator = (Vibrator) HikeMessengerApp.getInstance().getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
+		if (vibrator != null)
+		{
+			vibrator.vibrate(msecs);
 		}
 	}
 
@@ -2454,7 +2507,7 @@ public class Utils
 	 */
 	public static boolean loadOnUiThread()
 	{
-		return ((int) 10 * Utils.densityMultiplier) > 10;
+		return ((int) 10 * Utils.scaledDensityMultiplier) > 10;
 	}
 
 	public static void hideSoftKeyboard(Context context, View v)
@@ -3021,10 +3074,9 @@ public class Utils
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
 			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-			if(!TextUtils.isEmpty(subType)){
-				JSONObject md = new JSONObject();
-				md.put(HikeConstants.SUB_TYPE, subType);
-				data.put(HikeConstants.METADATA, md);
+			if(!TextUtils.isEmpty(subType))
+			{
+				data.put(HikeConstants.SUB_TYPE, subType);
 			}
 			if(!TextUtils.isEmpty(toMsisdn))
 			{
@@ -3347,15 +3399,15 @@ public class Utils
 
 	public static void resetUnseenStatusCount(Context context)
 	{
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 	}
 
 	public static void resetUnseenFriendRequestCount(Context context)
 	{
-		if (HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
+		if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
 		{
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_COUNT_CHANGED, null);
 	}
@@ -3388,7 +3440,7 @@ public class Utils
 
 		Bitmap bitmap = HikeBitmapFactory.drawableToBitmap(avatarDrawable, Bitmap.Config.RGB_565);
 
-		int dimension = (int) (Utils.densityMultiplier * 48);
+		int dimension = (int) (Utils.scaledDensityMultiplier * 48);
 
 		Bitmap scaled = HikeBitmapFactory.createScaledBitmap(bitmap, dimension, dimension, Bitmap.Config.RGB_565, false, true, true);
 		bitmap = null;
@@ -3400,7 +3452,7 @@ public class Utils
 
 	public static boolean isVoipActivated(Context context)
 	{
-		int voipActivated = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.VOIP_ACTIVATED, 0);
+		int voipActivated = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.VOIP_ACTIVATED, 1);
 		return (voipActivated == 0)? false : true;
 	}
 
@@ -3411,11 +3463,7 @@ public class Utils
 			Toast.makeText(context, context.getString(R.string.voip_offline_error), Toast.LENGTH_SHORT).show();
 			return;
 		}
-		Intent i = new Intent(context, VoIPService.class);
-		i.putExtra("action", "outgoingcall");
-		i.putExtra("msisdn", mContactNumber);
-		i.putExtra("call_source", source.ordinal());
-		context.startService(i);
+		context.startService(IntentManager.getVoipCallIntent(context, mContactNumber, source));
 	}
 
 	public static String getFormattedDateTimeFromTimestamp(long milliSeconds, Locale current)
@@ -3581,12 +3629,17 @@ public class Utils
 		String res = height + "x" + width;
 		String operator = manager.getSimOperatorName();
 		String circle = manager.getSimOperator();
-		String pdm = Float.toString(Utils.densityMultiplier);
+		String pdm = Float.toString(Utils.scaledDensityMultiplier);
 
 		jsonObject.put(HikeConstants.RESOLUTION, res);
 		jsonObject.put(HikeConstants.OPERATOR, operator);
 		jsonObject.put(HikeConstants.CIRCLE, circle);
 		jsonObject.put(HikeConstants.PIXEL_DENSITY_MULTIPLIER, pdm);
+	}
+
+	public static ConvMessage makeConvMessage(String msisdn, boolean conversationOnHike)
+	{
+		return makeConvMessage(msisdn, "", conversationOnHike);
 	}
 
 	public static ConvMessage makeConvMessage(String msisdn, String message, boolean isOnhike)
@@ -3720,6 +3773,15 @@ public class Utils
 
 	public static void makeNoMediaFile(File root)
 	{
+		makeNoMediaFile(root, false);
+	}
+
+	/*
+	 * Whenever creating a nomedia file in any dirctory and if images/videos are already present in 
+	 * that directory then we need to do re-scan to make them invisible from gallery.
+	 */
+	public static void makeNoMediaFile(File root, boolean reScan)
+	{
 		if (root == null)
 		{
 			return;
@@ -3732,13 +3794,50 @@ public class Utils
 		File file = new File(root, ".nomedia");
 		if (!file.exists())
 		{
+			FileOutputStream dest = null;
 			try
 			{
-				file.createNewFile();
+				dest = new FileOutputStream(file);
+				/*
+				 * File content could be blank (for backwards compatibility), or have one or more of the following values separated by a newline:
+				 * image|sound|video
+				 * Reference - https://code.google.com/p/android/issues/detail?id=35879
+				 */
+				String data = "";
+				dest.write(data.getBytes(), 0, data.getBytes().length);
 			}
 			catch (IOException e)
 			{
-				Logger.d("NoMedia", "failed to make nomedia file");
+				Logger.d("NoMedia", "Failed to make nomedia file");
+			}
+			finally
+			{
+				try
+				{
+					if(dest != null)
+					{
+						dest.flush();
+						dest.getFD().sync();
+						dest.close();
+					}
+				}
+				catch (IOException e)
+				{
+					Logger.d("NoMedia", "Failed to make nomedia file");
+				}
+			}
+			if(reScan)
+			{
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+				{
+					HikeMessengerApp.getInstance().getApplicationContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" +
+							root)));
+				}
+				else
+				{
+					HikeMessengerApp.getInstance().getApplicationContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" +
+							root)));
+				}
 			}
 		}
 	}
@@ -3871,7 +3970,7 @@ public class Utils
 	public static void addFavorite(final Context context, final ContactInfo contactInfo, final boolean isFtueContact)
 	{
 		toggleFavorite(context, contactInfo, isFtueContact);
-		if (!contactInfo.isOnhike() || HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, false))
+		if (!contactInfo.isOnhike() || HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, false))
 		{
 			return;
 		}
@@ -3883,7 +3982,7 @@ public class Utils
 			public void positiveClicked(Dialog dialog)
 			{
 				dialog.dismiss();
-				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
 			}
 
 			@Override
@@ -3895,7 +3994,7 @@ public class Utils
 			public void negativeClicked(Dialog dialog)
 			{
 				dialog.dismiss();
-				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
 			}
 
 			@Override
@@ -3950,7 +4049,7 @@ public class Utils
 
 	public static final void cancelScheduledStealthReset(Context context)
 	{
-		HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
+		HikeSharedPreferenceUtil.getInstance().removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
 	}
 
 	public static long getOldTimestamp(int min)
@@ -4566,7 +4665,7 @@ public class Utils
 		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
 		 */
 		int inSampleSize = 1;
-		if (!chatTheme.isTiled() && Utils.densityMultiplier < 2)
+		if (!chatTheme.isTiled() && Utils.scaledDensityMultiplier < 2)
 		{
 			inSampleSize = 2;
 		}
@@ -5016,7 +5115,7 @@ public class Utils
 	{
 		appContext = appContext.getApplicationContext();
 
-		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(appContext);
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance();
 
 		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
@@ -5098,6 +5197,34 @@ public class Utils
 		return networkType;
 	}
 
+	public static String conversationType(String msisdn)
+	{
+		if (isBot(msisdn))
+		{
+			return HikeConstants.BOT;
+		}
+		else if (isGroupConversation(msisdn))
+		{
+			return HikeConstants.GROUP_CONVERSATION;
+		}
+		else
+		{
+			return HikeConstants.ONE_TO_ONE_CONVERSATION;
+		}
+	}
+
+	public static boolean isBot(String msisdn)
+	{
+		if (HikeMessengerApp.hikeBotNamesMap != null)
+		{
+			return HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn);
+		}
+		else
+		{
+			//Not probable
+			return false;
+		}
+	}
 	/**
 	 * Returns Data Consumed in KB
 	 * @param appId
@@ -5118,5 +5245,48 @@ public class Utils
 		{
 			return TrafficsStatsFile.getTotalBytesManual(appId);  //In KB
 		}
+	}
+	
+	public static Bitmap viewToBitmap(View view) {
+		try
+		{
+	    Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+	    Canvas canvas = new Canvas(bitmap);
+	    view.draw(canvas);
+	    return bitmap;
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static Bitmap undrawnViewToBitmap(View view) {
+		int measuredWidth = View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.UNSPECIFIED);
+		int measuredHeight = View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.UNSPECIFIED);
+
+		// Cause the view to re-layout
+		view.measure(measuredWidth, measuredHeight);
+		view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+	    return viewToBitmap(view);
+	}
+	
+	public static boolean isConversationMuted(String msisdn)
+	{
+		if ((Utils.isGroupConversation(msisdn)))
+		{
+			if (HikeConversationsDatabase.getInstance().isGroupMuted(msisdn))
+			{
+				return true;
+			}
+		}
+		else if (Utils.isBot(msisdn))
+		{
+			if (HikeConversationsDatabase.getInstance().isBotMuted(msisdn))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }
