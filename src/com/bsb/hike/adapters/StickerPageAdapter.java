@@ -383,7 +383,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener, 
 			File stickerFile = new File(filePath, sticker.getStickerId());
 			String filePathBmp = stickerFile.getAbsolutePath();
 			String source = category.isCustom() ? StickerManager.FROM_RECENT : StickerManager.FROM_OTHER;
-			HAManager.getInstance().shareWhatsappAnalyticsMethod(HikeConstants.Extras.STKR_SHR_PLT, sticker.getCategoryId(), sticker.getStickerId(), filePathBmp, source);
+			HAManager.getInstance().shareWhatsappAnalyticsMethod(HikeConstants.Extras.STICKER_SHARE_PALLETTE, sticker.getCategoryId(), sticker.getStickerId(), filePathBmp, source);
 			Intent intent = ShareUtils.shareContent(HikeConstants.Extras.ShareTypes.STICKER_SHARE_PALLETE,filePathBmp );
 			HikeMessengerApp.getInstance().startActivity(intent); 
 		}

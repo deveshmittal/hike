@@ -1441,24 +1441,22 @@ public class HikeConstants
 
 		public static final String SHARE_FUNCTIONALITY_PALETTE = "shareStkrPlt";
 
-		public static final String STKR_SHR = "stkrShr";
+		public static final String STICKER_SHARE = "stkrShr";
 		
-		public static final String TEXT_SHR = "textShr";
+		public static final String TEXT_SHARE = "textShr";
 		
-		public static final String IMG_SHR = "imgShr";
+		public static final String IMAGE_SHARE = "imgShr";
 		
-		public static final String STKR_SHR_PLT = "stkrShrPlt";
+		public static final String STICKER_SHARE_PALLETTE = "stkrShrPlt";
 		
-		public static final String SHR_STKR_CHAT = "c";
+		public static final String SHARE_STICKER_CHATTHREAD = "c";
 		
 		public static final String WHATSAPP_SHARE = "whatsappShare";
 
-		public static final String SHR_TYPE = "shrType";
-
 		//required for analytics
-		public static final String CATID = "md1";
+		public static final String CATEGORYID = "md1";
 
-		public static final String STKRID = "md2";
+		public static final String STICKERID = "md2";
 
 		public static final String PATH = "md3";
 

@@ -605,9 +605,9 @@ public class HAManager
 		JSONObject metadata = new JSONObject();
 		try
 		{
-			metadata.put(HikeConstants.Extras.SHR_TYPE, shrType);
-			metadata.put(HikeConstants.Extras.CATID, catId);
-			metadata.put(HikeConstants.Extras.STKRID, stkrId);
+			metadata.put(HikeConstants.Extras.SHARE_TYPE, shrType);
+			metadata.put(HikeConstants.Extras.CATEGORYID, catId);
+			metadata.put(HikeConstants.Extras.STICKERID, stkrId);
 			metadata.put(HikeConstants.Extras.PATH, str);
 			metadata.put(HikeConstants.Extras.SOURCE, shrStkrChat);
 			record(HikeConstants.Extras.WHATSAPP_SHARE, HikeConstants.LogEvent.CLICK, EventPriority.HIGH, metadata);
@@ -627,7 +627,7 @@ public class HAManager
 
 		try
 		{
-			metadata.put(HikeConstants.Extras.SHR_TYPE, shr);
+			metadata.put(HikeConstants.Extras.SHARE_TYPE, shr);
 			record(HikeConstants.Extras.WHATSAPP_SHARE, HikeConstants.LogEvent.CLICK, EventPriority.HIGH, metadata);
 
 		}
