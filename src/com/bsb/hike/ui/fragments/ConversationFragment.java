@@ -1040,7 +1040,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	public boolean isConversationsEmpty()
 	{
-		return (mConversationsByMSISDN != null && !mConversationsByMSISDN.isEmpty()) ? false : true;
+		return (displayedConversations != null && !displayedConversations.isEmpty()) ? false : true;
 	}
 
 	@Override
