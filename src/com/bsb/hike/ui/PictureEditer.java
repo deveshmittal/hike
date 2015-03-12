@@ -254,7 +254,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 				DoodleEffectItemLinearLayout prev = HikePhotosUtils.FilterTools.getCurrentDoodleItem();
 				DoodleEffectItemLinearLayout me = (DoodleEffectItemLinearLayout) v;
 				editView.setBrushColor(me.getBrushColor());
-				doodlePreview.setBrushColor(me.getBrushColor(), true);
+				doodlePreview.setBrushColor(me.getBrushColor());
 				doodlePreview.refresh();
 				if (prev != null && prev.getBrushColor() != me.getBrushColor())
 				{

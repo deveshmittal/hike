@@ -32,6 +32,6 @@
         android:layout_marginTop="5dp" 
         android:background="@color/photos_pager_background"
         android:layout_width="match_parent"
-        android:layout_height="2dp"/>
+        android:layout_height="@dimen/photos_filter_selector_size"/>
 
 </com.bsb.hike.photos.views.FilterEffectItemLinearLayout>

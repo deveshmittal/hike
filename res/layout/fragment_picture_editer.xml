@@ -12,25 +12,29 @@
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
         android:orientation="vertical" >
-
+		<View 
+		    android:layout_width="match_parent"
+            android:layout_height="48dp"
+            />
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:animateLayoutChanges="true"
-            android:layout_weight="@integer/photos_editor_canvas_weight" >
+             >
 
             <com.bsb.hike.photos.views.PhotosEditerFrameLayoutView
                 android:id="@+id/editer"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop" />
+                android:layout_height="wrap_content"
+               
+                 />
 
             <ImageView
                 android:id="@+id/undo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
+                android:layout_alignBottom="@+id/editer"
                 android:layout_margin="@dimen/photos_doodle_undo_padding"
                 android:background="@drawable/photos_undo_selector"
                 android:visibility="gone" />
@@ -45,8 +49,7 @@
         <android.support.v4.view.ViewPager
             android:id="@+id/pager"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="@integer/photos_editor_pager_weight"
+            android:layout_height="wrap_content"
             android:background="@color/photos_pager_background" />
     </LinearLayout>
 

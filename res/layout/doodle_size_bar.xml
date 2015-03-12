@@ -26,10 +26,10 @@
         </FrameLayout>
 
         <FrameLayout
-            android:layout_width="0dp"
+            android:layout_width="@dimen/photos_doodle_previewIcon_width"
             android:layout_height="@dimen/photos_doodle_maximum_brush_width"
             android:layout_gravity="center_vertical"
-            android:layout_weight="1" >
+            >
 
             <ViewStub
                 android:id="@+id/viewStubPreview"

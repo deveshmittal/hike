@@ -2348,9 +2348,9 @@ public class HikeConstants
 
 		public static final int Min_BRUSH_WIDTH = 8;
 
-		public static final int PREVIEW_THUMBNAIL_WIDTH = 70;
+		public static final int PREVIEW_THUMBNAIL_WIDTH = 60;
 
-		public static final int PREVIEW_THUMBNAIL_HEIGHT = 70;
+		public static final int PREVIEW_THUMBNAIL_HEIGHT = 60;
 
 		public static final int DELTA_BRUSH_WIDTH = 10;
 
