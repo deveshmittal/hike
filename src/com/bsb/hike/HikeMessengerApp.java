@@ -936,7 +936,7 @@ public void onTrimMemory(int level)
 	{
 		ImageCacheParams params = new ImageCacheParams();
 		params.setMemCacheSizePercent(0.15f);
-		cache = new HikeLruCache(params, getApplicationContext());
+		cache = HikeLruCache.getInstance(params, getApplicationContext());
 	}
 
 	public static HikeLruCache getLruCache()

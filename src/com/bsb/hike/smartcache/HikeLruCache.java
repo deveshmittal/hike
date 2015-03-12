@@ -101,7 +101,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 
 	private final Set<MySoftReference<Bitmap>> reusableBitmaps;
 
-	public HikeLruCache(ImageCacheParams cacheParams, Context context)
+	private HikeLruCache(ImageCacheParams cacheParams, Context context)
 	{
 		super(cacheParams.memCacheSize);
 		reusableBitmaps = Utils.canInBitmap() ? Collections.synchronizedSet(new HashSet<MySoftReference<Bitmap>>()) : null;
