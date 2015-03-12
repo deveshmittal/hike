@@ -306,7 +306,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		try
 		{
 			JSONObject json = new JSONObject();
-			json.put(HikeConstants.HikePhotos.PHOTOS_DOODLE_COLOR_KEY, Integer.toString(colorHex));
+			json.put(HikeConstants.HikePhotos.PHOTOS_DOODLE_COLOR_KEY, Integer.toHexString(colorHex));
 			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_APPLIED_DOODLE);
 			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 		}
