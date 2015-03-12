@@ -20,6 +20,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,6 +28,8 @@ import android.view.View.OnTouchListener;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 import com.bsb.hike.photos.views.DoodleEffectItemLinearLayout;
@@ -38,7 +41,7 @@ import com.bsb.hike.photos.views.FilterEffectItemLinearLayout;
  * Utility class for picture editing.
  * 
  * @author akhiltripathi
- *        
+ * 
  */
 
 public class HikePhotosUtils
@@ -56,7 +59,6 @@ public class HikePhotosUtils
 
 	0xff16efc4, 0xffffffff, 0xff2ab0fc };
 
-
 	/**
 	 * 
 	 * Util method which converts the dp value into float(pixel value) based on the given context resources
@@ -73,7 +75,7 @@ public class HikePhotosUtils
 
 		return pixels;
 	}
-	
+
 	
 
 	/**
@@ -83,11 +85,11 @@ public class HikePhotosUtils
 	public static class FilterTools
 	{
 
-		private static FilterType selectedFilter ;
+		private static FilterType selectedFilter;
 
 		private static FilterEffectItemLinearLayout prevFilter;
-		
-		private static int selectedColor ;
+
+		private static int selectedColor;
 
 		private static DoodleEffectItemLinearLayout prevColor;
 
@@ -110,7 +112,7 @@ public class HikePhotosUtils
 		{
 			selectedColor = color;
 		}
-		
+
 		public static void setCurrentFilterItem(FilterEffectItemLinearLayout item)
 		{
 			prevFilter = item;
@@ -133,7 +135,7 @@ public class HikePhotosUtils
 
 		public enum FilterType
 		{
-			BRIGHTNESS, CONTRAST, SATURATION, HUE, SEPIA, GRAYSCALE, POLAROID, FADED, BGR, INVERSION, X_PRO_2, WILLOW, WALDEN, VALENCIA, TOASTER, SUTRO, SIERRA, RISE, NASHVILLE, MAYFAIR, LO_FI, KELVIN, INKWELL, HUDSON, HEFE, EARLYBIRD, BRANNAN, AMARO, E1977, FILTER1, CLASSIC, RETRO, APOLLO, ORIGINAL
+			BRIGHTNESS, CONTRAST, SATURATION, HUE, SEPIA, GRAYSCALE, POLAROID, FADED, BGR, INVERSION, X_PRO_2, WILLOW, WALDEN, VALENCIA, TOASTER, SUTRO, SIERRA, RISE, NASHVILLE, MAYFAIR, LO_FI, KELVIN, INKWELL, HUDSON, HEFE, EARLYBIRD, BRANNAN, AMARO, E1977, SOLOMON, CLASSIC, RETRO, APOLLO, ORIGINAL
 		}
 
 		public static class FilterList
@@ -159,17 +161,17 @@ public class HikePhotosUtils
 				{
 					effectfilters = new FilterList();
 					effectfilters.addFilter("ORIGINAL", FilterType.ORIGINAL);
-					effectfilters.addFilter("SOLOMON", FilterType.FILTER1);
-					effectfilters.addFilter("CLASSIC", FilterType.CLASSIC);
-					effectfilters.addFilter("NASHVILLE", FilterType.NASHVILLE);
-					effectfilters.addFilter("KELVIN", FilterType.KELVIN);
-					effectfilters.addFilter("X PRO 2", FilterType.X_PRO_2);
+					effectfilters.addFilter("KALA PILA", FilterType.SOLOMON);
+					effectfilters.addFilter("CHUSKI", FilterType.CLASSIC);
+					effectfilters.addFilter("JUGAAD", FilterType.NASHVILLE);
+					effectfilters.addFilter("JALEBI", FilterType.KELVIN);
+					effectfilters.addFilter("X-PRO", FilterType.X_PRO_2);
 					effectfilters.addFilter("RETRO", FilterType.RETRO);
 					effectfilters.addFilter("APOLLO", FilterType.APOLLO);
 					effectfilters.addFilter("EARLYBIRD", FilterType.EARLYBIRD);
-					effectfilters.addFilter("1977", FilterType.E1977);
+					effectfilters.addFilter("SHOLAY", FilterType.E1977);
 					effectfilters.addFilter("BRANNAN", FilterType.BRANNAN);
-					effectfilters.addFilter("LOMO FI", FilterType.LO_FI);
+					effectfilters.addFilter("Lo-Fi", FilterType.LO_FI);
 					effectfilters.addFilter("INKWELL", FilterType.INKWELL);
 					effectfilters.addFilter("SEPIA", FilterType.SEPIA);
 					effectfilters.addFilter("GRAYSCALE", FilterType.GRAYSCALE);

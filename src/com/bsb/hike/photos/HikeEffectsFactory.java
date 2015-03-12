@@ -528,15 +528,6 @@ public final class HikeEffectsFactory
 
 			applyEffect(effect);
 
-			if (blurImage)
-			{
-				mInAllocation = Allocation.createFromBitmap(mRS, inBitmapOut);
-				mScriptBlur.setRadius(mBlurRadius);
-				mScriptBlur.setInput(mInAllocation);
-				mScriptBlur.forEach(mOutAllocations);
-				mOutAllocations.copyTo(inBitmapOut);
-			}
-
 			uiHandler.post(new Runnable()
 			{
 				@Override
@@ -555,7 +546,7 @@ public final class HikeEffectsFactory
 
 			switch (effect)
 			{
-			case FILTER1:
+			case SOLOMON:
 				mScript.set_r(new int[] { 0x33, 0xCD, 0 });
 				mScript.set_g(new int[] { 0x27, 0x98, 0 });
 				mScript.set_b(new int[] { 0xCD, 0x83, 0 });

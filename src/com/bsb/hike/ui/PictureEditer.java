@@ -113,18 +113,17 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		indicator = (PhotosTabPageIndicator) findViewById(R.id.indicator);
 		indicator.setViewPager(pager);
 
-		  int density= getResources().getDisplayMetrics().densityDpi;
+		int density = getResources().getDisplayMetrics().densityDpi;
 
-		  switch(density)
-		  {
-		  case DisplayMetrics.DENSITY_LOW:
-		  case DisplayMetrics.DENSITY_MEDIUM:
-			  indicator.setVisibility(View.GONE);
-		      break;
-		
-		  }
+		switch (density)
+		{
+		case DisplayMetrics.DENSITY_LOW:
+		case DisplayMetrics.DENSITY_MEDIUM:
+			indicator.setVisibility(View.GONE);
+			break;
 
-		
+		}
+
 		undoButton = (ImageView) findViewById(R.id.undo);
 		undoButton.setOnClickListener(clickHandler);
 

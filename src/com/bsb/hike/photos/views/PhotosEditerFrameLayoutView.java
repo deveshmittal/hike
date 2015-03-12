@@ -17,6 +17,7 @@ import android.util.DisplayMetrics;
 import android.widget.FrameLayout;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -93,12 +94,29 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		savingFinal = false;
 	}
 
+	public int getThumbnailDimen()
+	{
+		int density =getResources().getDisplayMetrics().densityDpi;
+		int dimen = 0;
+		switch (density)
+		{
+		case DisplayMetrics.DENSITY_LOW:
+		case DisplayMetrics.DENSITY_MEDIUM:
+		case DisplayMetrics.DENSITY_HIGH:
+			return HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_WIDTH_MDPI;
+		default:
+			return HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_WIDTH_HDPI;
+
+		}
+
+	}
+	
 	public Bitmap getScaledImageOriginal()
 	{
 		if (scaledImageOriginal == null)
 		{
-			scaledImageOriginal = Bitmap.createScaledBitmap(imageOriginal, HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_WIDTH),
-					HikePhotosUtils.dpToPx(getContext(), HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_HEIGHT), false);
+			scaledImageOriginal = Bitmap.createScaledBitmap(imageOriginal, HikePhotosUtils.dpToPx(getContext(),getThumbnailDimen()),
+					HikePhotosUtils.dpToPx(getContext(),getThumbnailDimen()), false);
 		}
 		return scaledImageOriginal;
 	}
@@ -126,15 +144,22 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		imageOriginal = BitmapFactory.decodeFile(FilePath);
 		DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
 		int width = metrics.widthPixels;
-
-		imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
-		effectLayer.handleImage(imageScaled);
+		if (width < imageOriginal.getWidth())
+		{
+			imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
+			effectLayer.handleImage(imageScaled, true);
+		}
+		else
+		{
+			effectLayer.handleImage(imageOriginal, false);
+			imageScaled = imageOriginal;
+		}
 
 	}
 
 	public void loadImageFromBitmap(Bitmap bmp)
 	{
-		effectLayer.handleImage(bmp);
+		effectLayer.handleImage(bmp,false);
 	}
 
 	public void enableDoodling()
@@ -167,8 +192,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 	public void saveImage(HikeFileType fileType, String originalName, HikePhotosListener listener)
 	{
 		doodleLayer.getMeasure();
-		vignetteLayer.getMeasure(imageOriginal);
-
+		
 		this.mFileType = fileType;
 		this.mOriginalName = originalName;
 		this.mListener = listener;
@@ -268,10 +292,8 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 
 			sendAnalyticsFilterApplied(effectLayer.getCurrentFilter().name());
 
-			if (vignetteLayer.getVignetteBitmap() != null)
-			{
-				canvasResult.drawBitmap(vignetteLayer.getVignetteBitmap(), 0, 0, null);
-			}
+			imageEdited = vignetteLayer.applyVignetteToBitmap(imageEdited);
+
 			if (doodleLayer.getBitmap() != null)
 			{
 				Bitmap temp = Bitmap.createScaledBitmap(doodleLayer.getBitmap(), imageOriginal.getWidth(), imageOriginal.getHeight(), false);
@@ -289,7 +311,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 	{
 		if (!savingFinal)
 		{
-			vignetteLayer.setVignetteforFilter(preview);
+			vignetteLayer.setVignetteforFilter();
 			effectLayer.changeDisplayImage(preview);
 		}
 		else
