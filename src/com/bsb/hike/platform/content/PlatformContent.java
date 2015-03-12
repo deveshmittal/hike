@@ -87,8 +87,8 @@ public class PlatformContent
 	{
 		if (!isInitialized)
 		{
-			PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
-						+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
+//			PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
+//						+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
 			isInitialized = true;
 		}
 

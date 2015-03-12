@@ -42,7 +42,7 @@ public class ProductJavaScriptBridge extends JavascriptBridge
 
 	public ProductJavaScriptBridge(WebView mWebView, WeakReference<HikeDialogFragment> activity, Object productContentModel)
 	{
-		super(mWebView);
+		super(activity.get().getActivity(), mWebView);
 		this.mmWebView = mWebView;
 		this.mHikeDialogFragment = activity;
 		this.productContentModel=productContentModel;
@@ -84,21 +84,25 @@ public class ProductJavaScriptBridge extends JavascriptBridge
 	@JavascriptInterface
 	public void onSubmit(final String action, final String metaData)
 	{
-		mmWebView.post(new Runnable()
+		if (mHandler != null)
 		{
 
-			@Override
-			public void run()
+			mHandler.post(new Runnable()
 			{
-				if (getActivity()!=null)
-				{
-					takeAction(action, metaData,getActivity());
-				}
-				deletePopupAndDismissDialog();
 
-				onDestroy();
-			}
-		});
+				@Override
+				public void run()
+				{
+					if (getActivity() != null)
+					{
+						takeAction(action, metaData, getActivity());
+					}
+					deletePopupAndDismissDialog();
+
+					onDestroy();
+				}
+			});
+		}
 	}
 
 	protected Activity getActivity()

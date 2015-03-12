@@ -14,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
-
 import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
@@ -204,6 +203,7 @@ import com.bsb.hike.modules.lastseenmgr.FetchLastSeenTask;
 import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
+import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -380,7 +380,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
 			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT,HikePubSub.CONV_META_DATA_UPDATED, 
-			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED, HikePubSub.STICKER_FTUE_TIP,HikePubSub.MULTI_MESSAGE_DB_INSERTED  };
+			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED, HikePubSub.STICKER_FTUE_TIP,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.MUTE_BOT  };
 
 	private EmoticonType emoticonType;
 
@@ -1828,6 +1828,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return false;
 		}
+		if (message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+		{
+			if (message.webMetadata.isLongPressDisabled())
+			{
+				return false;
+			}
+		}
 		mAdapter.toggleSelection(message);
 		boolean isMsgSelected = mAdapter.isSelected(message);
 
@@ -1910,11 +1917,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// Sticker message is a non text message.
 			selectedNonTextMsg(isMsgSelected);
 		}
-        else if (message.getMessageType() == MESSAGE_TYPE.CONTENT || message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+        else if (message.getMessageType() == MESSAGE_TYPE.CONTENT )
         {
             // Content card is a non text message.
             selectedNonTextMsg(isMsgSelected);
-        }
+        }if (message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+		{
+			selectedNonTextMsg(isMsgSelected);
+		}
 
 		invalidateOptionsMenu();
 		return true;
@@ -2361,6 +2371,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 								json.put(HikePlatformConstants.CARD_TYPE, convMessage.webMetadata.getAppName());
 								json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
 								json.put(AnalyticsConstants.TO, mContactNumber);
+								json.put(AnalyticsConstants.CONTENT_ID, convMessage.getContentId());
 								HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 							}
 							catch (JSONException e)
@@ -4079,6 +4090,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
+		else if (HikePubSub.MUTE_BOT.equals(type))
+		{
+			mConversation.setBotConvMute(true);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MUTE_CONVERSATION_TOGGLED,
+					new Pair<String, Boolean>(mConversation.getMsisdn(), mConversation.isMutedBotConv(false)));
+		}
 		else if (HikePubSub.UPDATE_NETWORK_STATE.equals(type))
 		{
 			runOnUiThread(new Runnable()
@@ -5257,6 +5274,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_DELETE);
 				json.put(AnalyticsConstants.ORIGIN, origin);
 				json.put(AnalyticsConstants.CHAT_MSISDN, mContactNumber);
+				json.put(AnalyticsConstants.CONTENT_ID, convMessage.getContentId());
 				HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 			}
 			catch (JSONException e)

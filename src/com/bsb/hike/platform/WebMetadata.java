@@ -19,7 +19,9 @@ public class WebMetadata
 	private String appName;
 
 	private String layoutId;
-	
+
+	private boolean longPressDisabled;
+
 	private static final String PUSH_SILENT= "silent";
 	
 
@@ -72,11 +74,11 @@ public class WebMetadata
 
 	public void setHelperData(JSONObject helperData)
 	{
-		try
+		if (null != helperData)
 		{
 			this.helperData = helperData;
 		}
-		catch (NullPointerException npe)
+		else
 		{
 			this.helperData = new JSONObject();
 		}
@@ -133,6 +135,32 @@ public class WebMetadata
 		{
 			cardobj = new JSONObject();
 		}
+
+		if (metadata.has(HikePlatformConstants.LONG_PRESS_DISABLED))
+		{
+			if (metadata.optBoolean(HikePlatformConstants.LONG_PRESS_DISABLED))
+			{
+				setLongPressDisabled(true);
+			}
+			else
+			{
+				setLongPressDisabled(false);
+			}
+		}
+		else
+		{
+			setLongPressDisabled(false);
+		}
+	}
+
+	public boolean isLongPressDisabled()
+	{
+		return longPressDisabled;
+	}
+
+	private void setLongPressDisabled(boolean longPressDisabled)
+	{
+		this.longPressDisabled = longPressDisabled;
 	}
 
 	private void setPush(String optString)

@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformAlarmManager;
 import com.bsb.hike.platform.WebMetadata;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -39,20 +41,18 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 
 	private static final String tag = "platformbridge";
 
-	Context mContext;
-
 	ConvMessage message;
 
 	BaseAdapter adapter;
 
-	public PlatformJavaScriptBridge(WebView mWebView)
+	public PlatformJavaScriptBridge(Activity activity,WebView mWebView)
 	{
-		super(mWebView);
+		super(activity,mWebView);
 	}
 
-	public PlatformJavaScriptBridge(WebView webView, ConvMessage convMessage, BaseAdapter adapter)
+	public PlatformJavaScriptBridge(Activity activity,WebView webView, ConvMessage convMessage, BaseAdapter adapter)
 	{
-		super(webView);
+		super(activity,webView);
 		this.message = convMessage;
 		this.adapter = adapter;
 	}
@@ -98,6 +98,7 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 			jsonObject.put(AnalyticsConstants.CHAT_MSISDN, msisdn);
 			jsonObject.put(AnalyticsConstants.ORIGIN, Utils.conversationType(msisdn));
 			jsonObject.put(HikePlatformConstants.CARD_TYPE, message.webMetadata.getAppName());
+			jsonObject.put(AnalyticsConstants.CONTENT_ID, message.getContentId());
 			if (Boolean.valueOf(isUI))
 			{
 				HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.MICROAPP_UI_EVENT, subType, jsonObject);
@@ -137,7 +138,14 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 		try
 		{
 			Logger.i(tag, "set alarm called " + json + " , mId " + message.getMsgID() + " , time " + timeInMills);
-			PlatformAlarmManager.setAlarm(mContext, new JSONObject(json), (int) message.getMsgID(), Long.valueOf(timeInMills));
+			if(weakActivity.get()!=null)
+			{
+				PlatformAlarmManager.setAlarm(weakActivity.get().getApplicationContext(), new JSONObject(json), (int) message.getMsgID(), Long.valueOf(timeInMills));
+			}
+		}
+		catch(NumberFormatException ne)
+		{
+			ne.printStackTrace();
 		}
 		catch (JSONException e)
 		{
@@ -218,7 +226,11 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 				message.webMetadata = new WebMetadata(updatedJSON); // the new metadata to inflate in webview
 				if (notifyScreen != null && Boolean.valueOf(notifyScreen))
 				{
-					mWebView.post(new Runnable()
+					if (null == mHandler)
+					{
+						return;
+					}
+					mHandler.post(new Runnable()
 					{
 
 						@Override
@@ -271,15 +283,25 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 					message.webMetadata = new WebMetadata(updatedJSON);
 				}
 			}
+			
 
-			final Intent intent = IntentManager.getForwardIntentForConvMessage(mContext, message,
-					PlatformContent.getForwardCardData(message.webMetadata.JSONtoString()));
-			mWebView.post(new Runnable()
+			if (null == mHandler)
+			{
+				return;
+			}
+
+			mHandler.post(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					mContext.startActivity(intent);
+					Activity mContext = weakActivity.get();
+					if(mContext!=null)
+					{
+						final Intent intent = IntentManager.getForwardIntentForConvMessage(mContext, message,
+							PlatformContent.getForwardCardData(message.webMetadata.JSONtoString()));
+						mContext.startActivity(intent);
+					}
 				}
 			});
 
@@ -288,6 +310,29 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 		{
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * calling this method will forcefully mute the chat thread. The user won't receive any more
+	 * notifications after calling this.
+	 */
+	@JavascriptInterface
+	public void muteChatThread()
+	{
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MUTE_BOT,
+				null);
+
+	}
+
+	/**
+	 * calling this method will forcefully block the chat thread. The user won't see any messages in the
+	 * chat thread after calling this.
+	 */
+	@JavascriptInterface
+	public void blockChatThread()
+	{
+		HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, message.getMsisdn());
 	}
 
 	@JavascriptInterface
@@ -332,7 +377,7 @@ public class PlatformJavaScriptBridge extends JavascriptBridge
 
 	public void setData()
 	{
-		mWebView.loadUrl("javascript:setData('" + message.webMetadata.getHelperData().toString() + "','" + message.isSent() + "')");
+		mWebView.loadUrl("javascript:setData('" + message.getMsisdn() + "','" + message.webMetadata.getHelperData().toString() + "','" + message.isSent() + "')");
 	}
 
 	public void alarmPlayed(String alarmData)
