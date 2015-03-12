@@ -60,6 +60,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
@@ -1534,12 +1535,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					Utils.executeAsyncTask(logsTask);
 					break;
 				case HikeConstants.HOME_ACTIVITY_OVERFLOW.NEW_BROADCAST:
-					intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
-					intent.putExtra(HikeConstants.Extras.COMPOSE_MODE, HikeConstants.Extras.CREATE_BROADCAST_MODE);
-					intent.putExtra(HikeConstants.Extras.CREATE_BROADCAST, true);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
-					Logger.d("BroadcastActivity1111", "broadcast activity called");
+					
+					sendBroadCastAnalytics();
+					if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOW_BROADCAST_FTUE_SCREEN, true))
+					{
+						IntentManager.createBroadcastFtue(HomeActivity.this);
+					}
+					else
+					{
+						IntentManager.createBroadcastDefault(HomeActivity.this);
+					}
 					break;
 				}
 
@@ -1853,5 +1858,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 	}
 
+	private void sendBroadCastAnalytics()
+	{
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_BROADCAST_VIA_OVERFLOW);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+	}
 	
 }

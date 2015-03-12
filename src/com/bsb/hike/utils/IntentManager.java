@@ -27,6 +27,7 @@ import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
 import com.bsb.hike.ui.CreateNewGroupOrBroadcastActivity;
 import com.bsb.hike.ui.CreditsActivity;
+import com.bsb.hike.ui.FtueBroadcast;
 import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
@@ -209,6 +210,34 @@ public class IntentManager
 		appContext.startActivity(intent);
 	}
 
+	public static void createBroadcastFtue(Context appContext)
+	{
+		Intent intent = new Intent(appContext.getApplicationContext(), FtueBroadcast.class);
+		intent.putExtra(HikeConstants.Extras.COMPOSE_MODE, HikeConstants.Extras.CREATE_BROADCAST_MODE);
+		intent.putExtra(HikeConstants.Extras.CREATE_BROADCAST, true);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		appContext.startActivity(intent);
+	}
+	
+	public static void createBroadcastDefault(Context appContext)
+	{
+		Intent intent = new Intent(appContext.getApplicationContext(), ComposeChatActivity.class);
+		intent.putExtra(HikeConstants.Extras.COMPOSE_MODE, HikeConstants.Extras.CREATE_BROADCAST_MODE);
+		intent.putExtra(HikeConstants.Extras.CREATE_BROADCAST, true);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		appContext.startActivity(intent);
+	}
+	
+	public static void onBackPressedCreateNewBroadcast(Context appContext, ArrayList<String> broadcastRecipients)
+	{
+		Intent intent = new Intent(appContext.getApplicationContext(), ComposeChatActivity.class);
+		intent.putStringArrayListExtra(HikeConstants.Extras.BROADCAST_RECIPIENTS, broadcastRecipients);
+		intent.putExtra(HikeConstants.Extras.COMPOSE_MODE, HikeConstants.Extras.CREATE_BROADCAST_MODE);
+		intent.putExtra(HikeConstants.Extras.CREATE_BROADCAST, true);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		appContext.startActivity(intent);
+	}
+	
 	public static Intent getForwardIntentForConvMessage(Context context, ConvMessage convMessage, String metadata)
 	{
 		Intent intent = new Intent(context, ComposeChatActivity.class);

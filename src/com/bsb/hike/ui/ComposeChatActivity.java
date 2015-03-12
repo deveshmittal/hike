@@ -30,6 +30,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -66,6 +67,7 @@ import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -285,8 +287,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				int selected = adapter.getSelectedContactCount();
 				for (String msisdn : initiallySelectedMsisidns)
 				{
-					ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
-					tagEditText.addTag(contactInfo.getName(), msisdn, contactInfo);
+					ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn, true, false);
+					tagEditText.addTag(contactInfo.getNameOrMsisdn(), msisdn, contactInfo);
 				}
 
 
@@ -469,11 +471,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			MIN_MEMBERS_GROUP_CHAT = 1;
 		}
-
-		if (existingBroadcastId != null)
-		{
-			MIN_MEMBERS_BROADCAST_LIST = 1;
-		}
 		
 		setModeAndUpdateAdapter(composeMode);
 		
@@ -610,7 +607,26 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				contactInfo.setName(contactInfo.getMsisdn());
 			}
 			name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
-			tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
+			if(selectAllMode){
+				tagEditText.clear(false);
+				if(adapter.isContactAdded(contactInfo)){
+					adapter.removeContact(contactInfo);
+
+				}else{
+					adapter.addContact(contactInfo);
+
+				}
+				int selected = adapter.getSelectedContactCount();
+				if(selected>0){
+				tagEditText.toggleTag(getString(selected==1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
+				}else{
+					((CheckBox)findViewById(R.id.select_all_cb)).setChecked(false); // very rare case
+				}
+			}
+			else
+			{
+				tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
+			}
 			break;
 			
 		default:
@@ -1071,6 +1087,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			multiSelectActionBar = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
 		}
 		View sendBtn = multiSelectActionBar.findViewById(R.id.done_container);
+		TextView save = (TextView) multiSelectActionBar.findViewById(R.id.save);
+		if (createBroadcast)
+		{
+			save.setText(R.string.next_signup);
+		}
 		View closeBtn = multiSelectActionBar.findViewById(R.id.close_action_mode);
 		ViewGroup closeContainer = (ViewGroup) multiSelectActionBar.findViewById(R.id.close_container);
 
@@ -1097,19 +1118,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					int selected = adapter.getCurrentSelection();
 					if (selected < MIN_MEMBERS_BROADCAST_LIST)
 					{
-						Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_BROADCAST_LIST), Toast.LENGTH_SHORT).show();
+						Toast toast = Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_BROADCAST_LIST), Toast.LENGTH_SHORT);
+						toast.setGravity(Gravity.CENTER, 0, 0);
+						toast.show();
 						return;
 					}
+					sendBroadCastAnalytics();
 					createBroadcast(adapter.getAllSelectedContactsMsisdns());
 				}
 				else if (getIntent().hasExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST))
 				{
-					int selected = adapter.getCurrentSelection();
-					if (selected < MIN_MEMBERS_BROADCAST_LIST)
-					{
-						Toast.makeText(getApplicationContext(), getString(R.string.minContactInBroadcastErr, MIN_MEMBERS_BROADCAST_LIST), Toast.LENGTH_SHORT).show();
-						return;
-					}
 					createGroup(adapter.getAllSelectedContacts());
 				}
 				else if (composeMode == CREATE_GROUP_MODE)
@@ -2088,4 +2106,35 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
               }
       }
    }
+	
+	private void sendBroadCastAnalytics()
+	{
+		if(selectAllMode)
+		{
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.BROADCAST_SELECT_ALL_NEXT);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+
+		}
+		else
+		{
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.BROADCAST_NEXT_MULTI_CONTACT);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+		}
+	}
 }

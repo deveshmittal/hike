@@ -251,6 +251,7 @@
     <color name="pink_avatar">#ff92a5</color>
     <color name="violet_avatar">#c1a0e1</color>
     <color name="gray_avatar">#404b4e55</color>
+    <color name="broadcast_ftue_bg">#acdd77</color>
     <color name="rec_progress">#ef554e</color>
     <color name="bubble_blue">#d4feff</color>
     <color name="bubble_celebration_space">#e4cdfe</color>
