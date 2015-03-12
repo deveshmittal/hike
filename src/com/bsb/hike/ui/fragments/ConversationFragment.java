@@ -1301,7 +1301,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
 					deleteConfirmDialog.setHeader(R.string.delete);
-					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_broadcast_msg, conv.getLabel()));
+					deleteConfirmDialog.setBody(getString(R.string.delete_broadcast_confirm));
 					
 					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
 					{

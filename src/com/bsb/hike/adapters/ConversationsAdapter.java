@@ -636,7 +636,14 @@ public class ConversationsAdapter extends BaseAdapter
 		contactView.setText(name);
 		if (conversation instanceof GroupConversation)
 		{
-			contactView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_group, 0, 0, 0);
+			if (conversation instanceof BroadcastConversation)
+			{
+				contactView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+			}
+			else
+			{
+				contactView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_group, 0, 0, 0);
+			}
 		}
 		else
 		{
