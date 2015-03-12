@@ -945,7 +945,7 @@
     <string name="add_to_contacts">Add to contacts</string>
     <string name="delete_leave">Delete and exit group</string>
     <string name="group_participant_info">You can add upto 100 people to a group</string>
-    <string name="broadcast_ftue_message">A broadcast lets you send the same message to multiple friends at once.</string>
+    <string name="broadcast_ftue_message">A broadcast lets you send the same message to multiple hike contacts at once</string>
     <string name="broadcast_participant_info"><b>Note: </b>Only contacts with your number in their address book will receive this broadcast.</string>
     <string name="photo">GALLERY</string>
     <string name="video">VIDEOS</string>
