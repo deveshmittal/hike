@@ -138,7 +138,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		
 		
-		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.INVITE_SMS.ordinal());
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.INVITE_SMS.ordinal());
 	}
 
 	private void init()

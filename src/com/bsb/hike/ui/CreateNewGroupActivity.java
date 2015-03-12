@@ -115,7 +115,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 			groupImage.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(groupId, true));
 		}
 		
-		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.NEWGRP.ordinal());
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.NEWGRP.ordinal());
 
 	}
 

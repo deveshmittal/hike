@@ -2,6 +2,8 @@ package com.bsb.hike.utils;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 
@@ -18,6 +20,7 @@ import com.bsb.hike.productpopup.HikeDialogFragment;
 import com.bsb.hike.productpopup.IActivityPopup;
 import com.bsb.hike.productpopup.ProductContentModel;
 import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.ui.fragments.ImageViewerFragment;
 import com.bsb.hike.voip.view.CallIssuesPopup;
 import com.bsb.hike.voip.view.CallRatePopup;
@@ -27,7 +30,54 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 {
 
 	private static final String TAG = "HikeAppState";
+	
+	protected static final int PRODUCT_POPUP_HANDLER_WHAT = -99;
+	
+	protected static final int PRODUCT_POPUP_SHOW_DIALOG=-100;
+	
+	protected Handler mHandler = new Handler(){
+		public void handleMessage(android.os.Message msg) {
+			handleUIMessage(msg);
+		};
+	};
 
+	
+	/**
+	 * This method is made to be called from handler, do not call this method directly 
+	 * Post Message to mHandler to call this method
+	 * Subclasses should override this method to perform some UI functionality
+	 * <b>(DO NOT FORGET TO CALL super)</b>
+	 * @param msg
+	 */
+	protected void handleUIMessage(Message msg)
+	{
+		switch(msg.what)
+		{
+		case PRODUCT_POPUP_HANDLER_WHAT: 
+			isThereAnyPopUpForMe(msg.arg1);
+			break;
+		case PRODUCT_POPUP_SHOW_DIALOG:
+			showPopupDialog((ProductContentModel)msg.obj);
+			break;
+		}
+	}
+	
+	/**
+	 * 
+	 * @param msg
+	 * Shows the Popup on the Activity
+	 */
+	protected void showPopupDialog(ProductContentModel mmModel)
+	{
+		if (mmModel != null)
+		{
+			DialogPojo mmDialogPojo = ProductInfoManager.getInstance().getDialogPojo(mmModel);
+			HikeDialogFragment mmFragment = HikeDialogFragment.getInstance(mmDialogPojo);
+			mmFragment.showDialog(getSupportFragmentManager());
+		}
+	}
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -205,7 +255,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		});
 	}
 	
-	public void isThereAnyPopUpForMe(int popUpTriggerPoint)
+	private void isThereAnyPopUpForMe(int popUpTriggerPoint)
 	{
 		ProductInfoManager.getInstance().isThereAnyPopup(popUpTriggerPoint,new IActivityPopup()
 		{
@@ -213,18 +263,10 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 			@Override
 			public void onSuccess(final ProductContentModel mmModel)
 			{
-				runOnUiThread(new Runnable()
-				{
-					
-					@Override
-					public void run()
-					{
-						DialogPojo mmDialogPojo=ProductInfoManager.getInstance().getDialogPojo(mmModel);
-						HikeDialogFragment mmFragment=HikeDialogFragment.getInstance(mmDialogPojo);
-						mmFragment.showDialog(getSupportFragmentManager());
-					}
-				});
-			
+				Message msg = Message.obtain();
+				msg.what = PRODUCT_POPUP_SHOW_DIALOG;
+				msg.obj = mmModel;
+				mHandler.sendMessage(msg);
 			}
 
 			@Override
@@ -235,5 +277,13 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 			
 		});
 	
+	}
+	
+	protected void showProductPopup(int which)
+	{
+		Message m = Message.obtain();
+		m.what = PRODUCT_POPUP_HANDLER_WHAT;
+		m.arg1 = which;
+		mHandler.sendMessage(m);
 	}
 }

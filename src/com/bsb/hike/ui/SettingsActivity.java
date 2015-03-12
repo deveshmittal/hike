@@ -217,7 +217,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 		HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
 		
-		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.SETTINGS_SCR.ordinal());
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.SETTINGS_SCR.ordinal());
 		
 	}
 

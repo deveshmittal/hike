@@ -196,7 +196,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 			}
 		}
 		setupActionBar();
-		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.INVITEFRNDS.ordinal());
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.INVITEFRNDS.ordinal());
 	}
 
 	@Override

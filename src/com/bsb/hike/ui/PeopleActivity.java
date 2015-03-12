@@ -34,7 +34,7 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 	{
 		super.onCreate(savedInstanceState);
 		initialisePeopleScreen(savedInstanceState);
-		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.FAVOURITES.ordinal());
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.FAVOURITES.ordinal());
 		
 	}
 

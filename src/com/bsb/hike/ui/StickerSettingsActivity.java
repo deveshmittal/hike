@@ -27,7 +27,7 @@ public class StickerSettingsActivity extends HikeAppStateBaseFragmentActivity
 		setContentView(R.layout.sticker_settings_page);
 		setupSettingsFragment(savedInstanceState);
 		setupActionBar();
-		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.STICKER_SHOP_SETTINGS.ordinal());
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.STICKER_SHOP_SETTINGS.ordinal());
 		
 	}
 

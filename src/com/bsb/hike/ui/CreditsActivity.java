@@ -77,7 +77,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 		}
 		
-		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.FREE_SMS.ordinal());
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.FREE_SMS.ordinal());
 	
 
 	}

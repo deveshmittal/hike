@@ -412,7 +412,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		
 		if (triggerPointPopup != ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal())
 		{
-			isThereAnyPopUpForMe(triggerPointPopup);
+			showProductPopup(triggerPointPopup);
 		}
 		
 	}

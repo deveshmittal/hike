@@ -235,7 +235,7 @@ public class StatusUpdate extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		
 		
-		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.STATUS.ordinal());
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.STATUS.ordinal());
 	}
 
 	private void setupActionBar()

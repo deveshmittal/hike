@@ -23,6 +23,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -148,8 +149,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private ConversationFragment mainFragment;
 
-	private Handler mHandler = new Handler();
-
 	private SnowFallView snowFallView;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
@@ -206,9 +205,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 			initialiseHomeScreen(savedInstanceState);
 		}
-		
-			isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());		
-		
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());
 	}
 
 	private void setupActionBar()
@@ -418,7 +415,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			mainFragment.onNewintent(intent);
 		}
-		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());
 	}
 
 	@Override

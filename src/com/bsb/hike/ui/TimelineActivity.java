@@ -72,7 +72,7 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 		initialiseTimelineScreen(savedInstanceState);
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.TIMELINE.ordinal());
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.TIMELINE.ordinal());
 	}
 
 	private void initialiseTimelineScreen(Bundle savedInstanceState)

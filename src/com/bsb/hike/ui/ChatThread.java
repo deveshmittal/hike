@@ -896,7 +896,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			
 		}
 		Logger.i("chatthread", "on create end");
-		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.CHAT_SCR.ordinal());
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.CHAT_SCR.ordinal());
 
 	}
 	
@@ -1393,7 +1393,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Utils.onCallClicked(this, mContactNumber, VoIPUtils.CallSource.CHAT_THREAD);
 			break;
 		case R.id.attachment:
-			isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.ATCH_SCR.ordinal());
+			showProductPopup(ProductPopupsConstants.PopupTriggerPoints.ATCH_SCR.ordinal());
 			// hide pop up if any
 			return attachmentClicked();
 		case R.id.overflow_menu:
@@ -6961,7 +6961,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 		
-		isThereAnyPopUpForMe(ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal());
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal());
 	}
 
 	public void onEmoticonBtnClicked(View v)

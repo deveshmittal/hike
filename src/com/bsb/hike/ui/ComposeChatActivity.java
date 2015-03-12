@@ -453,7 +453,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		
 		if(triggerPointForPopup!=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal())
 		{
-			isThereAnyPopUpForMe(triggerPointForPopup);
+			showProductPopup(triggerPointForPopup);
 		}
 
 		
