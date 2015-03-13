@@ -378,16 +378,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				switch (type)
 				{
 				case HikeConstants.Extras.ShareTypes.STICKER_SHARE:
-					HAManager.getInstance().shareWhatsappAnalyticsMethod(HikeConstants.Extras.STICKER_SHARE, getIntent().getStringExtra(StickerManager.CATEGORY_ID),
+					HAManager.getInstance().shareWhatsappAnalytics(HikeConstants.Extras.STICKER_SHARE, getIntent().getStringExtra(StickerManager.CATEGORY_ID),
 							getIntent().getStringExtra(StickerManager.STICKER_ID), str, HikeConstants.Extras.SHARE_STICKER_CHATTHREAD);
 					break;
 
 				case HikeConstants.Extras.ShareTypes.IMAGE_SHARE:
-					HAManager.getInstance().shareWhatsappAnalyticsMethod(HikeConstants.Extras.IMAGE_SHARE);
+					HAManager.getInstance().shareWhatsappAnalytics(HikeConstants.Extras.IMAGE_SHARE);
 					break;
 
 				case HikeConstants.Extras.ShareTypes.TEXT_SHARE:
-					HAManager.getInstance().shareWhatsappAnalyticsMethod(HikeConstants.Extras.TEXT_SHARE);
+					HAManager.getInstance().shareWhatsappAnalytics(HikeConstants.Extras.TEXT_SHARE);
 					break;
 
 				}

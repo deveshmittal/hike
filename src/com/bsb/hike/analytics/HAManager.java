@@ -241,7 +241,8 @@ public class HAManager
 			throw new NullPointerException("Type and Context of event cannot be null.");
 		}
 		eventsList.add(generateAnalticsJson(type, eventContext, priority, metadata, tag));
-
+	    Logger.d(AnalyticsConstants.ANALYTICS_TAG, metadata.toString());
+	  	
 		if (maxInMemorySize == eventsList.size()) 
 		{			
 			// clone a local copy and send for writing
@@ -600,7 +601,7 @@ public class HAManager
 		fgSessionInstance.setConvType(convType);
 	}
 	
-	public void shareWhatsappAnalyticsMethod(String shrType, String catId, String stkrId, String str, String shrStkrChat)
+	public void shareWhatsappAnalytics(String shrType, String catId, String stkrId, String str, String shrStkrChat)
 	{
 		JSONObject metadata = new JSONObject();
 		try
@@ -610,30 +611,29 @@ public class HAManager
 			metadata.put(HikeConstants.Extras.STICKERID, stkrId);
 			metadata.put(HikeConstants.Extras.PATH, str);
 			metadata.put(HikeConstants.Extras.SOURCE, shrStkrChat);
-			record(HikeConstants.Extras.WHATSAPP_SHARE, HikeConstants.LogEvent.CLICK, EventPriority.HIGH, metadata);
-
-		}
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.Extras.WHATSAPP_SHARE);
+         	record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
+      	}
 		catch (JSONException e)
-		{
-			// TODO Auto-generated catch block
+		{  
 			e.printStackTrace();
 		}
 
 	}
 
-	public void shareWhatsappAnalyticsMethod(String shr)
+	public void shareWhatsappAnalytics(String shr)
 	{
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.Extras.SHARE_TYPE, shr);
-			record(HikeConstants.Extras.WHATSAPP_SHARE, HikeConstants.LogEvent.CLICK, EventPriority.HIGH, metadata);
-
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.Extras.WHATSAPP_SHARE);
+			record(AnalyticsConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, EventPriority.HIGH, metadata);
+		      
 		}
 		catch (JSONException e)
-		{
-			// TODO Auto-generated catch block
+		{   
 			e.printStackTrace();
 		}
 	}
