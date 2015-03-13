@@ -5527,4 +5527,23 @@ public class Utils
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_DB_INSERTED, allPairs);
 	}
+	
+	public static Long getMaxLongValue(ArrayList<Long> values)
+	{
+		if(values == null || values.isEmpty())
+		{
+			return Long.MIN_VALUE;
+		}
+		
+		Long maxVal = values.get(0);
+		for (Long value : values)
+		{
+			if(value > maxVal)
+			{
+				maxVal = value;
+			}
+		}
+		
+		return maxVal;
+	}
 }
