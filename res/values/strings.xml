@@ -282,7 +282,7 @@
     <string name="a_and_c_signup">Accept and Continue</string>
     <string name="pulling_digits_signup">Pulling your digits...</string>
     <string name="enter_num_signup">Enter your phone number below\nto get started.</string>
-    <string name="next_signup">Next</string>
+    <string name="next_signup">NEXT</string>
     <string name="verifying_num_signup">Verifying your number...</string>
     <string name="invalid_num_signup">That\'s an invalid phone number. Try again.</string>
     <string name="call_me_signup">Call Me</string>
@@ -1167,7 +1167,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="media_settings_hinttext">Settings for photos, videos, audio</string>
     <string name="image_quality_small">Normal</string>
     <string name="image_quality_medium">Better</string>
-	<string name="image_quality_original">Uncompressed</string>    
+    <string name="image_quality_original">Uncompressed</string>
     <string name="image_quality_send">Send</string>
     <string name="image_quality_files_as">files as</string>
     <string name="image_quality_popup_header">Choose image quality</string>
@@ -1204,7 +1204,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="content_card_title_tag">T1</string>
     <string name="content_card_subtitle_tag">T2</string>
     <string name="content_card_action_tag">T3</string>
-
     <string name="auth_title">Do you want to authorize %1$s \n to use your hike account?</string>
     <string name="auth_cd_app_logo">Application icon</string>
     <string name="auth_app_access_to">%1$s will receive access to:</string>
@@ -1283,9 +1282,9 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="play_text">PLAY</string>
     <string name="install_description">Hey, try out this awesome game I have been playing!</string>
     <string name="play_description">Are you playing this? Best game ever! Play and help me out.</string>
-	<string name="connected_apps_to_hike"> %1$s apps connected to hike</string>
-	<string name="connected_app_to_hike">1 app connected to hike</string>
-	<string name="confirm_disconnect_app">You will miss out on relevant benefits.</string>
+    <string name="connected_apps_to_hike"> %1$s apps connected to hike</string>
+    <string name="connected_app_to_hike">1 app connected to hike</string>
+    <string name="confirm_disconnect_app">You will miss out on relevant benefits.</string>
     <string name="send_sticker_joy">Wish your friends with this sticker</string>
     <string name="nux_invitefrnds_skip">SKIP</string>
     <string name="nux_invitefrnds_reward">Say more with stickers!</string>
@@ -1303,7 +1302,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="select_friends">SELECT FRIENDS</string>
     <string name="custom_message">I just love these stickers on hike. Check them out!</string>
     <string name="custome_message_send_button">SEND</string>
-    <string name="custom_message_hint"> </string>
+    <string name="custom_message_hint"></string>
     <string name="nux_select_friends_1">Choose your best friends</string>
     <string name="nux_select_friends_2">Pick %d more</string>
     <string name="nux_select_friends_3">You\'re good to go!</string>
@@ -1351,9 +1350,10 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="error_card_sharing">Some error occured, please try again</string>
     <string name="cardShareDescription">
 <![CDATA[ Get hike messenger at <font color="#57dcf9">http://get.hike.in</font>
-	    ]]></string>
-	    <string name="cardShareCaption">Download hike messenger at http://get.hike.in</string>
-        <string name="cardShareHeading">Don\'t miss out on all the fun on hike !</string>
+	    ]]>
+    </string>
+    <string name="cardShareCaption">Download hike messenger at http://get.hike.in</string>
+    <string name="cardShareHeading">Don\'t miss out on all the fun on hike !</string>
     <string name="voip_call_issues_header">Tell us about the issues</string>
     <string name="voip_call_issues_subheader">Select relevant options</string>
     <string name="report_issue">REPORT ISSUE</string>
@@ -1365,15 +1365,25 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="voip_issue_delay">Voice Delay</string>
     <string name="voip_partner_upgrade">Your friend is on an older version. Ask them to update hike.</string>
     <string name="voip_partner_incompat">Your friend\'s hike doesn\'t support free hike calls just yet. You\'ll have to message them for now :)</string>
-	<string name="voip_partner_is_busy">Busy</string>
-	<string name="voip_call_on_hold">Call on hold</string>
-	<string name="voip_call_issues_submit_toast">Your feedback has been submitted</string>
+    <string name="voip_partner_is_busy">Busy</string>
+    <string name="voip_call_on_hold">Call on hold.</string>
+    <string name="voip_call_issues_submit_toast">Your feedback has been submitted</string>
     <string name="video_compress">VIDEO COMPRESSION</string>
     <string name="send_compress_video">Send Compressed Video</string>
     <string name="voip_missed_call_notif">Missed Call</string>
     <string name="voip_missed_call_action">Call Back</string>
     <string name="voip_missed_call_message">Message</string>
     <string name="valentine_day">Happy Valentine\'s Day</string>
+    <string name="take_photo">Take a photo</string>
+    <string name="photo_dp_saving">Saving as profile photo..</string>
+    <string name="photo_dp_saved">All set!</string>
+    <string name="photo_dp_finishing">Finishing up..</string>
+    <string name="photo_dp_saved_sub">Lookin\' good</string>
+    <string name="photo_dp_save_error">Couldn\'t set profile photo</string>
+    <string name="photo_dp_save_error_sub">Tap to retry</string>
+    <string name="photo_gallery_choose_pic">Choose a photo</string>
+    <string name="cropping_image">Cropping image..</string>
+    <string name="compose_chat">New chat</string>
     <string name="voip_phone_unsupported">Your phone is not supported.</string>
     <string name="voip_unable_to_connect_call">Unable to connect your call</string>
     <string name="voip_unable_to_connect_to_network">Unable to connect to network</string>

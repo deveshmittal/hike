@@ -83,6 +83,7 @@ import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.FestivePopup;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.HikeTip;
@@ -161,6 +162,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE };
 
+	private boolean photosEnabled = true;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -207,6 +210,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 			initialiseHomeScreen(savedInstanceState);
 		}
+		
+//		photosEnabled = accountPrefs.getBoolean(HikeConstants.Extras.ENABLE_PHOTOS, false);
+		
 		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());
 	}
 
@@ -470,27 +476,38 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void onClick(View v)
 			{
-				try
+				if (photosEnabled)
 				{
-					JSONObject metadata = new JSONObject();
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
-					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					showComposeOverflowMenu();
+					accountPrefs.edit().putBoolean(HikeConstants.SHOW_PHOTOS_ENABLED_DOT, false).commit();
+					newConversationIndicator.setVisibility(View.GONE);
 				}
-				catch(JSONException e)
+				else
 				{
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
-				}
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch (JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 
-				Intent intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
-				intent.putExtra(HikeConstants.Extras.EDIT , true);
-				
-				newConversationIndicator.setVisibility(View.GONE);
-				startActivity(intent);
+					Intent intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
+					intent.putExtra(HikeConstants.Extras.EDIT, true);
+
+					newConversationIndicator.setVisibility(View.GONE);
+					startActivity(intent);
+				}
 			}
 		});
 		
 		return true;
 	}
+	
+	
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
@@ -1457,6 +1474,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
 
 		addEmailLogItem(optionsList);
+		
+		//Take a photo
+//		optionsList.add(new OverFlowMenuItem(getString(R.string.take_photo), 10));
 
 		overFlowWindow = new PopupWindow(this);
 
@@ -1556,6 +1576,98 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					{
 						IntentManager.createBroadcastDefault(HomeActivity.this);
 					}
+					break;
+				}
+
+				if (intent != null)
+				{
+					startActivity(intent);
+				}
+			}
+		});
+
+		overFlowWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
+		overFlowWindow.setOutsideTouchable(true);
+		overFlowWindow.setFocusable(true);
+		overFlowWindow.setWidth(getResources().getDimensionPixelSize(R.dimen.overflow_menu_width));
+		overFlowWindow.setHeight(LayoutParams.WRAP_CONTENT);
+		/*
+		 * In some devices Activity crashes and a BadTokenException is thrown by showAsDropDown method. Still need to find out exact repro of the bug.
+		 */
+		try
+		{
+			int rightMargin = getResources().getDimensionPixelSize(R.dimen.overflow_menu_right_margin);
+			overFlowWindow.showAsDropDown(findViewById(R.id.overflow_anchor), -rightMargin, 0);
+		}
+		catch (BadTokenException e)
+		{
+			Logger.e(getClass().getSimpleName(), "Excepetion in HomeActivity Overflow popup", e);
+		}
+		overFlowWindow.getContentView().setFocusableInTouchMode(true);
+		overFlowWindow.getContentView().setOnKeyListener(new View.OnKeyListener()
+		{
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event)
+			{
+				return onKeyUp(keyCode, event);
+			}
+		});
+	}
+	
+	private void showComposeOverflowMenu(){
+
+		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
+
+		final String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
+		
+		optionsList.add(new OverFlowMenuItem(getString(R.string.compose_chat), 11));
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.take_photo), 10));
+
+		overFlowWindow = new PopupWindow(this);
+
+		FrameLayout homeScreen = (FrameLayout) findViewById(R.id.home_screen);
+
+		View parentView = getLayoutInflater().inflate(R.layout.overflow_menu, homeScreen, false);
+
+		overFlowWindow.setContentView(parentView);
+
+		ListView overFlowListView = (ListView) parentView.findViewById(R.id.overflow_menu_list);
+		
+		overflowAdapter = new OverflowAdapter(this, R.layout.over_flow_menu_item, R.id.item_title, optionsList, msisdn);
+		
+		overFlowListView.setAdapter(overflowAdapter);
+
+		overFlowListView.setOnItemClickListener(new OnItemClickListener()
+		{
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+			{
+				Logger.d(getClass().getSimpleName(), "Onclick: " + position);
+				overFlowWindow.dismiss();
+				OverFlowMenuItem item = (OverFlowMenuItem) adapterView.getItemAtPosition(position);
+				Intent intent = null;
+				switch (item.getKey())
+				{
+				case 11:
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
+
+					intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
+					intent.putExtra(HikeConstants.Extras.EDIT , true);
+					break;
+				case 10:
+					//Take a photo
+					IntentManager.openHikeCameraActivity(HomeActivity.this);
+					sendAnalyticsTakePicture();
 					break;
 				}
 
@@ -1786,6 +1898,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					newConversationIndicator.setVisibility(View.VISIBLE);
 					newConversationIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
 				}
+				else if(photosEnabled && accountPrefs.getBoolean(HikeConstants.SHOW_PHOTOS_ENABLED_DOT, true))
+				{
+					newConversationIndicator.setText("1");
+					newConversationIndicator.setVisibility(View.VISIBLE);
+					newConversationIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
+				}
 				else
 				{
 					newConversationIndicator.setVisibility(View.GONE);
@@ -1866,6 +1984,20 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 				}
 			}
+		}
+	}
+	
+	private void sendAnalyticsTakePicture()
+	{
+		try
+		{
+			JSONObject json = new JSONObject();
+			json.put(AnalyticsConstants.EVENT_KEY, HikeConstants.LogEvent.PHOTOS_FLOW_OPTION_CLICK);
+			HikeAnalyticsEvent.analyticsForPhotos(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
 		}
 	}
 

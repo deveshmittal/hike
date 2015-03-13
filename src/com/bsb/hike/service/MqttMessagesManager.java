@@ -1666,6 +1666,11 @@ public class MqttMessagesManager
 				HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.Extras.MAX_MESSAGE_PROCESS_TIME, maxMessageProcessTime);
 			}
 		}
+		if(data.has(HikeConstants.Extras.ENABLE_PHOTOS))
+		{
+			boolean enablePhoto = data.getBoolean(HikeConstants.Extras.ENABLE_PHOTOS);
+			HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.ACCOUNT_SETTINGS).saveData(HikeConstants.Extras.ENABLE_PHOTOS, enablePhoto);
+		}
 		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);

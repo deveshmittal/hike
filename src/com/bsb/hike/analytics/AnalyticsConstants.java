@@ -111,6 +111,8 @@ public class AnalyticsConstants
     public static final String EVENT_TAG_PLATFORM = "plf";
 
 	public static final String EVENT_TAG_BOTS = "bot";
+	
+	public static final String EVENT_TAG_PHOTOS = "ph5";
 
 	public static final String CHAT_MSISDN = "chat_msisdn";
 
