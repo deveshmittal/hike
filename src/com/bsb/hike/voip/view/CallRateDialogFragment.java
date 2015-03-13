@@ -3,6 +3,8 @@ package com.bsb.hike.voip.view;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -20,13 +22,29 @@ import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.voip.VoIPConstants;
 
-public class CallRatePopup extends SherlockDialogFragment
+public class CallRateDialogFragment extends SherlockDialogFragment
 {
 	private int rating = -1;
 	
 	private final String TAG = "CallRatePopup";
 
-	public CallRatePopup(){
+	private IVoipCallRateListener listener;
+
+	public CallRateDialogFragment(){
+	}
+
+	@Override
+	public void onAttach(Activity activity) 
+	{
+		super.onAttach(activity);
+		try 
+		{
+			listener = (IVoipCallRateListener) activity;
+		}
+		catch (ClassCastException e) 
+		{
+			throw new ClassCastException(activity.toString() + " must implement IVoipCallRateListener");
+		}
 	}
 	
 	@Override
@@ -46,6 +64,7 @@ public class CallRatePopup extends SherlockDialogFragment
 				
 				@Override
 				public void onClick(View v) {
+					getSherlockActivity().finish();
 					dismiss();
 				}
 			});
@@ -58,6 +77,7 @@ public class CallRatePopup extends SherlockDialogFragment
 				{
 					submitRating();
 					dismiss();
+					getSherlockActivity().finish();
 				}
 				else if(rating >= 0)
 				{
@@ -110,6 +130,13 @@ public class CallRatePopup extends SherlockDialogFragment
 		 
 	}
 
+	@Override
+	public void onCancel(DialogInterface dialog)
+	{
+		getSherlockActivity().finish();
+		super.onCancel(dialog);
+	}
+
 	private void submitRating()
 	{
 		Bundle bundle = getArguments();
@@ -133,6 +160,7 @@ public class CallRatePopup extends SherlockDialogFragment
 			metadata.put(VoIPConstants.Analytics.IS_CALLER, isCallInitiator);
 			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, network);
 			metadata.put(AnalyticsConstants.TO, toMsisdn);
+			metadata.put(VoIPConstants.Analytics.NEW_LOG, 1);
 
 			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
 		}
@@ -152,6 +180,6 @@ public class CallRatePopup extends SherlockDialogFragment
 	private void showCallIssuesFragment(Bundle bundle)
 	{
 		bundle.putInt(VoIPConstants.CALL_RATING, rating+1);
-		((IVoipCallListener)getSherlockActivity()).onVoipCallEnd(bundle, HikeConstants.VOIP_CALL_ISSUES_FRAGMENT_TAG);
+		listener.showCallIssuesFragment(bundle);
 	}
 }

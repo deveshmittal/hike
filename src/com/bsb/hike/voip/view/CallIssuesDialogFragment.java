@@ -26,14 +26,14 @@ import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.voip.VoIPConstants;
 
-public class CallIssuesPopup extends SherlockDialogFragment
+public class CallIssuesDialogFragment extends SherlockDialogFragment
 {
-	public CallIssuesPopup(){
+	public CallIssuesDialogFragment(){
 	}
 
 	private final String TAG = "CallIssuesPopup";
 
-	private Set<String> selectedIssues = new HashSet<String>();
+	private String selectedIssues = "";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) 
@@ -72,11 +72,11 @@ public class CallIssuesPopup extends SherlockDialogFragment
 			
 			@Override
 			public void onClick(View v) {
-				populateSelectedIssues();
-				if(selectedIssues.size() > 0)
+				if(getSelectedIssues())
 				{
 					dismiss();
 					Toast.makeText(getSherlockActivity(), R.string.voip_call_issues_submit_toast, Toast.LENGTH_SHORT).show();
+					getSherlockActivity().finish();
 				}
 			}
 		});
@@ -84,10 +84,21 @@ public class CallIssuesPopup extends SherlockDialogFragment
 		return view;
 	}
 
-	private void populateSelectedIssues()
+	@Override
+	public void onCancel(DialogInterface dialog)
+	{
+		getSherlockActivity().finish();
+		super.onCancel(dialog);
+	}
+
+	private boolean getSelectedIssues()
 	{
 		TableLayout issuesContainer = (TableLayout) getView().findViewById(R.id.issues_container);
 		int i, rowCount = issuesContainer.getChildCount();
+
+		StringBuilder sb = new StringBuilder();
+		boolean atLeastOneSelected = false;
+
 		for(i=0; i<rowCount; i++)
 		{
 			TableRow row = (TableRow) issuesContainer.getChildAt(i);
@@ -95,13 +106,19 @@ public class CallIssuesPopup extends SherlockDialogFragment
 			for(j=0; j<colCount; j++)
 			{
 				View v = row.getChildAt(j);
-				String tag = (String) v.getTag();
-				if(v.isSelected() && tag!=null)
+				if(v.isSelected())
 				{
-					selectedIssues.add(tag);
+					sb.append("1");
+					atLeastOneSelected = true;
+				}
+				else
+				{
+					sb.append("0");
 				}
 			}
 		}
+		selectedIssues = sb.toString();
+		return atLeastOneSelected;
 	}
 
 	@Override
@@ -141,11 +158,8 @@ public class CallIssuesPopup extends SherlockDialogFragment
 			metadata.put(VoIPConstants.Analytics.IS_CALLER, isCallInitiator);
 			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, network);
 			metadata.put(AnalyticsConstants.TO, toMsisdn);
-
-			for(String issue : selectedIssues)
-			{
-				metadata.put(issue, 1);
-			}
+			metadata.put(VoIPConstants.Analytics.CALL_ISSUES, selectedIssues);
+			metadata.put(VoIPConstants.Analytics.NEW_LOG, 1);
 
 			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
 		}

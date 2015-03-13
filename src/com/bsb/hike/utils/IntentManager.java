@@ -53,6 +53,8 @@ import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPUtils;
+import com.bsb.hike.voip.view.CallRateActivity;
+import com.bsb.hike.voip.view.VoIPActivity;
 import com.google.android.gms.internal.co;
 
 public class IntentManager
@@ -448,6 +450,29 @@ public class IntentManager
 		intent.putExtra(VoIPConstants.Extras.ACTION, VoIPConstants.Extras.OUTGOING_CALL);
 		intent.putExtra(VoIPConstants.Extras.MSISDN, msisdn);
 		intent.putExtra(VoIPConstants.Extras.CALL_SOURCE, source.ordinal());
+		return intent;
+	}
+
+	public static Intent getVoipCallRateActivityIntent(Context context)
+	{
+		Intent intent = new Intent(context, CallRateActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+		return intent;
+	}
+
+	public static Intent getVoipIncomingCallIntent(Context context)
+	{
+		Intent intent = new Intent(context, VoIPActivity.class);
+		intent.putExtra(VoIPConstants.Extras.INCOMING_CALL, true);
+		intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		if(HikeMessengerApp.currentState != HikeMessengerApp.CurrentState.RESUMED && HikeMessengerApp.currentState != HikeMessengerApp.CurrentState.OPENED)
+		{
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+		}
+		else
+		{
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		}
 		return intent;
 	}
 }
