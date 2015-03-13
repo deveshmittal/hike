@@ -613,11 +613,9 @@ public class HAManager
 			metadata.put(HikeConstants.Extras.SOURCE, shrStkrChat);
 			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.Extras.WHATSAPP_SHARE);
          	record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
-            
-		}
+      	}
 		catch (JSONException e)
 		{  
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -636,7 +634,6 @@ public class HAManager
 		}
 		catch (JSONException e)
 		{   
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
