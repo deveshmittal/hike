@@ -283,7 +283,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if (!(initiallySelectedMsisidns == null || initiallySelectedMsisidns.isEmpty()))
 			{
 				tagEditText.clear(false);
-				int selected = adapter.getSelectedContactCount();
+				int selected = adapter.getCurrentSelectedContactCount();
 				for (String msisdn : initiallySelectedMsisidns)
 				{
 					ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn, true, false);
@@ -612,7 +612,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					adapter.addContact(contactInfo);
 
 				}
-				int selected = adapter.getSelectedContactCount();
+				int selected = adapter.getCurrentSelectedContactCount();
 				if(selected>0){
 				tagEditText.toggleTag(getString(selected==1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
 				}else{

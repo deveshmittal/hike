@@ -583,6 +583,11 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		return selectedPeople.size() + existingParticipants.size();
 	}
 
+	public int getCurrentSelectedContactCount()
+	{
+		return selectedPeople.size();
+	}
+	
 	public int getCurrentSelection()
 	{
 		return selectedPeople.size();
