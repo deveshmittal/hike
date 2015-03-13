@@ -20,6 +20,14 @@ import com.bsb.hike.platform.PlatformMessageMetadata;
 
 import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
+import com.bsb.hike.productpopup.ProductPopupsConstants.PopupTriggerPoints;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -111,6 +119,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -625,7 +634,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		super.onDestroy();
 		possibleKeyboardHeight = 0;
 		unregisterReceivers();
-		VoIPUtils.removeCallListener();
 
 		if (prefs != null && !prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
 		{
@@ -833,8 +841,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/* ensure that when we hit Alt+Enter, we insert a newline */
 		mComposeView.setOnKeyListener(this);
 
-		VoIPUtils.setCallListener(this);
-
 		mConversationDb = HikeConversationsDatabase.getInstance();
 
 		chatLayout.setOnSoftKeyboardListener(this);
@@ -910,6 +916,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			
 		}
 		Logger.i("chatthread", "on create end");
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.CHAT_SCR.ordinal());
 
 	}
 	
@@ -1411,6 +1418,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Utils.onCallClicked(this, mContactNumber, VoIPUtils.CallSource.CHAT_THREAD);
 			break;
 		case R.id.attachment:
+			showProductPopup(ProductPopupsConstants.PopupTriggerPoints.ATCH_SCR.ordinal());
 			// hide pop up if any
 			return attachmentClicked();
 		case R.id.overflow_menu:
@@ -2120,6 +2128,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		mConversation = null;
 
+		if (intent.getBooleanExtra(HikeConstants.Extras.SHOW_KEYBOARD, false))
+		{
+			showKeyboard = true;
+		}
+
+		if(intent.getBooleanExtra(HikeConstants.Extras.SHOW_RECORDING_DIALOG, false))
+		{
+			recordingDialogClicked();
+		}
+
 		if ((dataURI != null) && ("smsto".equals(dataURI.getScheme()) || "sms".equals(dataURI.getScheme())))
 		{
 			// Intent received externally
@@ -2531,7 +2549,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		if(savedInstanceState == null)
 		{
-			removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
+			if(removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
+			{
+				getSupportActionBar().show();
+			}
 		}
 
 		// This prevent the activity from simply finishing and opens up the last
@@ -3272,7 +3293,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onClick(View v)
 			{
 				Utils.hideSoftKeyboard(ChatThread.this, mComposeView);
-
 
 				Intent intent = new Intent(ChatThread.this, HomeActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -6189,6 +6209,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						recordingError(true);
 						Logger.e(getClass().getSimpleName(), "Failed to start recording", e);
 					}
+					catch (IllegalStateException e)
+					{
+						stopRecorder();
+						recordingError(true);
+						recordingDialog.dismiss();
+						Logger.e(getClass().getSimpleName(), "Failed to start recording", e);
+					}
 					recording = true;
 
 					Utils.blockOrientationChange(ChatThread.this);
@@ -7087,6 +7114,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 			}
 		}
+		
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal());
 	}
 
 	public void onEmoticonBtnClicked(View v)
@@ -9213,9 +9242,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public boolean removeFragment(String tag, boolean updateActionBar)
 	{
 		boolean isRemoved = super.removeFragment(tag);
-		if (isRemoved && updateActionBar)
-		{	
-			setupActionBar(false);
+		if (isRemoved)
+		{
+			getSupportActionBar().show();
+			if(updateActionBar)
+			{
+				setupActionBar(false);
+			}
 		}
 		return isRemoved;
 	}

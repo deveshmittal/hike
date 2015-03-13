@@ -154,5 +154,18 @@ public class HikeAnalyticsEvent
             npe.printStackTrace();
         }
     }
+    
+    public static void analyticsForPhotos(String type, String subType, JSONObject json)
+    {
+        try
+        {
+            Logger.d("HikeAnalyticsEvent", json.toString());
+            HAManager.getInstance().record(type, subType, HAManager.EventPriority.HIGH, json, AnalyticsConstants.EVENT_TAG_PHOTOS);
+        }
+        catch (NullPointerException npe)
+        {
+            npe.printStackTrace();
+        }
+    }
 
 }

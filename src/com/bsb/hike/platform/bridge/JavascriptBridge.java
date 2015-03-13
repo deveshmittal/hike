@@ -1,10 +1,13 @@
 package com.bsb.hike.platform.bridge;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.text.Html;
@@ -18,8 +21,24 @@ import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
+import com.bsb.hike.productpopup.ProductPopupsConstants.HIKESCREEN;
+import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.CreateNewGroupOrBroadcastActivity;
+import com.bsb.hike.ui.CreditsActivity;
+import com.bsb.hike.ui.HikeListActivity;
+import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PeopleActivity;
+import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.SettingsActivity;
+import com.bsb.hike.ui.StatusUpdate;
+import com.bsb.hike.ui.StickerSettingsActivity;
+import com.bsb.hike.ui.StickerShopActivity;
+import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -28,6 +47,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import org.ocpsoft.prettytime.units.Week;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by shobhit on 13/02/15.
@@ -46,7 +68,7 @@ public abstract class JavascriptBridge
 	{
 		this.mWebView = mWebView;
 		weakActivity = new WeakReference<Activity>(activity);
-		this.mHandler = new Handler(activity.getMainLooper());
+		this.mHandler = new Handler(HikeMessengerApp.getInstance().getMainLooper());
 	}
 
 	/**
@@ -373,5 +395,163 @@ public abstract class JavascriptBridge
 	{
 		mWebView.removeCallbacks(heightRunnable);
 	}
+	
+	public void openActivity(String data, Activity context)
+	{
+		String activityName = null;
+		JSONObject mmObject = null;
+		try
+		{
+			mmObject = new JSONObject(data);
+			activityName = mmObject.optString(HikeConstants.SCREEN);
+
+			if (activityName.equals(HIKESCREEN.SETTING.toString()))
+			{
+				IntentManager.openSetting(context);
+			}
+
+			if (activityName.equals(HIKESCREEN.ACCOUNT.toString()))
+			{
+				IntentManager.openSettingAccount(context);
+			}
+			if (activityName.equals(HIKESCREEN.FREE_SMS.toString()))
+			{
+				IntentManager.openSettingSMS(context);
+			}
+			if (activityName.equals(HIKESCREEN.MEDIA.toString()))
+			{
+				IntentManager.openSettingMedia(context);
+			}
+			if (activityName.equals(HIKESCREEN.NOTIFICATION.toString()))
+			{
+				IntentManager.openSettingNotification(context);
+			}
+			if (activityName.equals(HIKESCREEN.PRIVACY.toString()))
+			{
+				IntentManager.openSettingPrivacy(context);
+			}
+			if (activityName.equals(HIKESCREEN.TIMELINE.toString()))
+			{
+				IntentManager.openTimeLine(context);
+			}
+			if (activityName.equals(HIKESCREEN.NEWGRP.toString()))
+			{
+				context.startActivity(new Intent(context, CreateNewGroupOrBroadcastActivity.class));
+			}
+			if (activityName.equals(HIKESCREEN.INVITEFRNDS.toString()))
+			{
+				context.startActivity(new Intent(context, TellAFriend.class));
+			}
+			if (activityName.equals(HIKESCREEN.REWARDS_EXTRAS.toString()))
+			{
+				context.startActivity(IntentManager.getRewardsIntent(context));
+			}
+			if (activityName.equals(HIKESCREEN.STICKER_SHOP.toString()))
+			{
+				context.startActivity(IntentManager.getStickerShopIntent(context));
+			}
+			if (activityName.equals(HIKESCREEN.STICKER_SHOP_SETTINGS.toString()))
+			{
+				context.startActivity(IntentManager.getStickerSettingIntent(context));
+			}
+			if (activityName.equals(HIKESCREEN.STATUS.toString()))
+			{
+				context.startActivity(new Intent(context, StatusUpdate.class));
+			}
+			if (activityName.equals(HIKESCREEN.HIDDEN_MODE.toString()))
+			{
+				if (context instanceof HomeActivity)
+				{
+					((HomeActivity) context).hikeLogoClicked();
+				}
+			}
+			if (activityName.equals(HIKESCREEN.COMPOSE_CHAT.toString()))
+			{
+				context.startActivity(IntentManager.getComposeChatIntent(context));
+			}
+			if (activityName.equals(HIKESCREEN.INVITE_SMS.toString()))
+			{
+				boolean selectAll = mmObject.optBoolean(ProductPopupsConstants.SELECTALL, false);
+				Intent intent = new Intent(context, HikeListActivity.class);
+				intent.putExtra(ProductPopupsConstants.SELECTALL, selectAll);
+				context.startActivity(intent);
+			}
+			if (activityName.equals(HIKESCREEN.FAVOURITES.toString()))
+			{
+				context.startActivity(IntentManager.getFavouritesIntent(context));
+			}
+			if (activityName.equals(HIKESCREEN.HOME_SCREEN.toString()))
+			{
+				context.startActivity(Utils.getHomeActivityIntent(context));
+			}
+			if (activityName.equals(HIKESCREEN.PROFILE_PHOTO.toString()))
+			{
+
+				Intent intent =IntentManager.getProfileIntent(context);
+				if (mmObject.optBoolean(ProductPopupsConstants.SHOW_CAMERA, false))
+				{
+					intent.putExtra(ProductPopupsConstants.SHOW_CAMERA, true);
+				}
+				context.startActivity(intent);
+
+			}
+			if (activityName.equals(HIKESCREEN.EDIT_PROFILE.toString()))
+			{
+				Intent intent =IntentManager.getProfileIntent(context);
+				intent.putExtra(HikeConstants.Extras.EDIT_PROFILE, true);
+				context.startActivity(intent);
+
+			}
+			if (activityName.equals(HIKESCREEN.INVITE_WHATSAPP.toString()))
+			{
+				IntentManager.openInviteWatsApp(context);
+			}
+			if (activityName.equals(HIKESCREEN.OPENINBROWSER.toString()))
+			{
+				String url = mmObject.optString(HikeConstants.URL);
+
+				if (!TextUtils.isEmpty(url))
+				{
+					Intent in = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+					context.startActivity(in);
+				}
+			}
+			if (activityName.equals(HIKESCREEN.OPENAPPSTORE.toString()))
+			{
+				String url = mmObject.optString(HikeConstants.URL);
+
+				if (!TextUtils.isEmpty(url))
+				{
+					Utils.launchPlayStore(url, context);
+				}
+			}
+			if (activityName.equals(HIKESCREEN.HELP.toString()))
+			{
+				IntentManager.openSettingHelp(context);
+			}
+			if (activityName.equals(HIKESCREEN.NUXINVITE.toString()))
+			{
+				context.startActivity(IntentManager.openNuxFriendSelector(context));
+			}
+			if (activityName.equals(HIKESCREEN.NUXREMIND.toString()))
+			{
+				context.startActivity(IntentManager.openNuxCustomMessage(context));
+			}
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		catch (ActivityNotFoundException e)
+		{
+			Toast.makeText(context, "No activity found", Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
+		}
+
+	}
+
+	
+	
+	
 
 }

@@ -1,5 +1,6 @@
 package com.bsb.hike.platform;
 
+import com.bsb.hike.R;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import android.annotation.SuppressLint;
