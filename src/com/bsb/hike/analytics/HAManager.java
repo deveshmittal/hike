@@ -241,7 +241,7 @@ public class HAManager
 		}
 		eventsList.add(generateAnalticsJson(type, eventContext, priority, metadata, tag));
 
-		if (maxInMemorySize >= eventsList.size()) 
+		if (eventsList.size() >= maxInMemorySize) 
 		{			
 			// clone a local copy and send for writing
 			ArrayList<JSONObject> jsons = (ArrayList<JSONObject>) eventsList.clone();
