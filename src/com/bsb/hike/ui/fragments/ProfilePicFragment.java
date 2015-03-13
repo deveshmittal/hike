@@ -245,7 +245,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 
 			Utils.executeHttpTask(new HikeHTTPTask(ProfilePicFragment.this, R.string.delete_status_error), request);
 
-			updateProgressUniformly(60f, 10f);
+			updateProgressUniformly(80f, 10f);
 		}
 	}
 
@@ -264,7 +264,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 				updateProgress(interval);
 				updateProgressUniformly(total - interval, interval);
 			}
-		}, 1000);
+		}, 1300);
 	}
 
 	private void updateProgress(float i)
@@ -278,7 +278,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		ValueAnimator mAnim = ObjectAnimator.ofFloat(mCurrentProgress, mCurrentProgress + i);
 		mAnim.setInterpolator(animInterpolator);
 		mAnim.setEvaluator(new FloatEvaluator());
-		mAnim.setDuration(1000);
+		mAnim.setDuration(1300);
 		mAnim.addUpdateListener(new AnimatorUpdateListener()
 		{
 			@Override
