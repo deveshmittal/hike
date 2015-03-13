@@ -15,9 +15,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.photos.HikePhotosUtils;
+import com.bsb.hike.utils.IntentManager;
 
 /**
  * @author akhiltripathi
@@ -114,9 +116,19 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 			DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
 			int width = metrics.widthPixels;
 
-			mBitmap = Bitmap.createBitmap(width, width, Config.ARGB_8888);
-			mCanvas = new Canvas(mBitmap);
-			drawDoodle();
+			mBitmap = HikePhotosUtils.createBitmap(null, 0, 0, width, width, false, false, false, true);
+			// mBitmap = Bitmap.createBitmap(width, width, Config.ARGB_8888);
+			if (mBitmap != null)
+			{
+				mCanvas = new Canvas(mBitmap);
+				drawDoodle();
+			}
+			else
+			{
+				Toast.makeText(getContext(), "Unable to save Doodle!\nNot Enough Memory On Device.", Toast.LENGTH_SHORT);
+			}
+			
+
 		}
 		else if (mBitmap != null)
 		{
