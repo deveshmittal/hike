@@ -54,6 +54,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
+            android:id="@+id/flashContainer"
             android:layout_alignParentBottom="true"
             android:animateLayoutChanges="true"
             android:background="@color/photos_tabs_background"

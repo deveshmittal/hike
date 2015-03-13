@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.view.OrientationEventListener;
 import android.view.TextureView;
 import android.view.View;
@@ -106,6 +107,17 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		flashButton = findViewById(R.id.btntoggleflash);
 		flashButton.setOnClickListener(HikeCameraActivity.this);
 
+		int density = getResources().getDisplayMetrics().densityDpi;
+
+		switch (density)
+		{
+		case DisplayMetrics.DENSITY_LOW:
+		case DisplayMetrics.DENSITY_MEDIUM:
+			findViewById(R.id.flashContainer).setVisibility(View.GONE);
+			break;
+
+		}
+		
 		containerView = findViewById(R.id.container);
 
 		orientationListener = new OrientationEventListener(HikeCameraActivity.this, SensorManager.SENSOR_DELAY_UI)
