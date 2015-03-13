@@ -43,12 +43,12 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
@@ -65,6 +65,8 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 
 	private EditText groupOrBroadcastName;
 
+	private TextView broadcastNote;
+	
 	private View doneBtn;
 
 	private ImageView arrow;
@@ -77,6 +79,8 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 
 	private ArrayList<String> broadcastRecipients;
 	
+	private String myMsisdn;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -128,6 +132,9 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 			groupOrBroadcastImage = (ImageView) findViewById(R.id.broadcast_profile_image);
 			groupOrBroadcastName = (EditText) findViewById(R.id.broadcast_name);
 			groupOrBroadcastName.setHint(BroadcastConversation.defaultBroadcastName(broadcastRecipients));
+			myMsisdn = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.MSISDN_SETTING, "");
+			broadcastNote = (TextView) findViewById(R.id.broadcast_info);
+			broadcastNote.setText(getString(R.string.broadcast_participant_info, myMsisdn));
 			groupOrBroadcastName.addTextChangedListener(new TextWatcher()
 			{
 

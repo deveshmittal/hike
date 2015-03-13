@@ -731,7 +731,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else
 		{
-			multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getCurrentSelection()));
+			if (createBroadcast)
+			{
+				multiSelectTitle.setText(getString(R.string.broadcast_selected, adapter.getCurrentSelection()));
+			}
+			else
+			{
+				multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getCurrentSelection()));
+			}		
 		}
 	}
 
@@ -750,8 +757,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		invalidateOptionsMenu();
 		
 		int selectedCount = adapter.getCurrentSelection();
-		multiSelectTitle.setText(getString(R.string.gallery_num_selected, selectedCount));
-		
+		if (createBroadcast)
+		{
+			multiSelectTitle.setText(getString(R.string.broadcast_selected, adapter.getCurrentSelection()));
+		}
+		else
+		{
+			multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getCurrentSelection()));
+		}		
 	}
 
 	@Override
@@ -1092,7 +1105,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		ViewGroup closeContainer = (ViewGroup) multiSelectActionBar.findViewById(R.id.close_container);
 
 		multiSelectTitle = (TextView) multiSelectActionBar.findViewById(R.id.title);
-		multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getCurrentSelection()));
+		if (createBroadcast)
+		{
+			multiSelectTitle.setText(getString(R.string.broadcast_selected, adapter.getCurrentSelection()));
+		}
+		else
+		{
+			multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getCurrentSelection()));
+		}
 		
 		if (isForwardingMessage)
 		{

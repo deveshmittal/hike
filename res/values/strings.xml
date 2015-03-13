@@ -722,6 +722,7 @@
     <string name="selected_count">%1$s selected</string>
     <string name="clear_conversation">Clear Conversation</string>
     <string name="gallery_num_selected">%1$d selected</string>
+    <string name="broadcast_selected">%1$s/500 selected</string>
     <string name="select_file">Select File</string>
     <string name="free_of_total">Free %1$s of %2$s</string>
     <string name="unknown_error">Unknown error</string>
@@ -946,7 +947,7 @@
     <string name="delete_leave">Delete and exit group</string>
     <string name="group_participant_info">You can add upto 100 people to a group</string>
     <string name="broadcast_ftue_message">A broadcast lets you send the same message to multiple hike contacts at once</string>
-    <string name="broadcast_participant_info"><b>Note: </b>Only contacts with your number in their address book will receive this broadcast.</string>
+    <string name="broadcast_participant_info"><b>Note: </b>Only hike contacts with %1$s in their address book will receive this broadcast.</string>
     <string name="photo">GALLERY</string>
     <string name="video">VIDEOS</string>
     <string name="location_option">LOCATION</string>
