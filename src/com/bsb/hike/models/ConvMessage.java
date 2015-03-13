@@ -1037,7 +1037,6 @@ public class ConvMessage
 	public boolean isSilent()
 	{
 		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && webMetadata != null)
-
 		{
 			return webMetadata.isSilent();
 		}

@@ -91,6 +91,12 @@ import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.DownloadImageTask;
@@ -243,6 +249,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public SmileyParser smileyParser;
 	
+	int triggerPointPopup=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal();
+	
 	private static final String TAG = "Profile_Activity";
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -390,6 +398,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				this.profileType = ProfileType.USER_PROFILE_EDIT;
 				setupEditScreen();
 				HikeMessengerApp.getPubSub().addListeners(this, profilEditPubSubListeners);
+				triggerPointPopup=ProductPopupsConstants.PopupTriggerPoints.EDIT_PROFILE.ordinal();
 			}
 			else
 			{
@@ -399,6 +408,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				this.profileType = ProfileType.USER_PROFILE;
 				setupProfileScreen(savedInstanceState);
 				HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
+				triggerPointPopup=ProductPopupsConstants.PopupTriggerPoints.PROFILE_PHOTO.ordinal();
 			}
 		}
 		if (mActivityState.groupEditDialogShowing)
@@ -406,6 +416,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			onEditGroupNameClick(null);
 		}
 		setupActionBar();
+		if (getIntent().getBooleanExtra(ProductPopupsConstants.SHOW_CAMERA, false))
+		{
+			onHeaderButtonClicked(null);
+		}
+		
+		if (triggerPointPopup != ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal())
+		{
+			showProductPopup(triggerPointPopup);
+		}
+		
 	}
 
 	private void setGroupNameFields(View parent)

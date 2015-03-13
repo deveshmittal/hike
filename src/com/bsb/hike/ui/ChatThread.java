@@ -20,6 +20,14 @@ import com.bsb.hike.platform.PlatformMessageMetadata;
 
 import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
+import com.bsb.hike.productpopup.ProductPopupsConstants.PopupTriggerPoints;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -910,6 +918,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			
 		}
 		Logger.i("chatthread", "on create end");
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.CHAT_SCR.ordinal());
 
 	}
 	
@@ -1411,6 +1420,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Utils.onCallClicked(this, mContactNumber, VoIPUtils.CallSource.CHAT_THREAD);
 			break;
 		case R.id.attachment:
+			showProductPopup(ProductPopupsConstants.PopupTriggerPoints.ATCH_SCR.ordinal());
 			// hide pop up if any
 			return attachmentClicked();
 		case R.id.overflow_menu:
@@ -7087,6 +7097,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 			}
 		}
+		
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal());
 	}
 
 	public void onEmoticonBtnClicked(View v)

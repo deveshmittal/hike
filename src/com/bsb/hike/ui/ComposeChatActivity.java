@@ -84,6 +84,12 @@ import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
@@ -180,6 +186,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private boolean deviceDetailsSent;
 
 	private boolean nuxIncentiveMode;
+	
+	private int triggerPointForPopup=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal();
 
 	 private HorizontalFriendsFragment newFragment;
 	@Override
@@ -479,6 +487,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		
 		pref.saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
 		pref.saveData(HikeConstants.SHOW_RECENTLY_JOINED, false);
+		
+		if(triggerPointForPopup!=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal())
+		{
+			showProductPopup(triggerPointForPopup);
+		}
+
 		
 	}
 
@@ -789,9 +803,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			mode = MULTIPLE_FWD;
 		}
+		else if(getIntent().hasExtra(HikeConstants.Extras.GROUP_BROADCAST_ID) || existingGroupId != null)
+		{
+				mode=CREATE_GROUP_MODE;
+		}
 		else
 		{
-			mode = getIntent().hasExtra(HikeConstants.Extras.GROUP_BROADCAST_ID) || existingGroupId != null ? CREATE_GROUP_MODE : START_CHAT_MODE;
+				mode=START_CHAT_MODE;
+				triggerPointForPopup=ProductPopupsConstants.PopupTriggerPoints.COMPOSE_CHAT.ordinal();
 		}
 		setMode(mode);
 	}

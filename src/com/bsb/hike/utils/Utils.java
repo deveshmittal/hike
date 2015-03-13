@@ -61,6 +61,7 @@ import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
@@ -5391,6 +5392,21 @@ public class Utils
 		return false;
 	}
 	
+	
+	
+	public static void launchPlayStore(String packageName,Context context)
+	{
+		Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + 	context.getPackageName()));
+		marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+		try
+		{
+			context.startActivity(marketIntent);
+		}
+		catch (ActivityNotFoundException e)
+		{
+			Logger.e(HomeActivity.class.getSimpleName(), "Unable to open market");
+		}
+	}
 	public static boolean isOkHttp()
 	{
 		return HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.TOGGLE_OK_HTTP, true);
