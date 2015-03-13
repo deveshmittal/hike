@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -117,7 +118,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			break;
 
 		}
-		
+
 		containerView = findViewById(R.id.container);
 
 		orientationListener = new OrientationEventListener(HikeCameraActivity.this, SensorManager.SENSOR_DELAY_UI)
@@ -192,7 +193,10 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			View ffcBtn = findViewById(R.id.btnflip);
 			ffcBtn.setClickable(false);
 			ffcBtn.setEnabled(false);
-			ffcBtn.setAlpha(0.3f);
+			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1)
+			{
+				ffcBtn.setAlpha(0.3f);
+			}
 		}
 
 	}
@@ -334,12 +338,18 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				if (isUsingFFC)
 				{
 					flashButton.setClickable(false);
-					flashButton.setAlpha(0.3f);
+					if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1)
+					{
+						flashButton.setAlpha(0.3f);
+					}
 				}
 				else
 				{
 					flashButton.setClickable(true);
-					flashButton.setAlpha(1f);
+					if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1)
+					{
+						flashButton.setAlpha(1f);
+					}
 				}
 				cameraFragment = CameraFragment.newInstance(isUsingFFC);
 				replaceFragment(cameraFragment);
