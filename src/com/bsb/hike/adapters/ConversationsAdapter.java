@@ -666,7 +666,11 @@ public class ConversationsAdapter extends BaseAdapter
 				{
 					String name = info.getContactName();
 					boolean found = false;
-					if (textToBeFiltered.equals("group") && Utils.isGroupConversation(info.getMsisdn()))
+					if (textToBeFiltered.equals("broadcast") && Utils.isBroadcastConversation(info.getMsisdn()))
+					{
+						found = true;
+					}
+					else if (textToBeFiltered.equals("group") && Utils.isGroupConversation(info.getMsisdn()) && !Utils.isBroadcastConversation(info.getMsisdn()))
 					{
 						found = true;
 					}
