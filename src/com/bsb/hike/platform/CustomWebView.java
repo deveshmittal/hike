@@ -109,7 +109,6 @@ public class CustomWebView extends WebView
 	{
 		setVerticalScrollBarEnabled(false);
 		setHorizontalScrollBarEnabled(false);
-		getSettings().setDomStorageEnabled(true);
 		getSettings().setJavaScriptEnabled(true);
 	}
 

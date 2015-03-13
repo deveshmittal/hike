@@ -934,16 +934,18 @@ public class MqttMessagesManager
 			return;
 		}
 		
-		long[] msgIdsLongArray= new long[msgIds.size()];
-		for (int i = 0; i < msgIds.size(); i++ )
-		{
-			msgIdsLongArray[i] = msgIds.get(i);
-		}
-		
 		if (!Utils.isGroupConversation(msisdn))
 		{
-			convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, msgIds);
-			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, msgIdsLongArray);
+			
+			ArrayList<Long> updatedMessageIds = convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, msgIds);
+			
+			long[] updatedMsgIdsLongArray= new long[updatedMessageIds.size()];
+			for (int i = 0; i < updatedMessageIds.size(); i++ )
+			{
+				updatedMsgIdsLongArray[i] = updatedMessageIds.get(i);
+			}
+			
+			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, updatedMsgIdsLongArray);
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
 		}
 		else
