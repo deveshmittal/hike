@@ -119,7 +119,7 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		{
 		case DisplayMetrics.DENSITY_LOW:
 		case DisplayMetrics.DENSITY_MEDIUM:
-			indicator.setVisibility(View.GONE);
+			findViewById(R.id.indicatorView).setVisibility(View.GONE);
 			break;
 
 		}

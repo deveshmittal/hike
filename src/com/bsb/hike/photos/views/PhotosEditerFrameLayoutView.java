@@ -144,7 +144,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		imageOriginal = BitmapFactory.decodeFile(FilePath);
 		DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
 		int width = metrics.widthPixels;
-		if (width < imageOriginal.getWidth())
+		if (width != imageOriginal.getWidth())
 		{
 			imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
 			effectLayer.handleImage(imageScaled, true);
