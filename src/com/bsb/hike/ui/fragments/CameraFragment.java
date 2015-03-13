@@ -156,7 +156,6 @@ public class CameraFragment extends SherlockFragment
 
 						if (bimp != null)
 						{
-
 							OutputStream outStream = null;
 
 							File file = getHost().getPhotoPath();
