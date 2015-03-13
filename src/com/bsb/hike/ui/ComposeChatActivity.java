@@ -1902,8 +1902,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if (existingBroadcastId != null || createBroadcast)
 			{
 				ComposeChatActivity.this.finish();
-				final InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				inputMethodManager.hideSoftInputFromWindow(tagEditText.getWindowToken(), 0);
+//				Hiding keyboard on pressing back on "Add members to broadcast list" compose chat
+				Utils.hideSoftKeyboard(ComposeChatActivity.this, tagEditText);
 				return;
 			}
 			setModeAndUpdateAdapter(START_CHAT_MODE);
