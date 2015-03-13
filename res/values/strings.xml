@@ -1357,4 +1357,16 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="holi">Happy Holi</string>
     <string name="terms_conditions_hint">Terms &amp; Conditions</string>
 	<string name="terms_conditions_title">Terms</string>
+	<string name="privacy_settings">PRIVACY SETTINGS</string>
+    <string name="manage_list">MANAGE LISTS</string>
+    <string name="hidden_mode">HIDDEN MODE</string>
+    <string name="privacy_everyone_key">Everyone</string>
+    <string name="privacy_my_contacts_key">My Contacts</string>
+    <string name="privacy_favorites_key">Favorites</string>
+    <string name="privacy_nobody_key">Nobody</string>
+    <string name="fav_list_summary">Add/Remove users from favorites</string>
+    <string name="ls_my_contacts_summary">Last seen is visible to your address book contacts and favorites</string>
+    <string name="ls_favorites_summary">Last seen is visible only to your favorites</string>
+    <string name="ls_everyone_summary">Last seen is visible to everyone on hike</string>
+    <string name="ls_nobody_summary">Last seen is not visible to anyone</string>
 </resources>
