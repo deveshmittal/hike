@@ -40,16 +40,19 @@ public class BroadcastConversation extends GroupConversation {
 		}
 		Collections.sort(broadcastParticipants);
 
+		String name = broadcastParticipants.get(0).getFirstName();
 		switch (broadcastParticipants.size())
 		{
 		case 0:
 			return "";
 		case 1:
-			return broadcastParticipants.get(0).getFirstName();
-		case 2:
-			return broadcastParticipants.get(0).getFirstName() + " and " + broadcastParticipants.get(1).getFirstName();
+			return name;
 		default:
-			return broadcastParticipants.get(0).getFirstName() + ", " + broadcastParticipants.get(1).getFirstName() + " and " + (broadcastParticipants.size() - 2) + " others";
+			for (int i=1; i<broadcastParticipants.size(); i++)
+			{
+				name += ", " + broadcastParticipants.get(i).getFirstName();
+			}
+			return name;
 		}
 	}
 	
