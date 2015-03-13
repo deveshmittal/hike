@@ -3081,7 +3081,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void setIconForSentMessage(ConvMessage message, ImageView status, int tickResId, int smsDrawableResId, int boltDrawableResId)
 	{
-		if (conversation.isOnhike() && !(conversation instanceof GroupConversation))
+		if (conversation.isOnhike() && !(conversation instanceof GroupConversation) && !message.isBroadcastMessage())
 		{
 			if (message.isSMS())
 			{
