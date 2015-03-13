@@ -1948,6 +1948,11 @@ public class HikeConstants
 		public static final String BROADCAST_DONE = "bcdn";
 		
 		public static final String BROADCAST_SELECT_ALL_NEXT = "bcAll";
+
+		// Home search events
+
+		public static final String HOME_SEARCH = "hmSrch";
+
 	}
 
 	public static final class MqttMessageTypes
