@@ -241,7 +241,8 @@ public class HAManager
 			throw new NullPointerException("Type and Context of event cannot be null.");
 		}
 		eventsList.add(generateAnalticsJson(type, eventContext, priority, metadata, tag));
-
+	    Logger.d(AnalyticsConstants.ANALYTICS_TAG, metadata.toString());
+	  	
 		if (maxInMemorySize == eventsList.size()) 
 		{			
 			// clone a local copy and send for writing
