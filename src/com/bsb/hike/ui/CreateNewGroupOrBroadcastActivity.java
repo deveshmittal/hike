@@ -20,10 +20,10 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -164,6 +164,7 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 
 			groupOrBroadcastImage = (ImageView) findViewById(R.id.group_profile_image);
 			groupOrBroadcastName = (EditText) findViewById(R.id.group_name);
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 			groupOrBroadcastName.addTextChangedListener(new TextWatcher()
 			{
 
