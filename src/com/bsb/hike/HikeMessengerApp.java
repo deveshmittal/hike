@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.bsb.hike.platform.content.PlatformContent;
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
 import org.acra.ReportField;
@@ -850,6 +851,8 @@ public void onTrimMemory(int level)
 			cricketBotEntry();
 			HikeSharedPreferenceUtil.getInstance().saveData(HikePlatformConstants.CRICKET_PREF_NAME, true);
 		}
+
+		PlatformContent.init(settings.getBoolean(HikeMessengerApp.PRODUCTION, true));
 	}
 
 	// Hard coding the cricket bot on the App's onCreate so that there is a cricket bot entry
