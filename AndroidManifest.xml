@@ -3,7 +3,7 @@
     package="com.bsb.hike"
     android:installLocation="auto"
     android:versionCode="1124"
-    android:versionName="3.8.0.1.ls_revamp" >
+    android:versionName="3.8.0.0.1.ls_revamp" >
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="17" />
