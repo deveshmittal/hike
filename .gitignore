@@ -2,4 +2,5 @@ bin/
 gen/
 .settings/
 facebook-android-sdk/facebook/TestApp/
+libs/renderscript-v8.jar
 proguard/
