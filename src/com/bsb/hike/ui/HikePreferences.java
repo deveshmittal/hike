@@ -923,21 +923,21 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					String selectedPrivacyValue = "";
 					boolean isLSEnabled = true;
 					String ls_summary = null;
-					switch (slectedPrivacyId) {
-						case HikeConstants.PrivacyOptions.NOBODY:
+					switch (HikeConstants.PrivacyOptions.values()[slectedPrivacyId]) {
+						case NOBODY:
 							isLSEnabled = false;
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_nobody_key);
 							ls_summary = getApplicationContext().getString(R.string.ls_nobody_summary);
 							break;
-						case HikeConstants.PrivacyOptions.EVERYONE:
+						case EVERYONE:
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_everyone_key);
 							ls_summary = getApplicationContext().getString(R.string.ls_everyone_summary);
 							break;
-						case HikeConstants.PrivacyOptions.FAVORITES:
+						case FAVORITES:
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_favorites_key);
 							ls_summary = getApplicationContext().getString(R.string.ls_favorites_summary);
 							break;
-						case HikeConstants.PrivacyOptions.MY_CONTACTS:
+						case MY_CONTACTS:
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_my_contacts_key);
 							ls_summary = getApplicationContext().getString(R.string.ls_my_contacts_summary);
 							break;
@@ -967,17 +967,17 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		String defValue = getApplicationContext().getString(R.string.privacy_my_contacts);
 		String selectedValue = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(HikeConstants.LAST_SEEN_PREF_LIST, defValue);
 		String summaryTxt = null;
-		switch (Integer.parseInt(selectedValue)) {
-			case HikeConstants.PrivacyOptions.NOBODY:
+		switch (HikeConstants.PrivacyOptions.values()[Integer.parseInt(selectedValue)]) {
+			case NOBODY:
 				summaryTxt = getApplicationContext().getString(R.string.ls_nobody_summary);
 				break;
-			case HikeConstants.PrivacyOptions.EVERYONE:
+			case EVERYONE:
 				summaryTxt = getApplicationContext().getString(R.string.ls_everyone_summary);
 				break;
-			case HikeConstants.PrivacyOptions.FAVORITES:
+			case FAVORITES:
 				summaryTxt = getApplicationContext().getString(R.string.ls_favorites_summary);
 				break;
-			case HikeConstants.PrivacyOptions.MY_CONTACTS:
+			case MY_CONTACTS:
 				summaryTxt = getApplicationContext().getString(R.string.ls_my_contacts_summary);
 				break;
 		}

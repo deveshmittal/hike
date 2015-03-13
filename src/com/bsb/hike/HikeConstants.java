@@ -2292,14 +2292,8 @@ public class HikeConstants
 	
 	public static final String EXCEPTION_MESSAGE = "exm";
 
-	public static class PrivacyOptions
+	public static enum PrivacyOptions
 	{
-		public static final int NOBODY = 0;
-
-		public static final int EVERYONE = 1;
-
-		public static final int FAVORITES = 2;
-
-		public static final int MY_CONTACTS = 3;
+		NOBODY, EVERYONE, FAVORITES, MY_CONTACTS
 	}
 }
