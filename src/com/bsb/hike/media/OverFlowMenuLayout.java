@@ -109,6 +109,10 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 	public void show(int width, int height, View anchor) {
 		show(width, height, 0, 0, anchor);
 	}
+	
+	public void show(int width, int height, View anchor, int inputMethodMode) {
+		show(width, height, 0, 0, anchor, inputMethodMode);
+	}
 
 	public void show(int width, int height, int xOffset,
 			int yOffset, View anchor) {
@@ -117,7 +121,15 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 				getView());
 		popUpLayout.setOnDismissListener(mOnDismisslistener);
 	}
-
+	
+	public void show(int width, int height, int xOffset, int yOffset, View anchor, int inputMethodMode)
+	{
+		initView();
+		popUpLayout.showPopUpWindow(width, height, xOffset, yOffset, anchor,
+				getView(), inputMethodMode);
+		popUpLayout.setOnDismissListener(mOnDismisslistener);
+	}
+	
 	public void appendItem(OverFlowMenuItem item) {
 		this.overflowItems.add(item);
 	}

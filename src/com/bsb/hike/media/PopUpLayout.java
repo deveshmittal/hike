@@ -33,15 +33,23 @@ public class PopUpLayout implements OnTouchListener
 
 	/**
 	 * this method calls {@link #showPopUpWindow(int, int, int, int, View)} internally with x and y offset 0
-	 * 
-	 * @generated
-	 * @ordered
+	 * @param inputMethodMode 
+	 * 			  : <p>Since the popup is focusable, if displayed along with a keyboard, it can take focus from the keyboard. Thus, if there is a possibility that keyboard could be
+	 *            visible along with the popup, you should use it with {@link PopupWindow#INPUT_METHOD_NOT_NEEDED} flag.</p>
 	 */
-
 	public void showPopUpWindow(int width, int height, View anchor, View view, int inputMethodMode)
 	{
 		showPopUpWindow(width, height, 0, 0, anchor, view, inputMethodMode);
 	}
+	
+	/**
+	 * this method calls {@link #showPopUpWindow(int, int, int, int, View)} internally with x and y offset 0
+	 */
+	public void showPopUpWindow(int width, int height, View anchor, View view)
+	{
+		showPopUpWindow(width, height, 0, 0, anchor, view);
+	}
+	
 
 	/**
 	 * Shows a pop up window with default view, if you do not want to show view as pop up window, you should use {@link #getView()}
@@ -55,7 +63,41 @@ public class PopUpLayout implements OnTouchListener
 	 */
 	public void showPopUpWindowNoDismiss(int xoffset, int yoffset, View anchor, View view)
 	{
-		showPopUpWindow(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, xoffset, yoffset, anchor, view, PopupWindow.INPUT_METHOD_NOT_NEEDED);
+		showPopUpWindow(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, xoffset, yoffset, anchor, view);
+
+		// This is a workaround for not to dismiss popup window if anywhere out
+		// side is touched, for layout below we have made our popup with
+		// MATCH_PARENT but for action bar, we have to do following
+		// it will give us call back in on touch with
+		// action_outside event, so we can return true to eat that event
+		// BUT Point to note here is : even though the pop up is not dismissed,
+		// view behind it will still get onclick event
+		FrameLayout viewParent = (FrameLayout) view.getParent();
+		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent.getLayoutParams();
+		lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+
+		WindowManager windowManager = (WindowManager) context.getSystemService(context.WINDOW_SERVICE);
+		windowManager.updateViewLayout(viewParent, lp);
+
+		popup.setTouchInterceptor(this);
+	}
+	
+	/**
+	 * Shows a pop up window with default view, if you do not want to show view as pop up window, you should use {@link #getView()}
+	 * 
+	 * Popup window is given width and height as {@link LayoutParams#MATCH_PARENT} and background color is transparent to eat clicks and prevent it from being dismissed
+	 * 
+	 * @param xoffset
+	 * @param yoffset
+	 * @param anchor
+	 * @param context
+	 * @param inputMethodMode
+	 * 	 		  : <p>Since the popup is focusable, if displayed along with a keyboard, it can take focus from the keyboard. Thus, if there is a possibility that keyboard could be
+	 *            visible along with the popup, you should use it with {@link PopupWindow#INPUT_METHOD_NOT_NEEDED} flag.</p>
+	 */
+	public void showPopUpWindowNoDismiss(int xoffset, int yoffset, View anchor, View view, int inputMethodMode)
+	{
+		showPopUpWindow(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, xoffset, yoffset, anchor, view, inputMethodMode);
 
 		// This is a workaround for not to dismiss popup window if anywhere out
 		// side is touched, for layout below we have made our popup with
@@ -118,6 +160,11 @@ public class PopUpLayout implements OnTouchListener
 		popup.setInputMethodMode(inputMethodMode);
 		return popup;
 	}
+	
+	/**
+	 * This method is responsible for initializing popup window with given attributes, by default we set {@link android.R.color#transparent} as background color - by default popup
+	 * is dismissed if outside is touched
+	 */
 	
 	protected PopupWindow initPopUpWindow(int width, int height, View viewToShow, Context context)
 	{
