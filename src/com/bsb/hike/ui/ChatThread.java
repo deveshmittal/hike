@@ -14,6 +14,19 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
+import com.bsb.hike.platform.CardComponent;
+import com.bsb.hike.platform.HikePlatformConstants;
+import com.bsb.hike.platform.PlatformMessageMetadata;
+
+import com.bsb.hike.platform.WebMetadata;
+import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
+import com.bsb.hike.productpopup.ProductPopupsConstants.PopupTriggerPoints;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -164,11 +177,13 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.AccountData;
+import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
@@ -189,7 +204,7 @@ import com.bsb.hike.modules.lastseenmgr.FetchLastSeenTask;
 import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
-import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -221,6 +236,7 @@ import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 import com.bsb.hike.voip.VoIPUtils;
+import com.googlecode.mp4parser.boxes.dece.ContentInformationBox.BrandEntry;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener
@@ -365,7 +381,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
 			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT,HikePubSub.CONV_META_DATA_UPDATED, 
-			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED, HikePubSub.STICKER_FTUE_TIP,HikePubSub.MULTI_MESSAGE_DB_INSERTED  };
+			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED, HikePubSub.STICKER_FTUE_TIP,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.MUTE_BOT  };
 
 	private EmoticonType emoticonType;
 
@@ -900,6 +916,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			
 		}
 		Logger.i("chatthread", "on create end");
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.CHAT_SCR.ordinal());
 
 	}
 	
@@ -1297,7 +1314,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			});
 		}
 		// for group chat we show pin and one:one, we show theme
-		if ( Utils.isGroupConversation(mContactNumber))
+		if (Utils.isBroadcastConversation(mContactNumber))
+		{
+			menu.getItem(0).setVisible(false);
+			menu.getItem(1).setVisible(false);
+		}
+		else if ( Utils.isGroupConversation(mContactNumber))
 		{
 			onCreatePinMenu( menu);
 		}
@@ -1396,6 +1418,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Utils.onCallClicked(this, mContactNumber, VoIPUtils.CallSource.CHAT_THREAD);
 			break;
 		case R.id.attachment:
+			showProductPopup(ProductPopupsConstants.PopupTriggerPoints.ATCH_SCR.ordinal());
 			// hide pop up if any
 			return attachmentClicked();
 		case R.id.overflow_menu:
@@ -1468,8 +1491,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
-		optionsList.add(new OverFlowMenuItem(getString((mConversation instanceof GroupConversation) ? R.string.group_profile : R.string.view_profile), 0));
-
+		optionsList.add(new OverFlowMenuItem(getString((mConversation instanceof BroadcastConversation) ? R.string.broadcast_profile : 
+			((mConversation instanceof GroupConversation) ? R.string.group_profile : R.string.view_profile)), 0));
+		
 		if (!(mConversation instanceof GroupConversation))
 		{
 			optionsList.add(new OverFlowMenuItem(getString(R.string.chat_theme), 1));
@@ -1489,9 +1513,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (mConversation instanceof GroupConversation)
 		{
-			boolean isMuted = ((GroupConversation) mConversation).isMuted();
-
-			optionsList.add(new OverFlowMenuItem(getString(isMuted ? R.string.unmute_group : R.string.mute_group), 2));
+			if (!(mConversation instanceof BroadcastConversation))
+			{
+				boolean isMuted = ((GroupConversation) mConversation).isMuted();
+				optionsList.add(new OverFlowMenuItem(getString(isMuted ? R.string.unmute_group : R.string.mute_group), 2));
+			}
 		}
 
 		if (mConversation.isBotConv()
@@ -1510,9 +1536,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (mConversation instanceof GroupConversation)
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.chat_theme_small), 4));
+			if (!(mConversation instanceof BroadcastConversation))
+			{
+				optionsList.add(new OverFlowMenuItem(getString(R.string.chat_theme_small), 4));
+			}
 		}
 
+		if (mConversation instanceof BroadcastConversation)
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.add_shortcut), 8));
+		}
+		
 		if (!(mConversation instanceof GroupConversation) && contactInfo.isOnhike() && (!mConversation.isBotConv()))
 		{
 			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED
@@ -1645,6 +1679,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					break;
 				case 4:
 					setupThemePicker(null);
+					break;
+				case 8:
+					Utils.createShortcut(ChatThread.this, mConversation);
 					break;
 				}
 
@@ -1789,6 +1826,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return false;
 		}
+		if (message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+		{
+			if (message.webMetadata.isLongPressDisabled())
+			{
+				return false;
+			}
+		}
 		mAdapter.toggleSelection(message);
 		boolean isMsgSelected = mAdapter.isSelected(message);
 
@@ -1871,11 +1915,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// Sticker message is a non text message.
 			selectedNonTextMsg(isMsgSelected);
 		}
-        else if (message.getMessageType() == MESSAGE_TYPE.CONTENT || message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+        else if (message.getMessageType() == MESSAGE_TYPE.CONTENT )
         {
             // Content card is a non text message.
             selectedNonTextMsg(isMsgSelected);
-        }
+        }if (message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.WEB_CONTENT)
+		{
+			selectedNonTextMsg(isMsgSelected);
+		}
 
 		invalidateOptionsMenu();
 		return true;
@@ -1888,8 +1935,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	private void sendMessage(ConvMessage convMessage,boolean playPinAnim)
 	{
+		setSentTo(convMessage);
 		addMessage(convMessage,playPinAnim);
 
+		if(mConversation instanceof BroadcastConversation)
+		{
+			convMessage.setMessageOriginType(OriginType.BROADCAST);
+		}
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
@@ -1914,6 +1966,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
+	public void setSentTo(ConvMessage convMessage)
+	{
+		ArrayList<String> sentToList = new ArrayList<String>();
+		if (mConversation instanceof GroupConversation)
+		{
+			sentToList.addAll(((GroupConversation) mConversation).getGroupParticipantList().keySet());
+		}
+		else
+		{
+			sentToList.add(mConversation.getMsisdn());
+		}
+		convMessage.setSentToMsisdnsList(sentToList);
+	}
+	
 	public void onSendClick(View v)
 	{
 		if (!mConversation.isOnhike() && mCredits <= 0)
@@ -1966,7 +2032,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else
 		{
-			if (mConversation instanceof GroupConversation)
+			if (mConversation instanceof GroupConversation && !(mConversation instanceof BroadcastConversation))
 			{
 				if (!checkMessageTypeFromHash(convMessage)){
 					return;
@@ -2306,13 +2372,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							// as we will be changing msisdn and hike status while inserting in DB
 							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber,msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE), isConversationOnHike());
 							convMessage.setMessageType(MESSAGE_TYPE.FORWARD_WEB_CONTENT);
-							convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
+							convMessage.webMetadata = new WebMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
 							JSONObject json = new JSONObject();
 							try
 							{
-								json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+								json.put(HikePlatformConstants.CARD_TYPE, convMessage.webMetadata.getAppName());
 								json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
 								json.put(AnalyticsConstants.TO, mContactNumber);
+								json.put(AnalyticsConstants.CONTENT_ID, convMessage.getContentId());
 								HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 							}
 							catch (JSONException e)
@@ -2513,7 +2580,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		
 		if (mConversation == null)
 		{
-			if (Utils.isGroupConversation(mContactNumber))
+			if (Utils.isBroadcastConversation(mContactNumber))
+			{
+				/* the user must have deleted the chat. */
+				Toast toast = Toast.makeText(this, R.string.invalid_broadcast_list, Toast.LENGTH_LONG);
+				toast.show();
+				onBackPressed();
+				return false;
+			}
+			else if (Utils.isGroupConversation(mContactNumber))
 			{
 				/* the user must have deleted the chat. */
 				Toast toast = Toast.makeText(this, R.string.invalid_group_chat, Toast.LENGTH_LONG);
@@ -2530,9 +2605,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * Setting a flag which tells us whether the group contains sms users or not.
 		 * Set participant ready by list
 		 */
-		if (mConversation instanceof GroupConversation)
+		if ((mConversation instanceof GroupConversation))
 		{
-			hashWatcher = new HashSpanWatcher(mComposeView, HASH_PIN, getResources().getColor(R.color.sticky_yellow));
+			if(!(mConversation instanceof BroadcastConversation))
+			{
+				hashWatcher = new HashSpanWatcher(mComposeView, HASH_PIN, getResources().getColor(R.color.sticky_yellow));
+			}
+			
 			boolean hasSmsUser = false;
 			for (Entry<String, PairModified<GroupParticipant,String>> entry : ((GroupConversation) mConversation).getGroupParticipantList().entrySet())
 			{
@@ -3353,7 +3432,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			/*
 			 * Adding 1 to count the user.
 			 */
-			setLastSeenText(getString(R.string.num_people, (numActivePeople + 1)));
+			if (mConversation instanceof BroadcastConversation)
+			{
+				setLastSeenText(getString(R.string.num_people, numActivePeople));
+			}
+			else
+			{
+				setLastSeenText(getString(R.string.num_people, (numActivePeople + 1)));
+			}
 		}
 	}
 
@@ -3363,21 +3449,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return;
 		}
-		if (!(mConversation instanceof GroupConversation))
+		if (mConversation instanceof BroadcastConversation)
 		{
-			String userMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, "");
+			if (!((BroadcastConversation) mConversation).getIsGroupAlive())
+			{
+				return;
+			}
 
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
 			Intent intent = new Intent();
 			intent.setClass(ChatThread.this, ProfileActivity.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			if (!userMsisdn.equals(mContactNumber))
-			{
-				intent.putExtra(HikeConstants.Extras.CONTACT_INFO, mContactNumber);
-				intent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
-			}
+			intent.putExtra(HikeConstants.Extras.BROADCAST_LIST, true);
+			intent.putExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST, mConversation.getMsisdn());
 			startActivity(intent);
 		}
-		else
+		else if (mConversation instanceof GroupConversation)
 		{
 			if (!((GroupConversation) mConversation).getIsGroupAlive())
 			{
@@ -3389,6 +3475,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			intent.setClass(ChatThread.this, ProfileActivity.class);
 			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mConversation.getMsisdn());
+			startActivity(intent);
+		}
+		else
+		{
+			String userMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, "");
+
+			Intent intent = new Intent();
+			intent.setClass(ChatThread.this, ProfileActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			if (!userMsisdn.equals(mContactNumber))
+			{
+				intent.putExtra(HikeConstants.Extras.CONTACT_INFO, mContactNumber);
+				intent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
+			}
 			startActivity(intent);
 		}
 	}
@@ -3814,7 +3914,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			int count = p.second;
 			for(long msgId=baseId; msgId<(baseId+count) ; msgId++)
 			{
-				setStateAndUpdateView(msgId, false);
+				if (msgId == baseId)
+				{
+					setStateAndUpdateView(msgId, true);
+				}
+				else
+				{
+					setStateAndUpdateView(msgId, false);
+				}
 			}
 			if (mAdapter == null)
 			{
@@ -3993,6 +4100,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					invalidateOptionsMenu();
 				}
 			});
+		}
+		else if (HikePubSub.MUTE_BOT.equals(type))
+		{
+			mConversation.setBotConvMute(true);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MUTE_CONVERSATION_TOGGLED,
+					new Pair<String, Boolean>(mConversation.getMsisdn(), mConversation.isMutedBotConv(false)));
 		}
 		else if (HikePubSub.UPDATE_NETWORK_STATE.equals(type))
 		{
@@ -4617,7 +4730,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			msg.setState(ConvMessage.State.SENT_CONFIRMED);
 			if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
 			{
-				if (!msg.isSMS())
+				if (!msg.isSMS() && !msg.isBroadcastMessage())
 				{
 					if(mAdapter != null)
 					{
@@ -5168,10 +5281,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			JSONObject json = new JSONObject();
 			try
 			{
-				json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+				json.put(HikePlatformConstants.CARD_TYPE, convMessage.webMetadata.getAppName());
 				json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_DELETE);
 				json.put(AnalyticsConstants.ORIGIN, origin);
 				json.put(AnalyticsConstants.CHAT_MSISDN, mContactNumber);
+				json.put(AnalyticsConstants.CONTENT_ID, convMessage.getContentId());
 				HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 			}
 			catch (JSONException e)
@@ -7001,6 +7115,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 			}
 		}
+		
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal());
 	}
 
 	public void onEmoticonBtnClicked(View v)
@@ -7475,6 +7591,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			Logger.i("chatthread", "double tap");
 			if (isActionModeOn || isHikeToOfflineMode)
+			{
+				return false;
+			}
+			if (mConversation instanceof BroadcastConversation)
 			{
 				return false;
 			}
@@ -8138,8 +8258,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}  else if(message.getMessageType()==MESSAGE_TYPE.WEB_CONTENT || message.getMessageType() == MESSAGE_TYPE.FORWARD_WEB_CONTENT){
 						multiMsgFwdObject.put(MESSAGE_TYPE.MESSAGE_TYPE, MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 						multiMsgFwdObject.put(HikeConstants.HIKE_MESSAGE, message.getMessage());
-						if(message.platformWebMessageMetadata!=null){
-							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
+						if(message.webMetadata !=null){
+							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.webMetadata.JSONtoString()));
 
 						}
 					}

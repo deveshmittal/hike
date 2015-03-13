@@ -1101,25 +1101,15 @@ public class HikeBitmapFactory
 	}
 	public static BitmapDrawable getDefaultAvatar(Resources res, String msisdn, boolean hiRes)
 	{
-		boolean isGroupConversation = Utils.isGroupConversation(msisdn);
-		int index = BitmapUtils.iconHash(msisdn) % (HikeConstants.DEFAULT_AVATAR_KEYS.length);
-		return getDefaultAvatarAtIndex(res, index, isGroupConversation, hiRes);
 	
-	}
-	public static BitmapDrawable getDefaultAvatarAtIndex(Resources res, int index, boolean isGroupConversation, boolean hiRes)
-	{
+		int index = BitmapUtils.iconHash(msisdn) % (HikeConstants.DEFAULT_AVATAR_KEYS.length);
+
 		int defaultAvatarResId = HikeConstants.DEFAULT_AVATARS[index]; 
 		
 		Drawable layers[] = new Drawable[2];
 		layers[0] = res.getDrawable(defaultAvatarResId);
-		if (hiRes)
-		{
-			layers[1] = res.getDrawable(isGroupConversation ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
-		}
-		else
-		{
-			layers[1] = res.getDrawable(isGroupConversation ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
-		}
+		layers[1] = res.getDrawable(getDefaultAvatarIconResId(msisdn, hiRes));
+		
 		LayerDrawable ld = new LayerDrawable(layers);
 		ld.setId(0, 0);
 		ld.setId(1, 1);
@@ -1130,6 +1120,26 @@ public class HikeBitmapFactory
 		
 		BitmapDrawable bd = getBitmapDrawable(res, bmp);
 		return bd;
+	}
+	
+	private static int getDefaultAvatarIconResId( String msisdn, boolean hiRes)
+	{
+		boolean isGroupConversation = Utils.isGroupConversation(msisdn);
+		
+		boolean isBroadcastConversation = Utils.isBroadcastConversation(msisdn);
+
+		if (isBroadcastConversation)
+		{
+			return hiRes ? R.drawable.ic_default_avatar_broadcast_hires : R.drawable.ic_default_avatar_broadcast;
+		}
+		else if (isGroupConversation)
+		{
+			return hiRes ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_group;
+		}
+		else
+		{
+			return hiRes ? R.drawable.ic_default_avatar_hires : R.drawable.ic_default_avatar;
+		}
 	}
 
 }

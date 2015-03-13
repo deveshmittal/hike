@@ -12,11 +12,13 @@ import static com.bsb.hike.modules.httpmgr.request.Request.REQUEST_TYPE_SHORT;
 import org.json.JSONObject;
 
 import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.httpmgr.request.FileRequest;
 import com.bsb.hike.modules.httpmgr.interceptor.GzipRequestInterceptor;
 import com.bsb.hike.modules.httpmgr.interceptor.IRequestInterceptor;
 import com.bsb.hike.modules.httpmgr.request.JSONObjectRequest;
 import com.bsb.hike.modules.httpmgr.request.Request;
 import com.bsb.hike.modules.httpmgr.request.listener.IRequestListener;
+import com.bsb.hike.modules.httpmgr.retry.DefaultRetryPolicy;
 import com.bsb.hike.modules.httpmgr.request.requestbody.JsonBody;
 import com.bsb.hike.modules.httpmgr.retry.IRetryPolicy;
 import com.bsb.hike.utils.Utils;
@@ -81,6 +83,18 @@ public class HttpRequests
 				.post(body)
 				.build();
 		requestToken.getRequestInterceptors().addFirst("gzip", new GzipRequestInterceptor());
+		return requestToken;
+	}
+
+	public static RequestToken platformZipDownloadRequest(String filePath, String url, IRequestListener requestListener)
+	{
+
+		RequestToken requestToken = new FileRequest.Builder()
+				.setUrl(url)
+				.setFile(filePath)
+				.setRequestListener(requestListener)
+				.setRetryPolicy(new DefaultRetryPolicy(3, 1000, 2.0f))
+				.build();
 		return requestToken;
 	}
 }
