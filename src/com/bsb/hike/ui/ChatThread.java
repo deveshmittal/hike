@@ -3274,7 +3274,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else
 		{
 			avatar.setScaleType(ScaleType.CENTER_INSIDE);
-			avatar.setImageResource(mConversation instanceof BroadcastConversation? R.drawable.ic_broadcast_chat_thread : 
+			avatar.setImageResource(mConversation instanceof BroadcastConversation? R.drawable.ic_default_avatar_broadcast : 
 				((mConversation instanceof GroupConversation) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar));
 			avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
 		}

@@ -2204,7 +2204,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					if (convMessage.isBroadcastConversation())
 					{
-						icRes = R.drawable.ic_broadcast_icondark;
+						icRes = R.drawable.ic_broadcast_2;
 					}
 					else
 					{
@@ -2399,7 +2399,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (showBlackIcon)
 				{
-					broadcastIndicator.setImageResource(R.drawable.ic_broadcast_icondark);
+					broadcastIndicator.setImageResource(R.drawable.ic_broadcast_system_message);
 					broadcastIndicator.setScaleType(ScaleType.CENTER);
 					broadcastIndicator.setVisibility(View.VISIBLE);
 				}
