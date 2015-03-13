@@ -3525,6 +3525,13 @@ public class Utils
 		context.startService(IntentManager.getVoipCallIntent(context, mContactNumber, source));
 	}
 
+	public static void startNativeCall(Context context, String msisdn)
+	{
+		Intent callIntent = new Intent(Intent.ACTION_CALL);
+		callIntent.setData(Uri.parse("tel:" + msisdn));
+		context.startActivity(callIntent);
+	}
+
 	public static String getFormattedDateTimeFromTimestamp(long milliSeconds, Locale current)
 	{
 		String dateFormat = "dd/MM/yyyy hh:mm:ss a";

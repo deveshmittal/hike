@@ -119,6 +119,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -633,7 +634,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		super.onDestroy();
 		possibleKeyboardHeight = 0;
 		unregisterReceivers();
-		VoIPUtils.removeCallListener();
 
 		if (prefs != null && !prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
 		{
@@ -840,8 +840,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		/* ensure that when we hit Alt+Enter, we insert a newline */
 		mComposeView.setOnKeyListener(this);
-
-		VoIPUtils.setCallListener(this);
 
 		mConversationDb = HikeConversationsDatabase.getInstance();
 
@@ -2130,6 +2128,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		mConversation = null;
 
+		if (intent.getBooleanExtra(HikeConstants.Extras.SHOW_KEYBOARD, false))
+		{
+			showKeyboard = true;
+		}
+
+		if(intent.getBooleanExtra(HikeConstants.Extras.SHOW_RECORDING_DIALOG, false))
+		{
+			recordingDialogClicked();
+		}
+
 		if ((dataURI != null) && ("smsto".equals(dataURI.getScheme()) || "sms".equals(dataURI.getScheme())))
 		{
 			// Intent received externally
@@ -2541,7 +2549,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		if(savedInstanceState == null)
 		{
-			removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
+			if(removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
+			{
+				getSupportActionBar().show();
+			}
 		}
 
 		// This prevent the activity from simply finishing and opens up the last
@@ -6199,6 +6210,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						recordingError(true);
 						Logger.e(getClass().getSimpleName(), "Failed to start recording", e);
 					}
+					catch (IllegalStateException e)
+					{
+						stopRecorder();
+						recordingError(true);
+						recordingDialog.dismiss();
+						Logger.e(getClass().getSimpleName(), "Failed to start recording", e);
+					}
 					recording = true;
 
 					Utils.blockOrientationChange(ChatThread.this);
@@ -9225,9 +9243,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public boolean removeFragment(String tag, boolean updateActionBar)
 	{
 		boolean isRemoved = super.removeFragment(tag);
-		if (isRemoved && updateActionBar)
-		{	
-			setupActionBar(false);
+		if (isRemoved)
+		{
+			getSupportActionBar().show();
+			if(updateActionBar)
+			{
+				setupActionBar(false);
+			}
 		}
 		return isRemoved;
 	}

@@ -786,6 +786,13 @@ public class ConversationsAdapter extends BaseAdapter
 			}
 			
 			messageView.setText(messageText);
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0 && !message.isSent())
+			{
+				unreadIndicator.setVisibility(View.VISIBLE);
+				unreadIndicator.setBackgroundResource(conversation.isStealth() ? R.drawable.bg_unread_counter_stealth : R.drawable.bg_unread_counter);
+				unreadIndicator.setText(Integer.toString(conversation.getUnreadCount()));
+			}
+
 			imgStatus.setImageResource(imageId);
 			imgStatus.setVisibility(View.VISIBLE);
 			
@@ -804,6 +811,7 @@ public class ConversationsAdapter extends BaseAdapter
 				imgStatus.setImageResource(message.getImageState());
 				imgStatus.setVisibility(View.VISIBLE);
 			}
+
 			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0 && !message.isSent())
 			{
 				unreadIndicator.setVisibility(View.VISIBLE);

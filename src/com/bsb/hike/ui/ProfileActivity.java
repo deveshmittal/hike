@@ -310,7 +310,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		else if (profileType == ProfileType.CONTACT_INFO || profileType == ProfileType.CONTACT_INFO_TIMELINE)
 		{
 			HikeMessengerApp.getPubSub().removeListeners(this, contactInfoPubSubListeners);
-			VoIPUtils.removeCallListener();
 		}
 		else if (profileType == ProfileType.USER_PROFILE)
 		{
@@ -371,7 +370,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			this.profileType = ProfileType.CONTACT_INFO;
 			setupContactProfileScreen();
 			HikeMessengerApp.getPubSub().addListeners(this, contactInfoPubSubListeners);
-			VoIPUtils.setCallListener(this);
 		}
 		else if(getIntent().hasExtra(HikeConstants.Extras.CONTACT_INFO_TIMELINE))
 		{
@@ -3408,6 +3406,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		boolean isRemoved = super.removeFragment(tag);
 		if(isRemoved)
 		{
+			getSupportActionBar().show();
 			setupActionBar();
 		}
 		return isRemoved;

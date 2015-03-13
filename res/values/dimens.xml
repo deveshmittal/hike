@@ -169,6 +169,7 @@
 	<dimen name="sticker_grid_horizontal_padding">8dp</dimen>
 	<dimen name="drag_shadow_height">8dp</dimen>
 	<dimen name="sticker_settings_tip_margin">18dp</dimen>
+	<dimen name="call_failed_fragment_height">274dp</dimen>
 	<dimen name="photos_doodle_plus_minus_height">36dp</dimen>
 	<dimen name="photos_doodle_plus_minus_width">36dp</dimen>
 	<dimen name="photos_filters_preview_padding">9dp</dimen>
