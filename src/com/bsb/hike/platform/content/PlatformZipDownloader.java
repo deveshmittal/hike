@@ -68,8 +68,6 @@ public class PlatformZipDownloader
 			return;
 		}
 
-//		PlatformContentConstants.PLATFORM_CONTENT_DIR = HikeMessengerApp.getInstance().getApplicationContext().getFilesDir() + File.separator
-//				+ PlatformContentConstants.CONTENT_DIR_NAME + File.separator;
 		// Create temp folder
 		File tempFolder = new File(PlatformContentConstants.PLATFORM_CONTENT_DIR + PlatformContentConstants.TEMP_DIR_NAME);
 
