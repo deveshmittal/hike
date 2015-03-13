@@ -33,6 +33,7 @@ import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -635,7 +636,14 @@ public class ConversationsAdapter extends BaseAdapter
 		contactView.setText(name);
 		if (conversation instanceof GroupConversation)
 		{
-			contactView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_group, 0, 0, 0);
+			if (conversation instanceof BroadcastConversation)
+			{
+				contactView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+			}
+			else
+			{
+				contactView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_group, 0, 0, 0);
+			}
 		}
 		else
 		{
@@ -851,17 +859,8 @@ public class ConversationsAdapter extends BaseAdapter
 		else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
 		{
 			JSONArray participantInfoArray = metadata.getGcjParticipantInfo();
-
 			String highlight = Utils.getGroupJoinHighlightText(participantInfoArray, (GroupConversation) conversation);
-
-			if (metadata.isNewGroup())
-			{
-				markedUp = String.format(context.getString(R.string.new_group_message), highlight);
-			}
-			else
-			{
-				markedUp = String.format(context.getString(R.string.add_to_group_message), highlight);
-			}
+			markedUp = Utils.getParticipantAddedMessage(message, context, highlight);
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.DND_USER)
 		{
@@ -931,18 +930,32 @@ public class ConversationsAdapter extends BaseAdapter
 			}
 			else
 			{
-				markedUp = context.getString(R.string.group_chat_end);
+				if (conversation instanceof BroadcastConversation)
+				{
+					markedUp = context.getString(R.string.broadcast_list_end);
+				}
+				else
+				{
+					markedUp = context.getString(R.string.group_chat_end);
+				}
 			}
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
 		{
-			String msisdn = metadata.getMsisdn();
+			if (message.isBroadcastConversation())
+			{
+				markedUp = String.format(context.getString(R.string.change_broadcast_name), context.getString(R.string.you));
+			}
+			else
+			{
+				String msisdn = metadata.getMsisdn();
 
-			String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
+				String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-			String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
+				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
 
-			markedUp = String.format(context.getString(R.string.change_group_name), participantName);
+				markedUp = String.format(context.getString(R.string.change_group_name), participantName);
+			}
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS)
 		{

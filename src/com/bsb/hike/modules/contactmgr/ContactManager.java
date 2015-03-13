@@ -1932,17 +1932,20 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		{
 			if(group.isGroupAlive())
 			{
-				int numMembers = 0;
-				if(groupCountMap.containsKey(group.getGroupId()))
+				if (!Utils.isBroadcastConversation(group.getGroupId()))
 				{
-					numMembers = groupCountMap.get(group.getGroupId());
+					int numMembers = 0;
+					if(groupCountMap.containsKey(group.getGroupId()))
+					{
+						numMembers = groupCountMap.get(group.getGroupId());
+					}
+					String numberMembers = context.getString(R.string.num_people, (numMembers + 1));
+
+					ContactInfo groupContact = new ContactInfo(group.getGroupId(), group.getGroupId(), group.getGroupName(), numberMembers, true);
+					groupContact.setLastMessaged(group.getTimestamp());
+
+					groupContacts.add(groupContact);
 				}
-				String numberMembers = context.getString(R.string.num_people, (numMembers + 1));
-
-				ContactInfo groupContact = new ContactInfo(group.getGroupId(), group.getGroupId(), group.getGroupName(), numberMembers, true);
-				groupContact.setLastMessaged(group.getTimestamp());
-
-				groupContacts.add(groupContact);
 			}
 		}
 		if(shouldSort)

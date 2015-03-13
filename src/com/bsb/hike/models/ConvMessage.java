@@ -1,8 +1,10 @@
 package com.bsb.hike.models;
 
+import com.bsb.hike.db.DBConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.util.ArrayList;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -16,7 +18,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
-import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -25,7 +27,7 @@ public class ConvMessage
 	private boolean isBlockAddHeader;
 
 	private long msgID; // this corresponds to msgID stored in sender's DB
-
+	
 	private long mappedMsgId; // this corresponds to msgID stored in receiver's
 								// DB
 
@@ -62,6 +64,35 @@ public class ConvMessage
 	private boolean isTickSoundPlayed = false;
 	
 	private int  hashMessage= HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE;
+	
+	private int contentId;
+	private String nameSpace;
+
+	public String getNameSpace()
+	{
+		return nameSpace;
+	}
+
+	public void setNameSpace(String nameSpace)
+	{
+		this.nameSpace = (null == nameSpace ? "": nameSpace);
+	}
+
+	public int getContentId()
+	{
+		return contentId;
+	}
+	
+	public void setContentId(int contentId)
+	{
+		this.contentId = contentId;
+	}
+	
+	private ArrayList<String> sentToMsisdnsList = new ArrayList<String>();
+	
+	private String messageBroadcastId = null;
+	
+	private long serverId = -1;
 
 	public int getHashMessage()
 	{
@@ -79,7 +110,16 @@ public class ConvMessage
 	public ContentLove contentLove;
 	public PlatformMessageMetadata platformMessageMetadata;
 
-	public PlatformWebMessageMetadata platformWebMessageMetadata;
+	public WebMetadata webMetadata;
+
+	/* Adding entries to the beginning of this list is not backwards compatible */
+	public enum OriginType
+	{
+		NORMAL, /* message sent to server */
+		BROADCAST, /* message originated from a broadcast */
+	};
+	
+	private OriginType messageOriginType = OriginType.NORMAL;
 
 	public boolean isLovePresent(){
 		return contentLove!=null;
@@ -262,11 +302,15 @@ public class ConvMessage
 	}
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS, int type)
 	{
-		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type);
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type,0, "");
+	}
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS, int type,int contentId, String nameSpace)
+	{
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type, contentId, nameSpace);
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS,
-			ParticipantInfoState participantInfoState, int type)
+			ParticipantInfoState participantInfoState, int type,int contentId, String nameSpace)
 	{
 		assert (msisdn != null);
 		this.mMsisdn = msisdn;
@@ -284,6 +328,8 @@ public class ConvMessage
 			setTickSoundPlayed(true);
 		}
 		this.participantInfoState = participantInfoState;
+		setContentId(contentId);
+		setNameSpace(nameSpace);
 	}
 	
 	public ConvMessage(ConvMessage other) {
@@ -307,8 +353,13 @@ public class ConvMessage
 		this.unreadCount = other.unreadCount;
 		this.metadata = other.metadata;
 		this.platformMessageMetadata = other.platformMessageMetadata;
-		this.platformWebMessageMetadata = other.platformWebMessageMetadata;
+		this.webMetadata = other.webMetadata;
 		this.contentLove = other.contentLove;
+		this.messageOriginType  = other.messageOriginType;
+		if (other.isBroadcastConversation())
+		{
+			this.messageBroadcastId = other.getMsisdn();
+		}
 		try {
 			this.readByArray = other.readByArray !=null? new JSONArray(other.readByArray.toString()) : null;
 		} catch (JSONException e) {
@@ -360,6 +411,8 @@ public class ConvMessage
 			md.put(HikeConstants.POKE, true);
 			data.put(HikeConstants.METADATA, md);
 		}
+		setContentId(data.optInt(HikeConstants.CONTENT_ID));
+		setNameSpace(data.optString(DBConstants.HIKE_CONTENT.NAMESPACE));
 		if (data.has(HikeConstants.METADATA))
 		{
 			JSONObject mdata = data.getJSONObject(HikeConstants.METADATA);
@@ -377,12 +430,12 @@ public class ConvMessage
 			else if (ConvMessagePacketKeys.WEB_CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE)))
 			{
 				this.messageType  = MESSAGE_TYPE.WEB_CONTENT;
-				platformWebMessageMetadata  = new PlatformWebMessageMetadata(data.optJSONObject(HikeConstants.METADATA));
+				webMetadata = new WebMetadata(data.optJSONObject(HikeConstants.METADATA));
 			}
 			else if (ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE)))
 			{
 				this.messageType  = MESSAGE_TYPE.FORWARD_WEB_CONTENT;
-				platformWebMessageMetadata  = new PlatformWebMessageMetadata(data.optJSONObject(HikeConstants.METADATA));
+				webMetadata = new WebMetadata(data.optJSONObject(HikeConstants.METADATA));
 			}
 			else
 			{
@@ -424,14 +477,21 @@ public class ConvMessage
 		{
 		case PARTICIPANT_JOINED:
 			JSONArray arr = metadata.getGcjParticipantInfo();
-			this.mMessage = context.getString(metadata.isNewGroup() ? R.string.new_group_message : R.string.add_to_group_message,
-					Utils.getGroupJoinHighlightText(arr, (GroupConversation) conversation));
+			String highlight = Utils.getGroupJoinHighlightText(arr, (GroupConversation) conversation);
+			this.mMessage = Utils.getParticipantAddedMessage(this, context, highlight);
 			break;
 		case PARTICIPANT_LEFT:
 			this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn()));
 			break;
 		case GROUP_END:
-			this.mMessage = context.getString(R.string.group_chat_end);
+			if (conversation instanceof BroadcastConversation)
+			{
+				this.mMessage = context.getString(R.string.broadcast_list_end);
+			}
+			else
+			{
+				this.mMessage = context.getString(R.string.group_chat_end);
+			}
 			break;
 		case USER_JOIN:
 			//This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.\
@@ -738,6 +798,18 @@ public class ConvMessage
 				{
 					object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
 				}
+				if (isBroadcastConversation())
+				{
+					ArrayList<String> contactsList = getSentToMsisdnsList();
+					JSONArray msisdnArray = new JSONArray();
+					for (int i=0; i<contactsList.size();i++)
+					{
+						msisdnArray.put((String)contactsList.get(i));
+					}
+					
+					data.put(HikeConstants.LIST, msisdnArray);
+					object.put(HikeConstants.DATA, data);
+				}
 				// TODO : we should add all sub types here and set metadata accordingly
 				switch(messageType){
 				case MESSAGE_TYPE.CONTENT:
@@ -747,12 +819,12 @@ public class ConvMessage
 
 				case MESSAGE_TYPE.WEB_CONTENT:
 					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.WEB_CONTENT_TYPE);
-					data.put(HikeConstants.METADATA, platformWebMessageMetadata.getJSON());
+					data.put(HikeConstants.METADATA, webMetadata.getJSON());
 					break;
 
 				case MESSAGE_TYPE.FORWARD_WEB_CONTENT:
 					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.FORWARD_WEB_CONTENT_TYPE);
-					data.put(HikeConstants.METADATA, platformWebMessageMetadata.getJSON());
+					data.put(HikeConstants.METADATA, webMetadata.getJSON());
 					break;
 
 				}
@@ -805,6 +877,11 @@ public class ConvMessage
 	public static State stateValue(int val)
 	{
 		return State.values()[val];
+	}
+	
+	public static OriginType originTypeValue(int val)
+	{
+		return OriginType.values()[val];
 	}
 
 	public void setState(State state)
@@ -959,10 +1036,9 @@ public class ConvMessage
 	 */
 	public boolean isSilent()
 	{
-		
-		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && platformWebMessageMetadata != null)
+		if (getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT && webMetadata != null)
 		{
-			return platformWebMessageMetadata.isSilent();
+			return webMetadata.isSilent();
 		}
 		// Do not play sound in case of bg change, status updates
 		if ((getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) || (getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
@@ -993,4 +1069,61 @@ public class ConvMessage
 	{
 		return participantInfoState == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING;
 	}
+	
+	public boolean isBroadcastConversation() {
+		return Utils.isBroadcastConversation(this.mMsisdn);
+
+	}
+	
+	public boolean isBroadcastMessage() {
+		return messageOriginType == OriginType.BROADCAST;
+	}
+	
+	public ArrayList<String> getSentToMsisdnsList() {
+		return sentToMsisdnsList;
+	}
+
+	public void setSentToMsisdnsList(ArrayList<String> sentToMsisdnsList) {
+		this.sentToMsisdnsList.addAll(sentToMsisdnsList);
+	}
+
+	public void addToSentToMsisdnsList(String msisdn) {
+		this.sentToMsisdnsList.add(msisdn);
+	}
+
+	public boolean hasBroadcastId() {
+		return messageBroadcastId != null;
+	}
+
+	public String getMessageBroadcastId() {
+		return this.messageBroadcastId;
+	}
+
+	public OriginType getMessageOriginType()
+	{
+		return messageOriginType;
+	}
+
+	public void setMessageOriginType(OriginType messageOriginType)
+	{
+		this.messageOriginType = messageOriginType;
+	}
+
+	public long getServerId()
+	{
+		if(isBroadcastMessage() && !isBroadcastConversation())
+		{
+			return serverId;
+		}
+		else
+		{
+			return msgID;
+		}
+	}
+
+	public void setServerId(long serverId)
+	{
+		this.serverId = serverId;
+	}
+
 }
