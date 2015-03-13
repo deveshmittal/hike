@@ -167,6 +167,7 @@ public class CameraFragment extends SherlockFragment
 						catch (Exception e)
 						{
 							e.printStackTrace();
+							return;
 						}
 						Log.e("file", "" + file);
 
