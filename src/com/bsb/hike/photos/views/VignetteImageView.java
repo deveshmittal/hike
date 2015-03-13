@@ -64,20 +64,19 @@ class VignetteImageView extends ImageView
 		isFinal = false;
 	}
 
-	public void getMeasure(Bitmap bitmap)
+	
+
+	public Bitmap applyVignetteToBitmap(Bitmap bitmap)
 	{
 		if (bitmap != null)
 		{
 			isFinal = true;
 			width = bitmap.getWidth();
 			height = bitmap.getHeight();
-			setVignetteforFilter(bitmap);
+			vignetteBitmap = bitmap;
+			setVignetteforFilter();
 			
 		}
-	}
-
-	public Bitmap getVignetteBitmap()
-	{
 		return vignetteBitmap;
 	}
 
@@ -89,7 +88,7 @@ class VignetteImageView extends ImageView
 	 * 
 	 * @param original
 	 */
-	public void setVignetteforFilter(Bitmap original)
+	public void setVignetteforFilter()
 	{
 
 		if (filter == null)
@@ -97,7 +96,6 @@ class VignetteImageView extends ImageView
 			return;
 		}
 
-		width = original.getWidth();
 		switch (filter)
 		{
 		case X_PRO_2:
@@ -109,8 +107,8 @@ class VignetteImageView extends ImageView
 			break;
 		case EARLYBIRD:
 			colors = new int[] { 0x00000000, 0x00000000, 0xFF000000 };
-			stops = new float[] { 0.0f, 0.85f / 1.5f, 1.0f };
-			radiusRatio = 1.5f;
+			stops = new float[] { 0.0f, 0.85f / 1.65f, 1.0f };
+			radiusRatio = 1.65f;
 			// makeRadialGradient(1.5f, colors, stops);
 			break;
 		case RETRO:
@@ -140,17 +138,6 @@ class VignetteImageView extends ImageView
 		}
 		else
 		{
-			if (vignetteBitmap == null)
-			{
-				vignetteBitmap = Bitmap.createBitmap((int) width, (int) height, Config.ARGB_8888);
-				Log.e("com.bsb.hike","new Vignette bitmap created");
-
-			}
-			else
-			{
-				vignetteBitmap.eraseColor(0x00000000);
-				vignetteBitmap.setHasAlpha(true);
-			}
 			if(colors!=null && stops!=null)
 			{
 				makeRadialGradient();
@@ -163,7 +150,7 @@ class VignetteImageView extends ImageView
 	@Override
 	protected void onDraw(Canvas canvas)
 	{
-		if (width > 0 && colors != null && stops != null)
+		if (colors != null && stops != null)
 		{
 			width = canvas.getWidth() / 2;
 			height = canvas.getHeight() / 2;

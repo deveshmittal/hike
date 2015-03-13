@@ -108,7 +108,8 @@ public class DoodleEffectItemLinearLayout extends EffectItemLinearLayout
 		paint = new Paint();
 		paint.setDither(true);
 		paint.setShader(gradient);
-		canvas.drawCircle((diameter - 4) / 2, diameter / 2, (brushWidth + 1) / 2, paint);
+		int delta = ringColor == HikeConstants.HikePhotos.SELECTED_RING_COLOR?1:2;
+		canvas.drawCircle((diameter) / 2, diameter / 2, (brushWidth + delta) / 2, paint);
 
 		return bitmap;
 	}

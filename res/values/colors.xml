@@ -406,7 +406,7 @@
     <color name="photos_action_bar_background">#141414</color>
     <color name="photos_filters_font_color">#FFFFFF</color>
     <color name="photos_doodle_seperator">#2b2b2c</color>
-    <color name="photos_action_bar_font">#229EE0</color>
+    <color name="photos_action_bar_font">#FFFFFF</color>
     <color name="photos_circular_progress_blue">#178ee1</color>
     <color name="photos_circular_progress_red">#dd2b28</color>
     <color name="photos_circular_progress_red_alpha">#99dd2b28</color>
