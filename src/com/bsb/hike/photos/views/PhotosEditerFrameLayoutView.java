@@ -15,6 +15,7 @@ import android.media.MediaScannerConnection;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -28,6 +29,7 @@ import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
 import com.bsb.hike.platform.content.PlatformContentUtils;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -96,7 +98,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 
 	public int getThumbnailDimen()
 	{
-		int density =getResources().getDisplayMetrics().densityDpi;
+		int density = getResources().getDisplayMetrics().densityDpi;
 		int dimen = 0;
 		switch (density)
 		{
@@ -110,13 +112,21 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		}
 
 	}
-	
+
 	public Bitmap getScaledImageOriginal()
 	{
 		if (scaledImageOriginal == null)
 		{
-			scaledImageOriginal = Bitmap.createScaledBitmap(imageOriginal, HikePhotosUtils.dpToPx(getContext(),getThumbnailDimen()),
-					HikePhotosUtils.dpToPx(getContext(),getThumbnailDimen()), false);
+			scaledImageOriginal = HikePhotosUtils.createBitmap(imageOriginal, 0, 0, HikePhotosUtils.dpToPx(getContext(), getThumbnailDimen()),
+					HikePhotosUtils.dpToPx(getContext(), getThumbnailDimen()), true, true, false, true);
+
+			if(scaledImageOriginal == null)
+			{
+				//To Do Out Of Memory Handling
+			}
+			
+			// scaledImageOriginal = Bitmap.createScaledBitmap(imageOriginal, HikePhotosUtils.dpToPx(getContext(),getThumbnailDimen()),
+			// HikePhotosUtils.dpToPx(getContext(),getThumbnailDimen()), false);
 		}
 		return scaledImageOriginal;
 	}
@@ -141,12 +151,28 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 	 */
 	public void loadImageFromFile(String FilePath)
 	{
-		imageOriginal = BitmapFactory.decodeFile(FilePath);
+		try
+		{
+			imageOriginal = BitmapFactory.decodeFile(FilePath);
+		}
+		catch (OutOfMemoryError e)
+		{
+			//To Do Out Of Memory Handling
+			Toast.makeText(getContext(), "Unable to Load Image!\nNot Enough Memory On Device.", Toast.LENGTH_SHORT);
+			IntentManager.openHomeActivity(getContext(),true);
+		}
 		DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
 		int width = metrics.widthPixels;
-		if (width < imageOriginal.getWidth())
+		if (width != imageOriginal.getWidth())
 		{
-			imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
+			imageScaled = HikePhotosUtils.createBitmap(imageOriginal, 0, 0, width, width, true, true, false, true);
+			if(imageScaled == null)
+			{
+				//To Do Out Of Memory Handling
+				Toast.makeText(getContext(), "Unable to load Image!\nNot Enough Memory On Device.", Toast.LENGTH_SHORT);
+				IntentManager.openHomeActivity(getContext(),true);
+			}
+			// imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
 			effectLayer.handleImage(imageScaled, true);
 		}
 		else
@@ -159,7 +185,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 
 	public void loadImageFromBitmap(Bitmap bmp)
 	{
-		effectLayer.handleImage(bmp,false);
+		effectLayer.handleImage(bmp, false);
 	}
 
 	public void enableDoodling()
@@ -192,7 +218,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 	public void saveImage(HikeFileType fileType, String originalName, HikePhotosListener listener)
 	{
 		doodleLayer.getMeasure();
-		
+
 		this.mFileType = fileType;
 		this.mOriginalName = originalName;
 		this.mListener = listener;
@@ -296,10 +322,22 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 
 			if (doodleLayer.getBitmap() != null)
 			{
-				Bitmap temp = Bitmap.createScaledBitmap(doodleLayer.getBitmap(), imageOriginal.getWidth(), imageOriginal.getHeight(), false);
-				canvasResult.drawBitmap(temp, 0, 0, doodleLayer.getPaint());
-				sendAnalyticsDoodleApplied(doodleLayer.getColor());
-				temp.recycle();
+				Bitmap temp = HikePhotosUtils.createBitmap(doodleLayer.getBitmap(), 0, 0, imageOriginal.getWidth(), imageOriginal.getHeight(), true, true, false, true);
+				// Bitmap temp = Bitmap.createScaledBitmap(doodleLayer.getBitmap(), imageOriginal.getWidth(), imageOriginal.getHeight(), false);
+
+				if (temp != null)
+				{
+					canvasResult.drawBitmap(temp, 0, 0, doodleLayer.getPaint());
+					sendAnalyticsDoodleApplied(doodleLayer.getColor());
+					temp.recycle();
+				}
+				else
+				{
+					//To Do Out Of Memory Handling
+					Toast.makeText(getContext(), "Unable to save Image!\nNot Enough Memory On Device.", Toast.LENGTH_SHORT);
+					IntentManager.openHomeActivity(getContext(),true);
+					
+				}
 			}
 		}
 
@@ -309,18 +347,35 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 	@Override
 	public void onFilterApplied(Bitmap preview)
 	{
-		if (!savingFinal)
+
+		if (preview == null)
 		{
-			vignetteLayer.setVignetteforFilter();
-			effectLayer.changeDisplayImage(preview);
+			// To Do Out Of Memory handling
+			if (savingFinal)
+			{
+				// Move Back to Home
+				Toast.makeText(getContext(), "Unable to save Image!\nNot Enough Memory On Device.", Toast.LENGTH_SHORT);
+				IntentManager.openHomeActivity(getContext(),true);
+			}
+			else
+			{
+				Toast.makeText(getContext(), "Try Again", Toast.LENGTH_SHORT);
+			}
 		}
 		else
 		{
-			savingFinal = false;
-			imageEdited = preview;
-			flattenLayers();
+			if (!savingFinal)
+			{
+				vignetteLayer.setVignetteforFilter();
+				effectLayer.changeDisplayImage(preview);
+			}
+			else
+			{
+				savingFinal = false;
+				imageEdited = preview;
+				flattenLayers();
+			}
 		}
-
 	}
 
 	private void sendAnalyticsDoodleApplied(int colorHex)

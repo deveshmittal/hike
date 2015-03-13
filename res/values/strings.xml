@@ -282,7 +282,7 @@
     <string name="a_and_c_signup">Accept and Continue</string>
     <string name="pulling_digits_signup">Pulling your digits...</string>
     <string name="enter_num_signup">Enter your phone number below\nto get started.</string>
-    <string name="next_signup">NEXT</string>
+    <string name="next_signup">Next</string>
     <string name="verifying_num_signup">Verifying your number...</string>
     <string name="invalid_num_signup">That\'s an invalid phone number. Try again.</string>
     <string name="call_me_signup">Call Me</string>
@@ -944,7 +944,7 @@
     <string name="shortcut">Add conversation shortcut</string>
     <string name="add_to_contacts">Add to contacts</string>
     <string name="delete_leave">Delete and exit group</string>
-    <string name="group_participant_info">You can add upto 100 people to a group</string>
+    <string name="group_participant_info">You can add upto 500 people to a group</string>
     <string name="broadcast_ftue_message">A broadcast lets you send the same message to multiple hike contacts at once</string>
     <string name="broadcast_participant_info"><b>Note: </b>Only contacts with your number in their address book will receive this broadcast.</string>
     <string name="photo">GALLERY</string>
@@ -1382,6 +1382,9 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="photo_gallery_choose_pic">Choose a photo</string>
     <string name="cropping_image">Cropping image..</string>
     <string name="compose_chat">New chat</string>
+    <string name="terms_conditions_hint">Terms and Conditions</string>
+	<string name="terms_conditions_title">T &amp; C</string>
+	<string name="home_search_empty_text">Your search for \'%1$s\' did not match any contacts.</string>
     <string name="voip_phone_unsupported">Your phone is not supported.</string>
     <string name="voip_call_failed_frag_subheader">You can still contact %1$s with a</string>
     <string name="dismiss_upper_case">DISMISS</string>

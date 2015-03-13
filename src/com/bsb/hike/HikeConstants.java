@@ -559,7 +559,7 @@ public class HikeConstants
 
 	public static final String SHOW_RECENTLY_JOINED_DOT = "showRecentlyJoinedDot";
 	
-	public static final String SHOW_PHOTOS_ENABLED_DOT = "showphotosenabled";
+	public static final String SHOW_PHOTOS_RED_DOT = "showphotosenabled";
 	
 	public static final String SHOW_RECENTLY_JOINED = "showRecentlyJoined";
 
@@ -662,7 +662,7 @@ public class HikeConstants
 
 	public static final int MAX_CHAR_IN_NAME = 20;
 
-	public static final int MAX_CONTACTS_IN_GROUP = 100;
+	public static final int MAX_CONTACTS_IN_GROUP = 500;
 
 	public static final int MAX_CONTACTS_IN_BROADCAST = 500;
 
@@ -1948,6 +1948,11 @@ public class HikeConstants
 		public static final String BROADCAST_DONE = "bcdn";
 		
 		public static final String BROADCAST_SELECT_ALL_NEXT = "bcAll";
+
+		// Home search events
+
+		public static final String HOME_SEARCH = "hmSrch";
+
 	}
 
 	public static final class MqttMessageTypes

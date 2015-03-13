@@ -934,16 +934,18 @@ public class MqttMessagesManager
 			return;
 		}
 		
-		long[] msgIdsLongArray= new long[msgIds.size()];
-		for (int i = 0; i < msgIds.size(); i++ )
-		{
-			msgIdsLongArray[i] = msgIds.get(i);
-		}
-		
 		if (!Utils.isGroupConversation(msisdn))
 		{
-			convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, msgIds);
-			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, msgIdsLongArray);
+			
+			ArrayList<Long> updatedMessageIds = convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, msgIds);
+			
+			long[] updatedMsgIdsLongArray= new long[updatedMessageIds.size()];
+			for (int i = 0; i < updatedMessageIds.size(); i++ )
+			{
+				updatedMsgIdsLongArray[i] = updatedMessageIds.get(i);
+			}
+			
+			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, updatedMsgIdsLongArray);
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
 		}
 		else
@@ -1996,19 +1998,11 @@ public class MqttMessagesManager
 
 	private void saveServerTimestamp(JSONObject jsonObj) throws JSONException
 	{
-		JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
-		long serverTimeMillis = data.optLong(HikeConstants.TIMESTAMP_MILLIS);
-		long diffInMillis = System.currentTimeMillis() - serverTimeMillis;
-		Logger.d(getClass().getSimpleName(), "Diff b/w server and client in ms: " + diffInMillis);
-		
-		//long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
-		//long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;
-
-		//Logger.d(getClass().getSimpleName(), "Diff b/w server and client: " + diff);
-		
+		long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
+		long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;
+		Logger.d(getClass().getSimpleName(), "Diff b/w server and client: " + diff);
 		Editor editor = settings.edit();
-		//editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
-		editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diffInMillis);
+		editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
 		editor.commit();
 	}
 

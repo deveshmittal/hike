@@ -75,8 +75,61 @@ public class HikePhotosUtils
 
 		return pixels;
 	}
-
 	
+	
+	/**
+	 * Funtcion to create Bitmap. Handles out of Memory Exception
+	 * 
+	 * @author akhiltripathi
+	 */
+
+	public static Bitmap createBitmap(Bitmap source, int x, int y, int targetWidth, int targetHeight, boolean createMutableCopy, boolean scaledCopy, boolean crop, boolean retry)
+	{
+		Bitmap ret = null;
+
+		try
+		{
+			if (source != null)
+			{
+				if (scaledCopy && createMutableCopy)
+				{
+					ret = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false);
+				}
+				else if (crop )
+				{
+					ret = Bitmap.createBitmap(source, x, y, targetWidth, targetHeight);
+				}
+				else if (createMutableCopy)
+				{
+					ret = source.copy(source.getConfig(), true);
+				}
+				else
+				{
+					ret = Bitmap.createBitmap(source.getWidth(), source.getHeight(), source.getConfig());
+				}
+
+			}
+			else
+			{
+				ret = Bitmap.createBitmap(targetWidth, targetHeight, Config.ARGB_8888);
+			}
+
+		}
+		catch (OutOfMemoryError e)
+		{
+			if (retry)
+			{
+				System.gc();
+				createBitmap(source, x, y, targetWidth, targetHeight, createMutableCopy, scaledCopy, crop, false);
+			}
+			else
+			{
+				ret = null;
+			}
+		}
+
+		return ret;
+	}
 
 	/**
 	 * Utility class for Filters

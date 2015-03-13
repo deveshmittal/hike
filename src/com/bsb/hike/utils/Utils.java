@@ -2862,7 +2862,7 @@ public class Utils
 			sessionObject.put(HikeConstants.SUB_TYPE, subType);
 			
 			data.put(AnalyticsConstants.EVENT_TYPE, AnalyticsConstants.SESSION_EVENT);				
-			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, Utils.applyServerTimeOffset(context, System.currentTimeMillis()));
+			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, Utils.applyServerTimeOffset(context, System.currentTimeMillis()/1000));
 			data.put(AnalyticsConstants.METADATA, sessionMetaDataObject);
 			
 			sessionObject.put(HikeConstants.DATA, data);
@@ -5526,5 +5526,24 @@ public class Utils
 			allPairs.add(pair);
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_DB_INSERTED, allPairs);
+	}
+	
+	public static Long getMaxLongValue(ArrayList<Long> values)
+	{
+		if(values == null || values.isEmpty())
+		{
+			return Long.MIN_VALUE;
+		}
+		
+		Long maxVal = values.get(0);
+		for (Long value : values)
+		{
+			if(value > maxVal)
+			{
+				maxVal = value;
+			}
+		}
+		
+		return maxVal;
 	}
 }
