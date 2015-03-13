@@ -32,6 +32,12 @@ import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -210,6 +216,9 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		setupActionBar();
 
 		HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
+		
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.SETTINGS_SCR.ordinal());
+		
 	}
 
 	private void addProfileHeaderView(ListView settingsList)
@@ -350,6 +359,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 		if (isRemoved)
 		{
+			getSupportActionBar().show();
 			setupActionBar();
 		}
 		return isRemoved;

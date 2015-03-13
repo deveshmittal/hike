@@ -958,10 +958,10 @@ public class NUXManager
 					switch (PushTypeEnum.getEnumValue(pushType))
 					{
 					case PUSH:
-						notifyUser(pushText, pushTitle, false);
+						HikeNotification.getInstance(context).notifyUserAndOpenHomeActivity(pushText, pushTitle, false);
 						break;
 					case SILENT:
-						notifyUser(pushText, pushTitle, true);
+						HikeNotification.getInstance(context).notifyUserAndOpenHomeActivity(pushText, pushTitle, true);
 						break;
 					case NONE:
 					case UNKNOWN:
@@ -997,13 +997,7 @@ public class NUXManager
 
 	}
 
-	private void notifyUser(String text, String title, boolean shouldNotPlaySound)
-	{
-		Drawable drawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
-		Intent intent=Utils.getHomeActivityIntent(context);
-		HikeNotification.getInstance(context).showBigTextStyleNotification(intent, 0, System.currentTimeMillis(), HikeNotification.HIKE_SUMMARY_NOTIFICATION_ID, title, text,
-				title, "", null, drawable, shouldNotPlaySound, 0);
-	}
+	
 
 	/**
 	 * 

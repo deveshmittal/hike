@@ -20,6 +20,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -525,8 +526,15 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				if(totalfiles>0)
 				{
 					viewHolder.sharedFiles.setVisibility(View.VISIBLE);
-					((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.VISIBLE);
-					((LinearLayout) viewHolder.sharedFiles).findViewById(R.id.shared_content_seprator).setVisibility(View.VISIBLE);
+					if (groupConversation instanceof BroadcastConversation)
+					{
+						((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.GONE);
+					}
+					else
+					{
+						((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.VISIBLE);
+						((LinearLayout) viewHolder.sharedFiles).findViewById(R.id.shared_content_seprator).setVisibility(View.VISIBLE);
+					}
 				
 					viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
 					viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_pin_2));
@@ -541,7 +549,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				{
 					viewHolder.sharedFiles.setVisibility(View.GONE);
 					viewHolder.timeStamp.setVisibility(View.VISIBLE);
-					viewHolder.timeStamp.setText(context.getResources().getString(R.string.no_file));
+					if (groupConversation instanceof BroadcastConversation)
+					{
+						viewHolder.timeStamp.setText(context.getResources().getString(R.string.no_file_broadcast));
+					}
+					else
+					{
+						viewHolder.timeStamp.setText(context.getResources().getString(R.string.no_file));
+					}
 				}
 			}
 			else
@@ -592,8 +607,16 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			break;
 
 		case MEMBERS:
-			viewHolder.text.setText(context.getResources().getString(R.string.members));
-			viewHolder.subText.setText(Integer.toString(((ProfileGroupItem)profileItem).getTotalMembers()) + "/" + HikeConstants.MAX_CONTACTS_IN_GROUP);
+			if (groupConversation instanceof BroadcastConversation)
+			{
+				viewHolder.text.setText(context.getResources().getString(R.string.recipients));
+				viewHolder.subText.setText(Integer.toString(((ProfileGroupItem)profileItem).getTotalMembers()) + "/" + HikeConstants.MAX_CONTACTS_IN_BROADCAST);
+			}
+			else
+			{
+				viewHolder.text.setText(context.getResources().getString(R.string.members));
+				viewHolder.subText.setText(Integer.toString(((ProfileGroupItem)profileItem).getTotalMembers()) + "/" + HikeConstants.MAX_CONTACTS_IN_GROUP);
+			}
 			break;
 
 		case GROUP_PARTICIPANT:
@@ -648,7 +671,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			TextView nameTextView_mem = (TextView) groupParticipantParentView_mem.findViewById(R.id.name);
 			ImageView avatar_mem = (ImageView) groupParticipantParentView_mem.findViewById(R.id.add_participant);
 			avatar_mem.setVisibility(View.VISIBLE);
-			nameTextView_mem.setText(R.string.add_people);
+			if (groupConversation instanceof BroadcastConversation)
+			{
+				nameTextView_mem.setText(R.string.add_recipients);
+			}
+			else
+			{
+				nameTextView_mem.setText(R.string.add_people);
+			}
 			nameTextView_mem.setTextColor(context.getResources().getColor(R.color.blue_hike));
 			groupParticipantParentView_mem.setTag(null);
 			groupParticipantParentView_mem.setOnClickListener(profileActivity);
