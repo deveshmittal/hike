@@ -662,7 +662,7 @@ public class HikeConstants
 
 	public static final int MAX_CHAR_IN_NAME = 20;
 
-	public static final int MAX_CONTACTS_IN_GROUP = 100;
+	public static final int MAX_CONTACTS_IN_GROUP = 500;
 
 	public static final int MAX_CONTACTS_IN_BROADCAST = 500;
 
@@ -850,6 +850,7 @@ public class HikeConstants
 
 	public static final String VOIP_CALL_ISSUES_FRAGMENT_TAG = "voipCallIssuesFragmentTag";
 
+	public static final String VOIP_CALL_FAILED_FRAGMENT_TAG = "voipCallFailedFragmentTag";
 	/*
 	 * Contact Type
 	 */
@@ -1049,6 +1050,21 @@ public class HikeConstants
 
 	public static final String VOIP_QUALITY_TEST_SIMULATED_CALL_DURATION = "scd";
 
+	public static final String VOIP_AEC_ENABLED = "aec";
+
+	public static final String VOIP_AEC_CPU_NR = "cpunr";
+
+	public static final String VOIP_AEC_CPU = "cpuaec";
+
+	public static final String VOIP_AEC_MO = "aecmo";
+
+	public static final String VOIP_AEC_TYPE = "aect";
+
+	public static final String VOIP_AEC_CNP = "cnp";
+
+	public static final String VOIP_AEC_TAIL_TYPE = "att";
+	
+	
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
@@ -1302,6 +1318,8 @@ public class HikeConstants
 
 		public static final String SHOW_KEYBOARD = "ShowKeyboard";
 
+		public static final String SHOW_RECORDING_DIALOG = "showRecordingDialog";
+
 		public static final String IS_HOME_POPUP_SHOWING = "isHomePopupShowing";
 
 		public static final String LAST_UPDATE_PACKET_ID = "lastUpdatePacketId";
@@ -1417,6 +1435,8 @@ public class HikeConstants
 		public static final String NUX_INCENTIVE_MODE = "showNuxIncentiveMode";
 		
 		public static final String RETURN_CROP_RESULT_TO_FILE = "returnToFile";
+
+		public static final String CALL_RATE_BUNDLE = "callRateBundle";
 
 		public static final String GENERAL_SO_TIMEOUT = "sto";
 		
@@ -1928,6 +1948,11 @@ public class HikeConstants
 		public static final String BROADCAST_DONE = "bcdn";
 		
 		public static final String BROADCAST_SELECT_ALL_NEXT = "bcAll";
+
+		// Home search events
+
+		public static final String HOME_SEARCH = "hmSrch";
+
 	}
 
 	public static final class MqttMessageTypes

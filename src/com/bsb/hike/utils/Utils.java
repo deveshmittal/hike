@@ -2862,7 +2862,7 @@ public class Utils
 			sessionObject.put(HikeConstants.SUB_TYPE, subType);
 			
 			data.put(AnalyticsConstants.EVENT_TYPE, AnalyticsConstants.SESSION_EVENT);				
-			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, Utils.applyServerTimeOffset(context, System.currentTimeMillis()));
+			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, Utils.applyServerTimeOffset(context, System.currentTimeMillis()/1000));
 			data.put(AnalyticsConstants.METADATA, sessionMetaDataObject);
 			
 			sessionObject.put(HikeConstants.DATA, data);
@@ -3523,6 +3523,13 @@ public class Utils
 			return;
 		}
 		context.startService(IntentManager.getVoipCallIntent(context, mContactNumber, source));
+	}
+
+	public static void startNativeCall(Context context, String msisdn)
+	{
+		Intent callIntent = new Intent(Intent.ACTION_CALL);
+		callIntent.setData(Uri.parse("tel:" + msisdn));
+		context.startActivity(callIntent);
 	}
 
 	public static String getFormattedDateTimeFromTimestamp(long milliSeconds, Locale current)
