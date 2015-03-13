@@ -12,10 +12,12 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.view.OrientationEventListener;
 import android.view.TextureView;
 import android.view.View;
@@ -36,6 +38,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -105,6 +108,17 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		flashButton = findViewById(R.id.btntoggleflash);
 		flashButton.setOnClickListener(HikeCameraActivity.this);
+
+		int density = getResources().getDisplayMetrics().densityDpi;
+
+		switch (density)
+		{
+		case DisplayMetrics.DENSITY_LOW:
+		case DisplayMetrics.DENSITY_MEDIUM:
+			findViewById(R.id.flashContainer).setVisibility(View.GONE);
+			break;
+
+		}
 
 		containerView = findViewById(R.id.container);
 
@@ -180,7 +194,10 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			View ffcBtn = findViewById(R.id.btnflip);
 			ffcBtn.setClickable(false);
 			ffcBtn.setEnabled(false);
-			ffcBtn.setAlpha(0.3f);
+			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1)
+			{
+				ffcBtn.setAlpha(0.3f);
+			}
 		}
 
 	}
@@ -223,6 +240,9 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		}
 
 		HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(true);
+		HikeCameraActivity.this.findViewById(R.id.btngallery).setEnabled(true);
+		HikeCameraActivity.this.findViewById(R.id.btnflip).setEnabled(true);
+		HikeCameraActivity.this.findViewById(R.id.btntoggleflash).setEnabled(true);
 	}
 
 	@Override
@@ -234,6 +254,9 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		{
 		case R.id.btntakepic:
 			HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(false);
+			HikeCameraActivity.this.findViewById(R.id.btngallery).setEnabled(false);
+			HikeCameraActivity.this.findViewById(R.id.btnflip).setEnabled(false);
+			HikeCameraActivity.this.findViewById(R.id.btntoggleflash).setEnabled(false);
 			cameraFragment.cancelAutoFocus();
 			cameraFragment.takePicture();
 			tempBitmap = ((TextureView) cameraFragment.getCameraView().previewStrategy.getWidget()).getBitmap();
@@ -322,12 +345,18 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				if (isUsingFFC)
 				{
 					flashButton.setClickable(false);
-					flashButton.setAlpha(0.3f);
+					if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1)
+					{
+						flashButton.setAlpha(0.3f);
+					}
 				}
 				else
 				{
 					flashButton.setClickable(true);
-					flashButton.setAlpha(1f);
+					if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1)
+					{
+						flashButton.setAlpha(1f);
+					}
 				}
 				cameraFragment = CameraFragment.newInstance(isUsingFFC);
 				replaceFragment(cameraFragment);
@@ -426,7 +455,10 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 			widthBmp = widthBmp > srcBmp.getWidth() ? srcBmp.getWidth() : widthBmp;
 
-			Bitmap dstBmp = Bitmap.createBitmap(srcBmp, srcBmp.getWidth() / 2 - (widthBmp / 2), bmpY, widthBmp, widthBmp);
+			Bitmap dstBmp = HikePhotosUtils.createBitmap(srcBmp, srcBmp.getWidth() / 2 - (widthBmp / 2), bmpY, widthBmp, widthBmp,false,false,true,true);
+			
+			
+			//Bitmap dstBmp = Bitmap.createBitmap(srcBmp, srcBmp.getWidth() / 2 - (widthBmp / 2), bmpY, widthBmp, widthBmp);
 
 			// ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.containerImageView);
 			//

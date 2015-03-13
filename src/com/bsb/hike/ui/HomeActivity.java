@@ -549,7 +549,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				if (photosEnabled)
 				{
 					showComposeOverflowMenu();
-					accountPrefs.edit().putBoolean(HikeConstants.SHOW_PHOTOS_ENABLED_DOT, false).commit();
 					newConversationIndicator.setVisibility(View.GONE);
 				}
 				else
@@ -1531,7 +1530,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
 			boolean showTimelineRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_TIMELINE_RED_DOT, true);
 			boolean showBroadcastRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_NEW_BROADCAST_RED_DOT, true);
-			
+			boolean showPhotosRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_PHOTOS_RED_DOT, false);
+			boolean showNUJRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
+
 			int count = 0;
 			if (item.getKey() == 7)
 			{
@@ -1541,7 +1542,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				else if (count > 0)
 					newGamesIndicator.setText(String.valueOf(count));
 			}
-			if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked) || (item.getKey() == 7 && (count > 0 || showTimelineRedDot)) || (item.getKey() == 10 && showBroadcastRedDot))
+			if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked) || (item.getKey() == 7 && (count > 0 || showTimelineRedDot))
+					|| (item.getKey() == 10 && showBroadcastRedDot)|| (item.getKey() == 11 && showNUJRedDot)|| (item.getKey() == 12 && showPhotosRedDot))
 			{
 				newGamesIndicator.setVisibility(View.VISIBLE);
 			}
@@ -1596,9 +1598,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
 
 		addEmailLogItem(optionsList);
-		
-		//Take a photo
-//		optionsList.add(new OverFlowMenuItem(getString(R.string.take_photo), 10));
+
+		// Take a photo
+		// optionsList.add(new OverFlowMenuItem(getString(R.string.take_photo), 10));
 
 		overFlowWindow = new PopupWindow(this);
 
@@ -1735,16 +1737,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		});
 	}
-	
-	private void showComposeOverflowMenu(){
+
+	private void showComposeOverflowMenu()
+	{
 
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
 		final String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
-		
+
 		optionsList.add(new OverFlowMenuItem(getString(R.string.compose_chat), 11));
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.take_photo), 10));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.take_photo), 12));
 
 		overFlowWindow = new PopupWindow(this);
 
@@ -1778,16 +1781,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
 						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					}
-					catch(JSONException e)
+					catch (JSONException e)
 					{
 						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 					}
 
 					intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
-					intent.putExtra(HikeConstants.Extras.EDIT , true);
+					intent.putExtra(HikeConstants.Extras.EDIT, true);
 					break;
-				case 10:
-					//Take a photo
+				case 12:
+					// Take a photo
+					accountPrefs.edit().putBoolean(HikeConstants.SHOW_PHOTOS_RED_DOT, false).commit();
 					IntentManager.openHikeCameraActivity(HomeActivity.this);
 					sendAnalyticsTakePicture();
 					break;
@@ -2020,7 +2024,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					newConversationIndicator.setVisibility(View.VISIBLE);
 					newConversationIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
 				}
-				else if(photosEnabled && accountPrefs.getBoolean(HikeConstants.SHOW_PHOTOS_ENABLED_DOT, true))
+				else if (photosEnabled && accountPrefs.getBoolean(HikeConstants.SHOW_PHOTOS_RED_DOT, true))
 				{
 					newConversationIndicator.setText("1");
 					newConversationIndicator.setVisibility(View.VISIBLE);

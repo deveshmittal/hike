@@ -282,7 +282,7 @@
     <string name="a_and_c_signup">Accept and Continue</string>
     <string name="pulling_digits_signup">Pulling your digits...</string>
     <string name="enter_num_signup">Enter your phone number below\nto get started.</string>
-    <string name="next_signup">NEXT</string>
+    <string name="next_signup">Next</string>
     <string name="verifying_num_signup">Verifying your number...</string>
     <string name="invalid_num_signup">That\'s an invalid phone number. Try again.</string>
     <string name="call_me_signup">Call Me</string>

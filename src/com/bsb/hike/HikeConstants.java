@@ -559,7 +559,7 @@ public class HikeConstants
 
 	public static final String SHOW_RECENTLY_JOINED_DOT = "showRecentlyJoinedDot";
 	
-	public static final String SHOW_PHOTOS_ENABLED_DOT = "showphotosenabled";
+	public static final String SHOW_PHOTOS_RED_DOT = "showphotosenabled";
 	
 	public static final String SHOW_RECENTLY_JOINED = "showRecentlyJoined";
 
