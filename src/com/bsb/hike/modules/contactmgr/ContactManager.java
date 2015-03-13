@@ -1083,35 +1083,26 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		return transientCache.doesContactExist(msisdn);
 	}
 
-	public void makeOlderAvatarsRounded()
-	{
-		hDb.makeOlderAvatarsRounded();
-	}
-
 	/**
 	 * This method returns a drawable of an icon from the database
 	 * 
 	 * @param msisdn
-	 * @param rounded
-	 *            if true returns rounded drawable from rounded thumbnails table
 	 * @return
 	 */
-	public Drawable getIcon(String msisdn, boolean rounded)
+	public Drawable getIcon(String msisdn)
 	{
-		return hDb.getIcon(msisdn, rounded);
+		return hDb.getIcon(msisdn);
 	}
 
 	/**
 	 * This method returns a byte array of an icon from the database
 	 * 
 	 * @param id
-	 * @param rounded
-	 *            if true returns rounded thumbnail byte array from rounded thumbnails table
 	 * @return
 	 */
-	public byte[] getIconByteArray(String id, boolean rounded)
+	public byte[] getIconByteArray(String id)
 	{
-		return hDb.getIconByteArray(id, rounded);
+		return hDb.getIconByteArray(id);
 	}
 
 	/**
@@ -1941,17 +1932,20 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		{
 			if(group.isGroupAlive())
 			{
-				int numMembers = 0;
-				if(groupCountMap.containsKey(group.getGroupId()))
+				if (!Utils.isBroadcastConversation(group.getGroupId()))
 				{
-					numMembers = groupCountMap.get(group.getGroupId());
+					int numMembers = 0;
+					if(groupCountMap.containsKey(group.getGroupId()))
+					{
+						numMembers = groupCountMap.get(group.getGroupId());
+					}
+					String numberMembers = context.getString(R.string.num_people, (numMembers + 1));
+
+					ContactInfo groupContact = new ContactInfo(group.getGroupId(), group.getGroupId(), group.getGroupName(), numberMembers, true);
+					groupContact.setLastMessaged(group.getTimestamp());
+
+					groupContacts.add(groupContact);
 				}
-				String numberMembers = context.getString(R.string.num_people, (numMembers + 1));
-
-				ContactInfo groupContact = new ContactInfo(group.getGroupId(), group.getGroupId(), group.getGroupName(), numberMembers, true);
-				groupContact.setLastMessaged(group.getTimestamp());
-
-				groupContacts.add(groupContact);
 			}
 		}
 		if(shouldSort)
