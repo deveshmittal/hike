@@ -235,6 +235,9 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		}
 
 		HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(true);
+		HikeCameraActivity.this.findViewById(R.id.btngallery).setEnabled(true);
+		HikeCameraActivity.this.findViewById(R.id.btnflip).setEnabled(true);
+		HikeCameraActivity.this.findViewById(R.id.btntoggleflash).setEnabled(true);
 	}
 
 	@Override
@@ -246,6 +249,9 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		{
 		case R.id.btntakepic:
 			HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(false);
+			HikeCameraActivity.this.findViewById(R.id.btngallery).setEnabled(false);
+			HikeCameraActivity.this.findViewById(R.id.btnflip).setEnabled(false);
+			HikeCameraActivity.this.findViewById(R.id.btntoggleflash).setEnabled(false);
 			cameraFragment.cancelAutoFocus();
 			cameraFragment.takePicture();
 			tempBitmap = ((TextureView) cameraFragment.getCameraView().previewStrategy.getWidget()).getBitmap();
