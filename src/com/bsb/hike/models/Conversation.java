@@ -162,7 +162,7 @@ public class Conversation implements Comparable<Conversation>
 	public void setMessages(List<ConvMessage> messages)
 	{
 		this.messages = messages;
-		if (!messages.isEmpty() && messages!=null)
+		if (messages!=null && !messages.isEmpty())
 		{
 			setTimestamp(messages.get(messages.size()-1).getTimestamp());
 		}

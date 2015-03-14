@@ -46,6 +46,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -120,6 +121,11 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 		else
 		{
 			groupOrBroadcastImage.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(groupOrBroadcastId, true));
+		}
+		
+		if(!isBroadcast)
+		{
+			showProductPopup(ProductPopupsConstants.PopupTriggerPoints.NEWGRP.ordinal());
 		}
 	}
 

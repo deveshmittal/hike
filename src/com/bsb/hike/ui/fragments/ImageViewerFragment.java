@@ -173,9 +173,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		}
 		else
 		{
-			imageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(key, false));
-			imageView.setImageResource(Utils.isBroadcastConversation(mappedId) ? R.drawable.ic_default_avatar_broadcast_hires : 
-				(Utils.isGroupConversation(mappedId) ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires));
+			imageView.setImageDrawable(HikeBitmapFactory.getDefaultAvatar(getResources(), key, true));
 		}
 
 	}

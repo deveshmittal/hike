@@ -169,7 +169,7 @@ public class PlatformJavaScriptBridge
 			JSONObject jsonObject = new JSONObject(json);
 			jsonObject.put(AnalyticsConstants.CHAT_MSISDN, msisdn);
 			jsonObject.put(AnalyticsConstants.ORIGIN, Utils.conversationType(msisdn));
-			jsonObject.put(HikePlatformConstants.CARD_TYPE, message.platformWebMessageMetadata.getAppName());
+			jsonObject.put(HikePlatformConstants.CARD_TYPE, message.webMetadata.getAppName());
 			if (Boolean.valueOf(isUI))
 			{
 				HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.MICROAPP_UI_EVENT, subType, jsonObject);
@@ -229,7 +229,7 @@ public class PlatformJavaScriptBridge
 			String updatedJSON = HikeConversationsDatabase.getInstance().updateHelperData((message.getMsgID()), json);
 			if (updatedJSON != null)
 			{
-				message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON);
+				message.webMetadata = new WebMetadata(updatedJSON);
 			}
 
 		}
@@ -248,7 +248,7 @@ public class PlatformJavaScriptBridge
 	{
 		try
 		{
-			message.platformWebMessageMetadata = new PlatformWebMessageMetadata(new JSONObject(metadata));
+			message.webMetadata = new WebMetadata(new JSONObject(metadata));
 		}
 		catch (JSONException e)
 		{
@@ -295,7 +295,7 @@ public class PlatformJavaScriptBridge
 
 			if (updatedJSON != null)
 			{
-				message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON); // the new metadata to inflate in webview
+				message.webMetadata = new WebMetadata(updatedJSON); // the new metadata to inflate in webview
 				if (notifyScreen != null && Boolean.valueOf(notifyScreen))
 				{
 					mWebView.post(new Runnable()
@@ -347,12 +347,12 @@ public class PlatformJavaScriptBridge
 				String updatedJSON = HikeConversationsDatabase.getInstance().updateJSONMetadata((int)(message.getMsgID()), json);
 				if (!TextUtils.isEmpty(updatedJSON))
 				{
-					message.platformWebMessageMetadata = new PlatformWebMessageMetadata(updatedJSON);
+					message.webMetadata = new WebMetadata(updatedJSON);
 				}
 			}
 
 			final Intent intent = IntentManager.getForwardIntentForConvMessage(mContext, message,
-					PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
+					PlatformContent.getForwardCardData(message.webMetadata.JSONtoString()));
 			mWebView.post(new Runnable()
 			{
 				@Override
@@ -474,8 +474,8 @@ public class PlatformJavaScriptBridge
 			{
 				Logger.i(tag, "onloadfinished called with height=" + requiredHeightInPX + " current height is " + mWebView.getHeight() +" : updated in DB as well");
 				// lets save in DB, so that from next time onwards we will have less flickering
-				message.platformWebMessageMetadata.setCardHeight(requiredHeightinDP);
-				HikeConversationsDatabase.getInstance().updateMetadataOfMessage(message.getMsgID(), message.platformWebMessageMetadata.JSONtoString());
+				message.webMetadata.setCardHeight(requiredHeightinDP);
+				HikeConversationsDatabase.getInstance().updateMetadataOfMessage(message.getMsgID(), message.webMetadata.JSONtoString());
 				resizeWebview(height);
 			}else
 			{

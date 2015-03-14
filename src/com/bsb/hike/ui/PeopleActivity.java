@@ -16,6 +16,12 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.productpopup.DialogPojo;
+import com.bsb.hike.productpopup.HikeDialogFragment;
+import com.bsb.hike.productpopup.IActivityPopup;
+import com.bsb.hike.productpopup.ProductContentModel;
+import com.bsb.hike.productpopup.ProductInfoManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
@@ -28,6 +34,8 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 	{
 		super.onCreate(savedInstanceState);
 		initialisePeopleScreen(savedInstanceState);
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.FAVOURITES.ordinal());
+		
 	}
 
 	private void initialisePeopleScreen(Bundle savedInstanceState)
