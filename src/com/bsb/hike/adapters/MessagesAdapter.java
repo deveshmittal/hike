@@ -2100,7 +2100,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 					String participantMsisdn = metadata.getMsisdn();
 					String name = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participantMsisdn);
-					message = Utils.getFormattedParticipantInfo(String.format(context.getString(R.string.left_conversation), name), name);
+					message = Utils.getFormattedParticipantInfo(String.format(context.getString(conversation instanceof BroadcastConversation ? R.string.removed_from_broadcast : R.string.left_conversation), name), name);
 				}
 				else
 				{
@@ -2183,8 +2183,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				String userMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
-				String message = String.format(context.getString(convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name
-						: R.string.change_group_image), participantName);
+				String message;
+				if (convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
+				{
+					message = String.format(context.getString(convMessage.isBroadcastConversation() ? R.string.change_broadcast_name : R.string.change_group_name), participantName);
+				}
+				else
+				{
+					message = String.format(context.getString(R.string.change_group_image), participantName);
+				}
 
 				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
 				int icRes;
