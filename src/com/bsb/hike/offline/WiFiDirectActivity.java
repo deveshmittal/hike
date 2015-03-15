@@ -16,20 +16,25 @@ cfcf * Copyright (C) 2011 The Android Open Source Project
 
 package com.bsb.hike.offline;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 
-import java.util.HashSet;
-import java.util.List;
-
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -42,10 +47,24 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.RotateAnimation;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
+import android.view.animation.Animation.AnimationListener;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bsb.hike.R;
+import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.utils.Logger;
+
 /**
  * An activity that uses WiFi Direct APIs to discover and connect with available
  * devices. WiFi Direct APIs are asynchronous and rely on callback mechanism
@@ -59,7 +78,6 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     private WifiP2pConnectionManager connectionManager = null;
     private BroadcastReceiver receiver = null;
     private IntentFilter intentFilter;
-    
     public static boolean isOfflineFileTransferOn = false;
     private final int MAXTRIES = 5;
     // remember connection details for re-connection
@@ -78,11 +96,13 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_DISCOVERY_CHANGED_ACTION);
-        
+        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+       
         DeviceListFragment fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
         connectionManager = new WifiP2pConnectionManager(this, this, (PeerListListener)fragment, (GroupInfoListener) fragment);
         receiver = new WiFiDirectBroadcastReceiver(connectionManager);
         registerReceiver(receiver, intentFilter);
+        
     }
 
     /** register the BroadcastReceiver with the intent values to be matched */
@@ -143,22 +163,21 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
                 return true ;
             
             case R.id.atn_direct_wifinetworks:
-            	 WifiNetworksListFragment wififragment = (WifiNetworksListFragment) getFragmentManager().findFragmentById(R.id.wifi_list);
-            	 wififragment.updateWifiNetworks(getDistinctWifiNetworks());  	 
+            	 //WifiNetworksListFragment wififragment = (WifiNetworksListFragment) getFragmentManager().findFragmentById(R.id.wifi_list);
+            	 //wififragment.updateWifiNetworks(getDistinctWifiNetworks());  	 
+            	getDistinctWifiNetworks();
             	 return true ;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-    
-    @Override
-    public HashMap<String, ScanResult> getDistinctWifiNetworks()
-    {
-    	return connectionManager.getDistinctWifiNetworks();
+	
+    public HashMap<String, ScanResult>  getDistinctWifiNetworks(){
+        return 	connectionManager.getDistinctWifiNetworks();
     }
     
     @Override
-    public void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice ConnectingToDevice,int mode) {
+    public void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice ConnectingToDevice,int mode, Intent intent) {
 	    if(mode==0)
 	    {
 	    	if(numOfTries >= MAXTRIES)
@@ -178,9 +197,15 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 	    }
 	    else
 	    {
-	          connectionManager.createhotspot(ConnectingToDevice);  
+		    WiFiDirectActivity.connectingToDevice = ConnectingToDevice;
+		    WiFiDirectActivity.connectingDeviceConfig = config;
+		    WiFiDirectActivity.tries = numOfTries;
+	        connectionManager.createHotspot(ConnectingToDevice); 
+	        new checkConnectedHotspotTask(this,intent).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
 	    }
     }
+
+    
 
     @Override
     public void disconnect() {
@@ -314,7 +339,345 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     		callDisconnect();
     	}	  
     }
+    
+    
+    public class checkConnectedHotspotTask  extends AsyncTask<Void, Void ,ArrayList<ClientScanResult>>
+    {
+    	Context context;
+    	Dialog dialog = null ;
+    	Intent intent ; 
+    	Boolean isConnected  = false; 
+    	public checkConnectedHotspotTask(Context context, Intent intent) {
+			this.context =  context;
+			dialog  = new Dialog(context, R.style.Theme_CustomDialog);
+			this.intent = intent;
+		}
+    	protected void onPreExecute() {
+    		/*HikeDialog.showDialog(context,HikeDialog.SHOW_OFFLINE_CONNECTION_STATUS,  new HikeDialog.HikeDialogListener()
+			{
+				@Override
+				public void onSucess(Dialog dialog)
+				{
+					Log.d("dfsf", "afdaf");
+				}
 
+				@Override
+				public void negativeClicked(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void positiveClicked(Dialog dialog)
+				{
+					
+				}
+
+				@Override
+				public void neutralClicked(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+			});*/
+    	   
+    		    dialog.setContentView(R.layout.connecting_offline);
+       			dialog.setCancelable(true);
+       			dialog.show();
+       			
+       			long smileyOffset = 300;
+       			long smileyDuration = 300;
+       			long onsetTime  =  300;
+       			setupDotsAnimation(dialog.getWindow(),smileyOffset, smileyDuration, onsetTime);
+       			
+       			dialog.setOnDismissListener(new OnDismissListener() {
+					
+					@Override
+					public void onDismiss(DialogInterface dialog) {
+						// TODO Auto-generated method stub
+						if(isConnected)
+						  startActivity(intent);
+						else
+						{
+							connectionManager.closeHotspot(WiFiDirectActivity.connectingToDevice);
+							connectionManager.startWifi();
+						}
+						  
+					}
+				});
+       			return;
+    		
+    	}
+    	;
+    	ArrayList<ClientScanResult> temp = null;	
+		@Override
+		protected ArrayList<ClientScanResult> doInBackground(Void... params) {
+			int tries = 0;
+			Boolean status  =  false;
+			
+			while(tries<10)
+			{
+				
+				    tries++;
+				    if(temp!=null)
+				    {
+				    	break;
+				    }
+				    else
+				    {
+				    	
+				    BufferedReader br = null;
+					final ArrayList<ClientScanResult> result = new ArrayList<ClientScanResult>();
+					boolean onlyReachables  =   false; 
+					try {
+						br = new BufferedReader(new FileReader("/proc/net/arp"));
+						String line;
+						while ((line = br.readLine()) != null) {
+							String[] splitted = line.split(" +");
+	
+							if ((splitted != null) && (splitted.length >= 4)) {
+								String mac = splitted[3];
+	
+								if (mac.matches("..:..:..:..:..:..")) {
+									boolean isReachable = InetAddress.getByName(splitted[0]).isReachable(500);
+	
+									if (!onlyReachables || isReachable) {
+										result.add(new ClientScanResult(splitted[0], splitted[3], splitted[5], isReachable));
+									}
+								}
+							}
+						}
+					} catch (Exception e) {
+						Log.e(this.getClass().toString(), e.toString());
+					} finally {
+						try {
+							br.close();
+						} catch (IOException e) {
+							Log.e(this.getClass().toString(), e.getMessage());
+						}
+					}
+					if(result.size()>0)
+					 temp   = result  ;
+					else
+					{
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+						
+		        }
+			}
+				/*connectionManager.getClientList(false, new FinishScanListener() {
+	
+		  			@Override
+		  			public void onFinishScan(final ArrayList<ClientScanResult> clients) {
+		  				if(clients.size()>0)
+		  				{
+		  					Log.d(TAG, "YOYO");
+		  					//Toast.makeText(getApplicationContext(), clients.get(0).getIpAddr(), Toast.LENGTH_SHORT).show();
+		  					temp  =   clients;
+		  					
+		  				}
+		  				else
+		  				{
+		  					Log.d(TAG, "Issue");
+		  					try {
+								Thread.sleep(5000);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+		  					temp =  null;
+		  					
+		  				}
+		  			}
+		  		});*/
+		   
+            return temp;
+		}
+		
+		@Override
+		protected void onPostExecute(ArrayList<ClientScanResult> result) {
+			if(result!=null && result.size()>0)
+			{
+			  //startActivity(intent);
+			  isConnected = true;
+			  dialog.dismiss();
+			  
+			  //OfflineFileTransferManager.getInstance().switchOnReceivers(this, ClientScanResult);
+			  
+			  //Toast.makeText(getApplicationContext(), "Start Chattting man", Toast.LENGTH_LONG).show();
+			}
+			else
+			{
+				//Log.d(TAG, "No man ");
+				dialog.dismiss();
+				Toast.makeText(getApplicationContext(),"Sorry Mate !!! Chat Later", Toast.LENGTH_LONG).show();
+			}	
+			super.onPostExecute(result);
+		}
+
+		
+    	
+    }
+
+    private void setupDotsAnimation(Window window, long smileyOffset, long smileyDuration, long onsetTime)
+	{
+
+		final View dot0 = (View) window.findViewById(R.id.dot_left);
+		final View dot1 = (View) window.findViewById(R.id.dot_center);
+		final View dot2 = (View) window.findViewById(R.id.dot_right);
+		
+		ShapeDrawable circle0 = new ShapeDrawable(new OvalShape());
+		circle0.getPaint().setColor(this.getResources().getColor(R.color.restoring_red));
+		dot0.setBackgroundDrawable(circle0);
+		ShapeDrawable circle1 = new ShapeDrawable(new OvalShape());
+		circle1.getPaint().setColor(this.getResources().getColor(R.color.restoring_green));
+		dot1.setBackgroundDrawable(circle1);
+		ShapeDrawable circle2 = new ShapeDrawable(new OvalShape());
+		circle2.getPaint().setColor(this.getResources().getColor(R.color.restoring_orange));
+		dot2.setBackgroundDrawable(circle2);
+		
+		AlphaAnimation dotIn0 = new AlphaAnimation(0, 1);
+		dotIn0.setDuration(100);
+		AlphaAnimation dotOut0 = new AlphaAnimation(1, 0);
+		dotOut0.setDuration(100);
+		dotOut0.setStartOffset(200);
+		RotateAnimation dotStay0 = new RotateAnimation(0, 360);
+		dotStay0.setDuration(400);
+		dotStay0.setStartOffset(300);
+		
+		final AnimationSet dota0 = new AnimationSet(true);
+		dota0.addAnimation(dotIn0);
+		dota0.addAnimation(dotOut0);
+		dota0.addAnimation(dotStay0);
+		dota0.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+				dotIn.setDuration(100);
+				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+				dotOut.setDuration(100);
+				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(400 + 200);
+				dotStay.setStartOffset(300);
+				AnimationSet dot = new AnimationSet(true);
+				dot.addAnimation(dotIn);
+				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
+				dot.setAnimationListener(this);
+				dot0.startAnimation(dot);
+			}
+		});
+
+		AlphaAnimation dotIn1 = new AlphaAnimation(0, 1);
+		dotIn1.setDuration(100);
+		AlphaAnimation dotOut1 = new AlphaAnimation(1, 0);
+		dotOut1.setDuration(100);
+		dotOut1.setStartOffset(200);
+		RotateAnimation dotStay1 = new RotateAnimation(0, 360);
+		dotStay1.setDuration(200);
+		dotStay1.setStartOffset(300);
+		
+		final AnimationSet dota1 = new AnimationSet(true);
+		dota1.addAnimation(dotIn1);
+		dota1.addAnimation(dotOut1);
+		dota1.addAnimation(dotStay1);
+		dota1.setStartOffset(200);
+		dota1.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+				dotIn.setDuration(100);
+				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+				dotOut.setDuration(100);
+				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(200 + 200);
+				dotStay.setStartOffset(300);
+				AnimationSet dot = new AnimationSet(true);
+				dot.addAnimation(dotIn);
+				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
+				dot.setStartOffset(200);
+				dot.setAnimationListener(this);
+				dot1.startAnimation(dot);
+			}
+		});
+		
+		AlphaAnimation dotIn2 = new AlphaAnimation(0, 1);
+		dotIn2.setDuration(100);
+		AlphaAnimation dotOut2 = new AlphaAnimation(1, 0);
+		dotOut2.setDuration(100);
+		dotOut2.setStartOffset(200);
+		
+		final AnimationSet dota2 = new AnimationSet(true);
+
+
+		dota2.addAnimation(dotIn2);
+		dota2.addAnimation(dotOut2);
+		dota2.setStartOffset(400);
+		dota2.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+				dotIn.setDuration(100);
+				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+				dotOut.setDuration(100);
+				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(0 + 200);
+				dotStay.setStartOffset(300);
+				AnimationSet dot = new AnimationSet(true);
+				dot.addAnimation(dotIn);
+				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
+				dot.setAnimationListener(this);
+				dot.setStartOffset(400);
+				dot2.startAnimation(dot);
+			}
+		});
+		
+		//dot0.startAnimation(dota0);
+		//dot1.startAnimation(dota1);
+		//dot2.startAnimation(dota2);
+	}
+    
 	@Override
 	public void channelDisconnectedFailure() {
 		Toast.makeText(this,
@@ -405,6 +768,24 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 	@Override
 	public Boolean connectToHotspot(ScanResult result) {
 		return connectionManager.connectToHotspot(result.SSID);
+	}
+
+	
+
+	@Override
+	public void updateWifiNetworks(HashMap<String, ScanResult> distinctNetworks) {
+		
+		((WifiNetworksListFragment) getFragmentManager().findFragmentById(R.id.wifi_list)).updateWifiNetworks(distinctNetworks);
+	}
+
+	@Override
+	public void startScan() {
+		connectionManager.startScan();
+	}
+
+	@Override
+	public void resetWifi() {
+		connectionManager.resetWifi();
 	}
 }
 

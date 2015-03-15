@@ -8,18 +8,26 @@ import java.util.List;
 import org.apache.http.util.TextUtils;
 
 import com.bsb.hike.R;
+import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
+import com.bsb.hike.ui.GallerySelectionViewer;
+import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.utils.Utils;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ListFragment;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +46,8 @@ public class WifiNetworksListFragment extends ListFragment {
 	private int mIconImageSize;
 	private IconLoader iconLoader;
 	private Handler mHandler;
+	Thread updateNetwork =  null ; 
+	private boolean requestDialogShown = false;
 
 	@Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -68,30 +78,52 @@ public class WifiNetworksListFragment extends ListFragment {
 		runNetworkScan();
 		super.onStart();
 	}
+	
+	@Override
+	public void onDestroy() {
+		// TODO Auto-generated method stub
+		updateNetwork.interrupt();
+		super.onDestroy();
+	}
 	// starts a network scan for every 2sec
 	private void runNetworkScan()
 	{
-		new Thread()
+		if(isAdded())
 		{
-			@Override
-			public void run() {
-				while(!isInterrupted())
-				{
-					HashMap<String, ScanResult> nearbyNetworks = ((DeviceActionListener) getActivity()).getDistinctWifiNetworks();
-					Message targetMessage = mHandler.obtainMessage(POST_TO_FRAGMENT, nearbyNetworks);
-					targetMessage.sendToTarget();
-					try 
+		   //((DeviceActionListener) getActivity()).resetWifi();
+		}
+		if(updateNetwork==null)
+		{
+			updateNetwork =  (new Thread()
+			{
+				@Override
+				public void run() {
+					while(!isInterrupted())
 					{
-						sleep(2*1000);
-					} 
-					catch (InterruptedException e) 
-					{
-						e.printStackTrace();
+						if(isAdded())
+						{
+							
+							((DeviceActionListener) getActivity()).startScan();
+							//HashMap<String, ScanResult> nearbyNetworks = ((DeviceActionListener) getActivity()).getDistinctWifiNetworks();
+							//Message targetMessage = mHandler.obtainMessage(POST_TO_FRAGMENT, nearbyNetworks);
+							//targetMessage.sendToTarget();
+							
+							try 
+							{
+								sleep(2*1000);
+							} 
+							catch (InterruptedException e) 
+							{
+								e.printStackTrace();
+							}	
+						}
+						
 					}
 				}
-			}
-			
-		}.start();
+				
+			});
+			updateNetwork.start();
+		}
 	}
 	
     @Override
@@ -109,12 +141,7 @@ public class WifiNetworksListFragment extends ListFragment {
     
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-    	ScanResult scanResult  =   wifipeers.get(position);
-    	Boolean status  =  ((DeviceActionListener)getActivity()).connectToHotspot(scanResult);
-    	if(status)
-    		Toast.makeText(getActivity(), "Connected to" +  scanResult.SSID, Toast.LENGTH_SHORT).show();
-    	else
-    		Toast.makeText(getActivity(), "Connection Failed" , Toast.LENGTH_SHORT).show();
+    	
     	
     }
     
@@ -136,40 +163,78 @@ public class WifiNetworksListFragment extends ListFragment {
                         Context.LAYOUT_INFLATER_SERVICE);
                 v = vi.inflate(R.layout.conversation_item, null);
             }
-            ScanResult wifinetwork = items.get(position);
+            final ScanResult wifinetwork = items.get(position);
             if (wifinetwork != null) {
             	
             	
-                //TextView top = (TextView) v.findViewById(R.id.device_name);
-                
-                //TextView bottom = (TextView) v.findViewById(R.id.device_details);
-            	
-            	Context context = getContext();
-            	mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
-        		iconLoader = new IconLoader(context, mIconImageSize);
-        		
-        		String senderMsisdn = "";
-        		if(wifinetwork.SSID.startsWith("hike_"))
-        			senderMsisdn = wifinetwork.SSID.split("_")[1];
-        		ContactInfo deviceContact = ContactManager.getInstance().getContact(senderMsisdn);
-        		TextView contact_name = (TextView) v.findViewById(R.id.contact);
-        		
-        		String phoneName = "";
-        		if(deviceContact != null && !(TextUtils.isEmpty(deviceContact.getName())))
-        			phoneName = deviceContact.getName() + " wants to connect";
-        		else
-        			phoneName = wifinetwork.SSID;
-        		
-        		contact_name.setText(phoneName);
-            	ImageView avatarView =  (ImageView) v.findViewById(R.id.avatar);
-        		iconLoader.loadImage(wifinetwork.SSID, true, avatarView, false, true, true);
-        		TextView deviceStatus =  (TextView) v.findViewById(R.id.last_message_timestamp);
-        		deviceStatus.setText(wifinetwork.BSSID);
-        		TextView chatStatus = (TextView) v.findViewById(R.id.last_message);
-        		String stat =  wifinetwork.BSSID ;
-        		deviceStatus.setText(stat);
-        		
-            }
+	                //TextView top = (TextView) v.findViewById(R.id.device_name);
+	                
+	                //TextView bottom = (TextView) v.findViewById(R.id.device_details);
+	            	
+	            	Context context = getContext();
+	            	mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+	        		iconLoader = new IconLoader(context, mIconImageSize);
+	        		
+	        		String senderMsisdn = "";
+	        		
+	        			senderMsisdn = wifinetwork.SSID.split("_")[1];
+	        		ContactInfo deviceContact = ContactManager.getInstance().getContact(senderMsisdn);
+	        		TextView contact_name = (TextView) v.findViewById(R.id.contact);
+	        		
+	        		String phoneName = "";
+	        		if(deviceContact != null && !(TextUtils.isEmpty(deviceContact.getName())))
+	        			phoneName = deviceContact.getName() ;
+	        		else
+	        			phoneName = senderMsisdn;
+	        		
+	        		contact_name.setText(phoneName);
+	            	ImageView avatarView =  (ImageView) v.findViewById(R.id.avatar);
+	        		iconLoader.loadImage(wifinetwork.SSID, true, avatarView, false, true, true);
+	        		TextView deviceStatus =  (TextView) v.findViewById(R.id.last_message_timestamp);
+	        		deviceStatus.setText(wifinetwork.BSSID);
+	        		TextView chatStatus = (TextView) v.findViewById(R.id.last_message);
+	        		String stat =  wifinetwork.BSSID ;
+	        		deviceStatus.setText(stat);
+	        		if(!requestDialogShown)
+	        		{
+	        			requestDialogShown =  true ;
+	        			HikeDialog.showDialog(getActivity(), HikeDialog.OFFLINE_USER_REQUEST,  new HikeDialog.HikeDialogListener()
+						{
+							@Override
+							public void onSucess(Dialog dialog)
+							{
+								
+							}
+
+							@Override
+							public void negativeClicked(Dialog dialog)
+							{
+								
+								dialog.dismiss();
+							}
+
+							@Override
+							public void positiveClicked(Dialog dialog)
+							{
+								dialog.dismiss();
+								Boolean status  =  ((DeviceActionListener)getActivity()).connectToHotspot(wifinetwork);
+						    	if(status)
+						    		Toast.makeText(getActivity(), "Connected to" +  wifinetwork.SSID, Toast.LENGTH_SHORT).show();
+						    	else
+						    		Toast.makeText(getActivity(), "Connection Failed" , Toast.LENGTH_SHORT).show();
+							}
+
+							@Override
+							public void neutralClicked(Dialog dialog)
+							{
+								// TODO Auto-generated method stub
+								
+							}
+						}, (Object[]) new String[]{phoneName});
+
+	        		}
+	            }
+            
 
             return v;
 

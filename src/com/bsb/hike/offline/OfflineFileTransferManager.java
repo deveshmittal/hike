@@ -59,6 +59,7 @@ public class OfflineFileTransferManager {
 	private volatile boolean isOfflineFileTransferFinished;
 	private volatile boolean isOfflineTextTransferFinished;
 	private WifiP2pDevice connectedDevice;
+	private ClientScanResult clientscanResult;
 	private final int fileTransferPort = 18988;
 	private final int textMessagePort = 18999;
 	private final int SOCKET_TIMEOUT = 5000;
@@ -241,6 +242,8 @@ public class OfflineFileTransferManager {
 	    new TextReceiveAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
 	    this.connectedDevice = connectedDevice;
 	}
+	
+	
 	
 	public void switchOffReceivers()
 	{
