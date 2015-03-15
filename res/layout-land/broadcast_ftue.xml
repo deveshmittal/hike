@@ -28,7 +28,7 @@
         android:layout_marginRight="122dp"
         android:textSize="17sp"
         android:layout_gravity="center"
-        android:textStyle="italic"
+        android:textStyle="bold"
         android:textColor="#333333" />
     
     </LinearLayout>
@@ -38,7 +38,7 @@
         android:layout_width="120dp"
         android:layout_height="43dp"
         android:layout_marginTop="27dp"
-        android:background="@drawable/signup_button"
+        android:background="@drawable/bg_blue_btn"
         android:text="@string/got_it"
         android:textColor="#ffffff"
         android:textSize="13sp"

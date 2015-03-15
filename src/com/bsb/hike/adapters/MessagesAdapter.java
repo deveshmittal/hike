@@ -2100,7 +2100,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 					String participantMsisdn = metadata.getMsisdn();
 					String name = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participantMsisdn);
-					message = Utils.getFormattedParticipantInfo(String.format(context.getString(R.string.left_conversation), name), name);
+					message = Utils.getFormattedParticipantInfo(String.format(context.getString(conversation instanceof BroadcastConversation ? R.string.removed_from_broadcast : R.string.left_conversation), name), name);
 				}
 				else
 				{
@@ -2183,8 +2183,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				String userMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
-				String message = String.format(context.getString(convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name
-						: R.string.change_group_image), participantName);
+				String message;
+				if (convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
+				{
+					message = String.format(context.getString(convMessage.isBroadcastConversation() ? R.string.change_broadcast_name : R.string.change_group_name), participantName);
+				}
+				else
+				{
+					message = String.format(context.getString(R.string.change_group_image), participantName);
+				}
 
 				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
 				int icRes;
@@ -2192,7 +2199,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					if (convMessage.isBroadcastConversation())
 					{
-						icRes = R.drawable.ic_broadcast_icondark;
+						icRes = R.drawable.ic_broadcast_2;
 					}
 					else
 					{
@@ -2387,7 +2394,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (showBlackIcon)
 				{
-					broadcastIndicator.setImageResource(R.drawable.ic_broadcast_icondark);
+					broadcastIndicator.setImageResource(R.drawable.ic_broadcast_system_message);
 					broadcastIndicator.setScaleType(ScaleType.CENTER);
 					broadcastIndicator.setVisibility(View.VISIBLE);
 				}
@@ -3069,7 +3076,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void setIconForSentMessage(ConvMessage message, ImageView status, int tickResId, int smsDrawableResId, int boltDrawableResId)
 	{
-		if (conversation.isOnhike() && !(conversation instanceof GroupConversation))
+		if (conversation.isOnhike() && !(conversation instanceof GroupConversation) && !message.isBroadcastMessage())
 		{
 			if (message.isSMS())
 			{
