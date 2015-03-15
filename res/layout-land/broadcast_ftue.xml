@@ -16,8 +16,7 @@
             android:layout_height="96dp"
             android:layout_marginLeft="122dp"
             android:background="@drawable/ftue_broadcast_bg"
-            android:src="@drawable/ic_default_avatar_broadcast"
-            android:scaleType="centerInside" />
+            android:src="@drawable/ic_default_avatar_broadcast" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/broadcast_info"
