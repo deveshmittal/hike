@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+\ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
@@ -105,7 +106,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
         }
         else if(WifiP2pManager.WIFI_P2P_DISCOVERY_CHANGED_ACTION.equals(action))
         {
-            int state  =   intent.getIntExtra(WifiP2pManager.EXTRA_DISCOVERY_STATE,1);
+            int state = intent.getIntExtra(WifiP2pManager.EXTRA_DISCOVERY_STATE,1);
             if(state==1)
             {
                 if(WiFiDirectActivity.isOfflineFileTransferOn)
@@ -115,5 +116,10 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                 }
             }
         }
+        else if(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action))
+        {
+        	//connectionManager.getDistinctWifiNetworks();
+        }
+        
     }
 }

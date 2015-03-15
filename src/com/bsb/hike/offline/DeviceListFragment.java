@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.util.TextUtils;
+
+import android.app.Dialog;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -51,6 +53,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.utils.Logger;
 
 /**
@@ -129,6 +132,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
      */
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
+    	
     	if(syncMsisdn == null)
     		syncMsisdn = new Object();
     	synchronized(syncMsisdn){
@@ -200,8 +204,11 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	            */
 	    		//  mode - 0  wifi-direct 
 	    		//  mode  - 1 wifi hotspot 
+	    		
+	    		
+	    	
 	    		mode = 1;
-	    		((DeviceActionListener) getActivity()).connect(config, 0, currentDevice,mode);
+	    		((DeviceActionListener) getActivity()).connect(config, 0, currentDevice,mode, intent);
     	     }
     	}
     }
@@ -345,7 +352,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         		isReconnecting = false;
         		if(peers.contains(WiFiDirectActivity.connectingToDevice))
         			((DeviceActionListener) getActivity()).connect(WiFiDirectActivity.connectingDeviceConfig,
-        															++(WiFiDirectActivity.tries), WiFiDirectActivity.connectingToDevice, mode);
+        															++(WiFiDirectActivity.tries), WiFiDirectActivity.connectingToDevice, mode,null);
         		else
         			Toast.makeText(getActivity(), "Device not present in peer list!!", Toast.LENGTH_SHORT).show();
         	}
@@ -443,7 +450,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 				WifiP2pDevice groupOwner  =  group.getOwner();
 	    		connectedDevice = groupOwner;
 	    	}
-	    	OfflineFileTransferManager.getInstance().switchOnReceivers(this.getActivity(), connectedDevice);
+	    	OfflineFileTransferManager.getInstance().switchOnReceivers(this.getActivity(), connectedDevice.deviceName);
     	}
 	    if(intent != null)
 	    {

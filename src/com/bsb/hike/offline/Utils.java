@@ -17,7 +17,7 @@ import android.util.Log;
 
 public class Utils {
 
-	private final static String p2pInt = "p2p";
+	private final static String p2pInt = "wlan0";
 
 	public static String getIPFromMac(String MAC) {
 		/*

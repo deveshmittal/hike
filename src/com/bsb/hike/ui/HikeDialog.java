@@ -46,6 +46,10 @@ public class HikeDialog
 	public static final int HIKE_UPGRADE_DIALOG = 8;
 
 	public static final int VOIP_INTRO_DIALOG = 9;
+	
+	public static final int OFFLINE_USER_REQUEST =  10;
+	
+	public static final int SHOW_OFFLINE_CONNECTION_STATUS =  11;
 
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -73,6 +77,11 @@ public class HikeDialog
 			return showHikeUpgradeDialog(context, data);
 		case VOIP_INTRO_DIALOG:
 			return showVoipFtuePopUp(context, listener, data);
+		case OFFLINE_USER_REQUEST:
+			return showHikeOfflineUserRequest(context, listener, data);
+		case SHOW_OFFLINE_CONNECTION_STATUS:
+			return showHikeOfflineUserRequestResponse(context, listener, data);
+			
 		}
 
 		return null;
@@ -491,6 +500,74 @@ public class HikeDialog
 		return dialog;
 	}
 
+	private static Dialog showHikeOfflineUserRequest(Context context , final HikeDialogListener listener ,  Object ... data )
+	{
+		String name = "";
+		try
+		{
+			name = (String) data[0];
+		}
+		catch (ClassCastException ex)
+		{
+			throw new IllegalArgumentException("Make sure You are sending one string , that is name to fill with in dialog");
+		}
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.accept_offline_chat_request);
+		dialog.setCancelable(true);
+		TextView heading = (TextView) dialog.findViewById(R.id.offlinerequest);
+		heading.setText(name   +" " + context.getString(R.string.offline_messaging_request));
+		View no = dialog.findViewById(R.id.noButton);
+		View yes = dialog.findViewById(R.id.yesButton);
+		OnClickListener clickListener = new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View arg0)
+			{
+				switch (arg0.getId())
+				{
+				case R.id.noButton:
+					if (listener != null)
+					{
+						listener.negativeClicked(dialog);
+					}
+					else
+					{
+						dialog.dismiss();
+					}
+					break;
+				case R.id.yesButton:
+					if (listener != null)
+					{
+						listener.positiveClicked(dialog);
+					}
+					else
+					{
+						dialog.dismiss();
+					}
+					break;
+				}
+
+			}
+		};
+		no.setOnClickListener(clickListener);
+		yes.setOnClickListener(clickListener);
+		dialog.show();
+		return dialog;
+		
+	}
+	
+	private static Dialog showHikeOfflineUserRequestResponse(Context context , final HikeDialogListener listener ,  Object ... data )
+	{
+		
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.connecting_offline);
+		dialog.setCancelable(true);
+		dialog.show();
+		return dialog;
+		
+	}
+	
 
 	public static interface HikeDialogListener
 	{

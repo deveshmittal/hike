@@ -50,7 +50,7 @@ import android.widget.Toast;
 
 public class OfflineFileTransferManager {
 	private final String TAG = "OfflineFileTransferManager";
-	public static final String IP_SERVER = "192.168.49.1";
+	public static final String IP_SERVER = "192.168.43.1";
 	private static OfflineFileTransferManager _instance;
 	private BlockingQueue<OfflineInfoPacket> textMessageQueue = new LinkedBlockingQueue<OfflineInfoPacket>();
 	private BlockingQueue<OfflineInfoPacket> fileTransferQueue = new LinkedBlockingQueue<OfflineInfoPacket>();
@@ -58,7 +58,8 @@ public class OfflineFileTransferManager {
 	private FileTransferThread fileTransferThread;
 	private volatile boolean isOfflineFileTransferFinished;
 	private volatile boolean isOfflineTextTransferFinished;
-	private WifiP2pDevice connectedDevice;
+	private String connectedDevice;
+	private ClientScanResult clientscanResult;
 	private final int fileTransferPort = 18988;
 	private final int textMessagePort = 18999;
 	private final int SOCKET_TIMEOUT = 5000;
@@ -234,13 +235,16 @@ public class OfflineFileTransferManager {
 		this.isOfflineTextTransferFinished = isOfflineTextTransferFinished;
 	}
 	
-	public void switchOnReceivers(Activity UIToUpdate, WifiP2pDevice connectedDevice)
+	public void switchOnReceivers(Activity UIToUpdate, String deviceName)
 	{
 		isConnected = true;
+		this.connectedDevice = deviceName;
 	    new FileReceiveServerAsyncTask(UIToUpdate).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
 	    new TextReceiveAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-	    this.connectedDevice = connectedDevice;
+	    
 	}
+	
+	
 	
 	public void switchOffReceivers()
 	{
@@ -310,13 +314,13 @@ public class OfflineFileTransferManager {
 	            	client.close();
 	            	message = (new String(msg));
 	            	
-	            	if(connectedDevice == null)
+	            	if(TextUtils.isEmpty(connectedDevice))
 	                {
 	                	//Toast.makeText(getActivity(), "Proper Connection could not be established. Disconnecting.. Please Retry!!", Toast.LENGTH_SHORT).show();
 	                	//((DeviceActionListener) getActivity()).disconnect();
 	                	return null;
 	                }
-	    			ConvMessage convMessage =  new ConvMessage(message,connectedDevice.deviceName,System.currentTimeMillis()/1000,ConvMessage.State.RECEIVED_UNREAD);
+	    			ConvMessage convMessage =  new ConvMessage(message,connectedDevice,System.currentTimeMillis()/1000,ConvMessage.State.RECEIVED_UNREAD);
 	    			convMessage.setMappedMsgID(System.currentTimeMillis());
 	    			if(convMessage.getMessage().compareTo("Nudge!")==0)
 	    			{
@@ -439,7 +443,7 @@ public class OfflineFileTransferManager {
 	                path =  f.getAbsolutePath();
 					String result = path;
 					if (path != null) {
-			            if(connectedDevice == null)
+			            if(!TextUtils.isEmpty(connectedDevice))
 			            {
 			            	//Toast.makeText(getActivity(), "Proper Connection could not be established. Disconnecting.. Please Retry!!", Toast.LENGTH_SHORT).show();
 			            	//((DeviceActionListener) getActivity()).disconnect();
@@ -453,7 +457,7 @@ public class OfflineFileTransferManager {
 							String quality = null;
 							try {
 								metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.APK, null, null, -1, f.getPath(), (int) f.length(), quality);
-								convMessage = createConvMessage(f.getName(), metadata, connectedDevice.deviceName, false);
+								convMessage = createConvMessage(f.getName(), metadata, connectedDevice, false);
 								convMessage.setMappedMsgID(System.currentTimeMillis());
 								HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
 								
@@ -492,7 +496,7 @@ public class OfflineFileTransferManager {
 								try 
 								{
 									metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.IMAGE, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
-									convMessage = createConvMessage(f.getName(), metadata, connectedDevice.deviceName, false);
+									convMessage = createConvMessage(f.getName(), metadata, connectedDevice, false);
 									convMessage.setMappedMsgID(System.currentTimeMillis());
 									HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
 									long msgId = convMessage.getMsgID();
@@ -527,7 +531,7 @@ public class OfflineFileTransferManager {
 								ConvMessage convMessage = null;
 								try {
 									metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.VIDEO, thumbnailString, thumbnail, -1, f.getPath(), (int) f.length(), quality);
-									convMessage = createConvMessage(f.getName(), metadata, connectedDevice.deviceName, false);
+									convMessage = createConvMessage(f.getName(), metadata, connectedDevice, false);
 									convMessage.setMappedMsgID(System.currentTimeMillis());
 									HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
 									
@@ -551,7 +555,7 @@ public class OfflineFileTransferManager {
 							String quality = null;
 							try {
 								metadata = getFileTransferMetadata(f.getName(), null, HikeFileType.AUDIO, null, null, -1, f.getPath(), (int) f.length(), quality);
-								convMessage = createConvMessage(f.getName(), metadata, connectedDevice.deviceName, false);
+								convMessage = createConvMessage(f.getName(), metadata, connectedDevice, false);
 								convMessage.setMappedMsgID(System.currentTimeMillis());
 								HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
 								

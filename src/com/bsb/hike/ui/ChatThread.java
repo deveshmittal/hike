@@ -6964,6 +6964,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
         OfflineInfoPacket offlineInfoPacket = new OfflineInfoPacket(null, true, message, hostAddress, type);
         OfflineFileTransferManager.getInstance().sendMessage(offlineInfoPacket);	
 	}
+	
 	private void initialiseOfflineFileTransfer(String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration,
 			boolean isForwardingFile, int attachementType,  String deviceAddress, int fType)
 	{
