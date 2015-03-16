@@ -11,23 +11,21 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.media.MediaScannerConnection;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
 import com.bsb.hike.photos.views.CanvasImageView.OnDoodleStateChangeListener;
-import com.bsb.hike.platform.content.PlatformContentUtils;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Utils;
@@ -107,7 +105,16 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		case DisplayMetrics.DENSITY_HIGH:
 			return HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_WIDTH_MDPI;
 		default:
-			return HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_WIDTH_HDPI;
+			boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+			
+			if( !hasBackKey) {
+			    // Do whatever you need to do, this device has a navigation bar
+				return HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_WIDTH_MDPI;
+			}
+
+			else{
+				return HikeConstants.HikePhotos.PREVIEW_THUMBNAIL_WIDTH_HDPI;
+			}
 
 		}
 
