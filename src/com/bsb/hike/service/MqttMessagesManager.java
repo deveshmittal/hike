@@ -1707,6 +1707,7 @@ public class MqttMessagesManager
 		{
 			boolean enablePhoto = data.getBoolean(HikeConstants.Extras.ENABLE_PHOTOS);
 			HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.ACCOUNT_SETTINGS).saveData(HikeConstants.Extras.ENABLE_PHOTOS, enablePhoto);
+			HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.ACCOUNT_SETTINGS).saveData(HikeConstants.SHOW_PHOTOS_RED_DOT, true);
 		}
 		
 		editor.commit();
