@@ -586,7 +586,6 @@
     <string name="audio">AUDIO</string>
     <string name="location">Location</string>
     <string name="places_api_key">AIzaSyBMpi-RNcG5enYGvdag0F4UXTmboawXDZM</string>
-    <string name="enter_valid_group_name">Please enter a valid group name</string>
     <string name="add_as_friend_profile">Would you like to add %1$s as a friend to share updates?</string>
     <string name="request_pending">Friend request pending</string>
     <string name="remove_from_friends">Remove from your friend list</string>
@@ -1412,4 +1411,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="platform_error_subtext">Please Check your Internet Connection</string>
 	<string name="added_in_group">You have already added this contact in group</string>
 	<string name="added_in_broadcast">You have already added this contact in broadcast list</string>
+	<string name="enter_valid_group_name">Group name cannot be empty</string>
+	<string name="enter_valid_broadcast_name">Broadcast name cannot be empty</string>
 </resources>
