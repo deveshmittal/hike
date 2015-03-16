@@ -203,10 +203,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	            });
 	            */
 	    		//  mode - 0  wifi-direct 
-	    		//  mode  - 1 wifi hotspot 
-	    		
-	    		
-	    	
+	    		//  mode  - 1 wifi hotspot
 	    		mode = 1;
 	    		((DeviceActionListener) getActivity()).connect(config, 0, currentDevice,mode, intent);
     	     }
