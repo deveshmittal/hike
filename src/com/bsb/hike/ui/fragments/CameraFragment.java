@@ -191,7 +191,7 @@ public class CameraFragment extends SherlockFragment
 						else
 						{
 							//To Do Out Of Memory Handling
-							Toast.makeText(getActivity(), "Unable to capture Image", Toast.LENGTH_SHORT);
+							Toast.makeText(getActivity(), HikeConstants.HikePhotos.PHOTOS_OOM_CAMERA_MESSAGE, Toast.LENGTH_SHORT).show();
 						}
 					}
 				}

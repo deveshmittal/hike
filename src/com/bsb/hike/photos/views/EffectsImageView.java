@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.photos.HikeEffectsFactory;
 import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
 import com.bsb.hike.photos.HikePhotosUtils;
@@ -65,7 +66,7 @@ public class EffectsImageView extends ImageView
 		{
 			if (!HikeEffectsFactory.applyFilterToBitmap(bitmap, listener, currentFilter, true))
 			{
-				Toast.makeText(getContext(), "Unable to save Image!\nNot Enough Memory On Device.", Toast.LENGTH_SHORT);
+				Toast.makeText(getContext(), HikeConstants.HikePhotos.PHOTOS_OOM_SAVE_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
 				IntentManager.openHomeActivity(getContext(), true);
 
 			}
@@ -93,7 +94,7 @@ public class EffectsImageView extends ImageView
 		currentFilter = filter;
 		if (!HikeEffectsFactory.applyFilterToBitmap(originalImage, listener, filter, false))
 		{
-			Toast.makeText(getContext(), "Unable to Load Image!\nNot Enough Memory On Device.", Toast.LENGTH_SHORT);
+			Toast.makeText(getContext(), HikeConstants.HikePhotos.PHOTOS_OOM_LOAD_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
 			IntentManager.openHomeActivity(getContext(), true);
 
 		}

@@ -125,7 +125,7 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 			}
 			else
 			{
-				Toast.makeText(getContext(), "Unable to save Doodle!\nNot Enough Memory On Device.", Toast.LENGTH_SHORT);
+				Toast.makeText(getContext(),HikeConstants.HikePhotos.DOODLE_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
 			}
 			
 
