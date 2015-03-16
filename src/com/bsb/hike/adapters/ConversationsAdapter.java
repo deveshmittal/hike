@@ -104,7 +104,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private ContactFilter contactFilter;
 
-	public Set<String> conversationsMsisdns;
+	private Set<String> conversationsMsisdns;
 
 	private boolean isSearchModeOn = false;
 
@@ -554,7 +554,6 @@ public class ConversationsAdapter extends BaseAdapter
 	public void removeSearch()
 	{
 		isSearchModeOn = false;
-		conversationsMsisdns.clear();
 		convSpanStartIndexes.clear();
 		refinedSearchText = null;
 		/*
