@@ -665,7 +665,6 @@ public class ConversationsAdapter extends BaseAdapter
 			{
 				try
 				{
-					String name = info.getContactName();
 					boolean found = false;
 					if (textToBeFiltered.equals("broadcast") && Utils.isBroadcastConversation(info.getMsisdn()))
 					{
@@ -675,18 +674,9 @@ public class ConversationsAdapter extends BaseAdapter
 					{
 						found = true;
 					}
-					else if (TextUtils.isEmpty(name))
-					{
-						if (info.getMsisdn().contains(textToBeFiltered))
-						{
-							found = true;
-							int startIndex = info.getMsisdn().indexOf(textToBeFiltered);
-							convSpanStartIndexes.put(info.getMsisdn(), startIndex);
-						}
-					}
 					else
 					{
-						name = name.toLowerCase();
+						String name = info.getLabel().toLowerCase();
 						int startIndex = 0;
 						if (name.startsWith(textToBeFiltered))
 						{
@@ -909,7 +899,6 @@ public class ConversationsAdapter extends BaseAdapter
 
 		TextView contactView = viewHolder.headerText;
 		String name = conversation.getLabel();
-
 		Integer startSpanIndex = convSpanStartIndexes.get(conversation.getMsisdn());
 		if(isSearchModeOn && startSpanIndex!=null)
 		{
