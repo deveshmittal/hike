@@ -239,10 +239,10 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			tempBitmap = null;
 		}
 
-		HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(true);
-		HikeCameraActivity.this.findViewById(R.id.btngallery).setEnabled(true);
-		HikeCameraActivity.this.findViewById(R.id.btnflip).setEnabled(true);
-		HikeCameraActivity.this.findViewById(R.id.btntoggleflash).setEnabled(true);
+		HikeCameraActivity.this.findViewById(R.id.btntakepic).setClickable(true);
+		HikeCameraActivity.this.findViewById(R.id.btngallery).setClickable(true);
+		HikeCameraActivity.this.findViewById(R.id.btnflip).setClickable(true);
+		HikeCameraActivity.this.findViewById(R.id.btntoggleflash).setClickable(true);
 	}
 
 	@Override
@@ -253,10 +253,10 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		switch (viewId)
 		{
 		case R.id.btntakepic:
-			HikeCameraActivity.this.findViewById(R.id.btntakepic).setEnabled(false);
-			HikeCameraActivity.this.findViewById(R.id.btngallery).setEnabled(false);
-			HikeCameraActivity.this.findViewById(R.id.btnflip).setEnabled(false);
-			HikeCameraActivity.this.findViewById(R.id.btntoggleflash).setEnabled(false);
+			HikeCameraActivity.this.findViewById(R.id.btntakepic).setClickable(false);
+			HikeCameraActivity.this.findViewById(R.id.btngallery).setClickable(false);
+			HikeCameraActivity.this.findViewById(R.id.btnflip).setClickable(false);
+			HikeCameraActivity.this.findViewById(R.id.btntoggleflash).setClickable(false);
 			cameraFragment.cancelAutoFocus();
 			cameraFragment.takePicture();
 			tempBitmap = ((TextureView) cameraFragment.getCameraView().previewStrategy.getWidget()).getBitmap();
@@ -455,10 +455,9 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 			widthBmp = widthBmp > srcBmp.getWidth() ? srcBmp.getWidth() : widthBmp;
 
-			Bitmap dstBmp = HikePhotosUtils.createBitmap(srcBmp, srcBmp.getWidth() / 2 - (widthBmp / 2), bmpY, widthBmp, widthBmp,false,false,true,true);
-			
-			
-			//Bitmap dstBmp = Bitmap.createBitmap(srcBmp, srcBmp.getWidth() / 2 - (widthBmp / 2), bmpY, widthBmp, widthBmp);
+			Bitmap dstBmp = HikePhotosUtils.createBitmap(srcBmp, srcBmp.getWidth() / 2 - (widthBmp / 2), bmpY, widthBmp, widthBmp, false, false, true, true);
+
+			// Bitmap dstBmp = Bitmap.createBitmap(srcBmp, srcBmp.getWidth() / 2 - (widthBmp / 2), bmpY, widthBmp, widthBmp);
 
 			// ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.containerImageView);
 			//

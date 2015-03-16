@@ -169,7 +169,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE };
 
-	private boolean photosEnabled = true;
+	private boolean photosEnabled;
 
 	private static MenuItem searchItem;
 
@@ -222,7 +222,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			initialiseHomeScreen(savedInstanceState);
 		}
 		
-//		photosEnabled = accountPrefs.getBoolean(HikeConstants.Extras.ENABLE_PHOTOS, false);
+		photosEnabled = accountPrefs.getBoolean(HikeConstants.Extras.ENABLE_PHOTOS, false);
 		
 		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());
 	}
@@ -2023,7 +2023,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					newConversationIndicator.setVisibility(View.VISIBLE);
 					newConversationIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
 				}
-				else if (photosEnabled && accountPrefs.getBoolean(HikeConstants.SHOW_PHOTOS_RED_DOT, true))
+				else if (photosEnabled && accountPrefs.getBoolean(HikeConstants.SHOW_PHOTOS_RED_DOT, false))
 				{
 					newConversationIndicator.setText("1");
 					newConversationIndicator.setVisibility(View.VISIBLE);

@@ -141,7 +141,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		mCircularProgress.resetProgress();
 
 		mFragmentView.findViewById(R.id.retryButton).setVisibility(View.GONE);
-		
+
 		mFragmentView.findViewById(R.id.rounded_mask).setVisibility(View.GONE);
 
 		if (imagePath != null)
@@ -310,6 +310,10 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 				@Override
 				public void run()
 				{
+					if (isPaused)
+					{
+						return;
+					}
 					updateProgress(10f);
 					changeTextWithAnimation(text1, getString(R.string.photo_dp_saved));
 				}
