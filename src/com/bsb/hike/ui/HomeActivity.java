@@ -606,11 +606,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private OnQueryTextListener onQueryTextListener = new OnQueryTextListener()
 	{
-
 		@Override
 		public boolean onQueryTextSubmit(String query)
 		{
-			return false;
+			Utils.hideSoftKeyboard(getApplicationContext(), searchItem.getActionView());
+			return true;
 		}
 
 		@Override
