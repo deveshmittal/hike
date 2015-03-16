@@ -498,7 +498,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 
 		final SearchView searchView = new SearchView(getSupportActionBar().getThemedContext());
-		searchView.setQueryHint(getString(R.string.search_hint));
 		searchView.setIconifiedByDefault(false);
 		searchView.setIconified(false);
 		searchView.setOnQueryTextListener(onQueryTextListener);
