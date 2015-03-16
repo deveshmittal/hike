@@ -611,6 +611,12 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 				lastSeenScheduler.start(true);
 			}
 		}
+
+		@Override
+		public void makeCompleteListDone() {
+			// TODO Auto-generated method stub
+			
+		}
 	};
 
 	@Override
