@@ -786,8 +786,11 @@ public class Utils
 			}
 		}
 		Collections.sort(groupParticipants);
-
-		String name = groupParticipants.get(0).getContactInfo().getFirstName();
+		String name = null;
+		if (groupParticipants.size() > 0)
+		{
+			name = groupParticipants.get(0).getContactInfo().getFirstName();
+		}
 		switch (groupParticipants.size())
 		{
 		case 0:
