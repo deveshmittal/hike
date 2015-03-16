@@ -789,7 +789,7 @@ public class Utils
 		String name = null;
 		if (groupParticipants.size() > 0)
 		{
-			name = groupParticipants.get(0).getContactInfo().getFirstName();
+			name = extractFullFirstName(groupParticipants.get(0).getContactInfo().getFirstNameAndSurname());
 		}
 		switch (groupParticipants.size())
 		{
@@ -800,7 +800,7 @@ public class Utils
 		default:
 			for (int i=1; i<groupParticipants.size(); i++)
 			{
-				name += ", " + groupParticipants.get(i).getContactInfo().getFirstName();
+				name += ", " + extractFullFirstName(groupParticipants.get(i).getContactInfo().getFirstNameAndSurname());
 			}
 			return name;
 		}
@@ -5522,5 +5522,28 @@ public class Utils
 		}
 		
 		return maxVal;
+	}
+	
+	public static String extractFullFirstName(String fullName)
+	{
+		String fullFirstName = null;
+		
+		if(TextUtils.isEmpty(fullName))
+		{
+			return "";
+		}
+		
+		String[] args = fullName.trim().split(" ", 3);
+
+		if(args.length > 1)
+		{
+			// if contact has some prefix, name would be prefix + first-name else first-name + first word of last name		
+			fullFirstName = args[0] + " " + args[1];
+		}
+		else
+		{
+			fullFirstName = fullName;
+		}
+		return fullFirstName;
 	}
 }
