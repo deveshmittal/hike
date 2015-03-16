@@ -1947,6 +1947,19 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				lastSeenScheduler.start(true);
 			}
 		}
+
+		@Override
+		public void completeListFetched() {
+			if (adapter != null)
+			{
+				if (adapter.getCompleteList().size() <= 0)
+				{
+					View selectAllCont = findViewById(R.id.select_all_container);
+					selectAllCont.setVisibility(View.GONE);
+				}
+			}
+			
+		}
 	};
 
 	@Override

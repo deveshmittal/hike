@@ -29,7 +29,6 @@
         android:layout_marginTop="15dp"
         android:background="@drawable/bg_country_search_bar"
         android:drawablePadding="9dp"
-        android:textColorHint="@color/gray"
         android:gravity="center_vertical"
         android:maxLength="@integer/max_length_group_name"
         android:paddingLeft="10dp"
