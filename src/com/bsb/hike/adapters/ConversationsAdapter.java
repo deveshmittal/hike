@@ -1001,14 +1001,7 @@ public class ConversationsAdapter extends BaseAdapter
 		updateViewsRelatedToMessageState(parentView, message, conversation);
 		
 		TextView tsView = viewHolder.timeStamp;
-		if(conversationsMsisdns!=null && !conversationsMsisdns.contains(conversation.getMsisdn()))
-		{
-			tsView.setText("");
-		}
-		else
-		{
-			tsView.setText(message.getTimestampFormatted(true, context));
-		}
+		tsView.setText(message.getTimestampFormatted(true, context));
 	}
 
 	public void updateViewsRelatedToMessageState(View parentView, ConvMessage message, Conversation conversation)
