@@ -241,7 +241,6 @@ public class WifiP2pConnectionManager implements ChannelListener
 	
 	public HashMap<String, ScanResult> getDistinctWifiNetworks()
 	{
-		
 		wifiManager.startScan();
    	 	List<ScanResult> results = wifiManager.getScanResults();
    	
@@ -265,6 +264,7 @@ public class WifiP2pConnectionManager implements ChannelListener
 	   	}
 	   	//wifiP2pConnectionManagerListener.updateWifiNetworks(distinctNetworks);
 	   	return distinctNetworks;
+		//return null;
    }
 	
 	/*public void getClientList(boolean onlyReachables, FinishScanListener finishListner) {
