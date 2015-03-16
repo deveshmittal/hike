@@ -310,6 +310,10 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 				@Override
 				public void run()
 				{
+					if (isPaused)
+					{
+						return;
+					}
 					updateProgress(10f);
 					changeTextWithAnimation(text1, getString(R.string.photo_dp_saved));
 				}
