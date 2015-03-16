@@ -519,6 +519,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					mainFragment.setupSearch();
 		        }
 				toggleMenuItems(menu, false);
+				showProductPopup(ProductPopupsConstants.PopupTriggerPoints.SEARCH.ordinal());
 				setupSearchActionBar();
 				return true;
 			}
