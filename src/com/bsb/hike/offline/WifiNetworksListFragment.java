@@ -72,17 +72,11 @@ public class WifiNetworksListFragment extends ListFragment {
     	super.onActivityCreated(savedInstanceState);
     	this.setListAdapter(new WiFiNetworkListAdapter(getActivity(), R.layout.conversation_item, wifipeers));
     }
-	
+
 	@Override
-	public void onStart() {
-		super.onStart();
-	}
-	
-	@Override
-	public void onDestroy() {
-		// TODO Auto-generated method stub
-		//updateNetwork.interrupt();
-		super.onDestroy();
+	public void onResume() {
+		runNetworkScan();
+		super.onResume();
 	}
 	
 	@Override
@@ -91,11 +85,6 @@ public class WifiNetworksListFragment extends ListFragment {
 		super.onPause();
 	}
 	
-	@Override
-	public void onResume() {
-		runNetworkScan();
-		super.onResume();
-	}
 	// starts a network scan for every 2sec
 	private void runNetworkScan()
 	{
@@ -220,6 +209,7 @@ public class WifiNetworksListFragment extends ListFragment {
 							public void negativeClicked(Dialog dialog)
 							{
 								dialog.dismiss();
+								((DeviceActionListener)getActivity()).forgetWifiNetwork();
 								//requestDialogShown = false;
 							}
 							

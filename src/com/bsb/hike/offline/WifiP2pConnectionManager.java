@@ -433,6 +433,12 @@ public class WifiP2pConnectionManager implements ChannelListener
 	public void resetWifi(){
 		wifiManager.setWifiEnabled(false);
 		wifiManager.setWifiEnabled(true);
+		//wifiManager.removeNetwork(netId)
+	}
+	
+	public void forgetWifiNetwork(){
+		int netId = wifiManager.getConnectionInfo().getNetworkId();
+		wifiManager.removeNetwork(netId);
 	}
 	
 	public void startWifi()

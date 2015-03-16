@@ -21,4 +21,6 @@ public interface DeviceActionListener {
 	void startScan();
 
 	void resetWifi();
+	
+	void forgetWifiNetwork();
 }

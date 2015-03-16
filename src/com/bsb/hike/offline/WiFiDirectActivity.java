@@ -418,7 +418,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 		{
 			int tries = 0;
 			
-			while(tries<10)
+			while(tries<15)
 			{
 				
 				tries++;
@@ -787,6 +787,11 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 	@Override
 	public void resetWifi() {
 		connectionManager.resetWifi();
+	}
+
+	@Override
+	public void forgetWifiNetwork() {
+	   connectionManager.forgetWifiNetwork();
 	}
 }
 
