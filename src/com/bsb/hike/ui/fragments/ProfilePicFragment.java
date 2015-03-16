@@ -141,7 +141,7 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 		mCircularProgress.resetProgress();
 
 		mFragmentView.findViewById(R.id.retryButton).setVisibility(View.GONE);
-		
+
 		mFragmentView.findViewById(R.id.rounded_mask).setVisibility(View.GONE);
 
 		if (imagePath != null)
