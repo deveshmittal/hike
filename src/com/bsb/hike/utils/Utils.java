@@ -4793,6 +4793,10 @@ public class Utils
 
 	public static String getFormattedDate(Context context, long timestamp)
 	{
+		if (timestamp < 0)
+		{
+			return "";
+		}
 		Date date = new Date(timestamp * 1000);
 		String format;
 		if (android.text.format.DateFormat.is24HourFormat(context))
@@ -4810,6 +4814,10 @@ public class Utils
 
 	public static String getFormattedTime(boolean pretty, Context context, long timestamp)
 	{
+		if (timestamp < 0)
+		{
+			return "";
+		}
 		Date date = new Date(timestamp * 1000);
 		if (pretty)
 		{

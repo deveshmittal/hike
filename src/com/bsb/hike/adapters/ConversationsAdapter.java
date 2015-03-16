@@ -590,7 +590,7 @@ public class ConversationsAdapter extends BaseAdapter
 					msg = context.getString(R.string.on_sms);
 				}
 				List<ConvMessage> messagesList = new ArrayList<ConvMessage>();
-				ConvMessage message = new ConvMessage(msg, contact.getMsisdn(), 0, State.RECEIVED_READ);
+				ConvMessage message = new ConvMessage(msg, contact.getMsisdn(), -1, State.RECEIVED_READ);
 				messagesList.add(message);
 				conv.setMessages(messagesList);
 				if (contact.isOnhike())
