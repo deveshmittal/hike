@@ -549,7 +549,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 		notifyDataSetChanged();
 		setEmptyView();
-		friendsListFetchedCallback.makeCompleteListDone();
+		friendsListFetchedCallback.completeListFetched();
 		
 		
 		

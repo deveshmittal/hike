@@ -57,7 +57,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	{
 		public void listFetched();
 		
-		public void makeCompleteListDone();
+		public void completeListFetched();
 	}
 
 	public static final int FRIEND_INDEX = 0;

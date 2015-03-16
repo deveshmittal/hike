@@ -1947,7 +1947,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 
 		@Override
-		public void makeCompleteListDone() {
+		public void completeListFetched() {
 			if (adapter != null)
 			{
 				if (adapter.getCompleteList().size() <= 0)

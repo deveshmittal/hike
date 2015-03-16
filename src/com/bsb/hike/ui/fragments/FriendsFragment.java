@@ -613,7 +613,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		}
 
 		@Override
-		public void makeCompleteListDone() {
+		public void completeListFetched() {
 			// TODO Auto-generated method stub
 			
 		}
