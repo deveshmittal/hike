@@ -1,31 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:paddingLeft="60dp"
+    android:paddingRight="60dp"
+    android:orientation="horizontal" 
+    android:paddingBottom="20dp">
 
-    <ImageView
+      
+     <ImageView
         android:id="@+id/broadcast_profile_image"
         android:layout_width="96dp"
         android:layout_height="96dp"
-        android:layout_marginBottom="78.5dp"
-        android:layout_marginLeft="97dp"
-        android:layout_marginTop="64.5dp"
+        android:layout_marginRight="33dp"
+        android:layout_centerVertical="true"
         android:src="@drawable/ic_default_avatar_broadcast" />
-
+     
     <LinearLayout
+        android:id="@+id/broadcast_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginRight="102dp"
-        android:layout_marginLeft="33dp" >
+        android:layout_toRightOf="@id/broadcast_profile_image"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true">
         
       <com.bsb.hike.view.CustomFontEditText
         android:id="@+id/broadcast_name"
-        android:layout_height="30dp"
-        android:layout_width="312dp"
-        android:layout_marginTop="77dp"
-        android:layout_marginBottom="6dp"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:textSize="18sp"
         android:layout_gravity="center_horizontal"
         android:background="@drawable/bg_country_search_bar"
         android:maxLength="@integer/max_length_group_name"
@@ -38,10 +42,8 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginBottom="87dp"
         android:text="@string/broadcast_participant_info"/>
      
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>
