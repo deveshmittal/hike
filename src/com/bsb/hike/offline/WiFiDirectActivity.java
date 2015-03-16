@@ -746,7 +746,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		connectionManager.enableDiscovery();
+		//connectionManager.enableDiscovery();
 	}
 	
 	@Override

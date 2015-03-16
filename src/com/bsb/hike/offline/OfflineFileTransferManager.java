@@ -444,7 +444,7 @@ public class OfflineFileTransferManager {
 	                path =  f.getAbsolutePath();
 					String result = path;
 					if (path != null) {
-			            if(!TextUtils.isEmpty(connectedDevice))
+			            if(TextUtils.isEmpty(connectedDevice))
 			            {
 			            	//Toast.makeText(getActivity(), "Proper Connection could not be established. Disconnecting.. Please Retry!!", Toast.LENGTH_SHORT).show();
 			            	//((DeviceActionListener) getActivity()).disconnect();

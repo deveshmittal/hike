@@ -75,15 +75,26 @@ public class WifiNetworksListFragment extends ListFragment {
 	
 	@Override
 	public void onStart() {
-		runNetworkScan();
 		super.onStart();
 	}
 	
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
-		updateNetwork.interrupt();
+		//updateNetwork.interrupt();
 		super.onDestroy();
+	}
+	
+	@Override
+	public void onPause() {
+		updateNetwork.interrupt();
+		super.onPause();
+	}
+	
+	@Override
+	public void onResume() {
+		runNetworkScan();
+		super.onResume();
 	}
 	// starts a network scan for every 2sec
 	private void runNetworkScan()
