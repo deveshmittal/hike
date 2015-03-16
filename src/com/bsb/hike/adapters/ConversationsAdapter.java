@@ -1464,15 +1464,18 @@ public class ConversationsAdapter extends BaseAdapter
 
 	public void remove(Conversation conv)
 	{
-		completeList.remove(conv);
-		conversationList.remove(conv);
-		if(conversationsMsisdns!=null)
+		if (conv != null)
 		{
-			conversationsMsisdns.remove(conv.getMsisdn());
-		}
-		if (phoneBookContacts != null)
-		{
-			phoneBookContacts.add(conv);
+			completeList.remove(conv);
+			conversationList.remove(conv);
+			if(conversationsMsisdns!=null)
+			{
+				conversationsMsisdns.remove(conv.getMsisdn());
+			}
+			if (phoneBookContacts != null)
+			{
+				phoneBookContacts.add(conv);
+			}
 		}
 	}
 
