@@ -20,6 +20,7 @@ import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StringUtils;
 import com.bsb.hike.utils.Utils;
 
 public class ConvMessage
@@ -478,27 +479,13 @@ public class ConvMessage
 		case PARTICIPANT_JOINED:
 			JSONArray arr = metadata.getGcjParticipantInfo();
 			String highlight = Utils.getGroupJoinHighlightText(arr, (GroupConversation) conversation);
-			this.mMessage = Utils.getParticipantAddedMessage(this, context, highlight);
+			this.mMessage = StringUtils.getParticipantAddedMessage(this, context, highlight);
 			break;
 		case PARTICIPANT_LEFT:
-			if (conversation instanceof BroadcastConversation)
-			{
-				this.mMessage = String.format(context.getString(R.string.removed_from_broadcast), ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn()));
-			}
-			else
-			{
-				this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn()));
-			}
+			this.mMessage = StringUtils.getParticipantRemovedMessage(conversation, context, ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn()));
 			break;
 		case GROUP_END:
-			if (conversation instanceof BroadcastConversation)
-			{
-				this.mMessage = context.getString(R.string.broadcast_list_end);
-			}
-			else
-			{
-				this.mMessage = context.getString(R.string.group_chat_end);
-			}
+			this.mMessage = StringUtils.getConversationEndedMessage(conversation, context);
 			break;
 		case USER_JOIN:
 			//This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.\
@@ -546,7 +533,7 @@ public class ConvMessage
 			
 			if (participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME)
 			{
-				this.mMessage = String.format(context.getString(conversation instanceof BroadcastConversation ? R.string.change_broadcast_name : R.string.change_group_name), participantName);
+				this.mMessage = StringUtils.getConversationNameChangedMessage(conversation, context, participantName);
 			}
 			else
 			{

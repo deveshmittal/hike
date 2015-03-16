@@ -67,6 +67,7 @@ import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.StringUtils;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationsAdapter extends BaseAdapter
@@ -1157,7 +1158,7 @@ public class ConversationsAdapter extends BaseAdapter
 		{
 			JSONArray participantInfoArray = metadata.getGcjParticipantInfo();
 			String highlight = Utils.getGroupJoinHighlightText(participantInfoArray, (GroupConversation) conversation);
-			markedUp = Utils.getParticipantAddedMessage(message, context, highlight);
+			markedUp = StringUtils.getParticipantAddedMessage(message, context, highlight);
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.DND_USER)
 		{
@@ -1223,18 +1224,11 @@ public class ConversationsAdapter extends BaseAdapter
 				// booted because of that reason
 				String participantMsisdn = metadata.getMsisdn();
 				String participantName = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participantMsisdn);
-				markedUp = String.format(context.getString(conversation instanceof BroadcastConversation ? R.string.removed_from_broadcast : R.string.left_conversation), participantName);
+				markedUp = StringUtils.getParticipantRemovedMessage(conversation, context, participantName);
 			}
 			else
 			{
-				if (conversation instanceof BroadcastConversation)
-				{
-					markedUp = context.getString(R.string.broadcast_list_end);
-				}
-				else
-				{
-					markedUp = context.getString(R.string.group_chat_end);
-				}
+				markedUp = StringUtils.getConversationEndedMessage(conversation, context);
 			}
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
@@ -1250,8 +1244,8 @@ public class ConversationsAdapter extends BaseAdapter
 				String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
-
-				markedUp = String.format(context.getString(conversation instanceof BroadcastConversation ? R.string.change_broadcast_name : R.string.change_group_name), participantName);
+				
+				markedUp = StringUtils.getConversationNameChangedMessage(conversation, context, participantName);
 			}
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS)

@@ -5449,35 +5449,6 @@ public class Utils
 		return null;
 	}
 	
-	public static String getParticipantAddedMessage(ConvMessage convMessage, Context context, String highlight)
-	{
-		String participantAddedMessage;
-		MessageMetadata metadata = convMessage.getMetadata();
-		if (convMessage.isBroadcastConversation())
-		{
-			if (metadata.isNewBroadcast())
-			{
-				participantAddedMessage = String.format(context.getString(R.string.new_broadcast_message), highlight);
-			}
-			else
-			{
-				participantAddedMessage = String.format(context.getString(R.string.add_to_broadcast_message), highlight);
-			}
-		}
-		else
-		{
-			if (metadata.isNewGroup())
-			{
-				participantAddedMessage = String.format(context.getString(R.string.new_group_message), highlight);
-			}
-			else
-			{
-				participantAddedMessage = String.format(context.getString(R.string.add_to_group_message), highlight);
-			}
-		}
-		return participantAddedMessage;
-	}
-	
 	public static String valuesToCommaSepratedString(ArrayList<Long> entries)
 	{
 		StringBuilder result = new StringBuilder("(");
