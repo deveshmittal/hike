@@ -1366,5 +1366,11 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="nux_completed">You\'ve already completed this activity.</string>
     <string name="holi">Happy Holi</string>
     <string name="terms_conditions_hint">Terms &amp; Conditions</string>
-	<string name="terms_conditions_title">Terms</string>
+    <string name="terms_conditions_title">Terms</string>
+    <string name="DOODLE_ERROR_MESSAGE">Unable to save Doodle!\nNot Enough Memory On Device.</string>
+    <string name="PHOTOS_OOM_SAVE_ERROR_MESSAGE">Unable to save Image!\nNot Enough Memory On Device.</string>
+    <string name="PHOTOS_OOM_LOAD_ERROR_MESSAGE">Unable to load Image!\nNot Enough Memory On Device.</string>
+    <string name="PHOTOS_OOM_RETRY_MESSAGE">Try Again!</string>
+    <string name="PHOTOS_OOM_CAMERA_MESSAGE">Unable to capture Image</string>
+
 </resources>

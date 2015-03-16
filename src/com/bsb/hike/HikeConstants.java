@@ -2386,15 +2386,7 @@ public class HikeConstants
 		
 		public static final int PHOTOS_PAGER_DOODLE_WEIGHT_SUM = 10000;
 		
-		public static final String DOODLE_ERROR_MESSAGE = "Unable to save Doodle!\nNot Enough Memory On Device.";
 		
-		public static final String PHOTOS_OOM_SAVE_ERROR_MESSAGE = "Unable to save Image!\nNot Enough Memory On Device.";
-		
-		public static final String PHOTOS_OOM_LOAD_ERROR_MESSAGE = "Unable to load Image!\nNot Enough Memory On Device.";
-		
-		public static final String PHOTOS_OOM_RETRY_MESSAGE = "Try Again!";
-		
-		public static final String PHOTOS_OOM_CAMERA_MESSAGE = "Unable to capture Image";
 		
 	}
 

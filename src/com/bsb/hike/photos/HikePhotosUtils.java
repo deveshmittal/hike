@@ -224,7 +224,7 @@ public class HikePhotosUtils
 					effectfilters.addFilter("EARLYBIRD", FilterType.EARLYBIRD);
 					effectfilters.addFilter("SHOLAY", FilterType.E1977);
 					effectfilters.addFilter("BRANNAN", FilterType.BRANNAN);
-					effectfilters.addFilter("Lo-Fi", FilterType.LO_FI);
+					effectfilters.addFilter("LO-FI", FilterType.LO_FI);
 					effectfilters.addFilter("INKWELL", FilterType.INKWELL);
 					effectfilters.addFilter("SEPIA", FilterType.SEPIA);
 					effectfilters.addFilter("GRAYSCALE", FilterType.GRAYSCALE);

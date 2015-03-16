@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.photos.HikeCameraHost;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.ui.HikeCameraActivity;
@@ -191,7 +192,7 @@ public class CameraFragment extends SherlockFragment
 						else
 						{
 							//To Do Out Of Memory Handling
-							Toast.makeText(getActivity(), HikeConstants.HikePhotos.PHOTOS_OOM_CAMERA_MESSAGE, Toast.LENGTH_SHORT).show();
+							Toast.makeText(getActivity(),getResources().getString(R.string.PHOTOS_OOM_CAMERA_MESSAGE), Toast.LENGTH_SHORT).show();
 						}
 					}
 				}

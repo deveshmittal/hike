@@ -19,6 +19,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
@@ -165,7 +166,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		catch (OutOfMemoryError e)
 		{
 			//To Do Out Of Memory Handling
-			Toast.makeText(getContext(), HikeConstants.HikePhotos.PHOTOS_OOM_LOAD_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
+			Toast.makeText(getContext(), getResources().getString(R.string.PHOTOS_OOM_LOAD_ERROR_MESSAGE), Toast.LENGTH_SHORT).show();
 			IntentManager.openHomeActivity(getContext(),true);
 		}
 		DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
@@ -176,7 +177,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 			if(imageScaled == null)
 			{
 				//To Do Out Of Memory Handling
-				Toast.makeText(getContext(), HikeConstants.HikePhotos.PHOTOS_OOM_LOAD_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getContext(), getResources().getString(R.string.PHOTOS_OOM_LOAD_ERROR_MESSAGE), Toast.LENGTH_SHORT).show();
 				IntentManager.openHomeActivity(getContext(),true);
 			}
 			// imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
@@ -341,7 +342,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 				else
 				{
 					//To Do Out Of Memory Handling
-					Toast.makeText(getContext(), HikeConstants.HikePhotos.PHOTOS_OOM_SAVE_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
+					Toast.makeText(getContext(), getResources().getString(R.string.PHOTOS_OOM_SAVE_ERROR_MESSAGE), Toast.LENGTH_SHORT).show();
 					IntentManager.openHomeActivity(getContext(),true);
 					
 				}
@@ -361,12 +362,12 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 			if (savingFinal)
 			{
 				// Move Back to Home
-				Toast.makeText(getContext(),  HikeConstants.HikePhotos.PHOTOS_OOM_SAVE_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getContext(),  getResources().getString(R.string.PHOTOS_OOM_SAVE_ERROR_MESSAGE), Toast.LENGTH_SHORT).show();
 				IntentManager.openHomeActivity(getContext(),true);
 			}
 			else
 			{
-				Toast.makeText(getContext(),HikeConstants.HikePhotos.PHOTOS_OOM_RETRY_MESSAGE, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getContext(),getResources().getString(R.string.PHOTOS_OOM_RETRY_MESSAGE), Toast.LENGTH_SHORT).show();
 			}
 		}
 		else

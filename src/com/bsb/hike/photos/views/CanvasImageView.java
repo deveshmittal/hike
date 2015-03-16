@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.utils.IntentManager;
 
@@ -125,7 +126,7 @@ public class CanvasImageView extends ImageView implements OnTouchListener
 			}
 			else
 			{
-				Toast.makeText(getContext(),HikeConstants.HikePhotos.DOODLE_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getContext(),getResources().getString(R.string.DOODLE_ERROR_MESSAGE), Toast.LENGTH_SHORT).show();
 			}
 			
 
