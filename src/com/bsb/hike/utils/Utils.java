@@ -787,16 +787,19 @@ public class Utils
 		}
 		Collections.sort(groupParticipants);
 
+		String name = groupParticipants.get(0).getContactInfo().getFirstName();
 		switch (groupParticipants.size())
 		{
 		case 0:
 			return "";
 		case 1:
-			return groupParticipants.get(0).getContactInfo().getFirstName();
-		case 2:
-			return groupParticipants.get(0).getContactInfo().getFirstName() + " and " + groupParticipants.get(1).getContactInfo().getFirstName();
+			return name;
 		default:
-			return groupParticipants.get(0).getContactInfo().getFirstName() + " and " + (groupParticipants.size() - 1) + " others";
+			for (int i=1; i<groupParticipants.size(); i++)
+			{
+				name += ", " + groupParticipants.get(i).getContactInfo().getFirstName();
+			}
+			return name;
 		}
 	}
 

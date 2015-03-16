@@ -1204,7 +1204,7 @@ public class ConversationsAdapter extends BaseAdapter
 				// booted because of that reason
 				String participantMsisdn = metadata.getMsisdn();
 				String participantName = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participantMsisdn);
-				markedUp = String.format(context.getString(R.string.left_conversation), participantName);
+				markedUp = String.format(context.getString(conversation instanceof BroadcastConversation ? R.string.removed_from_broadcast : R.string.left_conversation), participantName);
 			}
 			else
 			{
@@ -1232,7 +1232,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
 
-				markedUp = String.format(context.getString(R.string.change_group_name), participantName);
+				markedUp = String.format(context.getString(conversation instanceof BroadcastConversation ? R.string.change_broadcast_name : R.string.change_group_name), participantName);
 			}
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS)
