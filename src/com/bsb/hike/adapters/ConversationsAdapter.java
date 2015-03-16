@@ -67,7 +67,7 @@ import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.SmileyParser;
-import com.bsb.hike.utils.StringUtils;
+import com.bsb.hike.utils.GroupUtils;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationsAdapter extends BaseAdapter
@@ -1147,7 +1147,7 @@ public class ConversationsAdapter extends BaseAdapter
 		{
 			JSONArray participantInfoArray = metadata.getGcjParticipantInfo();
 			String highlight = Utils.getGroupJoinHighlightText(participantInfoArray, (GroupConversation) conversation);
-			markedUp = StringUtils.getParticipantAddedMessage(message, context, highlight);
+			markedUp = GroupUtils.getParticipantAddedMessage(message, context, highlight);
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.DND_USER)
 		{
@@ -1213,11 +1213,11 @@ public class ConversationsAdapter extends BaseAdapter
 				// booted because of that reason
 				String participantMsisdn = metadata.getMsisdn();
 				String participantName = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participantMsisdn);
-				markedUp = StringUtils.getParticipantRemovedMessage(conversation, context, participantName);
+				markedUp = GroupUtils.getParticipantRemovedMessage(conversation, context, participantName);
 			}
 			else
 			{
-				markedUp = StringUtils.getConversationEndedMessage(conversation, context);
+				markedUp = GroupUtils.getConversationEndedMessage(conversation, context);
 			}
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
@@ -1234,7 +1234,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
 				
-				markedUp = StringUtils.getConversationNameChangedMessage(conversation, context, participantName);
+				markedUp = GroupUtils.getConversationNameChangedMessage(conversation, context, participantName);
 			}
 		}
 		else if (message.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS)

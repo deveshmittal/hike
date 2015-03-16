@@ -20,7 +20,7 @@ import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.StringUtils;
+import com.bsb.hike.utils.GroupUtils;
 import com.bsb.hike.utils.Utils;
 
 public class ConvMessage
@@ -479,13 +479,13 @@ public class ConvMessage
 		case PARTICIPANT_JOINED:
 			JSONArray arr = metadata.getGcjParticipantInfo();
 			String highlight = Utils.getGroupJoinHighlightText(arr, (GroupConversation) conversation);
-			this.mMessage = StringUtils.getParticipantAddedMessage(this, context, highlight);
+			this.mMessage = GroupUtils.getParticipantAddedMessage(this, context, highlight);
 			break;
 		case PARTICIPANT_LEFT:
-			this.mMessage = StringUtils.getParticipantRemovedMessage(conversation, context, ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn()));
+			this.mMessage = GroupUtils.getParticipantRemovedMessage(conversation, context, ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn()));
 			break;
 		case GROUP_END:
-			this.mMessage = StringUtils.getConversationEndedMessage(conversation, context);
+			this.mMessage = GroupUtils.getConversationEndedMessage(conversation, context);
 			break;
 		case USER_JOIN:
 			//This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.\
@@ -533,7 +533,7 @@ public class ConvMessage
 			
 			if (participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME)
 			{
-				this.mMessage = StringUtils.getConversationNameChangedMessage(conversation, context, participantName);
+				this.mMessage = GroupUtils.getConversationNameChangedMessage(conversation, context, participantName);
 			}
 			else
 			{

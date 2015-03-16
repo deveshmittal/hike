@@ -9,7 +9,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.MessageMetadata;
 
-public class StringUtils {
+public class GroupUtils {
 
 	public static String getParticipantAddedMessage(ConvMessage convMessage, Context context, String highlight)
 	{

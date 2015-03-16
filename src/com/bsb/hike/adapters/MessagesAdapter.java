@@ -112,7 +112,7 @@ import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StringUtils;
+import com.bsb.hike.utils.GroupUtils;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomSendMessageTextView;
@@ -2070,7 +2070,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				JSONArray participantInfoArray = metadata.getGcjParticipantInfo();
 				TextView participantInfo = (TextView) inflater.inflate(layoutRes, null);
 				String highlight = Utils.getGroupJoinHighlightText(participantInfoArray, (GroupConversation) conversation);
-				String message = StringUtils.getParticipantAddedMessage(convMessage, context, highlight);
+				String message = GroupUtils.getParticipantAddedMessage(convMessage, context, highlight);
 				
 				setTextAndIconForSystemMessages(participantInfo, Utils.getFormattedParticipantInfo(message, highlight), isDefaultTheme ? R.drawable.ic_joined_chat
 						: R.drawable.ic_joined_chat_custom);
@@ -2101,11 +2101,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 					String participantMsisdn = metadata.getMsisdn();
 					String name = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participantMsisdn);
-					message = Utils.getFormattedParticipantInfo(StringUtils.getParticipantRemovedMessage(conversation, context, name), name);
+					message = Utils.getFormattedParticipantInfo(GroupUtils.getParticipantRemovedMessage(conversation, context, name), name);
 				}
 				else
 				{
-					message = StringUtils.getConversationEndedMessage(conversation, context);
+					message = GroupUtils.getConversationEndedMessage(conversation, context);
 					
 				}
 				setTextAndIconForSystemMessages(participantInfo, message, isDefaultTheme ? R.drawable.ic_left_chat : R.drawable.ic_left_chat_custom);
@@ -2181,7 +2181,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				String message;
 				if (convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
 				{
-					message = StringUtils.getConversationNameChangedMessage(conversation, context, participantName);
+					message = GroupUtils.getConversationNameChangedMessage(conversation, context, participantName);
 				}
 				else
 				{
