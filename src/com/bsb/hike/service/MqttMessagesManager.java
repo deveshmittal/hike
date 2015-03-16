@@ -915,14 +915,25 @@ public class MqttMessagesManager
 			serverIdsArrayList.add(serverIds.optLong(i));
 		}
 		
-		Map<String, ArrayList<Long>> map = convDb.getMsisdnMapForServerIds(serverIdsArrayList, id);
-		if(map != null && !map.isEmpty())
+		if (!Utils.isGroupConversation(id))
 		{
-			for (String chatMsisdn : map.keySet())
+			Map<String, ArrayList<Long>> map = convDb.getMsisdnMapForServerIds(serverIdsArrayList, id);
+			if (map != null && !map.isEmpty())
 			{
-				ArrayList<Long> values = map.get(chatMsisdn);
-				saveMessageRead(chatMsisdn, values, participantMsisdn);
+				for (String chatMsisdn : map.keySet())
+				{
+					ArrayList<Long> values = map.get(chatMsisdn);
+					saveMessageRead(chatMsisdn, values, participantMsisdn);
+				}
 			}
+		}
+		else
+		{
+			//This will only be called in case of group MR. there is bug in which MR for one person
+			// in group are recieved by all other participants in group. If for those MR we try to find 
+			// a msisdn map we would end up finding a wrong message in db which we will incorrectly mark
+			// is read.
+			saveMessageRead(id, serverIdsArrayList, participantMsisdn);
 		}
 	}
 	
@@ -939,6 +950,10 @@ public class MqttMessagesManager
 			
 			ArrayList<Long> updatedMessageIds = convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, msgIds);
 			
+			if(updatedMessageIds == null || updatedMessageIds.isEmpty())
+			{
+				return;
+			}
 			long[] updatedMsgIdsLongArray= new long[updatedMessageIds.size()];
 			for (int i = 0; i < updatedMessageIds.size(); i++ )
 			{
