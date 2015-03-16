@@ -170,7 +170,7 @@ public class CameraFragment extends SherlockFragment
 							catch (Exception e)
 							{
 								e.printStackTrace();
-								return;
+                                return;
 							}
 							Log.e("file", "" + file);
 
@@ -191,7 +191,7 @@ public class CameraFragment extends SherlockFragment
 						else
 						{
 							// To Do Out Of Memory Handling
-							Toast.makeText(getActivity(), "Unable to capture Image", Toast.LENGTH_SHORT);
+							Toast.makeText(getActivity(), "Unable to capture Image", Toast.LENGTH_SHORT).show();
 						}
 					}
 				}
