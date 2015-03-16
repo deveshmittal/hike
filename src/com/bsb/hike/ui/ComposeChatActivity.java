@@ -794,6 +794,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if(getIntent().hasExtra(HikeConstants.Extras.COMPOSE_MODE))
 		{
 			mode = getIntent().getIntExtra(HikeConstants.Extras.COMPOSE_MODE, START_CHAT_MODE);
+			triggerPointForPopup=ProductPopupsConstants.PopupTriggerPoints.BROADCAST.ordinal();
+			
 		}
 		else if(nuxIncentiveMode)
 		{

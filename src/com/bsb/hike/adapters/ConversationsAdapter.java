@@ -105,7 +105,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private ContactFilter contactFilter;
 
-	public Set<String> conversationsMsisdns;
+	private Set<String> conversationsMsisdns;
 
 	private boolean isSearchModeOn = false;
 
@@ -555,7 +555,6 @@ public class ConversationsAdapter extends BaseAdapter
 	public void removeSearch()
 	{
 		isSearchModeOn = false;
-		conversationsMsisdns.clear();
 		convSpanStartIndexes.clear();
 		refinedSearchText = null;
 		/*
@@ -591,7 +590,7 @@ public class ConversationsAdapter extends BaseAdapter
 					msg = context.getString(R.string.on_sms);
 				}
 				List<ConvMessage> messagesList = new ArrayList<ConvMessage>();
-				ConvMessage message = new ConvMessage(msg, contact.getMsisdn(), 0, State.RECEIVED_READ);
+				ConvMessage message = new ConvMessage(msg, contact.getMsisdn(), -1, State.RECEIVED_READ);
 				messagesList.add(message);
 				conv.setMessages(messagesList);
 				if (contact.isOnhike())
@@ -1002,14 +1001,7 @@ public class ConversationsAdapter extends BaseAdapter
 		updateViewsRelatedToMessageState(parentView, message, conversation);
 		
 		TextView tsView = viewHolder.timeStamp;
-		if(conversationsMsisdns!=null && !conversationsMsisdns.contains(conversation.getMsisdn()))
-		{
-			tsView.setText("");
-		}
-		else
-		{
-			tsView.setText(message.getTimestampFormatted(true, context));
-		}
+		tsView.setText(message.getTimestampFormatted(true, context));
 	}
 
 	public void updateViewsRelatedToMessageState(View parentView, ConvMessage message, Conversation conversation)
@@ -1466,15 +1458,18 @@ public class ConversationsAdapter extends BaseAdapter
 
 	public void remove(Conversation conv)
 	{
-		completeList.remove(conv);
-		conversationList.remove(conv);
-		if(conversationsMsisdns!=null)
+		if (conv != null)
 		{
-			conversationsMsisdns.remove(conv.getMsisdn());
-		}
-		if (phoneBookContacts != null)
-		{
-			phoneBookContacts.add(conv);
+			completeList.remove(conv);
+			conversationList.remove(conv);
+			if(conversationsMsisdns!=null)
+			{
+				conversationsMsisdns.remove(conv.getMsisdn());
+			}
+			if (phoneBookContacts != null)
+			{
+				phoneBookContacts.add(conv);
+			}
 		}
 	}
 
