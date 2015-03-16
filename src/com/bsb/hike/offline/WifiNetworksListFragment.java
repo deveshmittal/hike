@@ -104,8 +104,7 @@ public class WifiNetworksListFragment extends ListFragment {
 						{
 							HashMap<String, ScanResult> nearbyNetworks = ((DeviceActionListener) getActivity()).getDistinctWifiNetworks();
 							Message targetMessage = mHandler.obtainMessage(POST_TO_FRAGMENT, nearbyNetworks);
-							targetMessage.sendToTarget();
-							
+							targetMessage.sendToTarget();	
 							try 
 							{
 								sleep(2*1000);
@@ -149,8 +148,7 @@ public class WifiNetworksListFragment extends ListFragment {
     		Toast.makeText(getActivity(), "Connected to" +  wifipeers.get(position).SSID, Toast.LENGTH_SHORT).show();
     	}
     	else
-    		Toast.makeText(getActivity(), "Connection Failed" , Toast.LENGTH_SHORT).show();
-    	
+    		Toast.makeText(getActivity(), "Connection Failed" , Toast.LENGTH_SHORT).show();	
     }
     
     private class WiFiNetworkListAdapter extends ArrayAdapter<ScanResult> 
@@ -173,7 +171,7 @@ public class WifiNetworksListFragment extends ListFragment {
                         Context.LAYOUT_INFLATER_SERVICE);
                 v = vi.inflate(R.layout.conversation_item, null);
             }
-            
+
             final ScanResult wifinetwork = items.get(position);
             if (wifinetwork != null) 
             {    	
@@ -213,7 +211,7 @@ public class WifiNetworksListFragment extends ListFragment {
 								dialog.dismiss();
 								//requestDialogShown = false;
 							}
-	
+							
 							@Override
 							public void positiveClicked(Dialog dialog)
 							{

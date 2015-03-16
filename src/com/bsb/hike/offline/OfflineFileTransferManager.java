@@ -58,6 +58,7 @@ public class OfflineFileTransferManager {
 	private FileTransferThread fileTransferThread;
 	private volatile boolean isOfflineFileTransferFinished;
 	private volatile boolean isOfflineTextTransferFinished;
+
 	private String connectedDevice;
 	private ClientScanResult clientscanResult;
 	private final int fileTransferPort = 18988;

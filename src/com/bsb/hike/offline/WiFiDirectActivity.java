@@ -340,7 +340,6 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     	}	  
     }
     
-    
     public class checkConnectedHotspotTask extends AsyncTask<Void, Void ,ArrayList<ClientScanResult>>
     {
     	Context context;
@@ -355,7 +354,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 			this.intent = intent;
 			temp = null;
 		}
-    	
+
     	protected void onPreExecute() {
     		/*HikeDialog.showDialog(context,HikeDialog.SHOW_OFFLINE_CONNECTION_STATUS,  new HikeDialog.HikeDialogListener()
 			{
@@ -364,6 +363,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 				{
 					Log.d("dfsf", "afdaf");
 				}
+<<<<<<< HEAD
 
 				@Override
 				public void negativeClicked(Dialog dialog)
@@ -536,19 +536,20 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 
     private void setupDotsAnimation(Window window, long smileyOffset, long smileyDuration, long onsetTime)
 	{
+
 		final View dot0 = (View) window.findViewById(R.id.dot_left);
 		final View dot1 = (View) window.findViewById(R.id.dot_center);
 		final View dot2 = (View) window.findViewById(R.id.dot_right);
 		
 		ShapeDrawable circle0 = new ShapeDrawable(new OvalShape());
 		circle0.getPaint().setColor(this.getResources().getColor(R.color.restoring_red));
-		dot0.setBackground(circle0);
+		dot0.setBackgroundDrawable(circle0);
 		ShapeDrawable circle1 = new ShapeDrawable(new OvalShape());
 		circle1.getPaint().setColor(this.getResources().getColor(R.color.restoring_green));
-		dot1.setBackground(circle1);
+		dot1.setBackgroundDrawable(circle1);
 		ShapeDrawable circle2 = new ShapeDrawable(new OvalShape());
 		circle2.getPaint().setColor(this.getResources().getColor(R.color.restoring_orange));
-		dot2.setBackground(circle2);
+		dot2.setBackgroundDrawable(circle2);
 		
 		AlphaAnimation dotIn0 = new AlphaAnimation(0, 1);
 		dotIn0.setDuration(100);
@@ -645,7 +646,6 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 		dotOut2.setStartOffset(200);
 		
 		final AnimationSet dota2 = new AnimationSet(true);
-
 
 		dota2.addAnimation(dotIn2);
 		dota2.addAnimation(dotOut2);
@@ -777,6 +777,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 	public Boolean connectToHotspot(ScanResult result) {
 		return connectionManager.connectToHotspot(result.SSID);
 	}
+
 
 	@Override
 	public void startScan() {
