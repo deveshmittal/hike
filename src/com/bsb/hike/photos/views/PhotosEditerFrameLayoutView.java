@@ -19,6 +19,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikeEffectsFactory.OnFilterAppliedListener;
@@ -164,8 +165,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 		}
 		catch (OutOfMemoryError e)
 		{
-			//To Do Out Of Memory Handling
-			Toast.makeText(getContext(), "Unable to Load Image!\nNot Enough Memory On Device.", Toast.LENGTH_SHORT);
+			Toast.makeText(getContext(), getResources().getString(R.string.photos_oom_load), Toast.LENGTH_SHORT).show();
 			IntentManager.openHomeActivity(getContext(),true);
 		}
 		DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
@@ -175,8 +175,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 			imageScaled = HikePhotosUtils.createBitmap(imageOriginal, 0, 0, width, width, true, true, false, true);
 			if(imageScaled == null)
 			{
-				//To Do Out Of Memory Handling
-				Toast.makeText(getContext(), "Unable to load Image!\nNot Enough Memory On Device.", Toast.LENGTH_SHORT);
+				Toast.makeText(getContext(), getResources().getString(R.string.photos_oom_load), Toast.LENGTH_SHORT).show();
 				IntentManager.openHomeActivity(getContext(),true);
 			}
 			// imageScaled = Bitmap.createScaledBitmap(imageOriginal, width, width, false);
@@ -340,8 +339,7 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 				}
 				else
 				{
-					//To Do Out Of Memory Handling
-					Toast.makeText(getContext(), "Unable to save Image!\nNot Enough Memory On Device.", Toast.LENGTH_SHORT);
+					Toast.makeText(getContext(), getResources().getString(R.string.photos_oom_save), Toast.LENGTH_SHORT).show();
 					IntentManager.openHomeActivity(getContext(),true);
 					
 				}
@@ -361,12 +359,12 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 			if (savingFinal)
 			{
 				// Move Back to Home
-				Toast.makeText(getContext(), "Unable to save Image!\nNot Enough Memory On Device.", Toast.LENGTH_SHORT);
+				Toast.makeText(getContext(),  getResources().getString(R.string.photos_oom_save), Toast.LENGTH_SHORT).show();
 				IntentManager.openHomeActivity(getContext(),true);
 			}
 			else
 			{
-				Toast.makeText(getContext(), "Try Again", Toast.LENGTH_SHORT);
+				Toast.makeText(getContext(),getResources().getString(R.string.photos_oom_retry), Toast.LENGTH_SHORT).show();
 			}
 		}
 		else
