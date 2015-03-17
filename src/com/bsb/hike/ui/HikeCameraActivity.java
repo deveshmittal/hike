@@ -19,6 +19,7 @@ import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.view.OrientationEventListener;
+import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -71,7 +72,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private OrientationEventListener orientationListener;
 
-	private Bitmap tempBitmap;
+	private Bitmap stillPreviewBitmap;
 
 	private View flashButton;
 
@@ -235,10 +236,10 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		iv.setVisibility(View.GONE);
 
-		if (tempBitmap != null)
+		if (stillPreviewBitmap != null)
 		{
-			tempBitmap.recycle();
-			tempBitmap = null;
+			stillPreviewBitmap.recycle();
+			stillPreviewBitmap = null;
 		}
 
 		HikeCameraActivity.this.findViewById(R.id.btntakepic).setClickable(true);
@@ -261,7 +262,18 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			HikeCameraActivity.this.findViewById(R.id.btntoggleflash).setClickable(false);
 			cameraFragment.cancelAutoFocus();
 			cameraFragment.takePicture();
-			tempBitmap = ((TextureView) cameraFragment.getCameraView().previewStrategy.getWidget()).getBitmap();
+
+			View previewStratBmp = cameraFragment.getCameraView().previewStrategy.getWidget();
+
+			if (previewStratBmp instanceof TextureView)
+			{
+				stillPreviewBitmap = ((TextureView) previewStratBmp).getBitmap();
+			}
+			else if (previewStratBmp instanceof SurfaceView)
+			{
+				// TODO. For now we do not show still preview after camera snap in case if preview is on SurfaceView. This is causing brief black screen on Cyanogenmod phones.
+			}
+
 			final View snapOverlay = findViewById(R.id.snapOverlay);
 			ObjectAnimator invisToVis = ObjectAnimator.ofFloat(snapOverlay, "alpha", 0f, 0.8f);
 			invisToVis.setDuration(200);
@@ -271,9 +283,12 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				@Override
 				public void onAnimationEnd(Animator animation)
 				{
-					ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.tempiv);
-					iv.setImageBitmap(tempBitmap);
-					iv.setVisibility(View.VISIBLE);
+					if (stillPreviewBitmap != null)
+					{
+						ImageView iv = (ImageView) HikeCameraActivity.this.findViewById(R.id.tempiv);
+						iv.setImageBitmap(stillPreviewBitmap);
+						iv.setVisibility(View.VISIBLE);
+					}
 					ObjectAnimator visToInvis = ObjectAnimator.ofFloat(snapOverlay, "alpha", 0.8f, 0f);
 					visToInvis.setDuration(150);
 					visToInvis.setInterpolator(deceleratorInterp);

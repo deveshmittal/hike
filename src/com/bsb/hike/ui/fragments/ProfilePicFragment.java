@@ -112,6 +112,13 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 			@Override
 			public void run()
 			{
+				if (isPaused)
+				{
+					// In edge case testing, if user presses back as soon as fragment is attached, this runnable executes after the fragment is no longer attached (due to delay).
+					// Only workaround is to add a flag check.
+					return;
+				}
+
 				ObjectAnimator objectAnimatorButton = ObjectAnimator.ofFloat(mCircularImageView, "translationY", 100f, 0f);
 				objectAnimatorButton.setDuration(500);
 				objectAnimatorButton.start();
@@ -121,7 +128,17 @@ public class ProfilePicFragment extends SherlockFragment implements FinishableEv
 				mCircularImageView.setVisibility(View.VISIBLE);
 				mCircularProgress.setVisibility(View.VISIBLE);
 				mProfilePicBg.setVisibility(View.VISIBLE);
-				((HikeAppStateBaseFragmentActivity) getActivity()).getSupportActionBar().hide();
+
+				try
+				{
+					((HikeAppStateBaseFragmentActivity) getActivity()).getSupportActionBar().hide();
+				}
+				catch (NullPointerException npe)
+				{
+					//TODO remove this defensive check and come up with better solution.
+					npe.printStackTrace();
+					return;
+				}
 				startUpload();
 			}
 		}, 300);
