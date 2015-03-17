@@ -1560,9 +1560,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		/*
 		 * removing out new chat option for now
 		 */
-		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
-
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_broadcast), 10));
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.timeline), 7));
 
