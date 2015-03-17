@@ -86,7 +86,6 @@ import com.bsb.hike.tasks.SendLogsTask;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.utils.LockPattern;
-import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.FestivePopup;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -288,14 +287,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				/*
 				 * Only show app rater if the tutorial is not being shown an the app was just launched i.e not an orientation change
 				 */
-				AppRater.appLaunched(this);
 		}
 		else if (dialogShowing != null)
 		{
 			showAppropriateDialog();
 		}
 
-		if (!AppRater.showingDialog() && dialogShowing == null)
+		if (dialogShowing == null)
 		{
 			if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true))
 			{
