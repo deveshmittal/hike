@@ -482,4 +482,9 @@ public class IntentManager
 		}
 		return intent;
 	}
+	
+	public static Intent getBrowserIntent(String url)
+	{
+		return new Intent(Intent.ACTION_VIEW,Uri.parse(url));
+	}
 }
