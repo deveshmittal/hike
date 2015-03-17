@@ -1048,7 +1048,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void resetSearchIcon()
 	{
-		HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
+		if (!searchMode)
+		{
+			HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
+		}
 	}
 
 	private boolean isConversationsEmpty()
