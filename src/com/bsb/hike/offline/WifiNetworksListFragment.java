@@ -9,6 +9,7 @@ import org.apache.http.util.TextUtils;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.HikeDialog;
 

@@ -336,6 +336,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     	}	  
     }
     
+    // check if someone connected to my hotspot
     public class checkConnectedHotspotTask extends AsyncTask<Void, Void ,ArrayList<ClientScanResult>>
     {
     	Context context;
@@ -352,36 +353,6 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 		}
 
     	protected void onPreExecute() {
-    		/*HikeDialog.showDialog(context,HikeDialog.SHOW_OFFLINE_CONNECTION_STATUS,  new HikeDialog.HikeDialogListener()
-			{
-				@Override
-				public void onSucess(Dialog dialog)
-				{
-					Log.d("dfsf", "afdaf");
-				}
-<<<<<<< HEAD
-
-				@Override
-				public void negativeClicked(Dialog dialog)
-				{
-					// TODO Auto-generated method stub
-					
-				}
-
-				@Override
-				public void positiveClicked(Dialog dialog)
-				{
-					
-				}
-
-				@Override
-				public void neutralClicked(Dialog dialog)
-				{
-					// TODO Auto-generated method stub
-					
-				}
-			});*/
-    	   
     		dialog.setContentView(R.layout.connecting_offline);
    			dialog.setCancelable(true);
    			dialog.setOnDismissListener(new OnDismissListener() {
@@ -413,7 +384,6 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 		protected ArrayList<ClientScanResult> doInBackground(Void... params) 
 		{
 			int tries = 0;
-			
 			while(tries<15)
 			{
 				
@@ -478,32 +448,6 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 					}
 			    }
 			}
-				/*connectionManager.getClientList(false, new FinishScanListener() {
-	
-		  			@Override
-		  			public void onFinishScan(final ArrayList<ClientScanResult> clients) {
-		  				if(clients.size()>0)
-		  				{
-		  					Log.d(TAG, "YOYO");
-		  					//Toast.makeText(getApplicationContext(), clients.get(0).getIpAddr(), Toast.LENGTH_SHORT).show();
-		  					temp  =   clients;
-		  					
-		  				}
-		  				else
-		  				{
-		  					Log.d(TAG, "Issue");
-		  					try {
-								Thread.sleep(5000);
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-		  					temp =  null;
-		  					
-		  				}
-		  			}
-		  		});*/
-		   
             return temp;
 		}
 		
@@ -512,11 +456,8 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 		{
 			if(result!=null && result.size()>0)
 			{
-				//startActivity(intent);
 				isConnected = true;
 				dialog.dismiss();
-				//OfflineFileTransferManager.getInstance().switchOnReceivers(this, ClientScanResult);  
-				//Toast.makeText(getApplicationContext(), "Start Chattting man", Toast.LENGTH_LONG).show();
 			}
 			else
 			{

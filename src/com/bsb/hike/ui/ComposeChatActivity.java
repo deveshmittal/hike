@@ -1,7 +1,6 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.ActionBar.LayoutParams;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -46,8 +46,10 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -431,6 +433,42 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		adapter.executeFetchTask();
 		
 		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
+		final Button offlineScanButton   =  (Button)findViewById(R.id.scan_wifi_peers);
+		final TextView searchView  =   (TextView)findViewById(R.id.composeChatNewGroupTagET);
+		
+		offlineScanButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				offlineScanButton.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT , 0.8f));
+				offlineScanButton.setText("Scan Free Wifi Contacts");
+				searchView.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT , 0.2f));
+				searchView.setHint("");
+				//searchView.set
+				searchView.setFocusable(false);
+				searchView.setFocusableInTouchMode(false);
+				
+			}
+		});
+		
+		
+		searchView.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+				searchView.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT , 0.8f));	
+				searchView.setHint("Search by name or number");
+				searchView.setFocusable(true);
+				searchView.setFocusableInTouchMode(true);
+				offlineScanButton.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT , 0.2f));
+				offlineScanButton.setMinWidth(0);
+				offlineScanButton.setMinHeight(0);
+				offlineScanButton.setText("");
+				
+				
+			}
+		});
 		
 	}
 
