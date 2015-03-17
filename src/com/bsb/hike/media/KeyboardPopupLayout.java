@@ -128,7 +128,15 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		if (event.getAction() == MotionEvent.ACTION_OUTSIDE)
 		{
 			int eventX = (int) event.getX();
-			return shouldEatOuterTouch(eventX);
+			int eventY = (int) event.getRawY();
+			/**
+			 * For vertical, we need accurate heuristics as event.getY() was not returning accurate data
+			 * http://stackoverflow.com/questions/6237200/motionevent-gety-and-getx-return-incorrect-values
+			 */
+			if (shouldEatOuterTouchEvent(eventX, eventY))
+			{
+				return true;
+			}
 		}
 		return false;
 	}
@@ -141,7 +149,7 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 	 * @return {@link Boolean}
 	 */
 
-	private boolean shouldEatOuterTouch(int eventX)
+	private boolean shouldEatOuterTouchEvent(int eventX, int eventY)
 	{
 		if (null == mEatTouchEventViewIds)
 		{
@@ -150,7 +158,7 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 
 		for (int id : mEatTouchEventViewIds)
 		{
-			if (shouldEatOuterTouch(eventX, id))
+			if (shouldEatOuterTouch(eventX, eventY, id))
 			{
 				return true;
 			}
@@ -166,12 +174,13 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 	 * @param viewId
 	 * @return {@link Boolean}
 	 */
-	private boolean shouldEatOuterTouch(int eventX, int viewId)
+	private boolean shouldEatOuterTouch(int eventX, int eventY, int viewId)
 	{
 		View st = mainView.findViewById(viewId);
 		int[] xy = new int[2];
 		st.getLocationInWindow(xy);
-		return ((eventX >= xy[0] && eventX <= (xy[0] + st.getWidth())));
+		boolean result = eventX >= xy[0] && eventX <= (xy[0] + st.getWidth()) && ((eventY + st.getHeight()) > xy[1]);
+		return result;
 	}
 
 	public void updateListenerAndView(PopupListener listener, View view)
