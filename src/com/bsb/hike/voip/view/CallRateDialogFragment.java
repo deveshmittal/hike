@@ -160,7 +160,7 @@ public class CallRateDialogFragment extends SherlockDialogFragment
 			metadata.put(VoIPConstants.Analytics.IS_CALLER, isCallInitiator);
 			metadata.put(VoIPConstants.Analytics.NETWORK_TYPE, network);
 			metadata.put(AnalyticsConstants.TO, toMsisdn);
-			metadata.put(VoIPConstants.Analytics.NEW_LOG, 1);
+			metadata.put(VoIPConstants.Analytics.NEW_LOG, -1);
 
 			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH, metadata);
 		}

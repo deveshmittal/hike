@@ -65,7 +65,7 @@ public class ProductPopupsConstants
 	{
 		HOME_SCREEN(0), TIMELINE(1), CHAT_SCR(2), ATCH_SCR(3),COMPOSE_CHAT(4), SETTINGS_SCR(5), STATUS(6), NEWGRP(7),
 		INVITEFRNDS(8), STKBUT_BUT(9),STICKER_SHOP(10),STICKER_SHOP_SETTINGS(11),PROFILE_PHOTO(12),EDIT_PROFILE(13),
-		NOTIFICATION(14),MEDIA(15),ACCOUNT(16),PRIVACY(17),HELP(18),INVITE_SMS(19),FREE_SMS(20),FAVOURITES(21),UNKNOWN(22);
+		NOTIFICATION(14),MEDIA(15),ACCOUNT(16),PRIVACY(17),HELP(18),INVITE_SMS(19),FREE_SMS(20),FAVOURITES(21),PHOTOS(22),BROADCAST(23), SEARCH(24),UNKNOWN(25);
 		private int value;
 
 		private PopupTriggerPoints(int val)
@@ -338,6 +338,25 @@ public class ProductPopupsConstants
 				// TODO Auto-generated method stub
 				return "nuxremind";
 			}
+		},
+		BROADCAST
+		{
+			@Override
+			public String toString()
+			{
+				// TODO Auto-generated method stub
+				return "broadcast";
+			}
+		},
+		PHOTOS
+		{
+			@Override
+			public String toString()
+			{
+				// TODO Auto-generated method stub
+				return "photos";
+			}
+
 		};
 		
 		

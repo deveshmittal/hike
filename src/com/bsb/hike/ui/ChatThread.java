@@ -3294,7 +3294,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				Utils.hideSoftKeyboard(ChatThread.this, mComposeView);
 
-
 				Intent intent = new Intent(ChatThread.this, HomeActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);

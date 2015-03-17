@@ -871,15 +871,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return executeUpdateMessageStatusStatement(query, val, msisdn);
 	}
 
-	public ArrayList<Long> getCurrentUnreadMessageIdsForMsisdn(String msisdn)
+	public ArrayList<Long> getCurrentUnreadMessageIdsForMsisdn(String msisdn, long maxMsgId)
 	{
 		ArrayList<Long> ids = new ArrayList<Long>();
 
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID,  DBConstants.MSG_STATUS, DBConstants.MESSAGE_ORIGIN_TYPE }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
-					+ State.SENT_DELIVERED_READ.ordinal(), new String[] { msisdn }, null, null, null);
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID,  DBConstants.MSG_STATUS, DBConstants.MESSAGE_ORIGIN_TYPE }, DBConstants.MSISDN + "=? AND "+ DBConstants.MESSAGE_ID + "<=? AND " + DBConstants.MSG_STATUS + "<"
+					+ State.SENT_DELIVERED_READ.ordinal(), new String[] { msisdn, String.valueOf(maxMsgId) }, null, null, null);
 
 			while (c.moveToNext())
 			{
@@ -909,9 +909,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		return ids;
 	}
 
-	public void setAllDeliveredMessagesReadForMsisdn(String msisdn, ArrayList<Long> msgIds)
+	public ArrayList<Long>  setAllDeliveredMessagesReadForMsisdn(String msisdn, ArrayList<Long> msgIds)
 	{
-		String initialWhereClause = DBConstants.MESSAGE_ID + " in " + Utils.valuesToCommaSepratedString(msgIds);
+		long maxMsgId = Utils.getMaxLongValue(msgIds);
+		ArrayList<Long> messageIdsToBeUpdated = getCurrentUnreadMessageIdsForMsisdn(msisdn, maxMsgId);
+		
+		if(messageIdsToBeUpdated == null || messageIdsToBeUpdated.isEmpty())
+		{
+			return null;
+		}
+		
+		String initialWhereClause = DBConstants.MESSAGE_ID + " in " + Utils.valuesToCommaSepratedString(messageIdsToBeUpdated);
 
 		int status = State.SENT_DELIVERED_READ.ordinal();
 
@@ -919,6 +927,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 		executeUpdateMessageStatusStatement(query, status, msisdn);
 
+		return messageIdsToBeUpdated;
 	}
 
 	/**
@@ -6656,6 +6665,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		Cursor c = null;
 		Map<String, ArrayList<Long>> map = new HashMap<String, ArrayList<Long>>();
 
+		if(serverIds == null || serverIds.isEmpty())
+		{
+			return map;
+		}
 		try
 		{
 			/*

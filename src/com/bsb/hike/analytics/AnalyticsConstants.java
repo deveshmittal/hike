@@ -100,6 +100,8 @@ public class AnalyticsConstants
 
 	public static final String ANALYTICS_BACKUP = "backup";
 
+	public static final String ANALYTICS_HOME_SEARCH = "search";
+
 	public static final String EVENT_SUB_TYPE = "st";
 
 	public static final String EVENT_TAG = "tag";
@@ -158,6 +160,8 @@ public class AnalyticsConstants
 	public static final String FOREGROUND = "fg";
 	
 	public static final String BACKGROUND = "bg";
+	
+	public static final String STICKER_PALLETE = "stkp";
 
 	public static final class MessageType
 	{

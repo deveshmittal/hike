@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.text.TextUtils;
+import android.view.View.OnClickListener;
 import android.content.Context;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -131,7 +133,6 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			fetchHideListContacts = (nuxPojo.getHideList() != null && !nuxPojo.getHideList().isEmpty());
 			fetchRecommendedContacts = (nuxPojo.getRecoList() != null && !nuxPojo.getRecoList().isEmpty());
 			
-			Logger.d("UmangX", "fetch hide : " + fetchHideListContacts + " fetch reco : "+ fetchRecommendedContacts);
 			int contactsShown = nuxPojo.getContactSectionType();
 			switch(NUXConstants.ContactSectionTypeEnum.getEnum(contactsShown)){
 				case none : 
@@ -206,12 +207,28 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		else
 		{
 			holder = (ViewHolder) convertView.getTag();
-			holder.msisdn = contactInfo.getMsisdn();
+			String msisdn = contactInfo.getMsisdn();
+			holder.msisdn = msisdn;
 
 			holder.status.setText(contactInfo.getMsisdn());
 
 			String name = contactInfo.getName();
-			holder.name.setText("".equals(name) || null == name ? contactInfo.getMsisdn() : name);
+			if(TextUtils.isEmpty(name))
+			{
+				holder.name.setText(msisdn);
+			}
+			else
+			{
+				Integer startIndex = contactSpanStartIndexes.get(msisdn);
+				if(startIndex!=null)
+				{
+					holder.name.setText(getSpanText(name, startIndex), TextView.BufferType.SPANNABLE);
+				}
+				else
+				{
+					holder.name.setText(name);
+				}
+			}
 
 			if (viewType == ViewType.NEW_CONTACT)
 			{
@@ -462,12 +479,10 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		{
 			String recoSectionHeader = NUXManager.getInstance().getNuxSelectFriendsPojo().getRecoSectionTitle();
 			ContactInfo recommendedSection = new ContactInfo(SECTION_ID, Integer.toString(nuxFilteredRecoList.size()), recoSectionHeader, RECOMMENDED);
-			Logger.d("UmngR", "nux CCA list :" +  nuxRecommendedList.toString());
 			if(nuxFilteredRecoList.size() > 0){
 				completeList.add(recommendedSection);
 				completeList.addAll(nuxFilteredRecoList);
 			}
-			Logger.d("UmngR", "nux CCA filter list :" +  nuxFilteredRecoList.toString());
 		}
 
 		if(fetchRecentlyJoined && !recentlyJoinedHikeContactsList.isEmpty())
@@ -531,7 +546,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 		notifyDataSetChanged();
 		setEmptyView();
-		
+		friendsListFetchedCallback.completeListFetched();
 		
 		
 		
