@@ -179,7 +179,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		Logger.d("UmangX","openenign Home onCreate");
 		if (Utils.requireAuth(this))
 		{
 			return;
@@ -187,7 +186,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				
 		if (NUXManager.getInstance().showNuxScreen())
 		{
-			Logger.d("UmangX","openenign NUX");
 			NUXManager.getInstance().startNUX(this);
 			return;
 
@@ -417,7 +415,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	@Override
 	protected void onDestroy()
 	{
-		Logger.d("UmangX","inside Home onDestory");
 		if (progDialog != null)
 		{
 			progDialog.dismiss();
