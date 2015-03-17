@@ -915,14 +915,25 @@ public class MqttMessagesManager
 			serverIdsArrayList.add(serverIds.optLong(i));
 		}
 		
-		Map<String, ArrayList<Long>> map = convDb.getMsisdnMapForServerIds(serverIdsArrayList, id);
-		if(map != null && !map.isEmpty())
+		if (!Utils.isGroupConversation(id))
 		{
-			for (String chatMsisdn : map.keySet())
+			Map<String, ArrayList<Long>> map = convDb.getMsisdnMapForServerIds(serverIdsArrayList, id);
+			if (map != null && !map.isEmpty())
 			{
-				ArrayList<Long> values = map.get(chatMsisdn);
-				saveMessageRead(chatMsisdn, values, participantMsisdn);
+				for (String chatMsisdn : map.keySet())
+				{
+					ArrayList<Long> values = map.get(chatMsisdn);
+					saveMessageRead(chatMsisdn, values, participantMsisdn);
+				}
 			}
+		}
+		else
+		{
+			//This will only be called in case of group MR. there is bug in which MR for one person
+			// in group are recieved by all other participants in group. If for those MR we try to find 
+			// a msisdn map we would end up finding a wrong message in db which we will incorrectly mark
+			// is read.
+			saveMessageRead(id, serverIdsArrayList, participantMsisdn);
 		}
 	}
 	
@@ -934,16 +945,22 @@ public class MqttMessagesManager
 			return;
 		}
 		
-		long[] msgIdsLongArray= new long[msgIds.size()];
-		for (int i = 0; i < msgIds.size(); i++ )
-		{
-			msgIdsLongArray[i] = msgIds.get(i);
-		}
-		
 		if (!Utils.isGroupConversation(msisdn))
 		{
-			convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, msgIds);
-			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, msgIdsLongArray);
+			
+			ArrayList<Long> updatedMessageIds = convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, msgIds);
+			
+			if(updatedMessageIds == null || updatedMessageIds.isEmpty())
+			{
+				return;
+			}
+			long[] updatedMsgIdsLongArray= new long[updatedMessageIds.size()];
+			for (int i = 0; i < updatedMessageIds.size(); i++ )
+			{
+				updatedMsgIdsLongArray[i] = updatedMessageIds.get(i);
+			}
+			
+			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, updatedMsgIdsLongArray);
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
 		}
 		else
@@ -1705,6 +1722,7 @@ public class MqttMessagesManager
 		{
 			boolean enablePhoto = data.getBoolean(HikeConstants.Extras.ENABLE_PHOTOS);
 			HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.ACCOUNT_SETTINGS).saveData(HikeConstants.Extras.ENABLE_PHOTOS, enablePhoto);
+			HikeSharedPreferenceUtil.getInstance(HikeMessengerApp.ACCOUNT_SETTINGS).saveData(HikeConstants.SHOW_PHOTOS_RED_DOT, true);
 		}
 		
 		editor.commit();
@@ -1996,19 +2014,11 @@ public class MqttMessagesManager
 
 	private void saveServerTimestamp(JSONObject jsonObj) throws JSONException
 	{
-		JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
-		long serverTimeMillis = data.optLong(HikeConstants.TIMESTAMP_MILLIS);
-		long diffInMillis = System.currentTimeMillis() - serverTimeMillis;
-		Logger.d(getClass().getSimpleName(), "Diff b/w server and client in ms: " + diffInMillis);
-		
-		//long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
-		//long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;
-
-		//Logger.d(getClass().getSimpleName(), "Diff b/w server and client: " + diff);
-		
+		long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
+		long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;
+		Logger.d(getClass().getSimpleName(), "Diff b/w server and client: " + diff);
 		Editor editor = settings.edit();
-		//editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
-		editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diffInMillis);
+		editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
 		editor.commit();
 	}
 

@@ -282,7 +282,7 @@
     <string name="a_and_c_signup">Accept and Continue</string>
     <string name="pulling_digits_signup">Pulling your digits...</string>
     <string name="enter_num_signup">Enter your phone number below\nto get started.</string>
-    <string name="next_signup">NEXT</string>
+    <string name="next_signup">Next</string>
     <string name="verifying_num_signup">Verifying your number...</string>
     <string name="invalid_num_signup">That\'s an invalid phone number. Try again.</string>
     <string name="call_me_signup">Call Me</string>
@@ -586,7 +586,6 @@
     <string name="audio">AUDIO</string>
     <string name="location">Location</string>
     <string name="places_api_key">AIzaSyBMpi-RNcG5enYGvdag0F4UXTmboawXDZM</string>
-    <string name="enter_valid_group_name">Please enter a valid group name</string>
     <string name="add_as_friend_profile">Would you like to add %1$s as a friend to share updates?</string>
     <string name="request_pending">Friend request pending</string>
     <string name="remove_from_friends">Remove from your friend list</string>
@@ -722,6 +721,7 @@
     <string name="selected_count">%1$s selected</string>
     <string name="clear_conversation">Clear Conversation</string>
     <string name="gallery_num_selected">%1$d selected</string>
+    <string name="broadcast_selected">%1$s/500 selected</string>
     <string name="select_file">Select File</string>
     <string name="free_of_total">Free %1$s of %2$s</string>
     <string name="unknown_error">Unknown error</string>
@@ -944,9 +944,9 @@
     <string name="shortcut">Add conversation shortcut</string>
     <string name="add_to_contacts">Add to contacts</string>
     <string name="delete_leave">Delete and exit group</string>
-    <string name="group_participant_info">You can add upto 100 people to a group</string>
+    <string name="group_participant_info">You can add upto 500 people to a group</string>
     <string name="broadcast_ftue_message">A broadcast lets you send the same message to multiple hike contacts at once</string>
-    <string name="broadcast_participant_info"><b>Note: </b>Only contacts with your number in their address book will receive this broadcast.</string>
+    <string name="broadcast_participant_info"><b>Note: </b>Only hike contacts with %1$s in their address book will receive this broadcast.</string>
     <string name="photo">GALLERY</string>
     <string name="video">VIDEOS</string>
     <string name="location_option">LOCATION</string>
@@ -1382,6 +1382,9 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="photo_gallery_choose_pic">Choose a photo</string>
     <string name="cropping_image">Cropping image..</string>
     <string name="compose_chat">New chat</string>
+    <string name="terms_conditions_hint">Terms and Conditions</string>
+	<string name="terms_conditions_title">T &amp; C</string>
+	<string name="home_search_empty_text">Your search for \'%1$s\' did not match any contacts.</string>
     <string name="voip_phone_unsupported">Your phone is not supported.</string>
     <string name="voip_call_failed_frag_subheader">You can still contact %1$s with a</string>
     <string name="dismiss_upper_case">DISMISS</string>
@@ -1408,4 +1411,11 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="platform_error_subtext">Please Check your Internet Connection</string>
 	<string name="added_in_group">You have already added this contact in group</string>
 	<string name="added_in_broadcast">You have already added this contact in broadcast list</string>
+	<string name="enter_valid_group_name">Group name cannot be empty</string>
+	<string name="enter_valid_broadcast_name">Broadcast name cannot be empty</string>
+    <string name="doodle_error_message">Unable to save Doodle!\nNot Enough Memory On Device.</string>
+    <string name="photos_oom_save">Unable to save Image!\nNot Enough Memory On Device.</string>
+    <string name="photos_oom_load">Unable to load Image!\nNot Enough Memory On Device.</string>
+    <string name="photos_oom_retry">Try Again!</string>
+    <string name="photos_oom_camera">Unable to capture Image</string>
 </resources>

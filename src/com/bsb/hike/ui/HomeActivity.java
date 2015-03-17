@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +29,7 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
@@ -52,6 +54,9 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
+import com.actionbarsherlock.widget.SearchView;
+import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -153,6 +158,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private ConversationFragment mainFragment;
 
 	private SnowFallView snowFallView;
+	
+	private int searchOptionID;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
@@ -162,7 +169,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE };
 
-	private boolean photosEnabled = true;
+	private boolean photosEnabled;
+
+	private static MenuItem searchItem;
+
+	private boolean showingSearchModeActionBar = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -211,19 +222,36 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			initialiseHomeScreen(savedInstanceState);
 		}
 		
-//		photosEnabled = accountPrefs.getBoolean(HikeConstants.Extras.ENABLE_PHOTOS, false);
+		photosEnabled = accountPrefs.getBoolean(HikeConstants.Extras.ENABLE_PHOTOS, false);
 		
 		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());
 	}
 
 	private void setupActionBar()
 	{
+		showingSearchModeActionBar = false;
 		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayShowCustomEnabled(false);
+		actionBar.setDisplayUseLogoEnabled(true);
+		actionBar.setDisplayShowHomeEnabled(true);
 		actionBar.setHomeButtonEnabled(true);
 		actionBar.setTitle("");
 		actionBar.setLogo(R.drawable.home_screen_top_bar_logo);
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setDisplayShowTitleEnabled(true);
+	}
+
+	private void setupSearchActionBar()
+	{
+		showingSearchModeActionBar = true;
+		final ActionBar actionBar = getSupportActionBar();
+		actionBar.setIcon(R.drawable.ic_search_back);
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
+		actionBarView.findViewById(R.id.seprator).setVisibility(View.GONE);
+		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		title.setVisibility(View.GONE);
+
+		actionBar.setCustomView(actionBarView);
 	}
 
 	private void initialiseHomeScreen(Bundle savedInstanceState)
@@ -423,6 +451,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			mainFragment.onNewintent(intent);
 		}
+		if(showingSearchModeActionBar)
+		{
+			searchItem.getActionView().clearFocus();
+			searchItem.collapseActionView();
+		}
 		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());
 	}
 
@@ -437,17 +470,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			return setupMenuOptions(menu);
 		}
-
 	}
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
-
 		return super.onPrepareOptionsMenu(menu);
 	}
 
-	private boolean setupMenuOptions(Menu menu)
+	private boolean setupMenuOptions(final Menu menu)
 	{
 		getSupportMenuInflater().inflate(R.menu.chats_menu, menu);
 
@@ -466,12 +497,51 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		});
 
+		final SearchView searchView = new SearchView(getSupportActionBar().getThemedContext());
+		searchView.setIconifiedByDefault(false);
+		searchView.setIconified(false);
+		searchView.setOnQueryTextListener(onQueryTextListener);
+		searchView.clearFocus();
+		searchView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+		searchItem = menu.findItem(R.id.search);
+		searchOptionID = searchItem.getItemId();
+		searchItem.setActionView(searchView).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+
+		searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()
+		{
+			@Override
+			public boolean onMenuItemActionExpand(MenuItem item)
+			{
+				if(mainFragment!=null)
+		        {
+					mainFragment.setupSearch();
+		        }
+				toggleMenuItems(menu, false);
+				showProductPopup(ProductPopupsConstants.PopupTriggerPoints.SEARCH.ordinal());
+				setupSearchActionBar();
+				return true;
+			}
+
+			@Override
+			public boolean onMenuItemActionCollapse(MenuItem item)
+			{
+				if(mainFragment!=null)
+		        {
+					mainFragment.removeSearch();
+		        }
+				toggleMenuItems(menu, true);
+				setupActionBar();
+				return true;
+			}
+		});
+		
 		newConversationIndicator = (TextView) menu.findItem(R.id.new_conversation).getActionView().findViewById(R.id.top_bar_indicator);
 		menu.findItem(R.id.new_conversation).getActionView().findViewById(R.id.overflow_icon_image).setContentDescription("Start a new chat");
 		((ImageView) menu.findItem(R.id.new_conversation).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_new_conversation);
 		showRecentlyJoinedDot(1000);
 
-		menu.findItem(R.id.new_conversation).getActionView().setOnClickListener(new View.OnClickListener()
+		menu.findItem(R.id.new_conversation).getActionView().setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -479,7 +549,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				if (photosEnabled)
 				{
 					showComposeOverflowMenu();
-					accountPrefs.edit().putBoolean(HikeConstants.SHOW_PHOTOS_ENABLED_DOT, false).commit();
 					newConversationIndicator.setVisibility(View.GONE);
 				}
 				else
@@ -506,8 +575,55 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		
 		return true;
 	}
-	
-	
+
+	private void recordSearchOptionClick()
+	{
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.HOME_SEARCH);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+		}
+		catch (JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+	}
+
+	public static void setSearchOptionAccess(boolean setVisible)
+	{
+		if (searchItem != null)
+		{
+			searchItem.setEnabled(setVisible);
+			searchItem.setVisible(setVisible);
+		}
+	}
+
+	private void toggleMenuItems(Menu menu, boolean value)
+	{
+		menu.findItem(R.id.overflow_menu).setVisible(value);
+		menu.findItem(R.id.new_conversation).setVisible(value);
+	}
+
+	private OnQueryTextListener onQueryTextListener = new OnQueryTextListener()
+	{
+		@Override
+		public boolean onQueryTextSubmit(String query)
+		{
+			Utils.hideSoftKeyboard(getApplicationContext(), searchItem.getActionView());
+			return true;
+		}
+
+		@Override
+		public boolean onQueryTextChange(String newText)
+		{
+			if(mainFragment!=null)
+	        {
+				mainFragment.onSearchQueryChanged(newText.toString());
+	        }
+			return true;
+		}
+	};
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
@@ -519,6 +635,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		case android.R.id.home:
 			hikeLogoClicked();
 			break;
+		}
+
+		if (item.getItemId() == searchOptionID)
+		{
+			recordSearchOptionClick();
 		}
 
 		if (intent != null)
@@ -1409,7 +1530,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
 			boolean showTimelineRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_TIMELINE_RED_DOT, true);
 			boolean showBroadcastRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_NEW_BROADCAST_RED_DOT, true);
-			
+			boolean showPhotosRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_PHOTOS_RED_DOT, false);
+			boolean showNUJRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
+
 			int count = 0;
 			if (item.getKey() == 7)
 			{
@@ -1419,7 +1542,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				else if (count > 0)
 					newGamesIndicator.setText(String.valueOf(count));
 			}
-			if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked) || (item.getKey() == 7 && (count > 0 || showTimelineRedDot)) || (item.getKey() == 10 && showBroadcastRedDot))
+			if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked) || (item.getKey() == 7 && (count > 0 || showTimelineRedDot))
+					|| (item.getKey() == 10 && showBroadcastRedDot)|| (item.getKey() == 11 && showNUJRedDot)|| (item.getKey() == 12 && showPhotosRedDot))
 			{
 				newGamesIndicator.setVisibility(View.VISIBLE);
 			}
@@ -1474,9 +1598,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
 
 		addEmailLogItem(optionsList);
-		
-		//Take a photo
-//		optionsList.add(new OverFlowMenuItem(getString(R.string.take_photo), 10));
+
+		// Take a photo
+		// optionsList.add(new OverFlowMenuItem(getString(R.string.take_photo), 10));
 
 		overFlowWindow = new PopupWindow(this);
 
@@ -1613,16 +1737,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		});
 	}
-	
-	private void showComposeOverflowMenu(){
+
+	private void showComposeOverflowMenu()
+	{
 
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
 		final String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
-		
+
 		optionsList.add(new OverFlowMenuItem(getString(R.string.compose_chat), 11));
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.take_photo), 10));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.take_photo), 12));
 
 		overFlowWindow = new PopupWindow(this);
 
@@ -1656,16 +1781,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
 						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					}
-					catch(JSONException e)
+					catch (JSONException e)
 					{
 						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 					}
 
 					intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
-					intent.putExtra(HikeConstants.Extras.EDIT , true);
+					intent.putExtra(HikeConstants.Extras.EDIT, true);
 					break;
-				case 10:
-					//Take a photo
+				case 12:
+					// Take a photo
+					accountPrefs.edit().putBoolean(HikeConstants.SHOW_PHOTOS_RED_DOT, false).commit();
 					IntentManager.openHikeCameraActivity(HomeActivity.this);
 					sendAnalyticsTakePicture();
 					break;
@@ -1898,7 +2024,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					newConversationIndicator.setVisibility(View.VISIBLE);
 					newConversationIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
 				}
-				else if(photosEnabled && accountPrefs.getBoolean(HikeConstants.SHOW_PHOTOS_ENABLED_DOT, true))
+				else if (photosEnabled && accountPrefs.getBoolean(HikeConstants.SHOW_PHOTOS_RED_DOT, false))
 				{
 					newConversationIndicator.setText("1");
 					newConversationIndicator.setVisibility(View.VISIBLE);
