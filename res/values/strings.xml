@@ -946,7 +946,7 @@
     <string name="delete_leave">Delete and exit group</string>
     <string name="group_participant_info">You can add upto 500 people to a group</string>
     <string name="broadcast_ftue_message">A broadcast lets you send the same message to multiple hike contacts at once</string>
-    <string name="broadcast_participant_info"><b>Note: </b>Only hike contacts with %1$s in their address book will receive this broadcast.</string>
+    <string name="broadcast_participant_info"><![CDATA[<font color=\"#848484\"><b>Note: </b>Only hike contacts with %1$s in their address book will receive this broadcast.</font>]]></string>
     <string name="photo">GALLERY</string>
     <string name="video">VIDEOS</string>
     <string name="location_option">LOCATION</string>
