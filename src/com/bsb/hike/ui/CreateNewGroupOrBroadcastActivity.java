@@ -121,7 +121,14 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 		}
 		else
 		{
-			groupOrBroadcastImage.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(groupOrBroadcastId, true));
+			if (isBroadcast)
+			{
+				findViewById(R.id.broadcast_bg).setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(groupOrBroadcastId, true));
+			}
+			else
+			{
+				groupOrBroadcastImage.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(groupOrBroadcastId, true));
+			}
 		}
 		
 		if(!isBroadcast)
