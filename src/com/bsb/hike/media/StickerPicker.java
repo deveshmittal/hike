@@ -1,5 +1,6 @@
 package com.bsb.hike.media;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -56,9 +57,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 * @param activity
 	 * @param listener
 	 */
-	public StickerPicker(Context context, StickerPickerListener listener)
+	public StickerPicker(Activity activity, StickerPickerListener listener)
 	{
-		this.mContext = context;
+		this.mContext = activity;
 		this.listener = listener;
 	}
 
@@ -69,9 +70,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 * @param listener
 	 * @param popUpLayout
 	 */
-	public StickerPicker(int layoutResId, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
+	public StickerPicker(int layoutResId, Activity activity, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
 	{
-		this(context, listener);
+		this(activity, listener);
 		this.mLayoutResId = layoutResId;
 		this.popUpLayout = popUpLayout;
 	}
@@ -84,9 +85,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 * @param listener
 	 * @param popUpLayout
 	 */
-	public StickerPicker(View view, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
+	public StickerPicker(View view, Activity activity, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
 	{
-		this(context, listener);
+		this(activity, listener);
 		this.viewToDisplay = view;
 		this.popUpLayout = popUpLayout;
 		initViewComponents(viewToDisplay);
@@ -103,10 +104,10 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 * @param eatTouchEventViewIds
 	 */
 
-	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, int[] eatTouchEventViewIds)
+	public StickerPicker(Activity activity, StickerPickerListener listener, View mainView, int firstTimeHeight, int[] eatTouchEventViewIds)
 	{
-		this(context, listener);
-		popUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, context.getApplicationContext(), eatTouchEventViewIds, null);
+		this(activity, listener);
+		popUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, eatTouchEventViewIds, null, null);
 	}
 
 	/**
@@ -117,9 +118,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup, StickerPi
 	 *            this is your activity Or fragment root view which gets resized when keyboard toggles
 	 * @param firstTimeHeight
 	 */
-	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight)
+	public StickerPicker(Activity activity, StickerPickerListener listener, View mainView, int firstTimeHeight)
 	{
-		this(context, listener, mainView, firstTimeHeight, null);
+		this(activity, listener, mainView, firstTimeHeight, null);
 	}
 
 	public void showStickerPicker(int screenOrietentation)

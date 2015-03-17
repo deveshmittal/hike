@@ -48,9 +48,9 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	 * @param emoPickerListener
 	 */
 
-	public EmoticonPicker(Context context, EditText editText)
+	public EmoticonPicker(Activity activity, EditText editText)
 	{
-		this.mContext = context;
+		this.mContext = activity;
 		this.mEditText = editText;
 	}
 
@@ -62,9 +62,9 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	 * @param popUpLayout
 	 */
 
-	public EmoticonPicker(int layoutResId, Context context, EditText editText, KeyboardPopupLayout popUpLayout)
+	public EmoticonPicker(int layoutResId, Activity activity, EditText editText, KeyboardPopupLayout popUpLayout)
 	{
-		this(context, editText);
+		this(activity, editText);
 		this.mLayoutResId = layoutResId;
 		this.mPopUpLayout = popUpLayout;
 	}
@@ -78,9 +78,9 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	 * @param popUpLayout
 	 */
 
-	public EmoticonPicker(View view, Context context, EditText editText, KeyboardPopupLayout popUpLayout)
+	public EmoticonPicker(View view, Activity activity, EditText editText, KeyboardPopupLayout popUpLayout)
 	{
-		this(context, editText);
+		this(activity, editText);
 		this.mPopUpLayout = popUpLayout;
 		this.mViewToDisplay = view;
 		initViewComponents(mViewToDisplay);
@@ -96,10 +96,10 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	 * @param firstTimeHeight
 	 * @param eatOuterTouchIds
 	 */
-	public EmoticonPicker(Context context, EditText editText, View mainView, int firstTimeHeight, int[] eatOuterTouchIds)
+	public EmoticonPicker(Activity activity, EditText editText, View mainView, int firstTimeHeight, int[] eatOuterTouchIds)
 	{
-		this(context, editText);
-		mPopUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, mContext, eatOuterTouchIds, null);
+		this(activity, editText);
+		mPopUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, eatOuterTouchIds, null, activity);
 	}
 
 	/**
@@ -267,10 +267,10 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 		this.mEditText = null;
 	}
 	
-	public void updateETAndContext(EditText editText, Context context)
+	public void updateETAndContext(EditText editText, Activity activity)
 	{
 		updateET(editText);
-		this.mContext = context;
+		this.mContext = activity;
 	}
 	
 	public void updateET(EditText editText)
