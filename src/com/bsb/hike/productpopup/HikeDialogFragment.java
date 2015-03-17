@@ -99,6 +99,7 @@ public class HikeDialogFragment extends DialogFragment
 		loadingCard.setVisibility(View.VISIBLE);
 		return view;
 	}
+	
 	/**
 	 * 
 	 * @param supportFragmentManager
@@ -125,18 +126,27 @@ public class HikeDialogFragment extends DialogFragment
 
 		mmWebView.addJavascriptInterface(mmBridge, HikePlatformConstants.PLATFORM_BRIDGE_NAME);
 		mmWebView.setWebViewClient(new CustomWebClient());
-		mmBridge.setDebuggableEnabled("true");
-		Logger.d("ProductPopup", "Widht before load url " + mmWebView.getWidth());
-		mmWebView.loadDataWithBaseURL("", mmModel.getFormedData(), "text/html", "UTF-8", "");
+		mmWebView.post(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				Logger.d("ProductPopup","in post runnable+ width is "+mmWebView.getWidth());
+				mmWebView.loadDataWithBaseURL("", mmModel.getFormedData(), "text/html", "UTF-8", "");
+			}
+		});
+		
 	}
 
+	
 	class CustomWebClient extends HikeWebClient
 	{
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon)
 		{
 			super.onPageStarted(view, url, favicon);
-			Logger.d("ProductPopup", "Web View HEight on Page Started>>>>" + mmWebView.getHeight());
+			Logger.d("ProductPopup", "Web View HEight and Width  on Page Started>>>>" + mmWebView.getHeight()+">>>>>"+mmWebView.getWidth());
 		}
 
 		@Override
