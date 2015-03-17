@@ -14,8 +14,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewTreeObserver.OnWindowAttachListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebView;
@@ -124,7 +126,7 @@ public class HikeDialogFragment extends DialogFragment
 
 		mmBridge = new ProductJavaScriptBridge(mmWebView, new WeakReference<HikeDialogFragment>(this), mmModel.getData());
 
-		mmWebView.addJavascriptInterface(mmBridge, HikePlatformConstants.PLATFORM_BRIDGE_NAME);
+		mmWebView.addJavascriptInterface(mmBridge, ProductPopupsConstants.POPUP_BRIDGE_NAME);
 		mmWebView.setWebViewClient(new CustomWebClient());
 		mmWebView.post(new Runnable()
 		{
