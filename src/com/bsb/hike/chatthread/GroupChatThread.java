@@ -774,6 +774,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		View content = activity.findViewById(R.id.impMessageCreateView);
 		content.setVisibility(View.VISIBLE);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
+		mComposeView.requestFocus();
 		mEmoticonPicker.updateET(mComposeView);
 		
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
@@ -807,10 +808,16 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 
 		mComposeView = (CustomFontEditText) activity.findViewById(R.id.msg_compose);
 		mEmoticonPicker.updateET(mComposeView);
+		mComposeView.requestFocus();
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
 		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
 		mBottomView.setVisibility(View.VISIBLE);
 		playPinCreateDestroyViewAnim();
+		
+		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
 	}
 	
 	
