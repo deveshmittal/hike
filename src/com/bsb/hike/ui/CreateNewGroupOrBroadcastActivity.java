@@ -137,7 +137,7 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 
 			groupOrBroadcastImage = (ImageView) findViewById(R.id.broadcast_profile_image);
 			groupOrBroadcastName = (EditText) findViewById(R.id.broadcast_name);
-			groupOrBroadcastName.setHint(BroadcastConversation.defaultBroadcastName(broadcastRecipients));
+//			groupOrBroadcastName.setHint(BroadcastConversation.defaultBroadcastName(broadcastRecipients));
 			myMsisdn = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.MSISDN_SETTING, "");
 			broadcastNote = (TextView) findViewById(R.id.broadcast_info);
 			broadcastNote.setText(getString(R.string.broadcast_participant_info, myMsisdn));

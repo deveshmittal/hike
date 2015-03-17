@@ -788,7 +788,7 @@
     <string name="compose_chat_action_bar_group_mode_title">Select members (min 2)</string>
     <string name="compose_chat_action_bar_title">New Chat</string>
     <string name="name_group">Name the group</string>
-    <string name="name_broadcast">Name the broadcast list</string>
+    <string name="name_broadcast">Name the broadcast</string>
     <string name="group_chats">Group Chats</string>
     <string name="friend_requests_sent">Friend requests sent</string>
     <string name="blue_status_updates">status updates</string>
