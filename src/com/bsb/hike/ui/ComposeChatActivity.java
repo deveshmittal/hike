@@ -794,6 +794,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if(getIntent().hasExtra(HikeConstants.Extras.COMPOSE_MODE))
 		{
 			mode = getIntent().getIntExtra(HikeConstants.Extras.COMPOSE_MODE, START_CHAT_MODE);
+			triggerPointForPopup=ProductPopupsConstants.PopupTriggerPoints.BROADCAST.ordinal();
+			
 		}
 		else if(nuxIncentiveMode)
 		{
@@ -1944,6 +1946,19 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				lastSeenScheduler = LastSeenScheduler.getInstance(ComposeChatActivity.this);
 				lastSeenScheduler.start(true);
 			}
+		}
+
+		@Override
+		public void completeListFetched() {
+			if (adapter != null)
+			{
+				if (adapter.getCompleteList().size() <= 0)
+				{
+					View selectAllCont = findViewById(R.id.select_all_container);
+					selectAllCont.setVisibility(View.GONE);
+				}
+			}
+			
 		}
 	};
 

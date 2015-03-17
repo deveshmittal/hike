@@ -914,6 +914,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		long maxMsgId = Utils.getMaxLongValue(msgIds);
 		ArrayList<Long> messageIdsToBeUpdated = getCurrentUnreadMessageIdsForMsisdn(msisdn, maxMsgId);
 		
+		if(messageIdsToBeUpdated == null || messageIdsToBeUpdated.isEmpty())
+		{
+			return null;
+		}
+		
 		String initialWhereClause = DBConstants.MESSAGE_ID + " in " + Utils.valuesToCommaSepratedString(messageIdsToBeUpdated);
 
 		int status = State.SENT_DELIVERED_READ.ordinal();
@@ -6660,6 +6665,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		Cursor c = null;
 		Map<String, ArrayList<Long>> map = new HashMap<String, ArrayList<Long>>();
 
+		if(serverIds == null || serverIds.isEmpty())
+		{
+			return map;
+		}
 		try
 		{
 			/*

@@ -786,8 +786,11 @@ public class Utils
 			}
 		}
 		Collections.sort(groupParticipants);
-
-		String name = groupParticipants.get(0).getContactInfo().getFirstName();
+		String name = null;
+		if (groupParticipants.size() > 0)
+		{
+			name = extractFullFirstName(groupParticipants.get(0).getContactInfo().getFirstNameAndSurname());
+		}
 		switch (groupParticipants.size())
 		{
 		case 0:
@@ -797,7 +800,7 @@ public class Utils
 		default:
 			for (int i=1; i<groupParticipants.size(); i++)
 			{
-				name += ", " + groupParticipants.get(i).getContactInfo().getFirstName();
+				name += ", " + extractFullFirstName(groupParticipants.get(i).getContactInfo().getFirstNameAndSurname());
 			}
 			return name;
 		}
@@ -4796,6 +4799,10 @@ public class Utils
 
 	public static String getFormattedDate(Context context, long timestamp)
 	{
+		if (timestamp < 0)
+		{
+			return "";
+		}
 		Date date = new Date(timestamp * 1000);
 		String format;
 		if (android.text.format.DateFormat.is24HourFormat(context))
@@ -4813,6 +4820,10 @@ public class Utils
 
 	public static String getFormattedTime(boolean pretty, Context context, long timestamp)
 	{
+		if (timestamp < 0)
+		{
+			return "";
+		}
 		Date date = new Date(timestamp * 1000);
 		if (pretty)
 		{
@@ -5449,35 +5460,6 @@ public class Utils
 		return null;
 	}
 	
-	public static String getParticipantAddedMessage(ConvMessage convMessage, Context context, String highlight)
-	{
-		String participantAddedMessage;
-		MessageMetadata metadata = convMessage.getMetadata();
-		if (convMessage.isBroadcastConversation())
-		{
-			if (metadata.isNewBroadcast())
-			{
-				participantAddedMessage = String.format(context.getString(R.string.new_broadcast_message), highlight);
-			}
-			else
-			{
-				participantAddedMessage = String.format(context.getString(R.string.add_to_broadcast_message), highlight);
-			}
-		}
-		else
-		{
-			if (metadata.isNewGroup())
-			{
-				participantAddedMessage = String.format(context.getString(R.string.new_group_message), highlight);
-			}
-			else
-			{
-				participantAddedMessage = String.format(context.getString(R.string.add_to_group_message), highlight);
-			}
-		}
-		return participantAddedMessage;
-	}
-	
 	public static String valuesToCommaSepratedString(ArrayList<Long> entries)
 	{
 		StringBuilder result = new StringBuilder("(");
@@ -5548,5 +5530,28 @@ public class Utils
 		}
 		
 		return maxVal;
+	}
+	
+	public static String extractFullFirstName(String fullName)
+	{
+		String fullFirstName = null;
+		
+		if(TextUtils.isEmpty(fullName))
+		{
+			return "";
+		}
+		
+		String[] args = fullName.trim().split(" ", 3);
+
+		if(args.length > 1)
+		{
+			// if contact has some prefix, name would be prefix + first-name else first-name + first word of last name		
+			fullFirstName = args[0] + " " + args[1];
+		}
+		else
+		{
+			fullFirstName = fullName;
+		}
+		return fullFirstName;
 	}
 }

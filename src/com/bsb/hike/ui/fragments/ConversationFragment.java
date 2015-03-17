@@ -1325,13 +1325,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		ArrayList<String> optionsList = new ArrayList<String>();
 
 		final Conversation conv = (Conversation) mAdapter.getItem(position);
-
-		boolean convIsPhoneBookContact = mAdapter.conversationsMsisdns!=null && !(mAdapter.conversationsMsisdns.contains(conv.getMsisdn()));
-		if (conv instanceof ConversationTip || convIsPhoneBookContact)
+		if (conv instanceof ConversationTip || !mConversationsByMSISDN.containsKey(conv.getMsisdn()))
 		{
 			return false;
 		}
-
 		/*
 		 * Switch to stealth mode if we are in ftue.
 		 */

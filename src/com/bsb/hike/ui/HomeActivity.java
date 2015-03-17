@@ -498,7 +498,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 
 		final SearchView searchView = new SearchView(getSupportActionBar().getThemedContext());
-		searchView.setQueryHint(getString(R.string.search_hint));
 		searchView.setIconifiedByDefault(false);
 		searchView.setIconified(false);
 		searchView.setOnQueryTextListener(onQueryTextListener);
@@ -519,6 +518,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					mainFragment.setupSearch();
 		        }
 				toggleMenuItems(menu, false);
+				showProductPopup(ProductPopupsConstants.PopupTriggerPoints.SEARCH.ordinal());
 				setupSearchActionBar();
 				return true;
 			}
@@ -607,11 +607,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private OnQueryTextListener onQueryTextListener = new OnQueryTextListener()
 	{
-
 		@Override
 		public boolean onQueryTextSubmit(String query)
 		{
-			return false;
+			Utils.hideSoftKeyboard(getApplicationContext(), searchItem.getActionView());
+			return true;
 		}
 
 		@Override

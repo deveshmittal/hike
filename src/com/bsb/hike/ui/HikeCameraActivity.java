@@ -40,6 +40,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.photos.HikePhotosUtils;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.ui.fragments.CameraFragment;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -201,6 +202,7 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 			}
 		}
 
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.PHOTOS.ordinal());
 	}
 
 	private void setupActionBar()
