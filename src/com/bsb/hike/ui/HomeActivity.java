@@ -170,7 +170,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private boolean photosEnabled;
 
-	private static MenuItem searchItem;
+	private static MenuItem searchMenuItem;
 
 	private boolean showingSearchModeActionBar = false;
 
@@ -448,8 +448,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		if(showingSearchModeActionBar)
 		{
-			searchItem.getActionView().clearFocus();
-			searchItem.collapseActionView();
+			searchMenuItem.getActionView().clearFocus();
+			searchMenuItem.collapseActionView();
 		}
 		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());
 	}
@@ -499,11 +499,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		searchView.clearFocus();
 		searchView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-		searchItem = menu.findItem(R.id.search);
-		searchOptionID = searchItem.getItemId();
-		searchItem.setActionView(searchView).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+		searchMenuItem = menu.findItem(R.id.search);
+		searchOptionID = searchMenuItem.getItemId();
+		searchMenuItem.setActionView(searchView).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
 
-		searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()
+		searchMenuItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()
 		{
 			@Override
 			public boolean onMenuItemActionExpand(MenuItem item)
@@ -587,10 +587,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	public static void setSearchOptionAccess(boolean setVisible)
 	{
-		if (searchItem != null)
+		if (searchMenuItem != null)
 		{
-			searchItem.setEnabled(setVisible);
-			searchItem.setVisible(setVisible);
+			searchMenuItem.setEnabled(setVisible);
+			searchMenuItem.setVisible(setVisible);
 		}
 	}
 
@@ -605,7 +605,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		@Override
 		public boolean onQueryTextSubmit(String query)
 		{
-			Utils.hideSoftKeyboard(getApplicationContext(), searchItem.getActionView());
+			Utils.hideSoftKeyboard(getApplicationContext(), searchMenuItem.getActionView());
 			return true;
 		}
 
