@@ -1051,9 +1051,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		HomeActivity.setSearchOptionAccess(!isConversationsEmpty());
 	}
 
-	public boolean isConversationsEmpty()
+	private boolean isConversationsEmpty()
 	{
-		return (displayedConversations != null && !displayedConversations.isEmpty()) ? false : true;
+		return (displayedConversations != null && displayedConversations.isEmpty()) ? true : false;
 	}
 
 	@Override
