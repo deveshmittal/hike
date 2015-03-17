@@ -67,13 +67,13 @@ public class WifiNetworksListFragment extends ListFragment {
 
 	@Override
 	public void onResume() {
-		//runNetworkScan();
+		runNetworkScan();
 		super.onResume();
 	}
 	
 	@Override
 	public void onPause() {
-		//updateNetwork.interrupt();
+		updateNetwork.interrupt();
 		super.onPause();
 	}
 	

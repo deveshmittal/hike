@@ -223,7 +223,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
 			ft.add(R.id.horizontal_friends_placeholder, newFragment, "chatFragment").commit();
 			setListnerToRootView();
-
 		}
 		Object object = getLastCustomNonConfigurationInstance();
 

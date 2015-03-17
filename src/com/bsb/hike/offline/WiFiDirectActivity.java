@@ -316,9 +316,12 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 			while(!OfflineFileTransferManager.getInstance().getIsOfflineFileTransferFinished() ||
 					!OfflineFileTransferManager.getInstance().getIsOfflineTextTransferFinished())
 	    	{
-				try {
+				try 
+				{
 					Thread.sleep(1*1000);
-				} catch (InterruptedException e) {
+				} 
+				catch (InterruptedException e) 
+				{
 					Logger.e(TAG, "Sleep failed in OnFileTransferCompleteTask");
 					e.printStackTrace();
 				}
@@ -327,7 +330,8 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 		}
 		
 		@Override
-    	protected void onPostExecute(Void result) {
+    	protected void onPostExecute(Void result) 
+		{
     		callDisconnect();
     	}	  
     }
