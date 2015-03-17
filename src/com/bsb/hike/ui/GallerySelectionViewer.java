@@ -248,7 +248,8 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			@Override
 			public void onClick(View v)
 			{
-				if(!WiFiDirectActivity.isOfflineFileTransferOn){
+				if(!WiFiDirectActivity.isOfflineFileTransferOn)
+				{
 						final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
 						long sizeOriginal = 0;
 						for (GalleryItem galleryItem : galleryItems)
@@ -302,40 +303,42 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 							Utils.executeAsyncTask(fileTransferTask);
 							progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
 						}
-					}else{
-						String deviceAddress  =  getIntent().getExtras().getString("OfflineDeviceName");
-						String localIP = com.bsb.hike.offline.Utils.getLocalIPAddress();
-						String IP_SERVER = OfflineFileTransferManager.IP_SERVER;
-						
-						String client_mac_fixed = new String(deviceAddress).replace("99", "19");
-						String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
-					     
-						for (GalleryItem galleryItem : galleryItems)
-						{
-							 String filePath = galleryItem.getFilePath();
-							 String hostAddress;
-							 int type = 2;
-							 if(localIP.equals(IP_SERVER) || ( (clientIP!=null) && !(clientIP.equals(IP_SERVER)) )){
-									hostAddress = clientIP;
-								}else{
-									hostAddress = IP_SERVER;
-								}
-							 OfflineInfoPacket offlineInfoPacket = new OfflineInfoPacket(filePath, false, null, hostAddress, type);
-							 OfflineFileTransferManager.getInstance().sendMessage(offlineInfoPacket);
-							 
-							 File file = new File(filePath);
-							 Boolean onHike  = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
-							 String msisdn  = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
-							 FileTransferManager.getInstance(getApplicationContext()).uploadOfflineFile(msisdn, file, null, null, HikeFileType.IMAGE, false, false,
-										onHike, -1, FTAnalyticEvents.GALLERY_ATTACHEMENT);
-						}
-						
-						Intent intent = new Intent(GallerySelectionViewer.this, ChatThread.class);
-						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-						intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
-						startActivity(intent);
-						
+				}
+				else
+				{
+					String deviceAddress  =  getIntent().getExtras().getString("OfflineDeviceName");
+					String localIP = com.bsb.hike.offline.Utils.getLocalIPAddress();
+					String IP_SERVER = OfflineFileTransferManager.IP_SERVER;
+					
+					String client_mac_fixed = new String(deviceAddress);//replace("99", "19");
+					String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
+				     
+					for (GalleryItem galleryItem : galleryItems)
+					{
+						 String filePath = galleryItem.getFilePath();
+						 String hostAddress;
+						 int type = 2;
+						 if(localIP.equals(IP_SERVER) || ( (clientIP!=null) && !(clientIP.equals(IP_SERVER)) )){
+								hostAddress = clientIP;
+							}else{
+								hostAddress = IP_SERVER;
+							}
+						 OfflineInfoPacket offlineInfoPacket = new OfflineInfoPacket(filePath, false, null, hostAddress, type);
+						 OfflineFileTransferManager.getInstance().sendMessage(offlineInfoPacket);
+						 
+						 File file = new File(filePath);
+						 Boolean onHike  = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
+						 String msisdn  = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+						 FileTransferManager.getInstance(getApplicationContext()).uploadOfflineFile(msisdn, file, null, null, HikeFileType.IMAGE, false, false,
+									onHike, -1, FTAnalyticEvents.GALLERY_ATTACHEMENT);
 					}
+					
+					Intent intent = new Intent(GallerySelectionViewer.this, ChatThread.class);
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
+					startActivity(intent);
+					
+				}
 			}
 		});
 		

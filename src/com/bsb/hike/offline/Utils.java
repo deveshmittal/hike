@@ -17,8 +17,9 @@ import android.util.Log;
 
 public class Utils {
 
-	private final static String p2pInt = "wlan0";
-
+	// change this to wlan0 for hotspot mode 
+	private final static String p2pInt = "p2p";
+	
 	public static String getIPFromMac(String MAC) {
 		/*
 		 * method modified from:

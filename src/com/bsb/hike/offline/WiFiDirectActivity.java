@@ -48,21 +48,15 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.RotateAnimation;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.view.animation.Animation.AnimationListener;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bsb.hike.R;
-import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.utils.Logger;
 
 /**
@@ -84,7 +78,6 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     public static WifiP2pDevice connectingToDevice = null;
     public static WifiP2pConfig connectingDeviceConfig = null;
     public static int tries;
-    private CheckInvitedStuckTask checkTask = null;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -122,7 +115,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     @Override
     protected void onRestart() {
     	DeviceListFragment.intent =  null;
-    	// give time to disconnect
+    	
     	try {
 			Thread.sleep(1*1000);
 		} catch (InterruptedException e) {
@@ -173,7 +166,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     }
 	
     public HashMap<String, ScanResult>  getDistinctWifiNetworks(){
-        return 	connectionManager.getDistinctWifiNetworks();
+        return connectionManager.getDistinctWifiNetworks();
     }
     
     @Override
@@ -264,7 +257,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     	private WifiP2pDevice connectingToDevice;
     	private WifiP2pDevice latestInstance;
     	private DeviceListFragment fragment;
-    	private boolean destroy = false;
+    	
     	public CheckInvitedStuckTask(WifiP2pDevice connectingToDevice)
     	{
     		this.connectingToDevice = connectingToDevice;
@@ -312,7 +305,6 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 				fragment = null;
 				DeviceListFragment.isReconnecting = true;
     			callDisconnect();
-				this.destroy = true;
 			}
     	}
     }
@@ -543,13 +535,13 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 		
 		ShapeDrawable circle0 = new ShapeDrawable(new OvalShape());
 		circle0.getPaint().setColor(this.getResources().getColor(R.color.restoring_red));
-		dot0.setBackgroundDrawable(circle0);
+		dot0.setBackground(circle0);
 		ShapeDrawable circle1 = new ShapeDrawable(new OvalShape());
 		circle1.getPaint().setColor(this.getResources().getColor(R.color.restoring_green));
-		dot1.setBackgroundDrawable(circle1);
+		dot1.setBackground(circle1);
 		ShapeDrawable circle2 = new ShapeDrawable(new OvalShape());
 		circle2.getPaint().setColor(this.getResources().getColor(R.color.restoring_orange));
-		dot2.setBackgroundDrawable(circle2);
+		dot2.setBackground(circle2);
 		
 		AlphaAnimation dotIn0 = new AlphaAnimation(0, 1);
 		dotIn0.setDuration(100);
@@ -735,7 +727,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 
 	@Override
 	public void discoveryFailure(int reasonCode) {
-		String err=new String();
+		String err = new String();
         if(reasonCode==WifiP2pManager.BUSY) err="BUSY";
         if(reasonCode==WifiP2pManager.ERROR)err="ERROR";
         if(reasonCode==WifiP2pManager.P2P_UNSUPPORTED) err="P2P_UNSUPPORTED";

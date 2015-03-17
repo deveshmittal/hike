@@ -1,6 +1,5 @@
 package com.bsb.hike.offline;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,26 +7,18 @@ import java.util.List;
 import org.apache.http.util.TextUtils;
 
 import com.bsb.hike.R;
-import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
-import com.bsb.hike.ui.GallerySelectionViewer;
 import com.bsb.hike.ui.HikeDialog;
-import com.bsb.hike.utils.Utils;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.ListFragment;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,6 +51,7 @@ public class WifiNetworksListFragment extends ListFragment {
 				switch(msg.what)
 				{
 					case POST_TO_FRAGMENT:
+						@SuppressWarnings("unchecked")
 						HashMap<String, ScanResult> nearbyNetworks = (HashMap<String, ScanResult>) msg.obj;
 						updateWifiNetworks(nearbyNetworks);
 						break;
@@ -75,13 +67,13 @@ public class WifiNetworksListFragment extends ListFragment {
 
 	@Override
 	public void onResume() {
-		runNetworkScan();
+		//runNetworkScan();
 		super.onResume();
 	}
 	
 	@Override
 	public void onPause() {
-		updateNetwork.interrupt();
+		//updateNetwork.interrupt();
 		super.onPause();
 	}
 	

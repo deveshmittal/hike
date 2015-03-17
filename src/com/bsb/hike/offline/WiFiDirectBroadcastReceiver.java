@@ -23,13 +23,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.p2p.WifiP2pManager.Channel;
-import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
-
-import com.bsb.hike.R;
 import com.bsb.hike.utils.Logger;
 
 /**

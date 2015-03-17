@@ -1548,6 +1548,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				optionsList.add(new OverFlowMenuItem(getString(R.string.add_as_favorite_menu), 7));
 			}
+			
+		}
+		
+		if(!(mConversation instanceof GroupConversation))
+		{
 			optionsList.add(new OverFlowMenuItem(getString(R.string.send_offline_files), 8));
 		}
 
@@ -1678,19 +1683,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					setupThemePicker(null);
 					break;
 				case 8:
-					/*com.bsb.hike.offline.WiFiDirectActivity.isOfflineFileTransferOn = true;
-				 	Intent intent = new Intent(getApplicationContext(), com.bsb.hike.offline.WiFiDirectActivity.class);
-				 	startActivity(intent);
-				 	*/
-				    try {
-				    	
+				    try
+				    {	
 				    	JSONObject message = new JSONObject();
 						message.put(HikeConstants.TO, mContactNumber);
 						message.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0);
 						message.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.OFFLINE_MSG_REQUEST);
 						HikeMqttManagerNew.getInstance().sendMessage(message, HikeMqttManagerNew.MQTT_QOS_ONE);
-					} catch (JSONException e) {
-						// TODO Auto-generated catch block
+					}
+				    catch (JSONException e) 
+				    {
 						e.printStackTrace();
 					}
 				 	break;
@@ -1953,7 +1955,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Log.d(WiFiDirectActivity.TAG,"localip " + localIP);
 					
 					// Trick to find the ip in the file /proc/net/arp
-					String client_mac_fixed = new String(deviceAddress).replace("99", "19");
+					String client_mac_fixed = new String(deviceAddress);//.replace("99", "19");
 					String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
 			        Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
 			        Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);
@@ -6973,7 +6975,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		Log.d(WiFiDirectActivity.TAG,"localip " + localIP);
 		
 		// Trick to find the ip in the file /proc/net/arp
-		String client_mac_fixed = new String(deviceAddress).replace("99", "19");
+		String client_mac_fixed = new String(deviceAddress);//.replace("99", "19");
 		String clientIP = com.bsb.hike.offline.Utils.getIPFromMac(client_mac_fixed);
         Log.d(WiFiDirectActivity.TAG,"client_mac_address: " +  client_mac_fixed);
         Log.d(WiFiDirectActivity.TAG,"clientIP" +  clientIP);

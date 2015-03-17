@@ -24,11 +24,9 @@ import java.util.List;
 
 import org.apache.http.util.TextUtils;
 
-import android.app.Dialog;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
@@ -53,7 +51,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.utils.Logger;
 
 /**
@@ -79,14 +76,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     public static Intent intent;
     private Object syncMsisdn;
     private WifiP2pDevice connectedDevice = null;
-    private static int currentSizeReceived = 0;
     public List<String> peers_msisdn = new ArrayList<String>();
-    private static  int numOfIterations = 0;
-    private int fileSize = 0;
-    private int textSize = 0;
     public static boolean isReconnecting = false;
-    private int mode  =   0;
-    private boolean isConnected = false;
+    private int mode = 0;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -190,21 +182,10 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	    		config.deviceAddress = currentDevice.deviceAddress;
 	    		config.wps.setup = WpsInfo.PBC;
 	    		config.groupOwnerIntent = 0;
-	    		/*if (progressDialog != null && progressDialog.isShowing()) {
-	    			progressDialog.dismiss();
-	    		}
-	    		progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
-	    				"Connecting to :" + currentDevice.deviceAddress, true, true,
-	    				new DialogInterface.OnCancelListener(){
-	                @Override
-	                public void onCancel(DialogInterface dialog) {
-	                    Log.d("wifidirectdemo", "Hello cancelled");
-	                }
-	            });
-	            */
+	    		
 	    		//  mode - 0  wifi-direct 
 	    		//  mode  - 1 wifi hotspot
-	    		mode = 1;
+	    		mode = 0;
 	    		((DeviceActionListener) getActivity()).connect(config, 0, currentDevice,mode, intent);
     	     }
     	}
@@ -394,13 +375,15 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	public void clearConnectionDetails() {
 		connectedDevice = null;
 		//switch off AsyncTasks
-		isConnected = false;
-		try {
+		try 
+		{
 			if (fileReceiveServerSocket != null)
 				fileReceiveServerSocket.close();
 			if (textReceiveServerSocket != null)
 				textReceiveServerSocket.close();
-		} catch (IOException e) {
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
 		}
 		OfflineFileTransferManager.getInstance().switchOffReceivers();
@@ -419,14 +402,15 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	}
 
 	@Override
-	public void onGroupInfoAvailable(WifiP2pGroup group) {
+	public void onGroupInfoAvailable(WifiP2pGroup group) 
+	{
 		if(group != null)
     	{
-			if (progressDialog != null && progressDialog.isShowing()) {
+			if (progressDialog != null && progressDialog.isShowing()) 
+			{
 				progressDialog.dismiss();
 		    }
 		    groupInfo = group;
-		    isConnected = true;
 		    
 		    //OfflineFileTransferManager.getInstance().switchOnReceivers(this);
 		    //new FileReceiveServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
@@ -438,7 +422,8 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		    
 	    	if(group.isGroupOwner())
 	    	{
-	    		for(WifiP2pDevice  client :  group.getClientList()){
+	    		for(WifiP2pDevice  client :  group.getClientList())
+	    		{
 	    			connectedDevice = client;
 				}
 	    	}

@@ -1,13 +1,7 @@
 package com.bsb.hike.offline;
 
-import java.io.BufferedReader;
-
-import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import com.bsb.hike.HikeMessengerApp;
@@ -25,7 +19,6 @@ import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
 import android.net.wifi.p2p.WifiP2pManager.GroupInfoListener;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
-import android.os.Handler;
 import android.util.Log;
 
 public class WifiP2pConnectionManager implements ChannelListener
@@ -70,14 +63,10 @@ public class WifiP2pConnectionManager implements ChannelListener
 			
 			@Override
 			public void onSuccess() {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void onFailure(int reason) {
-				// TODO Auto-generated method stub
-				
 			}
 		});*/
         setDeviceNameAsMsisdn();   
@@ -106,13 +95,10 @@ public class WifiP2pConnectionManager implements ChannelListener
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
