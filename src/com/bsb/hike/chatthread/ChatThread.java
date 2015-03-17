@@ -975,6 +975,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (mShareablePopupLayout.isShowing())
 		{
 			mShareablePopupLayout.dismiss();
+			return;
 		}
 
 		if (removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true))
