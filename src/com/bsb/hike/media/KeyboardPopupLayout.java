@@ -247,4 +247,12 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		
 		}
 	};
+
+	public void onCloseKeyBoard()
+	{
+		if (isKeyboardOpen() && isShowing())
+		{
+			dismiss();
+		}
+	}
 }

@@ -206,4 +206,12 @@ public class ShareablePopupLayout
 		mKeyboardPopupLayout.releaseResources();
 	}
 
+	public void onCloseKeyBoard()
+	{
+		if (isKeyboardOpen())
+		{
+			mKeyboardPopupLayout.onCloseKeyBoard();
+		}
+	}
+
 }

@@ -4267,4 +4267,18 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mShareablePopupLayout.dismiss();
 		}
 	}
+
+	/**
+	 * Close the keyboard. Since we are going to a different fragment Reset the application Flags
+	 */
+	public void onAttachFragment()
+	{
+		Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+
+		if (mShareablePopupLayout != null)
+		{
+			mShareablePopupLayout.onCloseKeyBoard();
+
+		}
+	}
 }

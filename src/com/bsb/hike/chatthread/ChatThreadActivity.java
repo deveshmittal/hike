@@ -1,5 +1,6 @@
 package com.bsb.hike.chatthread;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -208,6 +209,14 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 		Logger.i(TAG, "OnConfigchanged");
 		chatThread.onConfigurationChanged(newConfig);
 		super.onConfigurationChanged(newConfig);
+	}
+	
+	@Override
+	public void onAttachFragment(android.support.v4.app.Fragment fragment)
+	{
+		Logger.i(TAG, "onAttachFragment");
+		chatThread.onAttachFragment();
+		super.onAttachFragment(fragment);
 	}
 	
 	public String getContactNumber()
