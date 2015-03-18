@@ -143,16 +143,9 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 
 			queries.add(popupDB);
 
-			String alterContentId = "ALTER TABLE " + CONTENT_TABLE + " ADD COLUMN " + CONTENT_ID + " INTEGER UNIQUE";
-			queries.add(alterContentId);
-
 
 			String alterNamespace = "ALTER TABLE " + CONTENT_TABLE + " ADD COLUMN " + NAMESPACE + " TEXT";
 			queries.add(alterNamespace);
-
-
-			String contentIndex = CREATE_INDEX + CONTENT_ID_INDEX + " ON " + CONTENT_TABLE + " (" + CONTENT_ID + ")";
-			queries.add(contentIndex);
 
 			String nameSpaceIndex = CREATE_INDEX + CONTENT_TABLE_NAMESPACE_INDEX + " ON " + CONTENT_TABLE + " (" + NAMESPACE + ")";
 			queries.add(nameSpaceIndex);
