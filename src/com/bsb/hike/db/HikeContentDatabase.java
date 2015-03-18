@@ -58,7 +58,6 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 	{
 		mDB = db;
 		// CREATE all tables, it is possible that few tables are created in this version
-		onCreate(mDB);
 		String[] updateQueries = getUpdateQueries(oldVersion, newVersion);
 		for (String update : updateQueries)
 		{
@@ -132,6 +131,33 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 	{
 		ArrayList<String> queries = new ArrayList<String>();
 		// UPDATE TABLE
+		if (oldVersion< 2)
+		{
+			String popupDB = CREATE_TABLE + POPUPDATA + "("
+					+_ID +" INTEGER PRIMARY KEY ,"
+					+ POPUPDATA + " TEXT ,"
+					+ STATUS + " INTEGER ,"
+					+ START_TIME + " INTEGER,"
+					+ END_TIME + " INTEGER,"
+					+ TRIGGER_POINT + " INTEGER " + ")";
+
+			queries.add(popupDB);
+
+			String alterContentId = "ALTER TABLE " + CONTENT_TABLE + " ADD COLUMN " + CONTENT_ID + " INTEGER UNIQUE";
+			queries.add(alterContentId);
+
+
+			String alterNamespace = "ALTER TABLE " + CONTENT_TABLE + " ADD COLUMN " + NAMESPACE + " TEXT";
+			queries.add(alterNamespace);
+
+
+			String contentIndex = CREATE_INDEX + CONTENT_ID_INDEX + " ON " + CONTENT_TABLE + " (" + CONTENT_ID + ")";
+			queries.add(contentIndex);
+
+			String nameSpaceIndex = CREATE_INDEX + CONTENT_TABLE_NAMESPACE_INDEX + " ON " + CONTENT_TABLE + " (" + NAMESPACE + ")";
+			queries.add(nameSpaceIndex);
+
+		}
 		if(oldVersion < 3)
 		{
 			// URL_WHITELIST_TABLE
@@ -141,7 +167,7 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 					+ IN_HIKE + " INTEGER" + ")";
 			queries.add(urlWhitelistTable);
 		}
-		// UPDATE INDEXES
+		
 		return queries.toArray(new String[]{});
 	}
 

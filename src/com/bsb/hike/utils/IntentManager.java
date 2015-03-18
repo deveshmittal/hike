@@ -42,6 +42,7 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.NUXInviteActivity;
 import com.bsb.hike.ui.NuxSendCustomMessageActivity;
 import com.bsb.hike.ui.PeopleActivity;
+import com.bsb.hike.ui.PictureEditer;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.SignupActivity;
@@ -486,5 +487,12 @@ public class IntentManager
 	public static Intent getBrowserIntent(String url)
 	{
 		return new Intent(Intent.ACTION_VIEW,Uri.parse(url));
+	}
+	
+	public static Intent getPictureEditorActivityIntent(String imageFileName)
+	{
+		Intent i = new Intent(HikeMessengerApp.getInstance().getApplicationContext(), PictureEditer.class);
+		i.putExtra(HikeConstants.HikePhotos.FILENAME, imageFileName);
+		return i;
 	}
 }
