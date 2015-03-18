@@ -55,7 +55,6 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 	{
 		mDB = db;
 		// CREATE all tables, it is possible that few tables are created in this version
-		onCreate(mDB);
 		String[] updateQueries = getUpdateQueries(oldVersion, newVersion);
 		for (String update : updateQueries)
 		{
@@ -120,8 +119,37 @@ public class HikeContentDatabase extends SQLiteOpenHelper implements DBConstants
 
 	private String[] getUpdateQueries(int oldVersion, int newVersion)
 	{
-		String[] updateAndIndexes = new String[0];
+		String[] updateAndIndexes = new String[5];
 		// UPDATE TABLE
+
+		int i = 0;
+		if (oldVersion< 2)
+		{
+			String popupDB = CREATE_TABLE + POPUPDATA + "("
+					+_ID +" INTEGER PRIMARY KEY ,"
+					+ POPUPDATA + " TEXT ,"
+					+ STATUS + " INTEGER ,"
+					+ START_TIME + " INTEGER,"
+					+ END_TIME + " INTEGER,"
+					+ TRIGGER_POINT + " INTEGER " + ")";
+
+			updateAndIndexes[i++] = popupDB;
+
+			String alterContentId = "ALTER TABLE " + CONTENT_TABLE + " ADD COLUMN " + CONTENT_ID + " INTEGER UNIQUE";
+			updateAndIndexes[i++] = alterContentId;
+
+
+			String alterNamespace = "ALTER TABLE " + CONTENT_TABLE + " ADD COLUMN " + NAMESPACE + " TEXT";
+			updateAndIndexes[i++] = alterNamespace;
+
+
+			String contentIndex = CREATE_INDEX + CONTENT_ID_INDEX + " ON " + CONTENT_TABLE + " (" + CONTENT_ID + ")";
+			updateAndIndexes[i++] = contentIndex;
+
+			String nameSpaceIndex = CREATE_INDEX + CONTENT_TABLE_NAMESPACE_INDEX + " ON " + CONTENT_TABLE + " (" + NAMESPACE + ")";
+			updateAndIndexes[i++] = nameSpaceIndex;
+
+		}
 
 		// UPDATE INDEXES
 		return updateAndIndexes;
