@@ -35,7 +35,6 @@ public class WifiP2pConnectionManager implements ChannelListener
     private PeerListListener peerListListener;
     private GroupInfoListener groupInfoListener;
     private WifiP2pConnectionManagerListener wifiP2pConnectionManagerListener; 
-    private volatile boolean isOfflineFileTransferOn = false;
     
 	public WifiP2pConnectionManager(Context context, WifiP2pConnectionManagerListener wListener, PeerListListener pListener, GroupInfoListener gListener)
 	{
@@ -61,7 +60,6 @@ public class WifiP2pConnectionManager implements ChannelListener
 	
 	private void initialise(Context context)
 	{
-        isOfflineFileTransferOn = true;
         manager = (WifiP2pManager) context.getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(context, context.getMainLooper(), this);
         wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -109,19 +107,6 @@ public class WifiP2pConnectionManager implements ChannelListener
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
-		}
-	}
-
-	public boolean getIsOfflineFileTransferOn()
-	{
-		return isOfflineFileTransferOn;
-	}
-	
-	public void setIsOfflineFileTransferOn(boolean isOfflineFileTransferOn)
-	{
-		synchronized(WifiP2pConnectionManager.class)
-		{
-			this.isOfflineFileTransferOn = isOfflineFileTransferOn;
 		}
 	}
 	

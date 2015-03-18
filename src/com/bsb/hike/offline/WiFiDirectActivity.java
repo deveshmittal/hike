@@ -72,7 +72,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     private WifiP2pConnectionManager connectionManager = null;
     private BroadcastReceiver receiver = null;
     private IntentFilter intentFilter;
-    public static boolean isOfflineFileTransferOn = false;
+    public static boolean isOfflineFileTransferOn = true;
     private final int MAXTRIES = 5;
     // remember connection details for re-connection
     public static WifiP2pDevice connectingToDevice = null;

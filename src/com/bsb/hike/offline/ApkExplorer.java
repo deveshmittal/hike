@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 
 public class ApkExplorer extends Fragment {
@@ -58,7 +59,7 @@ public class ApkExplorer extends Fragment {
 						String uri = null;
 						uri = appInfo.get(position).sourceDir;
 						Intent intent = getActivity().getIntent();
-						intent.putExtra(FileTransferService.EXTRAS_FILE_PATH, uri);
+						intent.putExtra(HikeConstants.Extras.EXTRAS_APK_PATH, uri);
 						getActivity().setResult(getActivity().RESULT_OK, intent);
 						getActivity().finish();
 					}

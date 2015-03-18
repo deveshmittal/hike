@@ -1064,6 +1064,7 @@ public class HikeConstants
 		public static final String INVITE = "invite";
 
 		public static final String MSG = "msg";
+		
 		public static final String POKE = "poke";
 
 		public static final String PREF = "pref";
@@ -1393,6 +1394,10 @@ public class HikeConstants
 		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
 		
 		public static final String NUX_INCENTIVE_MODE = "showNuxIncentiveMode";
+		
+		public static final String OFFLINE_MODE_ON = "offlineModeOn";
+		
+		public static final String EXTRAS_APK_PATH = "apk_path";
 	}
 
 	public static final class LogEvent

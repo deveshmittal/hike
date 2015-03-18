@@ -21,6 +21,8 @@ import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.http.util.TextUtils;
 
@@ -49,6 +51,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.Conversation;
@@ -87,6 +90,8 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	private Handler mHandler;
 	Thread updateNetwork =  null ; 
 	private boolean requestDialogShown = false;
+	private Timer wifiScanTimer;
+	private TimerTask  timerTask ;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -111,12 +116,13 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 			}
 			
 		};
-    	this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.conversation_item, peers));
+    	this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.conversation_item, peers_msisdn));
     }
     
     public void updateFragment(HashMap<String, ScanResult> strength)
     {
 		// update UI and also notify the user that a new network is available using HikeNotifications
+    	
     }
     
 
@@ -128,23 +134,42 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     
     @Override
     public void onPause() {
-    	updateNetwork.interrupt();
+    	//updateNetwork.interrupt();
+    	timerTask.cancel();
     	super.onPause();
     }
     
     @Override
     public void onResume() {
-    	runNetworkScan();
+    	//runNetworkScan();
+    	runNetworkScanTimer();
     	super.onResume();
     }
     
+    private void runNetworkScanTimer()
+    {
+        wifiScanTimer  =  new Timer();
+        initializeTimerTask();
+        wifiScanTimer.schedule(timerTask, 0,2000);
+        
+    }
+    private void initializeTimerTask() {
+         timerTask =  new TimerTask() {
+             
+             @Override
+             public void run() {
+                 if(isAdded())
+                     {
+                         HashMap<String, ScanResult> nearbyNetworks = ((DeviceActionListener) getActivity()).getDistinctWifiNetworks();
+                         Message targetMessage = mHandler.obtainMessage(POST_TO_FRAGMENT, nearbyNetworks);
+                         targetMessage.sendToTarget();    
+                     }
+             }
+         };
+     }
  // starts a network scan for every 2sec
  	private void runNetworkScan()
  	{
- 		if(isAdded())
- 		{
- 		   //((DeviceActionListener) getActivity()).resetWifi();
- 		}
  		if(updateNetwork==null)
  		{
  			updateNetwork =  (new Thread()
@@ -172,8 +197,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
  				}
  				
  			});
- 			updateNetwork.start();
  		}
+ 		if (!updateNetwork.isAlive())
+ 			updateNetwork.start();
  	}
   
     public WifiP2pDevice getDevice() {
@@ -224,6 +250,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
     	        	intent.putExtra("OfflineDeviceName", connectedDevice.deviceAddress);
     	        	intent.putExtra("OfflineActivity", "");
+    	        	intent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
     	        	startActivity(intent);
     	        	return;
     			}
@@ -248,6 +275,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
 	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
 	        	intent.putExtra("OfflineActivity", "");
+	        	intent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
 	        	startActivity(intent);
 	    	}
 	    	else
@@ -256,6 +284,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
 	        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
 	        	intent.putExtra("OfflineActivity", "");
+	        	intent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
 	        	
 	        	WifiP2pConfig config = new WifiP2pConfig();
 	    		config.deviceAddress = currentDevice.deviceAddress;
@@ -274,9 +303,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     /**
      * Array adapter for ListFragment that maintains WifiP2pDevice list.
      */
-    private class WiFiPeerListAdapter extends ArrayAdapter<WifiP2pDevice> {
+    private class WiFiPeerListAdapter extends ArrayAdapter<String> {
 
-        private List<WifiP2pDevice> items;
+        private List<String> items;
 
         /**
          * @param context
@@ -284,7 +313,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
          * @param objects
          */
         public WiFiPeerListAdapter(Context context, int textViewResourceId,
-                List<WifiP2pDevice> objects) {
+                List<String> objects) {
             super(context, textViewResourceId, objects);
             items = objects;
 
@@ -298,28 +327,26 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                         Context.LAYOUT_INFLATER_SERVICE);
                 v = vi.inflate(R.layout.conversation_item, null);
             }
-            WifiP2pDevice device = items.get(position);
+            String device = items.get(position);
             if (device != null) {
             	Context context = getContext();
             	mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
         		iconLoader = new IconLoader(context, mIconImageSize);
         		
-        		ContactInfo deviceContact = ContactManager.getInstance().getContact(device.deviceName);
+        		ContactInfo deviceContact = ContactManager.getInstance().getContact(device);
         		TextView contact_name = (TextView) v.findViewById(R.id.contact);
         		String phoneName = "";
         		if(deviceContact != null && !(TextUtils.isEmpty(deviceContact.getName())))
         			phoneName = deviceContact.getName();
         		else
-        			phoneName = device.deviceName;
+        			phoneName = device;
         		
         		contact_name.setText(phoneName);
         		//v.findViewById(id)
             	ImageView avatarView =  (ImageView) v.findViewById(R.id.avatar);
-        		iconLoader.loadImage(device.deviceName, true, avatarView, false, true, true);
-        		TextView deviceStatus =  (TextView) v.findViewById(R.id.last_message_timestamp);
-        		String stat =   peersStatus.get(device);
-        		deviceStatus.setText(stat);
-        		
+        		iconLoader.loadImage(device, true, avatarView, false, true, true);
+        		TextView timestamp = (TextView) v.findViewById(R.id.last_message_timestamp);
+        		timestamp.setText("");
             }
 
             return v;

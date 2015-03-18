@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 
 public class FileExplorer extends Activity{
@@ -57,7 +58,7 @@ public class FileExplorer extends Activity{
 						String uri = null;
 						uri = appInfo.get(position).sourceDir;
 						Intent intent = getIntent();
-						intent.putExtra(FileTransferService.EXTRAS_FILE_PATH, uri);
+						intent.putExtra(HikeConstants.Extras.EXTRAS_APK_PATH, uri);
 						setResult(RESULT_OK, intent);
 						finish();
 					}

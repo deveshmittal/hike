@@ -185,7 +185,6 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.offline.FileTransferService;
 import com.bsb.hike.offline.OfflineFileTransferManager;
 import com.bsb.hike.offline.OfflineInfoPacket;
 import com.bsb.hike.offline.WiFiDirectActivity;
@@ -459,7 +458,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	private Intent fromIntent;
 	
-	
+	private boolean isOfflineModeOn;
 
 	@Override
 	protected void onPause()
@@ -738,13 +737,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		// expanded.
 		Editor offlineEditor = getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).edit();
 		fromIntent = getIntent();
-		String deviceAddress =   fromIntent.getStringExtra("OfflineDeviceName");
+		String deviceAddress = fromIntent.getStringExtra("OfflineDeviceName");
 		if(!TextUtils.isEmpty(deviceAddress))
 		{
 			offlineEditor.putString("OfflineDeviceAddress",deviceAddress );
 			offlineEditor.commit(); 
 		}
 		
+		isOfflineModeOn = fromIntent.getExtras().getBoolean(HikeConstants.Extras.OFFLINE_MODE_ON);
 		if (fromIntent.getBooleanExtra(HikeConstants.Extras.SHOW_KEYBOARD, false))
 			showKeyboard = true;
 
@@ -1260,15 +1260,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (isHikeOfflineTipShowing())
 		{
 			hideHikeToOfflineTip();
-			return;
-		}
-		
-		if(com.bsb.hike.offline.WiFiDirectActivity.isOfflineFileTransferOn)
-		{
-			Intent intent = new Intent(this, WiFiDirectActivity.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
-			super.onBackPressed();
 			return;
 		}
 
@@ -1938,7 +1929,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	private void sendMessage(ConvMessage convMessage,boolean playPinAnim)
 	{
-        if(WiFiDirectActivity.isOfflineFileTransferOn)
+        if(isOfflineModeOn)
         {
         	if(convMessage.isStickerMessage())
         	{
@@ -5948,12 +5939,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					imageIntent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
 					imageIntent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
 					// If in offline file transfer mode send device address 
-					if(WiFiDirectActivity.isOfflineFileTransferOn)
-						{
+					if(isOfflineModeOn)
+					{
 						   
 						    String  deviceAddress =   getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
 						    imageIntent.putExtra("OfflineDeviceName",deviceAddress);
-						}
+						    imageIntent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
+					}
 					startActivity(imageIntent);
 					return;
 				}
@@ -6573,7 +6565,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				default:
 					break;
 			}
-			if(!WiFiDirectActivity.isOfflineFileTransferOn)
+			if(isOfflineModeOn == false)
 			{
 				if (selectedFile != null && requestCode == HikeConstants.IMAGE_CAPTURE_CODE)
 				{
@@ -6640,7 +6632,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else if (requestCode == HikeConstants.SHARE_APK_CODE && resultCode == RESULT_OK)
 		{
 			String deviceAddress =   getSharedPreferences(HikeConstants.OFFLINE_FILE_SETTINGS, Context.MODE_PRIVATE).getString("OfflineDeviceAddress","");
-			String filePath = data.getStringExtra(FileTransferService.EXTRAS_FILE_PATH);
+			String filePath = data.getStringExtra(HikeConstants.Extras.EXTRAS_APK_PATH);
 			//initialiseOfflineFileTransfer(filePath, deviceAddress, requestCode);
 			initialiseOfflineFileTransfer(filePath, null, HikeFileType.APK, null, false, (long)-1, false, -1, deviceAddress, requestCode);
 		}

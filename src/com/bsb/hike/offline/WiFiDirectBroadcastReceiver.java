@@ -103,11 +103,8 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             int state = intent.getIntExtra(WifiP2pManager.EXTRA_DISCOVERY_STATE,1);
             if(state==1)
             {
-                if(WiFiDirectActivity.isOfflineFileTransferOn)
-                {
-                    Logger.d("wifidirectdemo", "Discovery changed");
-                	connectionManager.enableDiscovery();
-                }
+            	Logger.d("wifidirectdemo", "Discovery changed");
+                connectionManager.enableDiscovery();
             }
         }
         else if(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action))

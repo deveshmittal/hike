@@ -43,7 +43,6 @@ import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.offline.FileTransferService;
 import com.bsb.hike.offline.OfflineFileTransferManager;
 import com.bsb.hike.offline.OfflineInfoPacket;
 import com.bsb.hike.offline.WiFiDirectActivity;
@@ -80,7 +79,9 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 	private boolean smlDialogShown = false;
 	
-	private String deviceAddress ;
+	private String deviceAddress;
+	
+	private boolean isOfflineModeOn;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -94,7 +95,11 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			fileTransferTask = (InitiateMultiFileTransferTask) object;
 			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
 		}
-		deviceAddress  =  getIntent().getExtras().getString("OfflineDeviceName");
+		
+		isOfflineModeOn = getIntent().getExtras().getBoolean(HikeConstants.Extras.OFFLINE_MODE_ON);
+		if (isOfflineModeOn)
+			deviceAddress  =  getIntent().getExtras().getString("OfflineDeviceName");
+		
 		galleryItems = getIntent().getParcelableArrayListExtra(HikeConstants.Extras.GALLERY_SELECTIONS);
 		totalSelections = galleryItems.size();
 
@@ -151,10 +156,10 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET));
 		intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
-		if(WiFiDirectActivity.isOfflineFileTransferOn)
+		if(isOfflineModeOn)
 		{
-			  
 			  intent.putExtra("OfflineDeviceName",deviceAddress);
+			  intent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
 		}
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -248,7 +253,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			@Override
 			public void onClick(View v)
 			{
-				if(!WiFiDirectActivity.isOfflineFileTransferOn)
+				if(!isOfflineModeOn)
 				{
 						final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
 						long sizeOriginal = 0;
@@ -335,6 +340,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 					
 					Intent intent = new Intent(GallerySelectionViewer.this, ChatThread.class);
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					intent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
 					intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
 					startActivity(intent);
 					

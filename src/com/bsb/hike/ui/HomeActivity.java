@@ -480,7 +480,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				startActivity(intent);
 			}
 		});
-		
+		/*
 		offlinemessagingIndicator  =  (TextView)menu.findItem(R.id.offline_conversation).getActionView().findViewById(R.id.top_bar_indicator);
 		menu.findItem(R.id.offline_conversation).getActionView().findViewById(R.id.overflow_icon_image).setContentDescription("Start offline chatting");
 		((ImageView) menu.findItem(R.id.offline_conversation).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_offline_messaging);
@@ -494,7 +494,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				 	startActivity(intent);
 			}
 			
-		});
+		});*/
 		
 		return true;
 	}

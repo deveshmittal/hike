@@ -549,6 +549,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					android.app.FragmentTransaction ft = fm.beginTransaction();
 					ft.remove(listFragment).commit();
 					listFragment = null;
+					
 					listView.setVisibility(View.VISIBLE);
 				}
 				
