@@ -3306,8 +3306,12 @@ public class MqttMessagesManager
 		{
 			for (int i = 0; i < array.length(); i++)
 			{
-				WhitelistDomain domain = new WhitelistDomain(array.getString(i), whitelistState,array.getString(i));
-				domains[i] = domain;
+				String dom = array.getString(i);
+				if(!TextUtils.isEmpty(dom))
+				{
+					WhitelistDomain domain = new WhitelistDomain(dom, whitelistState,dom);
+					domains[i] = domain;
+				}
 			}
 			HikeContentDatabase.getInstance().addDomainInWhitelist(domains);
 		}
