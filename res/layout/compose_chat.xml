@@ -55,7 +55,11 @@
 	     	
 	</LinearLayout>
     
-		       
+	<FrameLayout
+       android:id="@+id/offline_fragment_holder"
+       android:layout_height="wrap_content"
+       android:layout_width="match_parent">
+  	</FrameLayout>	       
 
     <com.bsb.hike.view.PinnedSectionListView
         android:layout_height="0dp"

@@ -103,6 +103,8 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     public void onResume() {
         super.onResume();
         //registerReceiver(receiver, intentFilter);
+        
+        // TODO: should be added in the onResume of DeviceListFragment
         connectionManager.enableDiscovery();
     }
 
@@ -115,7 +117,6 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
     @Override
     protected void onRestart() {
     	DeviceListFragment.intent =  null;
-    	
     	try {
 			Thread.sleep(1*1000);
 		} catch (InterruptedException e) {
@@ -365,7 +366,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 					}
 					else
 					{
-						connectionManager.closeHotspot(WiFiDirectActivity.connectingToDevice);
+						connectionManager.closeHotspot(connectingToDevice.deviceName);
 						connectionManager.startWifi();
 					}
 					
@@ -700,7 +701,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 
 	@Override
 	public void updateMyDevice(WifiP2pDevice device) {
-		((DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list)).updateThisDevice(device);
+		//((DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list)).updateThisDevice(device);
 	}
 	
 	@Override

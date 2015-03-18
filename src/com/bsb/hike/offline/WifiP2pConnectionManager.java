@@ -46,6 +46,15 @@ public class WifiP2pConnectionManager implements ChannelListener
 		initialise(context);
 	}
 	
+	/* Not needed since DeviceListFragment implements both PeerListListener and GroupInfoListener
+	public WifiP2pConnectionManager(Context context, WifiP2pConnectionManagerListener wListener, PeerListListener pListener)
+	{
+		this.context = context;
+		this.peerListListener = pListener;
+		this.wifiP2pConnectionManagerListener = wListener;
+		initialise(context);
+	}*/
+	
 	public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
         this.isWifiP2pEnabled = isWifiP2pEnabled;
     }
@@ -170,11 +179,11 @@ public class WifiP2pConnectionManager implements ChannelListener
 	
 	
 	
-	public Boolean closeHotspot(WifiP2pDevice wifiP2pDevice)
+	public Boolean closeHotspot(String deviceName)
 	{
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
         myMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
-		String targetMsisdn =  wifiP2pDevice.deviceName;
+		String targetMsisdn =  deviceName;
 		Boolean result = false;
 		try
 		{
@@ -431,27 +440,3 @@ public class WifiP2pConnectionManager implements ChannelListener
 		wifiManager.setWifiEnabled(true);
 	}
 }
-
-interface WifiP2pConnectionManagerListener
-{
-	void channelDisconnectedFailure();
-	
-	void updateMyDevice(WifiP2pDevice device);
-
-	void resetData();
-	
-	void notifyWifiNotEnabled();
-	
-	void connectSuccess();
-	
-	void connectFailure(int reasonCode);
-	
-	void cancelConnectSuccess();
-	
-	void cancelConnectFailure(int reasonCode);
-	
-	void discoverySuccess();
-	
-	void discoveryFailure(int reasonCode);
-}
-

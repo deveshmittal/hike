@@ -28,6 +28,7 @@ import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -36,6 +37,8 @@ import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pManager.GroupInfoListener;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,7 +54,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.utils.Logger;
 
 /**
  * A ListFragment that displays available peers on discovery and requests the
@@ -59,11 +61,10 @@ import com.bsb.hike.utils.Logger;
  */
 public class DeviceListFragment extends ListFragment implements PeerListListener ,GroupInfoListener{
 
+	private final String TAG = "DeviceListFragment";
 	public static final String IP_SERVER = "192.168.49.1";
 	public static int fileTransferPort = 18988;
 	public static int textMessagePort = 18999;
-	private ServerSocket textReceiveServerSocket;
-    private ServerSocket fileReceiveServerSocket;
 	
     private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
     HashMap<WifiP2pDevice, String> peersStatus = new HashMap<WifiP2pDevice, String>();
@@ -79,30 +80,108 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     public List<String> peers_msisdn = new ArrayList<String>();
     public static boolean isReconnecting = false;
     private int mode = 0;
+    
+    // variables of WifiNetworkListFragment
+    private final int POST_TO_FRAGMENT = 0;
+	private List<ScanResult> wifipeers = new ArrayList<ScanResult>();
+	private Handler mHandler;
+	Thread updateNetwork =  null ; 
+	private boolean requestDialogShown = false;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
     	super.onActivityCreated(savedInstanceState);
     	if(syncMsisdn == null)
     		syncMsisdn = new Object();
+    	mHandler = new Handler(getActivity().getMainLooper())
+		{
+			@Override
+			public void handleMessage(Message msg)
+			{
+				switch(msg.what)
+				{
+					case POST_TO_FRAGMENT:
+						@SuppressWarnings("unchecked")
+						HashMap<String, ScanResult> nearbyNetworks = (HashMap<String, ScanResult>) msg.obj;
+						updateFragment(nearbyNetworks); //update fragment list here
+						break;
+					default:
+						super.handleMessage(msg);
+				}
+			}
+			
+		};
     	this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.conversation_item, peers));
     }
+    
+    public void updateFragment(HashMap<String, ScanResult> strength)
+    {
+		// update UI and also notify the user that a new network is available using HikeNotifications
+    }
+    
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mContentView = inflater.inflate(R.layout.device_list, null);
         return mContentView;
     }
-
-    /**
-     * @return this device
-     */
+    
+    @Override
+    public void onPause() {
+    	updateNetwork.interrupt();
+    	super.onPause();
+    }
+    
+    @Override
+    public void onResume() {
+    	runNetworkScan();
+    	super.onResume();
+    }
+    
+ // starts a network scan for every 2sec
+ 	private void runNetworkScan()
+ 	{
+ 		if(isAdded())
+ 		{
+ 		   //((DeviceActionListener) getActivity()).resetWifi();
+ 		}
+ 		if(updateNetwork==null)
+ 		{
+ 			updateNetwork =  (new Thread()
+ 			{
+ 				@Override
+ 				public void run() {
+ 					while(!isInterrupted())
+ 					{
+ 						if(isAdded())
+ 						{
+ 							HashMap<String, ScanResult> nearbyNetworks = ((DeviceActionListener) getActivity()).getDistinctWifiNetworks();
+ 							Message targetMessage = mHandler.obtainMessage(POST_TO_FRAGMENT, nearbyNetworks);
+ 							targetMessage.sendToTarget();	
+ 							try 
+ 							{
+ 								sleep(2*1000);
+ 							} 
+ 							catch (InterruptedException e) 
+ 							{
+ 								e.printStackTrace();
+ 							}	
+ 						}
+ 						
+ 					}
+ 				}
+ 				
+ 			});
+ 			updateNetwork.start();
+ 		}
+ 	}
+  
     public WifiP2pDevice getDevice() {
         return device;
     }
 
-    private static String getDeviceStatus(int deviceStatus) {
-        Log.d(WiFiDirectActivity.TAG, "Peer status :" + deviceStatus);
+    private String getDeviceStatus(int deviceStatus) {
+        Log.d(TAG, "Peer status :" + deviceStatus);
         switch (deviceStatus) {
             case WifiP2pDevice.AVAILABLE:
                 return "Available";
@@ -221,12 +300,6 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
             }
             WifiP2pDevice device = items.get(position);
             if (device != null) {
-            	
-            	
-                //TextView top = (TextView) v.findViewById(R.id.device_name);
-                
-                //TextView bottom = (TextView) v.findViewById(R.id.device_details);
-            	
             	Context context = getContext();
             	mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
         		iconLoader = new IconLoader(context, mIconImageSize);
@@ -259,14 +332,14 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
      * 
      * @param device WifiP2pDevice object
      */
-    public void updateThisDevice(WifiP2pDevice device) {
+    /*public void updateThisDevice(WifiP2pDevice device) {
         this.device = device;
         TextView view = (TextView) mContentView.findViewById(R.id.my_name);
         view.setText(device.deviceName);
         view = (TextView) mContentView.findViewById(R.id.my_status);
         view.setText(getDeviceStatus(device.status));
     }
-
+*/
     @Override
     public void onPeersAvailable(WifiP2pDeviceList peerList) {
         if(syncMsisdn == null)
@@ -291,6 +364,8 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        }
 	        
 	        ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+	        
+	        /* no need to store groupInfo
 	        if (peers.size() == 0) 
 	        {
 	        	if(groupInfo != null)
@@ -314,12 +389,13 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        	}
 	        	else
 	        	{
-	        		Logger.d(WiFiDirectActivity.TAG, "No peers found");
+	        		Logger.d(TAG, "No peers found");
 	        	}
 	            return;
-	        }
+	        }*/
         }
         
+        /* Not doing reconnection for hotspot
         if(WiFiDirectActivity.connectingToDevice != null && isReconnecting == true && 
         		peers_msisdn.contains(WiFiDirectActivity.connectingToDevice.deviceName))
         {
@@ -334,7 +410,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         		else
         			Toast.makeText(getActivity(), "Device not present in peer list!!", Toast.LENGTH_SHORT).show();
         	}
-        }
+        }*/
     }
     
     public WifiP2pDevice getLatestPeerInstance(String deviceAddress)
@@ -374,26 +450,8 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	
 	public void clearConnectionDetails() {
 		connectedDevice = null;
-		//switch off AsyncTasks
-		try 
-		{
-			if (fileReceiveServerSocket != null)
-				fileReceiveServerSocket.close();
-			if (textReceiveServerSocket != null)
-				textReceiveServerSocket.close();
-		} 
-		catch (IOException e) 
-		{
-			e.printStackTrace();
-		}
 		OfflineFileTransferManager.getInstance().switchOffReceivers();
 	}
-	
-	/**
-	 * A simple server socket that accepts connection and writes some data on
-	 * the stream.
-	 */
-
 	
 	public void updatePeerStatus(WifiP2pDevice connectedDevice, String status)
 	{
@@ -401,6 +459,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
 	}
 
+	// TODO : can delete everything related to GroupInfoListener
 	@Override
 	public void onGroupInfoAvailable(WifiP2pGroup group) 
 	{
@@ -416,9 +475,9 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 		    //new FileReceiveServerAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
 		    //new TextReceiveAsyncTask(getActivity()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
 		    
-		    WiFiDirectActivity.connectingDeviceConfig = null;
-		    WiFiDirectActivity.connectingToDevice = null;
-		    WiFiDirectActivity.tries = 0;
+		    //WiFiDirectActivity.connectingDeviceConfig = null;
+		    //WiFiDirectActivity.connectingToDevice = null;
+		    //WiFiDirectActivity.tries = 0;
 		    
 	    	if(group.isGroupOwner())
 	    	{

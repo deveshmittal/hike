@@ -1356,7 +1356,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="p2p_off_warning">Enable P2P from action bar button above or system settings</string>
     <string name="group_owner_text">"Am I the Group Owner? "</string>
     <string name="label_me">ME</string>
-    <string name="label_peers">PEERS</string>
+    <string name="label_peers">FREE CONTACTS</string>
     <string name="empty"></string>
     <string name="apk">Apps</string>
     <string name="send_offline_files">Offline File Transfer</string>

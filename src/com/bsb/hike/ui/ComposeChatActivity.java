@@ -1,6 +1,10 @@
 package com.bsb.hike.ui;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,14 +19,30 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.ActionBar.LayoutParams;
+import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.net.Uri;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pConfig;
+import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.WifiP2pManager.GroupInfoListener;
+import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -30,16 +50,22 @@ import android.provider.ContactsContract.Data;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.RotateAnimation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.AbsListView;
@@ -81,6 +107,15 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.offline.ClientScanResult;
+import com.bsb.hike.offline.DeviceActionListener;
+import com.bsb.hike.offline.DeviceListFragment;
+import com.bsb.hike.offline.OfflineFileTransferManager;
+import com.bsb.hike.offline.WiFiDirectActivity;
+import com.bsb.hike.offline.WiFiDirectBroadcastReceiver;
+import com.bsb.hike.offline.WifiP2pConnectionManager;
+import com.bsb.hike.offline.WifiP2pConnectionManagerListener;
+import com.bsb.hike.offline.WiFiDirectActivity.checkConnectedHotspotTask;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
@@ -102,7 +137,7 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
 
-public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener, OnScrollListener
+public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener, OnScrollListener, WifiP2pConnectionManagerListener, DeviceActionListener
 {
 	private static final String SELECT_ALL_MSISDN="all";
 	
@@ -172,7 +207,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private boolean nuxIncentiveMode;
 
-	 private HorizontalFriendsFragment newFragment =null;
+	private HorizontalFriendsFragment newFragment =null;
+	
+	// offlineMode variables
+	private WifiP2pConnectionManager connectionManager = null;
+	
+	private DeviceListFragment listFragment = null;
+	
+	private IntentFilter intentFilter;
+	
+	private BroadcastReceiver receiver = null;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -276,7 +321,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	                }
 	                isOpened = true;
 	            }else if(isOpened == true){
-	            	 Logger.d("UmangX","Keyboard Down");
+	            	Logger.d("UmangX","Keyboard Down");
 	                isOpened = false;
 					FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 					if (tagEditText.getText().toString().length() == 0)
@@ -333,6 +378,23 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	private void initialiseOfflineMode(PeerListListener pListener, GroupInfoListener gListener)
+	{
+		
+		intentFilter = new IntentFilter();
+    	intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_DISCOVERY_CHANGED_ACTION);
+        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        
+        connectionManager = new WifiP2pConnectionManager((Activity)this, (WifiP2pConnectionManagerListener)this, pListener, gListener);
+        receiver = new WiFiDirectBroadcastReceiver(connectionManager);
+        registerReceiver(receiver, intentFilter);
+       
 	}
 	
 	private boolean shouldInitiateFileTransfer()
@@ -433,8 +495,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		adapter.executeFetchTask();
 		
 		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
-		final Button offlineScanButton   =  (Button)findViewById(R.id.scan_wifi_peers);
-		final TextView searchView  =   (TextView)findViewById(R.id.composeChatNewGroupTagET);
+		final Button offlineScanButton = (Button)findViewById(R.id.scan_wifi_peers);
+		final TextView searchView = (TextView)findViewById(R.id.composeChatNewGroupTagET);
 		
 		offlineScanButton.setOnClickListener(new OnClickListener() {
 			
@@ -448,6 +510,19 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				searchView.setFocusable(false);
 				searchView.setFocusableInTouchMode(false);
 				
+				// adding DeviceListFragment
+				
+				if (listFragment == null)
+				{
+					listView.setVisibility(View.GONE);
+					android.app.FragmentManager fm = getFragmentManager();
+					
+					listFragment = new DeviceListFragment();
+					android.app.FragmentTransaction ft = fm.beginTransaction();
+					ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+					initialiseOfflineMode(listFragment, listFragment);
+					ft.replace(R.id.offline_fragment_holder, listFragment, "listFragment").commit();
+				}
 			}
 		});
 		
@@ -455,8 +530,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		searchView.setOnClickListener(new OnClickListener() {
 			
 			@Override
-			public void onClick(View v) {
-				
+			public void onClick(View v) {			
 				searchView.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT , 0.8f));	
 				searchView.setHint("Search by name or number");
 				searchView.setFocusable(true);
@@ -465,6 +539,18 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				offlineScanButton.setMinWidth(0);
 				offlineScanButton.setMinHeight(0);
 				offlineScanButton.setText("");
+				
+				// start the searchView again
+				//FragmentManager fm = getSupportFragmentManager();
+				//newFragment = (HorizontalFriendsFragment) fm.findFragmentById(R.id.horizontal_friends_placeholder);
+				if (listFragment != null)
+				{
+					android.app.FragmentManager fm = getFragmentManager();
+					android.app.FragmentTransaction ft = fm.beginTransaction();
+					ft.remove(listFragment).commit();
+					listFragment = null;
+					listView.setVisibility(View.VISIBLE);
+				}
 				
 				
 			}
@@ -485,7 +571,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	@Override
 	protected void onPause()
 	{
-		// TODO Auto-generated method stub
 		super.onPause();
 		if(adapter != null)
 		{
@@ -496,7 +581,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	@Override
 	protected void onResume()
 	{
-		// TODO Auto-generated method stub
 		super.onResume();
 		if(adapter != null)
 		{
@@ -519,7 +603,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			lastSeenScheduler.stop(true);
 			lastSeenScheduler = null;
 		}
-
+		if(receiver != null)
+			unregisterReceiver(receiver);
 		HikeMessengerApp.getPubSub().removeListeners(this, hikePubSubListeners);
 		super.onDestroy();
 	}
@@ -657,7 +742,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						return;
 					}
 				}
-
 				Utils.startChatThread(this, contactInfo);
 				finish();
 			}
@@ -1914,7 +1998,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		@Override
 		protected void onPreExecute() {
-			// TODO Auto-generated method stub
 			super.onPreExecute();
 			progressDialog = ProgressDialog.show(ComposeChatActivity.this, null, getResources().getString(R.string.multi_file_creation));
 		}
@@ -1928,7 +2011,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		@Override
 		protected void onPostExecute(Void result) {
-			// TODO Auto-generated method stub
 			Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_LONG).show();
 			super.onPostExecute(result);
 			if(progressDialog!=null){
@@ -1962,4 +2044,428 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
               }
       }
    }
+
+
+	@Override
+	public void discoverySuccess() {
+		Toast.makeText(this, "Discovery enabled!!", Toast.LENGTH_SHORT).show();
+	}
+
+
+	@Override
+	public void discoveryFailure(int reasonCode) {
+		String err = new String();
+        if(reasonCode==WifiP2pManager.BUSY) err="BUSY";
+        if(reasonCode==WifiP2pManager.ERROR)err="ERROR";
+        if(reasonCode==WifiP2pManager.P2P_UNSUPPORTED) err="P2P_UNSUPPORTED";
+        //Log.e(TAG,"FAIL - couldnt start to discover peers code: "+err);
+        
+        try {
+			Thread.sleep(500);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		connectionManager.enableDiscovery();
+	}
+
+
+	@Override
+	public void channelDisconnectedFailure() {
+		Toast.makeText(this,
+                "Severe! Channel is probably lost premanently. Try Disable/Re-Enable P2P.",
+                Toast.LENGTH_SHORT).show();
+	}
+
+
+	@Override
+	public void updateMyDevice(WifiP2pDevice device) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void resetData() {
+		if (listFragment != null)
+		{
+			//listFragment.clearPeers();
+            listFragment.clearConnectionDetails();
+		}
+		connectionManager.enableDiscovery();
+	}
+
+
+	@Override
+	public void notifyWifiNotEnabled() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void connectSuccess() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void connectFailure(int reasonCode) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void cancelConnectSuccess() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void cancelConnectFailure(int reasonCode) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void callDisconnect() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void connect(WifiP2pConfig config, int numOfTries,
+			WifiP2pDevice connectingToDevice, int mode, Intent intent) {
+		connectionManager.createHotspot(connectingToDevice); 
+        new checkConnectedHotspotTask(this,intent, connectingToDevice.deviceName).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+		
+	}
+
+
+	@Override
+	public void disconnect() {
+		connectionManager.disconnect();
+	}
+
+
+	@Override
+	public Boolean connectToHotspot(ScanResult scanResult) {
+		return connectionManager.connectToHotspot(scanResult.SSID);
+	}
+
+
+	@Override
+	public HashMap<String, ScanResult> getDistinctWifiNetworks() {
+		return connectionManager.getDistinctWifiNetworks();
+	}
+
+
+	@Override
+	public void startScan() {
+		connectionManager.startScan();
+	}
+
+	@Override
+	public void resetWifi() {
+		connectionManager.resetWifi();
+	}
+
+	@Override
+	public void forgetWifiNetwork() {
+	   connectionManager.forgetWifiNetwork();
+	}
+	
+	// check if someone connected to my hotspot
+	public class checkConnectedHotspotTask extends AsyncTask<Void, Void ,ArrayList<ClientScanResult>>
+    {
+    	Context context;
+    	Dialog dialog;
+    	Intent intent ; 
+    	Boolean isConnected;
+    	ArrayList<ClientScanResult> temp;
+    	String connectingToDevice;
+    	public checkConnectedHotspotTask(Context context, Intent intent, String deviceName) {
+			this.context =  context;
+			isConnected = false;
+			dialog  = new Dialog(context, R.style.Theme_CustomDialog);
+			this.intent = intent;
+			this.connectingToDevice = deviceName;
+			temp = null;
+		}
+
+    	protected void onPreExecute() {
+    		dialog.setContentView(R.layout.connecting_offline);
+   			dialog.setCancelable(true);
+   			dialog.setOnDismissListener(new OnDismissListener() {
+				@Override
+				public void onDismiss(DialogInterface dialog) {
+					if(isConnected)
+					{
+					  startActivity(intent);
+					  OfflineFileTransferManager.getInstance().switchOnReceivers((Activity) context, connectingToDevice);
+					}
+					else
+					{
+						connectionManager.closeHotspot(connectingToDevice);
+						connectionManager.startWifi();
+					}
+					
+				}
+			});
+   			dialog.show();
+   			
+   			long smileyOffset = 300;
+   			long smileyDuration = 300;
+   			long onsetTime  =  300;
+   			setupDotsAnimation(dialog.getWindow(),smileyOffset, smileyDuration, onsetTime);
+   			return;
+    	}
+    	
+		@Override
+		protected ArrayList<ClientScanResult> doInBackground(Void... params) 
+		{
+			int tries = 0;
+			while(tries<15)
+			{
+				
+				tries++;
+			    if(temp!=null)
+			    	break;
+			    
+			    else
+			    {
+				    BufferedReader br = null;
+					final ArrayList<ClientScanResult> result = new ArrayList<ClientScanResult>();
+					
+					try 
+					{
+						br = new BufferedReader(new FileReader("/proc/net/arp"));
+						String line;
+						while ((line = br.readLine()) != null) 
+						{
+							String[] splitted = line.split(" +");
+	
+							if ((splitted != null) && (splitted.length >= 4)) 
+							{
+								String mac = splitted[3];
+								if (mac.matches("..:..:..:..:..:..")) {
+									boolean isReachable = InetAddress.getByName(splitted[0]).isReachable(500);
+	
+									if (isReachable) 
+									{
+										result.add(new ClientScanResult(splitted[0], splitted[3], splitted[5], isReachable));
+									}
+								}
+							}
+						}
+					}
+					catch (Exception e) 
+					{
+						Log.e(this.getClass().toString(), e.toString());
+					} 
+					finally 
+					{
+						try 
+						{
+							br.close();
+						} 
+						catch (IOException e) 
+						{
+							Log.e(this.getClass().toString(), e.getMessage());
+						}
+					}
+					if(result.size()>0)
+						temp = result;
+					else
+					{
+						try 
+						{
+							Thread.sleep(2000);
+						} 
+						catch (InterruptedException e) 
+						{
+							e.printStackTrace();
+						}
+					}
+			    }
+			}
+            return temp;
+		}
+		
+		@Override
+		protected void onPostExecute(ArrayList<ClientScanResult> result) 
+		{
+			if(result!=null && result.size()>0)
+			{
+				isConnected = true;
+				dialog.dismiss();
+			}
+			else
+			{
+				dialog.dismiss();
+				Toast.makeText(getApplicationContext(),"Sorry Mate !!! Chat Later", Toast.LENGTH_LONG).show();
+			}	
+			super.onPostExecute(result);
+		}
+
+		
+    	
+    }
+	
+	// Animation added for creating hotspot on sender
+    private void setupDotsAnimation(Window window, long smileyOffset, long smileyDuration, long onsetTime)
+	{
+
+		final View dot0 = (View) window.findViewById(R.id.dot_left);
+		final View dot1 = (View) window.findViewById(R.id.dot_center);
+		final View dot2 = (View) window.findViewById(R.id.dot_right);
+		
+		ShapeDrawable circle0 = new ShapeDrawable(new OvalShape());
+		circle0.getPaint().setColor(this.getResources().getColor(R.color.restoring_red));
+		dot0.setBackground(circle0);
+		ShapeDrawable circle1 = new ShapeDrawable(new OvalShape());
+		circle1.getPaint().setColor(this.getResources().getColor(R.color.restoring_green));
+		dot1.setBackground(circle1);
+		ShapeDrawable circle2 = new ShapeDrawable(new OvalShape());
+		circle2.getPaint().setColor(this.getResources().getColor(R.color.restoring_orange));
+		dot2.setBackground(circle2);
+		
+		AlphaAnimation dotIn0 = new AlphaAnimation(0, 1);
+		dotIn0.setDuration(100);
+		AlphaAnimation dotOut0 = new AlphaAnimation(1, 0);
+		dotOut0.setDuration(100);
+		dotOut0.setStartOffset(200);
+		RotateAnimation dotStay0 = new RotateAnimation(0, 360);
+		dotStay0.setDuration(400);
+		dotStay0.setStartOffset(300);
+		
+		final AnimationSet dota0 = new AnimationSet(true);
+		dota0.addAnimation(dotIn0);
+		dota0.addAnimation(dotOut0);
+		dota0.addAnimation(dotStay0);
+		dota0.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+				dotIn.setDuration(100);
+				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+				dotOut.setDuration(100);
+				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(400 + 200);
+				dotStay.setStartOffset(300);
+				AnimationSet dot = new AnimationSet(true);
+				dot.addAnimation(dotIn);
+				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
+				dot.setAnimationListener(this);
+				dot0.startAnimation(dot);
+			}
+		});
+
+		AlphaAnimation dotIn1 = new AlphaAnimation(0, 1);
+		dotIn1.setDuration(100);
+		AlphaAnimation dotOut1 = new AlphaAnimation(1, 0);
+		dotOut1.setDuration(100);
+		dotOut1.setStartOffset(200);
+		RotateAnimation dotStay1 = new RotateAnimation(0, 360);
+		dotStay1.setDuration(200);
+		dotStay1.setStartOffset(300);
+		
+		final AnimationSet dota1 = new AnimationSet(true);
+		dota1.addAnimation(dotIn1);
+		dota1.addAnimation(dotOut1);
+		dota1.addAnimation(dotStay1);
+		dota1.setStartOffset(200);
+		dota1.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+				dotIn.setDuration(100);
+				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+				dotOut.setDuration(100);
+				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(200 + 200);
+				dotStay.setStartOffset(300);
+				AnimationSet dot = new AnimationSet(true);
+				dot.addAnimation(dotIn);
+				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
+				dot.setStartOffset(200);
+				dot.setAnimationListener(this);
+				dot1.startAnimation(dot);
+			}
+		});
+		
+		AlphaAnimation dotIn2 = new AlphaAnimation(0, 1);
+		dotIn2.setDuration(100);
+		AlphaAnimation dotOut2 = new AlphaAnimation(1, 0);
+		dotOut2.setDuration(100);
+		dotOut2.setStartOffset(200);
+		
+		final AnimationSet dota2 = new AnimationSet(true);
+
+		dota2.addAnimation(dotIn2);
+		dota2.addAnimation(dotOut2);
+		dota2.setStartOffset(400);
+		dota2.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+				dotIn.setDuration(100);
+				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+				dotOut.setDuration(100);
+				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(0 + 200);
+				dotStay.setStartOffset(300);
+				AnimationSet dot = new AnimationSet(true);
+				dot.addAnimation(dotIn);
+				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
+				dot.setAnimationListener(this);
+				dot.setStartOffset(400);
+				dot2.startAnimation(dot);
+			}
+		});
+		
+		//dot0.startAnimation(dota0);
+		//dot1.startAnimation(dota1);
+		//dot2.startAnimation(dota2);
+	}
+
 }

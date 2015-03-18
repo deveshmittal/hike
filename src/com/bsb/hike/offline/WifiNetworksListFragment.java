@@ -132,7 +132,7 @@ public class WifiNetworksListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) 
     {
-    	Boolean status  =  ((DeviceActionListener)getActivity()).connectToHotspot(wifipeers.get(position));
+    	Boolean status = ((DeviceActionListener)getActivity()).connectToHotspot(wifipeers.get(position));
     	if(status)
     	{
     		String ssid  = wifipeers.get(position).SSID;
@@ -143,6 +143,10 @@ public class WifiNetworksListFragment extends ListFragment {
     	else
     		Toast.makeText(getActivity(), "Connection Failed" , Toast.LENGTH_SHORT).show();	
     }
+    
+    // will not be needed in the new UI and any updates will be made by runNetworkScan to deviceListFragment
+    // finding if the particular user is available in peers and adding the user if not. 
+    // This way the entire list will remain in DeviceListFragment
     
     private class WiFiNetworkListAdapter extends ArrayAdapter<ScanResult> 
     {
