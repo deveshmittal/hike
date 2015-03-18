@@ -483,7 +483,12 @@ public class IntentManager
 		}
 		return intent;
 	}
-
+	
+	public static Intent getBrowserIntent(String url)
+	{
+		return new Intent(Intent.ACTION_VIEW,Uri.parse(url));
+	}
+	
 	public static Intent getPictureEditorActivityIntent(String imageFileName)
 	{
 		Intent i = new Intent(HikeMessengerApp.getInstance().getApplicationContext(), PictureEditer.class);
