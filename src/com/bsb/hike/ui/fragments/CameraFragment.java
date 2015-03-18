@@ -148,6 +148,11 @@ public class CameraFragment extends SherlockFragment
 		@Override
 		public void onComplete(final Bitmap bmp)
 		{
+			if (!isAdded())
+			{
+				return;
+			}
+
 			getActivity().runOnUiThread(new Runnable()
 			{
 				@Override
@@ -184,7 +189,7 @@ public class CameraFragment extends SherlockFragment
 								@Override
 								public void run()
 								{
-									if (getActivity() != null) // This happens when current HikeCameraActivity is stopped
+									if (isAdded()) // This happens when current HikeCameraActivity is stopped
 									{
 										Intent i = IntentManager.getPictureEditorActivityIntent(filePath);
 										getActivity().startActivity(i);
@@ -194,8 +199,11 @@ public class CameraFragment extends SherlockFragment
 						}
 						else
 						{
-							// To Do Out Of Memory Handling
-							Toast.makeText(getActivity(), getResources().getString(R.string.photos_oom_camera), Toast.LENGTH_SHORT).show();
+							if (isAdded())
+							{
+								// To Do Out Of Memory Handling
+								Toast.makeText(getActivity(), getResources().getString(R.string.photos_oom_camera), Toast.LENGTH_SHORT).show();
+							}
 						}
 					}
 				}
