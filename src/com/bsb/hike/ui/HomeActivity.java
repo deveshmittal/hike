@@ -86,7 +86,6 @@ import com.bsb.hike.tasks.SendLogsTask;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.utils.LockPattern;
-import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.FestivePopup;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -171,7 +170,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private boolean photosEnabled;
 
-	private static MenuItem searchItem;
+	private static MenuItem searchMenuItem;
 
 	private boolean showingSearchModeActionBar = false;
 
@@ -179,7 +178,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		Logger.d("UmangX","openenign Home onCreate");
 		if (Utils.requireAuth(this))
 		{
 			return;
@@ -187,7 +185,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				
 		if (NUXManager.getInstance().showNuxScreen())
 		{
-			Logger.d("UmangX","openenign NUX");
 			NUXManager.getInstance().startNUX(this);
 			return;
 
@@ -290,14 +287,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				/*
 				 * Only show app rater if the tutorial is not being shown an the app was just launched i.e not an orientation change
 				 */
-				AppRater.appLaunched(this);
 		}
 		else if (dialogShowing != null)
 		{
 			showAppropriateDialog();
 		}
 
-		if (!AppRater.showingDialog() && dialogShowing == null)
+		if (dialogShowing == null)
 		{
 			if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true))
 			{
@@ -417,7 +413,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	@Override
 	protected void onDestroy()
 	{
-		Logger.d("UmangX","inside Home onDestory");
 		if (progDialog != null)
 		{
 			progDialog.dismiss();
@@ -453,8 +448,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		if(showingSearchModeActionBar)
 		{
-			searchItem.getActionView().clearFocus();
-			searchItem.collapseActionView();
+			searchMenuItem.getActionView().clearFocus();
+			searchMenuItem.collapseActionView();
 		}
 		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.HOME_SCREEN.ordinal());
 	}
@@ -504,11 +499,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		searchView.clearFocus();
 		searchView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-		searchItem = menu.findItem(R.id.search);
-		searchOptionID = searchItem.getItemId();
-		searchItem.setActionView(searchView).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+		searchMenuItem = menu.findItem(R.id.search);
+		searchOptionID = searchMenuItem.getItemId();
+		searchMenuItem.setActionView(searchView).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
 
-		searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()
+		searchMenuItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()
 		{
 			@Override
 			public boolean onMenuItemActionExpand(MenuItem item)
@@ -592,10 +587,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	public static void setSearchOptionAccess(boolean setVisible)
 	{
-		if (searchItem != null)
+		if (searchMenuItem != null)
 		{
-			searchItem.setEnabled(setVisible);
-			searchItem.setVisible(setVisible);
+			searchMenuItem.setEnabled(setVisible);
+			searchMenuItem.setVisible(setVisible);
 		}
 	}
 
@@ -610,7 +605,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		@Override
 		public boolean onQueryTextSubmit(String query)
 		{
-			Utils.hideSoftKeyboard(getApplicationContext(), searchItem.getActionView());
+			Utils.hideSoftKeyboard(getApplicationContext(), searchMenuItem.getActionView());
 			return true;
 		}
 
@@ -1565,9 +1560,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		/*
 		 * removing out new chat option for now
 		 */
-		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
-
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_broadcast), 10));
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.timeline), 7));
 
@@ -1964,25 +1959,28 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void neutralClicked(Dialog dialog)
 			{
-				switch (dialogShowing)
+				if(dialogShowing != null)
 				{
-				case STEALTH_FTUE_POPUP:
-					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
-					
-					try
+					switch (dialogShowing)
 					{
-						JSONObject metadata = new JSONObject();
-						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.QUICK_SETUP_CLICK);
-						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					case STEALTH_FTUE_POPUP:
+						HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
+						
+						try
+						{
+							JSONObject metadata = new JSONObject();
+							metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.QUICK_SETUP_CLICK);
+							HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+						}
+						catch(JSONException e)
+						{
+							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+						}
+						break;
+	
+					default:
+						break;
 					}
-					catch(JSONException e)
-					{
-						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
-					}
-					break;
-
-				default:
-					break;
 				}
 
 				dialogShowing = null;

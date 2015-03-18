@@ -1531,8 +1531,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			int unreadMessageCount = 0;
 
             Map<String, Pair<List<String>, Long>> map = new HashMap<String, Pair<List<String>, Long>>();
-            long sortingTimeStamp = System.currentTimeMillis()/1000;
-			long lastMessageTimeStamp = sortingTimeStamp;
 			int totalMessage = convMessages.size()-1;
 			long baseId = -1;
 			for (ContactInfo contact : contacts)
@@ -1543,6 +1541,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					conv.setSMS(!contact.isOnhike());
 					conv.setMsisdn(contact.getMsisdn());
 					String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
+					
+					long sortingTimeStamp = conv.getTimestamp();
+					if(conv.getTimestamp() <= 0)
+					{
+						sortingTimeStamp = System.currentTimeMillis()/1000;
+					}
+					
+					long lastMessageTimeStamp = sortingTimeStamp;
 
 					bindConversationInsert(insertStatement, conv,createConvIfNotExist);
 
