@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.photos.HikeCameraHost;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.ui.HikeCameraActivity;
@@ -170,7 +171,7 @@ public class CameraFragment extends SherlockFragment
 							catch (Exception e)
 							{
 								e.printStackTrace();
-								return;
+                                return;
 							}
 							Log.e("file", "" + file);
 
@@ -190,8 +191,8 @@ public class CameraFragment extends SherlockFragment
 						}
 						else
 						{
-							// To Do Out Of Memory Handling
-							Toast.makeText(getActivity(), "Unable to capture Image", Toast.LENGTH_SHORT);
+							//To Do Out Of Memory Handling
+							Toast.makeText(getActivity(),getResources().getString(R.string.photos_oom_camera), Toast.LENGTH_SHORT).show();
 						}
 					}
 				}

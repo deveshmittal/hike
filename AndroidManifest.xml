@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="1135"
-    android:versionName="3.8.0.61" >
+    android:versionCode="1140"
+    android:versionName="3.8.0.66" >
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="17" />
@@ -278,8 +278,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
-            android:name=".ui.CreateNewGroupOrBroadcastActivity"
-            android:windowSoftInputMode="stateVisible" >
+            android:name=".ui.CreateNewGroupOrBroadcastActivity" >
         </activity>
         <activity
             android:name=".ui.FtueBroadcast"

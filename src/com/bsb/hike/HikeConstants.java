@@ -2502,7 +2502,6 @@ public class HikeConstants
 		
 		public static final int PHOTOS_PAGER_DOODLE_WEIGHT_SUM = 10000;
 		
-		
 	}
 
 	
