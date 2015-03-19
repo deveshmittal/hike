@@ -18,7 +18,10 @@ package com.bsb.hike.offline;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -94,11 +97,13 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	Thread updateNetwork =  null ; 
 	private Timer wifiScanTimer;
 	private TimerTask  timerTask ;
-	private HashMap<String, ScanResult> nearbyNetworks;
-	private HashMap<String, Boolean>   peers_request_status  =  new  HashMap<String,Boolean>();
+	private HashMap<String, ScanResult> currentNearbyNetworks;
+	private HashMap<String, ScanResult> prevNearbyNetworks = null;
+	private HashMap<String, ScanResult> diffNearbyNetworks = null;
+	private HashMap<String, Boolean> peers_request_status = new HashMap<String,Boolean>();
 	ImageView acceptButton;
 	ImageView  rejectButton ;
-	
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
     	super.onActivityCreated(savedInstanceState);
@@ -122,39 +127,49 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 			}
 			
 		};
+		currentNearbyNetworks = new HashMap<String, ScanResult>();
+		prevNearbyNetworks = new HashMap<String, ScanResult>();
+		diffNearbyNetworks = new HashMap<String, ScanResult>();
     	this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.conversation_item, peers_msisdn));
 
     }
     
     public void updateFragment(HashMap<String, ScanResult> results)
     {
-	      	nearbyNetworks  =   results;
-	      	for(String ssid :  results.keySet())
+	    //currentNearbyNetworks = results;
+       for(String ssid : peers_request_status.keySet())
+       {
+    	   peers_request_status.put(ssid.split("_")[1], false);
+       }
+    	if(diffNearbyNetworks != null)
+    	{
+	      	for(String ssid : diffNearbyNetworks.keySet())
 	      	{
-                 String msisdn   =   ssid.split("_")[1];
+                 String msisdn = ssid.split("_")[1];
                  peers_request_status.put(msisdn, true);
-                 
 	      	}
 	      	((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-	      	if(results!=null && results.size()>0)
+	      	if(diffNearbyNetworks!=null && diffNearbyNetworks.size()>0)
 	      		sendNotification();
+    	}
+		// update UI and also notify the user that a new network is available using HikeNotifications
     }
     
     private void sendNotification()
     {
-        NotificationCompat.Builder mBuilder = 
-                new NotificationCompat.Builder(getActivity())
-                   .setSmallIcon(R.drawable.free_hike)
-                .setContentTitle("Hike Offline")
-                .setContentText("New Offline Users are available");
-        
-        Intent clickIntent = new Intent(getActivity(), ComposeChatActivity.class);
-        clickIntent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
-        HikeNotification.getInstance(getActivity()).setNotificationIntentForBuilder(mBuilder, clickIntent);
-        int mNotificationId = 001;
-        NotificationManager mNotifyMgr = 
-                (NotificationManager) getActivity().getSystemService(Activity.NOTIFICATION_SERVICE);
-        mNotifyMgr.notify(mNotificationId, mBuilder.build());
+    	NotificationCompat.Builder mBuilder = 
+    			new NotificationCompat.Builder(getActivity())
+    		   	.setSmallIcon(R.drawable.free_hike)
+    		    .setContentTitle("Hike Offline")
+    		    .setContentText("New Offline Users are available");
+    	
+    	Intent clickIntent = new Intent(getActivity(), ComposeChatActivity.class);
+    	clickIntent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
+    	HikeNotification.getInstance(getActivity()).setNotificationIntentForBuilder(mBuilder, clickIntent);
+    	int mNotificationId = 001;
+    	NotificationManager mNotifyMgr = 
+    	        (NotificationManager) getActivity().getSystemService(Activity.NOTIFICATION_SERVICE);
+    	mNotifyMgr.notify(mNotificationId, mBuilder.build());
     }
 
     @Override
@@ -179,41 +194,6 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     	super.onResume();
     }
     
-   
- // starts a network scan for every 2sec
- 	/*private void runNetworkScan()
- 	{
- 		if(updateNetwork==null)
- 		{
- 			updateNetwork =  (new Thread()
- 			{
- 				@Override
- 				public void run() {
- 					while(!isInterrupted())
- 					{
- 						if(isAdded())
- 						{
- 							HashMap<String, ScanResult> nearbyNetworks = ((DeviceActionListener) getActivity()).getDistinctWifiNetworks();
- 							Message targetMessage = mHandler.obtainMessage(POST_TO_FRAGMENT, nearbyNetworks);
- 							targetMessage.sendToTarget();	
- 							try 
- 							{
- 								sleep(2*1000);
- 							} 
- 							catch (InterruptedException e) 
- 							{
- 								e.printStackTrace();
- 							}	
- 						}
- 						
- 					}
- 				}
- 				
- 			});
- 		}
- 		if (!updateNetwork.isAlive())
- 			updateNetwork.start();
- 	}*/
     private void runNetworkScanTimer()
     {
     	wifiScanTimer  =  new Timer();
@@ -228,15 +208,43 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 			public void run() {
 				if(isAdded())
 					{
-						nearbyNetworks = ((DeviceActionListener) getActivity()).getDistinctWifiNetworks();
-						Message targetMessage = mHandler.obtainMessage(POST_TO_FRAGMENT, nearbyNetworks);
-						targetMessage.sendToTarget();	
+						if (currentNearbyNetworks != null) {
+							prevNearbyNetworks.clear();
+							prevNearbyNetworks.putAll(currentNearbyNetworks);
+						}
+						currentNearbyNetworks = ((DeviceActionListener) getActivity()).getDistinctWifiNetworks();
+						isNotificationNeeded();
+						Message targetMessage = mHandler.obtainMessage(POST_TO_FRAGMENT, currentNearbyNetworks);
+						targetMessage.sendToTarget();
 					}
 			}
 		};
 	}
-
-	public WifiP2pDevice getDevice() {
+    
+    // check if this works and see when to call this
+    private void isNotificationNeeded()
+    {
+    	if(prevNearbyNetworks == null)
+    	{
+    		diffNearbyNetworks.clear();
+    		diffNearbyNetworks.putAll(currentNearbyNetworks);
+    		return;
+    	}
+    	
+    	diffNearbyNetworks.clear();
+    	Iterator<Entry<String, ScanResult>> it = currentNearbyNetworks.entrySet().iterator();
+    	while(it.hasNext())
+    	{
+    		Map.Entry<String, ScanResult> pair = it.next();
+    		// check if currentNearbyNetworks contains any new entry
+    		if(prevNearbyNetworks.containsKey(pair.getKey()) == false)
+    		{
+    			diffNearbyNetworks.put(pair.getKey(), pair.getValue());
+    		}
+    	}
+    }
+    
+    public WifiP2pDevice getDevice() {
         return device;
     }
 
@@ -365,7 +373,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
                         Context.LAYOUT_INFLATER_SERVICE);
                 v = vi.inflate(R.layout.offline_conversation_item, null);
             }
-            String device = items.get(position);
+            final String device = items.get(position);
             if (device != null) {
             	Context context = getContext();
             	mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -387,25 +395,27 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         		final ImageView rejectRequest =  (ImageView) v.findViewById(R.id.reject);
         		if(peers_request_status.get(device)==true)
         		{
-        			     acceptRequest.setVisibility(View.VISIBLE);
-        			     rejectRequest.setVisibility(View.VISIBLE);
-        			     acceptRequest.setOnClickListener(new OnClickListener() {
+        			
+    			    acceptRequest.setVisibility(View.VISIBLE);
+    			    rejectRequest.setVisibility(View.VISIBLE);
+    			    acceptRequest.setOnClickListener(new OnClickListener() {
+						
+    			    	@Override
+						public void onClick(View v) {
+						
+						}
+					});
+    			     
+    			    rejectRequest.setOnClickListener(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							 acceptRequest.setVisibility(View.GONE);
+	        			     rejectRequest.setVisibility(View.GONE);
+	        			     peers_request_status.put(device, false);
 							
-							@Override
-							public void onClick(View v) {
-							
-							}
-						});
-        			     
-        			    rejectRequest.setOnClickListener(new OnClickListener() {
-							
-							@Override
-							public void onClick(View v) {
-								 acceptRequest.setVisibility(View.GONE);
-		        			     rejectRequest.setVisibility(View.GONE);
-								
-							}
-						}); 
+						}
+					}); 
         		}
         		
             }
