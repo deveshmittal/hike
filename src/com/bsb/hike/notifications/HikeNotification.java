@@ -71,6 +71,8 @@ public class HikeNotification
 	public static final int STEALTH_POPUP_NOTIFICATION_ID = -89;
 
 	public static final int HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID = -89;
+	
+	public static final int HIKE_USERS_AVAILABLE = -90;
 
 	// We need a constant notification id for bulk/big text notifications. Since
 	// we are using msisdn for other single notifications, it is safe to use any

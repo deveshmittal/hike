@@ -29,10 +29,13 @@ import org.apache.http.util.TextUtils;
 
 import android.app.Activity;
 import android.app.ListFragment;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
@@ -41,6 +44,7 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pManager.GroupInfoListener;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -101,8 +105,8 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	private HashMap<String, ScanResult> prevNearbyNetworks = null;
 	private HashMap<String, ScanResult> diffNearbyNetworks = null;
 	private HashMap<String, Boolean> peers_request_status = new HashMap<String,Boolean>();
-	ImageView acceptButton;
-	ImageView  rejectButton ;
+	private ImageView acceptButton;
+	private ImageView rejectButton ;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -119,7 +123,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 					case POST_TO_FRAGMENT:
 						@SuppressWarnings("unchecked")
 						HashMap<String, ScanResult> nearbyNetworks = (HashMap<String, ScanResult>) msg.obj;
-						updateFragment(nearbyNetworks); //update fragment list here
+						updateFragment(); //update fragment list here
 						break;
 					default:
 						super.handleMessage(msg);
@@ -134,42 +138,68 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
     }
     
-    public void updateFragment(HashMap<String, ScanResult> results)
+    public void updateFragment()
     {
-	    //currentNearbyNetworks = results;
-       for(String ssid : peers_request_status.keySet())
-       {
-    	   peers_request_status.put(ssid.split("_")[1], false);
-       }
-    	if(diffNearbyNetworks != null)
-    	{
-	      	for(String ssid : diffNearbyNetworks.keySet())
-	      	{
-                 String msisdn = ssid.split("_")[1];
-                 peers_request_status.put(msisdn, true);
-	      	}
-	      	((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-	      	if(diffNearbyNetworks!=null && diffNearbyNetworks.size()>0)
-	      		sendNotification();
-    	}
-		// update UI and also notify the user that a new network is available using HikeNotifications
+    	// update peers_request_status
+    	Iterator<Entry<String, Boolean>> it = peers_request_status.entrySet().iterator();
+    	while(it.hasNext())
+		{
+    		Map.Entry<String, Boolean> entry = it.next();
+    		if (entry.getValue() == true)
+    		{
+    			boolean present = false;
+    			String msisdn = entry.getKey();
+	    		for (String ssid : currentNearbyNetworks.keySet())
+	    		{
+	    			if (ssid.contains(msisdn))
+	    			{
+	    				present = true;
+	    				break;
+	    			}
+	    		}
+	    		
+	    		if (present == false)
+	    			peers_request_status.put(msisdn, false);
+	    		
+	    		if(present && (peers_msisdn.contains(msisdn) == false))
+		        	 peers_msisdn.add(msisdn);
+    		}
+		}
+    	
+		((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+    }
+    
+    
+    
+    private int returnSmallIcon()
+    {
+        if (Build.VERSION.SDK_INT < 16)
+        {
+            return R.drawable.ic_contact_logo;
+
+        }
+        else
+        {
+            return R.drawable.ic_stat_notify;
+        }
+
     }
     
     private void sendNotification()
     {
-    	NotificationCompat.Builder mBuilder = 
-    			new NotificationCompat.Builder(getActivity())
-    		   	.setSmallIcon(R.drawable.free_hike)
-    		    .setContentTitle("Hike Offline")
-    		    .setContentText("New Offline Users are available");
+    	String contentTitle = "Hike Offline";
+    	String contentText = "New Offline Users are available";
+    	String tickerText = "New Offline Users are available";
+    	final Drawable avatarDrawable = getActivity().getResources().getDrawable(R.drawable.free_hike);
+    	int smallIconId = returnSmallIcon();
     	
+    	NotificationCompat.Builder mBuilder = HikeNotification.getInstance(getActivity()).getNotificationBuilder(contentTitle, contentText, tickerText, avatarDrawable, smallIconId, false);
     	Intent clickIntent = new Intent(getActivity(), ComposeChatActivity.class);
     	clickIntent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
     	HikeNotification.getInstance(getActivity()).setNotificationIntentForBuilder(mBuilder, clickIntent);
-    	int mNotificationId = 001;
     	NotificationManager mNotifyMgr = 
     	        (NotificationManager) getActivity().getSystemService(Activity.NOTIFICATION_SERVICE);
-    	mNotifyMgr.notify(mNotificationId, mBuilder.build());
+    	mNotifyMgr.notify(HikeNotification.HIKE_USERS_AVAILABLE, mBuilder.build());
     }
 
     @Override
@@ -242,6 +272,17 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     			diffNearbyNetworks.put(pair.getKey(), pair.getValue());
     		}
     	}
+    	// notify the user that a new network is available using hikenotifications
+    	if(diffNearbyNetworks != null)
+		{
+		  	for(String ssid : diffNearbyNetworks.keySet())
+		  	{
+		         String msisdn = ssid.split("_")[1];
+		         peers_request_status.put(msisdn, true);
+		  	}
+		  	if(diffNearbyNetworks!=null && diffNearbyNetworks.size()>0)
+		  		sendNotification();
+		}
     }
     
     public WifiP2pDevice getDevice() {
@@ -413,9 +454,13 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 							 acceptRequest.setVisibility(View.GONE);
 	        			     rejectRequest.setVisibility(View.GONE);
 	        			     peers_request_status.put(device, false);
-							
 						}
 					}); 
+        		}
+        		else
+        		{
+        			acceptRequest.setVisibility(View.GONE);
+    			    rejectRequest.setVisibility(View.GONE);
         		}
         		
             }
@@ -459,57 +504,13 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        for(int i=0; i<peers.size(); i++){
 	        	peers_msisdn.add(peers.get(i).deviceName);
 	        	peersStatus.put(peers.get(i), getDeviceStatus(peers.get(i).status));
-	        	peers_request_status.put(peers.get(i).deviceName, false);
+	        	if (peers_request_status.containsKey(peers.get(i).deviceName) == false)
+	        		peers_request_status.put(peers.get(i).deviceName, false);
 	        }
 	        
-	        ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-	        
-	        /* no need to store groupInfo
-	        if (peers.size() == 0) 
-	        {
-	        	if(groupInfo != null)
-	        	{
-		        	if(groupInfo.isGroupOwner())
-		 		   	{
-		 				for(WifiP2pDevice  client : groupInfo.getClientList()){
-		 					peers.add(client);
-		 					peers_msisdn.add(client.deviceName);
-		 				    peersStatus.put(client,getDeviceStatus(client.status));
-		 				}
-		 		   	}
-		 		   	else
-		 		   	{
-		 				WifiP2pDevice groupOwner = groupInfo.getOwner();
-		 				peers.add(groupOwner);
-		 				peers_msisdn.add(groupOwner.deviceName);
-		 				peersStatus.put(groupOwner,getDeviceStatus(groupOwner.status));
-		 		   	}
-		 		   	((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-	        	}
-	        	else
-	        	{
-	        		Logger.d(TAG, "No peers found");
-	        	}
-	            return;
-	        }*/
+	        updateFragment();
+	        //((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
         }
-        
-        /* Not doing reconnection for hotspot
-        if(WiFiDirectActivity.connectingToDevice != null && isReconnecting == true && 
-        		peers_msisdn.contains(WiFiDirectActivity.connectingToDevice.deviceName))
-        {
-        	if(peers.size() == 0)
-        		Toast.makeText(getActivity(), "Device List Empty!!", Toast.LENGTH_SHORT).show();
-        	else
-        	{
-        		isReconnecting = false;
-        		if(peers.contains(WiFiDirectActivity.connectingToDevice))
-        			((DeviceActionListener) getActivity()).connect(WiFiDirectActivity.connectingDeviceConfig,
-        															++(WiFiDirectActivity.tries), WiFiDirectActivity.connectingToDevice, mode,null);
-        		else
-        			Toast.makeText(getActivity(), "Device not present in peer list!!", Toast.LENGTH_SHORT).show();
-        	}
-        }*/
     }
     
     public WifiP2pDevice getLatestPeerInstance(String deviceAddress)
