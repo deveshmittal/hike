@@ -132,7 +132,7 @@ public class WifiNetworksListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) 
     {
-    	Boolean status = ((DeviceActionListener)getActivity()).connectToHotspot(wifipeers.get(position));
+    	Boolean status = ((DeviceActionListener)getActivity()).connectToHotspot(wifipeers.get(position).SSID);
     	if(status)
     	{
     		String ssid  = wifipeers.get(position).SSID;
@@ -215,7 +215,7 @@ public class WifiNetworksListFragment extends ListFragment {
 							{
 								dialog.dismiss();
 								//requestDialogShown = false;
-								Boolean status  =  ((DeviceActionListener)getActivity()).connectToHotspot(wifinetwork);
+								Boolean status  =  ((DeviceActionListener)getActivity()).connectToHotspot(wifinetwork.SSID);
 						    	if(status)
 						    	{
 						    		OfflineFileTransferManager.getInstance().switchOnReceivers(getActivity(), senderMsisdn);

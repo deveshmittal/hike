@@ -62,6 +62,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.Conversation;
@@ -318,70 +319,25 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     	if(v.findViewById(R.id.accept).getVisibility() != View.VISIBLE)
     	{
 	    	synchronized(syncMsisdn){
-	    		Log.d("DeviceListFragment", peers.get(position).deviceAddress + "-----> " + peers.get(position).status );
-	    		if((!OfflineFileTransferManager.getInstance().getIsOfflineFileTransferFinished() ||
-	    				!OfflineFileTransferManager.getInstance().getIsOfflineTextTransferFinished()) && (connectedDevice != null))
-	    		{
-	    			if(peers.get(position).deviceAddress.compareTo(connectedDevice.deviceAddress)==0)
-	    			{
-	    				ContactInfo deviceContact = ContactManager.getInstance().getContact(peers_msisdn.get(position));
-	    		    	String phoneNumber = "";
-	    		    	if(deviceContact == null)
-	    		    		phoneNumber = peers_msisdn.get(position);
-	    		    	else
-	    		    		phoneNumber = deviceContact.getName();
-	    				
-	    		    	Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
-	    	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
-	    	        	intent.putExtra("OfflineDeviceName", connectedDevice.deviceAddress);
-	    	        	intent.putExtra("OfflineActivity", "");
-	    	        	intent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
-	    	        	startActivity(intent);
-	    	        	return;
-	    			}
-	    			else
-	    			{
-	    				Toast.makeText(getActivity(), "You are currently sending file to " + connectedDevice.deviceAddress, Toast.LENGTH_LONG).show();
-	    				return;
-	    			}
-	    		}
-	    		
-		        WifiP2pDevice currentDevice = peers.get(position);
+	    		String  currentDeviceName = peers_msisdn.get(position);
 		    	ContactInfo deviceContact = ContactManager.getInstance().getContact(peers_msisdn.get(position));
 		    	String phoneNumber = "";
 		    	if(deviceContact == null)
 		    		phoneNumber = peers_msisdn.get(position);
 		    	else
 		    		phoneNumber = deviceContact.getName();
-	
-		    	if(currentDevice.status == WifiP2pDevice.CONNECTED || currentDevice.status == WifiP2pDevice.UNAVAILABLE)
-		    	{
-		    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, true);
-		        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
-		        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
-		        	intent.putExtra("OfflineActivity", "");
-		        	intent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
-		        	startActivity(intent);
-		    	}
-		    	else
-		    	{	
-		    		Conversation conv = new Conversation(peers_msisdn.get(position), phoneNumber, false);
-		        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
-		        	intent.putExtra("OfflineDeviceName", currentDevice.deviceAddress);
-		        	intent.putExtra("OfflineActivity", "");
-		        	intent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
-		        	
-		        	WifiP2pConfig config = new WifiP2pConfig();
-		    		config.deviceAddress = currentDevice.deviceAddress;
-		    		config.wps.setup = WpsInfo.PBC;
-		    		config.groupOwnerIntent = 0;
-		    		
-		    		//  mode - 0  wifi-direct 
-		    		//  mode  - 1 wifi hotspot
-		    		mode = 1;
-		    		((DeviceActionListener) getActivity()).connect(config, 0, currentDevice,mode, intent);
-	    	     }
+	    
+	    		Conversation conv = new Conversation(currentDeviceName, phoneNumber, false);
+	        	intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
+	        	intent.putExtra("OfflineActivity", "");
+	        	intent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
+	        	mode = 1;
+	    		((DeviceActionListener) getActivity()).connect(0, currentDeviceName,mode, intent);
 	    	}
+    	}
+    	else
+    	{
+    		  Toast.makeText(getActivity(), "Click on button to approve or reject", Toast.LENGTH_SHORT).show();
     	}
     	
     }
@@ -433,17 +389,45 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
             	ImageView avatarView =  (ImageView) v.findViewById(R.id.avatar);
         		iconLoader.loadImage(device, true, avatarView, false, true, true);
         		final ImageView acceptRequest =  (ImageView) v.findViewById(R.id.accept);
+        		acceptRequest.setTag(device);
         		final ImageView rejectRequest =  (ImageView) v.findViewById(R.id.reject);
+        		rejectRequest.setTag(device);
         		if(peers_request_status.get(device)==true)
         		{
-        			
     			    acceptRequest.setVisibility(View.VISIBLE);
     			    rejectRequest.setVisibility(View.VISIBLE);
     			    acceptRequest.setOnClickListener(new OnClickListener() {
 						
     			    	@Override
 						public void onClick(View v) {
-						
+	    		
+							 String deviceName  =  (String) acceptRequest.getTag();
+							 acceptRequest.setVisibility(View.GONE);
+	        			     rejectRequest.setVisibility(View.GONE);
+	        			     
+	        			     ContactInfo deviceContact = ContactManager.getInstance().getContact(deviceName);
+	        			     String phoneNumber = "";
+	        			     if(deviceContact == null)
+	        			    	phoneNumber = deviceName;
+	        			     else
+	        			    	phoneNumber = deviceContact.getName();
+	        			    String myMsisdn = ((DeviceActionListener) getActivity()).getMsisdn();	
+	        		    	Conversation conv = new Conversation(deviceName, phoneNumber, false);
+	        		        intent = com.bsb.hike.utils.Utils.createIntentForConversation(getActivity(), conv);
+	        		        intent.putExtra("OfflineActivity", "");
+	        		        intent.putExtra(HikeConstants.Extras.OFFLINE_MODE_ON, true);
+	        		        mode = 1;
+	        		        peers_request_status.put(device, false);
+	        		        String wifinetwork  =   "h_" + deviceName + "_" +  myMsisdn  ;
+	        		        Boolean status  =  ((DeviceActionListener)getActivity()).connectToHotspot(wifinetwork);
+					    	if(status)
+					    	{
+					    		OfflineFileTransferManager.getInstance().switchOnReceivers(getActivity(), deviceName);
+					    		startActivity(intent);
+					    	}
+	        		    	//((DeviceActionListener) getActivity()).connect(0,deviceName,mode, intent);
+							
+    								
 						}
 					});
     			     
@@ -460,7 +444,8 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         		else
         		{
         			acceptRequest.setVisibility(View.GONE);
-    			    rejectRequest.setVisibility(View.GONE);
+   			        rejectRequest.setVisibility(View.GONE);
+        			      
         		}
         		
             }

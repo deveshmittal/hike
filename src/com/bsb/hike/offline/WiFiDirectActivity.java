@@ -170,9 +170,10 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
         return connectionManager.getDistinctWifiNetworks();
     }
     
+    
     @Override
-    public void connect(WifiP2pConfig config, int numOfTries, WifiP2pDevice ConnectingToDevice,int mode, Intent intent) {
-	    if(mode==0)
+    public void connect(int numOfTries, String ConnectingToDevice,int mode, Intent intent) {
+	    /*if(mode==0)
 	    {
 	    	if(numOfTries >= MAXTRIES)
 	    	{
@@ -183,7 +184,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 	    			fragment.progressDialog.dismiss();
 	    		return;
 	    	}
-	    	WiFiDirectActivity.connectingToDevice = ConnectingToDevice;
+	    	//WiFiDirectActivity.connectingToDevice = ConnectingToDevice;
 	    	WiFiDirectActivity.connectingDeviceConfig = config;
 	    	WiFiDirectActivity.tries = numOfTries;
 	    	new CheckInvitedStuckTask(connectingToDevice).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
@@ -191,12 +192,13 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 	    }
 	    else
 	    {
-		    WiFiDirectActivity.connectingToDevice = ConnectingToDevice;
+		    //WiFiDirectActivity.connectingToDevice = ConnectingToDevice;
 		    WiFiDirectActivity.connectingDeviceConfig = config;
 		    WiFiDirectActivity.tries = numOfTries;
 	        connectionManager.createHotspot(ConnectingToDevice); 
 	        new checkConnectedHotspotTask(this,intent).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
 	    }
+	    */
     }
 
     
@@ -712,8 +714,8 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 	}
 
 	@Override
-	public Boolean connectToHotspot(ScanResult result) {
-		return connectionManager.connectToHotspot(result.SSID);
+	public Boolean connectToHotspot(String  SSID) {
+		return connectionManager.connectToHotspot(SSID);
 	}
 
 
@@ -730,6 +732,11 @@ public class WiFiDirectActivity extends Activity implements WifiP2pConnectionMan
 	@Override
 	public void forgetWifiNetwork() {
 	   connectionManager.forgetWifiNetwork();
+	}
+
+	@Override
+	public String getMsisdn() {
+		return connectionManager.getMsisdn();
 	}
 }
 

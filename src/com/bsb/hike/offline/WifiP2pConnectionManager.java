@@ -36,6 +36,11 @@ public class WifiP2pConnectionManager implements ChannelListener
     private GroupInfoListener groupInfoListener;
     private WifiP2pConnectionManagerListener wifiP2pConnectionManagerListener; 
     
+    
+    public String getMsisdn()
+    {
+    	return this.myMsisdn;
+    }
 	public WifiP2pConnectionManager(Context context, WifiP2pConnectionManagerListener wListener, PeerListListener pListener, GroupInfoListener gListener)
 	{
 		this.context = context;
@@ -125,11 +130,11 @@ public class WifiP2pConnectionManager implements ChannelListener
         });
 	}
 	
-	public Boolean createHotspot(WifiP2pDevice wifiP2pDevice)
+	public Boolean createHotspot(String  wifiP2pDeviceName)
 	{
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
         myMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
-		String targetMsisdn =  wifiP2pDevice.deviceName;
+		String targetMsisdn =  wifiP2pDeviceName;
 		Boolean result = false;
 		try
 		{
@@ -226,8 +231,8 @@ public class WifiP2pConnectionManager implements ChannelListener
 	   	HashMap<String,ScanResult> distinctNetworks = new HashMap<String, ScanResult>();
 	   	for(ScanResult scanResult :  results)
 	   	{
-	   		//if(scanResult.SSID.startsWith("hike_"))
-	   		if((scanResult.SSID)!=null &&  !scanResult.SSID.isEmpty() && scanResult.SSID.contains(myMsisdn) ){
+	   		//&& scanResult.SSID.contains(myMsisdn
+	   		if((scanResult.SSID)!=null &&  !scanResult.SSID.isEmpty() && scanResult.SSID.contains(myMsisdn)){
 		   		if(!distinctNetworks.containsKey(scanResult))
 		   		{
 		   			distinctNetworks.put(scanResult.SSID, scanResult); 

@@ -2138,10 +2138,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 
 	@Override
-	public void connect(WifiP2pConfig config, int numOfTries,
-			WifiP2pDevice connectingToDevice, int mode, Intent intent) {
-		connectionManager.createHotspot(connectingToDevice); 
-        new checkConnectedHotspotTask(this,intent, connectingToDevice.deviceName).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+	public void connect(int numOfTries,
+			String deviceName, int mode, Intent intent) {
+		connectionManager.createHotspot(deviceName); 
+        new checkConnectedHotspotTask(this,intent, deviceName).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
 		
 	}
 
@@ -2153,8 +2153,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 
 	@Override
-	public Boolean connectToHotspot(ScanResult scanResult) {
-		return connectionManager.connectToHotspot(scanResult.SSID);
+	public Boolean connectToHotspot(String SSID) {
+		return connectionManager.connectToHotspot(SSID);
 	}
 
 
@@ -2467,6 +2467,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		//dot0.startAnimation(dota0);
 		//dot1.startAnimation(dota1);
 		//dot2.startAnimation(dota2);
+	}
+
+
+	@Override
+	public String getMsisdn() {
+		return connectionManager.getMsisdn();
 	}
 
 }
