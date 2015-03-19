@@ -719,9 +719,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
-	public void upgrade(int oldVersion, int newVersion)
+	public void reinitializeDB()
 	{
-		onUpgrade(mDb, oldVersion, newVersion);
+		if (mDb != null)
+		{
+			mDb.close();
+		}
+		hikeConversationsDatabase = new HikeConversationsDatabase(HikeMessengerApp.getInstance());
 	}
 
 	public void clearTable(String table)
