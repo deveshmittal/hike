@@ -81,7 +81,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 	private SQLiteDatabase mDb;
 
-	private static HikeConversationsDatabase hikeConversationsDatabase;
+	private static volatile HikeConversationsDatabase hikeConversationsDatabase;
 
 	private static Context mContext;
 
