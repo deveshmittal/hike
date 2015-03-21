@@ -422,8 +422,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			overFlowWindow.dismiss();
 		HikeMessengerApp.getPubSub().removeListeners(this, homePubSubListeners);
 		HikeMessengerApp.getPubSub().removeListeners(this, progressPubSubListeners);
-		SearchView searchView = (SearchView) searchMenuItem.getActionView();
-		searchView.setOnQueryTextListener(null);
+		if (searchMenuItem != null && searchMenuItem.getActionView() != null)
+		{
+			SearchView searchView = (SearchView) searchMenuItem.getActionView();
+			searchView.setOnQueryTextListener(null);
+		}
 		super.onDestroy();
 	}
 
