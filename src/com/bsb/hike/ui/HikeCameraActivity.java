@@ -18,12 +18,12 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -31,6 +31,7 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
@@ -82,8 +83,6 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 		overridePendingTransition(R.anim.fade_in_animation, R.anim.fade_out_animation);
 
 		super.onCreate(savedInstanceState);
-
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -207,7 +206,12 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private void setupActionBar()
 	{
-		findViewById(R.id.back).setOnClickListener(new OnClickListener()
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.photos_action_bar, null);
+		View mActionBarBackButton = actionBarView.findViewById(R.id.back);
+		mActionBarBackButton.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -215,7 +219,10 @@ public class HikeCameraActivity extends HikeAppStateBaseFragmentActivity impleme
 				onBackPressed();
 			}
 		});
-		findViewById(R.id.done_container).setVisibility(View.GONE);
+
+		actionBarView.findViewById(R.id.done_container).setVisibility(View.INVISIBLE);
+
+		actionBar.setCustomView(actionBarView);
 	}
 
 	@Override
