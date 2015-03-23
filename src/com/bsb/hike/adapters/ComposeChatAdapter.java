@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
@@ -616,7 +617,11 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 	private boolean isIntegers(String input)
 	{
-		return input.matches("\\+?\\d+");
+		if(input.trim().length()==0){
+			return false;
+		}
+		//Regex Explanation - number can start with '+', then any character between [0-9] one or more time and any character among them [-, ., space, slash ]only once
+		return input.matches("^\\+?(([0-9]+)[-.\\s/]?)*");
 	}
 
 	private String getNormalisedMsisdn(String textEntered)

@@ -173,7 +173,10 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 			{
 
 				HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> filteredSectionsContacts = new HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>>();
-
+				//Regex Explanation - number can start with '+', then any character between [0-9] one or more time and any character among them [-, ., space, slash ]only once
+				if(textToBeFiltered.matches("^\\+?(([0-9]+)[-.\\s/]?)*")){
+					textToBeFiltered = constraint.toString().toLowerCase().trim().replaceAll("[-.\\s /]", "");
+				}
 				Set<Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>>> entrySet = HikeInviteAdapter.this.completeSectionsData.entrySet();
 				for (Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>> entry : entrySet)
 				{
