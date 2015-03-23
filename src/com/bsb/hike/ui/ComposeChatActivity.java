@@ -775,6 +775,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	public void charResetAfterSeperator()
 	{
 		adapter.removeFilter();
+		setupForSelectAll();
 	}
 
 	private void setMode(int mode)
