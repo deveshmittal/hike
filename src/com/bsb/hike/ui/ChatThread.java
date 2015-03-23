@@ -898,6 +898,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		intents.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
 		intents.addAction("SHOW_PROGRESS");
 		intents.addAction("SHOW_OFFLINE_CONNECTED");
+		intents.addAction("SHOW_OFFLINE_CONNECTED_STATUS");
 		registerReceiver(offlineIntentBR, intents);
 		
 		final int whichPinEditShowing = savedInstanceState!=null ? savedInstanceState.getInt(HikeConstants.Extras.PIN_TYPE_SHOWING) : 0;
@@ -8778,6 +8779,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				TextView networkErrorPopUp = (TextView) findViewById(R.id.network_error_chat);
 				networkErrorPopUp.setText("Connected Offline");
 				networkErrorPopUp.setVisibility(View.VISIBLE);
+			}
+			else if("SHOW_OFFLINE_CONNECTED_STATUS".equals(action))
+			{
+				   int status = intent.getIntExtra("status",0);
+				   if(status==0)
+				   {
+					   setLastSeenText("Connecting .....");
+				   }
+				   else if(status==1)
+				   {
+					   setLastSeenText("Connected Offline");
+				   }
+				   else if(status==-1)
+				   {
+					   setLastSeenText("Connection Failed");
+				   }
+				   
 			}
 		}
 	}

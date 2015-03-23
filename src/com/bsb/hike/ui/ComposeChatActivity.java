@@ -2198,7 +2198,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 
     	protected void onPreExecute() {
-    		dialog.setContentView(R.layout.connecting_offline);
+    		/*dialog.setContentView(R.layout.connecting_offline);
    			dialog.setCancelable(true);
    			dialog.setOnDismissListener(new OnDismissListener() {
 				@Override
@@ -2221,7 +2221,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
    			long smileyOffset = 300;
    			long smileyDuration = 300;
    			long onsetTime  =  300;
-   			setupDotsAnimation(dialog.getWindow(),smileyOffset, smileyDuration, onsetTime);
+   			setupDotsAnimation(dialog.getWindow(),smileyOffset, smileyDuration, onsetTime);*/
+    		startActivity(intent);
    			return;
     	}
     	
@@ -2282,6 +2283,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						temp = result;
 					else
 					{
+						Intent intent  =   new Intent("SHOW_OFFLINE_CONNECTED_STATUS");
+						intent.putExtra("status", 0);
+						sendBroadcast(intent);
 						try 
 						{
 							Thread.sleep(2000);
@@ -2302,12 +2306,22 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if(result!=null && result.size()>0)
 			{
 				isConnected = true;
-				dialog.dismiss();
+				Intent intent  =   new Intent("SHOW_OFFLINE_CONNECTED_STATUS");
+				intent.putExtra("status", 1);
+				sendBroadcast(intent);
+				OfflineFileTransferManager.getInstance().switchOnReceivers((Activity)context, connectingToDevice);
+				//dialog.dismiss();
 			}
 			else
 			{
-				dialog.dismiss();
-				Toast.makeText(getApplicationContext(),"Sorry Mate !!! Chat Later", Toast.LENGTH_LONG).show();
+				//dialog.dismiss();
+				isConnected = false;
+				Intent intent  =   new Intent("SHOW_OFFLINE_CONNECTED_STATUS");
+				intent.putExtra("status", -1);
+				sendBroadcast(intent);
+				connectionManager.closeHotspot(connectingToDevice);
+				connectionManager.startWifi();
+				//Toast.makeText(getApplicationContext(),"Sorry Mate !!! Chat Later", Toast.LENGTH_LONG).show();
 			}	
 			super.onPostExecute(result);
 		}

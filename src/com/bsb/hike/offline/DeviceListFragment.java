@@ -238,16 +238,16 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 			@Override
 			public void run() {
 				if(isAdded())
-					{
-						if (currentNearbyNetworks != null) {
-							prevNearbyNetworks.clear();
-							prevNearbyNetworks.putAll(currentNearbyNetworks);
-						}
-						currentNearbyNetworks = ((DeviceActionListener) getActivity()).getDistinctWifiNetworks();
-						isNotificationNeeded();
-						Message targetMessage = mHandler.obtainMessage(POST_TO_FRAGMENT, currentNearbyNetworks);
-						targetMessage.sendToTarget();
+				{
+					if (currentNearbyNetworks != null) {
+						prevNearbyNetworks.clear();
+						prevNearbyNetworks.putAll(currentNearbyNetworks);
 					}
+					currentNearbyNetworks = ((DeviceActionListener) getActivity()).getDistinctWifiNetworks();
+					isNotificationNeeded();
+					Message targetMessage = mHandler.obtainMessage(POST_TO_FRAGMENT, currentNearbyNetworks);
+					targetMessage.sendToTarget();
+				}
 			}
 		};
 	}
@@ -419,7 +419,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 	        		        mode = 1;
 	        		        peers_request_status.put(device, false);
 	        		        String wifinetwork  =   "h_" + deviceName + "_" +  myMsisdn  ;
-	        		        Boolean status  =  ((DeviceActionListener)getActivity()).connectToHotspot(wifinetwork);
+	        		        Boolean status = ((DeviceActionListener)getActivity()).connectToHotspot(wifinetwork);
 					    	if(status)
 					    	{
 					    		OfflineFileTransferManager.getInstance().switchOnReceivers(getActivity(), deviceName);

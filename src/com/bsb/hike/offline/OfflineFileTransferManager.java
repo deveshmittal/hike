@@ -49,7 +49,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class OfflineFileTransferManager {
-	private final String TAG = "OfflineFileTransferManager";
+	private final static String TAG = "OfflineFileTransferManager";
 	public static final String IP_SERVER = "192.168.43.1";
 	private static OfflineFileTransferManager _instance;
 	private BlockingQueue<OfflineInfoPacket> textMessageQueue = new LinkedBlockingQueue<OfflineInfoPacket>();
@@ -130,7 +130,7 @@ public class OfflineFileTransferManager {
 			out.close();
 			inputStream.close();
 		} catch (IOException e) {
-			Log.d(WiFiDirectActivity.TAG, e.toString());
+			Log.d(TAG, e.toString());
 			return false;
 		}
 		return true;
@@ -140,7 +140,11 @@ public class OfflineFileTransferManager {
 		isOfflineTextTransferFinished = false;
 		boolean isSent = true;
 		String message = offlineInfoPacket.getMsgText();
-		String host    = offlineInfoPacket.getHost();   
+		String host    = offlineInfoPacket.getHost();
+		if(host == null)
+			host = com.bsb.hike.offline.Utils.getIPFromMac(null);
+		if(host == null)
+			return false;
 		Socket socket = new Socket();
 		int port = textMessagePort;
 		InputStream is = null;
@@ -158,11 +162,21 @@ public class OfflineFileTransferManager {
 			byte[] intToBArray = com.bsb.hike.offline.Utils.intToByteArray((int)message.length());
 			int s = intToBArray.length;
 			stream.write(intToBArray, 0, s);
-			copyFile(is, stream);
-			Log.d(WiFiDirectActivity.TAG, "Client: Data written");
-		} catch (IOException e) {
-			Log.e(WiFiDirectActivity.TAG, e.getMessage());
-		} finally {
+			isSent = copyFile(is, stream);
+			Log.d(TAG, "Client: Data written");
+		} 
+		catch (IOException e) {
+			isSent = false;
+			Log.e(TAG, e.getMessage());
+		} 
+		/*
+		catch(IllegalArgumentException e)
+		{
+			isSent = false;
+			Log.e(TAG, e.getMessage());
+		}*/
+			finally {
+		
 			if (socket != null) {
 				if (socket.isConnected()) {
 					try {
@@ -182,16 +196,20 @@ public class OfflineFileTransferManager {
 		isOfflineFileTransferFinished = false;
 		boolean isSent = true;
 		String fileUri = offlineInfoPacket.getFilePath();
-		String host    = offlineInfoPacket.getHost();   
+		String host    = offlineInfoPacket.getHost();
+		if(host == null)
+			host = com.bsb.hike.offline.Utils.getIPFromMac(null);
+		if(host == null)
+			return false;
 		Socket socket = new Socket();
 		int port = fileTransferPort;
 		Log.d(TAG, "Start");
 		InputStream is = null;
 		try {
-			Log.d(WiFiDirectActivity.TAG, "Opening client socket - ");
+			Log.d(TAG, "Opening client socket - ");
 			socket.bind(null);
 			socket.connect((new InetSocketAddress(host, port)), SOCKET_TIMEOUT);
-			Log.d(WiFiDirectActivity.TAG, "Client socket - " + socket.isConnected());
+			Log.d(TAG, "Client socket - " + socket.isConnected());
 			
 			OutputStream stream = socket.getOutputStream();
 			File f = new File(fileUri);
@@ -199,7 +217,7 @@ public class OfflineFileTransferManager {
 			try {
 				is = new FileInputStream(fileUri);
 			} catch (FileNotFoundException e) {
-				Log.d(WiFiDirectActivity.TAG, e.toString());
+				Log.d(TAG, e.toString());
 			}
 			byte[]  type  =  new byte[1];
 			type[0] =  (byte)offlineInfoPacket.getType();
@@ -296,7 +314,7 @@ public class OfflineFileTransferManager {
 			try 
 			{
 				textReceiveServerSocket = new ServerSocket(textMessagePort);
-                Log.d(WiFiDirectActivity.TAG, "Server: Socket opened");
+                Log.d(TAG, "Server: Socket opened");
                 
                 while(isConnected)
                 {
@@ -308,7 +326,7 @@ public class OfflineFileTransferManager {
 	                byte[] intArray = new byte[4];
 	                inputstream.read(intArray, 0, 4);
 	                textSize = com.bsb.hike.offline.Utils.byteArrayToInt(intArray);
-	                Log.d(WiFiDirectActivity.TAG, ""+textSize);
+	                Log.d(TAG, ""+textSize);
 	                type = typeArr[0];
 	                byte[] msg  =  new byte[textSize];
 	            	inputstream.read(msg,0,textSize);
@@ -341,7 +359,7 @@ public class OfflineFileTransferManager {
 			}
 			catch (IOException e) 
 			{
-				Log.e(WiFiDirectActivity.TAG, e.getMessage());
+				Log.e(TAG, e.getMessage());
 			}
 			return null;
 		}
@@ -370,7 +388,7 @@ public class OfflineFileTransferManager {
 			try 
 			{
 				fileReceiveServerSocket = new ServerSocket(fileTransferPort);
-                Log.d(WiFiDirectActivity.TAG, "Server: Socket opened");
+                Log.d(TAG, "Server: Socket opened");
                 while(isConnected)
                 {
 	                Socket client = fileReceiveServerSocket.accept();
@@ -382,7 +400,7 @@ public class OfflineFileTransferManager {
 	                byte[] intArray = new byte[4];
 	                inputstream.read(intArray, 0, 4);
 	                fileSize = com.bsb.hike.offline.Utils.byteArrayToInt(intArray);
-	                Log.d(WiFiDirectActivity.TAG, ""+fileSize);
+	                Log.d(TAG, ""+fileSize);
 	                currentSizeReceived = 0;
 	                numOfIterations = fileSize/1024 + ((fileSize%1024!=0)?1:0);
 	                type = typeArr[0];
@@ -438,7 +456,7 @@ public class OfflineFileTransferManager {
 	                    break;
 	                }
 	                
-	                Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
+	                Log.d(TAG, "server: copying files " + f.toString());
 	                copyFile(inputstream, new FileOutputStream(f));
 	                client.close();
 	                path =  f.getAbsolutePath();
@@ -577,7 +595,7 @@ public class OfflineFileTransferManager {
 			}
 			catch (IOException e) 
 			{
-				Log.e(WiFiDirectActivity.TAG, e.getMessage());
+				Log.e(TAG, e.getMessage());
 			}
 			return null;
 		}
@@ -626,7 +644,7 @@ public class OfflineFileTransferManager {
 		public void run() {
 			try
 			{
-				while((packet = textMessageQueue.take()) != null)
+				while(((packet = textMessageQueue.take()) != null))
 				{
 					boolean val;
 					do {
@@ -648,7 +666,7 @@ public class OfflineFileTransferManager {
 		public void run() {
 			try 
 			{
-				while((packet = fileTransferQueue.take()) != null)
+				while(((packet = fileTransferQueue.take()) != null))
 				{
 					boolean val;
 					do {
@@ -663,22 +681,6 @@ public class OfflineFileTransferManager {
 		}
 		
 		
-	}
-	
-	class Test extends AsyncTask<Void, Void, Void>
-	{
-
-		@Override
-		protected Void doInBackground(Void... params) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
-		@Override
-		protected void onPostExecute(Void result) {
-			
-			super.onPostExecute(result);
-		}
 	}
 }
 
