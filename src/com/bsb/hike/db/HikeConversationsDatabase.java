@@ -2487,7 +2487,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				return null;
 			}
 
-			if (Utils.isGroupConversation(msisdn))
+			if (OneToNConversationUtils.isGroupConversation(msisdn))
 			{
 				conv = getGroupConversation(msisdn);
 			}
@@ -3858,7 +3858,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				String groupName = groupCursor.getString(groupNameIdx);
 
 				List<PairModified<GroupParticipant, String>> groupParticipantMap = ContactManager.getInstance().getGroupParticipants(groupId, true, false, false);
-				groupName = TextUtils.isEmpty(groupName) ? Utils.defaultGroupName(groupParticipantMap) : groupName;
+				groupName = TextUtils.isEmpty(groupName) ? OneToNConversationUtils.defaultGroupName(groupParticipantMap) : groupName;
 				int numMembers = groupParticipantMap.size();
 
 				// Here we make this string the msisdn so that it can be

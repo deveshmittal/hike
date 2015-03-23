@@ -2824,7 +2824,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			
 			// This Pubsub is currently used here only to update default name
 			// of a broadcast conversation.
-			if(!Utils.isBroadcastConversation(groupId))
+			if(!OneToNConversationUtils.isBroadcastConversation(groupId))
 			{
 				return;
 			}
