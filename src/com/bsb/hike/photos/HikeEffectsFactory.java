@@ -39,8 +39,6 @@ public final class HikeEffectsFactory
 
 	private Bitmap mBitmapIn, currentOut, mBitmapOut2, mBitmapOut1, finalBitmap;
 
-	public Bitmap toBeRecycled1, toBeRecycled2;
-
 	private RenderScript mRS;
 
 	private Allocation mInAllocation;
@@ -72,8 +70,6 @@ public final class HikeEffectsFactory
 		mInAllocation = Allocation.createFromBitmap(mRS, mBitmapIn);
 		if (!isFinal && (currentOut == null || (finalBitmap == null && currentOut.getHeight() != mBitmapIn.getHeight())) && !isThumbnail)
 		{
-			toBeRecycled1 = mBitmapOut1;
-			toBeRecycled2 = mBitmapOut2;
 			mBitmapOut1 = HikePhotosUtils.createBitmap(mBitmapIn, 0, 0, 0, 0, false, false, false, true);
 			// mBitmapOut1 = mBitmapOut1.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
 			mBitmapOut2 = HikePhotosUtils.createBitmap(mBitmapIn, 0, 0, 0, 0, false, false, false, true);
@@ -111,21 +107,6 @@ public final class HikeEffectsFactory
 
 		return ret;
 
-	}
-
-	public static void clearCache()
-	{
-		if (instance == null)
-			instance = new HikeEffectsFactory();
-
-		if (instance.toBeRecycled1 != null)
-		{
-			instance.toBeRecycled1.recycle();
-		}
-		if (instance.toBeRecycled2 != null)
-		{
-			instance.toBeRecycled2.recycle();
-		}
 	}
 
 	/**
