@@ -62,7 +62,7 @@ int rSpline[256];
 int gSpline[256];
 int bSpline[256];
 int compositeSpline[256];
-
+int isThumbnail;
 int r[3],g[3],b[3];
 
 float preMatrix[20],postMatrix[20];
@@ -136,7 +136,40 @@ uchar4 __attribute__((kernel)) filter_1977_or_xpro(uchar4 in,uint32_t x,uint32_t
 	in.b=bSpline[in.b];
 	
 	in = applyColorMatrix(in,postMatrix);
+	
+	if(!isThumbnail)
+	{
+		uchar4 v = rsGetElementAt_uchar4(input1, x, y);
+	
+		in.r =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.r,in.r),in.r,0.72);
+	
+		in.g =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.g,in.g),in.g,0.72);
+	
+		in.b =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.b,in.b),in.b,0.72);
+	}
+	return in;
+}
 
+uchar4 __attribute__((kernel)) filter_apollo(uchar4 in,uint32_t x,uint32_t y) {
+
+	in.r=rSpline[in.r];
+
+	in.g=gSpline[in.g];
+
+	in.b=bSpline[in.b];
+	
+	in = applyColorMatrix(in,postMatrix);
+	
+	if(!isThumbnail)
+	{
+		uchar4 v = rsGetElementAt_uchar4(input1, x, y);
+	
+		in.r =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.r,in.r),in.r,0.88);
+	
+		in.g =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.g,in.g),in.g,0.88);
+	
+		in.b =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.b,in.b),in.b,0.88);
+	}
 	return in;
 }
 
@@ -178,7 +211,17 @@ uchar4 __attribute__((kernel)) filter_kelvin(uchar4 in,uint32_t x,uint32_t y) {
 	in.g =  ChannelBlend_Alpha(ChannelBlend_Overlay(g[0],in.g),in.g,0.30);
 
 	in.b =  ChannelBlend_Alpha(ChannelBlend_Overlay(b[0],in.b),in.b,0.30);
-
+	
+	if(!isThumbnail)
+	{
+		uchar4 v = rsGetElementAt_uchar4(input1, x, y);
+	
+		in.r =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.r,in.r),in.r,0.72);
+	
+		in.g =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.g,in.g),in.g,0.72);
+	
+		in.b =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.b,in.b),in.b,0.72);
+	}
 
 	return in;
 }
@@ -201,7 +244,18 @@ uchar4 __attribute__((kernel)) filter_retro(uchar4 in,uint32_t x,uint32_t y) {
 	in.b =  ChannelBlend_Alpha(ChannelBlend_Multiply(b[0],in.b),in.b,0.60);
 	 
 	in = applyColorMatrix(in,preMatrix);
-
+	
+	if(!isThumbnail)
+	{
+		uchar4 v = rsGetElementAt_uchar4(input1, x, y);
+	
+		in.r =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.r,in.r),in.r,0.72);
+	
+		in.g =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.g,in.g),in.g,0.72);
+	
+		in.b =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.b,in.b),in.b,0.72);
+	}
+	
 	return in;
 }
 
@@ -232,7 +286,18 @@ uchar4 __attribute__((kernel)) filter_earlyBird(uchar4 in,uint32_t x,uint32_t y)
 	in.g = ChannelBlend_Multiply(g[0],in.g);
 
 	in.b = ChannelBlend_Multiply(b[0],in.b);
-
+	
+	if(!isThumbnail)
+	{
+		uchar4 v = rsGetElementAt_uchar4(input1, x, y);
+	
+		in.r =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.r,in.r),in.r,0.88);
+	
+		in.g =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.g,in.g),in.g,0.88);
+	
+		in.b =  ChannelBlend_Alpha(ChannelBlend_Multiply(v.b,in.b),in.b,0.88);
+	}
+	
 	return in;
 }
 
@@ -284,6 +349,45 @@ uchar4 __attribute__((kernel)) filter_nashville(uchar4 in,uint32_t x,uint32_t y)
 
 	in.b =  ChannelBlend_Alpha(ChannelBlend_Multiply(b[1],in.b),in.b,0.70);
 	
+	return in;
+}
+
+uchar4 __attribute__((kernel)) filter_jalebi(uchar4 in,uint32_t x,uint32_t y) {
+
+	in.r=rSpline[in.r];
+
+	in.g=gSpline[in.g];
+
+	in.b=bSpline[in.b];
+
+
+	if(!isThumbnail)
+	{
+		uchar4 v = rsGetElementAt_uchar4(input1, x, y);
+	
+		in.r =  ChannelBlend_Alpha(ChannelBlend_Overlay(v.r,in.r),in.r,0.45);
+	
+		in.g =  ChannelBlend_Alpha(ChannelBlend_Overlay(v.g,in.g),in.g,0.45);
+	
+		in.b =  ChannelBlend_Alpha(ChannelBlend_Overlay(v.b,in.b),in.b,0.45);
+	}
+	
+	else
+	{
+		
+		in.r =  ChannelBlend_Alpha(ChannelBlend_Multiply(r[0],in.r),in.r,0.70);
+
+		in.g =  ChannelBlend_Alpha(ChannelBlend_Multiply(g[0],in.g),in.g,0.70);
+
+		in.b =  ChannelBlend_Alpha(ChannelBlend_Multiply(b[0],in.b),in.b,0.70);
+	
+	}
+
+	return in;
+}
+
+uchar4 __attribute__((kernel)) filter_original(uchar4 in,uint32_t x,uint32_t y) {
+
 	return in;
 }
 
