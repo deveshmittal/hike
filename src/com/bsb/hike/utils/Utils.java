@@ -5289,4 +5289,13 @@ public class Utils
 		}
 		return false;
 	}
+
+	public static boolean isLastSeenSetToFavorite()
+	{
+		Context appContext = HikeMessengerApp.getInstance().getApplicationContext();
+		String defValue = appContext.getString(R.string.privacy_my_contacts);
+		return PreferenceManager.getDefaultSharedPreferences(appContext).getString(HikeConstants.LAST_SEEN_PREF_LIST, defValue)
+				.equals(appContext.getString(R.string.privacy_favorites));
+		
+	}
 }

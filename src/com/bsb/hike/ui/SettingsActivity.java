@@ -227,6 +227,8 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		contactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 		msisdn = contactInfo.getMsisdn();
 
+		String infoSubText = getString(Utils.isLastSeenSetToFavorite() ? R.string.both_ls_status_update : R.string.status_updates_proper_casing);
+		((TextView) header.findViewById(R.id.update_text)).setText(getString(R.string.add_fav_msg, infoSubText));
 		// set name and status
 		setNameInHeader(nameView);
 
