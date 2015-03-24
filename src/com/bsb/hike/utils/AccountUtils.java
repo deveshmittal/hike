@@ -63,6 +63,8 @@ import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.http.CustomSSLSocketFactory;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -687,7 +689,32 @@ public class AccountUtils
 		request.setEntity(entity);
 		entity.setContentType("application/json");
 		JSONObject obj = executeRequest(request);
+		if(obj == null)
+		{
+			recordAddressBookUploadFailException(data.toString());
+		}
 		return getContactList(obj, new_contacts_by_id);
+	}
+	
+	private static void recordAddressBookUploadFailException(String jsonString)
+	{
+		String md5Hash = Utils.StringToMD5(jsonString);
+		if(!TextUtils.isEmpty(md5Hash))
+		{
+			try
+			{
+				JSONObject metadata = new JSONObject();
+
+				metadata.put(HikeConstants.MD5_HASH, md5Hash);
+
+				Logger.d("AccountUtils", "recording addressbook upload fail event. md5 : " + md5Hash);
+				HAManager.getInstance().record(HikeConstants.EXCEPTION, HikeConstants.LogEvent.ADDRESSBOOK_UPLOAD, metadata);
+			}
+			catch (JSONException e)
+			{
+				Logger.e(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+		}
 	}
 
 	private static JSONObject getJsonContactList(Map<String, List<ContactInfo>> contactsMap, boolean sendWAValue)
