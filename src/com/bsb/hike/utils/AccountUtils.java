@@ -67,7 +67,6 @@ import com.bsb.hike.http.CustomSSLSocketFactory;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
-import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
 
@@ -666,7 +665,7 @@ public class AccountUtils
 	 */
 	public static List<ContactInfo> updateAddressBook(Map<String, List<ContactInfo>> new_contacts_by_id, JSONArray ids_json) throws IllegalStateException
 	{
-		HttpPatch request = new HttpPatch(base + "/account/addressbook");
+		HttpPost request = new HttpPost(base + "/account/addressbook-update");
 		addToken(request);
 		JSONObject data = new JSONObject();
 
