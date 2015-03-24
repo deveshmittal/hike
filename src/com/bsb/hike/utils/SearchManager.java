@@ -57,32 +57,32 @@ public class SearchManager
 		}
 		Logger.d("search", "nextMessage()");
 		Logger.d("search", "list: " + indexList.toString());
-		int currentCusrsor = getCurrentCursor(cursorPosition);
-		Logger.d("search", "currentCusrsor: " + currentCusrsor);
-		int position = Collections.binarySearch(indexList, currentCusrsor);
+		int searchCusrsor = getCurrentCursor(cursorPosition);
+		Logger.d("search", "currentCusrsor: " + searchCusrsor);
+		int position = Collections.binarySearch(indexList, searchCusrsor);
 		Logger.d("search", "position: " + position);
 
 		int start, end, threshold = -1;
 		int lastMessageIndex = itemList.size() - 1;
 		if (indexList.isEmpty())
 		{
-			start = currentCusrsor;
+			start = searchCusrsor;
 			end = lastMessageIndex;
-			threshold = currentCusrsor;
+			threshold = searchCusrsor;
 		}
 		else
 		{
 			int lastIndex = indexList.get(indexList.size() - 1);
 			int firstIndex = indexList.get(0);
-			if (currentCusrsor >= lastIndex)
+			if (searchCusrsor >= lastIndex)
 			{
 				start = lastIndex + 1;
 				end = lastMessageIndex;
-				threshold = currentCusrsor;
+				threshold = searchCusrsor;
 			}
-			else if (currentCusrsor < firstIndex)
+			else if (searchCusrsor < firstIndex)
 			{
-				start = currentCusrsor;
+				start = searchCusrsor;
 				end = firstIndex - 1;
 			}
 			else
@@ -108,7 +108,7 @@ public class SearchManager
 		{
 			found = searchAllMessages(start, end);
 		}
-		position = Collections.binarySearch(indexList, currentCusrsor);
+		position = Collections.binarySearch(indexList, searchCusrsor);
 		if (position >= 0)
 		{
 			position++;
@@ -136,32 +136,33 @@ public class SearchManager
 		}
 		Logger.d("search", "prevMessage()");
 		Logger.d("search", "list: " + indexList.toString());
-		int currentCusrsor = getCurrentCursor(cursorPosition);
-		Logger.d("search", "currentCusrsor: " + currentCusrsor);
-		int position = Collections.binarySearch(indexList, currentCusrsor);
+		int searchCusrsor = getCurrentCursor(cursorPosition);
+		Logger.d("search", "currentCusrsor: " + searchCusrsor);
+		int position = Collections.binarySearch(indexList, searchCusrsor);
 		Logger.d("search", "position: " + position);
 
 		int start, end, threshold = -1;
 		if (indexList.isEmpty())
 		{
-			start = currentCusrsor;
+			start = searchCusrsor;
 			end = 0;
+			threshold = searchCusrsor;
 		}
 		else
 		{
 			int lastIndex = indexList.get(indexList.size() - 1);
 			int firstIndex = indexList.get(0);
-			if (currentCusrsor > lastIndex)
+			if (searchCusrsor > lastIndex)
 			{
-				start = currentCusrsor;
+				start = searchCusrsor;
 				end = lastIndex + 1;
-				threshold = currentCusrsor;
+				threshold = searchCusrsor;
 			}
-			else if (currentCusrsor <= firstIndex)
+			else if (searchCusrsor <= firstIndex)
 			{
 				start = firstIndex - 1;
 				end = 0;
-				threshold = currentCusrsor;
+				threshold = searchCusrsor;
 			}
 			else
 			{
@@ -186,7 +187,7 @@ public class SearchManager
 		{
 			found = searchAllMessages(start, end);
 		}
-		position = Collections.binarySearch(indexList, currentCusrsor);
+		position = Collections.binarySearch(indexList, searchCusrsor);
 		if (position >= 0)
 		{
 			position--;
@@ -299,9 +300,9 @@ public class SearchManager
 
 	public void updateIndex(int count)
 	{
-		for (Integer index : indexList)
+		for (int i=0; i < indexList.size(); i++)
 		{
-			index += count;
+			indexList.set(i, indexList.get(i) + count );
 		}
 	}
 
