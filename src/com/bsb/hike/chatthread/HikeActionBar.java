@@ -5,6 +5,7 @@ import java.util.Set;
 
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -193,7 +194,7 @@ public class HikeActionBar
 
 	public void showOverflowMenu(int width, int height, int xOffset, int yOffset, View anchor)
 	{
-		overFlowMenuLayout.show(width, height, xOffset, yOffset, anchor);
+		overFlowMenuLayout.show(width, height, xOffset, yOffset, anchor, PopupWindow.INPUT_METHOD_NOT_NEEDED);
 	}
 	
 	/**

@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Message;
 import android.text.Editable;
 import android.text.Spannable;
@@ -333,6 +334,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	private void showStickyMessageAtTop(ConvMessage impMessage, boolean playPinAnim)
 	{
 		// Hiding pin tip if open
+		if (impMessage == null)
+		{
+			Logger.wtf(TAG, "Trying to showStickyPinMessage on a null ConvMessage object");
+			return;
+		}
+		
 		mTips.hideTip(ChatThreadTips.PIN_TIP);
 		boolean wasPinViewInflated = false;
 		if (impMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
@@ -767,6 +774,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		View content = activity.findViewById(R.id.impMessageCreateView);
 		content.setVisibility(View.VISIBLE);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
+		mComposeView.requestFocus();
 		mEmoticonPicker.updateET(mComposeView);
 		
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
@@ -799,12 +807,17 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		// AFTER PIN MODE, we make sure mComposeView is reinitialized to message composer compose
 
 		mComposeView = (CustomFontEditText) activity.findViewById(R.id.msg_compose);
-		setEditTextListeners();
 		mEmoticonPicker.updateET(mComposeView);
+		mComposeView.requestFocus();
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
 		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
 		mBottomView.setVisibility(View.VISIBLE);
 		playPinCreateDestroyViewAnim();
+		
+		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
 	}
 	
 	
@@ -1415,4 +1428,16 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip_group);
 	}
 	
+	@Override
+	protected void handleActionModeOrientationChange(int whichActionMode)
+	{
+		switch (whichActionMode)
+		{
+		case PIN_CREATE_ACTION_MODE:
+			mActionMode.reInflateActionMode();
+			break;
+		default:
+			super.handleActionModeOrientationChange(whichActionMode);
+		}
+	}
 }

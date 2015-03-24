@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
@@ -46,7 +47,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
-import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
@@ -61,6 +61,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -68,8 +69,6 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.SearchView;
-import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
@@ -114,7 +113,6 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
@@ -127,7 +125,6 @@ import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.utils.ChatTheme;
-import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
@@ -138,8 +135,6 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.CustomLinearLayout;
-import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 
@@ -192,6 +187,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static final int HIDE_UP_FAST_SCROLL_INDICATOR = 18;
 
 	protected static final int SET_LABEL = 19;
+	
+	protected static final int DISABLE_TRANSCRIPT_MODE = 20;
 
 	protected static final int STICKER_CATEGORY_MAP_UPDATED = 21;
 
@@ -378,6 +375,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case STICKER_FTUE_TIP:
 			mTips.showStickerFtueTip();
 			break;
+		case DISABLE_TRANSCRIPT_MODE:
+			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_DISABLED);		
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
 			break;
@@ -431,7 +431,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		init();
 		setContentView();
-		fetchConversation(true);
+		fetchConversation(false);
 		uiHandler.sendEmptyMessage(SET_WINDOW_BG);
 	}
 	
@@ -593,6 +593,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case AttachmentPicker.CONTACT:
 			onShareContact(resultCode, data);
 			break;
+		case AttachmentPicker.GALLERY:
+			if (resultCode == Activity.RESULT_OK)
+			{
+				mConversationsView.requestFocusFromTouch();
+				mConversationsView.setSelection(messages.size() - 1);
+			}
 		}
 	}
 
@@ -787,7 +793,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			recordFirstTimeStickerClick();
 		}
 		
-		mShareablePopupLayout.togglePopup(mStickerPicker);
+		mShareablePopupLayout.togglePopup(mStickerPicker, activity.getResources().getConfiguration().orientation);
 	}
 	
 	private void recordFirstTimeStickerClick()
@@ -812,7 +818,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void emoticonClicked()
 	{
-		mShareablePopupLayout.togglePopup(mEmoticonPicker);
+		mShareablePopupLayout.togglePopup(mEmoticonPicker, activity.getResources().getConfiguration().orientation);
 	}
 
 	protected void showThemePicker()
@@ -854,7 +860,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		int width = (int) (Utils.scaledDensityMultiplier * 270);
 		int xOffset = -(int) (276 * Utils.scaledDensityMultiplier);
 		int yOffset = -(int) (0.5 * Utils.scaledDensityMultiplier);
-		attachmentPicker.show(width, LayoutParams.WRAP_CONTENT, xOffset, yOffset, activity.findViewById(R.id.attachment_anchor));
+		attachmentPicker.show(width, LayoutParams.WRAP_CONTENT, xOffset, yOffset, activity.findViewById(R.id.attachment_anchor), PopupWindow.INPUT_METHOD_NOT_NEEDED);
 	}
 
 	/**
@@ -916,8 +922,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		else
 		{
-			backgroundImage.setScaleType(theme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
-			backgroundImage.setImageDrawable(Utils.getChatTheme(theme, activity));
+			backgroundImage.setScaleType(theme.isTiled() ? ScaleType.FIT_XY : ScaleType.MATRIX);
+			Drawable drawable = Utils.getChatTheme(theme, activity);
+			if(!theme.isTiled())
+			{
+				ChatThreadUtils.applyMatrixTransformationToImageView(drawable, backgroundImage);
+			}
+			
+			backgroundImage.setImageDrawable(drawable);
 		}
 	}
 
@@ -963,6 +975,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (mShareablePopupLayout.isShowing())
 		{
 			mShareablePopupLayout.dismiss();
+			return;
 		}
 
 		if (removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true))
@@ -1000,27 +1013,37 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private void setupSearchMode()
 	{
 		mActionMode.showActionMode(SEARCH_ACTION_MODE, R.layout.search_action_bar);
-		int id = mComposeView.getId();
-		mComposeView = (CustomFontEditText) activity.findViewById(R.id.search_text);
-		mComposeView.setTag(id);
-		View mBottomView = activity.findViewById(R.id.bottom_panel);
-		if (mShareablePopupLayout.isKeyboardOpen())
-		{ // ifkeyboard is not open, then keyboard will come which will make so much animation on screen
-			mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.up_down_lower_part));
-		}
-		mBottomView.setVisibility(View.GONE);
-		mComposeView.requestFocus();
-		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
+		setUpSearchViews();
+		
 		if (messageSearchManager == null)
 		{
 			messageSearchManager = new SearchManager();
 		}
 		messageSearchManager.init(messages);
+	}
+	
+	private void setUpSearchViews()
+	{
+		int id = mComposeView.getId();
+		mComposeView = (CustomFontEditText) activity.findViewById(R.id.search_text);
+		mComposeView.setTag(id);
+		
 		mComposeView.addTextChangedListener(searchTextWatcher);
 		mComposeView.setOnEditorActionListener(this);
 		activity.findViewById(R.id.next).setOnClickListener(this);
 		activity.findViewById(R.id.previous).setOnClickListener(this);
 		activity.findViewById(R.id.search_clear_btn).setOnClickListener(this);
+		
+		View mBottomView = activity.findViewById(R.id.bottom_panel);
+		if (mShareablePopupLayout.isKeyboardOpen())
+		{ 
+			// ifkeyboard is not open, then keyboard will come which will make so much animation on screen
+			mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.up_down_lower_part));
+		}
+		
+		mBottomView.setVisibility(View.GONE);
+		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
+		mComposeView.requestFocus();
 	}
 	
 	TextWatcher searchTextWatcher = new TextWatcher()
@@ -1081,7 +1104,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mComposeView = (CustomFontEditText) activity.findViewById(R.id.msg_compose);
 		mComposeView.requestFocus();
 		mComposeView.removeTextChangedListener(searchTextWatcher);
-		mComposeView.setText("");
+		mEmoticonPicker.updateET(mComposeView);
+		
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
 		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
 		mBottomView.setVisibility(View.VISIBLE);
@@ -1392,7 +1416,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 		addToPubSub();
 
+		checkAndAddTypingNotifications();
+		
 		takeActionBasedOnIntent();
+	}
+	
+	/**
+	 * Checks if there is any typing notification present for the given msisdn, if present, it adds it to the ConvMessages
+	 */
+	protected void checkAndAddTypingNotifications()
+	{
+		if (HikeMessengerApp.getTypingNotificationSet().containsKey(msisdn))
+		{
+			setTypingText(true, HikeMessengerApp.getTypingNotificationSet().get(msisdn));
+		}
 	}
 	
 	protected void setEditTextListeners()
@@ -2034,7 +2071,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mAdapter.setActionMode(true);
 			v.setVisibility(mAdapter.isSelected(message) ? View.VISIBLE : View.INVISIBLE);
 
-			hideShowActionModeMenus(MULTI_SELECT_ACTION_MODE);
+			hideShowActionModeMenus();
 			/**
 			 * Hiding any open tip
 			 */
@@ -2137,7 +2174,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	}
 
-	private void hideShowActionModeMenus(int actionModeId)
+	/**
+	 * This method is used to hiding/showing multi_select_action_bar_menus
+	 */
+	private void hideShowActionModeMenus()
 	{
 		mActionMode.showHideMenuItem(R.id.copy_msgs, selectedNonTextMsgs == 0);
 
@@ -2688,7 +2728,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		resumeImageLoaders(true);
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
-		
 	}
 
 	/**
@@ -3783,7 +3822,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			/**
 			 * Scrolling to bottom.
 			 */
-			mConversationsView.setSelection(messages.size() - 1);
+			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+			
+			/*
+			 * Resetting the transcript mode once the list has scrolled to the bottom.
+			 */
+			uiHandler.sendEmptyMessage(DISABLE_TRANSCRIPT_MODE);
 		}
 
 	}
@@ -4078,8 +4122,62 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void onConfigurationChanged(Configuration newConfig)
 	{
 		Logger.d(TAG, "newConfig : " + newConfig.toString());
+		
+		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
+		
+		/**
+		 * Handle theme background image change.
+		 */
+		if (getCurrentlTheme() != null && getCurrentlTheme() != ChatTheme.DEFAULT)
+		{
+			setBackground(getCurrentlTheme());
+		}
+		
+		/**
+		 * Handling MULTI_SELECT_ACTION_MODE orientation change
+		 */
+		if (mActionMode != null)
+		{
+			handleActionModeOrientationChange(mActionMode.whichActionModeIsOn());
+		}
+		
+		if (themePicker != null && themePicker.isShowing())
+		{
+			themePicker.refreshViews();
+		}
 	}
-
+	
+	/**
+	 * This method is used to handle orientation changes for ActionMode.
+	 * If a lower class has a special actionMode not known to super class, it should override this method
+	 * 
+	 * @param whichActionMode
+	 */
+	protected void handleActionModeOrientationChange(int whichActionMode)
+	{
+		switch (whichActionMode)
+		{
+		case MULTI_SELECT_ACTION_MODE:
+			mActionMode.reInflateActionMode();
+			hideShowActionModeMenus();
+			break;
+			
+		case SEARCH_ACTION_MODE:
+			mActionMode.reInflateActionMode();
+			String oldText = mComposeView.getText().toString();
+			setUpSearchViews();
+			mComposeView.setText(oldText);
+			mComposeView.setSelection(oldText.length());
+			break;
+			
+		default:
+			break;
+		}
+	}
+	
 	@Override
 	public boolean onEditorAction(TextView view, int actionId, KeyEvent keyEvent)
 	{
@@ -4155,7 +4253,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			setEmoticonButtonSelected(false);
 		}
-		
 	}
 	
 	@Override
@@ -4168,6 +4265,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (mShareablePopupLayout.isKeyboardOpen() && mShareablePopupLayout.isShowing())
 		{
 			mShareablePopupLayout.dismiss();
+		}
+	}
+
+	/**
+	 * Close the keyboard. Since we are going to a different fragment Reset the application Flags
+	 */
+	public void onAttachFragment()
+	{
+		Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+
+		if (mShareablePopupLayout != null)
+		{
+			mShareablePopupLayout.onCloseKeyBoard();
+
 		}
 	}
 }

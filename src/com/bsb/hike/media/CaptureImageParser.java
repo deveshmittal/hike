@@ -96,6 +96,6 @@ public class CaptureImageParser
 			public void negativeClicked(HikeDialog hikeDialog)
 			{
 			}
-		}, new Long[] { (long) 1, file.length() }); // 1 since count of images is 1.
+		}, new Long[] { (long) 1, file.length() }).setCanceledOnTouchOutside(false); // 1 since count of images is 1.
 	}
 }

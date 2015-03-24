@@ -40,7 +40,7 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 
 	private ActionModeListener mListener;
 	
-	private boolean shouldInflateMenu;
+	private boolean shouldInflateMenu, reInflation;
 	
 	private int menuResId = -1;
 	
@@ -110,11 +110,16 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	@Override
 	public void onDestroyActionMode(ActionMode mode)
 	{
-		if (mListener != null)
+		if (!reInflation)
 		{
-			mListener.actionModeDestroyed(actionModeId);
+			if (mListener != null)
+			{
+				mListener.actionModeDestroyed(actionModeId);
+			}
+			actionBarDestroyed();
 		}
-		actionBarDestroyed();
+		
+		reInflation = false;
 	}
 
 	public void showActionMode(int id)
@@ -291,5 +296,15 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	private void hideView(int resId)
 	{
 		mActionMode.getCustomView().findViewById(resId).setVisibility(View.GONE);
+	}
+	
+	/**
+	 * Note : This method is to be used when you need to forcefully reinflate the ActionMode again. 
+	 * If you have supplied a custom layout/menu, you"ll have to handle their reinflation on your own. 
+	 */
+	public void reInflateActionMode()
+	{
+		reInflation = true;
+		mActivity.startActionMode(this);
 	}
 }

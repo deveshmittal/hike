@@ -4,7 +4,13 @@ import android.view.View;
 
 public interface ShareablePopup
 {
-	public View getView();
+	/**
+	 * Get the view based on the current device orientation.
+	 * 
+	 * @param screenOrientation
+	 * @return
+	 */
+	public View getView(int screenOrientation);
 
 	public int getViewId();
 

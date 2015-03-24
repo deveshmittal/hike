@@ -34,6 +34,8 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	private View mViewToDisplay;
 
 	private int mLayoutResId = -1;
+	
+	private int currentConfig = Configuration.ORIENTATION_PORTRAIT;
 
 	private static final String TAG = "EmoticonPicker";
 	
@@ -46,9 +48,9 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	 * @param emoPickerListener
 	 */
 
-	public EmoticonPicker(Context context, EditText editText)
+	public EmoticonPicker(Activity activity, EditText editText)
 	{
-		this.mContext = context;
+		this.mContext = activity;
 		this.mEditText = editText;
 	}
 
@@ -60,9 +62,9 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	 * @param popUpLayout
 	 */
 
-	public EmoticonPicker(int layoutResId, Context context, EditText editText, KeyboardPopupLayout popUpLayout)
+	public EmoticonPicker(int layoutResId, Activity activity, EditText editText, KeyboardPopupLayout popUpLayout)
 	{
-		this(context, editText);
+		this(activity, editText);
 		this.mLayoutResId = layoutResId;
 		this.mPopUpLayout = popUpLayout;
 	}
@@ -76,9 +78,9 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	 * @param popUpLayout
 	 */
 
-	public EmoticonPicker(View view, Context context, EditText editText, KeyboardPopupLayout popUpLayout)
+	public EmoticonPicker(View view, Activity activity, EditText editText, KeyboardPopupLayout popUpLayout)
 	{
-		this(context, editText);
+		this(activity, editText);
 		this.mPopUpLayout = popUpLayout;
 		this.mViewToDisplay = view;
 		initViewComponents(mViewToDisplay);
@@ -94,10 +96,10 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	 * @param firstTimeHeight
 	 * @param eatOuterTouchIds
 	 */
-	public EmoticonPicker(Context context, EditText editText, View mainView, int firstTimeHeight, int[] eatOuterTouchIds)
+	public EmoticonPicker(Activity activity, EditText editText, View mainView, int firstTimeHeight, int[] eatOuterTouchIds)
 	{
-		this(context, editText);
-		mPopUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, mContext, eatOuterTouchIds, null);
+		this(activity, editText);
+		mPopUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, activity.getApplicationContext(), eatOuterTouchIds, null);
 	}
 
 	/**
@@ -119,13 +121,22 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 		this.mLayoutResId = layoutResId;
 	}
 
-	public void showEmoticonPicker()
+	public void showEmoticonPicker(int screenOrientation)
 	{
-		showEmoticonPicker(0, 0);
+		showEmoticonPicker(0, 0, screenOrientation);
 	}
 
-	public void showEmoticonPicker(int xoffset, int yoffset)
+	public void showEmoticonPicker(int xoffset, int yoffset, int screenOritentation)
 	{
+		/**
+		 * Checking for configuration change
+		 */
+		if (orientationChanged(screenOritentation))
+		{
+			resetView();
+			currentConfig = screenOritentation;
+		}
+		
 		initView();
 
 		mPopUpLayout.showKeyboardPopup(mViewToDisplay);
@@ -221,8 +232,15 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 	 */
 
 	@Override
-	public View getView()
+	public View getView(int screenOrientation)
 	{
+		if (orientationChanged(screenOrientation))
+		{
+			Logger.i(TAG, "Orientation Changed");
+			resetView();
+			currentConfig = screenOrientation;
+		}
+		
 		if (mViewToDisplay == null)
 		{
 			initView();
@@ -249,10 +267,10 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 		this.mEditText = null;
 	}
 	
-	public void updateETAndContext(EditText editText, Context context)
+	public void updateETAndContext(EditText editText, Activity activity)
 	{
 		updateET(editText);
-		this.mContext = context;
+		this.mContext = activity;
 	}
 	
 	public void updateET(EditText editText)
@@ -284,6 +302,16 @@ public class EmoticonPicker implements ShareablePopup, EmoticonPickerListener, O
 			eraseEmoticon();
 			break;
 		}
+	}
+	
+	private void resetView()
+	{
+		mViewToDisplay = null;
+	}
+	
+	private boolean orientationChanged(int deviceOrientation)
+	{
+		return currentConfig != deviceOrientation;
 	}
 
 }

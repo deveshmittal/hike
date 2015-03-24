@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
+import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
 
@@ -55,49 +56,7 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 
 	private void registerOnGlobalLayoutListener()
 	{
-		mainView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener()
-		{
-
-			@Override
-			public void onGlobalLayout()
-			{
-				Log.i("chatthread", "global layout listener");
-
-				Log.i("chatthread", "global layout listener rootHeight " + mainView.getRootView().getHeight() + " new height " + mainView.getHeight());
-				Rect r = new Rect();
-				mainView.getWindowVisibleDisplayFrame(r);
-				// this is height of view which is visible on screen
-				int rootViewHeight = mainView.getRootView().getHeight();
-				int temp = rootViewHeight - r.bottom;
-				Logger.i("chatthread", "keyboard  height " + temp);
-				boolean islandScape = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-				if (temp > 0)
-				{
-					if (islandScape)
-					{
-						possibleKeyboardHeightLand = temp;
-					}
-					else
-					{
-						possibleKeyboardHeight = temp;
-					}
-					isKeyboardOpen = true;
-					if (isShowing())
-					{
-						updatePadding(0);
-					}
-					updateDimension(LayoutParams.MATCH_PARENT, temp);
-				}
-				else
-				{
-					// when we change orientation , from portrait to landscape and keyboard is open , it is possible that screen does adjust its size more than once until it
-					// stabilize
-					if (islandScape)
-						possibleKeyboardHeightLand = 0;
-					isKeyboardOpen = false;
-				}
-			}
-		});
+		mainView.getViewTreeObserver().addOnGlobalLayoutListener(mGlobalLayoutListener);
 	}
 
 	private void updatePadding(int bottomPadding)
@@ -120,7 +79,10 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		
 		if (popup == null)
 		{
-			initPopUpWindow(LayoutParams.MATCH_PARENT, height, view, context);
+			initPopUpWindow(LayoutParams.MATCH_PARENT, height, view, context, PopupWindow.INPUT_METHOD_NOT_NEEDED);
+			
+			fixLollipopHeadsUpNotifPopup(popup);
+			
 			// this is a strange bug in Android, if we set focusable true, GRAVITY BOTTOM IS NOT working
 			popup.setFocusable(false);
 			
@@ -166,7 +128,15 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		if (event.getAction() == MotionEvent.ACTION_OUTSIDE)
 		{
 			int eventX = (int) event.getX();
-			return shouldEatOuterTouch(eventX);
+			int eventY = (int) event.getRawY();
+			/**
+			 * For vertical, we need accurate heuristics as event.getY() was not returning accurate data
+			 * http://stackoverflow.com/questions/6237200/motionevent-gety-and-getx-return-incorrect-values
+			 */
+			if (shouldEatOuterTouchEvent(eventX, eventY))
+			{
+				return true;
+			}
 		}
 		return false;
 	}
@@ -179,7 +149,7 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 	 * @return {@link Boolean}
 	 */
 
-	private boolean shouldEatOuterTouch(int eventX)
+	private boolean shouldEatOuterTouchEvent(int eventX, int eventY)
 	{
 		if (null == mEatTouchEventViewIds)
 		{
@@ -188,7 +158,7 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 
 		for (int id : mEatTouchEventViewIds)
 		{
-			if (shouldEatOuterTouch(eventX, id))
+			if (shouldEatOuterTouch(eventX, eventY, id))
 			{
 				return true;
 			}
@@ -204,12 +174,13 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 	 * @param viewId
 	 * @return {@link Boolean}
 	 */
-	private boolean shouldEatOuterTouch(int eventX, int viewId)
+	private boolean shouldEatOuterTouch(int eventX, int eventY, int viewId)
 	{
 		View st = mainView.findViewById(viewId);
 		int[] xy = new int[2];
 		st.getLocationInWindow(xy);
-		return ((eventX >= xy[0] && eventX <= (xy[0] + st.getWidth())));
+		boolean result = eventX >= xy[0] && eventX <= (xy[0] + st.getWidth()) && ((eventY + st.getHeight()) > xy[1]);
+		return result;
 	}
 
 	public void updateListenerAndView(PopupListener listener, View view)
@@ -227,7 +198,70 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 	public void releaseResources()
 	{
 		this.mListener = null;
+
+		/**
+		 * Removing the global layout listener
+		 */
+		this.mainView.getViewTreeObserver().removeGlobalOnLayoutListener(mGlobalLayoutListener);
 		this.mainView = null;
 	}
 	
+	private ViewTreeObserver.OnGlobalLayoutListener mGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener()
+	{
+		
+		@Override
+		public void onGlobalLayout()
+		{
+			if (mainView == null)
+			{
+				Logger.wtf("chatthread", "Getting null view inside global layout listener");
+				return;
+			}
+
+			Log.i("chatthread", "global layout listener");
+
+			Log.i("chatthread", "global layout listener rootHeight " + mainView.getRootView().getHeight() + " new height " + mainView.getHeight());
+			Rect r = new Rect();
+			mainView.getWindowVisibleDisplayFrame(r);
+			// this is height of view which is visible on screen
+			int rootViewHeight = mainView.getRootView().getHeight();
+			int temp = rootViewHeight - r.bottom;
+			Logger.i("chatthread", "keyboard  height " + temp);
+			boolean islandScape = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+			if (temp > 0)
+			{
+				if (islandScape)
+				{
+					possibleKeyboardHeightLand = temp;
+				}
+				else
+				{
+					possibleKeyboardHeight = temp;
+				}
+				isKeyboardOpen = true;
+				if (isShowing())
+				{
+					updatePadding(0);
+				}
+				updateDimension(LayoutParams.MATCH_PARENT, temp);
+			}
+			else
+			{
+				// when we change orientation , from portrait to landscape and keyboard is open , it is possible that screen does adjust its size more than once until it
+				// stabilize
+				if (islandScape)
+					possibleKeyboardHeightLand = 0;
+				isKeyboardOpen = false;
+			}
+		
+		}
+	};
+
+	public void onCloseKeyBoard()
+	{
+		if (isKeyboardOpen() && isShowing())
+		{
+			dismiss();
+		}
+	}
 }
