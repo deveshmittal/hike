@@ -161,6 +161,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_marginBottom="12dp"
                 android:layout_marginRight="16dp"
+                android:gravity="center"
                 android:background="@drawable/bg_new_msg"
                 android:visibility="gone" >
 

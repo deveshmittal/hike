@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Message;
 import android.text.Editable;
 import android.text.Spannable;
@@ -27,7 +28,6 @@ import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -312,7 +312,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		addUnreadCountMessage();
 		if (groupConversation.getImpMessage() != null)
 		{
-			showImpMessage(groupConversation.getImpMessage(), -1);
+			showStickyMessageAtTop(groupConversation.getImpMessage(), false);
 		}
 
 		updateUnreadPinCount();
@@ -328,15 +328,18 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	}
 
 	/**
-	 * 
 	 * @param impMessage
 	 *            -- ConvMessage to stick to top
-	 * @param animationId
-	 *            -- play animation on message , id must be anim resource id, -1 of no
 	 */
-	private void showImpMessage(ConvMessage impMessage, int animationId)
+	private void showStickyMessageAtTop(ConvMessage impMessage, boolean playPinAnim)
 	{
 		// Hiding pin tip if open
+		if (impMessage == null)
+		{
+			Logger.wtf(TAG, "Trying to showStickyPinMessage on a null ConvMessage object");
+			return;
+		}
+		
 		mTips.hideTip(ChatThreadTips.PIN_TIP);
 		boolean wasPinViewInflated = false;
 		if (impMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
@@ -427,9 +430,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			wasPinViewInflated = false; // To avoid animation, since the message create view will be destroyed soon.
 		}
 		
-		if (animationId != -1 && wasPinViewInflated) // If we're inflating pin for the first time, then we animate it.
+		if (playPinAnim && wasPinViewInflated) // If we're inflating pin for the first time, then we animate it.
 		{
-			ChatThreadUtils.playPinUpAnimation(activity.getApplicationContext(), pinView, animationId);
+			ChatThreadUtils.playPinUpAnimation(activity.getApplicationContext(), pinView, R.anim.up_down_fade_in);
 		}
 		
 		// decrement the unread count if message pinned
@@ -538,8 +541,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		ContactManager conMgr = ContactManager.getInstance();
 		groupConversation.setGroupParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), false, false));
 	}
-
-	private void addMessage(ConvMessage convMessage, boolean playPinAnim)
+	
+	@Override
+	protected void addMessage(ConvMessage convMessage)
 	{
 		/*
 		 * If we were showing the typing bubble, we remove it from the add the new message and add the typing bubble back again
@@ -552,7 +556,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		 */
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
-			showImpMessage(convMessage, playPinAnim ? R.anim.up_down_fade_in : -1);
+			showStickyMessageAtTop(convMessage, true);
 		}
 
 		/**
@@ -576,7 +580,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 
 		super.addMessage(convMessage);
 	}
-
+	
 	/**
 	 * This overrides : {@link ChatThread}'s {@link #setTypingText(boolean, TypingNotification)}
 	 */
@@ -698,8 +702,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			addBulkMessages((LinkedList<ConvMessage>) msg.obj);
 			break;
 		case SHOW_IMP_MESSAGE:
-			Pair<Integer, ConvMessage> pair = (Pair<Integer, ConvMessage>) msg.obj;
-			showImpMessage(pair.second, pair.first);
+			showStickyMessageAtTop((ConvMessage) msg.obj, true);
 			break;
 		case GROUP_REVIVED:
 			handleGroupRevived();
@@ -708,7 +711,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			incrementGroupParticipants((int) msg.obj);
 			break;
 		case MESSAGE_RECEIVED:
-			addMessage((ConvMessage) msg.obj, true);
+			addMessage((ConvMessage) msg.obj);
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in Group ChatThread. Calling super class' handleUIMessage");
@@ -771,6 +774,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		View content = activity.findViewById(R.id.impMessageCreateView);
 		content.setVisibility(View.VISIBLE);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
+		mComposeView.requestFocus();
 		mEmoticonPicker.updateET(mComposeView);
 		
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
@@ -803,12 +807,17 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		// AFTER PIN MODE, we make sure mComposeView is reinitialized to message composer compose
 
 		mComposeView = (CustomFontEditText) activity.findViewById(R.id.msg_compose);
-		setEditTextListeners();
 		mEmoticonPicker.updateET(mComposeView);
+		mComposeView.requestFocus();
 		View mBottomView = activity.findViewById(R.id.bottom_panel);
 		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
 		mBottomView.setVisibility(View.VISIBLE);
 		playPinCreateDestroyViewAnim();
+		
+		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
 	}
 	
 	
@@ -911,7 +920,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	{
 		if (convMessage != null)
 		{
-			addMessage(convMessage, true);
+			addMessage(convMessage);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
 
 			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
@@ -1209,13 +1218,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 
 			sendUIMessage(BULK_MESSAGE_RECEIVED, messagesList);
 
-			sendUIMessage(SHOW_IMP_MESSAGE, new Pair<Integer, ConvMessage>(R.anim.up_down_fade_in, pinConvMessage));
+			sendUIMessage(SHOW_IMP_MESSAGE, pinConvMessage);
 
 			if (ids != null && ids.length() > 0)
 			{
 				ChatThreadUtils.doBulkMqttPublish(ids, msisdn);
 			}
-
 		}
 	}
 
@@ -1420,4 +1428,16 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip_group);
 	}
 	
+	@Override
+	protected void handleActionModeOrientationChange(int whichActionMode)
+	{
+		switch (whichActionMode)
+		{
+		case PIN_CREATE_ACTION_MODE:
+			mActionMode.reInflateActionMode();
+			break;
+		default:
+			super.handleActionModeOrientationChange(whichActionMode);
+		}
+	}
 }

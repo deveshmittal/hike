@@ -12,6 +12,10 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -21,6 +25,8 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
@@ -477,5 +483,51 @@ public class ChatThreadUtils
 	protected static void recordStickerFTUEClick()
 	{
 		HAManager.getInstance().record(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH);
+	}
+	
+	/**
+	 * This method scales the image proportional to the given view height and width. By using {@code Matrix.ScaleToFit} instead of {@link ScaleType} we avoid the image view from moving
+	 * up/down when keyboard opens. This method also preserves the aspect ratio of the original bitmap by calculating its new height/width opportunistically
+	 * 
+	 * @param drawable
+	 * @param imageView
+	 */
+	
+	protected static void applyMatrixTransformationToImageView(Drawable drawable, ImageView imageView)
+	{
+		Rect r = new Rect();
+		imageView.getWindowVisibleDisplayFrame(r);
+		
+		/**
+		 * Drawable width and height
+		 */
+		float imageWidth = drawable.getIntrinsicWidth();
+		float imageHeight =drawable.getIntrinsicHeight();
+		/**
+		 * View height and width
+		 */
+		float viewHeight = r.bottom - r.top;
+		float viewWidth = r.right - r.left;
+		
+		RectF dst; //Destination rectangle frame in which we have to place the drawable
+		/**
+		 * We scale the image on the basis of the smaller dimension.
+		 * We also preserve the aspect ratio of the original drawable
+		 */
+		if (imageWidth > imageHeight)
+		{
+			dst = new RectF(0, 0, (viewHeight * imageWidth/imageHeight), viewHeight);
+		}
+		
+		else
+		{
+			dst = new RectF(0, 0, viewWidth, viewWidth * imageHeight/imageWidth);
+		}
+		
+		Matrix matrix = new Matrix();
+		
+		matrix.setRectToRect(new RectF(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight()), dst, Matrix.ScaleToFit.CENTER);
+		Logger.d(TAG, "Matrix:"+ matrix.toString());
+		imageView.setImageMatrix(matrix);
 	}
 }
