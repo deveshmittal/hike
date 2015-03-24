@@ -698,6 +698,10 @@ public class AccountUtils
 	
 	private static void recordAddressBookUploadFailException(String jsonString)
 	{
+		if(!HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.EXCEPTION_ANALYTIS_ENABLED, true))
+		{
+			return;
+		}
 		String md5Hash = Utils.StringToMD5(jsonString);
 		if(!TextUtils.isEmpty(md5Hash))
 		{

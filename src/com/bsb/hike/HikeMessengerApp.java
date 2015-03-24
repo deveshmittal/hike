@@ -466,6 +466,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String UPGRADE_FOR_SERVER_ID_FIELD = "upgradeForServerIdField";
 
 	public static final String SHOW_BROADCAST_FTUE_SCREEN = "showBroadcastFtueScreen";
+
+	public static final String EXCEPTION_ANALYTIS_ENABLED = "exceptionAnalaticsEnabled";
 	
 	public static CurrentState currentState = CurrentState.CLOSED;
 
