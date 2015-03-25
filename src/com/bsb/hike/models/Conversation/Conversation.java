@@ -263,7 +263,7 @@ public abstract class Conversation implements Comparable<Conversation>
 		}
 	}
 
-	public abstract static class ConversationBuilder<T extends ConversationBuilder>
+	public static class ConversationBuilder<T extends ConversationBuilder>
 	{
 		private ConvInfoBuilder convInfoBuilder;
 
@@ -290,8 +290,5 @@ public abstract class Conversation implements Comparable<Conversation>
 			convInfoBuilder.setSortingTimeStamp(timeStamp);
 			return (T) this;
 		}
-
-		public abstract T build();
-
 	}
 }
