@@ -1,5 +1,7 @@
 package com.bsb.hike.models.Conversation;
 
+import android.text.TextUtils;
+
 import com.bsb.hike.models.ConvMessage;
 
 /**
@@ -19,6 +21,8 @@ public class ConvInfo implements Comparable<ConvInfo>
 
 	private boolean isMute;
 
+	private boolean isStealth;
+
 	private long sortingTimeStamp;
 
 	/**
@@ -26,10 +30,28 @@ public class ConvInfo implements Comparable<ConvInfo>
 	 */
 	private ConvMessage lastConversationMsg;
 
-	public ConvInfo(String msisdn, String convName)
+	private ConvInfo(ConvInfoBuilder builder)
 	{
-		this.msisdn = msisdn;
-		this.mConversationName = convName;
+		if (!validateConvInfo(builder))
+		{
+			throw new IllegalArgumentException("No msisdn set.! ConvInfo object cannot be created.");
+		}
+
+		this.msisdn = builder.msisdn;
+		this.mConversationName = builder.convName;
+		this.sortingTimeStamp = builder.sortingTimeStamp;
+		this.isStealth = builder.isStealth;
+	}
+
+	/**
+	 * Validates params for convInfo to ensure msisdn is set
+	 * 
+	 * @param builder
+	 * @return
+	 */
+	private boolean validateConvInfo(ConvInfoBuilder builder)
+	{
+		return !(TextUtils.isEmpty(builder.msisdn));
 	}
 
 	/**
@@ -43,7 +65,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 	/**
 	 * @return the mConversationName
 	 */
-	public String getmConversationName()
+	public String getConversationName()
 	{
 		return mConversationName;
 	}
@@ -142,6 +164,23 @@ public class ConvInfo implements Comparable<ConvInfo>
 		this.lastConversationMsg = lastConversationMsg;
 	}
 
+	/**
+	 * @return the isStealth
+	 */
+	public boolean isStealth()
+	{
+		return isStealth;
+	}
+
+	/**
+	 * @param isStealth
+	 *            the isStealth to set
+	 */
+	protected void setStealth(boolean isStealth)
+	{
+		this.isStealth = isStealth;
+	}
+
 	@Override
 	public String toString()
 	{
@@ -219,4 +258,54 @@ public class ConvInfo implements Comparable<ConvInfo>
 		return true;
 	}
 
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((mConversationName == null) ? 0 : mConversationName.hashCode());
+		result = prime * result + ((msisdn == null) ? 0 : msisdn.hashCode());
+		result = prime * result + (isStealth ? 1231 : 1237);
+
+		return result;
+	}
+
+	public class ConvInfoBuilder
+	{
+		private String msisdn;
+
+		private String convName;
+
+		private boolean isStealth;
+
+		private long sortingTimeStamp;
+
+		public ConvInfoBuilder(String msisdn)
+		{
+			this.msisdn = msisdn;
+		}
+
+		public ConvInfoBuilder setConvName(String convName)
+		{
+			this.convName = convName;
+			return this;
+		}
+
+		public ConvInfoBuilder setIsStealth(boolean isStealth)
+		{
+			this.isStealth = isStealth;
+			return this;
+		}
+
+		public ConvInfoBuilder setSortingTimeStamp(long timeStamp)
+		{
+			this.sortingTimeStamp = timeStamp;
+			return this;
+		}
+
+		public ConvInfo build()
+		{
+			return new ConvInfo(this);
+		}
+	}
 }
