@@ -171,6 +171,12 @@ public abstract class Conversation implements Comparable<Conversation>
 	{
 		convInfo.setStealth(isStealth);
 	}
+	
+	@Override
+	public String toString()
+	{
+		return convInfo.toString();
+	}
 
 	public JSONObject serialize(String type)
 	{
