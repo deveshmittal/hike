@@ -1,6 +1,7 @@
 package com.bsb.hike.models.Conversation;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import com.bsb.hike.models.ConvMessage;
@@ -12,7 +13,7 @@ import com.bsb.hike.utils.ChatTheme;
  * @author Anu/Piyush
  * 
  */
-public abstract class Conversation
+public abstract class Conversation implements Comparable<Conversation>
 {
 	private ConvInfo convInfo;
 
@@ -162,5 +163,80 @@ public abstract class Conversation
 	public void setIsStealth(boolean isStealth)
 	{
 		convInfo.setStealth(isStealth);
+	}
+
+	@Override
+	public int compareTo(Conversation other)
+	{
+		if (other == null)
+		{
+			return 1;
+		}
+
+		if (this.equals(other))
+		{
+			return 0;
+		}
+
+		return convInfo.compareTo(other.convInfo);
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+		{
+			return true;
+		}
+
+		if (obj == null)
+		{
+			return false;
+		}
+
+		if (getClass() != obj.getClass())
+		{
+			return false;
+		}
+
+		Conversation other = (Conversation) obj;
+
+		return convInfo.equals(other.convInfo);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return convInfo.hashCode();
+	}
+
+	public static class ConversationComparator implements Comparator<Conversation>
+	{
+		/**
+		 * This comparator reverses the order of the normal comparable
+		 * 
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+
+		@Override
+		public int compare(Conversation lhs, Conversation rhs)
+		{
+			if (rhs == null)
+			{
+				return 1;
+			}
+
+			if (lhs instanceof ConversationTip)
+			{
+				return -1;
+			}
+
+			else if (rhs instanceof ConversationTip)
+			{
+				return 1;
+			}
+
+			return rhs.compareTo(lhs);
+		}
 	}
 }
