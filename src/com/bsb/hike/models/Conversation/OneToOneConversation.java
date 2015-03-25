@@ -60,7 +60,7 @@ public class OneToOneConversation extends Conversation
 		return (TextUtils.isEmpty(getConversationName()) ? getMsisdn() : getConversationName());
 	}
 
-	public static class OneToOneConversationBuilder extends ConversationBuilder<ConversationBuilder>
+	public static class OneToOneConversationBuilder extends ConversationBuilder<OneToOneConversationBuilder>
 	{
 		private boolean isOnHike;
 

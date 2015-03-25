@@ -263,7 +263,7 @@ public abstract class Conversation implements Comparable<Conversation>
 		}
 	}
 
-	public static class ConversationBuilder<T extends ConversationBuilder>
+	public static class ConversationBuilder<T extends ConversationBuilder<T>>
 	{
 		private ConvInfoBuilder convInfoBuilder;
 
