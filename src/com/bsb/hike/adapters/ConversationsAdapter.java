@@ -375,38 +375,11 @@ public class ConversationsAdapter extends BaseAdapter
 
 		private void filterList(List<ConvInfo> allList, List<ConvInfo> listToUpdate, String textToBeFiltered)
 		{
-
 			for (ConvInfo info : allList)
 			{
 				try
 				{
-					boolean found = false;
-					if (textToBeFiltered.equals("broadcast") && Utils.isBroadcastConversation(info.getMsisdn()))
-					{
-						found = true;
-					}
-					else if (textToBeFiltered.equals("group") && Utils.isGroupConversation(info.getMsisdn()) && !Utils.isBroadcastConversation(info.getMsisdn()))
-					{
-						found = true;
-					}
-					else
-					{
-						String name = info.getLabel().toLowerCase();
-						int startIndex = 0;
-						if (name.startsWith(textToBeFiltered))
-						{
-							found = true;
-							convSpanStartIndexes.put(info.getMsisdn(), startIndex);
-						}
-						else if (name.contains(" " + textToBeFiltered))
-						{
-							found = true;
-							startIndex = name.indexOf(" " + textToBeFiltered) + 1;
-							convSpanStartIndexes.put(info.getMsisdn(), startIndex);
-						}
-					}
-
-					if(found)
+					if(filterConvForSearch(info, textToBeFiltered))
 					{
 						listToUpdate.add(info);
 					}
@@ -417,6 +390,37 @@ public class ConversationsAdapter extends BaseAdapter
 				}
 			}
 			
+		}
+		
+		public boolean filterConvForSearch(ConvInfo convInfo, String textToBeFiltered)
+		{
+			boolean found = false;
+			String msisdn = convInfo.getMsisdn();
+			if (textToBeFiltered.equals("broadcast") && Utils.isBroadcastConversation(msisdn))
+			{
+				found = true;
+			}
+			else if (textToBeFiltered.equals("group") && Utils.isGroupConversation(msisdn) && !Utils.isBroadcastConversation(msisdn))
+			{
+				found = true;
+			}
+			else
+			{
+				String name = convInfo.getLabel().toLowerCase();
+				int startIndex = 0;
+				if (name.startsWith(textToBeFiltered))
+				{
+					found = true;
+					convSpanStartIndexes.put(msisdn, startIndex);
+				}
+				else if (name.contains(" " + textToBeFiltered))
+				{
+					found = true;
+					startIndex = name.indexOf(" " + textToBeFiltered) + 1;
+					convSpanStartIndexes.put(msisdn, startIndex);
+				}
+			}
+			return found;
 		}
 
 		@Override
@@ -934,34 +938,6 @@ public class ConversationsAdapter extends BaseAdapter
 		return iconLoader;
 	}
 
-	public void addToLists(ConvInfo conv)
-	{
-		if (!isSearchModeOn)
-		{
-			completeList.add(conv);
-		}
-		else
-		{
-			conversationList.add(conv);
-		}
-		if(conversationsMsisdns!=null)
-		{
-			conversationsMsisdns.add(conv.getMsisdn());
-		}
-		if(phoneBookContacts!=null)
-		{
-			phoneBookContacts.remove(conv);
-		}
-	}
-
-	public void addToLists(Set<ConvInfo> list)
-	{
-		for (ConvInfo conv : list)
-		{
-			addToLists(conv);
-		}
-	}
-
 	public void removeStealthConversationsFromLists()
 	{
 		for (Iterator<ConvInfo> iter = completeList.iterator(); iter.hasNext();)
@@ -989,6 +965,35 @@ public class ConversationsAdapter extends BaseAdapter
 		Collections.sort(completeList, mConversationsComparator);
 		Collections.sort(conversationList, mConversationsComparator);
 	}
+	
+	public void addToLists(ConvInfo convInfo)
+	{
+		conversationList.add(convInfo);
+		if(conversationsMsisdns!=null)
+		{
+			conversationsMsisdns.add(convInfo.getMsisdn());
+		}
+		if(phoneBookContacts!=null)
+		{
+			phoneBookContacts.remove(convInfo);
+		}
+		if (!isSearchModeOn)
+		{
+			completeList.add(convInfo);
+		}
+		else
+		{
+			onQueryChanged(refinedSearchText);
+		}
+	}
+
+	public void addToLists(Set<ConvInfo> list)
+	{
+		for (ConvInfo convInfo : list)
+		{
+			addToLists(convInfo);
+		}
+	}
 
 	public void remove(ConvInfo conv)
 	{
@@ -1003,6 +1008,10 @@ public class ConversationsAdapter extends BaseAdapter
 			if (phoneBookContacts != null)
 			{
 				phoneBookContacts.add(getPhoneContactFakeConv(conv));
+			}
+			if (isSearchModeOn)
+			{
+				onQueryChanged(refinedSearchText);
 			}
 		}
 	}
