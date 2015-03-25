@@ -14,7 +14,7 @@ public class OneToOneConversation extends Conversation
 {
 	protected boolean isOnHike;
 
-	private OneToOneConversation(OneToOneConversationBuilder builder)
+	protected OneToOneConversation(OneToOneConversationBuilder builder)
 	{
 		super(builder);
 		this.isOnHike = builder.isOnHike;
