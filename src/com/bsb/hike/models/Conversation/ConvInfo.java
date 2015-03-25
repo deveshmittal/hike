@@ -270,7 +270,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 		return result;
 	}
 
-	public class ConvInfoBuilder
+	public static class ConvInfoBuilder
 	{
 		private String msisdn;
 
