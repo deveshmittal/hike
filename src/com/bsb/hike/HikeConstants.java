@@ -2539,4 +2539,6 @@ public class HikeConstants
 	public static final String EXCEPTION = "exception";
 
 	public static final String ENABLE_EXCEPTION_ANALYTIS = "enableExceptionAnalytics";
+
+	public static final String PAYLOAD = "payload";
 }

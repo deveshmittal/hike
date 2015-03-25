@@ -702,22 +702,18 @@ public class AccountUtils
 		{
 			return;
 		}
-		String md5Hash = Utils.StringToMD5(jsonString);
-		if(!TextUtils.isEmpty(md5Hash))
+		try
 		{
-			try
-			{
-				JSONObject metadata = new JSONObject();
+			JSONObject metadata = new JSONObject();
 
-				metadata.put(HikeConstants.MD5_HASH, md5Hash);
+			metadata.put(HikeConstants.PAYLOAD, jsonString);
 
-				Logger.d("AccountUtils", "recording addressbook upload fail event. md5 : " + md5Hash + "\n json = "+jsonString);
-				HAManager.getInstance().record(HikeConstants.EXCEPTION, HikeConstants.LogEvent.ADDRESSBOOK_UPLOAD, metadata);
-			}
-			catch (JSONException e)
-			{
-				Logger.e(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
-			}
+			Logger.d("AccountUtils", "recording addressbook upload fail event. json = " + jsonString);
+			HAManager.getInstance().record(HikeConstants.EXCEPTION, HikeConstants.LogEvent.ADDRESSBOOK_UPLOAD, metadata);
+		}
+		catch (JSONException e)
+		{
+			Logger.e(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 	}
 
