@@ -711,7 +711,7 @@ public class AccountUtils
 
 				metadata.put(HikeConstants.MD5_HASH, md5Hash);
 
-				Logger.d("AccountUtils", "recording addressbook upload fail event. md5 : " + md5Hash);
+				Logger.d("AccountUtils", "recording addressbook upload fail event. md5 : " + md5Hash + "\n json = "+jsonString);
 				HAManager.getInstance().record(HikeConstants.EXCEPTION, HikeConstants.LogEvent.ADDRESSBOOK_UPLOAD, metadata);
 			}
 			catch (JSONException e)
