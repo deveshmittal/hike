@@ -698,7 +698,7 @@ public class AccountUtils
 	
 	private static void recordAddressBookUploadFailException(String jsonString)
 	{
-		if(!HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.EXCEPTION_ANALYTIS_ENABLED, true))
+		if(!HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.EXCEPTION_ANALYTIS_ENABLED, false))
 		{
 			return;
 		}
