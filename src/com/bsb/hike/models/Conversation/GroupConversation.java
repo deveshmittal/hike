@@ -1,4 +1,4 @@
-package com.bsb.hike.models;
+package com.bsb.hike.models.Conversation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
