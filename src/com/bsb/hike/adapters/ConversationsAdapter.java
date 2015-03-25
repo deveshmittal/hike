@@ -285,33 +285,15 @@ public class ConversationsAdapter extends BaseAdapter
 		protected Void doInBackground(Void... arg0)
 		{
 			List<ContactInfo> allContacts = ContactManager.getInstance().getAllContacts();
-			for(ContactInfo contact : allContacts)
+			for (ContactInfo contact : allContacts)
 			{
 				ConvInfo convInfo = new ConvInfo.ConvInfoBuilder(contact.getMsisdn()).setConvName(contact.getName()).build();
 				
-				if(stealthConversations.contains(convInfo) || conversationsMsisdns.contains(contact.getMsisdn()))
+				if(stealthConversations.contains(convInfo) || conversationsMsisdns.contains(contact.getMsisdn()) || !contact.isOnhike())
 				{
 					continue;
 				}
-				// TODO : Check with GM on this.
-				
-//				String msg= null;
-//				if (contact.isOnhike())
-//				{
-//					msg = context.getString(R.string.start_new_chat);
-//				}
-//				else
-//				{
-//					msg = context.getString(R.string.on_sms);
-//				}
-//				List<ConvMessage> messagesList = new ArrayList<ConvMessage>();
-//				ConvMessage message = new ConvMessage(msg, contact.getMsisdn(), -1, State.RECEIVED_READ);
-//				messagesList.add(message);
-//				convInfo.setMessages(messagesList);
-				if (contact.isOnhike())
-				{
-					hikeContacts.add(convInfo);
-				}
+				hikeContacts.add(getPhoneContactFakeConv(convInfo));
 			}
 			return null;
 		}
@@ -323,6 +305,25 @@ public class ConversationsAdapter extends BaseAdapter
 			phoneBookContacts.addAll(hikeContacts);
 			super.onPostExecute(result);
 		}
+	}
+
+	private ConvInfo getPhoneContactFakeConv(ConvInfo convInfo)
+	{
+		if (convInfo != null)
+		{
+			String msg= null;
+			if (convInfo.isOnHike())
+			{
+				msg = context.getString(R.string.start_new_chat);
+			}
+			else
+			{
+				msg = context.getString(R.string.on_sms);
+			}
+			ConvMessage message = new ConvMessage(msg, convInfo.getMsisdn(), -1, State.RECEIVED_READ);
+			convInfo.setLastConversationMsg(message);
+		}
+		return convInfo;
 	}
 
 	public void onQueryChanged(String s)
@@ -1001,9 +1002,8 @@ public class ConversationsAdapter extends BaseAdapter
 			}
 			if (phoneBookContacts != null)
 			{
-				phoneBookContacts.add(conv);
+				phoneBookContacts.add(getPhoneContactFakeConv(conv));
 			}
 		}
 	}
-
 }
