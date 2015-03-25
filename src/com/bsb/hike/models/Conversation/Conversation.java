@@ -4,8 +4,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.Logger;
 
 /**
  * Conversation objects will be made from this abstract class
@@ -163,6 +168,22 @@ public abstract class Conversation implements Comparable<Conversation>
 	public void setIsStealth(boolean isStealth)
 	{
 		convInfo.setStealth(isStealth);
+	}
+
+	public JSONObject serialize(String type)
+	{
+		JSONObject object = new JSONObject();
+		try
+		{
+			object.put(HikeConstants.TYPE, type);
+			object.put(HikeConstants.TO, convInfo.getMsisdn());
+			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
+		}
+		catch (JSONException e)
+		{
+			Logger.e("Conversation", "invalid json message", e);
+		}
+		return object;
 	}
 
 	@Override
