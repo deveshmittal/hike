@@ -17,9 +17,10 @@ public class BotConversation extends OneToOneConversation
 	/**
 	 * 
 	 */
-	private BotConversation(BotConversationBuilder builder)
+	private BotConversation(InitBuilder<?> builder)
 	{
 		super(builder);
+		this.properties = builder.properties;
 		this.isOnHike = true;
 	}
 
@@ -40,11 +41,54 @@ public class BotConversation extends OneToOneConversation
 		this.properties = properties;
 	}
 
-	private static class BotConversationBuilder extends OneToOneConversationBuilder
+	/**
+	 * Builder base class extending {@link OneToOneConversation.InitBuilder}
+	 * 
+	 * @author piyush
+	 * 
+	 * @param <P>
+	 */
+	protected static abstract class InitBuilder<P extends InitBuilder<P>> extends OneToOneConversation.InitBuilder<P>
 	{
+		private short properties;
+
+		public InitBuilder(String msisdn)
+		{
+			super(msisdn);
+		}
+
+		public P setProperties(short property)
+		{
+			this.properties = property;
+			return getSelfObject();
+		}
+
 		public BotConversation build()
 		{
 			return new BotConversation(this);
+		}
+	}
+
+	/**
+	 * Builder class used to generating {@link BotConversation}
+	 * <p>
+	 * Bare bone Usage : BotConversation conv = BotConversation.ConversationBuilder(msisdn).build();<br>
+	 * Other examples : BotConversation conv = BotConversation.ConversationBuilder(msisdn).setConvName("ABC").setProperties(127).build();
+	 * 
+	 * @author piyush
+	 * 
+	 */
+	public static class ConversationBuilder extends BotConversation.InitBuilder<ConversationBuilder>
+	{
+		public ConversationBuilder(String msisdn)
+		{
+			super(msisdn);
+		}
+
+		@Override
+		protected ConversationBuilder getSelfObject()
+		{
+			return this;
 		}
 	}
 }

@@ -1,8 +1,8 @@
 package com.bsb.hike.models.Conversation;
 
-import com.bsb.hike.models.ConvMessage;
-
 import android.text.TextUtils;
+
+import com.bsb.hike.models.ConvMessage;
 
 /**
  * Conversation primitive for 1-1 chats like human chats, bot chats etc.
@@ -14,7 +14,7 @@ public class OneToOneConversation extends Conversation
 {
 	protected boolean isOnHike;
 
-	protected OneToOneConversation(OneToOneConversationBuilder builder)
+	protected OneToOneConversation(InitBuilder<?> builder)
 	{
 		super(builder);
 		this.isOnHike = builder.isOnHike;
@@ -60,19 +60,57 @@ public class OneToOneConversation extends Conversation
 		return (TextUtils.isEmpty(getConversationName()) ? getMsisdn() : getConversationName());
 	}
 
-	public static class OneToOneConversationBuilder extends ConversationBuilder<OneToOneConversationBuilder>
+	/**
+	 * Builder base class extending {@link Conversation.InitBuilder}
+	 * 
+	 * @author piyush
+	 * 
+	 * @param <P>
+	 */
+	protected static abstract class InitBuilder<P extends InitBuilder<P>> extends Conversation.InitBuilder<P>
 	{
 		private boolean isOnHike;
 
-		public OneToOneConversationBuilder setIsOnHike(boolean isOnHike)
+		public InitBuilder(String msisdn)
+		{
+			super(msisdn);
+		}
+
+		public P setIsOnHike(boolean isOnHike)
 		{
 			this.isOnHike = isOnHike;
-			return this;
+			return getSelfObject();
 		}
 
 		public OneToOneConversation build()
 		{
 			return new OneToOneConversation(this);
 		}
+
+	}
+
+	/**
+	 * Builder class used to generating {@link OneToOneConversation}
+	 * <p>
+	 * Bare bone Usage : OneToOneConversation conv = OneToOneConversation.ConversationBuilder(msisdn).build();<br>
+	 * Other examples : OneToOneConversation conv = OneToOneConversation.ConversationBuilder(msisdn).setConvName("ABC").setIsOnHike(false).build();
+	 * 
+	 * @author piyush
+	 * 
+	 */
+	public static class ConversationBuilder extends OneToOneConversation.InitBuilder<ConversationBuilder>
+	{
+
+		public ConversationBuilder(String msisdn)
+		{
+			super(msisdn);
+		}
+
+		@Override
+		protected ConversationBuilder getSelfObject()
+		{
+			return this;
+		}
+
 	}
 }
