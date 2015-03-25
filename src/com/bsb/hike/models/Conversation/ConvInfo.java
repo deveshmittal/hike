@@ -7,7 +7,7 @@ import com.bsb.hike.models.ConvMessage;
  * 
  * @author Anu/Piyush
  */
-public class ConvInfo
+public class ConvInfo implements Comparable<ConvInfo>
 {
 	private String msisdn;
 
@@ -146,6 +146,77 @@ public class ConvInfo
 	public String toString()
 	{
 		return "Conversation { msisdn = " + msisdn + ", conversation name = " + mConversationName + " }";
+	}
+
+	@Override
+	public int compareTo(ConvInfo other)
+	{
+		if (other == null)
+		{
+			return 1;
+		}
+
+		if (this.equals(other))
+		{
+			return 0;
+		}
+
+		long this_sorting_ts = this.sortingTimeStamp;
+		long other_sorting_ts = other.sortingTimeStamp;
+
+		if (other_sorting_ts != this_sorting_ts)
+		{
+			return (this_sorting_ts < other_sorting_ts) ? -1 : 1;
+		}
+
+		return (this.msisdn.compareTo(other.msisdn));
+	}
+
+	/**
+	 * Custom equals method
+	 */
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+		{
+			return true;
+		}
+
+		if (obj == null)
+		{
+			return false;
+		}
+
+		if (getClass() != obj.getClass())
+		{
+			return false;
+		}
+
+		ConvInfo other = (ConvInfo) obj;
+
+		if ((mConversationName == null) && (other.mConversationName != null))
+		{
+			return false;
+		}
+
+		else if (!mConversationName.equals(other.mConversationName))
+		{
+			return false;
+		}
+
+		if (this.msisdn == null && other.msisdn != null)
+		{
+			return false;
+		}
+
+		else if (!this.msisdn.equals(other.msisdn))
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 }
