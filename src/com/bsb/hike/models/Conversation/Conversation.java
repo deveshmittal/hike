@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation.ConvInfo.ConvInfoBuilder;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 
@@ -31,9 +32,10 @@ public abstract class Conversation implements Comparable<Conversation>
 	 */
 	private ChatTheme chatTheme = ChatTheme.DEFAULT;
 
-	public Conversation()
+	private Conversation(ConversationBuilder conversationBuilder)
 	{
-		// TODO Auto-generated constructor stub
+		ConvInfoBuilder convInfoBuilder = conversationBuilder.convInfoBuilder;
+		this.convInfo = convInfoBuilder.build();
 	}
 
 	/**
@@ -259,5 +261,37 @@ public abstract class Conversation implements Comparable<Conversation>
 
 			return rhs.compareTo(lhs);
 		}
+	}
+
+	public abstract static class ConversationBuilder<T extends ConversationBuilder>
+	{
+		private ConvInfoBuilder convInfoBuilder;
+
+		public T setMsisdn(String msisdn)
+		{
+			convInfoBuilder = new ConvInfoBuilder(msisdn);
+			return (T) this;
+		}
+
+		public T setConvName(String convName)
+		{
+			convInfoBuilder.setConvName(convName);
+			return (T) this;
+		}
+
+		public T setIsStealth(boolean isStealth)
+		{
+			convInfoBuilder.setIsStealth(isStealth);
+			return (T) this;
+		}
+
+		public T setSortingTimeStamp(long timeStamp)
+		{
+			convInfoBuilder.setSortingTimeStamp(timeStamp);
+			return (T) this;
+		}
+
+		public abstract T build();
+
 	}
 }
