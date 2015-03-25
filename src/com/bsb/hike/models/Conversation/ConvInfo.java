@@ -142,4 +142,10 @@ public class ConvInfo
 		this.lastConversationMsg = lastConversationMsg;
 	}
 
+	@Override
+	public String toString()
+	{
+		return "Conversation { msisdn = " + msisdn + ", conversation name = " + mConversationName + " }";
+	}
+
 }
