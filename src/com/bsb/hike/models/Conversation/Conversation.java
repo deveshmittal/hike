@@ -21,18 +21,18 @@ import com.bsb.hike.utils.Logger;
  */
 public abstract class Conversation implements Comparable<Conversation>
 {
-	private ConvInfo convInfo;
+	protected ConvInfo convInfo;
 
-	private ArrayList<ConvMessage> messagesList;
+	protected ArrayList<ConvMessage> messagesList;
 
-	private ConversationMetadata metadata;
+	protected ConversationMetadata metadata;
 
 	/**
 	 * Default value of chat theme
 	 */
-	private ChatTheme chatTheme = ChatTheme.DEFAULT;
+	protected ChatTheme chatTheme = ChatTheme.DEFAULT;
 
-	private Conversation(ConversationBuilder conversationBuilder)
+	protected Conversation(ConversationBuilder conversationBuilder)
 	{
 		ConvInfoBuilder convInfoBuilder = conversationBuilder.convInfoBuilder;
 		this.convInfo = convInfoBuilder.build();
