@@ -84,7 +84,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private Map<String, Integer> convSpanStartIndexes;
 
-	private String refinedSearchText;
+	private String refinedSearchText = "";
 
 	private Context context;
 
@@ -268,7 +268,7 @@ public class ConversationsAdapter extends BaseAdapter
 	{
 		isSearchModeOn = false;
 		convSpanStartIndexes.clear();
-		refinedSearchText = null;
+		refinedSearchText = "";
 		/*
 		 * Purposely returning conversation list on the UI thread on collapse to avoid showing ftue empty state. 
 		 */
@@ -289,7 +289,7 @@ public class ConversationsAdapter extends BaseAdapter
 			{
 				ConvInfo convInfo = new ConvInfo.ConvInfoBuilder(contact.getMsisdn()).setConvName(contact.getName()).build();
 				
-				if(stealthConversations.contains(convInfo) || conversationsMsisdns.contains(contact.getMsisdn()) || !contact.isOnhike())
+				if(stealthConversations.contains(convInfo) || conversationsMsisdns.contains(contact.getMsisdn()) || !convInfo.isOnHike())
 				{
 					continue;
 				}
@@ -328,6 +328,10 @@ public class ConversationsAdapter extends BaseAdapter
 
 	public void onQueryChanged(String s)
 	{
+		if (s == null)
+		{
+			s = "";
+		}
 		refinedSearchText = s.toLowerCase();
 		contactFilter.filter(refinedSearchText);
 	}
@@ -396,6 +400,13 @@ public class ConversationsAdapter extends BaseAdapter
 		{
 			boolean found = false;
 			String msisdn = convInfo.getMsisdn();
+			String name = convInfo.getConversationName();
+			// For Groups/Broadcasts, the contact name can be empty, so the search is to be performed on the diaplayed name.
+			if (Utils.isGroupConversation(msisdn))
+			{
+				// getLabel() fetches the appropriate display name.
+				name = convInfo.getLabel();
+			}
 			if (textToBeFiltered.equals("broadcast") && Utils.isBroadcastConversation(msisdn))
 			{
 				found = true;
@@ -404,9 +415,20 @@ public class ConversationsAdapter extends BaseAdapter
 			{
 				found = true;
 			}
+			// The name field can be empty for unsaved 1 to 1 conversation
+			// In this case search is to be performed on the contact number.
+			else if (TextUtils.isEmpty(name))
+			{
+				if (msisdn.contains(textToBeFiltered))
+				{
+					found = true;
+					int startIndex = msisdn.indexOf(textToBeFiltered);
+					convSpanStartIndexes.put(msisdn, startIndex);
+				}
+			}
 			else
 			{
-				String name = convInfo.getLabel().toLowerCase();
+				name = name.toLowerCase();
 				int startIndex = 0;
 				if (name.startsWith(textToBeFiltered))
 				{
@@ -1005,7 +1027,7 @@ public class ConversationsAdapter extends BaseAdapter
 			{
 				conversationsMsisdns.remove(conv.getMsisdn());
 			}
-			if (phoneBookContacts != null)
+			if (phoneBookContacts != null && conv.isOnHike())
 			{
 				phoneBookContacts.add(getPhoneContactFakeConv(conv));
 			}
