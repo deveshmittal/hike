@@ -180,6 +180,8 @@ public class AnalyticsConstants
 		public static final String LOCATION = "location";
 
 		public static final String CONTACT = "contact";
+		
+		public static final String MULTIMEDIA = "multimedia";
 	}
 
 	public static final class ConversationType
@@ -207,4 +209,56 @@ public class AnalyticsConstants
 	public static final String LAST_SEEN_ANALYTICS_TAG = "last_seen_analytics";
 
 	public static final String LAST_SEEN_ANALYTICS = "last_seen_analytics";
+	
+	//Added For Message Reliability
+	public static final int MAX_RANGE_TEXT_MSG = 100;
+	
+	public static final int MAX_RANGE_STK_MSG = 1000;
+	
+	public static final int MAX_RANGE_MULTIMEDIA_MSG = 1000;
+	
+	public static final String MSG_ID = "mid";
+	
+	public static final String TRACK_ID = "uid";
+	
+	public static final String MSG_REL = "m_rel";
+	
+	public static final String MSG_REL_TAG = "m_rel";
+	
+	public static final class MsgRelEventType
+	{
+		public static final String SEND_BUTTON_CLICKED = "1";
+
+		public static final String SENDER_FIRE_MSG_SENT_PUBSUB = "1.1";
+
+		public static final String DB_TRANSACTION_COMPLETED = "1.2";
+
+		public static final String RECV_NOTIF_SOCKET_WRITING = "1.3";
+
+		public static final String GOING_TO_SHOW_SINGLE_TICK = "1.4";
+
+		public static final String SINGLE_TICK_ON_SENDER = "2";
+
+		public static final String SENDER_RECV_ACK = "3";
+
+		public static final String DR_SHOWN_AT_SENEDER_SCREEN = "4";
+
+		public static final String MR_SHOWN_AT_SENEDER_SCREEN = "5";
+
+		public static final String SENDER_MQTT_RECV_SENDING_MSG = "6";
+
+		public static final String RECEIVER_MQTT_RECVS_SENT_MSG = "9";
+
+		public static final String RECEIVER_MQTT_RECV_MSG_ACK = "10";
+
+		public static final String DR_RECEIVED_AT_SENEDER_MQTT = "13";
+
+		public static final String RECEIVER_MQTT_RECV_MR_FROM_RECEIVER = "14";
+
+		public static final String MR_RECEIVED_AT_SENEDER_MQTT = "17";
+
+		public static final String RECIEVR_RECV_MSG = "18";
+
+		public static final String RECEIVER_OPENS_CONV_SCREEN = "19";
+	}
 }

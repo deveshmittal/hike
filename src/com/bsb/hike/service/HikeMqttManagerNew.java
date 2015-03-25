@@ -6,6 +6,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,8 +52,10 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.AnalyticsConstants.MsgRelEventType;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
+import com.bsb.hike.analytics.MsgRelLogManager;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.HikePacket;
@@ -1125,6 +1128,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			 * String.format("Inflight msgs : %d , MaxInflight count : %d .... Waiting for sometime", mqtt.getInflightMessages(), mqtt.getMaxflightMessages())); Thread.sleep(30); }
 			 * catch (InterruptedException e) { // TODO Auto-generated catch block e.printStackTrace(); } }
 			 */
+			
+			// Adding Logs for Message Reliability
+			Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+			Logger.d(AnalyticsConstants.MSG_REL_TAG, "Packet Arrives at MQTT , track_id:- " + packet.getTrackId());
+			if (HikeConstants.MqttMessageTypes.NEW_MESSAGE_READ.equals(packet.getMsgType()))
+			{
+				MsgRelLogManager.getInstance().logPacketForMsgReliability(packet, MsgRelEventType.RECEIVER_MQTT_RECV_MR_FROM_RECEIVER);
+			}
+			else
+			{
+				MsgRelLogManager.getInstance().logPacketForMsgReliability(packet, MsgRelEventType.SENDER_MQTT_RECV_SENDING_MSG);
+			}
+			
 			mqtt.publish(this.topic + HikeConstants.PUBLISH_TOPIC, packet.getMessage(), qos, false, packet, new IMqttActionListenerNew()
 			{
 				@Override
@@ -1141,6 +1157,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 							{
 								Long msgId = packet.getMsgId();
 								Logger.d(TAG, "Recieved S status for msg with id : " + msgId);
+								
+								// Adding Logs for Message Reliability
+								MsgRelLogManager.getInstance().logPacketForMsgReliability(packet, MsgRelEventType.SENDER_RECV_ACK);
+
 								// HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
 							}
 						}
@@ -1208,6 +1228,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						else
 						{
 							HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+							
+							// Adding Logs for Message Reliability.
+							 // Adding Logs for Message Reliability.
+							Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+							Logger.d(AnalyticsConstants.MSG_REL_TAG, "Written complete so showing SINGLE TICK,track_id:- " + packet.getTrackId());
+							MsgRelLogManager.getInstance().logPacketForMsgReliability(packet, MsgRelEventType.RECV_NOTIF_SOCKET_WRITING);
 						}
 					}
 				}
@@ -1698,15 +1724,17 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		String data = o.toString();
 
 		long msgId = -1;
+		String trackID = null;
+
 		/*
 		 * if this is a message, then grab the messageId out of the json object so we can get confirmation of success/failure
 		 */
+		// get Values of (uid, msgId, type, track) from metadata of convMsg
 		if (HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) || (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE))))
 		{
 			JSONObject json = o.optJSONObject(HikeConstants.DATA);
 			msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
 		}
-
 		int type;
 		if (HikeConstants.MqttMessageTypes.MULTIPLE_FORWARD.equals(o.optString(HikeConstants.SUB_TYPE)))
 		{
@@ -1728,6 +1756,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 
 		HikePacket packet = new HikePacket(data.getBytes(), msgId, System.currentTimeMillis(), type);
+		setTrackIDInPacketForMsgRel(o, packet);
 		addToPersistence(packet, qos);
 
 		Message msg = Message.obtain();
@@ -1773,6 +1802,60 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			catch (Exception e)
 			{
 				Logger.e(TAG, "Unable to persist message", e);
+			}
+		}
+	}
+	
+	/**
+	 * Checks for "pd" inside JSONObject... (pd present means message should be tracked) if present, then inserts into packet 2 things
+	 * 
+	 * A)track_id -> get from pd
+	 * 
+	 * B)msg type -> type = 'm' OR type = 'nmr'
+	 * 
+	 * NOTE: (B is used only for Logging.This is not sent to server)
+	 * 
+	 * @param o
+	 * @param packet
+	 */
+	private void setTrackIDInPacketForMsgRel(JSONObject o, HikePacket packet)
+	{
+		String trackID = "";
+		JSONObject pd = o.optJSONObject(HikeConstants.PRIVATE_DATA);
+		if (pd != null)
+		{
+			trackID = pd.optString(HikeConstants.MSG_REL_UID);
+			if (trackID != null)
+			{
+				packet.setTrackId(trackID);
+				packet.setMsgType(o.optString(HikeConstants.TYPE));
+			}
+		}
+		else if (HikeConstants.MqttMessageTypes.NEW_MESSAGE_READ.equals(o.optString(HikeConstants.TYPE)))
+		{
+			try
+			{
+				JSONObject msgMetadata = o.optJSONObject(HikeConstants.DATA);
+				if (msgMetadata != null)
+				{
+					Iterator<?> keys = msgMetadata.keys();
+					while (keys.hasNext())
+					{
+						String key = (String) keys.next();
+						JSONObject pdObject = msgMetadata.getJSONObject(key);
+						trackID = pdObject.optString(HikeConstants.MSG_REL_UID);
+						if (trackID != null)
+						{
+							packet.setTrackId(trackID);
+							packet.setMsgType(HikeConstants.MqttMessageTypes.NEW_MESSAGE_READ);
+							break;
+						}
+					}
+				}
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
 			}
 		}
 	}

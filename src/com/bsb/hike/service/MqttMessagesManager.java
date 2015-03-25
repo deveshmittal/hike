@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,13 +39,16 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.MqttMessageTypes;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.AnalyticsConstants.MsgRelEventType;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeContentDatabase;
+import com.bsb.hike.analytics.MsgRelLogManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
@@ -60,6 +64,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.MessagePrivateData;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
@@ -555,6 +560,11 @@ public class MqttMessagesManager
 	private void saveMessage(JSONObject jsonObj) throws JSONException
 	{
 		final ConvMessage convMessage = messagePreProcess(jsonObj);
+		
+		//Logs for Msg Reliability
+		Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Packet Arrived at RECV MQTT,track_id:- " + convMessage.getPrivateData().getTrackID());
+		MsgRelLogManager.getInstance().logMessageRealiablityEvent(convMessage, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
 
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
 		{
@@ -577,6 +587,11 @@ public class MqttMessagesManager
 			return;
 		}
 
+		//Logs for Msg Reliability
+		Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver recvs Msg,track_id:- " + convMessage.getPrivateData().getTrackID());
+		MsgRelLogManager.getInstance().logMessageRealiablityEvent(convMessage, MsgRelEventType.RECIEVR_RECV_MSG);
+		
 		/*
 		 * Return if there is no conversation for this msisdn.
 		 */
@@ -653,7 +668,9 @@ public class MqttMessagesManager
 	{
 		ConvMessage convMessage = messagePreProcess(jsonObj);
 		addToLists(convMessage.getMsisdn(), convMessage);
-
+		
+		MsgRelLogManager.getInstance().logMessageRealiablityEvent(jsonObj, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
+		
 		if (convMessage.isGroupChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
 			ConvMessage convMessageNew = convDb.showParticipantStatusMessage(convMessage.getMsisdn());
@@ -702,6 +719,17 @@ public class MqttMessagesManager
 			 */
 			convMessage.setMetadata(metadataJson);
 		}
+		
+		//Check if "pd" is there in response ===> if msg was a trackable msg
+		// If found ===> update "pd" field of convMessage
+		JSONObject pd = jsonObj.getJSONObject(HikeConstants.PRIVATE_DATA);
+		if(pd != null)
+		{
+			String uid = pd.getString(HikeConstants.MSG_REL_UID);
+			MessagePrivateData messagePrivateData = new MessagePrivateData(uid, "-1"); 
+			convMessage.setPrivateData(messagePrivateData);
+		}
+		
 		/*
 		 * Applying the offset.
 		 */
@@ -832,6 +860,10 @@ public class MqttMessagesManager
 				{
 					long msgId = values.get(0); //max size this list will be of 1 only
 					saveDeliveryReport(msgId, chatMsisdn);
+					
+					Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+					Logger.d(AnalyticsConstants.MSG_REL_TAG, "Handling ndr for json: "+ jsonObj);
+					MsgRelLogManager.getInstance().logMsgRelDR(jsonObj, MsgRelEventType.DR_SHOWN_AT_SENEDER_SCREEN);
 				}
 			}
 		}
@@ -850,7 +882,6 @@ public class MqttMessagesManager
 		Pair<String, Long> pair = new Pair<String, Long>(msisdn, msgID);
 
 		this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, pair);
-
 	}
 
 	/**
@@ -895,6 +926,9 @@ public class MqttMessagesManager
 		{
 			messageStatusMap.get(msisdn).setSecond(msgID);
 		}
+		
+
+		MsgRelLogManager.getInstance().logMsgRelDR(jsonObj, MsgRelEventType.DR_SHOWN_AT_SENEDER_SCREEN);
 	}
 
 	private void saveMessageRead(JSONObject jsonObj) throws JSONException
@@ -983,6 +1017,32 @@ public class MqttMessagesManager
 		}
 	}
 
+	private void saveNewMessageRead(JSONObject jsonObj)
+	{
+		try
+		{
+			Logger.d(AnalyticsConstants.MSG_REL_TAG, "inside API saveNewMessageRead ===========================================");
+			Logger.d(AnalyticsConstants.MSG_REL_TAG, "For nmr,jsonObject: " + jsonObj);
+			String id = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
+			JSONObject msgMetadata = jsonObj.optJSONObject(HikeConstants.DATA);
+			if (msgMetadata != null)
+			{
+				Iterator<?> keys = msgMetadata.keys();
+				ArrayList<Long> serverIdsArrayList = new ArrayList<Long>(msgMetadata.length());
+				while (keys.hasNext())
+				{
+					Long key = Long.parseLong((String) keys.next());
+					serverIdsArrayList.add(key);
+				}
+				saveMessageRead(id, serverIdsArrayList, null);
+			}
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * <li>This function does specific "mr" processing for bulk.</li>
 	 * <p>
@@ -1729,7 +1789,21 @@ public class MqttMessagesManager
 		{
 			handleWhitelistDomains(data.getString(HikeConstants.URL_WHITELIST));
 		}
-		
+		if(data.has(HikeConstants.PROB_NUM_TEXT_MSG))
+		{
+			int textMsgMaxNumber = data.getInt(HikeConstants.PROB_NUM_TEXT_MSG);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.PROB_NUM_TEXT_MSG, textMsgMaxNumber);
+		}
+		if(data.has(HikeConstants.PROB_NUM_STICKER_MSG))
+		{
+			int stkMsgMaxNumber = data.getInt(HikeConstants.PROB_NUM_STICKER_MSG);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.PROB_NUM_STICKER_MSG, stkMsgMaxNumber);
+		}
+		if(data.has(HikeConstants.PROB_NUM_MULTIMEDIA_MSG))
+		{
+			int multimediaMsgMaxNumber = data.getInt(HikeConstants.PROB_NUM_MULTIMEDIA_MSG);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.PROB_NUM_MULTIMEDIA_MSG, multimediaMsgMaxNumber);
+		}
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
 		
@@ -2463,6 +2537,13 @@ public class MqttMessagesManager
 				lastPinMap.get(msisdn).setFirst(convMessage); // update last pin message for a msisdn
 				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() + 1); // increment pin unread count for a msisdn
 			}
+			
+			// Adding Logs for Message Reliability
+			MessagePrivateData pd = convMessage.getPrivateData();
+			if (pd != null && pd.getTrackID() != null)
+			{
+				MsgRelLogManager.getInstance().recordMsgRel(pd.getTrackID(), Long.parseLong(msisdn), MsgRelEventType.RECIEVR_RECV_MSG, "-1");
+			}
 		}
 
 		/*
@@ -2608,6 +2689,8 @@ public class MqttMessagesManager
 			}
 			else
 			{
+				MsgRelLogManager.getInstance().logMsgRelDR(jsonObj, MsgRelEventType.DR_RECEIVED_AT_SENEDER_MQTT);
+				
 				saveDeliveryReport(jsonObj);
 			}
 		}
@@ -2622,6 +2705,8 @@ public class MqttMessagesManager
 			}
 			else
 			{
+				MsgRelLogManager.getInstance().logMessageRealiablityEvent(jsonObj, MsgRelEventType.MR_RECEIVED_AT_SENEDER_MQTT);
+				
 				saveMessageRead(jsonObj);
 			}
 		}
@@ -2757,7 +2842,11 @@ public class MqttMessagesManager
 				}
 			}
 		}
-
+		else if (HikeConstants.MqttMessageTypes.NEW_MESSAGE_READ.equals(type))//Message came with
+		//'pd' means message is to be tracked for reliability
+		{
+			saveNewMessageRead(jsonObj);
+		}
 	}
 
 	private void deleteBot(String msisdn)

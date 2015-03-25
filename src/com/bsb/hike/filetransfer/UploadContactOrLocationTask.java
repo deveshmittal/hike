@@ -35,6 +35,11 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.analytics.AnalyticsConstants.MsgRelEventType;
+import com.bsb.hike.analytics.AnalyticsUtils;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.AnalyticsConstants.MessageType;
+import com.bsb.hike.analytics.MsgRelLogManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.CustomByteArrayEntity;
 import com.bsb.hike.models.ConvMessage;
@@ -192,6 +197,10 @@ public class UploadContactOrLocationTask extends FileTransferBase
 			}
 
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessageObject);
+			// 1) user clicked send button in chat thread i.e Sending Text Message
+			MsgRelLogManager.getInstance().startMessageRelLogging((ConvMessage) userContext, MessageType.MULTIMEDIA);
+			
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
 		}
 		catch (Exception e)
 		{
