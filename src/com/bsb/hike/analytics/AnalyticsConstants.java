@@ -217,13 +217,13 @@ public class AnalyticsConstants
 	
 	public static final int MAX_RANGE_MULTIMEDIA_MSG = 1000;
 	
-	public static final String MSG_ID = "mid";
+	public static final String MSG_ID = "msg_id";
 	
-	public static final String TRACK_ID = "uid";
+	public static final String TRACK_ID = "track_id";
 	
-	public static final String MSG_REL = "m_rel";
+	public static final String MSG_REL = "rel_m";
 	
-	public static final String MSG_REL_TAG = "m_rel";
+	public static final String MSG_REL_TAG = "rel_m";
 	
 	public static final class MsgRelEventType
 	{
@@ -245,7 +245,7 @@ public class AnalyticsConstants
 
 		public static final String MR_SHOWN_AT_SENEDER_SCREEN = "5";
 
-		public static final String SENDER_MQTT_RECV_SENDING_MSG = "6";
+		public static final String SENDER_MQTT_RECV_SENDING_MSG = "5.9";
 
 		public static final String RECEIVER_MQTT_RECVS_SENT_MSG = "9";
 
@@ -255,7 +255,7 @@ public class AnalyticsConstants
 
 		public static final String RECEIVER_MQTT_RECV_MR_FROM_RECEIVER = "14";
 
-		public static final String MR_RECEIVED_AT_SENEDER_MQTT = "17";
+		public static final String MR_RECEIVED_AT_SENEDER_MQTT = "17.1";
 
 		public static final String RECIEVR_RECV_MSG = "18";
 
