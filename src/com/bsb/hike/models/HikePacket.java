@@ -100,6 +100,7 @@ public class HikePacket implements Parcelable
 		dest.writeLong(packetId);
 		dest.writeInt(packetType);
 		dest.writeString(trackId);
+		dest.writeString(msgType);
 	}
 
 	public static final Creator<HikePacket> CREATOR = new Creator<HikePacket>()
@@ -120,7 +121,8 @@ public class HikePacket implements Parcelable
 			long packetId = source.readLong();
 			int packetType = source.readInt();
 			String trackId = source.readString();
-			HikePacket hikePacket = new HikePacket(message, msgId, timeStamp, packetId, packetType, trackId);
+			String msgType = source.readString();
+			HikePacket hikePacket = new HikePacket(message, msgId, timeStamp, packetId, packetType, trackId, msgType);
 			return hikePacket;
 		}
 	};

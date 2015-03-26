@@ -1023,18 +1023,18 @@ public class MqttMessagesManager
 		{
 			Logger.d(AnalyticsConstants.MSG_REL_TAG, "inside API saveNewMessageRead ===========================================");
 			Logger.d(AnalyticsConstants.MSG_REL_TAG, "For nmr,jsonObject: " + jsonObj);
-			String id = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
 			JSONObject msgMetadata = jsonObj.optJSONObject(HikeConstants.DATA);
 			if (msgMetadata != null)
 			{
 				Iterator<?> keys = msgMetadata.keys();
-				ArrayList<Long> serverIdsArrayList = new ArrayList<Long>(msgMetadata.length());
+				JSONArray serverIds = new JSONArray();
 				while (keys.hasNext())
 				{
 					Long key = Long.parseLong((String) keys.next());
-					serverIdsArrayList.add(key);
+					serverIds.put(key);
 				}
-				saveMessageRead(id, serverIdsArrayList, null);
+				jsonObj.put(HikeConstants.DATA, serverIds);
+				saveMessageRead(jsonObj);
 			}
 		}
 		catch (JSONException e)

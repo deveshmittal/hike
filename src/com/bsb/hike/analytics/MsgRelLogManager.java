@@ -22,7 +22,7 @@ public class MsgRelLogManager
 		if (AnalyticsUtils.isMessageToBeTracked(msgType))
 		{
 			Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
-			Logger.d(AnalyticsConstants.MSG_REL_TAG, "Starting text message sending");
+			Logger.d(AnalyticsConstants.MSG_REL_TAG, "Starting message sending");
 			if (convMessage.getPrivateData() == null)
 			{
 				convMessage.setPrivateData(new MessagePrivateData(UUID.randomUUID().toString(), msgType));

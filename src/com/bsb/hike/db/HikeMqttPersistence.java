@@ -35,6 +35,8 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 
 	public static final String MQTT_MSG_TRACK_ID = "mqttMsgTrackId";
 	
+	public static final String MQTT_MSG_MSG_TYPE = "mqttMsgMsgType";
+	
 	public static final String MQTT_TIME_STAMP_INDEX = "mqttTimeStampIndex";
 
 	private SQLiteDatabase mDb;
@@ -73,6 +75,7 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 			ih.bind(ih.getColumnIndex(MQTT_TIME_STAMP), packet.getTimeStamp());
 			ih.bind(ih.getColumnIndex(MQTT_PACKET_TYPE), packet.getPacketType());
 			ih.bind(ih.getColumnIndex(MQTT_MSG_TRACK_ID), packet.getTrackId());
+			ih.bind(ih.getColumnIndex(MQTT_MSG_MSG_TYPE), packet.getMsgType());
 			long rowid = ih.execute();
 			if (rowid < 0)
 			{
@@ -107,11 +110,12 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 			int packetIdIdx = c.getColumnIndex(MQTT_PACKET_ID);
 			int packetTypeIdx = c.getColumnIndex(MQTT_PACKET_TYPE);
 			int msgTrackIDIdx = c.getColumnIndex(MQTT_MSG_TRACK_ID);
+			int msgTypeIdx = c.getColumnIndex(MQTT_MSG_MSG_TYPE);
 			
 			while (c.moveToNext())
 			{
 				HikePacket hikePacket = new HikePacket(c.getBlob(dataIdx), c.getLong(idIdx),
-						c.getLong(tsIdx), c.getLong(packetIdIdx), c.getInt(packetTypeIdx), c.getString(msgTrackIDIdx));
+						c.getLong(tsIdx), c.getLong(packetIdIdx), c.getInt(packetTypeIdx), c.getString(msgTrackIDIdx), c.getString(msgTypeIdx));
 				vals.add(hikePacket);
 			}
 
