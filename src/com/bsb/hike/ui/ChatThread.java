@@ -4823,12 +4823,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			if(updateView)
 			{
-				if(msg.getPrivateData().getTrackID() != null)
-				{
-					MsgRelLogManager.recordMsgRel(msg.getPrivateData().getTrackID(), 
-							msgId, MsgRelEventType.SINGLE_TICK_ON_SENDER, 
-							msg.getPrivateData().getMsgType());
-				}
+				MsgRelLogManager.logMessageReliablityEvent(msg, MsgRelEventType.SINGLE_TICK_ON_SENDER);
+				
 				runOnUiThread(mUpdateAdapter);
 			}
 		}
