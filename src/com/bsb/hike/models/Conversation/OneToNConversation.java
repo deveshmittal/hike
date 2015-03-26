@@ -4,20 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.text.TextUtils;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
@@ -300,4 +296,122 @@ public abstract class OneToNConversation extends Conversation
 		return (OneToNConversationMetadata) this.metadata;
 	}
 
+	
+	/**
+	 * Builder base class extending {@link Conversation.InitBuilder}
+	 * 
+	 * @author piyush
+	 * 
+	 * @param <P>
+	 */
+	protected static abstract class InitBuilder<P extends InitBuilder<P>> extends Conversation.InitBuilder<P>
+	{
+		private String conversationOwner;
+		
+		private Map<String, PairModified<GroupParticipant, String>> conversationParticipantList;
+		
+		private ArrayList<String> readByParticipantList;
+		
+		private ConvMessage pinnedConvmessage;
+		
+		private boolean isConversationAlive;
+		
+		private long lastSentMsgId = -1;
+		
+		private int unreadPinnedMessageCount;
+		
+		public InitBuilder(String msisdn)
+		{
+			super(msisdn);
+		}
+		
+		public P setConversationOwner(String conversationOwner)
+		{
+			this.conversationOwner = conversationOwner;
+			return getSelfObject();
+		}
+		
+		public P setConversationOwner(Map<String, PairModified<GroupParticipant, String>> participantList)
+		{
+			this.conversationParticipantList = participantList;
+			return getSelfObject();
+		}
+		
+		public P setConversationOwner(List<PairModified<GroupParticipant, String>> participantList)
+		{
+			this.conversationParticipantList = new HashMap<String, PairModified<GroupParticipant, String>>();
+	        for (PairModified<GroupParticipant, String> grpParticipant : participantList)
+	        {
+	            String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
+	            this.conversationParticipantList.put(msisdn, grpParticipant);
+	        }
+			return getSelfObject();
+		}
+		
+		public P setupReadByList(String readBy, long msgId)
+		{
+			if (msgId < 1)
+			{
+				return getSelfObject();
+			}
+
+			if (readByParticipantList == null)
+			{
+				readByParticipantList = new ArrayList<String>();
+			}
+			readByParticipantList.clear();
+			lastSentMsgId = msgId;
+
+			if (readBy == null)
+			{
+				return getSelfObject();
+			}
+			try
+			{
+				JSONArray readByArray;
+				readByArray = new JSONArray(readBy);
+				for (int i = 0; i < readByArray.length(); i++)
+				{
+					readByParticipantList.add(readByArray.optString(i));
+				}
+			}
+			catch (JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			return getSelfObject();
+		}
+		
+		public P setPinnedConvmessage(ConvMessage pinnedConvMessage)
+		{
+			this.pinnedConvmessage = pinnedConvMessage;
+			return getSelfObject();
+		}
+		
+		public P setIsAlive(boolean isAlive)
+		{
+			this.isConversationAlive = isAlive;
+			return getSelfObject();
+		}
+		
+		public P setUnreadPinnedMsgCount(int count)
+		{
+			this.unreadPinnedMessageCount = count;
+			return getSelfObject();
+		}
+		
+		@Override
+		public P setConversationMetadata(ConversationMetadata metadata)
+		{
+			if (!(metadata instanceof OneToNConversationMetadata))
+			{
+				throw new IllegalStateException("Pass metadata as OneToNConversationMetadata object for such type of conversations!");
+			}
+
+			this.metadata = (OneToNConversationMetadata) metadata;
+			return getSelfObject();
+		}
+	}
 }
