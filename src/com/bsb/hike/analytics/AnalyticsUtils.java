@@ -15,9 +15,7 @@ public class AnalyticsUtils
 	
 	public static boolean isMessageToBeTracked(String msgType)
 	{
-		//TODO THIS IS COMMENTED JUST FOR TESTING PURPOSE
-		//TODO UNCOMMENT IT BEFORE MERGING
-		/*if(!TextUtils.isEmpty(msgType))
+		if(!TextUtils.isEmpty(msgType))
 		{
 			if(AnalyticsConstants.MessageType.TEXT.equals(msgType))
 			{
@@ -54,7 +52,6 @@ public class AnalyticsUtils
 			}
 		}
 		
-		return false;*/
-		return true;
+		return false;
 	}
 }
