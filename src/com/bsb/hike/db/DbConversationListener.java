@@ -112,7 +112,7 @@ public class DbConversationListener implements Listener
 				// Adding Logs for Message Reliability
 				Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 				Logger.d(AnalyticsConstants.MSG_REL_TAG, "DB Transaction completed");
-				MsgRelLogManager.logMessageReliablityEvent(convMessage, MsgRelEventType.DB_TRANSACTION_COMPLETED);
+				MsgRelLogManager.logMessageReliablityEvent(convMessage, MsgRelEventType.DB_UPDATE_TRANSACTION_COMPLETED);
 			}
 			else
 			{
@@ -124,7 +124,7 @@ public class DbConversationListener implements Listener
 					// Adding Logs for Message Reliability
 					Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 					Logger.d(AnalyticsConstants.MSG_REL_TAG, "DB Transaction completed");
-					MsgRelLogManager.logMessageReliablityEvent(convMessage, MsgRelEventType.DB_TRANSACTION_COMPLETED);
+					MsgRelLogManager.logMessageReliablityEvent(convMessage, MsgRelEventType.DB_ADD_TRANSACTION_COMPLETED);
 					
 					if (convMessage.isSent())
 					{

@@ -3628,7 +3628,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 								dataMR.putOpt(String.valueOf(pair.first), pd);
 								// Logs for Msg Reliability
 								Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
-								Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver reads msg on screen,track_id:- " + trackId);
+								Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver reads msg on after opening screen,track_id:- " + trackId);
 								MsgRelLogManager.recordMsgRel(trackId, pair.first, MsgRelEventType.RECEIVER_OPENS_CONV_SCREEN);
 							}
 							else
@@ -3660,7 +3660,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					object.put(HikeConstants.DATA, ids);
 					
 					//Logs for Msg Reliability
-					Logger.d(AnalyticsConstants.MSG_REL_TAG, "NMR Packet gen API setMessageRead:- " + object);
+					Logger.d(AnalyticsConstants.MSG_REL_TAG, "MR Packet gen API setMessageRead:- " + object);
 					HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
 				}
 				
@@ -3794,18 +3794,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						//Logs for Msg Reliability
 						Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
-						Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver reads msg on screen,track_id:- " + message.getPrivateData().getTrackID());
+						Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver reads msg on already opened screen,track_id:- " + message.getPrivateData().getTrackID());
 						MsgRelLogManager.logMessageReliablityEvent(message, MsgRelEventType.RECEIVER_OPENS_CONV_SCREEN);
 					}
 
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal(), mConversation.getMsisdn());
 					if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 					{
-						String msgType = HikeConstants.MqttMessageTypes.MESSAGE_READ;
-						if(message.getPrivateData() != null)
-						{
-							msgType = HikeConstants.MqttMessageTypes.NEW_MESSAGE_READ;
-						}
 						HikeMqttManagerNew.getInstance().sendMessage(message.serializeDeliveryReportRead(), HikeMqttManagerNew.MQTT_QOS_ONE);
 					}
 					// return to

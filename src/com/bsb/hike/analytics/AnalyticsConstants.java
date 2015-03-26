@@ -244,9 +244,11 @@ public class AnalyticsConstants
 
 		public static final String SENDER_FIRE_MSG_SENT_PUBSUB = "1.1";
 
-		public static final String DB_TRANSACTION_COMPLETED = "1.2";
+		public static final String DB_ADD_TRANSACTION_COMPLETED = "1.2";
+		
+		public static final String DB_UPDATE_TRANSACTION_COMPLETED = "1.3";
 
-		public static final String RECV_NOTIF_SOCKET_WRITING = "1.3";
+		public static final String RECV_NOTIF_SOCKET_WRITING = "1.4";
 
 		public static final String SINGLE_TICK_ON_SENDER = "2";
 

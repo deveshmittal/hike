@@ -59,6 +59,12 @@ public class MessagePrivateData
 		
 		return pd;
 	}
+
+	@Override
+	public String toString()
+	{
+		return "MessagePrivateData [trackID=" + trackID + ", msgType=" + msgType + "]";
+	}
 	
 	
 }

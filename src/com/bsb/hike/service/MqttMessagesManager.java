@@ -563,7 +563,7 @@ public class MqttMessagesManager
 		
 		//Logs for Msg Reliability
 		Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
-		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Packet Arrived at RECV MQTT,track_id:- " + convMessage.getPrivateData().getTrackID());
+		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Packet Arrived at RECV MQTT,track_id:- " + convMessage);
 		MsgRelLogManager.logMessageReliablityEvent(convMessage, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
 
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
@@ -589,7 +589,7 @@ public class MqttMessagesManager
 
 		//Logs for Msg Reliability
 		Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
-		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver recvs Msg,track_id:- " + convMessage.getPrivateData().getTrackID());
+		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver recvs Msg,track_id:- " + convMessage);
 		MsgRelLogManager.logMessageReliablityEvent(convMessage, MsgRelEventType.RECIEVR_RECV_MSG);
 		
 		/*
@@ -722,9 +722,9 @@ public class MqttMessagesManager
 		
 		//Check if "pd" is there in response ===> if msg was a trackable msg
 		// If found ===> update "pd" field of convMessage
-		JSONObject pd = jsonObj.getJSONObject(HikeConstants.PRIVATE_DATA);
-		if(pd != null)
+		if(jsonObj.has(HikeConstants.PRIVATE_DATA))
 		{
+			JSONObject pd = jsonObj.getJSONObject(HikeConstants.PRIVATE_DATA);
 			String uid = pd.getString(HikeConstants.MSG_REL_UID);
 			MessagePrivateData messagePrivateData = new MessagePrivateData(uid); 
 			convMessage.setPrivateData(messagePrivateData);
@@ -1034,6 +1034,7 @@ public class MqttMessagesManager
 					serverIds.put(key);
 				}
 				jsonObj.put(HikeConstants.DATA, serverIds);
+				Logger.d(AnalyticsConstants.MSG_REL_TAG, "For nmr,jsonObject sent to call 'mr' API: " + jsonObj);
 				saveMessageRead(jsonObj);
 			}
 		}

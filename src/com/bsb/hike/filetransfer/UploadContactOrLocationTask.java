@@ -197,8 +197,6 @@ public class UploadContactOrLocationTask extends FileTransferBase
 			}
 
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessageObject);
-			// 1) user clicked send button in chat thread i.e Sending Text Message
-			MsgRelLogManager.startMessageRelLogging(convMessageObject, MessageType.MULTIMEDIA);
 			
 		}
 		catch (Exception e)
@@ -291,6 +289,9 @@ public class UploadContactOrLocationTask extends FileTransferBase
 			
 			if (TextUtils.isEmpty(fileKey))
 			{
+				// 1) user clicked send button in chat thread i.e Sending Text Message
+				MsgRelLogManager.startMessageRelLogging((ConvMessage) userContext, MessageType.MULTIMEDIA);
+				
 				// Called so that the UI in the Conversation lists screen is
 				// updated
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);

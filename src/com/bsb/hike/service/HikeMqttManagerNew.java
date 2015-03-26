@@ -1819,10 +1819,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	 */
 	private void setTrackIDInPacketForMsgRel(JSONObject o, HikePacket packet)
 	{
-		String trackID = "";
-		JSONObject pd = o.optJSONObject(HikeConstants.PRIVATE_DATA);
-		if (pd != null)
+		if (o.has(HikeConstants.PRIVATE_DATA))
 		{
+			String trackID = "";
+			JSONObject pd = o.optJSONObject(HikeConstants.PRIVATE_DATA);
 			trackID = pd.optString(HikeConstants.MSG_REL_UID);
 			if (trackID != null)
 			{
@@ -1834,6 +1834,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			try
 			{
+				String trackID = "";
 				JSONObject msgMetadata = o.optJSONObject(HikeConstants.DATA);
 				if (msgMetadata != null)
 				{
