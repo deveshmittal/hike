@@ -39,7 +39,7 @@ public class AnalyticsUtils
 					return true;
 				}
 			}
-			else
+			else if(AnalyticsConstants.MessageType.MULTIMEDIA.equals(msgType))
 			{
 				int randomInt = randomGenerator.nextInt(AnalyticsConstants.MAX_RANGE_MULTIMEDIA_MSG);
 				int probSample = HikeSharedPreferenceUtil.getInstance().

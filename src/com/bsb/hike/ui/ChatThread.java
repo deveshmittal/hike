@@ -3951,7 +3951,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
 					removeFromMessageMap(msg);
 					
-					//Log Events For Message Relaiability
+					//Log Events For Message Reliability
 					MessagePrivateData pd = msg.getPrivateData();
 					if(pd != null && pd.getTrackID() != null)
 					{

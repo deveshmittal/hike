@@ -121,7 +121,7 @@ public class MsgRelLogManager
 	
 	public static void recordMsgRel(String trackID, long msgId, String eventType)
 	{
-		recordMsgRel(trackID, msgId, eventType);
+		recordMsgRel(trackID, msgId, eventType, "-1");
 	}
 	
 	public static void recordMsgRel(String trackID, long msgId, String eventType, String msgType)
