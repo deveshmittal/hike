@@ -30,6 +30,12 @@ public class MessagePrivateData
 	{
 		this.trackID = trackID;
 	}
+
+	public MessagePrivateData(String traclID)
+	{
+		this.trackID = traclID;
+		this.msgType = "-1";
+	}
 	
 	public MessagePrivateData(String traclID, String msgType)
 	{

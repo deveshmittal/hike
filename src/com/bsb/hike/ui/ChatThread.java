@@ -2011,9 +2011,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, message, isConversationOnHike());
 		
 		// 1) user clicked send button in chat thread i.e Sending Text Message
-		Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
-		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Starting text message sending");
-		MsgRelLogManager.getInstance().startMessageRelLogging(convMessage, MessageType.TEXT);
+		MsgRelLogManager.startMessageRelLogging(convMessage, MessageType.TEXT);
 		
 		if (showingImpMessagePinCreate)
 		{
@@ -3602,7 +3600,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					setSMSReadInNative();
 				}
-				JSONArray ids = new JSONArray();
 				
 				List<Pair<Long, JSONObject>> pairList = mConversationDb.updateStatusAndSendDeliveryReport(mConversation.getMsisdn());
 				
@@ -3613,26 +3610,31 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				
 				JSONObject dataMR = new JSONObject();
 
+				JSONArray ids = new JSONArray();
+				
 				for (int i = 0; i < pairList.size(); i++)
 				{
 					Pair<Long, JSONObject> pair = pairList.get(i);
 					JSONObject object = pair.second;
-					String pdString = object.optString(HikeConstants.PRIVATE_DATA);
-					JSONObject pd = new JSONObject(pdString);
-					if (pd != null)
+					if(object.has(HikeConstants.PRIVATE_DATA))
 					{
-						String trackId = pd.optString(HikeConstants.MSG_REL_UID);
-						if (trackId != null)
+						String pdString = object.optString(HikeConstants.PRIVATE_DATA);
+						JSONObject pd = new JSONObject(pdString);
+						if (pd != null)
 						{
-							dataMR.putOpt(String.valueOf(pair.first), pd);
-							// Logs for Msg Reliability
-							Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
-							Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver reads msg on screen,track_id:- " + trackId);
-							MsgRelLogManager.getInstance().recordMsgRel(trackId, pair.first, MsgRelEventType.RECEIVER_OPENS_CONV_SCREEN, "-1");
-						}
-						else
-						{
-							ids.put(pair.first);
+							String trackId = pd.optString(HikeConstants.MSG_REL_UID);
+							if (trackId != null)
+							{
+								dataMR.putOpt(String.valueOf(pair.first), pd);
+								// Logs for Msg Reliability
+								Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+								Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver reads msg on screen,track_id:- " + trackId);
+								MsgRelLogManager.recordMsgRel(trackId, pair.first, MsgRelEventType.RECEIVER_OPENS_CONV_SCREEN);
+							}
+							else
+							{
+								ids.put(pair.first);
+							}
 						}
 					}
 					else
@@ -3793,7 +3795,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						//Logs for Msg Reliability
 						Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 						Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver reads msg on screen,track_id:- " + message.getPrivateData().getTrackID());
-						MsgRelLogManager.getInstance().logMessageRealiablityEvent(message, MsgRelEventType.RECEIVER_OPENS_CONV_SCREEN);
+						MsgRelLogManager.logMessageReliablityEvent(message, MsgRelEventType.RECEIVER_OPENS_CONV_SCREEN);
 					}
 
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal(), mConversation.getMsisdn());
@@ -3955,7 +3957,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 						Logger.d(AnalyticsConstants.MSG_REL_TAG, "Read Shown to Sender:track_id "+ msg.getPrivateData().getTrackID());
-						MsgRelLogManager.getInstance().logMessageRealiablityEvent(msg, MsgRelEventType.MR_SHOWN_AT_SENEDER_SCREEN);
+						MsgRelLogManager.logMessageReliablityEvent(msg, MsgRelEventType.MR_SHOWN_AT_SENEDER_SCREEN);
 					}
 				}
 			}
@@ -4823,7 +4825,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				if(msg.getPrivateData().getTrackID() != null)
 				{
-					MsgRelLogManager.getInstance().recordMsgRel(msg.getPrivateData().getTrackID(), 
+					MsgRelLogManager.recordMsgRel(msg.getPrivateData().getTrackID(), 
 							msgId, MsgRelEventType.SINGLE_TICK_ON_SENDER, 
 							msg.getPrivateData().getMsgType());
 				}
@@ -7603,7 +7605,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			convMessage.setMetadata(metadata);
 			
 			// 1) user double clicked on Chat Screen i.e Sending nudge
-			MsgRelLogManager.getInstance().startMessageRelLogging(convMessage, MessageType.TEXT);
+			MsgRelLogManager.startMessageRelLogging(convMessage, MessageType.TEXT);
 		}
 		catch (JSONException e)
 		{
@@ -7660,7 +7662,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			convMessage.setMetadata(metadata);
 			
 			// 1) user clicked sticker in Sticker Pallete i.e Sending Sticker
-			MsgRelLogManager.getInstance().startMessageRelLogging(convMessage, MessageType.STICKER);
+			MsgRelLogManager.startMessageRelLogging(convMessage, MessageType.STICKER);
 			
 			Logger.d(getClass().getSimpleName(), "metadata: " + metadata.toString());
 		}

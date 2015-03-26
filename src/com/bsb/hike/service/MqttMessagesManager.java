@@ -564,7 +564,7 @@ public class MqttMessagesManager
 		//Logs for Msg Reliability
 		Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Packet Arrived at RECV MQTT,track_id:- " + convMessage.getPrivateData().getTrackID());
-		MsgRelLogManager.getInstance().logMessageRealiablityEvent(convMessage, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
+		MsgRelLogManager.logMessageReliablityEvent(convMessage, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
 
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
 		{
@@ -590,7 +590,7 @@ public class MqttMessagesManager
 		//Logs for Msg Reliability
 		Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver recvs Msg,track_id:- " + convMessage.getPrivateData().getTrackID());
-		MsgRelLogManager.getInstance().logMessageRealiablityEvent(convMessage, MsgRelEventType.RECIEVR_RECV_MSG);
+		MsgRelLogManager.logMessageReliablityEvent(convMessage, MsgRelEventType.RECIEVR_RECV_MSG);
 		
 		/*
 		 * Return if there is no conversation for this msisdn.
@@ -669,7 +669,7 @@ public class MqttMessagesManager
 		ConvMessage convMessage = messagePreProcess(jsonObj);
 		addToLists(convMessage.getMsisdn(), convMessage);
 		
-		MsgRelLogManager.getInstance().logMessageRealiablityEvent(jsonObj, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
+		MsgRelLogManager.logMessageReliablityEvent(jsonObj, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
 		
 		if (convMessage.isGroupChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
@@ -726,7 +726,7 @@ public class MqttMessagesManager
 		if(pd != null)
 		{
 			String uid = pd.getString(HikeConstants.MSG_REL_UID);
-			MessagePrivateData messagePrivateData = new MessagePrivateData(uid, "-1"); 
+			MessagePrivateData messagePrivateData = new MessagePrivateData(uid); 
 			convMessage.setPrivateData(messagePrivateData);
 		}
 		
@@ -863,7 +863,7 @@ public class MqttMessagesManager
 					
 					Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 					Logger.d(AnalyticsConstants.MSG_REL_TAG, "Handling ndr for json: "+ jsonObj);
-					MsgRelLogManager.getInstance().logMsgRelDR(jsonObj, MsgRelEventType.DR_SHOWN_AT_SENEDER_SCREEN);
+					MsgRelLogManager.logMsgRelDR(jsonObj, MsgRelEventType.DR_SHOWN_AT_SENEDER_SCREEN);
 				}
 			}
 		}
@@ -928,7 +928,7 @@ public class MqttMessagesManager
 		}
 		
 
-		MsgRelLogManager.getInstance().logMsgRelDR(jsonObj, MsgRelEventType.DR_SHOWN_AT_SENEDER_SCREEN);
+		MsgRelLogManager.logMsgRelDR(jsonObj, MsgRelEventType.DR_SHOWN_AT_SENEDER_SCREEN);
 	}
 
 	private void saveMessageRead(JSONObject jsonObj) throws JSONException
@@ -2542,7 +2542,7 @@ public class MqttMessagesManager
 			MessagePrivateData pd = convMessage.getPrivateData();
 			if (pd != null && pd.getTrackID() != null)
 			{
-				MsgRelLogManager.getInstance().recordMsgRel(pd.getTrackID(), Long.parseLong(msisdn), MsgRelEventType.RECIEVR_RECV_MSG, "-1");
+				MsgRelLogManager.recordMsgRel(pd.getTrackID(), Long.parseLong(msisdn), MsgRelEventType.RECIEVR_RECV_MSG);
 			}
 		}
 
@@ -2689,7 +2689,7 @@ public class MqttMessagesManager
 			}
 			else
 			{
-				MsgRelLogManager.getInstance().logMsgRelDR(jsonObj, MsgRelEventType.DR_RECEIVED_AT_SENEDER_MQTT);
+				MsgRelLogManager.logMsgRelDR(jsonObj, MsgRelEventType.DR_RECEIVED_AT_SENEDER_MQTT);
 				
 				saveDeliveryReport(jsonObj);
 			}
@@ -2705,7 +2705,7 @@ public class MqttMessagesManager
 			}
 			else
 			{
-				MsgRelLogManager.getInstance().logMessageRealiablityEvent(jsonObj, MsgRelEventType.MR_RECEIVED_AT_SENEDER_MQTT);
+				MsgRelLogManager.logMessageReliablityEvent(jsonObj, MsgRelEventType.MR_RECEIVED_AT_SENEDER_MQTT);
 				
 				saveMessageRead(jsonObj);
 			}

@@ -3153,10 +3153,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			{
 				long msgId = c.getLong(msgIdIdx);
 				long mappedMsgId = c.getLong(mappedMsgIdIdx);
-				String msgMetadata = c.getString(msgMetadataIdx);
-				String privatedata = c.getString(privatedataIdx);
+				
 				if (mappedMsgId > 0)
 				{
+					String msgMetadata = c.getString(msgMetadataIdx);
+					String privatedata = c.getString(privatedataIdx);
+					
 					JSONObject dataObject = new JSONObject();
 					dataObject.put(HikeConstants.METADATA, msgMetadata);
 					dataObject.put(HikeConstants.PRIVATE_DATA, privatedata);

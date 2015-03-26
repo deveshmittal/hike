@@ -198,9 +198,8 @@ public class UploadContactOrLocationTask extends FileTransferBase
 
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessageObject);
 			// 1) user clicked send button in chat thread i.e Sending Text Message
-			MsgRelLogManager.getInstance().startMessageRelLogging((ConvMessage) userContext, MessageType.MULTIMEDIA);
+			MsgRelLogManager.startMessageRelLogging(convMessageObject, MessageType.MULTIMEDIA);
 			
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
 		}
 		catch (Exception e)
 		{

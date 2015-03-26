@@ -64,8 +64,6 @@ public class HAManager
 	
 	private Session fgSessionInstance;
 	
-	private MsgRelLogManager msgRelLogManager;
-		
 	/**
 	 * Constructor
 	 */
@@ -123,7 +121,6 @@ public class HAManager
 		// set network listener
 		listner = new NetworkListener(this.context);
 		
-		msgRelLogManager = MsgRelLogManager.getInstance();
 	}
 	
 	/**
