@@ -36,6 +36,9 @@ public abstract class Conversation implements Comparable<Conversation>
 	{
 		ConvInfoBuilder convInfoBuilder = builder.convInfoBuilder;
 		this.convInfo = convInfoBuilder.build();
+		this.messagesList = builder.messagesList;
+		this.metadata = builder.metadata;
+		this.chatTheme = builder.chatTheme;
 	}
 
 	/**
@@ -171,7 +174,7 @@ public abstract class Conversation implements Comparable<Conversation>
 	{
 		convInfo.setStealth(isStealth);
 	}
-	
+
 	@Override
 	public String toString()
 	{
@@ -279,6 +282,12 @@ public abstract class Conversation implements Comparable<Conversation>
 	{
 		private ConvInfoBuilder convInfoBuilder;
 
+		private ChatTheme chatTheme;
+
+		private ArrayList<ConvMessage> messagesList;
+
+		private ConversationMetadata metadata;
+
 		public InitBuilder(String msisdn)
 		{
 			convInfoBuilder = new ConvInfoBuilder(msisdn);
@@ -299,6 +308,24 @@ public abstract class Conversation implements Comparable<Conversation>
 		public P setSortingTimeStamp(long timeStamp)
 		{
 			convInfoBuilder.setSortingTimeStamp(timeStamp);
+			return getSelfObject();
+		}
+
+		public P setChatTheme(ChatTheme chatTheme)
+		{
+			this.chatTheme = chatTheme;
+			return getSelfObject();
+		}
+
+		public P setMessagesList(ArrayList<ConvMessage> messagesList)
+		{
+			this.messagesList = messagesList;
+			return getSelfObject();
+		}
+
+		public P setConversationMetadata(ConversationMetadata metadata)
+		{
+			this.metadata = metadata;
 			return getSelfObject();
 		}
 
