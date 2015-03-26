@@ -162,9 +162,6 @@ public class MsgRelLogManager
 			// con:- 2g/3g/4g/wifi/off
 			metadata.put(AnalyticsConstants.CONNECTION_TYPE, Utils.getNetworkType(context));
 			
-			// timestamp: syn with servertime
-			metadata.put(AnalyticsConstants.CURRENT_TIME_STAMP, Utils.applyServerTimeOffset(context, System.currentTimeMillis()));
-			
 			HAManager.getInstance().record(AnalyticsConstants.MSG_REL, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.MSG_REL);
 			
 			Logger.d(AnalyticsConstants.MSG_REL_TAG, " --track: " + trackID + " --msg_id: " + msgId + " --m_type: " + msgType + " --event_num: " + eventType + " --con_type: "

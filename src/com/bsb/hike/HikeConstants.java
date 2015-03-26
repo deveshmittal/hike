@@ -2536,11 +2536,11 @@ public class HikeConstants
 	
 	public static final String BLACKLIST_DOMAIN_ANALYTICS = "blacklist";
 
-	public static final String PROB_NUM_TEXT_MSG = "prob_txt";
+	public static final String PROB_NUM_TEXT_MSG = "p_txt";
 
-	public static final String PROB_NUM_STICKER_MSG = "prob_stk";
+	public static final String PROB_NUM_STICKER_MSG = "p_stk";
 
-	public static final String PROB_NUM_MULTIMEDIA_MSG = "prob_mmulti";
+	public static final String PROB_NUM_MULTIMEDIA_MSG = "p_mul";
 
 	public static final String MSG_REL = "rel_m";
 	

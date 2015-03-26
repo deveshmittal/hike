@@ -4824,7 +4824,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				if(msg.getPrivateData().getTrackID() != null)
 				{
 					MsgRelLogManager.getInstance().recordMsgRel(msg.getPrivateData().getTrackID(), 
-							msgId, MsgRelEventType.GOING_TO_SHOW_SINGLE_TICK, 
+							msgId, MsgRelEventType.SINGLE_TICK_ON_SENDER, 
 							msg.getPrivateData().getMsgType());
 				}
 				runOnUiThread(mUpdateAdapter);

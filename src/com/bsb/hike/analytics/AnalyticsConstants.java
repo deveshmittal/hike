@@ -211,11 +211,24 @@ public class AnalyticsConstants
 	public static final String LAST_SEEN_ANALYTICS = "last_seen_analytics";
 	
 	//Added For Message Reliability
-	public static final int MAX_RANGE_TEXT_MSG = 100;
+	
+	//These Max Range are fixed for All three
+	public static final int MAX_RANGE_TEXT_MSG = 1000;
 	
 	public static final int MAX_RANGE_STK_MSG = 1000;
 	
 	public static final int MAX_RANGE_MULTIMEDIA_MSG = 1000;
+	
+	//----------------------***----------------------------------//
+	
+	//These three values are server configured
+	public static int text_msg_track_decider = 1000;
+	
+	public static int stk_msg_track_decider = 1000;
+	
+	public static int multimedia_msg_track_decider = 1000;
+	
+	//----------------------***----------------------------------//
 	
 	public static final String MSG_ID = "msg_id";
 	
@@ -234,8 +247,6 @@ public class AnalyticsConstants
 		public static final String DB_TRANSACTION_COMPLETED = "1.2";
 
 		public static final String RECV_NOTIF_SOCKET_WRITING = "1.3";
-
-		public static final String GOING_TO_SHOW_SINGLE_TICK = "1.4";
 
 		public static final String SINGLE_TICK_ON_SENDER = "2";
 

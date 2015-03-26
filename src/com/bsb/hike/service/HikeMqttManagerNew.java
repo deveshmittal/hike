@@ -1229,7 +1229,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						{
 							HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
 							
-							// Adding Logs for Message Reliability.
 							 // Adding Logs for Message Reliability.
 							Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 							Logger.d(AnalyticsConstants.MSG_REL_TAG, "Written complete so showing SINGLE TICK,track_id:- " + packet.getTrackId());
