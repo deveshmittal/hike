@@ -113,6 +113,17 @@ public abstract class Conversation implements Comparable<Conversation>
 		convInfo.setmConversationName(convName);
 	}
 
+
+	public void setIsMute(boolean isMute)
+	{
+		convInfo.setMute(isMute);
+	}
+
+	public boolean isMuted()
+	{
+		return convInfo.isMute();
+	}
+	
 	/**
 	 * Returns a friendly label for the conversation
 	 * 
