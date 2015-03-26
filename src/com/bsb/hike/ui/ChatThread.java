@@ -197,8 +197,8 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.MessagePrivateData;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.MessagePrivateData;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
@@ -212,6 +212,7 @@ import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -3795,7 +3796,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						//Logs for Msg Reliability
 						Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 						Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver reads msg on already opened screen,track_id:- " + message.getPrivateData().getTrackID());
-						MsgRelLogManager.logMessageReliablityEvent(message, MsgRelEventType.RECEIVER_OPENS_CONV_SCREEN);
+						MsgRelLogManager.logMsgRelEvent(message, MsgRelEventType.RECEIVER_OPENS_CONV_SCREEN);
 					}
 
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal(), mConversation.getMsisdn());
@@ -3952,7 +3953,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 						Logger.d(AnalyticsConstants.MSG_REL_TAG, "Read Shown to Sender:track_id "+ msg.getPrivateData().getTrackID());
-						MsgRelLogManager.logMessageReliablityEvent(msg, MsgRelEventType.MR_SHOWN_AT_SENEDER_SCREEN);
+						MsgRelLogManager.logMsgRelEvent(msg, MsgRelEventType.MR_SHOWN_AT_SENEDER_SCREEN);
 					}
 				}
 			}
@@ -4818,7 +4819,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			if(updateView)
 			{
-				MsgRelLogManager.logMessageReliablityEvent(msg, MsgRelEventType.SINGLE_TICK_ON_SENDER);
+				MsgRelLogManager.logMsgRelEvent(msg, MsgRelEventType.SINGLE_TICK_ON_SENDER);
 				
 				runOnUiThread(mUpdateAdapter);
 			}

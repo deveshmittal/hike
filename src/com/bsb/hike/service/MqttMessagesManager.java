@@ -564,7 +564,7 @@ public class MqttMessagesManager
 		//Logs for Msg Reliability
 		Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Packet Arrived at RECV MQTT,track_id:- " + convMessage);
-		MsgRelLogManager.logMessageReliablityEvent(convMessage, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
+		MsgRelLogManager.logMsgRelEvent(convMessage, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
 
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.WEB_CONTENT)
 		{
@@ -590,7 +590,7 @@ public class MqttMessagesManager
 		//Logs for Msg Reliability
 		Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver recvs Msg,track_id:- " + convMessage);
-		MsgRelLogManager.logMessageReliablityEvent(convMessage, MsgRelEventType.RECIEVR_RECV_MSG);
+		MsgRelLogManager.logMsgRelEvent(convMessage, MsgRelEventType.RECIEVR_RECV_MSG);
 		
 		/*
 		 * Return if there is no conversation for this msisdn.
@@ -669,7 +669,7 @@ public class MqttMessagesManager
 		ConvMessage convMessage = messagePreProcess(jsonObj);
 		addToLists(convMessage.getMsisdn(), convMessage);
 		
-		MsgRelLogManager.logMessageReliablityEvent(jsonObj, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
+		MsgRelLogManager.logMsgRelEvent(jsonObj, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
 		
 		if (convMessage.isGroupChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
@@ -2706,7 +2706,7 @@ public class MqttMessagesManager
 			}
 			else
 			{
-				MsgRelLogManager.logMessageReliablityEvent(jsonObj, MsgRelEventType.MR_RECEIVED_AT_SENEDER_MQTT);
+				MsgRelLogManager.logMsgRelEvent(jsonObj, MsgRelEventType.MR_RECEIVED_AT_SENEDER_MQTT);
 				
 				saveMessageRead(jsonObj);
 			}

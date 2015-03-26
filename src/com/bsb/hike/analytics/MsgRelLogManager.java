@@ -1,9 +1,12 @@
 package com.bsb.hike.analytics;
 
+import java.util.Random;
 import java.util.UUID;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -12,14 +15,23 @@ import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.models.MessagePrivateData;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class MsgRelLogManager
 {
+	public static Random randomGenerator = new Random();
+	
+	/**
+	 * This starts Msg Tracking
+	 * If 'isMessageToBeTracked(msgType)' says true, then updates 'pd' field on convMessage
+	 * @param convMessage
+	 * @param msgType
+	 */
 	public static void startMessageRelLogging(ConvMessage convMessage, String msgType)
 	{
-		if (AnalyticsUtils.isMessageToBeTracked(msgType))
+		if (isMessageToBeTracked(msgType))
 		{
 			Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
 			Logger.d(AnalyticsConstants.MSG_REL_TAG, "Starting message sending");
@@ -29,7 +41,7 @@ public class MsgRelLogManager
 			}
 			else
 			{
-				Logger.e(MsgRelLogManager.class.getSimpleName(), "Found Conv Message With NUll PD ");
+				Logger.e(MsgRelLogManager.class.getSimpleName(), "Found Conv Message With NUll PD, should not be case ");
 			}
 			recordMsgRel(convMessage.getPrivateData().getTrackID(), convMessage.getMsgID(), MsgRelEventType.SEND_BUTTON_CLICKED, msgType);
 		}
@@ -69,7 +81,7 @@ public class MsgRelLogManager
 	 * @param eventType
 	 * @throws JSONException
 	 */
-	public static void logMessageReliablityEvent(JSONObject jsonObj, String eventType) throws JSONException
+	public static void logMsgRelEvent(JSONObject jsonObj, String eventType) throws JSONException
 	{
 		if(jsonObj.has(HikeConstants.PRIVATE_DATA))
 		{
@@ -88,7 +100,7 @@ public class MsgRelLogManager
 	 * @param convMessage
 	 * @param msgType
 	 */
-	public static void logMessageReliablityEvent(ConvMessage convMessage, String eventType)
+	public static void logMsgRelEvent(ConvMessage convMessage, String eventType)
 	{
 		MessagePrivateData messagePrivateData = convMessage.getPrivateData();
 		if (messagePrivateData != null && messagePrivateData.getTrackID() != null)
@@ -155,5 +167,47 @@ public class MsgRelLogManager
 		{
 			Logger.d(AnalyticsConstants.MSG_REL_TAG, "invalid json");
 		}
+	}
+	
+	private static boolean isMessageToBeTracked(String msgType)
+	{
+		if(!TextUtils.isEmpty(msgType))
+		{
+			if(AnalyticsConstants.MessageType.TEXT.equals(msgType))
+			{
+				int randomInt = randomGenerator.nextInt(AnalyticsConstants.MAX_RANGE_TEXT_MSG);
+				int probSample = HikeSharedPreferenceUtil.getInstance().
+						getData(HikeMessengerApp.PROB_NUM_TEXT_MSG, AnalyticsConstants.text_msg_track_decider);
+				Logger.d(AnalyticsConstants.MSG_REL_TAG, " --random number : " + randomInt + ", prob sampling: "+ probSample);
+				if(randomInt <= probSample)
+				{
+					return true;
+				}
+			}
+			else if(AnalyticsConstants.MessageType.STICKER.equals(msgType))
+			{
+				int randomInt = randomGenerator.nextInt(AnalyticsConstants.MAX_RANGE_STK_MSG);
+				int probSample = HikeSharedPreferenceUtil.getInstance().
+						getData(HikeMessengerApp.PROB_NUM_STICKER_MSG, AnalyticsConstants.stk_msg_track_decider);
+				Logger.d(AnalyticsConstants.MSG_REL_TAG, " --random number : " + randomInt + ", prob sampling: "+ probSample);
+				if(randomInt <= probSample)
+				{
+					return true;
+				}
+			}
+			else if(AnalyticsConstants.MessageType.MULTIMEDIA.equals(msgType))
+			{
+				int randomInt = randomGenerator.nextInt(AnalyticsConstants.MAX_RANGE_MULTIMEDIA_MSG);
+				int probSample = HikeSharedPreferenceUtil.getInstance().
+						getData(HikeMessengerApp.PROB_NUM_MULTIMEDIA_MSG, AnalyticsConstants.multimedia_msg_track_decider);
+				Logger.d(AnalyticsConstants.MSG_REL_TAG, " --random number : " + randomInt + ", prob sampling: "+ probSample);
+				if(randomInt <= probSample)
+				{
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 }
