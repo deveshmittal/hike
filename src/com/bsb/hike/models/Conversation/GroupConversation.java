@@ -24,7 +24,7 @@ import com.bsb.hike.utils.PairModified;
 public class GroupConversation extends OneToNConversation
 {
 
-	protected GroupConversation(InitBuilder<?> builder)
+	private GroupConversation(InitBuilder<?> builder)
 	{
 		super(builder);
 	}
@@ -76,6 +76,52 @@ public class GroupConversation extends OneToNConversation
 			Logger.e("GroupConversation", "invalid json message", e);
 		}
 		return object;
+	}
+
+	/**
+	 * Builder base class extending {@link OneToNConversation.InitBuilder}
+	 * 
+	 * @author piyush
+	 * 
+	 * @param <P>
+	 */
+	protected static abstract class InitBuilder<P extends InitBuilder<P>> extends OneToNConversation.InitBuilder<P>
+	{
+
+		public InitBuilder(String msisdn)
+		{
+			super(msisdn);
+		}
+
+		public GroupConversation build()
+		{
+			return new GroupConversation(this);
+		}
+	}
+
+	/**
+	 * Builder class used to generating {@link GroupConversation}
+	 * <p>
+	 * Bare bone Usage : GroupConversation conv = GroupConversation.ConversationBuilder(msisdn).build();<br>
+	 * Other examples : GroupConversation conv = GroupConversation.ConversationBuilder(msisdn).setConvName("ABC").setIsAlive(true).build();
+	 * 
+	 * @author piyush
+	 * 
+	 */
+	public static class ConversationBuilder extends GroupConversation.InitBuilder<ConversationBuilder>
+	{
+
+		public ConversationBuilder(String msisdn)
+		{
+			super(msisdn);
+		}
+
+		@Override
+		protected ConversationBuilder getSelfObject()
+		{
+			return this;
+		}
+
 	}
 
 }
