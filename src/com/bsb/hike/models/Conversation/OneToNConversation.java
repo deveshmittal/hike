@@ -50,6 +50,19 @@ public abstract class OneToNConversation extends Conversation
 	protected OneToNConversation(InitBuilder<?> builder)
 	{
 		super(builder);
+		this.conversationOwner = builder.conversationOwner;
+
+		this.conversationParticipantList = builder.conversationParticipantList;
+
+		this.readByParticipantsList = builder.readByParticipantList;
+
+		this.pinnedConvMessage = builder.pinnedConvmessage;
+
+		this.lastSentMsgId = builder.lastSentMsgId;
+
+		this.isConversationAlive = builder.isConversationAlive;
+
+		this.unreadPinnedMessageCount = builder.unreadPinnedMessageCount;
 	}
 
 	/**
@@ -98,8 +111,8 @@ public abstract class OneToNConversation extends Conversation
 
 	public PairModified<GroupParticipant, String> getConversationParticipant(String msisdn)
 	{
-		return conversationParticipantList.containsKey(msisdn) ? conversationParticipantList.get(msisdn) : new PairModified<GroupParticipant, String>(new GroupParticipant(new ContactInfo(
-				msisdn, msisdn, msisdn, msisdn)), msisdn);
+		return conversationParticipantList.containsKey(msisdn) ? conversationParticipantList.get(msisdn) : new PairModified<GroupParticipant, String>(new GroupParticipant(
+				new ContactInfo(msisdn, msisdn, msisdn, msisdn)), msisdn);
 	}
 
 	/**
@@ -296,7 +309,6 @@ public abstract class OneToNConversation extends Conversation
 		return (OneToNConversationMetadata) this.metadata;
 	}
 
-	
 	/**
 	 * Builder base class extending {@link Conversation.InitBuilder}
 	 * 
@@ -307,47 +319,47 @@ public abstract class OneToNConversation extends Conversation
 	protected static abstract class InitBuilder<P extends InitBuilder<P>> extends Conversation.InitBuilder<P>
 	{
 		private String conversationOwner;
-		
+
 		private Map<String, PairModified<GroupParticipant, String>> conversationParticipantList;
-		
+
 		private ArrayList<String> readByParticipantList;
-		
+
 		private ConvMessage pinnedConvmessage;
-		
+
 		private boolean isConversationAlive;
-		
+
 		private long lastSentMsgId = -1;
-		
+
 		private int unreadPinnedMessageCount;
-		
+
 		public InitBuilder(String msisdn)
 		{
 			super(msisdn);
 		}
-		
+
 		public P setConversationOwner(String conversationOwner)
 		{
 			this.conversationOwner = conversationOwner;
 			return getSelfObject();
 		}
-		
+
 		public P setConversationOwner(Map<String, PairModified<GroupParticipant, String>> participantList)
 		{
 			this.conversationParticipantList = participantList;
 			return getSelfObject();
 		}
-		
+
 		public P setConversationOwner(List<PairModified<GroupParticipant, String>> participantList)
 		{
 			this.conversationParticipantList = new HashMap<String, PairModified<GroupParticipant, String>>();
-	        for (PairModified<GroupParticipant, String> grpParticipant : participantList)
-	        {
-	            String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
-	            this.conversationParticipantList.put(msisdn, grpParticipant);
-	        }
+			for (PairModified<GroupParticipant, String> grpParticipant : participantList)
+			{
+				String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
+				this.conversationParticipantList.put(msisdn, grpParticipant);
+			}
 			return getSelfObject();
 		}
-		
+
 		public P setupReadByList(String readBy, long msgId)
 		{
 			if (msgId < 1)
@@ -380,28 +392,28 @@ public abstract class OneToNConversation extends Conversation
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			return getSelfObject();
 		}
-		
+
 		public P setPinnedConvmessage(ConvMessage pinnedConvMessage)
 		{
 			this.pinnedConvmessage = pinnedConvMessage;
 			return getSelfObject();
 		}
-		
+
 		public P setIsAlive(boolean isAlive)
 		{
 			this.isConversationAlive = isAlive;
 			return getSelfObject();
 		}
-		
+
 		public P setUnreadPinnedMsgCount(int count)
 		{
 			this.unreadPinnedMessageCount = count;
 			return getSelfObject();
 		}
-		
+
 		@Override
 		public P setConversationMetadata(ConversationMetadata metadata)
 		{
