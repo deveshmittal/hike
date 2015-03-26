@@ -1,6 +1,7 @@
 package com.bsb.hike.models.Conversation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -424,6 +425,43 @@ public abstract class OneToNConversation extends Conversation
 
 			this.metadata = (OneToNConversationMetadata) metadata;
 			return getSelfObject();
+		}
+	}
+
+	/**
+	 * Utility method for returning a default name for a 1-n Conversation
+	 * 
+	 * @param participantList
+	 * @return
+	 */
+	public static String defaultConversationName(List<PairModified<GroupParticipant, String>> participantList)
+	{
+		List<GroupParticipant> groupParticipants = new ArrayList<GroupParticipant>();
+		for (PairModified<GroupParticipant, String> participant : participantList)
+		{
+			if (!participant.getFirst().hasLeft())
+			{
+				groupParticipants.add(participant.getFirst());
+			}
+		}
+		Collections.sort(groupParticipants);
+		String name = null;
+		if (groupParticipants.size() > 0)
+		{
+			name = Utils.extractFullFirstName(groupParticipants.get(0).getContactInfo().getFirstNameAndSurname());
+		}
+		switch (groupParticipants.size())
+		{
+		case 0:
+			return "";
+		case 1:
+			return name;
+		default:
+			for (int i = 1; i < groupParticipants.size(); i++)
+			{
+				name += ", " + Utils.extractFullFirstName(groupParticipants.get(i).getContactInfo().getFirstNameAndSurname());
+			}
+			return name;
 		}
 	}
 }
