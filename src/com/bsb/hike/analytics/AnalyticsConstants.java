@@ -258,13 +258,13 @@ public class AnalyticsConstants
 
 		public static final String SENDER_MQTT_RECV_SENDING_MSG = "5.9";
 
-		public static final String RECEIVER_MQTT_RECVS_SENT_MSG = "9";
+		public static final String RECEIVER_MQTT_RECVS_SENT_MSG = "9.1";
 
 		public static final String RECEIVER_MQTT_RECV_MSG_ACK = "10";
 
-		public static final String DR_RECEIVED_AT_SENEDER_MQTT = "13";
+		public static final String DR_RECEIVED_AT_SENEDER_MQTT = "13.1";
 
-		public static final String RECEIVER_MQTT_RECV_MR_FROM_RECEIVER = "14";
+		public static final String RECEIVER_MQTT_RECV_MR_FROM_RECEIVER = "13.9";
 
 		public static final String MR_RECEIVED_AT_SENEDER_MQTT = "17.1";
 
