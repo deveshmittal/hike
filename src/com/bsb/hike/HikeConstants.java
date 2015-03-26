@@ -1987,6 +1987,14 @@ public class HikeConstants
 
 		public static final String GROUP_CHAT_NAME = "gcn";
 
+		public static final String BROADCAST_LIST_JOIN = "gcj";
+
+		public static final String BROADCAST_LIST_LEAVE = "gcl";
+
+		public static final String BROADCAST_LIST_END = "gce";
+
+		public static final String BROADCAST_LIST_NAME = "gcn";
+		
 		public static final String ANALYTICS_EVENT = "le";
 
 		public static final String UPDATE_AVAILABLE = "ua";
