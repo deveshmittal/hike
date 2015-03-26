@@ -297,7 +297,7 @@ public abstract class Conversation implements Comparable<Conversation>
 
 		private ArrayList<ConvMessage> messagesList;
 
-		private ConversationMetadata metadata;
+		protected ConversationMetadata metadata;
 
 		public InitBuilder(String msisdn)
 		{
