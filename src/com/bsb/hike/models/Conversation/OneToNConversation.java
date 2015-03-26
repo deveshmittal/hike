@@ -31,22 +31,22 @@ import com.bsb.hike.utils.Utils;
 public abstract class OneToNConversation extends Conversation
 {
 
-	private String conversationOwner;
+	protected String conversationOwner;
 
-	private Map<String, PairModified<GroupParticipant, String>> groupParticipantList;
+	protected Map<String, PairModified<GroupParticipant, String>> conversationParticipantList;
 
-	private ArrayList<String> readByParticipantsList;
+	protected ArrayList<String> readByParticipantsList;
 
-	private ConvMessage pinnedConvMessage;
+	protected ConvMessage pinnedConvMessage;
 
-	private boolean isConversationAlive;
+	protected boolean isConversationAlive;
 
 	/**
 	 * Default value of long is 0, hence setting this as -1 here
 	 */
-	private long lastSentMsgId = -1;
+	protected long lastSentMsgId = -1;
 
-	private int unreadPinnedMessageCount;
+	protected int unreadPinnedMessageCount;
 
 	/**
 	 * @param builder
@@ -76,33 +76,33 @@ public abstract class OneToNConversation extends Conversation
 	/**
 	 * @return the groupParticipantList
 	 */
-	public Map<String, PairModified<GroupParticipant, String>> getGroupParticipantList()
+	public Map<String, PairModified<GroupParticipant, String>> getConversationParticipantList()
 	{
-		return groupParticipantList;
+		return conversationParticipantList;
 	}
 
 	/**
-	 * @param groupParticipantList
-	 *            the groupParticipantList to set
+	 * @param participantList
+	 *            the participantList to set
 	 */
-	public void setGroupParticipantList(Map<String, PairModified<GroupParticipant, String>> groupParticipantList)
+	public void setConversationParticipantList(Map<String, PairModified<GroupParticipant, String>> participantList)
 	{
-		this.groupParticipantList = groupParticipantList;
+		this.conversationParticipantList = participantList;
 	}
 
-	public void setGroupParticipantList(List<PairModified<GroupParticipant, String>> groupParticipantList)
+	public void setConversationParticipantList(List<PairModified<GroupParticipant, String>> participantList)
 	{
-		this.groupParticipantList = new HashMap<String, PairModified<GroupParticipant, String>>();
-		for (PairModified<GroupParticipant, String> grpParticipant : groupParticipantList)
+		this.conversationParticipantList = new HashMap<String, PairModified<GroupParticipant, String>>();
+		for (PairModified<GroupParticipant, String> convParticipant : participantList)
 		{
-			String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
-			this.groupParticipantList.put(msisdn, grpParticipant);
+			String msisdn = convParticipant.getFirst().getContactInfo().getMsisdn();
+			this.conversationParticipantList.put(msisdn, convParticipant);
 		}
 	}
 
-	public PairModified<GroupParticipant, String> getGroupParticipant(String msisdn)
+	public PairModified<GroupParticipant, String> getConversationParticipant(String msisdn)
 	{
-		return groupParticipantList.containsKey(msisdn) ? groupParticipantList.get(msisdn) : new PairModified<GroupParticipant, String>(new GroupParticipant(new ContactInfo(
+		return conversationParticipantList.containsKey(msisdn) ? conversationParticipantList.get(msisdn) : new PairModified<GroupParticipant, String>(new GroupParticipant(new ContactInfo(
 				msisdn, msisdn, msisdn, msisdn)), msisdn);
 	}
 
@@ -113,13 +113,13 @@ public abstract class OneToNConversation extends Conversation
 	 *            of the contact
 	 * @return name of the contact
 	 */
-	public String getGroupParticipantName(String msisdn)
+	public String getConversationParticipantName(String msisdn)
 	{
 		String name = null;
 
-		if (null != groupParticipantList)
+		if (null != conversationParticipantList)
 		{
-			PairModified<GroupParticipant, String> grpPair = groupParticipantList.get(msisdn);
+			PairModified<GroupParticipant, String> grpPair = conversationParticipantList.get(msisdn);
 
 			if (null != grpPair)
 			{
@@ -145,9 +145,9 @@ public abstract class OneToNConversation extends Conversation
 	 *            of the contact
 	 * @return first full name of the contact
 	 */
-	public String getGroupParticipantFullFirstName(String msisdn)
+	public String getConvParticipantFullFirstName(String msisdn)
 	{
-		String fullName = getGroupParticipantName(msisdn);
+		String fullName = getConversationParticipantName(msisdn);
 
 		return Utils.extractFullFirstName(fullName);
 	}
@@ -159,9 +159,9 @@ public abstract class OneToNConversation extends Conversation
 	 *            of the contact
 	 * @return first name + last name of the contact
 	 */
-	public String getGroupParticipantFirstNameAndSurname(String msisdn)
+	public String getConvParticipantFirstNameAndSurname(String msisdn)
 	{
-		return getGroupParticipantName(msisdn);
+		return getConversationParticipantName(msisdn);
 	}
 
 	/**
@@ -196,44 +196,6 @@ public abstract class OneToNConversation extends Conversation
 	public void setConversationAlive(boolean isConversationAlive)
 	{
 		this.isConversationAlive = isConversationAlive;
-	}
-
-	public void setIsMute(boolean isMute)
-	{
-		convInfo.setMute(isMute);
-	}
-
-	public boolean isMuted()
-	{
-		return convInfo.isMute();
-	}
-
-	public JSONObject serialize(String type)
-	{
-		JSONObject object = new JSONObject();
-		try
-		{
-			object.put(HikeConstants.TYPE, type);
-			object.put(HikeConstants.TO, getMsisdn());
-			if (type.equals(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN))
-			{
-				JSONArray array = new JSONArray();
-				for (Entry<String, PairModified<GroupParticipant, String>> participant : groupParticipantList.entrySet())
-				{
-					JSONObject nameMsisdn = new JSONObject();
-					nameMsisdn.put(HikeConstants.NAME, participant.getValue().getSecond());
-					nameMsisdn.put(HikeConstants.MSISDN, participant.getKey());
-					array.put(nameMsisdn);
-				}
-				object.put(HikeConstants.DATA, array);
-			}
-			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-		}
-		catch (JSONException e)
-		{
-			Logger.e("Conversation", "invalid json message", e);
-		}
-		return object;
 	}
 
 	public void setupReadByList(String readBy, long msgId)
