@@ -1035,6 +1035,7 @@ public class MqttMessagesManager
 				}
 				jsonObj.put(HikeConstants.DATA, serverIds);
 				Logger.d(AnalyticsConstants.MSG_REL_TAG, "For nmr,jsonObject sent to call 'mr' API: " + jsonObj);
+				MsgRelLogManager.logMsgRelEvent(jsonObj, MsgRelEventType.GOING_TO_CALL_MR_SAVE_API);
 				saveMessageRead(jsonObj);
 			}
 		}

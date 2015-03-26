@@ -255,6 +255,8 @@ public class AnalyticsConstants
 		public static final String SENDER_RECV_ACK = "3";
 
 		public static final String DR_SHOWN_AT_SENEDER_SCREEN = "4";
+		
+		public static final String GOING_TO_CALL_MR_SAVE_API = "4.1";
 
 		public static final String MR_SHOWN_AT_SENEDER_SCREEN = "5";
 
