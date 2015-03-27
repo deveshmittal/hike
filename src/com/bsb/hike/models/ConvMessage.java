@@ -1,10 +1,10 @@
 package com.bsb.hike.models;
 
-import com.bsb.hike.db.DBConstants;
+import java.util.ArrayList;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.util.ArrayList;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -14,7 +14,11 @@ import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.Conversation.Conversation;
+import com.bsb.hike.models.Conversation.GroupConversation;
+import com.bsb.hike.models.Conversation.OneToNConversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
@@ -482,10 +486,10 @@ public class ConvMessage
 			this.mMessage = OneToNConversationUtils.getParticipantAddedMessage(this, context, highlight);
 			break;
 		case PARTICIPANT_LEFT:
-			this.mMessage = OneToNConversationUtils.getParticipantRemovedMessage(conversation, context, ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn()));
+			this.mMessage = OneToNConversationUtils.getParticipantRemovedMessage((OneToNConversation) conversation, context, ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(metadata.getMsisdn()));
 			break;
 		case GROUP_END:
-			this.mMessage = OneToNConversationUtils.getConversationEndedMessage(conversation, context);
+			this.mMessage = OneToNConversationUtils.getConversationEndedMessage((OneToNConversation) conversation, context);
 			break;
 		case USER_JOIN:
 			//This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.\
@@ -496,7 +500,7 @@ public class ConvMessage
 			{
 				if (conversation instanceof GroupConversation)
 				{
-					fName = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn());
+					fName = ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(metadata.getMsisdn());
 				}
 				else
 				{
@@ -516,7 +520,7 @@ public class ConvMessage
 			String name;
 			if (conversation instanceof GroupConversation)
 			{
-				name = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn());
+				name = ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(metadata.getMsisdn());
 			}
 			else
 			{
@@ -529,11 +533,11 @@ public class ConvMessage
 			String msisdn = metadata.getMsisdn();
 			String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-			String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
+			String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(msisdn);
 			
 			if (participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME)
 			{
-				this.mMessage = OneToNConversationUtils.getConversationNameChangedMessage(conversation, context, participantName);
+				this.mMessage = OneToNConversationUtils.getConversationNameChangedMessage((OneToNConversation) conversation, context, participantName);
 			}
 			else
 			{
@@ -567,7 +571,7 @@ public class ConvMessage
 				String nameString;
 				if (conversation instanceof GroupConversation)
 				{
-					nameString = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn());
+					nameString = ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(metadata.getMsisdn());
 				}
 				else
 				{
