@@ -57,8 +57,10 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.Conversation.BroadcastConversation;
+import com.bsb.hike.models.Conversation.ConvInfo;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.GroupConversation;
+import com.bsb.hike.models.Conversation.OneToNConvInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
 import com.bsb.hike.modules.contactmgr.GroupDetails;
@@ -2814,42 +2816,32 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 		}
 	}
-
-	public List<Conversation> getConversations()
-	{
-		return getConversations(false);
-	}
-
-	public List<Conversation> getConversations(boolean getMetadata)
+	
+	/**
+	 * Returns a list of convInfo objects to be displayed on the home screen
+	 * 
+	 * @return
+	 * 			{@link ConvInfo}
+	 */			
+	public List<ConvInfo> getConvInfoObjects()
 	{
 		long startTime = System.currentTimeMillis();
-
-		Cursor groupInfoCursor = null;
 		Cursor c = null;
 
-		if (getMetadata)
-		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.LAST_MESSAGE_TIMESTAMP,
-					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.UNREAD_COUNT,
-					DBConstants.IS_STEALTH, DBConstants.CONVERSATION_METADATA, DBConstants.SORTING_TIMESTAMP }, null, null, null, null, null);
-		}
-		else
-		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.LAST_MESSAGE_TIMESTAMP,
-					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.UNREAD_COUNT,
-					DBConstants.IS_STEALTH, DBConstants.SORTING_TIMESTAMP }, null, null, null, null, null);
-		}
+		c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.LAST_MESSAGE_TIMESTAMP,
+				DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.UNREAD_COUNT, DBConstants.IS_STEALTH,
+				DBConstants.SORTING_TIMESTAMP }, null, null, null, null, null);
 
-		Map<String, Conversation> conversations = new HashMap<String, Conversation>();
+		Map<String, ConvInfo> conversations = new HashMap<String, ConvInfo>();
 
 		final int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
 		final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
 		final int msgStatusColumn = c.getColumnIndex(DBConstants.MSG_STATUS);
+		final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
 		final int lastMessageTsColumn = c.getColumnIndex(DBConstants.LAST_MESSAGE_TIMESTAMP);
 		final int sortingTsColumn = c.getColumnIndex(DBConstants.SORTING_TIMESTAMP);
 		final int mappedMsgIdColumn = c.getColumnIndex(DBConstants.MAPPED_MSG_ID);
 		final int msgIdColumn = c.getColumnIndex(DBConstants.MESSAGE_ID);
-		final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
 		final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 		final int unreadCountColumn = c.getColumnIndex(DBConstants.UNREAD_COUNT);
 		final int isStealthColumn = c.getColumnIndex(DBConstants.IS_STEALTH);
@@ -2858,10 +2850,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		{
 			List<String> groupIds = new ArrayList<String>();
 			List<String> msisdns = new ArrayList<String>();
+
 			while (c.moveToNext())
 			{
-				Conversation conv;
-				// TODO this can be expressed in a single sql query
+
+				ConvInfo convInfo;
 				String msisdn = c.getString(msisdnIdx);
 				String messageString = c.getString(msgColumn);
 				String metadata = c.getString(metadataColumn);
@@ -2874,55 +2867,36 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					if (null == details)
 					{
 						groupIds.add(msisdn);
-						conv = new GroupConversation(msisdn, null, null, true, false);
+						convInfo = new OneToNConvInfo.ConvInfoBuilder(msisdn).setConversationAlive(true).setIsMute(false).build();
 					}
 					else
 					{
 						String name = details.getGroupName();
 						boolean groupAlive = details.isGroupAlive();
 						boolean isMuteGroup = details.isGroupMute();
-						if(!Utils.isBroadcastConversation(msisdn))
-							conv = new GroupConversation(msisdn, name, null, groupAlive, isMuteGroup);
-						else
-						{
-							conv = new BroadcastConversation(msisdn, name, null, groupAlive, isMuteGroup);
-						}
+						convInfo = new OneToNConvInfo.ConvInfoBuilder(msisdn).setConversationAlive(groupAlive).setIsMute(isMuteGroup).setConvName(name).build();
 					}
 				}
 				else
 				{
-					conv = new Conversation(msisdn, sortingTimestamp);
-					ContactInfo contact = ContactManager.getInstance().getContact(conv.getMsisdn());
+					convInfo = new ConvInfo.ConvInfoBuilder(msisdn).setSortingTimeStamp(sortingTimestamp).build();
+
+					ContactInfo contact = ContactManager.getInstance().getContact(convInfo.getMsisdn());
+
 					ContactManager.getInstance().updateContactRecency(msisdn, sortingTimestamp, false);
+
 					if (null == contact)
 					{
 						msisdns.add(msisdn);
 					}
 					else
 					{
-						conv.setContactName(contact.getName());
-						conv.setOnhike(contact.isOnhike());
+						convInfo.setmConversationName(contact.getName());
 					}
 				}
 
-				conv.setUnreadCount(c.getInt(unreadCountColumn)+getExtraConvUnreadCount(msisdn));
-				conv.setIsStealth(c.getInt(isStealthColumn) == 1);
-
-				if (getMetadata)
-				{
-					int metadataIndex = c.getColumnIndex(DBConstants.CONVERSATION_METADATA);
-					JSONObject convMetadata = null;
-					try
-					{
-						convMetadata = new JSONObject(c.getString(metadataIndex));
-					}
-					catch (JSONException e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					// conv.setMetadata(convMetadata);
-				}
+				convInfo.setUnreadCount(c.getInt(unreadCountColumn) + getExtraConvUnreadCount(msisdn));
+				convInfo.setStealth(c.getInt(isStealthColumn) == 1);
 
 				ConvMessage message = new ConvMessage(messageString, msisdn, lastMessageTimestamp, ConvMessage.stateValue(c.getInt(msgStatusColumn)), c.getLong(msgIdColumn),
 						c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn));
@@ -2935,10 +2909,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					Logger.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
 				}
 
-				conv.addMessage(message);
-				conv.setTimestamp(sortingTimestamp);
+				convInfo.setLastConversationMsg(message);
+				convInfo.setSortingTimeStamp(sortingTimestamp);
 				Logger.d("HikeConversationDatabase", "conversation msisdn : " + msisdn);
-				conversations.put(msisdn, conv);
+				conversations.put(msisdn, convInfo);
+
 			}
 
 			if (msisdns.size() > 0)
@@ -2946,9 +2921,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				List<ContactInfo> contacts = ContactManager.getInstance().getContact(msisdns, false, true);
 				for (ContactInfo contact : contacts)
 				{
-					Conversation conv = conversations.get(contact.getMsisdn());
-					conv.setContactName(contact.getName());
-					conv.setOnhike(contact.isOnhike());
+					ConvInfo convinfo = conversations.get(contact.getMsisdn());
+					convinfo.setmConversationName(contact.getName());
 				}
 			}
 
@@ -2958,27 +2932,32 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				Map<String, GroupDetails> groupDetailsMap = ContactManager.getInstance().getGroupDetails(groupIds);
 				for (Entry<String, GroupDetails> mapEntry : groupDetailsMap.entrySet())
 				{
-					Conversation conv = conversations.get(mapEntry.getKey());
+					ConvInfo convInfo = conversations.get(mapEntry.getKey());
 					GroupDetails details = mapEntry.getValue();
 					if (null != details)
 					{
 						String name = details.getGroupName();
 						boolean groupAlive = details.isGroupAlive();
 						boolean isMuteGroup = details.isGroupMute();
-						conv.setContactName(name);
-						((GroupConversation) conv).setGroupAlive(groupAlive);
-						((GroupConversation) conv).setIsMuted(isMuteGroup);
+						convInfo.setmConversationName(name);
+						((OneToNConvInfo) convInfo).setConversationAlive(groupAlive);
+						convInfo.setMute(isMuteGroup);
 					}
 				}
 			}
 		}
+
 		finally
 		{
 			c.close();
 		}
-		List<Conversation> conversationsList = new ArrayList<Conversation>(conversations.values());
+
+		List<ConvInfo> conversationsList = new ArrayList<ConvInfo>(conversations.values());
+
 		Collections.sort(conversationsList, Collections.reverseOrder());
+
 		Logger.d("ConversationsTimeTest", "Query time: " + (System.currentTimeMillis() - startTime));
+
 		return conversationsList;
 	}
 
