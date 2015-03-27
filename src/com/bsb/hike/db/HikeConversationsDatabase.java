@@ -935,6 +935,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	{
 		long maxMsgId = Utils.getMaxLongValue(msgIds);
 		ArrayList<Long> messageIdsToBeUpdated = getCurrentUnreadMessageIdsForMsisdn(msisdn, maxMsgId);
+		Logger.d(AnalyticsConstants.MSG_REL_TAG, "For mr/nmr, Unread Msg Ids for maxMsgTd: " + maxMsgId +" , messageIdsToBeUpdated: "+ messageIdsToBeUpdated);
 		
 		if(messageIdsToBeUpdated == null || messageIdsToBeUpdated.isEmpty())
 		{
