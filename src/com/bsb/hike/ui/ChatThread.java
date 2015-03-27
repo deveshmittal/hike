@@ -14,10 +14,10 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
+
 import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
-
 import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.productpopup.DialogPojo;
@@ -187,6 +187,7 @@ import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.Conversation.ConversationMetadata;
 import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -4624,9 +4625,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}else if(HikePubSub.CONV_META_DATA_UPDATED.equals(type))
 		{			
-			if(mConversation.getMsisdn().equals(((MetaData)object).getGroupId()))
+			Pair<String, ConversationMetadata> pair = object;
+			if(mConversation.getMsisdn().equals(pair.first))
 			{
-				mConversation.setMetaData((MetaData) object);
+				mConversation.setMetaData(pair.second);
 			}
 		}
 		else if (HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT.equals(type))
