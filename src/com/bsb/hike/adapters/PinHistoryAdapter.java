@@ -21,8 +21,8 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.Conversation.Conversation;
+import com.bsb.hike.models.Conversation.GroupConversation;
 import com.bsb.hike.ui.PinHistoryActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.SmileyParser;
@@ -194,9 +194,9 @@ public class PinHistoryAdapter extends BaseAdapter implements OnLongClickListene
 				{
 					GroupConversation gConv = (GroupConversation) mConversation;
 					String number = null;
-					String name = gConv.getGroupParticipantFirstNameAndSurname(textPin.getGroupParticipantMsisdn());
+					String name = gConv.getConvParticipantFirstNameAndSurname(textPin.getGroupParticipantMsisdn());
 
-					if (((GroupConversation) mConversation).getGroupParticipant(textPin.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
+					if (((GroupConversation) mConversation).getConversationParticipant(textPin.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
 					{
 						number = textPin.getGroupParticipantMsisdn();
 					}

@@ -211,6 +211,16 @@ public abstract class OneToNConversation extends Conversation
 	{
 		this.isConversationAlive = isConversationAlive;
 	}
+	
+	public int getParticipantListSize()
+	{
+		if (this.conversationParticipantList != null)
+		{
+			return conversationParticipantList.size();
+		}
+		
+		return -1;
+	}
 
 	public void setupReadByList(String readBy, long msgId)
 	{
