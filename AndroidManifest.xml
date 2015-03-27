@@ -3,7 +3,7 @@
     package="com.bsb.hike"
     android:installLocation="auto"
     android:versionCode="1147"
-    android:versionName="3.8.5.007.MsgRel" >
+    android:versionName="3.8.5.008.MsgRel" >
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="17" />
