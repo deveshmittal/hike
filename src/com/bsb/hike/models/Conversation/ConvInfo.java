@@ -5,7 +5,8 @@ import android.text.TextUtils;
 import com.bsb.hike.models.ConvMessage;
 
 /**
- * This class contains the core fields which are required for a conversation entity to be displayed on the ConversationFragment screen.
+ * This class contains the core fields which are required for a conversation entity to be displayed on the ConversationFragment screen. This is the atomic unit for entities to be
+ * displayed on the home screen.
  * 
  * @author Anu/Piyush
  */
