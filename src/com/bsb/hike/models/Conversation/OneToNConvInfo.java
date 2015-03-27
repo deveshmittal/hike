@@ -25,7 +25,8 @@ public class OneToNConvInfo extends ConvInfo
 	}
 
 	/**
-	 * @param isConversationAlive the isConversationAlive to set
+	 * @param isConversationAlive
+	 *            the isConversationAlive to set
 	 */
 	public void setConversationAlive(boolean isConversationAlive)
 	{
@@ -51,7 +52,7 @@ public class OneToNConvInfo extends ConvInfo
 	public static class ConvInfoBuilder extends OneToNConvInfo.InitBuilder<ConvInfoBuilder>
 	{
 
-		protected ConvInfoBuilder(String msisdn)
+		public ConvInfoBuilder(String msisdn)
 		{
 			super(msisdn);
 		}
