@@ -44,6 +44,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 		this.mConversationName = builder.convName;
 		this.sortingTimeStamp = builder.sortingTimeStamp;
 		this.isStealth = builder.isStealth;
+		this.isMute = builder.isMute;
 	}
 
 	/**
@@ -77,7 +78,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 	 * @param mConversationName
 	 *            the mConversationName to set
 	 */
-	protected void setmConversationName(String mConversationName)
+	public void setmConversationName(String mConversationName)
 	{
 		this.mConversationName = mConversationName;
 	}
@@ -94,7 +95,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 	 * @param unreadCount
 	 *            the unreadCount to set
 	 */
-	protected void setUnreadCount(int unreadCount)
+	public void setUnreadCount(int unreadCount)
 	{
 		this.unreadCount = unreadCount;
 	}
@@ -128,7 +129,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 	 * @param isMute
 	 *            the isMute to set
 	 */
-	protected void setMute(boolean isMute)
+	public void setMute(boolean isMute)
 	{
 		this.isMute = isMute;
 	}
@@ -145,7 +146,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 	 * @param sortingTimeStamp
 	 *            the sortingTimeStamp to set
 	 */
-	protected void setSortingTimeStamp(long sortingTimeStamp)
+	public void setSortingTimeStamp(long sortingTimeStamp)
 	{
 		this.sortingTimeStamp = sortingTimeStamp;
 	}
@@ -162,7 +163,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 	 * @param lastConversationMsg
 	 *            the lastConversationMsg to set
 	 */
-	protected void setLastConversationMsg(ConvMessage lastConversationMsg)
+	public void setLastConversationMsg(ConvMessage lastConversationMsg)
 	{
 		this.lastConversationMsg = lastConversationMsg;
 	}
@@ -179,7 +180,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 	 * @param isStealth
 	 *            the isStealth to set
 	 */
-	protected void setStealth(boolean isStealth)
+	public void setStealth(boolean isStealth)
 	{
 		this.isStealth = isStealth;
 	}
@@ -238,12 +239,12 @@ public class ConvInfo implements Comparable<ConvInfo>
 
 		ConvInfo other = (ConvInfo) obj;
 
-		if ((mConversationName == null) && (other.mConversationName != null))
+		if ((this.mConversationName == null) && (other.mConversationName != null))
 		{
 			return false;
 		}
 
-		else if (!mConversationName.equals(other.mConversationName))
+		else if (this.mConversationName != null && (!mConversationName.equals(other.mConversationName)))
 		{
 			return false;
 		}
@@ -283,6 +284,8 @@ public class ConvInfo implements Comparable<ConvInfo>
 
 		private long sortingTimeStamp;
 
+		private boolean isMute;
+
 		protected InitBuilder(String msisdn)
 		{
 			this.msisdn = msisdn;
@@ -305,6 +308,12 @@ public class ConvInfo implements Comparable<ConvInfo>
 		public P setSortingTimeStamp(long timeStamp)
 		{
 			this.sortingTimeStamp = timeStamp;
+			return getSelfObject();
+		}
+
+		public P setIsMute(boolean mute)
+		{
+			this.isMute = mute;
 			return getSelfObject();
 		}
 
