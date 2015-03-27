@@ -92,6 +92,16 @@ public abstract class Conversation implements Comparable<Conversation>
 	}
 
 	/**
+	 * By default every conversation is assumed to be in Hike's ecosystem
+	 * 
+	 * @return
+	 */
+	public boolean isOnHike()
+	{
+		return true;
+	}
+
+	/**
 	 * @param chatTheme
 	 *            the chatTheme to set
 	 */

@@ -23,6 +23,7 @@ public class OneToOneConversation extends Conversation
 	/**
 	 * @return the isOnHike
 	 */
+	@Override
 	public boolean isOnHike()
 	{
 		return isOnHike;
