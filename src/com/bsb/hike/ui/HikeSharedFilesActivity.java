@@ -43,10 +43,10 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
+import com.bsb.hike.models.Conversation.Conversation;
+import com.bsb.hike.models.Conversation.OneToNConversation;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -618,7 +618,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	public static Intent getHikeSharedFilesActivityIntent(Context context, Conversation conversation)
 	{
 		Pair<String[], String[]> msisdnAndNameArrays = Utils.getMsisdnToNameArray(conversation);
-		return getHikeSharedFilesActivityIntent(context, conversation instanceof GroupConversation, conversation.getLabel(), 
+		return getHikeSharedFilesActivityIntent(context, conversation instanceof OneToNConversation, conversation.getLabel(), 
 				msisdnAndNameArrays.first, msisdnAndNameArrays.second, conversation.getMsisdn());
 	}
 	/**
