@@ -1,5 +1,7 @@
 package com.bsb.hike.models.Conversation;
 
+import java.util.Comparator;
+
 import android.text.TextUtils;
 
 import com.bsb.hike.models.ConvMessage;
@@ -308,5 +310,26 @@ public class ConvInfo implements Comparable<ConvInfo>
 		{
 			return new ConvInfo(this);
 		}
+	}
+
+	public static class ConvInfoComparator implements Comparator<ConvInfo>
+	{
+		/**
+		 * This comparator reverses the order of the normal comparable
+		 * 
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+
+		@Override
+		public int compare(ConvInfo lhs, ConvInfo rhs)
+		{
+			if (rhs == null)
+			{
+				return 1;
+			}
+
+			return rhs.compareTo(lhs);
+		}
+
 	}
 }

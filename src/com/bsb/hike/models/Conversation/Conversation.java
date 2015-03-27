@@ -1,7 +1,6 @@
 package com.bsb.hike.models.Conversation;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import org.json.JSONException;
@@ -116,7 +115,6 @@ public abstract class Conversation implements Comparable<Conversation>
 		convInfo.setmConversationName(convName);
 	}
 
-
 	public void setIsMute(boolean isMute)
 	{
 		convInfo.setMute(isMute);
@@ -126,7 +124,7 @@ public abstract class Conversation implements Comparable<Conversation>
 	{
 		return convInfo.isMute();
 	}
-	
+
 	/**
 	 * Returns a friendly label for the conversation
 	 * 
@@ -251,36 +249,6 @@ public abstract class Conversation implements Comparable<Conversation>
 	public int hashCode()
 	{
 		return convInfo.hashCode();
-	}
-
-	public static class ConversationComparator implements Comparator<Conversation>
-	{
-		/**
-		 * This comparator reverses the order of the normal comparable
-		 * 
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-
-		@Override
-		public int compare(Conversation lhs, Conversation rhs)
-		{
-			if (rhs == null)
-			{
-				return 1;
-			}
-
-			if (lhs instanceof ConversationTip)
-			{
-				return -1;
-			}
-
-			else if (rhs instanceof ConversationTip)
-			{
-				return 1;
-			}
-
-			return rhs.compareTo(lhs);
-		}
 	}
 
 	/**
