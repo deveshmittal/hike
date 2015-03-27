@@ -2784,7 +2784,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else if(HikePubSub.UNREAD_PIN_COUNT_RESET.equals(type))
 		{
-			if(groupConversation.getMsisdn().equals(((Conversation)object).getMetadata().getGroupId()))
+			if(groupConversation.getMsisdn().equals(((Conversation)object).getMsisdn()))
 			{
 				sharedContentItem.setUnreadPinCount(0);	
 				
@@ -2944,7 +2944,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			{
 				if (isBroadcast)
 				{
-					if(broadcastConversation.getGroupMemberAliveCount() > 1)
+					if(broadcastConversation.getParticipantListSize() > 1)
 					{
 						optionsList.add(getString(R.string.remove_from_broadcast));
 					}

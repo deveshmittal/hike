@@ -863,7 +863,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		notifyDataSetChanged();
 	}
 
-	public void updateGroupConversation(GroupConversation groupConversation)
+	public void updateGroupConversation(OneToNConversation groupConversation)
 	{
 		this.groupConversation = groupConversation;
 		notifyDataSetChanged();
