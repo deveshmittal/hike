@@ -73,22 +73,17 @@ import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.Conversation.GroupConversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
-import com.bsb.hike.productpopup.DialogPojo;
-import com.bsb.hike.productpopup.HikeDialogFragment;
-import com.bsb.hike.productpopup.IActivityPopup;
-import com.bsb.hike.productpopup.ProductContentModel;
-import com.bsb.hike.productpopup.ProductInfoManager;
 import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
@@ -954,16 +949,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			participantList.put(particpant.getMsisdn(), new PairModified<GroupParticipant, String>(groupParticipant, groupParticipant.getContactInfo().getNameOrMsisdn()));
 		}
 		ContactInfo userContactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
-
-		GroupConversation groupConversation = new GroupConversation(groupId, null, userContactInfo.getMsisdn(), true);
-		groupConversation.setGroupParticipantList(participantList);
-
+		
+		GroupConversation groupConversation = new GroupConversation.ConversationBuilder(groupId).setConversationOwner(userContactInfo.getMsisdn()).setIsAlive(true)
+				.setConversationParticipantsList(participantList).build();
+		
 		Logger.d(getClass().getSimpleName(), "Creating group: " + groupId);
 		HikeConversationsDatabase mConversationDb = HikeConversationsDatabase.getInstance();
-		mConversationDb.addRemoveGroupParticipants(groupId, groupConversation.getGroupParticipantList(), false);
+		mConversationDb.addRemoveGroupParticipants(groupId, groupConversation.getConversationParticipantList(), false);
 		if (newGroup)
 		{
-			mConversationDb.addConversation(groupConversation.getMsisdn(), false, groupName, groupConversation.getGroupOwner());
+			mConversationDb.addConversation(groupConversation.getMsisdn(), false, groupName, groupConversation.getConversationOwner());
 			ContactManager.getInstance().insertGroup(groupConversation.getMsisdn(),groupName);
 		}
 

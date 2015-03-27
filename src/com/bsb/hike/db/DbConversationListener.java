@@ -28,15 +28,14 @@ import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.FtueContactInfo;
 import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.HikeSDKMessageFilter;
@@ -413,7 +412,7 @@ public class DbConversationListener implements Listener
 		{
 			
 				Conversation conv = (Conversation)object;
-				HikeConversationsDatabase.getInstance().updateConversationMetadata(conv.getMsisdn(), conv.getMetaData());
+				HikeConversationsDatabase.getInstance().updateConversationMetadata(conv.getMsisdn(), conv.getMetadata());
 			
 		}else if(HikePubSub.HIKE_SDK_MESSAGE.equals(type)){
 			handleHikeSdkMessage(object);
