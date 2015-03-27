@@ -200,7 +200,7 @@ public class HikePhotosUtils
 
 		public enum FilterType
 		{
-			BRIGHTNESS, CONTRAST, SATURATION, HUE, SEPIA, GRAYSCALE, POLAROID, FADED, BGR, INVERSION, X_PRO_2, WILLOW, WALDEN, VALENCIA, TOASTER, SUTRO, SIERRA, RISE, NASHVILLE, MAYFAIR, LO_FI, KELVIN, INKWELL, HUDSON, HEFE, EARLYBIRD, BRANNAN, AMARO, E1977, SOLOMON, CLASSIC, RETRO, APOLLO, ORIGINAL, JALEBI
+			BRIGHTNESS, CONTRAST, SATURATION, HUE, SEPIA, GRAYSCALE, POLAROID, FADED, BGR, INVERSION, X_PRO_2, WILLOW, WALDEN, VALENCIA, TOASTER, SUTRO, SIERRA, RISE, NASHVILLE, MAYFAIR, LO_FI, KELVIN, INKWELL, HUDSON, HEFE, EARLYBIRD, BRANNAN, AMARO, E1977, SOLOMON, CLASSIC, RETRO, APOLLO, ORIGINAL
 		}
 
 		public static class FilterList
@@ -229,12 +229,11 @@ public class HikePhotosUtils
 					effectfilters.addFilter("KALA PILA", FilterType.SOLOMON);
 					effectfilters.addFilter("CHUSKI", FilterType.CLASSIC);
 					effectfilters.addFilter("JUGAAD", FilterType.NASHVILLE);
-					effectfilters.addFilter("JALEBI", FilterType.JALEBI);
+					effectfilters.addFilter("JALEBI", FilterType.KELVIN);
 					effectfilters.addFilter("X-PRO", FilterType.X_PRO_2);
 					effectfilters.addFilter("RETRO", FilterType.RETRO);
 					effectfilters.addFilter("APOLLO", FilterType.APOLLO);
 					effectfilters.addFilter("EARLYBIRD", FilterType.EARLYBIRD);
-					effectfilters.addFilter("KELVIN", FilterType.KELVIN);
 					effectfilters.addFilter("SHOLAY", FilterType.E1977);
 					effectfilters.addFilter("BRANNAN", FilterType.BRANNAN);
 					effectfilters.addFilter("LO-FI", FilterType.LO_FI);

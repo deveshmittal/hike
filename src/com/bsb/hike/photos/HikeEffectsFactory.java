@@ -14,7 +14,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
-import com.bsb.hike.photos.views.VignetteImageView;
 
 /**
  * 
@@ -38,11 +37,13 @@ public final class HikeEffectsFactory
 
 	private static HikeEffectsFactory instance;// singleton instance
 
-	private Bitmap mBitmapIn, currentOut, mBitmapOut2, mBitmapOut1, vignetteBitmap, finalBitmap;
+	private Bitmap mBitmapIn, currentOut, mBitmapOut2, mBitmapOut1, finalBitmap;
 
 	private RenderScript mRS;
 
-	private Allocation mInAllocation, mOutAllocations, mBlendAllocation;
+	private Allocation mInAllocation;
+
+	private Allocation mOutAllocations;
 
 	private ScriptC_HikePhotosEffects mScript;
 
@@ -73,7 +74,6 @@ public final class HikeEffectsFactory
 			// mBitmapOut1 = mBitmapOut1.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
 			mBitmapOut2 = HikePhotosUtils.createBitmap(mBitmapIn, 0, 0, 0, 0, false, false, false, true);
 			// mBitmapOut2 = mBitmapOut2.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
-			vignetteBitmap = HikePhotosUtils.createBitmap(mBitmapIn, 0, 0, 0, 0, false, false, false, true);
 			currentOut = mBitmapOut1;
 			// Log.e("com.bsb.hike","2 new bitmap created");
 		}
@@ -89,19 +89,14 @@ public final class HikeEffectsFactory
 				currentOut = mBitmapOut1;
 				// Log.e("com.bsb.hike","using out 1");
 			}
-			vignetteBitmap.eraseColor(0x00000000);
 		}
 		else if (isFinal)
 		{
 			if (finalBitmap == null)
 			{
 				finalBitmap = HikePhotosUtils.createBitmap(mBitmapIn, 0, 0, 0, 0, false, false, false, true);
-				vignetteBitmap = HikePhotosUtils.createBitmap(mBitmapIn, 0, 0, 0, 0, false, false, false, true);
+				// finalBitmap = finalBitmap.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(), mBitmapIn.getConfig());
 				// Log.e("com.bsb.hike","new final bitmap created");
-			}
-			else
-			{
-				vignetteBitmap.eraseColor(0x00000000);
 			}
 			currentOut = finalBitmap;
 		}
@@ -296,9 +291,6 @@ public final class HikeEffectsFactory
 		{
 			return false;
 		}
-
-		instance.vignetteBitmap = VignetteImageView.getVignetteforFilter(instance.vignetteBitmap, type, true, false);
-
 		instance.beginEffectAsyncTask(listener, type, false);
 
 		return true;
@@ -512,7 +504,6 @@ public final class HikeEffectsFactory
 			else
 			{
 				mOutAllocations = Allocation.createFromBitmap(mRS, currentOut);
-				mBlendAllocation = Allocation.createFromBitmap(mRS, vignetteBitmap);
 			}
 
 		}
@@ -553,16 +544,6 @@ public final class HikeEffectsFactory
 		{
 			int[] ro, ri, go, gi, bo, bi, ci, co;
 			Splines red, green, blue, composite;
-
-			if (!blurImage)
-			{
-				mScript.set_input1(mBlendAllocation);
-				mScript.set_isThumbnail(0);
-			}
-			else
-			{
-				mScript.set_isThumbnail(1);
-			}
 
 			switch (effect)
 			{
@@ -628,25 +609,6 @@ public final class HikeEffectsFactory
 				mScript.set_b(new int[] { 0x7C, 0, 0 });
 				mScript.forEach_filter_kelvin(mInAllocation, mOutAllocations);
 				break;
-			case JALEBI:
-
-				ri = new int[] { 0, 149, 255 };
-				ro = new int[] { 64, 229, 255 };
-				gi = new int[] { 0, 159, 255 };
-				go = new int[] { 38, 181, 255 };
-				bi = new int[] { 0, 255 };
-				bo = new int[] { 62, 189 };
-				red = new Splines(ri, ro);
-				green = new Splines(gi, go);
-				blue = new Splines(bi, bo);
-				mScript.set_rSpline(red.getInterpolationMatrix());
-				mScript.set_gSpline(green.getInterpolationMatrix());
-				mScript.set_bSpline(blue.getInterpolationMatrix());
-				mScript.set_r(new int[] { 0xFF, 0, 0 });
-				mScript.set_g(new int[] { 0xB0, 0, 0 });
-				mScript.set_b(new int[] { 0x7C, 0, 0 });
-				mScript.forEach_filter_jalebi(mInAllocation, mOutAllocations);
-				break;
 			case RETRO:
 				ci = new int[] { 0, 91, 182, 255 };
 				co = new int[] { 0, 85, 199, 255 };
@@ -691,7 +653,7 @@ public final class HikeEffectsFactory
 				mScript.set_rSpline(red.getInterpolationMatrix());
 				mScript.set_gSpline(green.getInterpolationMatrix());
 				mScript.set_bSpline(blue.getInterpolationMatrix());
-				mScript.forEach_filter_apollo(mInAllocation, mOutAllocations);
+				mScript.forEach_filter_1977_or_xpro(mInAllocation, mOutAllocations);
 				break;
 			case BRANNAN:
 				bi = new int[] { 0, 183, 255 };
@@ -738,7 +700,14 @@ public final class HikeEffectsFactory
 				mScript.forEach_filter_nashville(mInAllocation, mOutAllocations);
 				break;
 			case ORIGINAL:
-				mScript.forEach_filter_original(mInAllocation, mOutAllocations);
+				if (blurImage)
+				{
+					inBitmapOut = HikePhotosUtils.createBitmap(mBitmapIn, 0, 0, 0, 0, true, false, false, true);
+				}
+				else
+				{
+					currentOut = HikePhotosUtils.createBitmap(mBitmapIn, 0, 0, 0, 0, true, false, false, true);
+				}
 				break;
 			default:
 				mScript.forEach_filter_colorMatrix(mInAllocation, mOutAllocations);
@@ -746,7 +715,10 @@ public final class HikeEffectsFactory
 
 			}
 
-			mOutAllocations.copyTo(blurImage ? inBitmapOut : currentOut);
+			if (effect != FilterType.ORIGINAL)
+			{
+				mOutAllocations.copyTo(blurImage ? inBitmapOut : currentOut);
+			}
 
 		}
 
