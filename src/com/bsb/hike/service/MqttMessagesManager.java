@@ -950,10 +950,10 @@ public class MqttMessagesManager
 		{
 			serverIdsArrayList.add(serverIds.optLong(i));
 		}
-		
 		if (!Utils.isGroupConversation(id))
 		{
 			Map<String, ArrayList<Long>> map = convDb.getMsisdnMapForServerIds(serverIdsArrayList, id);
+			Logger.d(AnalyticsConstants.MSG_REL_TAG, "NOT GC so --> For mr/nmr, calling : ids, map" + serverIdsArrayList + " , .. "+ map);
 			if (map != null && !map.isEmpty())
 			{
 				for (String chatMsisdn : map.keySet())
@@ -965,6 +965,7 @@ public class MqttMessagesManager
 		}
 		else
 		{
+			Logger.d(AnalyticsConstants.MSG_REL_TAG, "GROUP MR so --> For mr/nmr, calling : " + serverIdsArrayList);
 			//This will only be called in case of group MR. there is bug in which MR for one person
 			// in group are recieved by all other participants in group. If for those MR we try to find 
 			// a msisdn map we would end up finding a wrong message in db which we will incorrectly mark
@@ -985,7 +986,7 @@ public class MqttMessagesManager
 		{
 			
 			ArrayList<Long> updatedMessageIds = convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, msgIds);
-			
+			Logger.d(AnalyticsConstants.MSG_REL_TAG, "For mr/nmr, reading : " + updatedMessageIds);
 			if(updatedMessageIds == null || updatedMessageIds.isEmpty())
 			{
 				return;

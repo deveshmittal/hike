@@ -1130,16 +1130,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			 */
 			
 			// Adding Logs for Message Reliability
-			Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
-			Logger.d(AnalyticsConstants.MSG_REL_TAG, "Packet Arrives at MQTT , track_id:- " + packet.getTrackId());
-			if (HikeConstants.MqttMessageTypes.NEW_MESSAGE_READ.equals(packet.getMsgType()))
-			{
-				MsgRelLogManager.logPacketForMsgReliability(packet, MsgRelEventType.RECEIVER_MQTT_RECV_MR_FROM_RECEIVER);
-			}
-			else
-			{
-				MsgRelLogManager.logPacketForMsgReliability(packet, MsgRelEventType.SENDER_MQTT_RECV_SENDING_MSG);
-			}
+			MsgRelLogManager.recordPacketArrivedAtMqtt(packet);
 			
 			mqtt.publish(this.topic + HikeConstants.PUBLISH_TOPIC, packet.getMessage(), qos, false, packet, new IMqttActionListenerNew()
 			{
@@ -1159,7 +1150,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 								Logger.d(TAG, "Recieved S status for msg with id : " + msgId);
 								
 								// Adding Logs for Message Reliability
-								MsgRelLogManager.logPacketForMsgReliability(packet, MsgRelEventType.SENDER_RECV_ACK);
+								MsgRelLogManager.recordAckMsgRelEvent(packet);
 
 								// HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
 							}

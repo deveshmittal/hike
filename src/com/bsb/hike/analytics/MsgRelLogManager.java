@@ -147,7 +147,7 @@ public class MsgRelLogManager
 			metadata.put(AnalyticsConstants.TRACK_ID, trackID);
 			
 			// msg_id:-
-			metadata.put(AnalyticsConstants.MSG_ID, msgId);
+			//metadata.put(AnalyticsConstants.MSG_ID, msgId);
 			
 			// msg type:- Text/STICKER/Multimedia
 			metadata.put(AnalyticsConstants.MESSAGE_TYPE, msgType);
@@ -209,5 +209,33 @@ public class MsgRelLogManager
 		}
 		
 		return false;
+	}
+	
+	public static void recordAckMsgRelEvent(HikePacket packet)
+	{
+		Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Ack Arrives, track_id:- " + packet.getTrackId());
+		if (HikeConstants.MqttMessageTypes.NEW_MESSAGE_READ.equals(packet.getMsgType()))
+		{
+			MsgRelLogManager.logPacketForMsgReliability(packet, MsgRelEventType.RECEIVER_MQTT_RECV_MSG_ACK);
+		}
+		else
+		{
+			MsgRelLogManager.logPacketForMsgReliability(packet, MsgRelEventType.SENDER_RECV_ACK);
+		}
+	}
+	
+	public static void recordPacketArrivedAtMqtt(HikePacket packet)
+	{
+		Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+		Logger.d(AnalyticsConstants.MSG_REL_TAG, "Packet Arrives at MQTT , track_id:- " + packet.getTrackId());
+		if (HikeConstants.MqttMessageTypes.NEW_MESSAGE_READ.equals(packet.getMsgType()))
+		{
+			MsgRelLogManager.logPacketForMsgReliability(packet, MsgRelEventType.RECEIVER_MQTT_RECV_MR_FROM_RECEIVER);
+		}
+		else
+		{
+			MsgRelLogManager.logPacketForMsgReliability(packet, MsgRelEventType.SENDER_MQTT_RECV_SENDING_MSG);
+		}
 	}
 }
