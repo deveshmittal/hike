@@ -41,11 +41,11 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.Conversation.BroadcastConversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
@@ -345,16 +345,14 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 		}
 		ContactInfo userContactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 
-		BroadcastConversation broadcastConversation;
-		broadcastConversation = new BroadcastConversation(groupOrBroadcastId, null, userContactInfo.getMsisdn(), true);
-		broadcastConversation.setGroupParticipantList(participantList);
-
+		BroadcastConversation broadcastConversation = new BroadcastConversation.ConversationBuilder(groupOrBroadcastId).setConversationOwner(userContactInfo.getMsisdn()).setIsAlive(true).setConversationParticipantsList(participantList).build();
+		
 		Logger.d(getClass().getSimpleName(), "Creating group: " + groupOrBroadcastId);
 		HikeConversationsDatabase mConversationDb = HikeConversationsDatabase.getInstance();
-		mConversationDb.addRemoveGroupParticipants(groupOrBroadcastId, broadcastConversation.getGroupParticipantList(), false);
+		mConversationDb.addRemoveGroupParticipants(groupOrBroadcastId, broadcastConversation.getConversationParticipantList(), false);
 		if (newBroadcast)
 		{
-			mConversationDb.addConversation(broadcastConversation.getMsisdn(), false, broadcastName, broadcastConversation.getGroupOwner());
+			mConversationDb.addConversation(broadcastConversation.getMsisdn(), false, broadcastName, broadcastConversation.getConversationOwner());
 			ContactManager.getInstance().insertGroup(broadcastConversation.getMsisdn(),broadcastName);
 		}
 
