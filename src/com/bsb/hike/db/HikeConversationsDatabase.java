@@ -330,7 +330,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 			String insert = "INSERT INTO " + DBConstants.GROUP_MEMBERS_TABLE + " SELECT * FROM temp_table";
 
-			String drop = "DROP TABLE temp_table";
+			String drop = "DROP TABLE IF EXISTS temp_table";
 
 			db.execSQL(alter);
 			db.execSQL(dropIndex);
@@ -400,7 +400,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					Logger.d(getClass().getSimpleName(), "DB data: " + data.toString());
 					Utils.makeNewFileWithExistingData(data);
 
-					String drop = "DROP TABLE " + DBConstants.FILE_TABLE;
+					String drop = "DROP TABLE IF EXISTS " + DBConstants.FILE_TABLE;
 					db.execSQL(drop);
 				}
 			}
@@ -5661,7 +5661,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ DBConstants.MESSAGE_METADATA + " FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.MESSAGES_TABLE + "." + DBConstants.MESSAGE_ID
 				+ " IN ( SELECT " + DBConstants.MESSAGE_ID + " FROM " + TEMP_SHARED_MEDIA_TABLE + " )";
 
-		String sql4 = "DROP TABLE " + TEMP_SHARED_MEDIA_TABLE;
+		String sql4 = "DROP TABLE IF EXISTS " + TEMP_SHARED_MEDIA_TABLE;
 
 		mDb.execSQL(sql1);
 		mDb.execSQL(sql2);
@@ -6137,7 +6137,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			 */
 			if(!currentCategoryData.isEmpty())
 			{
-				mDb.execSQL("DROP TABLE " + STICKERS_TABLE);
+				mDb.execSQL("DROP TABLE IF EXISTS " + STICKERS_TABLE);
 			}
 		}
 		catch (JSONException e)
