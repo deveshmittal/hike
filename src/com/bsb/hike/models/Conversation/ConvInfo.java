@@ -33,7 +33,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 	 */
 	private ConvMessage lastConversationMsg;
 
-	private ConvInfo(ConvInfoBuilder builder)
+	protected ConvInfo(InitBuilder<?> builder)
 	{
 		if (!validateConvInfo(builder))
 		{
@@ -52,7 +52,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 	 * @param builder
 	 * @return
 	 */
-	private boolean validateConvInfo(ConvInfoBuilder builder)
+	private boolean validateConvInfo(InitBuilder<?> builder)
 	{
 		return !(TextUtils.isEmpty(builder.msisdn));
 	}
@@ -273,7 +273,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 		return result;
 	}
 
-	public static class ConvInfoBuilder
+	protected static abstract class InitBuilder<P extends InitBuilder<P>>
 	{
 		private String msisdn;
 
@@ -283,33 +283,52 @@ public class ConvInfo implements Comparable<ConvInfo>
 
 		private long sortingTimeStamp;
 
-		public ConvInfoBuilder(String msisdn)
+		protected InitBuilder(String msisdn)
 		{
 			this.msisdn = msisdn;
 		}
 
-		public ConvInfoBuilder setConvName(String convName)
+		protected abstract P getSelfObject();
+
+		public P setConvName(String convName)
 		{
 			this.convName = convName;
-			return this;
+			return getSelfObject();
 		}
 
-		public ConvInfoBuilder setIsStealth(boolean isStealth)
+		public P setIsStealth(boolean isStealth)
 		{
 			this.isStealth = isStealth;
-			return this;
+			return getSelfObject();
 		}
 
-		public ConvInfoBuilder setSortingTimeStamp(long timeStamp)
+		public P setSortingTimeStamp(long timeStamp)
 		{
 			this.sortingTimeStamp = timeStamp;
-			return this;
+			return getSelfObject();
 		}
 
 		public ConvInfo build()
 		{
 			return new ConvInfo(this);
 		}
+
+	}
+
+	public static class ConvInfoBuilder extends InitBuilder<ConvInfoBuilder>
+	{
+
+		public ConvInfoBuilder(String msisdn)
+		{
+			super(msisdn);
+		}
+
+		@Override
+		protected ConvInfoBuilder getSelfObject()
+		{
+			return this;
+		}
+
 	}
 
 	public static class ConvInfoComparator implements Comparator<ConvInfo>

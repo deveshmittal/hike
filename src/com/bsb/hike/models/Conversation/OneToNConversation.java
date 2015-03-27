@@ -40,8 +40,6 @@ public abstract class OneToNConversation extends Conversation
 
 	protected ConvMessage pinnedConvMessage;
 
-	protected boolean isConversationAlive;
-
 	/**
 	 * Default value of long is 0, hence setting this as -1 here
 	 */
@@ -64,8 +62,6 @@ public abstract class OneToNConversation extends Conversation
 		this.pinnedConvMessage = builder.pinnedConvmessage;
 
 		this.lastSentMsgId = builder.lastSentMsgId;
-
-		this.isConversationAlive = builder.isConversationAlive;
 
 		this.unreadPinnedMessageCount = builder.unreadPinnedMessageCount;
 	}
@@ -200,7 +196,7 @@ public abstract class OneToNConversation extends Conversation
 	 */
 	public boolean isConversationAlive()
 	{
-		return isConversationAlive;
+		return ((OneToNConvInfo) convInfo).isConversationAlive();
 	}
 
 	/**
@@ -209,16 +205,16 @@ public abstract class OneToNConversation extends Conversation
 	 */
 	public void setConversationAlive(boolean isConversationAlive)
 	{
-		this.isConversationAlive = isConversationAlive;
+		((OneToNConvInfo) convInfo).setConversationAlive(isConversationAlive);
 	}
-	
+
 	public int getParticipantListSize()
 	{
 		if (this.conversationParticipantList != null)
 		{
 			return conversationParticipantList.size();
 		}
-		
+
 		return -1;
 	}
 
@@ -308,6 +304,17 @@ public abstract class OneToNConversation extends Conversation
 	}
 
 	@Override
+	protected void setConvInfo(ConvInfo convInfo)
+	{
+		if (!(convInfo instanceof OneToNConvInfo))
+		{
+			throw new IllegalStateException("Pass ConvInfo as OneToNConvInfo object for such type of conversations!");
+		}
+
+		this.convInfo = (OneToNConvInfo) convInfo;
+	}
+
+	@Override
 	public void setMetadata(ConversationMetadata metadata)
 	{
 		if (!(metadata instanceof OneToNConversationMetadata))
@@ -340,8 +347,6 @@ public abstract class OneToNConversation extends Conversation
 		private ArrayList<String> readByParticipantList;
 
 		private ConvMessage pinnedConvmessage;
-
-		private boolean isConversationAlive;
 
 		private long lastSentMsgId = -1;
 
@@ -414,12 +419,6 @@ public abstract class OneToNConversation extends Conversation
 		public P setPinnedConvmessage(ConvMessage pinnedConvMessage)
 		{
 			this.pinnedConvmessage = pinnedConvMessage;
-			return getSelfObject();
-		}
-
-		public P setIsAlive(boolean isAlive)
-		{
-			this.isConversationAlive = isAlive;
 			return getSelfObject();
 		}
 
