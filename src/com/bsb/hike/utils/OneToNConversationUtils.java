@@ -8,7 +8,7 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Conversation.BroadcastConversation;
 import com.bsb.hike.models.Conversation.OneToNConversation;
 
-public class GroupUtils {
+public class OneToNConversationUtils {
 
 	public static String getParticipantAddedMessage(ConvMessage convMessage, Context context, String highlight)
 	{
