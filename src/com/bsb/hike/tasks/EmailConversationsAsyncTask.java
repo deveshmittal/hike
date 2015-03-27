@@ -20,12 +20,12 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.Conversation.Conversation;
+import com.bsb.hike.models.Conversation.GroupConversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
@@ -68,11 +68,11 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 			{
 				sBuilder.append(R.string.group_name_email);
 				GroupConversation gConv = ((GroupConversation) convs[k]);
-				if (null == gConv.getGroupParticipantList())
+				if (null == gConv.getConversationParticipantList())
 				{
-					gConv.setGroupParticipantList(ContactManager.getInstance().getGroupParticipants(gConv.getMsisdn(), false, false));
+					gConv.setConversationParticipantList(ContactManager.getInstance().getGroupParticipants(gConv.getMsisdn(), false, false));
 				}
-				participantMap = gConv.getGroupParticipantList();
+				participantMap = gConv.getConversationParticipantList();
 			}
 			// initialize with a label
 			sBuilder.append(activity.getResources().getString(R.string.chat_with_prefix) + chatLabel + "\n");
@@ -85,7 +85,7 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 			}
 			// iterate through the messages and construct a meaningful
 			// payload
-			List<ConvMessage> cList = conv.getMessages();
+			List<ConvMessage> cList = conv.getMessagesList();
 			for (int i = 0; i < cList.size(); i++)
 			{
 				ConvMessage cMessage = cList.get(i);
