@@ -167,14 +167,13 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.Conversation.MetaData;
-import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.FtueContactsData;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.Conversation.Conversation;
+import com.bsb.hike.models.Conversation.GroupConversation;
+import com.bsb.hike.models.Conversation.OneToNConversation;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
@@ -194,7 +193,6 @@ import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
-import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPUtils;
 import com.google.android.maps.GeoPoint;
 
@@ -809,12 +807,12 @@ public class Utils
 	public static String getGroupJoinHighlightText(JSONArray participantInfoArray, GroupConversation conversation)
 	{
 		JSONObject participant = (JSONObject) participantInfoArray.opt(0);
-		String highlight = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participant.optString(HikeConstants.MSISDN));
+		String highlight = ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(participant.optString(HikeConstants.MSISDN));
 
 		if (participantInfoArray.length() == 2)
 		{
 			JSONObject participant2 = (JSONObject) participantInfoArray.opt(1);
-			String name2 = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(participant2.optString(HikeConstants.MSISDN));
+			String name2 = ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(participant2.optString(HikeConstants.MSISDN));
 
 			highlight += " and " + name2;
 		}
@@ -3485,9 +3483,9 @@ public class Utils
 	public static Intent createIntentForConversation(Context context, Conversation conversation)
 	{
 		Intent intent = new Intent(context, ChatThread.class);
-		if (conversation.getContactName() != null)
+		if (conversation.getConversationName() != null)
 		{
-			intent.putExtra(HikeConstants.Extras.NAME, conversation.getContactName());
+			intent.putExtra(HikeConstants.Extras.NAME, conversation.getConversationName());
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -4755,13 +4753,13 @@ public class Utils
 		return bd;
 	}
 
-	public static void resetPinUnreadCount(Conversation conv)
+	public static void resetPinUnreadCount(OneToNConversation conv)
 	{
-		if (conv.getMetaData() != null)
+		if (conv.getMetadata() != null)
 		{
 			try
 			{
-				conv.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
+				conv.getMetadata().setUnreadPinCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
 			}
 			catch (JSONException e)
 			{
@@ -4851,7 +4849,7 @@ public class Utils
 	{
 		if (conversation instanceof GroupConversation)
 		{
-			Map<String, PairModified<GroupParticipant, String>> groupParticipants = ((GroupConversation) conversation).getGroupParticipantList();
+			Map<String, PairModified<GroupParticipant, String>> groupParticipants = ((GroupConversation) conversation).getConversationParticipantList();
 			String[] msisdnArray = new String[groupParticipants.size()];
 			String[] nameArray = new String[groupParticipants.size()];
 
