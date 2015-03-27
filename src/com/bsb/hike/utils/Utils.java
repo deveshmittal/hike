@@ -804,7 +804,7 @@ public class Utils
 		}
 	}
 
-	public static String getGroupJoinHighlightText(JSONArray participantInfoArray, GroupConversation conversation)
+	public static String getGroupJoinHighlightText(JSONArray participantInfoArray, OneToNConversation conversation)
 	{
 		JSONObject participant = (JSONObject) participantInfoArray.opt(0);
 		String highlight = ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(participant.optString(HikeConstants.MSISDN));

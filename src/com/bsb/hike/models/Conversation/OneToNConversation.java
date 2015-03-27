@@ -64,6 +64,8 @@ public abstract class OneToNConversation extends Conversation
 		this.lastSentMsgId = builder.lastSentMsgId;
 
 		this.unreadPinnedMessageCount = builder.unreadPinnedMessageCount;
+		
+		setConversationAlive(builder.isAlive);
 	}
 
 	/**
@@ -351,6 +353,8 @@ public abstract class OneToNConversation extends Conversation
 		private long lastSentMsgId = -1;
 
 		private int unreadPinnedMessageCount;
+		
+		private boolean isAlive;
 
 		public InitBuilder(String msisdn)
 		{
@@ -437,6 +441,12 @@ public abstract class OneToNConversation extends Conversation
 			}
 
 			this.metadata = (OneToNConversationMetadata) metadata;
+			return getSelfObject();
+		}
+		
+		public P setIsAlive(boolean alive)
+		{
+			this.isAlive = alive;
 			return getSelfObject();
 		}
 	}

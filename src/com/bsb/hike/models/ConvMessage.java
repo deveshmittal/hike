@@ -482,7 +482,7 @@ public class ConvMessage
 		{
 		case PARTICIPANT_JOINED:
 			JSONArray arr = metadata.getGcjParticipantInfo();
-			String highlight = Utils.getGroupJoinHighlightText(arr, (GroupConversation) conversation);
+			String highlight = Utils.getGroupJoinHighlightText(arr, (OneToNConversation) conversation);
 			this.mMessage = OneToNConversationUtils.getParticipantAddedMessage(this, context, highlight);
 			break;
 		case PARTICIPANT_LEFT:
@@ -569,9 +569,9 @@ public class ConvMessage
 			{
 
 				String nameString;
-				if (conversation instanceof GroupConversation)
+				if (conversation instanceof OneToNConversation)
 				{
-					nameString = ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(metadata.getMsisdn());
+					nameString = ((OneToNConversation) conversation).getConvParticipantFirstNameAndSurname(metadata.getMsisdn());
 				}
 				else
 				{
