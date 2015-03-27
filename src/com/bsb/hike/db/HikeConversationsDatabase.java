@@ -3163,7 +3163,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					JSONObject dataObject = new JSONObject();
 					dataObject.put(HikeConstants.METADATA, msgMetadata);
 					dataObject.put(HikeConstants.PRIVATE_DATA, privatedata);
-					Pair<Long, JSONObject> pair = new Pair<Long, JSONObject>(msgId, dataObject);
+					Pair<Long, JSONObject> pair = new Pair<Long, JSONObject>(mappedMsgId, dataObject);
 					ids.add(pair);
 				}
 				sb.append(msgId);
