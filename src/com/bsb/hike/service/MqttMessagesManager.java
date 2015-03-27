@@ -61,6 +61,7 @@ import com.bsb.hike.models.WhitelistDomain;
 import com.bsb.hike.models.Conversation.BroadcastConversation;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.GroupConversation;
+import com.bsb.hike.models.Conversation.OneToNConversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.platform.content.PlatformContent;
@@ -392,16 +393,10 @@ public class MqttMessagesManager
 		{
 			return;
 		}
-		GroupConversation groupConversation;
-		String msisdn = jsonObj.getString(HikeConstants.TO);
-		if (Utils.isBroadcastConversation(msisdn))
-		{
-			groupConversation = new BroadcastConversation(jsonObj, this.context);
-		}
-		else
-		{
-			groupConversation = new GroupConversation(jsonObj, this.context);
-		}
+		OneToNConversation groupConversation;
+		
+		groupConversation = OneToNConversation.createOneToNConversationFromJSON(jsonObj);
+		
 		boolean groupRevived = false;
 
 		if (!ContactManager.getInstance().isGroupAlive(groupConversation.getMsisdn()))
@@ -426,7 +421,7 @@ public class MqttMessagesManager
 			}
 
 		}
-		int gcjAdd = this.convDb.addRemoveGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList(), groupRevived);
+		int gcjAdd = this.convDb.addRemoveGroupParticipants(groupConversation.getMsisdn(), groupConversation.getConversationParticipantList(), groupRevived);
 		if (!groupRevived && gcjAdd != HikeConstants.NEW_PARTICIPANT)
 		{
 			Logger.d(getClass().getSimpleName(), "GCJ Message was already received");
@@ -458,7 +453,8 @@ public class MqttMessagesManager
 				// Earlier there were 2 queries, one to make the group conv and second to set the name. I have combined the both
 				groupName = metadata.optString(HikeConstants.NAME);
 			}
-			groupConversation = (GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, groupName, groupConversation.getGroupOwner());
+			
+			groupConversation = (GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, groupName, groupConversation.getConversationOwner());
 			ContactManager.getInstance().insertGroup(groupConversation.getMsisdn(), groupName);
 
 			// Adding a key to the json signify that this was the GCJ
@@ -3015,7 +3011,7 @@ public class MqttMessagesManager
 		if (!isChatBgMsg)
 		{
 			if ((conversation == null && (!isUJMsg || !ContactManager.getInstance().doesContactExist(msisdn)))
-					|| (conversation != null && TextUtils.isEmpty(conversation.getContactName()) && isUJMsg && !isGettingCredits && !(conversation instanceof GroupConversation)))
+					|| (conversation != null && TextUtils.isEmpty(conversation.getConversationName()) && isUJMsg && !isGettingCredits && !(conversation instanceof GroupConversation)))
 			{
 				return null;
 			}

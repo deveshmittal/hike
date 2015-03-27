@@ -8,13 +8,17 @@ import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.text.TextUtils;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
@@ -344,13 +348,13 @@ public abstract class OneToNConversation extends Conversation
 			return getSelfObject();
 		}
 
-		public P setConversationOwner(Map<String, PairModified<GroupParticipant, String>> participantList)
+		public P setConversationParticipantsList(Map<String, PairModified<GroupParticipant, String>> participantList)
 		{
 			this.conversationParticipantList = participantList;
 			return getSelfObject();
 		}
 
-		public P setConversationOwner(List<PairModified<GroupParticipant, String>> participantList)
+		public P setConversationParticipantsList(List<PairModified<GroupParticipant, String>> participantList)
 		{
 			this.conversationParticipantList = new HashMap<String, PairModified<GroupParticipant, String>>();
 			for (PairModified<GroupParticipant, String> grpParticipant : participantList)
@@ -463,5 +467,60 @@ public abstract class OneToNConversation extends Conversation
 			}
 			return name;
 		}
+	}
+
+	public static OneToNConversation createOneToNConversationFromJSON(JSONObject jsonObj) throws JSONException
+	{
+		OneToNConversation conversation;
+		String msisdn = jsonObj.getString(HikeConstants.TO);
+
+		Map<String, PairModified<GroupParticipant, String>> participants = new HashMap<String, PairModified<GroupParticipant, String>>();
+
+		JSONArray array = jsonObj.getJSONArray(HikeConstants.DATA);
+		List<String> msisdns = new ArrayList<String>();
+		for (int i = 0; i < array.length(); i++)
+		{
+			JSONObject nameMsisdn = array.getJSONObject(i);
+			String contactNum = nameMsisdn.getString(HikeConstants.MSISDN);
+			msisdns.add(contactNum);
+			String contactName = nameMsisdn.getString(HikeConstants.NAME);
+			boolean onHike = nameMsisdn.optBoolean(HikeConstants.ON_HIKE);
+			boolean onDnd = nameMsisdn.optBoolean(HikeConstants.DND);
+			GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(contactNum, contactNum, contactName, contactNum, onHike), false, onDnd);
+			Logger.d("OneToNConversation", "Parsing JSON and adding contact to conversation: " + contactNum);
+			participants.put(contactNum, new PairModified<GroupParticipant, String>(groupParticipant, contactName));
+		}
+
+		List<ContactInfo> contacts = ContactManager.getInstance().getContact(msisdns, true, false);
+		for (ContactInfo contact : contacts)
+		{
+			PairModified<GroupParticipant, String> grpPair = participants.get(contact.getMsisdn());
+			if (null != grpPair)
+			{
+				GroupParticipant grpParticipant = grpPair.getFirst();
+				contact.setOnhike(grpParticipant.getContactInfo().isOnhike());
+				grpParticipant.setContactInfo(contact);
+				if (null != contact.getName())
+				{
+					grpPair.setSecond(contact.getName());
+				}
+			}
+		}
+
+		String convName = ContactManager.getInstance().getName(msisdn);
+
+		if (Utils.isBroadcastConversation(msisdn))
+		{
+			conversation = new BroadcastConversation.ConversationBuilder(msisdn).setConversationOwner(jsonObj.getString(HikeConstants.FROM))
+					.setConversationParticipantsList(participants).setConversationOwner(convName).build();
+
+		}
+		else
+		{
+			conversation = new GroupConversation.ConversationBuilder(msisdn).setConversationOwner(jsonObj.getString(HikeConstants.FROM))
+					.setConversationParticipantsList(participants).setConversationOwner(convName).build();
+		}
+
+		return conversation;
 	}
 }
