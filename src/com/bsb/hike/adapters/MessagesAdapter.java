@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -631,7 +630,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else
 			{
-				type = conversation.isOnhike() ? ViewType.SEND_HIKE : ViewType.SEND_SMS;
+				type = conversation.isOnHike() ? ViewType.SEND_HIKE : ViewType.SEND_SMS;
 			}
 		}
 		else
@@ -2224,7 +2223,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				String name = Utils.getFirstName(conversation.getLabel());
 				String message;
-				if (conversation.isOnhike())
+				if (conversation.isOnHike())
 				{
 					boolean firstIntro = conversation.getMsisdn().hashCode() % 2 == 0;
 					message = String.format(context.getString(firstIntro ? R.string.start_thread1 : R.string.start_thread1), name);
@@ -2235,7 +2234,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 
 				int icRes;
-				if (conversation.isOnhike())
+				if (conversation.isOnHike())
 				{
 					icRes = isDefaultTheme ? R.drawable.ic_user_join : R.drawable.ic_user_join_custom;
 				}
@@ -3069,7 +3068,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void setIconForSentMessage(ConvMessage message, ImageView status, int tickResId, int smsDrawableResId, int boltDrawableResId)
 	{
-		if (conversation.isOnhike() && !(conversation instanceof GroupConversation) && !message.isBroadcastMessage())
+		if (conversation.isOnHike() && !(conversation instanceof GroupConversation) && !message.isBroadcastMessage())
 		{
 			if (message.isSMS())
 			{
@@ -3279,7 +3278,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					if ((hikeFile.getHikeFileType() == HikeFileType.LOCATION) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT))
 					{
 						FileTransferManager.getInstance(context)
-								.uploadContactOrLocation(convMessage, (hikeFile.getHikeFileType() == HikeFileType.CONTACT), conversation.isOnhike());
+								.uploadContactOrLocation(convMessage, (hikeFile.getHikeFileType() == HikeFileType.CONTACT), conversation.isOnHike());
 					}
 					else
 					{
@@ -3291,7 +3290,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						}
 						else if (fss.getFTState() != FTState.INITIALIZED)
 						{
-							FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
+							FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnHike());
 						}
 					}
 					notifyDataSetChanged();
@@ -3331,7 +3330,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			Intent intent = new Intent(context, ProfileActivity.class);
 			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
-			intent.putExtra(HikeConstants.Extras.ON_HIKE, conversation.isOnhike());
+			intent.putExtra(HikeConstants.Extras.ON_HIKE, conversation.isOnHike());
 
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.putExtra(HikeConstants.Extras.CONTACT_INFO, convMessage.getMsisdn());
@@ -3817,7 +3816,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else
 		{
-			if (conversation.isOnhike())
+			if (conversation.isOnHike())
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_HIKE_SMS_FALLBACK, unsentMessages);
 				chatThread.messagesSentCloseHikeToOfflineMode(false);
