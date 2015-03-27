@@ -1729,11 +1729,27 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		 * if this is a message, then grab the messageId out of the json object so we can get confirmation of success/failure
 		 */
 		// get Values of (uid, msgId, type, track) from metadata of convMsg
-		if (HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) || (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE))))
+		if (HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) 
+				|| (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE))))
 		{
 			JSONObject json = o.optJSONObject(HikeConstants.DATA);
 			msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
 		}
+		else if((HikeConstants.MqttMessageTypes.NEW_MESSAGE_READ.equals(o.optString(HikeConstants.TYPE))))
+		{
+			Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+			Logger.d(AnalyticsConstants.MSG_REL_TAG, "Sending NMR to Sender back so fetching msgId from object");
+			JSONObject json = o.optJSONObject(HikeConstants.DATA);
+			Logger.d(AnalyticsConstants.MSG_REL_TAG, "Sending fetching msgId from DATA:- "+ json);
+			Iterator<String> json_keys = json.keys();
+
+		    while(json_keys.hasNext())
+		    {
+		        msgId = Long.parseLong((String) json_keys.next());
+				Logger.d(AnalyticsConstants.MSG_REL_TAG, "Sending NMR to Sender back with msgId:- " + msgId);
+		    }
+		}
+		
 		int type;
 		if (HikeConstants.MqttMessageTypes.MULTIPLE_FORWARD.equals(o.optString(HikeConstants.SUB_TYPE)))
 		{
