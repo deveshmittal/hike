@@ -153,7 +153,7 @@ public class MsgRelLogManager
 			metadata.put(AnalyticsConstants.MESSAGE_TYPE, msgType);
 			
 			// event type:- 0 to 19
-			metadata.put(AnalyticsConstants.EVENT_TYPE, eventType);
+			metadata.put(AnalyticsConstants.MSG_REL_EVENT_TYPE, eventType);
 			
 			// con:- 2g/3g/4g/wifi/off
 			metadata.put(AnalyticsConstants.CONNECTION_TYPE, Utils.getNetworkType(HikeMessengerApp.getInstance().getApplicationContext()));

@@ -238,6 +238,8 @@ public class AnalyticsConstants
 	
 	public static final String MSG_REL_TAG = "rel_m";
 	
+	public static String MSG_REL_EVENT_TYPE = "e_t";
+	
 	public static final class MsgRelEventType
 	{
 		public static final String SEND_BUTTON_CLICKED = "1";
