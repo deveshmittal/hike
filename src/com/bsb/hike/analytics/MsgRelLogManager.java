@@ -149,6 +149,9 @@ public class MsgRelLogManager
 			// msg_id:-
 			//metadata.put(AnalyticsConstants.MSG_ID, msgId);
 			
+			//Constant Field need to be added for all the messages as required by Analytics Team
+			metadata.put(AnalyticsConstants.MSG_REL_CONST_STR, "msg");
+			
 			// msg type:- Text/STICKER/Multimedia
 			metadata.put(AnalyticsConstants.MESSAGE_TYPE, msgType);
 			

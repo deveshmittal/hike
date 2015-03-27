@@ -754,7 +754,7 @@ public class HAManager
 		{
 			metadata = new JSONObject();
 			
-			metadata.put("screen", screen);
+			metadata.put("scr", screen);
 			
 			metadata.put("api", api);
 			
@@ -765,7 +765,7 @@ public class HAManager
 			
 			if(!TextUtils.isEmpty(toUser))
 			{
-				metadata.put("to_user", toUser);
+				metadata.put("to", toUser);
 			}
 			
 			HAManager.getInstance().record(AnalyticsConstants.LAST_SEEN_ANALYTICS, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.LAST_SEEN_ANALYTICS);

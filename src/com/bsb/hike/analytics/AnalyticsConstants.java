@@ -206,9 +206,9 @@ public class AnalyticsConstants
 	public static final String TO_USER = "to_user";
 	
 	//Added For Last seen Event
-	public static final String LAST_SEEN_ANALYTICS_TAG = "last_seen_analytics";
+	public static final String LAST_SEEN_ANALYTICS_TAG = "lsa";
 
-	public static final String LAST_SEEN_ANALYTICS = "last_seen_analytics";
+	public static final String LAST_SEEN_ANALYTICS = "lsa";
 	
 	//Added For Message Reliability
 	
@@ -238,7 +238,9 @@ public class AnalyticsConstants
 	
 	public static final String MSG_REL_TAG = "rel_m";
 	
-	public static String MSG_REL_EVENT_TYPE = "e_t";
+	public static final String MSG_REL_EVENT_TYPE = "stg";
+	
+	public static final String MSG_REL_CONST_STR = "ek";
 	
 	public static final class MsgRelEventType
 	{
