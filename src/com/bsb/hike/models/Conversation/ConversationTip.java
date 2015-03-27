@@ -1,9 +1,9 @@
 package com.bsb.hike.models.Conversation;
 
-public class ConversationTip extends Conversation
+public class ConversationTip 
 {
 	public static final int GROUP_CHAT_TIP = 1;
-	
+
 	public static final int STEALTH_FTUE_TIP = 2;
 
 	public static final int RESET_STEALTH_TIP = 3;
@@ -23,17 +23,15 @@ public class ConversationTip extends Conversation
 	public static final int ATOMIC_STATUS_TIP = 10;
 
 	public static final int ATOMIC_INFO_TIP = 11;
-	
+
 	public static final int ATOMIC_HTTP_TIP = 12;
-	
+
 	public static final int ATOMIC_APP_GENERIC_TIP = 13;
 
 	private int tipType;
 
 	public ConversationTip(int tipType)
 	{
-//		passing 0 as timestamp because the tip is displayed on top irrespective, so this won't affect
-		super(null, 0);
 		this.tipType = tipType;
 	}
 
@@ -61,12 +59,12 @@ public class ConversationTip extends Conversation
 	{
 		return tipType == RESET_STEALTH_TIP;
 	}
-	
+
 	public boolean isWelcomeHikeTip()
 	{
 		return tipType == WELCOME_HIKE_TIP;
 	}
-	
+
 	public boolean isStealthInfoTip()
 	{
 		return tipType == STEALTH_INFO_TIP;
