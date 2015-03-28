@@ -1212,6 +1212,18 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	}
 
 	/**
+	 * Returns a list of participants in a 1-n conversation with their names in case of unsaved contact. This method also increases reference count if the contact is already loaded
+	 * in memory
+	 * 
+	 * @param convId
+	 * @return
+	 */
+	public List<PairModified<GroupParticipant, String>> getActiveConversationParticipants(String convId)
+	{
+		return getGroupParticipants(convId, true, false);
+	}
+
+	/**
 	 * Returns a list of participants of a group with their names in case of unsaved contact. This method also increases the reference count if contact is already loaded in memory
 	 * 
 	 * @param groupId

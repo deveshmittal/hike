@@ -3031,7 +3031,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 			GroupConversation conv;
 			conv = new GroupConversation.ConversationBuilder(msisdn).setConvName(groupName).setConversationOwner(groupOwner).setIsAlive(isGroupAlive).build();
-			conv.setConversationParticipantList(ContactManager.getInstance().getGroupParticipants(msisdn, false, false));
+			conv.setConversationParticipantList(ContactManager.getInstance().getActiveConversationParticipants(msisdn));
 //			conv.setGroupMemberAliveCount(getActiveParticipantCount(msisdn));
 			conv.setIsMute(isMuted);
 
@@ -3067,7 +3067,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 			BroadcastConversation conv;
 			conv = new BroadcastConversation.ConversationBuilder(msisdn).setConvName(groupName).setConversationOwner(groupOwner).setIsAlive(isGroupAlive).build();
-			conv.setConversationParticipantList(ContactManager.getInstance().getGroupParticipants(msisdn, false, false));
+			conv.setConversationParticipantList(ContactManager.getInstance().getActiveConversationParticipants(msisdn));
 //			conv.setGroupMemberAliveCount(getActiveParticipantCount(msisdn));
 			conv.setIsMute(isMuted);
 
