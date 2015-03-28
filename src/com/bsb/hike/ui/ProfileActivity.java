@@ -1117,22 +1117,22 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		sharedFileCount = hCDB.getSharedMediaCount(mLocalMSISDN, false);
 		participantMap = groupConversation.getConversationParticipantList();
-		List<String> inactiveMsisdns = new ArrayList<String>();
-		/*
-		 * Removing inactive participants
-		 */
-		for (Entry<String, PairModified<GroupParticipant, String>> participantEntry : participantMap.entrySet())
-		{
-			GroupParticipant groupParticipant = participantEntry.getValue().getFirst();
-			if (groupParticipant.hasLeft())
-			{
-				inactiveMsisdns.add(participantEntry.getKey());
-			}
-		}
-		for (String msisdn : inactiveMsisdns)
-		{
-			participantMap.remove(msisdn);
-		}
+//		List<String> inactiveMsisdns = new ArrayList<String>();
+//		/*
+//		 * Removing inactive participants
+//		 */
+//		for (Entry<String, PairModified<GroupParticipant, String>> participantEntry : participantMap.entrySet())
+//		{
+//			GroupParticipant groupParticipant = participantEntry.getValue().getFirst();
+//			if (groupParticipant.hasLeft())
+//			{
+//				inactiveMsisdns.add(participantEntry.getKey());
+//			}
+//		}
+//		for (String msisdn : inactiveMsisdns)
+//		{
+//			participantMap.remove(msisdn);
+//		}
 
 		httpRequestURL = "/group/" + groupConversation.getMsisdn();
 
@@ -1169,22 +1169,22 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		sharedFileCount = hCDB.getSharedMediaCount(mLocalMSISDN, false);
 		participantMap = broadcastConversation.getConversationParticipantList();
-		List<String> inactiveMsisdns = new ArrayList<String>();
-		/*
-		 * Removing inactive participants
-		 */
-		for (Entry<String, PairModified<GroupParticipant, String>> participantEntry : participantMap.entrySet())
-		{
-			GroupParticipant groupParticipant = participantEntry.getValue().getFirst();
-			if (groupParticipant.hasLeft())
-			{
-				inactiveMsisdns.add(participantEntry.getKey());
-			}
-		}
-		for (String msisdn : inactiveMsisdns)
-		{
-			participantMap.remove(msisdn);
-		}
+//		List<String> inactiveMsisdns = new ArrayList<String>();
+//		/*
+//		 * Removing inactive participants
+//		 */
+//		for (Entry<String, PairModified<GroupParticipant, String>> participantEntry : participantMap.entrySet())
+//		{
+//			GroupParticipant groupParticipant = participantEntry.getValue().getFirst();
+//			if (groupParticipant.hasLeft())
+//			{
+//				inactiveMsisdns.add(participantEntry.getKey());
+//			}
+//		}
+//		for (String msisdn : inactiveMsisdns)
+//		{
+//			participantMap.remove(msisdn);
+//		}
 
 		httpRequestURL = "/group/" + broadcastConversation.getMsisdn();
 
