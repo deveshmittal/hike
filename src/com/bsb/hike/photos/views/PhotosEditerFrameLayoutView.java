@@ -320,13 +320,6 @@ public class PhotosEditerFrameLayoutView extends FrameLayout implements OnFilter
 
 		if (imageEdited != null)
 		{
-			
-			if(imageEdited.getHeight() > HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX)
-			{
-				imageEdited = Bitmap.createScaledBitmap(imageEdited, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, false);
-			}
-
-			
 			Canvas canvasResult = new Canvas(imageEdited);
 
 			sendAnalyticsFilterApplied(effectLayer.getCurrentFilter().name());
