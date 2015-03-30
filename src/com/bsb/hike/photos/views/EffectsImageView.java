@@ -86,7 +86,6 @@ public class EffectsImageView extends ImageView
 	public void changeDisplayImage(Bitmap image)
 	{
 		this.setImageBitmap(image);
-		HikeEffectsFactory.clearCache();
 		currentImage = image;
 	}
 
