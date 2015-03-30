@@ -187,7 +187,6 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 	@Override
 	public void finish()
 	{
-		// TODO Auto-generated method stub
 		HikeEffectsFactory.finish();
 		super.finish();
 	}
