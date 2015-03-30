@@ -1,6 +1,13 @@
 package com.bsb.hike.models.Conversation;
 
-public class ConversationTip 
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.bsb.hike.R;
+
+public class ConversationTip
 {
 	public static final int GROUP_CHAT_TIP = 1;
 
@@ -30,9 +37,41 @@ public class ConversationTip
 
 	private int tipType;
 
-	public ConversationTip(int tipType)
+	private LayoutInflater inflater;
+
+	public ConversationTip(int tipType, Context context)
 	{
 		this.tipType = tipType;
+		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	}
+
+	public View getView(int tipType, ViewGroup parent)
+	{
+		switch (tipType)
+		{
+		case STEALTH_FTUE_TIP:
+		case RESET_STEALTH_TIP:
+			return inflater.inflate(R.layout.stealth_ftue_conversation_tip, parent, false);
+
+		case WELCOME_HIKE_TIP:
+			return inflater.inflate(R.layout.welcome_hike_tip, parent, false);
+
+		case STEALTH_INFO_TIP:
+		case STEALTH_UNREAD_TIP:
+			return inflater.inflate(R.layout.stealth_unread_tip, parent, false);
+
+		case ATOMIC_PROFILE_PIC_TIP:
+		case ATOMIC_FAVOURTITES_TIP:
+		case ATOMIC_INVITE_TIP:
+		case ATOMIC_STATUS_TIP:
+		case ATOMIC_INFO_TIP:
+		case ATOMIC_HTTP_TIP:
+		case ATOMIC_APP_GENERIC_TIP:
+			return inflater.inflate(R.layout.tip_left_arrow, parent, false);
+
+		default:
+			return null;
+		}
 	}
 
 	public int getTipType()
