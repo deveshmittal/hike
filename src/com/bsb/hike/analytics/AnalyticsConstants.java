@@ -213,20 +213,20 @@ public class AnalyticsConstants
 	//Added For Message Reliability
 	
 	//These Max Range are fixed for All three
-	public static final int MAX_RANGE_TEXT_MSG = 1000;
+	public static final int MAX_RANGE_TEXT_MSG = 10000;
 	
-	public static final int MAX_RANGE_STK_MSG = 1000;
+	public static final int MAX_RANGE_STK_MSG = 10000;
 	
-	public static final int MAX_RANGE_MULTIMEDIA_MSG = 1000;
+	public static final int MAX_RANGE_MULTIMEDIA_MSG = 10000;
 	
 	//----------------------***----------------------------------//
 	
 	//These three values are server configured
-	public static int text_msg_track_decider = 1000;
+	public static int text_msg_track_decider = 100;
 	
-	public static int stk_msg_track_decider = 1000;
+	public static int stk_msg_track_decider = 100;
 	
-	public static int multimedia_msg_track_decider = 1000;
+	public static int multimedia_msg_track_decider = 100;
 	
 	//----------------------***----------------------------------//
 	
