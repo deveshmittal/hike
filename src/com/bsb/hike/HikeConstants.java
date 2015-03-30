@@ -1953,6 +1953,8 @@ public class HikeConstants
 
 		public static final String HOME_SEARCH = "hmSrch";
 
+		public static final String ADDRESSBOOK_UPLOAD = "addressbookUpload";
+
 	}
 
 	public static final class MqttMessageTypes
@@ -2550,4 +2552,9 @@ public class HikeConstants
 
 	public static final String PRIVATE_DATA = "pd";
 
+	public static final String EXCEPTION = "exception";
+
+	public static final String ENABLE_EXCEPTION_ANALYTIS = "enableExceptionAnalytics";
+
+	public static final String PAYLOAD = "payload";
 }
