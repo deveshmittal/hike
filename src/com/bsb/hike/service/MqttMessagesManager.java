@@ -1729,6 +1729,11 @@ public class MqttMessagesManager
 		{
 			handleWhitelistDomains(data.getString(HikeConstants.URL_WHITELIST));
 		}
+		if (data.has(HikeConstants.ENABLE_EXCEPTION_ANALYTIS))
+		{
+			boolean enable = data.getBoolean(HikeConstants.ENABLE_EXCEPTION_ANALYTIS);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.EXCEPTION_ANALYTIS_ENABLED, enable);
+		}
 		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);

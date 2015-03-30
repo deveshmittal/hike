@@ -1953,6 +1953,8 @@ public class HikeConstants
 
 		public static final String HOME_SEARCH = "hmSrch";
 
+		public static final String ADDRESSBOOK_UPLOAD = "addressbookUpload";
+
 	}
 
 	public static final class MqttMessageTypes
@@ -2533,4 +2535,10 @@ public class HikeConstants
 	public static final String WHITELISTED_DOMAINS[] = new String[]{"hike.in"};
 	
 	public static final String BLACKLIST_DOMAIN_ANALYTICS = "blacklist";
+
+	public static final String EXCEPTION = "exception";
+
+	public static final String ENABLE_EXCEPTION_ANALYTIS = "enableExceptionAnalytics";
+
+	public static final String PAYLOAD = "payload";
 }
