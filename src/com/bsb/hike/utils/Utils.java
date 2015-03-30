@@ -753,10 +753,14 @@ public class Utils
 		}
 		return contactNames;
 	}
-
+	/**
+	 * To ensure that group Conversation and Broadcast conversation are mutually exclusive, we add the !isBroadCast check
+	 * @param msisdn
+	 * @return
+	 */
 	public static boolean isGroupConversation(String msisdn)
 	{
-		return msisdn != null && !msisdn.startsWith("+");
+		return msisdn != null && !msisdn.startsWith("+") && !isBroadcastConversation(msisdn);
 	}
 	
 	public static boolean isBroadcastConversation(String msisdn)
