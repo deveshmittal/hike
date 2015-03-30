@@ -32,6 +32,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.photos.HikeEffectsFactory;
 import com.bsb.hike.photos.HikePhotosListener;
 import com.bsb.hike.photos.HikePhotosUtils;
 import com.bsb.hike.photos.HikePhotosUtils.MenuType;
@@ -181,6 +182,14 @@ public class PictureEditer extends HikeAppStateBaseFragmentActivity
 		mActionBarDoneContainer.setOnClickListener(clickHandler);
 
 		actionBar.setCustomView(actionBarView);
+	}
+
+	@Override
+	public void finish()
+	{
+		// TODO Auto-generated method stub
+		HikeEffectsFactory.finish();
+		super.finish();
 	}
 
 	public class PhotoEditViewPagerAdapter extends FragmentPagerAdapter implements IconPagerAdapter
