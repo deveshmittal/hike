@@ -213,6 +213,7 @@ import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.OneToNConversationUtils;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.SoundUtils;
@@ -2564,7 +2565,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			toLoad = HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY;
 		}
-		mConversation = mConversationDb.getConversation(mContactNumber, toLoad,Utils.isGroupConversation(mContactNumber));
+		mConversation = mConversationDb.getConversation(mContactNumber, toLoad,OneToNConversationUtils.isOneToNConversation(mContactNumber));
 		
 		if (mConversation == null)
 		{
@@ -3068,7 +3069,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (messageMap == null)
 			return;
 
-		if (msg.isGroupChat())
+		if (msg.isOneToNChat())
 		{
 			return;
 		}

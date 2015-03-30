@@ -97,7 +97,7 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 				// file backup
 				MessageMetadata cMetadata = cMessage.getMetadata();
 				boolean isSent = cMessage.isSent();
-				if (cMessage.isGroupChat()) // gc naming logic
+				if (cMessage.isOneToNChat()) // gc naming logic
 				{
 					GroupParticipant gPart = null;
 					PairModified<GroupParticipant, String> groupParticipantPair = participantMap.get(cMessage.getGroupParticipantMsisdn());

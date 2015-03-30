@@ -992,9 +992,9 @@ public class ConvMessage
 		}
 	}
 
-	public boolean isGroupChat()
+	public boolean isOneToNChat()
 	{
-		return Utils.isGroupConversation(this.mMsisdn);
+		return OneToNConversationUtils.isOneToNConversation(this.mMsisdn);
 	}
 
 	/**

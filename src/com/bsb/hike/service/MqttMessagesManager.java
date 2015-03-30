@@ -83,6 +83,7 @@ import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
+import com.bsb.hike.utils.OneToNConversationUtils;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -578,7 +579,7 @@ public class MqttMessagesManager
 		messageProcessVibrate(convMessage);
 		messageProcessFT(convMessage);
 
-		if (convMessage.isGroupChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+		if (convMessage.isOneToNChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
 			ConvMessage convMessageNew = convDb.showParticipantStatusMessage(convMessage.getMsisdn());
 			if (convMessageNew != null)
@@ -639,7 +640,7 @@ public class MqttMessagesManager
 		ConvMessage convMessage = messagePreProcess(jsonObj);
 		addToLists(convMessage.getMsisdn(), convMessage);
 
-		if (convMessage.isGroupChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+		if (convMessage.isOneToNChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
 			ConvMessage convMessageNew = convDb.showParticipantStatusMessage(convMessage.getMsisdn());
 			if (convMessageNew != null)
@@ -902,7 +903,7 @@ public class MqttMessagesManager
 			serverIdsArrayList.add(serverIds.optLong(i));
 		}
 		
-		if (!Utils.isGroupConversation(id))
+		if (!OneToNConversationUtils.isOneToNConversation(id))
 		{
 			Map<String, ArrayList<Long>> map = convDb.getMsisdnMapForServerIds(serverIdsArrayList, id);
 			if (map != null && !map.isEmpty())
@@ -932,7 +933,7 @@ public class MqttMessagesManager
 			return;
 		}
 		
-		if (!Utils.isGroupConversation(msisdn))
+		if (!OneToNConversationUtils.isOneToNConversation(msisdn))
 		{
 			
 			ArrayList<Long> updatedMessageIds = convDb.setAllDeliveredMessagesReadForMsisdn(msisdn, msgIds);
@@ -1015,7 +1016,7 @@ public class MqttMessagesManager
 		PairModified<Long, Set<String>> pair = messageStatusMap.get(id).getFirst();
 		long msgID = -1;
 
-		if (Utils.isGroupConversation(id))
+		if (OneToNConversationUtils.isOneToNConversation(id))
 		{
 			ArrayList<Long> ids = new ArrayList<Long>(msgIds.length());
 			for (int i = 0; i < msgIds.length(); i++)
@@ -3017,7 +3018,7 @@ public class MqttMessagesManager
 			}
 		}
 		ConvMessage convMessage = new ConvMessage(jsonObj, conversation, context, false);
-		if(Utils.isGroupConversation(convMessage.getMsisdn()))
+		if(OneToNConversationUtils.isOneToNConversation(convMessage.getMsisdn()))
 		{
 			ContactManager.getInstance().updateGroupRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
 		}

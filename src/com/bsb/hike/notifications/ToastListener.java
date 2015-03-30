@@ -215,7 +215,7 @@ public class ToastListener implements Listener
 			if (bigPicture != null)
 			{
 				ContactInfo contactInfo;
-				if (message.isGroupChat())
+				if (message.isOneToNChat())
 				{
 					Logger.d("ToastListener", "GroupName is " + ContactManager.getInstance().getName(message.getMsisdn()));
 					contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), ContactManager.getInstance().getName(message.getMsisdn()), message.getMsisdn());

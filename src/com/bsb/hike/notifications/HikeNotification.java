@@ -373,7 +373,7 @@ public class HikeNotification
 		String partName = "";
 		// For showing the name of the contact that sent the message in a group
 		// chat
-		if (convMsg.isGroupChat() && !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn()) && convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+		if (convMsg.isOneToNChat() && !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn()) && convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
 			GroupParticipant groupParticipant = HikeConversationsDatabase.getInstance().getGroupParticipant(convMsg.getMsisdn(), convMsg.getGroupParticipantMsisdn());
 
@@ -410,7 +410,7 @@ public class HikeNotification
 			final String messageString = (!convMsg.isFileTransferMessage()) ? convMsg.getMessage() : HikeFileType.getFileTypeMessage(context, convMsg.getMetadata().getHikeFiles()
 					.get(0).getHikeFileType(), convMsg.isSent());
 
-			if (convMsg.isGroupChat())
+			if (convMsg.isOneToNChat())
 			{
 				message = partName + HikeConstants.SEPARATOR + messageString;
 			}

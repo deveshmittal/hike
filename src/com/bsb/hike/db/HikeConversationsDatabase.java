@@ -1583,10 +1583,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 					addThumbnailStringToMetadata(conv.getMetadata(), thumbnailString);
 					/*
-					 * Represents we dont have any conversation made for this msisdn. Here we are also checking whether the message is a group message, If it is and the
+					 * Represents we dont have any conversation made for this msisdn. Here we are also checking whether the message is a 1-n message, If it is not and the
 					 * conversation does not exist we do not add a conversation.
 					 */
-					if (msgId <= 0 && !Utils.isGroupConversation(conv.getMsisdn()))
+					if (msgId <= 0 && !OneToNConversationUtils.isOneToNConversation(conv.getMsisdn()))
 					{
 
 						addConversation(conv.getMsisdn(), !conv.isSMS(), null, null, conv);
@@ -1640,7 +1640,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					}
 				// upgrade groupInfoTable
 				updateReadBy(conv);
-				if (Utils.isGroupConversation(conv.getMsisdn()))
+				if (OneToNConversationUtils.isOneToNConversation(conv.getMsisdn()))
 				{
 					long timestamp = 0;
 					Pair<List<String>, Long> pair = map.get(conv.getMsisdn());
@@ -1713,7 +1713,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				 * Represents we dont have any conversation made for this msisdn. Here we are also checking whether the message is a group message, If it is and the conversation
 				 * does not exist we do not add a conversation.
 				 */
-				if (msgId <= 0 && !Utils.isGroupConversation(conv.getMsisdn()))
+				if (msgId <= 0 && !OneToNConversationUtils.isOneToNConversation(conv.getMsisdn()))
 				{
 					addConversation(conv.getMsisdn(), !conv.isSMS(), null, null, conv);
 
@@ -1866,7 +1866,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() - 1);
 			}
 
-			if (Utils.isGroupConversation(conv.getMsisdn()))
+			if (OneToNConversationUtils.isOneToNConversation(conv.getMsisdn()))
 			{
 				long timestamp = 0;
 				Pair<List<String>, Long> pair = map.get(conv.getMsisdn());
@@ -2091,7 +2091,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				mDb.delete(DBConstants.CONVERSATIONS_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
 				mDb.delete(DBConstants.MESSAGES_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
 				mDb.delete(DBConstants.SHARED_MEDIA_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
-				if (Utils.isGroupConversation(msisdn))
+				if (OneToNConversationUtils.isOneToNConversation(msisdn))
 				{
 					mDb.delete(DBConstants.GROUP_MEMBERS_TABLE, DBConstants.GROUP_ID + " =?", new String[] { msisdn });
 					mDb.delete(DBConstants.GROUP_INFO_TABLE, DBConstants.GROUP_ID + " =?", new String[] { msisdn });
@@ -2140,7 +2140,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	 */
 	public Conversation addConversation(String msisdn, boolean onhike, String groupName, String groupOwner, ConvMessage initialConvMessage)
 	{
-		ContactInfo contactInfo = Utils.isGroupConversation(msisdn) ? new ContactInfo(msisdn, msisdn, groupName, msisdn) : HikeMessengerApp.getContactManager().getContact(msisdn,
+		ContactInfo contactInfo = OneToNConversationUtils.isOneToNConversation(msisdn) ? new ContactInfo(msisdn, msisdn, groupName, msisdn) : HikeMessengerApp.getContactManager().getContact(msisdn,
 				false, true);
 		InsertHelper ih = null;
 		try
@@ -2169,15 +2169,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 			if (id >= 0)
 			{
-				Conversation conv;
-				if (Utils.isGroupConversation(msisdn))
+				Conversation conv = null;
+				if (OneToNConversationUtils.isOneToNConversation(msisdn))
 				{
-					if (!(Utils.isBroadcastConversation(msisdn)))
+					if (Utils.isGroupConversation(msisdn))
 					{
 						conv = new GroupConversation.ConversationBuilder(msisdn).setConvName((contactInfo != null) ? contactInfo.getName() : null).setConversationOwner(groupOwner)
 								.setIsAlive(true).build();
 					}
-					else
+					else if (Utils.isBroadcastConversation(msisdn))
 					{
 						conv = new BroadcastConversation.ConversationBuilder(msisdn).setConvName((contactInfo != null) ? contactInfo.getName() : null).setConversationOwner(groupOwner)
 								.setIsAlive(true).build();
@@ -2203,6 +2203,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 					((OneToNConversation) conv).setConversationParticipantList(ContactManager.getInstance().getGroupParticipants(msisdn, false, false));
 				}
+				
 				else
 				{
 					conv = new OneToOneConversation.ConversationBuilder(msisdn).setConvName((contactInfo != null) ? contactInfo.getName() : null).setIsOnHike(onhike).build();
@@ -2544,7 +2545,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				String metadata = c.getString(metadataColumn);
 				long timestamp = c.getLong(timestampColumn);
 
-				if (Utils.isGroupConversation(msisdn))
+				if (OneToNConversationUtils.isOneToNConversation(msisdn))
 				{
 					List<String> grpMsisdns = null;
 					try
@@ -2610,7 +2611,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				String metadata = c.getString(metadataColumn);
 				long timestamp = c.getLong(sortingTimestampColumn);
 
-				if(!Utils.isGroupConversation(msisdn))
+				if(!OneToNConversationUtils.isOneToNConversation(msisdn))
 				{
 					if (!TextUtils.isEmpty(metadata) && removeNewOrReturningUsers)
 					{
@@ -3262,7 +3263,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					Logger.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
 				}
 				ContentValues contentValues = getContentValueForConversationMessage(message,message.getTimestamp());
-				if (Utils.isGroupConversation(msisdn))
+				if (OneToNConversationUtils.isOneToNConversation(msisdn))
 				{
 					updateGroupRecency(message);
 					HikeMessengerApp.getContactManager().removeContact(c.getString(groupParticipantColumn), false);
@@ -3271,7 +3272,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			}
 			else
 			{
-				if (Utils.isGroupConversation(msisdn))
+				if (OneToNConversationUtils.isOneToNConversation(msisdn))
 				{
 					/*
 					 * If we have removed the last message of a group, we should do the same operations we do when clearing a conversation.
@@ -3304,7 +3305,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 	private void updateGroupRecency(ConvMessage conv)
 	{
-		if (Utils.isGroupConversation(conv.getMsisdn()))
+		if (OneToNConversationUtils.isOneToNConversation(conv.getMsisdn()))
 		{
 			if (conv.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE)
 			{
@@ -5342,7 +5343,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		Cursor c = null;
 		try
 		{
-			HashMap<String, String> groupIdMap = getAllGroupConversations();
+			HashMap<String, String> groupIdMap = getAllOneToNConversations();
 			String convIdStatement = Utils.getMsisdnStatement(groupIdMap.keySet());
 			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { " MAX (" + DBConstants.MESSAGE_ID + ") AS msgid", DBConstants.READ_BY, DBConstants.CONV_ID },
 					DBConstants.CONV_ID + " IN " + convIdStatement + " AND " + DBConstants.MSG_STATUS + " = " + State.SENT_DELIVERED_READ.ordinal(), null, DBConstants.CONV_ID,
@@ -5381,7 +5382,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
-	public HashMap<String, String> getAllGroupConversations()
+	public HashMap<String, String> getAllOneToNConversations()
 	{
 		Cursor c = null;
 		String msisdn;
@@ -5393,7 +5394,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			while (c.moveToNext())
 			{
 				msisdn = c.getString(c.getColumnIndex(DBConstants.MSISDN));
-				if (Utils.isGroupConversation(msisdn))
+				if (OneToNConversationUtils.isOneToNConversation(msisdn))
 				{
 					groupIdMap.put(Integer.toString(c.getInt(c.getColumnIndex(DBConstants.CONV_ID))), msisdn);
 				}
@@ -5518,7 +5519,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	 */
 	private void updateReadBy(ConvMessage convMessage)
 	{
-		if (Utils.isGroupConversation(convMessage.getMsisdn()) && convMessage.isSent())
+		if (OneToNConversationUtils.isOneToNConversation(convMessage.getMsisdn()) && convMessage.isSent())
 		{
 			String readByString = null;
 			ContentValues contentValues = new ContentValues();
@@ -5888,7 +5889,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			String metadata = c.getString(metadataIdx);
 			String msisdn = c.getString(msisdnIdx);
 
-			if (message == null && metadata == null && !Utils.isGroupConversation(msisdn))
+			if (message == null && metadata == null && !OneToNConversationUtils.isOneToNConversation(msisdn))
 			{
 				deleteSelection.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 			}

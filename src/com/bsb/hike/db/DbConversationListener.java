@@ -136,7 +136,7 @@ public class DbConversationListener implements Listener
 					Logger.d(getClass().getSimpleName(), "Messages Id: " + convMessage.getMsgID());
 					sendNativeSMS(convMessage);
 				}
-				if (convMessage.isGroupChat())
+				if (convMessage.isOneToNChat())
 				{
 					convMessage = mConversationDb.showParticipantStatusMessage(convMessage.getMsisdn());
 					if(convMessage != null)
