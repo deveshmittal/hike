@@ -1960,13 +1960,15 @@ public class HikeConstants
 	public static final class MqttMessageTypes
 	{
 		public static final String MESSAGE_READ = "mr";
+		
+		public static final String NEW_MESSAGE_READ = "nmr";
 
 		public static final String MESSAGE = "m";
 
 		public static final String SMS_CREDITS = "sc";
 
 		public static final String DELIVERY_REPORT = "dr";
-
+		
 		public static final String USER_JOINED = "uj";
 
 		public static final String USER_LEFT = "ul";
@@ -2535,6 +2537,20 @@ public class HikeConstants
 	public static final String WHITELISTED_DOMAINS[] = new String[]{"hike.in"};
 	
 	public static final String BLACKLIST_DOMAIN_ANALYTICS = "blacklist";
+
+	public static final String PROB_NUM_TEXT_MSG = "p_txt";
+
+	public static final String PROB_NUM_STICKER_MSG = "p_stk";
+
+	public static final String PROB_NUM_MULTIMEDIA_MSG = "p_mul";
+
+	public static final String MSG_REL = "rel_m";
+	
+	public static final String MSG_REL_UID = "track_id";
+	
+	public static final String MSG_REL_MSG_TYPE = "rel_m_type";
+
+	public static final String PRIVATE_DATA = "pd";
 
 	public static final String EXCEPTION = "exception";
 
