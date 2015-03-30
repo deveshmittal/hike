@@ -1,5 +1,7 @@
 package com.bsb.hike.models.Conversation;
 
+import com.bsb.hike.db.HikeConversationsDatabase;
+
 /**
  * Conversation primitive for configurable bot chats.
  * 
@@ -22,6 +24,10 @@ public class BotConversation extends OneToOneConversation
 		super(builder);
 		this.properties = builder.properties;
 		this.isOnHike = true;
+		/**
+		 * Setting the mute state in the constructor itself as it is needed for BotConversations
+		 */
+		setIsMute(HikeConversationsDatabase.getInstance().isBotMuted(getMsisdn()));
 	}
 
 	/**
