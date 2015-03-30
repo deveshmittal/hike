@@ -2,6 +2,7 @@ package com.bsb.hike.photos;
 
 import android.graphics.Bitmap;
 import android.graphics.ColorMatrix;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v8.renderscript.Allocation;
@@ -28,7 +29,7 @@ import com.bsb.hike.photos.HikePhotosUtils.FilterTools.FilterType;
  * @see http://developer.android.com/reference/android/graphics/ColorMatrix.html
  * 
  * @author akhiltripathi
- *
+ * 
  * 
  */
 
@@ -108,46 +109,28 @@ public final class HikeEffectsFactory
 		return ret;
 
 	}
-	
+
 	/**
-	 * Method To Clear HikeEffectFactory's singleton object and attributes associated with it.
-	 * Recycles all bitmaps.
-	 * Should be called only when no further effects are to be applied.
+	 * Method To Clear HikeEffectFactory's singleton object and attributes associated with it. Recycles all bitmaps. Should be called only when no further effects are to be
+	 * applied.
 	 */
-	
+
 	public static void finish()
 	{
-		Log.e("com.bsb.hike","collecting garbage");
+		Log.e("com.bsb.hike", "collecting garbage");
 		if (instance != null)
 		{
 			instance.mInAllocation = null;
 			instance.mOutAllocations = null;
-			if(instance.finalBitmap!=null)
-			{
-				instance.finalBitmap.recycle();
-				instance.finalBitmap = null;
-			}
-			if(instance.mBitmapIn!=null)
-			{
-				instance.mBitmapIn.recycle();
-				instance.mBitmapIn = null;
-			}
-			if(instance.mBitmapOut1!=null)
-			{
-				instance.mBitmapOut1.recycle();
-				instance.mBitmapOut1 = null;
-			}
-			if(instance.mBitmapOut2!=null)
-			{
-				instance.mBitmapOut2.recycle();
-				instance.mBitmapOut2 = null;
-			}
-			
-			
-			instance = null;
+			instance.finalBitmap = null;
+			instance.mBitmapIn = null;
+			instance.mBitmapOut1 = null;
+			instance.mBitmapOut2 = null;
 		}
-	}
 
+		instance = null;
+
+	}
 
 	/**
 	 * Method initiates an async task to apply filter to the provided thumbnail (obtained by scaling the image to be handled). Run on a background since loading preview can take
