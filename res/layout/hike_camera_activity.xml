@@ -25,7 +25,11 @@
         android:background="@android:color/transparent"
         android:orientation="vertical" >
 
-       
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            layout="@layout/photos_action_bar" />
+
         <com.bsb.hike.photos.views.SquareRelativeLayout
             android:id="@+id/previewWindow"
             android:layout_width="match_parent"
