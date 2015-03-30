@@ -76,6 +76,7 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.OneToNConversationUtils;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -2474,7 +2475,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			/*
 			 * If the message does not contain any text or metadata, its an empty message and the conversation is blank.
 			 */
-			if (!Utils.isGroupConversation(msisdn) && TextUtils.isEmpty(messageString) && TextUtils.isEmpty(metadata))
+			if (!OneToNConversationUtils.isOneToNConversation(msisdn) && TextUtils.isEmpty(messageString) && TextUtils.isEmpty(metadata))
 			{
 				return null;
 			}
@@ -2834,8 +2835,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				String metadata = c.getString(metadataColumn);
 				long lastMessageTimestamp = c.getLong(lastMessageTsColumn);
 				long sortingTimestamp = c.getLong(sortingTsColumn);
-
-				if (Utils.isGroupConversation(msisdn))
+				//If broadcast or group converstaion, create a oneToN object
+				if (OneToNConversationUtils.isOneToNConversation(msisdn))
 				{
 					GroupDetails details = ContactManager.getInstance().getGroupDetails(msisdn);
 					if (null == details)

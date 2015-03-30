@@ -298,7 +298,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private SharedPreferences preferences;
 
-	private boolean isGroupChat;
+	private boolean isOneToNChat;
 
 	private ChatTheme chatTheme;
 
@@ -349,7 +349,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		this.chatThread = chatThread;
 		this.voiceMessagePlayer = new VoiceMessagePlayer();
 		this.preferences = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		this.isGroupChat = Utils.isGroupConversation(conversation.getMsisdn());
+		this.isOneToNChat = OneToNConversationUtils.isOneToNConversation(conversation.getMsisdn());
 		this.chatTheme = ChatTheme.DEFAULT;
 		this.mSelectedItemsIds = new HashSet<Long>();
 		setLastSentMessagePosition();
@@ -724,7 +724,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			ad.setVisible(true, true);
 			ad.start();
 
-			if (isGroupChat)
+			if (isOneToNChat)
 			{
 				typingHolder.typingAvatarContainer.setVisibility(View.VISIBLE);
 
@@ -1899,7 +1899,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			if (viewType == ViewType.SEND_HIKE)
 			{
-				if (!shownSdrIntroTip && !isGroupChat && convMessage.getState() == State.SENT_DELIVERED_READ)
+				if (!shownSdrIntroTip && !isOneToNChat && convMessage.getState() == State.SENT_DELIVERED_READ)
 				{
 					if (msgIdForSdrTip == -1)
 					{
@@ -2311,7 +2311,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				String userMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 				String name;
-				if (isGroupChat)
+				if (isOneToNChat)
 				{
 					name = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(msisdn);
 				}
@@ -2597,7 +2597,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else if (detailHolder.avatarContainer != null)
 		{
 			detailHolder.senderDetails.setVisibility(View.GONE);
-			detailHolder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
+			detailHolder.avatarContainer.setVisibility(isOneToNChat ? View.INVISIBLE : View.GONE);
 		}
 	}
 
@@ -2800,7 +2800,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		boolean ret = false;
 		if (!convMessage.isSent())
 		{
-			if (isGroupChat && !TextUtils.isEmpty(convMessage.getGroupParticipantMsisdn()))
+			if (isOneToNChat && !TextUtils.isEmpty(convMessage.getGroupParticipantMsisdn()))
 			{
 				if (position != 0)
 				{
@@ -3056,7 +3056,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			timeStatus.setVisibility(View.VISIBLE);
 
 		if ((message.getState() != null) && (position == lastSentMessagePosition)
-				&& ((message.getState() == State.SENT_DELIVERED_READ && isGroupChat) || message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED))
+				&& ((message.getState() == State.SENT_DELIVERED_READ && isOneToNChat) || message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED))
 		{
 			inflateNSetMessageInfo(getItem(position), detailHolder, clickableItem);
 		}
@@ -3121,7 +3121,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		messageInfo.setVisibility(View.GONE);
 		sending.setVisibility(View.GONE);
 		inflated.setVisibility(View.GONE);
-		if (message.getState() == State.SENT_DELIVERED_READ && isGroupChat)
+		if (message.getState() == State.SENT_DELIVERED_READ && isOneToNChat)
 		{
 			inflated.setVisibility(View.VISIBLE);
 			messageInfo.setVisibility(View.VISIBLE);

@@ -56,4 +56,9 @@ public class OneToNConversationUtils {
 		String message = context.getString(conversation instanceof BroadcastConversation ? R.string.broadcast_list_end : R.string.group_chat_end);
 		return message;
 	}
+	
+	public static boolean isOneToNConversation(String msisdn)
+	{
+		return Utils.isGroupConversation(msisdn) || Utils.isBroadcastConversation(msisdn);
+	}
 }
