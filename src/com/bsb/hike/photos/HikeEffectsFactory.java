@@ -124,25 +124,20 @@ public final class HikeEffectsFactory
 			instance.mOutAllocations = null;
 			if(instance.finalBitmap!=null)
 			{
-				instance.finalBitmap.recycle();
 				instance.finalBitmap = null;
 			}
 			if(instance.mBitmapIn!=null)
 			{
-				instance.mBitmapIn.recycle();
 				instance.mBitmapIn = null;
 			}
 			if(instance.mBitmapOut1!=null)
 			{
-				instance.mBitmapOut1.recycle();
 				instance.mBitmapOut1 = null;
 			}
 			if(instance.mBitmapOut2!=null)
 			{
-				instance.mBitmapOut2.recycle();
 				instance.mBitmapOut2 = null;
 			}
-			
 			
 			instance = null;
 		}
