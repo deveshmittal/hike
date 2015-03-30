@@ -35,27 +35,11 @@ public class ConvInfo implements Comparable<ConvInfo>
 
 	protected ConvInfo(InitBuilder<?> builder)
 	{
-		if (!validateConvInfo(builder))
-		{
-			throw new IllegalArgumentException("No msisdn set.! ConvInfo object cannot be created.");
-		}
-
 		this.msisdn = builder.msisdn;
 		this.mConversationName = builder.convName;
 		this.sortingTimeStamp = builder.sortingTimeStamp;
 		this.isStealth = builder.isStealth;
 		this.isMute = builder.isMute;
-	}
-
-	/**
-	 * Validates params for convInfo to ensure msisdn is set
-	 * 
-	 * @param builder
-	 * @return
-	 */
-	private boolean validateConvInfo(InitBuilder<?> builder)
-	{
-		return !(TextUtils.isEmpty(builder.msisdn));
 	}
 
 	/**
@@ -319,7 +303,23 @@ public class ConvInfo implements Comparable<ConvInfo>
 
 		public ConvInfo build()
 		{
+			if (!this.validateConvInfo())
+			{
+				throw new IllegalArgumentException("No msisdn set.! ConvInfo object cannot be created.");
+			}
+
 			return new ConvInfo(this);
+		}
+
+		/**
+		 * Validates params for convInfo to ensure msisdn is set
+		 * 
+		 * @param builder
+		 * @return
+		 */
+		private boolean validateConvInfo()
+		{
+			return !(TextUtils.isEmpty(this.msisdn));
 		}
 
 	}
