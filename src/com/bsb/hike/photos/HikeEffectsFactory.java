@@ -126,9 +126,8 @@ public final class HikeEffectsFactory
 			instance.mBitmapIn = null;
 			instance.mBitmapOut1 = null;
 			instance.mBitmapOut2 = null;
+			instance = null;
 		}
-
-		instance = null;
 
 	}
 
