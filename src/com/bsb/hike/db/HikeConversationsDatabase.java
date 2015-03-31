@@ -2804,7 +2804,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		long startTime = System.currentTimeMillis();
 		Cursor c = null;
 
-		c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.LAST_MESSAGE_TIMESTAMP,
+		c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.ONHIKE, DBConstants.LAST_MESSAGE_TIMESTAMP,
 				DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.UNREAD_COUNT, DBConstants.IS_STEALTH,
 				DBConstants.SORTING_TIMESTAMP }, null, null, null, null, null);
 
@@ -2821,6 +2821,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 		final int unreadCountColumn = c.getColumnIndex(DBConstants.UNREAD_COUNT);
 		final int isStealthColumn = c.getColumnIndex(DBConstants.IS_STEALTH);
+		final int isOnHikeColumn = c.getColumnIndex(DBConstants.ONHIKE);
 
 		try
 		{
@@ -2836,6 +2837,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				String metadata = c.getString(metadataColumn);
 				long lastMessageTimestamp = c.getLong(lastMessageTsColumn);
 				long sortingTimestamp = c.getLong(sortingTsColumn);
+				boolean onhike = c.getInt(isOnHikeColumn) != 0;
 				//If broadcast or group converstaion, create a oneToN object
 				if (OneToNConversationUtils.isOneToNConversation(msisdn))
 				{
@@ -2843,19 +2845,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					if (null == details)
 					{
 						groupIds.add(msisdn);
-						convInfo = new OneToNConvInfo.ConvInfoBuilder(msisdn).setConversationAlive(true).setIsMute(false).build();
+						convInfo = new OneToNConvInfo.ConvInfoBuilder(msisdn).setConversationAlive(true).setIsMute(false).setOnHike(onhike).build();
 					}
 					else
 					{
 						String name = details.getGroupName();
 						boolean groupAlive = details.isGroupAlive();
 						boolean isMuteGroup = details.isGroupMute();
-						convInfo = new OneToNConvInfo.ConvInfoBuilder(msisdn).setConversationAlive(groupAlive).setIsMute(isMuteGroup).setConvName(name).build();
+						convInfo = new OneToNConvInfo.ConvInfoBuilder(msisdn).setConversationAlive(groupAlive).setIsMute(isMuteGroup).setOnHike(onhike).setConvName(name).build();
 					}
 				}
 				else
 				{
-					convInfo = new ConvInfo.ConvInfoBuilder(msisdn).setSortingTimeStamp(sortingTimestamp).build();
+					convInfo = new ConvInfo.ConvInfoBuilder(msisdn).setSortingTimeStamp(sortingTimestamp).setOnHike(onhike).build();
 
 					ContactInfo contact = ContactManager.getInstance().getContact(convInfo.getMsisdn());
 

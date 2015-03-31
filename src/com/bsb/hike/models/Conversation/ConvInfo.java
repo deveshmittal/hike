@@ -33,6 +33,8 @@ public class ConvInfo implements Comparable<ConvInfo>
 
 	private long sortingTimeStamp;
 
+	private boolean isOnHike;
+
 	/**
 	 * Keeps track of the last message for a given conversation
 	 */
@@ -45,6 +47,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 		this.sortingTimeStamp = builder.sortingTimeStamp;
 		this.isStealth = builder.isStealth;
 		this.isMute = builder.isMute;
+		this.isOnHike = builder.isOnHike;
 	}
 
 	/**
@@ -174,6 +177,23 @@ public class ConvInfo implements Comparable<ConvInfo>
 		this.isStealth = isStealth;
 	}
 
+	/**
+	 * @return the isOnHike
+	 */
+	public boolean isOnHike()
+	{
+		return isOnHike;
+	}
+
+	/**
+	 * @param isOnHike
+	 *            the isOnHike to set
+	 */
+	public void setOnHike(boolean isOnHike)
+	{
+		this.isOnHike = isOnHike;
+	}
+
 	@Override
 	public String toString()
 	{
@@ -262,7 +282,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 
 		return result;
 	}
-	
+
 	public JSONObject serialize(String type)
 	{
 		JSONObject object = new JSONObject();
@@ -290,6 +310,8 @@ public class ConvInfo implements Comparable<ConvInfo>
 		private long sortingTimeStamp;
 
 		private boolean isMute;
+		
+		private boolean isOnHike;
 
 		protected InitBuilder(String msisdn)
 		{
@@ -319,6 +341,12 @@ public class ConvInfo implements Comparable<ConvInfo>
 		public P setIsMute(boolean mute)
 		{
 			this.isMute = mute;
+			return getSelfObject();
+		}
+		
+		public P setOnHike(boolean onHike)
+		{
+			this.isOnHike = onHike;
 			return getSelfObject();
 		}
 
@@ -381,4 +409,5 @@ public class ConvInfo implements Comparable<ConvInfo>
 		}
 
 	}
+
 }
