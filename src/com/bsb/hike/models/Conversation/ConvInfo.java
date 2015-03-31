@@ -2,9 +2,14 @@ package com.bsb.hike.models.Conversation;
 
 import java.util.Comparator;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.text.TextUtils;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.utils.Logger;
 
 /**
  * This class contains the core fields which are required for a conversation entity to be displayed on the ConversationFragment screen. This is the atomic unit for entities to be
@@ -256,6 +261,22 @@ public class ConvInfo implements Comparable<ConvInfo>
 		result = prime * result + (isStealth ? 1231 : 1237);
 
 		return result;
+	}
+	
+	public JSONObject serialize(String type)
+	{
+		JSONObject object = new JSONObject();
+		try
+		{
+			object.put(HikeConstants.TYPE, type);
+			object.put(HikeConstants.TO, msisdn);
+			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
+		}
+		catch (JSONException e)
+		{
+			Logger.e("Conversation", "invalid json message", e);
+		}
+		return object;
 	}
 
 	protected static abstract class InitBuilder<P extends InitBuilder<P>>

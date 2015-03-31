@@ -202,18 +202,7 @@ public abstract class Conversation implements Comparable<Conversation>
 
 	public JSONObject serialize(String type)
 	{
-		JSONObject object = new JSONObject();
-		try
-		{
-			object.put(HikeConstants.TYPE, type);
-			object.put(HikeConstants.TO, convInfo.getMsisdn());
-			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-		}
-		catch (JSONException e)
-		{
-			Logger.e("Conversation", "invalid json message", e);
-		}
-		return object;
+		return this.convInfo.serialize(type);
 	}
 
 	@Override
