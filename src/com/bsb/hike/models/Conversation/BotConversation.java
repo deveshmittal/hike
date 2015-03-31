@@ -1,6 +1,12 @@
 package com.bsb.hike.models.Conversation;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.platform.HikePlatformConstants;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 
 /**
  * Conversation primitive for configurable bot chats.
@@ -45,6 +51,23 @@ public class BotConversation extends OneToOneConversation
 	public void setProperties(short properties)
 	{
 		this.properties = properties;
+	}
+
+	public static void analyticsForBots(ConvInfo convInfo, String key, String subType)
+	{
+		JSONObject json = new JSONObject();
+		try
+		{
+			json.put(AnalyticsConstants.EVENT_KEY, key);
+			json.put(AnalyticsConstants.ORIGIN, HikePlatformConstants.CONVERSATION_FRAGMENT);
+			json.put(AnalyticsConstants.UNREAD_COUNT, convInfo.getUnreadCount());
+			json.put(AnalyticsConstants.CHAT_MSISDN, convInfo.getMsisdn());
+			HikeAnalyticsEvent.analyticsForBots(AnalyticsConstants.UI_EVENT, subType, json);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	/**
