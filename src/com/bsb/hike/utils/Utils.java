@@ -3464,6 +3464,18 @@ public class Utils
 			asyncTask.execute(conversations);
 		}
 	}
+	
+	public static void executeConvAsyncTask(AsyncTask<ConvInfo, Void, ConvInfo[]> asyncTask, ConvInfo... conversations)
+	{
+		if (Utils.isHoneycombOrHigher())
+		{
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, conversations);
+		}
+		else
+		{
+			asyncTask.execute(conversations);
+		}
+	}
 
 	public static boolean getSendSmsPref(Context context)
 	{
@@ -3516,12 +3528,12 @@ public class Utils
 		return intent;
 	}
 
-	public static void createShortcut(Activity activity, Conversation conv)
+	public static void createShortcut(Activity activity, ConvInfo conv)
 	{
-		Intent shortcutIntent = Utils.createIntentForConversation(activity, conv.getConvInfo());
+		Intent shortcutIntent = Utils.createIntentForConversation(activity, conv);
 		Intent intent = new Intent();
 		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
-		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
+		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getConversationName());
 
 		Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(activity, conv.getMsisdn(), false);
 
