@@ -1,5 +1,7 @@
 package com.bsb.hike.models.Conversation;
 
+import com.bsb.hike.HikeMessengerApp;
+
 /**
  * This class contains the core fields which are required for a 1-n conversation entity to be displayed on the ConversationFragment screen. This is the atomic unit for 1-n
  * conversation to be displayed on the home screen.
@@ -65,4 +67,14 @@ public class OneToNConvInfo extends ConvInfo
 
 	}
 
+	/**
+	 * 
+	 * @return conversation participant name
+	 */
+	public String getConvParticipantName(String groupParticipantMsisdn)
+	{
+		HikeMessengerApp.getContactManager().getContact(groupParticipantMsisdn, true, false);
+		String name = HikeMessengerApp.getContactManager().getName(getMsisdn(), groupParticipantMsisdn);
+		return name;
+	}
 }
