@@ -171,6 +171,7 @@ import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.Conversation.ConvInfo;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.GroupConversation;
 import com.bsb.hike.models.Conversation.OneToNConvInfo;
@@ -3503,21 +3504,21 @@ public class Utils
 		return !convMessage.isSent() && convMessage.getState() == State.RECEIVED_UNREAD && convMessage.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE;
 	}
 
-	public static Intent createIntentForConversation(Context context, Conversation conversation)
+	public static Intent createIntentForConversation(Context context, ConvInfo convInfo)
 	{
 		Intent intent = new Intent(context, ChatThread.class);
-		if (conversation.getConversationName() != null)
+		if (convInfo.getConversationName() != null)
 		{
-			intent.putExtra(HikeConstants.Extras.NAME, conversation.getConversationName());
+			intent.putExtra(HikeConstants.Extras.NAME, convInfo.getConversationName());
 		}
-		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.MSISDN, convInfo.getMsisdn());
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
 	}
 
 	public static void createShortcut(Activity activity, Conversation conv)
 	{
-		Intent shortcutIntent = Utils.createIntentForConversation(activity, conv);
+		Intent shortcutIntent = Utils.createIntentForConversation(activity, conv.getConvInfo());
 		Intent intent = new Intent();
 		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
 		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());

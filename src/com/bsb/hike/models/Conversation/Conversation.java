@@ -3,14 +3,11 @@ package com.bsb.hike.models.Conversation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation.ConvInfo.ConvInfoBuilder;
 import com.bsb.hike.utils.ChatTheme;
-import com.bsb.hike.utils.Logger;
 
 /**
  * Conversation objects will be made from this abstract class
@@ -47,6 +44,14 @@ public abstract class Conversation implements Comparable<Conversation>
 	protected void setConvInfo(ConvInfo convInfo)
 	{
 		this.convInfo = convInfo;
+	}
+
+	/**
+	 * @return the convInfo
+	 */
+	public ConvInfo getConvInfo()
+	{
+		return convInfo;
 	}
 
 	/**
@@ -310,5 +315,4 @@ public abstract class Conversation implements Comparable<Conversation>
 		protected abstract P getSelfObject();
 
 	}
-
 }
