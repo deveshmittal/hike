@@ -173,6 +173,7 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.GroupConversation;
+import com.bsb.hike.models.Conversation.OneToNConvInfo;
 import com.bsb.hike.models.Conversation.OneToNConversation;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
@@ -808,6 +809,24 @@ public class Utils
 		}
 	}
 
+	public static String getConversationJoinHighlightText(JSONArray participantInfoArray, OneToNConvInfo convInfo)
+	{
+		JSONObject participant = (JSONObject) participantInfoArray.opt(0);
+		String highlight = convInfo.getConvParticipantName(participant.optString(HikeConstants.MSISDN));
+		if (participantInfoArray.length() == 2)
+		{
+			JSONObject participant2 = (JSONObject) participantInfoArray.opt(1);
+			String name2 = convInfo.getConvParticipantName(participant2.optString(HikeConstants.MSISDN));
+
+			highlight += " and " + name2;
+		}
+		else if (participantInfoArray.length() > 2)
+		{
+			highlight += " and " + (participantInfoArray.length() - 1) + " others";
+		}
+		return highlight;
+	}
+	
 	public static String getGroupJoinHighlightText(JSONArray participantInfoArray, OneToNConversation conversation)
 	{
 		JSONObject participant = (JSONObject) participantInfoArray.opt(0);

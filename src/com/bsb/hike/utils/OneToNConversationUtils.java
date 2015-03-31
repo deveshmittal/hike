@@ -5,8 +5,6 @@ import android.content.Context;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.MessageMetadata;
-import com.bsb.hike.models.Conversation.BroadcastConversation;
-import com.bsb.hike.models.Conversation.OneToNConversation;
 
 public class OneToNConversationUtils {
 
@@ -39,21 +37,21 @@ public class OneToNConversationUtils {
 		return participantAddedMessage;
 	}
 	
-	public static String getParticipantRemovedMessage(OneToNConversation conversation, Context context, String participantName)
+	public static String getParticipantRemovedMessage(String msisdn, Context context, String participantName)
 	{
-		String participantRemovedMessage = String.format(context.getString(conversation instanceof BroadcastConversation ? R.string.removed_from_broadcast : R.string.left_conversation), participantName);
+		String participantRemovedMessage = String.format(context.getString(Utils.isBroadcastConversation(msisdn) ? R.string.removed_from_broadcast : R.string.left_conversation), participantName);
 		return participantRemovedMessage;
 	}
 	
-	public static String getConversationNameChangedMessage(OneToNConversation conversation, Context context, String participantName)
+	public static String getConversationNameChangedMessage(String msisdn, Context context, String participantName)
 	{
-		String nameChangedMessage = String.format(context.getString(conversation instanceof BroadcastConversation ? R.string.change_broadcast_name : R.string.change_group_name), participantName);
+		String nameChangedMessage = String.format(context.getString(Utils.isBroadcastConversation(msisdn) ? R.string.change_broadcast_name : R.string.change_group_name), participantName);
 		return nameChangedMessage;
 	}
 	
-	public static String getConversationEndedMessage(OneToNConversation conversation, Context context)
+	public static String getConversationEndedMessage(String msisdn, Context context)
 	{
-		String message = context.getString(conversation instanceof BroadcastConversation ? R.string.broadcast_list_end : R.string.group_chat_end);
+		String message = context.getString(Utils.isBroadcastConversation(msisdn) ? R.string.broadcast_list_end : R.string.group_chat_end);
 		return message;
 	}
 	
