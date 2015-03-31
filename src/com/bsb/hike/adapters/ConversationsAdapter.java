@@ -16,8 +16,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.CountDownTimer;
-import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -65,14 +63,8 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private int mIconImageSize;
 
-	private CountDownSetter countDownSetter;
-	
 	private SparseBooleanArray itemsToAnimat;
 	
-	private boolean stealthFtueTipAnimated = false;
-	
-	private boolean resetStealthTipAnimated = false;
-
 	private List<ConvInfo> conversationList;
 
 	private List<ConvInfo> phoneBookContacts;
@@ -117,8 +109,6 @@ public class ConversationsAdapter extends BaseAdapter
 		TextView timeStamp;
 
 		ImageView avatar;
-		
-		View parent;
 		
 		ImageView muteIcon;
 	}
@@ -843,64 +833,6 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 
 		return markedUp;
-	}
-
-	private class CountDownSetter extends CountDownTimer
-	{
-		TextView textView;
-
-		public CountDownSetter(TextView textView, long millisInFuture, long countDownInterval)
-		{
-			super(millisInFuture, countDownInterval);
-			this.textView = textView;
-		}
-
-		@Override
-		public void onFinish()
-		{
-			if (textView == null)
-			{
-				return;
-			}
-			textView.setText(Html.fromHtml(context.getResources().getString(R.string.tap_to_reset_stealth_tip)));
-		}
-
-		@Override
-		public void onTick(long millisUntilFinished)
-		{
-			if (textView == null)
-			{
-				return;
-			}
-
-			setTimeRemainingText(textView, millisUntilFinished);
-		}
-
-		public void setTextView(TextView tv)
-		{
-			this.textView = tv;
-		}
-	}
-
-	private void setTimeRemainingText(TextView textView, long millisUntilFinished)
-	{
-		long secondsUntilFinished = millisUntilFinished / 1000;
-		int minutes = (int) (secondsUntilFinished / 60);
-		int seconds = (int) (secondsUntilFinished % 60);
-		String text = String.format("%1$02d:%2$02d", minutes, seconds);
-		textView.setText(Html.fromHtml(context.getString(R.string.reset_stealth_tip, text)));
-
-	}
-
-	public void resetCountDownSetter()
-	{
-		if(countDownSetter == null)
-		{
-			return;
-		}
-
-		this.countDownSetter.cancel();
-		this.countDownSetter = null;
 	}
 
 	public void addItemsToAnimat(Set<Conversation> stealthConversations)
