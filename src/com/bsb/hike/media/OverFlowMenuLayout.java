@@ -184,5 +184,64 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 			return Integer.toString(counter);
 		}
 	}
+	
+	/**
+	 * Can be used to update the unread count of an overflow menu item on the fly
+	 * 
+	 * @param itemId
+	 * @param newCount
+	 */
+	public void updateOverflowMenuItemCount(int itemId, int newCount)
+	{
+		List<OverFlowMenuItem> mItems = getOverFlowMenuItems();
+
+		/**
+		 * Defensive check
+		 */
+		if (mItems != null)
+		{
+			for (OverFlowMenuItem overFlowMenuItem : mItems)
+			{
+				/**
+				 * Updating only if the count has changed
+				 */
+
+				if (overFlowMenuItem.id == itemId && overFlowMenuItem.unreadCount != newCount)
+				{
+					overFlowMenuItem.unreadCount = newCount;
+					notifyDateSetChanged();
+					break;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Can be used to update the title of an overflow menu item on the fly
+	 * 
+	 * @param itemId
+	 * @param newTitle
+	 */
+	public void updateOverflowMenuItemString(int itemId, String newTitle)
+	{
+		List<OverFlowMenuItem> mItems = getOverFlowMenuItems();
+
+		/**
+		 * Defensive check
+		 */
+		if (mItems != null)
+		{
+			for (OverFlowMenuItem overFlowMenuItem : mItems)
+			{
+				if (overFlowMenuItem.id == itemId)
+				{
+					overFlowMenuItem.text = newTitle;
+					notifyDateSetChanged();
+					break;
+				}
+			}
+		}
+
+	}
 
 }

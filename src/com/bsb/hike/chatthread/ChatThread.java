@@ -1400,8 +1400,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		setEditTextListeners();
 		
-		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
-
+		activity.supportInvalidateOptionsMenu(); // Calling the onCreate menu here
 		// Register broadcasts
 		mBroadCastReceiver = new ChatThreadBroadcasts();
 
@@ -3374,65 +3373,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	}
 
-	/**
-	 * Can be used to update the title of an overflow menu item on the fly
-	 * 
-	 * @param itemId
-	 * @param newTitle
-	 */
-	protected void updateOverflowMenuItemString(int itemId, String newTitle)
-	{
-		List<OverFlowMenuItem> mItems = mActionBar.getOverFlowMenuItems();
-
-		/**
-		 * Defensive check
-		 */
-		if (mItems != null)
-		{
-			for (OverFlowMenuItem overFlowMenuItem : mItems)
-			{
-				if (overFlowMenuItem.id == itemId)
-				{
-					overFlowMenuItem.text = newTitle;
-					mActionBar.overFlowMenuLayout.notifyDateSetChanged();
-					break;
-				}
-			}
-		}
-
-	}
-
-	/**
-	 * Can be used to update the unread count of an overflow menu item on the fly
-	 * 
-	 * @param itemId
-	 * @param newCount
-	 */
-	protected void updateOverflowMenuItemCount(int itemId, int newCount)
-	{
-		List<OverFlowMenuItem> mItems = mActionBar.getOverFlowMenuItems();
-
-		/**
-		 * Defensive check
-		 */
-		if (mItems != null)
-		{
-			for (OverFlowMenuItem overFlowMenuItem : mItems)
-			{
-				/**
-				 * Updating only if the count has changed
-				 */
-
-				if (overFlowMenuItem.id == itemId && overFlowMenuItem.unreadCount != newCount)
-				{
-					overFlowMenuItem.unreadCount = newCount;
-					mActionBar.overFlowMenuLayout.notifyDateSetChanged();
-					break;
-				}
-			}
-		}
-	}
-
+	
 	private void blockUser(Object object, boolean isBlocked)
 	{
 		String mMsisdn = (String) object;
@@ -3482,14 +3423,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.MENU_BLOCK);
 			showBlockOverlay(getBlockedUserLabel());
-			updateOverflowMenuItemString(R.string.block_title, activity.getString(R.string.unblock_title));
+			mActionBar.updateOverflowMenuItemString(R.string.block_title, activity.getString(R.string.unblock_title));
 		}
 
 		else
 		{
 			mComposeView.setEnabled(true);
 			hideOverlay();
-			updateOverflowMenuItemString(R.string.block_title, activity.getString(R.string.block_title));
+			mActionBar.updateOverflowMenuItemString(R.string.block_title, activity.getString(R.string.block_title));
 		}
 	}
 
@@ -3726,49 +3667,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (mStickerPicker != null)
 		{
 			mStickerPicker.setExitTasksEarly(flag);
-		}
-	}
-
-	/**
-	 * This is used to update/show counter on the overflow menu icon. This will be called from the UI Thread
-	 * 
-	 * Can be used for pin count or in future say missed calls count for VoIP or any other futuristic feature
-	 */
-	protected void updateOverflowMenuIndicatorCount(int newCount)
-	{
-		MenuItem menuItem = mActionBar.getMenuItem(R.id.overflow_menu);
-		
-		if (menuItem != null && menuItem.getActionView() != null)
-		{
-			TextView topBarCounter = (TextView) menuItem.getActionView().findViewById(R.id.top_bar_indicator);
-
-			if (newCount < 1)
-			{
-				topBarCounter.setVisibility(View.GONE);
-
-			}
-
-			else
-			{
-				topBarCounter.setVisibility(View.VISIBLE);
-				topBarCounter.setText(getUnreadCounterText(newCount));
-				topBarCounter.startAnimation(Utils.getNotificationIndicatorAnim());
-			}
-
-		}
-
-	}
-	
-	private String getUnreadCounterText(int counter)
-	{
-		if (counter >= HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY)
-		{
-			return activity.getString(R.string.max_pin_unread_counter);
-		}
-
-		else
-		{
-			return Integer.toString(counter);
 		}
 	}
 
