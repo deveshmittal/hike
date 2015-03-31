@@ -19,13 +19,17 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 
 public class OverFlowMenuLayout implements OnItemClickListener {
+	public static interface OverflowMenuListener{
+		public void preShowOverflowMenu();
+	}
 	protected Context context;
 	protected List<OverFlowMenuItem> overflowItems;
 	protected OverflowItemClickListener listener;
 	protected View viewToShow;
 	protected PopUpLayout popUpLayout;
 	private OnDismissListener mOnDismisslistener;
-
+	private OverflowMenuListener menuListener;
+	
 	/**
 	 * This class is made to show overflow menu items, by default it populates
 	 * listview of items you want o display, if some other view is required,
@@ -116,15 +120,16 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 
 	public void show(int width, int height, int xOffset,
 			int yOffset, View anchor) {
-		initView();
-		popUpLayout.showPopUpWindow(width, height, xOffset, yOffset, anchor,
-				getView());
-		popUpLayout.setOnDismissListener(mOnDismisslistener);
+		show(width, height, xOffset, yOffset, anchor, PopupWindow.INPUT_METHOD_FROM_FOCUSABLE);
 	}
 	
 	public void show(int width, int height, int xOffset, int yOffset, View anchor, int inputMethodMode)
 	{
 		initView();
+		if(menuListener!=null)
+		{
+			menuListener.preShowOverflowMenu();
+		}
 		popUpLayout.showPopUpWindow(width, height, xOffset, yOffset, anchor,
 				getView(), inputMethodMode);
 		popUpLayout.setOnDismissListener(mOnDismisslistener);
@@ -242,6 +247,11 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 			}
 		}
 
+	}
+	
+	public void setOverflowListener(OverflowMenuListener menuListener)
+	{
+		this.menuListener = menuListener;
 	}
 
 }
