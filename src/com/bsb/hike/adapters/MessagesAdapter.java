@@ -2100,11 +2100,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 					String participantMsisdn = metadata.getMsisdn();
 					String name = ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(participantMsisdn);
-					message = Utils.getFormattedParticipantInfo(OneToNConversationUtils.getParticipantRemovedMessage((OneToNConversation) conversation, context, name), name);
+					message = Utils.getFormattedParticipantInfo(OneToNConversationUtils.getParticipantRemovedMessage(conversation.getMsisdn(), context, name), name);
 				}
 				else
 				{
-					message = OneToNConversationUtils.getConversationEndedMessage((OneToNConversation) conversation, context);
+					message = OneToNConversationUtils.getConversationEndedMessage(conversation.getMsisdn(), context);
 					
 				}
 				setTextAndIconForSystemMessages(participantInfo, message, isDefaultTheme ? R.drawable.ic_left_chat : R.drawable.ic_left_chat_custom);
@@ -2180,7 +2180,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				String message;
 				if (convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
 				{
-					message = OneToNConversationUtils.getConversationNameChangedMessage((OneToNConversation) conversation, context, participantName);
+					message = OneToNConversationUtils.getConversationNameChangedMessage(conversation.getMsisdn(), context, participantName);
 				}
 				else
 				{
