@@ -1,6 +1,5 @@
 package com.bsb.hike.ui.fragments;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,7 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,10 +28,8 @@ import android.os.Bundle;
 import android.os.Message;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
-import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.TextWatcher;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
@@ -74,42 +70,27 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.models.BroadcastConversation;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.ConversationTip;
 import com.bsb.hike.models.EmptyConversationContactItem;
 import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
-import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.NUXChatReward;
 import com.bsb.hike.models.NUXTaskDetails;
 import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.models.Conversation.BroadcastConversation;
+import com.bsb.hike.models.Conversation.ConvInfo;
+import com.bsb.hike.models.Conversation.Conversation;
+import com.bsb.hike.models.Conversation.ConversationTip;
+import com.bsb.hike.models.Conversation.GroupConversation;
+import com.bsb.hike.models.Conversation.OneToNConvInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.platform.HikeUser;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
-import com.bsb.hike.ui.*;
-import com.bsb.hike.utils.*;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.*;
-import java.util.Map.Entry;
-
-import com.bsb.hike.ui.ComposeChatActivity;
-import com.bsb.hike.ui.HikeDialog;
-import com.bsb.hike.ui.HikeFragmentable;
-import com.bsb.hike.ui.HikeListActivity;
-import com.bsb.hike.ui.HomeActivity;
-import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeFragmentable;
 import com.bsb.hike.ui.HomeActivity;
@@ -117,10 +98,6 @@ import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.PairModified;
-import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
@@ -131,7 +108,7 @@ import com.bsb.hike.view.HoloCircularProgress;
 public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener, HikeFragmentable, OnClickListener
 {
 
-	private class DeleteConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>
+	private class DeleteConversationsAsyncTask extends AsyncTask<ConvInfo, Void, ConvInfo[]>
 	{
 
 		Context context;
@@ -153,21 +130,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		@Override
-		protected Conversation[] doInBackground(Conversation... convs)
+		protected ConvInfo[] doInBackground(ConvInfo... convs)
 		{
 			HikeConversationsDatabase db = null;
 			ArrayList<String> msisdns = new ArrayList<String>(convs.length);
 			Editor editor = context.getSharedPreferences(HikeConstants.DRAFT_SETTING, Context.MODE_PRIVATE).edit();
-			for (Conversation conv : convs)
+			for (ConvInfo conv : convs)
 			{
-				/*
-				 * Added to check for the Conversation tip item we add for the group chat tip and other.
-				 */
-				if (conv instanceof ConversationTip)
-				{
-					continue;
-				}
-				else if (conv instanceof GroupConversation)
+				
+				 if (conv instanceof OneToNConvInfo)
 				{
 					//TODO in case of leaving group from group info screen ==> 2 gcl event will trigger
 					//we can avoid these by moving delete conversation task to db
@@ -187,29 +158,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		@Override
-		protected void onPostExecute(Conversation[] deleted)
+		protected void onPostExecute(ConvInfo[] deleted)
 		{
 			if (!isAdded())
 			{
 				return;
 			}
 			NotificationManager mgr = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-			for (Conversation conversation : deleted)
+			for (ConvInfo convInfo : deleted)
 			{
-				/*
-				 * Added to check for the Conversation tip item we add for the group chat tip and other.
-				 */
-				if (conversation instanceof ConversationTip)
-				{
-					continue;
-				}
-				mAdapter.remove(conversation);
-				mConversationsByMSISDN.remove(conversation.getMsisdn());
-				mConversationsAdded.remove(conversation.getMsisdn());
+				mAdapter.remove(convInfo);
+				mConversationsByMSISDN.remove(convInfo.getMsisdn());
+				mConversationsAdded.remove(convInfo.getMsisdn());
 				resetSearchIcon();
 
-				HikeMessengerApp.removeStealthMsisdn(conversation.getMsisdn(), publishStealthEvent);
-				stealthConversations.remove(conversation);
+				HikeMessengerApp.removeStealthMsisdn(convInfo.getMsisdn(), publishStealthEvent);
+				stealthConversations.remove(convInfo);
 			}
 
 			notifyDataSetChanged();
@@ -233,17 +197,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private ConversationsAdapter mAdapter;
 
-	private HashMap<String, Conversation> mConversationsByMSISDN;
+	private HashMap<String, ConvInfo> mConversationsByMSISDN;
 
 	private HashSet<String> mConversationsAdded;
 
-	private Comparator<? super Conversation> mConversationsComparator;
+	private Comparator<? super ConvInfo> mConversationsComparator;
 
 	private View emptyView;
 
-	private Set<Conversation> stealthConversations;
+	private Set<ConvInfo> stealthConversations;
 
-	private List<Conversation> displayedConversations;
+	private List<ConvInfo> displayedConversations;
 
 	private boolean showingStealthFtueConvTip = false;
 
