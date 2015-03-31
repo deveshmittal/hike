@@ -1070,7 +1070,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		 * Updating the overflow menu item
 		 */
 
-		updateOverflowMenuItemString(R.string.mute_group, isMuted ? activity.getString(R.string.unmute_group) : activity.getString(R.string.mute_group));
+		mActionBar.updateOverflowMenuItemString(R.string.mute_group, isMuted ? activity.getString(R.string.unmute_group) : activity.getString(R.string.mute_group));
 	}
 
 	private void toggleConversationMuteViewVisibility(boolean isMuted)
@@ -1105,8 +1105,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		if (groupConversation != null)
 		{
 			int unreadPinCount = groupConversation.getUnreadPinCount();
-			updateOverflowMenuIndicatorCount(unreadPinCount);
-			updateOverflowMenuItemCount(R.string.group_profile, unreadPinCount);
+			mActionBar.updateOverflowMenuIndicatorCount(unreadPinCount);
+			mActionBar.updateOverflowMenuItemCount(R.string.group_profile, unreadPinCount);
 		}
 	}
 

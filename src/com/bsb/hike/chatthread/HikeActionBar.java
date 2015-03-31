@@ -6,16 +6,20 @@ import java.util.Set;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.PopupWindow.OnDismissListener;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.media.OverFlowMenuLayout;
 import com.bsb.hike.media.OverflowItemClickListener;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Utils;
 
 /**
  * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -214,4 +218,72 @@ public class HikeActionBar
 		return menuItem;
 	}
 
+	
+	/**
+	 * Can be used to update the unread count of an overflow menu item on the fly
+	 * 
+	 * @param itemId
+	 * @param newCount
+	 */
+	protected void updateOverflowMenuItemCount(int itemId, int newCount)
+	{
+		if(overFlowMenuLayout!=null)
+		{
+			overFlowMenuLayout.updateOverflowMenuItemCount(itemId, newCount);
+		}
+	}
+	
+	/**
+	 * Can be used to update the title of an overflow menu item on the fly
+	 * 
+	 * @param itemId
+	 * @param newTitle
+	 */
+	protected void updateOverflowMenuItemString(int itemId, String newTitle)
+	{
+		if(overFlowMenuLayout!=null)
+		{
+			overFlowMenuLayout.updateOverflowMenuItemString(itemId, newTitle);
+		}
+	}
+	
+	/**
+	 * This is used to update/show counter on the overflow menu icon. This will be called from the UI Thread
+	 * 
+	 * Can be used for pin count or in future say missed calls count for VoIP or any other futuristic feature
+	 */
+	protected void updateOverflowMenuIndicatorCount(int newCount)
+	{
+		MenuItem menuItem = getMenuItem(R.id.overflow_menu);
+		
+		if (menuItem != null && menuItem.getActionView() != null)
+		{
+			TextView topBarCounter = (TextView) menuItem.getActionView().findViewById(R.id.top_bar_indicator);
+
+			if (newCount < 1)
+			{
+				topBarCounter.setVisibility(View.GONE);
+
+			}
+			else
+			{
+				topBarCounter.setVisibility(View.VISIBLE);
+				topBarCounter.setText(getUnreadCounterText(newCount));
+				topBarCounter.startAnimation(Utils.getNotificationIndicatorAnim());
+			}
+
+		}
+	}
+	
+	private String getUnreadCounterText(int counter)
+	{
+		if (counter >= HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY)
+		{
+			return mActivity.getString(R.string.max_pin_unread_counter);
+		}
+		else
+		{
+			return Integer.toString(counter);
+		}
+	}
 }
