@@ -486,10 +486,10 @@ public class ConvMessage
 			this.mMessage = OneToNConversationUtils.getParticipantAddedMessage(this, context, highlight);
 			break;
 		case PARTICIPANT_LEFT:
-			this.mMessage = OneToNConversationUtils.getParticipantRemovedMessage((OneToNConversation) conversation, context, ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(metadata.getMsisdn()));
+			this.mMessage = OneToNConversationUtils.getParticipantRemovedMessage(conversation.getMsisdn(), context, ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(metadata.getMsisdn()));
 			break;
 		case GROUP_END:
-			this.mMessage = OneToNConversationUtils.getConversationEndedMessage((OneToNConversation) conversation, context);
+			this.mMessage = OneToNConversationUtils.getConversationEndedMessage(conversation.getMsisdn(), context);
 			break;
 		case USER_JOIN:
 			//This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.\
@@ -537,7 +537,7 @@ public class ConvMessage
 			
 			if (participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME)
 			{
-				this.mMessage = OneToNConversationUtils.getConversationNameChangedMessage((OneToNConversation) conversation, context, participantName);
+				this.mMessage = OneToNConversationUtils.getConversationNameChangedMessage(conversation.getMsisdn(), context, participantName);
 			}
 			else
 			{
