@@ -33,8 +33,10 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 
 	public static final String MQTT_TIME_STAMP = "mqttTimeStamp";
 
+	//Added for Instrumentation
 	public static final String MQTT_MSG_TRACK_ID = "mqttMsgTrackId";
 	
+	//Added for Instrumentation
 	public static final String MQTT_MSG_MSG_TYPE = "mqttMsgMsgType";
 	
 	public static final String MQTT_TIME_STAMP_INDEX = "mqttTimeStampIndex";
@@ -100,7 +102,7 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 
 	public List<HikePacket> getAllSentMessages()
 	{
-		Cursor c = mDb.query(MQTT_DATABASE_TABLE, new String[] { MQTT_MESSAGE, MQTT_MESSAGE_ID, MQTT_TIME_STAMP, MQTT_PACKET_ID, MQTT_PACKET_TYPE, MQTT_MSG_TRACK_ID }, null, null, null, null, MQTT_TIME_STAMP);
+		Cursor c = mDb.query(MQTT_DATABASE_TABLE, new String[] { MQTT_MESSAGE, MQTT_MESSAGE_ID, MQTT_TIME_STAMP, MQTT_PACKET_ID, MQTT_PACKET_TYPE, MQTT_MSG_TRACK_ID, MQTT_MSG_MSG_TYPE }, null, null, null, null, MQTT_TIME_STAMP);
 		try
 		{
 			List<HikePacket> vals = new ArrayList<HikePacket>(c.getCount());
@@ -151,7 +153,7 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 
 		String sql = "CREATE TABLE IF NOT EXISTS " + MQTT_DATABASE_TABLE + " ( " + MQTT_PACKET_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + MQTT_MESSAGE_ID + " INTEGER,"
 				+ MQTT_MESSAGE + " BLOB," + MQTT_TIME_STAMP + " INTEGER," +  MQTT_PACKET_TYPE + " INTEGER," + 
-				MQTT_MSG_TRACK_ID + " TEXT) ";
+				MQTT_MSG_TRACK_ID + " TEXT," + MQTT_MSG_MSG_TYPE + " TEXT) ";
 		db.execSQL(sql);
 
 		sql = "CREATE INDEX IF NOT EXISTS " + MQTT_MSG_ID_INDEX + " ON " + MQTT_DATABASE_TABLE + "(" + MQTT_MESSAGE_ID + ")";
@@ -169,10 +171,14 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 			db.execSQL(alter);
 		}
 		
+		//Both column are added for Instrumentation 
 		if(oldVersion < 3)
 		{
 			String alter1 = "ALTER TABLE " + MQTT_DATABASE_TABLE + " ADD COLUMN " + MQTT_MSG_TRACK_ID + " TEXT";
 			db.execSQL(alter1);
+			
+			String alter2 = "ALTER TABLE " + MQTT_DATABASE_TABLE + " ADD COLUMN " + MQTT_MSG_MSG_TYPE + " TEXT";
+			db.execSQL(alter2);
 		}
 	}
 
