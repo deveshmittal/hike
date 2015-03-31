@@ -995,7 +995,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			
 		
 		}
-		mConversationsComparator = new Conversation.ConversationComparator();
+		mConversationsComparator = new ConvInfo.ConvInfoComparator();
 		fetchConversations();
 
 		for (TypingNotification typingNotification : HikeMessengerApp.getTypingNotificationSet().values())
@@ -1032,10 +1032,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 		{
 			// if stealth setup is not done and user has marked some chats as stealth unmark all of them
-			for (Conversation conv : stealthConversations)
+			for (ConvInfo convInfo : stealthConversations)
 			{
-				conv.setIsStealth(false);
-				HikeConversationsDatabase.getInstance().toggleStealth(conv.getMsisdn(), false);
+				convInfo.setStealth(false);
+				HikeConversationsDatabase.getInstance().toggleStealth(convInfo.getMsisdn(), false);
 			}
 
 			HikeMessengerApp.clearStealthMsisdn();
@@ -1129,7 +1129,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			resultType = 1;
 		}
 		// For new conversation with hike use
-		else if (conv.isOnhike())
+		else if (conv.isOnHike())
 		{
 			resultType = 2;
 		}
@@ -3293,22 +3293,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	public boolean hasNoConversation()
 	{
-		for(Conversation conv : displayedConversations)
-		{
-			if(conv instanceof ConversationTip)
-			{
-				/*
-				 * we should ideally remove this tip here.
-				 */
-				continue;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		
-		return true;
+		return displayedConversations.size() == 0;
 	}
 	
 	private class MenuArrayAdapter extends ArrayAdapter<CharSequence>
@@ -3343,13 +3328,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		
 	}
 	
-	protected void viewContacts(Conversation conv) 
+	protected void viewContacts(ConvInfo conv) 
 	{
 		Intent intent = new Intent(getActivity(), ProfileActivity.class);
 		intent.putExtra(HikeConstants.Extras.CONTACT_INFO, conv.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.ON_HIKE, conv.isOnhike());
+		intent.putExtra(HikeConstants.Extras.ON_HIKE, conv.isOnHike());
 		startActivity(intent);
 	}
+	
 	protected void viewGroupInfo(Conversation conv) {
 		Intent intent = new Intent(getActivity(), ProfileActivity.class);
 		if (Utils.isBroadcastConversation(conv.getMsisdn()))
@@ -3474,12 +3460,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (nm.getCurrentState() == NUXConstants.NUX_IS_ACTIVE
 				|| (nm.getCurrentState() == NUXConstants.NUX_SKIPPED)||(nm.getCurrentState() == NUXConstants.COMPLETED))
 		{
-			
-			
-			
-			
-			
-			
 			
 			if (NUXManager.getInstance().isReminderReceived())
 			{
