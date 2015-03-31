@@ -1400,8 +1400,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		setEditTextListeners();
 		
-		activity.invalidateOptionsMenu(); // Calling the onCreate menu here
-
+		activity.supportInvalidateOptionsMenu(); // Calling the onCreate menu here
 		// Register broadcasts
 		mBroadCastReceiver = new ChatThreadBroadcasts();
 
