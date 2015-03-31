@@ -46,7 +46,6 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Conversation.ConvInfo;
-import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.OneToNConvInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
@@ -835,9 +834,9 @@ public class ConversationsAdapter extends BaseAdapter
 		return markedUp;
 	}
 
-	public void addItemsToAnimat(Set<Conversation> stealthConversations)
+	public void addItemsToAnimat(Set<ConvInfo> stealthConversations)
 	{
-		for (Conversation conversation : stealthConversations)
+		for (ConvInfo conversation : stealthConversations)
 		{
 			itemsToAnimat.put(conversation.hashCode(), true);
 		}
