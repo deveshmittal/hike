@@ -669,7 +669,7 @@ public class MqttMessagesManager
 		ConvMessage convMessage = messagePreProcess(jsonObj);
 		addToLists(convMessage.getMsisdn(), convMessage);
 		
-		MsgRelLogManager.logMsgRelEvent(jsonObj, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
+		MsgRelLogManager.logMsgRelEvent(convMessage, MsgRelEventType.RECEIVER_MQTT_RECVS_SENT_MSG);
 		
 		if (convMessage.isGroupChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
@@ -2715,8 +2715,6 @@ public class MqttMessagesManager
 			}
 			else
 			{
-				MsgRelLogManager.logMsgRelEvent(jsonObj, MsgRelEventType.MR_RECEIVED_AT_SENEDER_MQTT);
-				
 				saveMessageRead(jsonObj);
 			}
 		}

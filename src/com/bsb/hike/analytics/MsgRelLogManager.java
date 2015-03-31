@@ -21,6 +21,8 @@ import com.bsb.hike.utils.Utils;
 
 public class MsgRelLogManager
 {
+	private static final String TAG = "MsgRelLogManager";
+	
 	public static Random randomGenerator = new Random();
 	
 	/**
@@ -53,26 +55,34 @@ public class MsgRelLogManager
 	 */
 	public static void logMsgRelDR(JSONObject jsonObj, String eventType)
 	{
-		if (jsonObj.has(HikeConstants.PRIVATE_DATA))
+		try
 		{
-			String id = jsonObj.optString(HikeConstants.DATA);
-			long msgID;
-			try
+			if (jsonObj.has(HikeConstants.PRIVATE_DATA))
 			{
-				msgID = Long.parseLong(id);
+				String id = jsonObj.optString(HikeConstants.DATA);
+				long msgID;
+				try
+				{
+					msgID = Long.parseLong(id);
+				}
+				catch (NumberFormatException e)
+				{
+					Logger.e(MsgRelLogManager.class.getSimpleName(), "Exception occured while parsing msgId. Exception : " + e);
+					msgID = -1;
+				}
+				JSONObject pdObject = jsonObj.optJSONObject(HikeConstants.PRIVATE_DATA);
+				String trackId = pdObject.optString(HikeConstants.MSG_REL_UID);
+				String msgType = pdObject.optString(HikeConstants.MSG_REL_MSG_TYPE);
+				if (trackId != null && msgID != -1)
+				{
+					recordMsgRel(trackId, msgID, eventType, msgType);
+				}
 			}
-			catch (NumberFormatException e)
-			{
-				Logger.e(MsgRelLogManager.class.getSimpleName(), "Exception occured while parsing msgId. Exception : " + e);
-				msgID = -1;
-			}
-			JSONObject pdObject = jsonObj.optJSONObject(HikeConstants.PRIVATE_DATA);
-			String trackId = pdObject.optString(HikeConstants.MSG_REL_UID);
-			String msgType = pdObject.optString(HikeConstants.MSG_REL_MSG_TYPE);
-			if (trackId != null && msgID != -1)
-			{
-				recordMsgRel(trackId, msgID, eventType, msgType);
-			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.e(TAG, "Exception in MsgRelLogging : " + e.getMessage());
 		}
 	}
 
@@ -83,15 +93,23 @@ public class MsgRelLogManager
 	 */
 	public static void logMsgRelEvent(JSONObject jsonObj, String eventType) throws JSONException
 	{
-		if(jsonObj.has(HikeConstants.PRIVATE_DATA))
+		try
 		{
-			JSONObject pd = jsonObj.getJSONObject(HikeConstants.PRIVATE_DATA);
-			String trackId = pd.getString(HikeConstants.MSG_REL_UID);
-			if (trackId != null)
+			if(jsonObj.has(HikeConstants.PRIVATE_DATA))
 			{
-				long msgId = jsonObj.getLong(HikeConstants.MESSAGE_ID);
-				recordMsgRel(trackId, msgId, eventType);
+				JSONObject pd = jsonObj.getJSONObject(HikeConstants.PRIVATE_DATA);
+				String trackId = pd.getString(HikeConstants.MSG_REL_UID);
+				if (trackId != null)
+				{
+					long msgId = jsonObj.getLong(HikeConstants.MESSAGE_ID);
+					recordMsgRel(trackId, msgId, eventType);
+				}
 			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.e(TAG, "Exception in MsgRelLogging : " + e.getMessage());
 		}
 	}
 
