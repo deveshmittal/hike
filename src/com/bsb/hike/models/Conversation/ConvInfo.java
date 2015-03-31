@@ -34,6 +34,8 @@ public class ConvInfo implements Comparable<ConvInfo>
 	private long sortingTimeStamp;
 
 	private boolean isOnHike;
+	
+	private boolean isTyping;
 
 	/**
 	 * Keeps track of the last message for a given conversation
@@ -408,6 +410,22 @@ public class ConvInfo implements Comparable<ConvInfo>
 			return rhs.compareTo(lhs);
 		}
 
+	}
+
+	/**
+	 * @return the isTyping
+	 */
+	public boolean isTyping()
+	{
+		return isTyping;
+	}
+
+	/**
+	 * @param isTyping the isTyping to set
+	 */
+	public void setTyping(boolean isTyping)
+	{
+		this.isTyping = isTyping;
 	}
 
 }
