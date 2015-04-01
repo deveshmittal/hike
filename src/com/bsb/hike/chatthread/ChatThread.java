@@ -2234,6 +2234,24 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			loadMessage(true);
 		}
 
+		/*
+		 * The search indicator over overflow menu item is shown if:
+		 *  - It hasn't been shown before
+		 *  - Theres nothing being displayed in its position right now, like gc pin unread count.
+		 *  - User has scrolled up by atleast 1 message.
+		 *  - Messages not are being loaded.
+		 *  Note: This is to be shown only once
+		 */
+		if (!HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).getData(HikeMessengerApp.CT_SEARCH_INDICATOR_SHOWN, false)
+				&& !mActionBar.isOverflowMenuIndicatorInUse() && (firstVisibleItem + visibleItemCount + 1) < totalItemCount && !loadingMoreMessages)
+		{
+			// If the indicator is successfully displayed the setting is saved, so that its not shown again.
+			if (mActionBar.updateOverflowMenuIndicatorImage(R.drawable.ic_top_bar_indicator_search))
+			{
+				HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).saveData(HikeMessengerApp.CT_SEARCH_INDICATOR_SHOWN, true);
+			}
+		}
+
 		View unreadMessageIndicator = activity.findViewById(R.id.new_message_indicator);
 
 		if (unreadMessageIndicator.getVisibility() == View.VISIBLE && mConversationsView.getLastVisiblePosition() > messages.size() - unreadMessageCount - 2)
