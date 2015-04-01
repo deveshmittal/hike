@@ -4152,7 +4152,7 @@ public class Utils
 		context.startActivity(i);
 	}
 
-	public static final void cancelScheduledStealthReset(Context context)
+	public static final void cancelScheduledStealthReset()
 	{
 		HikeSharedPreferenceUtil.getInstance().removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
 	}
