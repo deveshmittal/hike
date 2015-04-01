@@ -185,6 +185,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 	public void setLastConversationMsg(ConvMessage lastConversationMsg)
 	{
 		this.lastConversationMsg = lastConversationMsg;
+		setSortingTimeStamp(lastConversationMsg.getTimestamp());
 	}
 
 	/**
