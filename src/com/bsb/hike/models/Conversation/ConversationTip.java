@@ -1,20 +1,31 @@
 package com.bsb.hike.models.Conversation;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
-public class ConversationTip
+public class ConversationTip implements OnClickListener
 {
+	public static final int NO_TIP = -1;
+
 	public static final int GROUP_CHAT_TIP = 1;
 
 	public static final int STEALTH_FTUE_TIP = 2;
@@ -49,25 +60,40 @@ public class ConversationTip
 
 	CountDownSetter countDownSetter;
 
-	public ConversationTip(int tipType, Context context)
+	public interface ConversationTipClickedListener
 	{
-		this.tipType = tipType;
-		this.context = context;
-		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		public void closeTip(int whichTip);
 	}
 
-	public View getView()
+	private ConversationTipClickedListener mListener;
+
+	public ConversationTip(Context context, ConversationTipClickedListener listener)
 	{
+		this.context = context;
+		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		this.mListener = listener;
+	}
+
+	public View getView(int whichTip)
+	{
+		if (whichTip == NO_TIP)
+		{
+			return null;
+		}
+		tipType = whichTip;
+
 		View v;
 		switch (tipType)
 		{
 		case STEALTH_FTUE_TIP:
 			v = inflater.inflate(R.layout.stealth_ftue_conversation_tip, null, false);
+			v.findViewById(R.id.close).setOnClickListener(this);
 			// TODO Add animation Code here
 			return v;
 
 		case RESET_STEALTH_TIP:
 			v = inflater.inflate(R.layout.stealth_ftue_conversation_tip, null, false);
+			v.findViewById(R.id.close).setOnClickListener(this);
 			TextView headerText = (TextView) v.findViewById(R.id.tip);
 			long remainingTime = HikeConstants.RESET_COMPLETE_STEALTH_TIME_MS
 					- (System.currentTimeMillis() - HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l));
@@ -97,12 +123,14 @@ public class ConversationTip
 			v = inflater.inflate(R.layout.welcome_hike_tip, null, false);
 			((TextView) v.findViewById(R.id.tip_header)).setText(R.string.new_ui_welcome_tip_header);
 			((TextView) v.findViewById(R.id.tip_msg)).setText(R.string.new_ui_welcome_tip_msg);
+			v.findViewById(R.id.close_tip).setOnClickListener(this);
 			return v;
 
 		case STEALTH_INFO_TIP:
 			v = inflater.inflate(R.layout.stealth_unread_tip, null, false);
 			((TextView) v.findViewById(R.id.tip_header)).setText(R.string.stealth_info_tip_header);
 			((TextView) v.findViewById(R.id.tip_msg)).setText(R.string.stealth_info_tip_subtext);
+			v.findViewById(R.id.close_tip).setOnClickListener(this);
 			return v;
 
 		case STEALTH_UNREAD_TIP:
@@ -111,6 +139,7 @@ public class ConversationTip
 			String msgTxt = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_UNREAD_TIP_MESSAGE, "");
 			((TextView) v.findViewById(R.id.tip_header)).setText(headerTxt);
 			((TextView) v.findViewById(R.id.tip_msg)).setText(msgTxt);
+			v.findViewById(R.id.close_tip).setOnClickListener(this);
 			return v;
 
 		case ATOMIC_PROFILE_PIC_TIP:
@@ -143,6 +172,7 @@ public class ConversationTip
 			return v;
 
 		default:
+			tipType = NO_TIP;
 			return null;
 		}
 	}
@@ -157,6 +187,7 @@ public class ConversationTip
 		String message = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_MESSAGE_MAIN, "");
 		header.setText(headerTxt1);
 		subText.setText(message);
+		v.findViewById(R.id.close_tip).setOnClickListener(this);
 		return v;
 
 	}
@@ -245,5 +276,75 @@ public class ConversationTip
 		int seconds = (int) (secondsUntilFinished % 60);
 		String text = String.format("%1$02d:%2$02d", minutes, seconds);
 		textView.setText(Html.fromHtml(context.getString(R.string.reset_stealth_tip, text)));
+	}
+
+	private void resetCountDownSetter()
+	{
+		if (countDownSetter == null)
+		{
+			return;
+		}
+
+		this.countDownSetter.cancel();
+		this.countDownSetter = null;
+	}
+
+	@Override
+	public void onClick(View v)
+	{
+		if (v.getId() == R.id.close_tip || v.getId() == R.id.close)
+		{
+
+			switch (tipType)
+			{
+			case RESET_STEALTH_TIP:
+				resetCountDownSetter();
+				Utils.cancelScheduledStealthReset();
+
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch (JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
+
+				break;
+
+			case WELCOME_HIKE_TIP:
+				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_WELCOME_HIKE_TIP, null);
+				break;
+
+			case STEALTH_INFO_TIP:
+				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STEALTH_INFO_TIP, null);
+				break;
+
+			case STEALTH_UNREAD_TIP:
+				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_UNREAD_TIP_CLICKED, null);
+				break;
+
+			case ATOMIC_PROFILE_PIC_TIP:
+			case ATOMIC_FAVOURTITES_TIP:
+			case ATOMIC_INVITE_TIP:
+			case ATOMIC_STATUS_TIP:
+			case ATOMIC_INFO_TIP:
+			case ATOMIC_HTTP_TIP:
+			case ATOMIC_APP_GENERIC_TIP:
+				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
+				break;
+			default:
+				break;
+			}
+
+			if (mListener != null)
+			{
+				mListener.closeTip(tipType);
+			}
+
+			tipType = NO_TIP;
+		}
 	}
 }
