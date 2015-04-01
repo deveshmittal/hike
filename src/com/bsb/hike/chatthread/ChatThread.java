@@ -307,7 +307,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	/**
 	 * This method is called from the UI Handler's handleMessage. All the tasks performed by this are supposed to run on the UI Thread only.
 	 * 
-	 * This is also overriden by {@link OneToOneChatThread} and {@link GroupChatThread}
+	 * This is also overriden by {@link OneToOneChatThread} and {@link OneToNChatThread}
 	 * 
 	 * @param msg
 	 */
@@ -3314,7 +3314,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	}
 
 	/**
-	 * Used to call {@link #showOverlay(boolean, String, String, String)} from {@link OneToOneChatThread} or {@link GroupChatThread}
+	 * Used to call {@link #showOverlay(boolean, String, String, String)} from {@link OneToOneChatThread} or {@link OneToNChatThread}
 	 * 
 	 * @param label
 	 */
@@ -3401,7 +3401,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	}
 
 	/**
-	 * This method is overriden by {@link OneToOneChatThread} and {@link GroupChatThread}
+	 * This method is overriden by {@link OneToOneChatThread} and {@link OneToNChatThread}
 	 * 
 	 * @return
 	 */
@@ -3810,7 +3810,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	// ------------------------ ACTIONMODE CALLBACKS -------------------------------
 	/**
-	 * These methods is also overriden by {@link GroupChatThread} for pins
+	 * These methods is also overriden by {@link OneToNChatThread} for pins
 	 */
 	@Override
 	public void actionModeDestroyed(int id)
