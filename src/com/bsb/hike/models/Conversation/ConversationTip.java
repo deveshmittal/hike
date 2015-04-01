@@ -4,8 +4,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.CountDownTimer;
 import android.text.Html;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -18,7 +20,12 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.ui.PeopleActivity;
+import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.StatusUpdate;
+import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -140,6 +147,7 @@ public class ConversationTip implements OnClickListener
 			((TextView) v.findViewById(R.id.tip_header)).setText(headerTxt);
 			((TextView) v.findViewById(R.id.tip_msg)).setText(msgTxt);
 			v.findViewById(R.id.close_tip).setOnClickListener(this);
+			v.findViewById(R.id.close_container).setOnClickListener(this);
 			return v;
 
 		case ATOMIC_PROFILE_PIC_TIP:
@@ -161,6 +169,7 @@ public class ConversationTip implements OnClickListener
 		case ATOMIC_INFO_TIP:
 			v = generateAtomicTipViews();
 			((ImageView) v.findViewById(R.id.arrow_pointer)).setImageResource(R.drawable.ic_information);
+			v.findViewById(R.id.all_content).setClickable(false);
 			return v;
 		case ATOMIC_HTTP_TIP:
 			v = generateAtomicTipViews();
@@ -188,6 +197,7 @@ public class ConversationTip implements OnClickListener
 		header.setText(headerTxt1);
 		subText.setText(message);
 		v.findViewById(R.id.close_tip).setOnClickListener(this);
+		v.findViewById(R.id.all_content).setOnClickListener(this);
 		return v;
 
 	}
@@ -278,7 +288,7 @@ public class ConversationTip implements OnClickListener
 		textView.setText(Html.fromHtml(context.getString(R.string.reset_stealth_tip, text)));
 	}
 
-	private void resetCountDownSetter()
+	public void resetCountDownSetter()
 	{
 		if (countDownSetter == null)
 		{
@@ -292,6 +302,28 @@ public class ConversationTip implements OnClickListener
 	@Override
 	public void onClick(View v)
 	{
+
+		if (v.getId() == R.id.all_content)
+		{
+			switch (tipType)
+			{
+			case STEALTH_UNREAD_TIP:
+				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_UNREAD_TIP_CLICKED, null);
+				break;
+
+			case ATOMIC_PROFILE_PIC_TIP:
+			case ATOMIC_FAVOURTITES_TIP:
+			case ATOMIC_INVITE_TIP:
+			case ATOMIC_STATUS_TIP:
+			case ATOMIC_HTTP_TIP:
+			case ATOMIC_APP_GENERIC_TIP:
+				resetAtomicPopUpKey();
+
+			default:
+				break;
+			}
+		}
+
 		if (v.getId() == R.id.close_tip || v.getId() == R.id.close)
 		{
 
@@ -351,4 +383,133 @@ public class ConversationTip implements OnClickListener
 			tipType = NO_TIP;
 		}
 	}
+
+	private void resetAtomicPopUpKey()
+	{
+		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance();
+		JSONObject metadata = new JSONObject();
+
+		try
+		{
+			switch (this.tipType)
+			{
+			case ConversationTip.ATOMIC_FAVOURTITES_TIP:
+				context.startActivity(new Intent(context, PeopleActivity.class));
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_FAVOURITES_TIP_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case ConversationTip.ATOMIC_INVITE_TIP:
+				context.startActivity(new Intent(context, TellAFriend.class));
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_INVITE_TIP_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case ConversationTip.ATOMIC_PROFILE_PIC_TIP:
+				context.startActivity(new Intent(context, ProfileActivity.class));
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_PROFILE_PIC_TIP_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case ConversationTip.ATOMIC_STATUS_TIP:
+				context.startActivity(new Intent(context, StatusUpdate.class));
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_STATUS_TIP_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case ConversationTip.ATOMIC_HTTP_TIP:
+				String url = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HTTP_URL, null);
+				if (!TextUtils.isEmpty(url))
+				{
+					Utils.startWebViewActivity(context, url, pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_MAIN, ""));
+					pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_HTTP_URL, "");
+				}
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_HTTP_TIP_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case ConversationTip.ATOMIC_APP_GENERIC_TIP:
+				onClickGenericAppTip(pref);
+				break;
+			}
+			if (mListener != null)
+			{
+				mListener.closeTip(tipType);
+			}
+
+			pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
+		}
+		catch (JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+	}
+
+	private void onClickGenericAppTip(HikeSharedPreferenceUtil pref)
+	{
+		int what = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC_WHAT, -1);
+		try
+		{
+			JSONObject metadata = new JSONObject();
+
+			switch (what)
+			{
+			case HikeConstants.ATOMIC_APP_TIP_SETTINGS:
+				IntentManager.openSetting(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_NOTIF:
+				IntentManager.openSettingNotification(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_NOTIF_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_PRIVACY:
+				IntentManager.openSettingPrivacy(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_PRIVACY_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_SMS:
+				IntentManager.openSettingSMS(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_SMS_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_MEDIA:
+				IntentManager.openSettingMedia(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_MEDIA_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_INVITE_FREE_SMS:
+				IntentManager.openInviteSMS(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_FREE_SMS_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_INVITE_WATSAPP:
+				if (Utils.isPackageInstalled(context, HikeConstants.PACKAGE_WATSAPP))
+				{
+					IntentManager.openInviteWatsApp(context);
+				}
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_WHATSAPP_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_TIMELINE:
+				IntentManager.openTimeLine(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_TIMELINE_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_HIKE_EXTRA:
+				IntentManager.openHikeExtras(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			case HikeConstants.ATOMIC_APP_TIP_HIKE_REWARDS:
+				IntentManager.openHikeRewards(context);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				break;
+			default:
+				return;
+			}
+		}
+		catch (JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
+	}
+
 }
