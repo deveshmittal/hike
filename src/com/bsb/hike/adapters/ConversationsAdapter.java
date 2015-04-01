@@ -41,6 +41,7 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -219,6 +220,11 @@ public class ConversationsAdapter extends BaseAdapter
 		if (lastConvMessage != null)
 		{
 			updateViewsRelatedToLastMessage(v, lastConvMessage, convInfo);
+		}
+		
+		if (lastConvMessage != null && convInfo.getTypingNotif() != null)
+		{
+			updateViewsRelatedToTypingNotif(v, convInfo);
 		}
 
 		updateViewsRelatedToAvatar(v, convInfo);
@@ -535,6 +541,25 @@ public class ConversationsAdapter extends BaseAdapter
 				muteIcon.setVisibility(View.GONE);
 			}
 		}
+	}
+	
+	public void updateViewsRelatedToTypingNotif(View parentView, ConvInfo convInfo)
+	{
+		ConvMessage typingNotifMessage = generateTypingNotifMessage(convInfo.getLastConversationMsg(), convInfo.getTypingNotif());
+		if (typingNotifMessage != null)
+		{
+			updateViewsRelatedToLastMessage(parentView, typingNotifMessage, convInfo);
+
+		}
+	}
+
+	private ConvMessage generateTypingNotifMessage(ConvMessage lastConversationMsg, TypingNotification typingNotif)
+	{
+		ConvMessage convMessage = new ConvMessage(typingNotif);
+		convMessage.setTimestamp(lastConversationMsg.getTimestamp());
+		convMessage.setMessage(HikeConstants.IS_TYPING);
+		convMessage.setState(State.RECEIVED_UNREAD);
+		return convMessage;
 	}
 
 	public void updateViewsRelatedToLastMessage(View parentView, ConvMessage message, ConvInfo convInfo)

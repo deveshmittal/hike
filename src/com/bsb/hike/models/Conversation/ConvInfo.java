@@ -9,6 +9,7 @@ import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.utils.Logger;
 
 /**
@@ -35,8 +36,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 
 	private boolean isOnHike;
 	
-	private boolean isTyping;
-
+	private TypingNotification typingNotif;
 	/**
 	 * Keeps track of the last message for a given conversation
 	 */
@@ -109,6 +109,22 @@ public class ConvInfo implements Comparable<ConvInfo>
 	protected void setBlocked(boolean isBlocked)
 	{
 		this.isBlocked = isBlocked;
+	}
+
+	/**
+	 * @return the typingNotif
+	 */
+	public TypingNotification getTypingNotif()
+	{
+		return typingNotif;
+	}
+
+	/**
+	 * @param typingNotif the typingNotif to set
+	 */
+	public void setTypingNotif(TypingNotification typingNotif)
+	{
+		this.typingNotif = typingNotif;
 	}
 
 	/**
@@ -412,20 +428,5 @@ public class ConvInfo implements Comparable<ConvInfo>
 
 	}
 
-	/**
-	 * @return the isTyping
-	 */
-	public boolean isTyping()
-	{
-		return isTyping;
-	}
-
-	/**
-	 * @param isTyping the isTyping to set
-	 */
-	public void setTyping(boolean isTyping)
-	{
-		this.isTyping = isTyping;
-	}
 
 }

@@ -234,6 +234,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	public boolean searchMode = false;
 	
 	private String searchText;
+	
+	private ConversationTip convTip;
 
 	private enum hikeBotConvStat
 	{
@@ -1751,6 +1753,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void toggleTypingNotification(boolean isTyping, TypingNotification typingNotification)
 	{
+		if (!wasViewSetup())
+		{
+			return;
+		}
+		
 		if (mConversationsByMSISDN == null)
 		{
 			return;
@@ -1762,70 +1769,42 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			Logger.d(getClass().getSimpleName(), "Conversation Does not exist");
 			return;
 		}
-//		List<ConvMessage> messageList = convInfo.getMessages();
-//		if (messageList.isEmpty())
-//		{
-//			Logger.d(getClass().getSimpleName(), "Conversation is empty");
-//			return;
-//		}
-		ConvMessage message;
-
-		boolean shouldUpdateUI = false;
-
-//		if (isTyping)
-//		{
-//			message = messageList.get(messageList.size() - 1);
-//			if (message.getTypingNotification() == null)
-//			{
-//				ConvMessage convMessage = new ConvMessage(typingNotification);
-//				convMessage.setTimestamp(message.getTimestamp());
-//				convMessage.setMessage(HikeConstants.IS_TYPING);
-//				convMessage.setState(State.RECEIVED_UNREAD);
-//				messageList.add(convMessage);
-//
-//				shouldUpdateUI = true;
-//			}
-//		}
-//		else
-//		{
-//			message = messageList.get(messageList.size() - 1);
-//			if (message.getTypingNotification() != null)
-//			{
-//				messageList.remove(message);
-//				shouldUpdateUI = true;
-//			}
-//		}
-//
-//		if (shouldUpdateUI)
-//		{
-//			if (messageList.isEmpty())
-//			{
-//				return;
-//			}
-//
-//			/*
-//			 * Getting the current last message in the conversation
-//			 */
-//			ConvMessage convMessage = messageList.get(messageList.size() - 1);
-//
-//			if (!wasViewSetup())
-//			{
-//				return;
-//			}
-//
-//			View parentView = getParenViewForConversation(convInfo);
-//
-//			if (parentView == null || convMessage == null)
-//			{
-//				if(parentView == null)
-//				{
-//					notifyDataSetChanged();
-//				}
-//				return;
-//			}
-//			
-//			mAdapter.updateViewsRelatedToLastMessage(parentView, convMessage, convInfo);
-//		}
+		
+		if (convInfo.getLastConversationMsg() == null)
+		{
+			Logger.d(getClass().getSimpleName(), "Conversation is empty");
+			return;
+		}
+		
+		if (isTyping)
+		{	// If we were not already typing and we got isTyping as true, we set typing flag
+			if (convInfo.getTypingNotif() == null)
+			{
+				convInfo.setTypingNotif(typingNotification);
+				View parentView = getParenViewForConversation(convInfo);
+				if (parentView == null)
+				{
+					notifyDataSetChanged();
+				}
+				
+				mAdapter.updateViewsRelatedToTypingNotif(parentView, convInfo);
+			}
+		}
+		else
+		{	// If we were already typing and we got isTyping as false, we remove the typing flag
+			if (convInfo.getTypingNotif() != null)
+			{
+				convInfo.setTypingNotif(null);
+				View parentView = getParenViewForConversation(convInfo);
+				if (parentView == null)
+				{
+					notifyDataSetChanged();
+				}
+				
+				mAdapter.updateViewsRelatedToLastMessage(parentView, convInfo.getLastConversationMsg(), convInfo);
+				
+			}
+		}
 	}
 
 	public void notifyDataSetChanged()
