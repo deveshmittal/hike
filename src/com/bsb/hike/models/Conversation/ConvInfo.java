@@ -379,12 +379,11 @@ public class ConvInfo implements Comparable<ConvInfo>
 
 		public ConvInfo build()
 		{
-			if (!this.validateConvInfo())
+			if (this.validateConvInfo())
 			{
-				throw new IllegalArgumentException("No msisdn set.! ConvInfo object cannot be created.");
+				return new ConvInfo(this);
 			}
-
-			return new ConvInfo(this);
+			return null;
 		}
 
 		/**
@@ -393,9 +392,13 @@ public class ConvInfo implements Comparable<ConvInfo>
 		 * @param builder
 		 * @return
 		 */
-		private boolean validateConvInfo()
+		protected boolean validateConvInfo()
 		{
-			return !(TextUtils.isEmpty(this.msisdn));
+			if (TextUtils.isEmpty(this.msisdn))
+			{
+				throw new IllegalArgumentException("No msisdn set.! ConvInfo object cannot be created.");
+			}
+			return true;
 		}
 
 	}
