@@ -1086,7 +1086,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	public void onListItemClick(ListView l, View v, int position, long id)
 	{
 		ConvInfo convInfo = (ConvInfo) mAdapter.getItem(position);
-
+		if (isTipShowing() && position == 0)
+		{
+			return;
+		}
+		
+		if(isTipShowing())
+		{
+			position--;
+		}
 		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), convInfo);
 		startActivity(intent);
 		
@@ -1104,6 +1112,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 	}
 	
+	private boolean isTipShowing()
+	{
+		return tipView != null;
+	}
+
 	private void recordSearchItemClicked(ConvInfo convInfo, int position, String text)
 	{
 		String SEARCH_RESULT = "srchRslt";
@@ -3437,7 +3450,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			getListView().removeHeaderView(tipView);
 			tipView = null;
-			whichTip = ConversationTip.NO_TIP;
+			tipType = ConversationTip.NO_TIP;
 		}
 	}
 
