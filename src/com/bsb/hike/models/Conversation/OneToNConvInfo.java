@@ -1,7 +1,13 @@
 package com.bsb.hike.models.Conversation;
 
+import java.util.ArrayList;
+
+import android.text.TextUtils;
+
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.utils.PairModified;
 
 /**
  * This class contains the core fields which are required for a 1-n conversation entity to be displayed on the ConversationFragment screen. This is the atomic unit for 1-n
@@ -36,6 +42,25 @@ public class OneToNConvInfo extends ConvInfo
 		this.isConversationAlive = isConversationAlive;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.bsb.hike.models.Conversation.ConvInfo#getLabel()
+	 */
+	@Override
+	public String getLabel()
+	{
+		if (!TextUtils.isEmpty(getConversationName()))
+			return getConversationName();
+		else
+		{
+			// Before contact manager we were adding all the group participants to conversation object initially when getConversations of HikeConversationDatabase is called
+			// But now we do lazy loading, we don't have group participants when we are on home screen
+			// In case of empty group name, group Participants are needed so setting it here.
+			return OneToNConversation.defaultConversationName(ContactManager.getInstance().getGroupParticipants(getMsisdn(), false, false));
+		}
+	}
+	
 	protected static abstract class InitBuilder<P extends InitBuilder<P>> extends ConvInfo.InitBuilder<P>
 	{
 		private boolean isConversationAlive;
@@ -49,6 +74,16 @@ public class OneToNConvInfo extends ConvInfo
 		{
 			this.isConversationAlive = alive;
 			return getSelfObject();
+		}
+		
+		@Override
+		public ConvInfo build()
+		{
+			if (this.validateConvInfo())
+			{
+				return new OneToNConvInfo(this);
+			}
+			return null;
 		}
 	}
 

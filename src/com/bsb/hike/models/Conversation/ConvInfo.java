@@ -77,6 +77,15 @@ public class ConvInfo implements Comparable<ConvInfo>
 		this.mConversationName = mConversationName;
 	}
 
+
+	/**
+	 * @return mConversationName or msisdn
+	 */
+	public String getLabel()
+	{
+		return (TextUtils.isEmpty(getConversationName()) ? getMsisdn() : getConversationName());
+	}
+	
 	/**
 	 * @return the unreadCount
 	 */
@@ -176,6 +185,7 @@ public class ConvInfo implements Comparable<ConvInfo>
 	public void setLastConversationMsg(ConvMessage lastConversationMsg)
 	{
 		this.lastConversationMsg = lastConversationMsg;
+		setSortingTimeStamp(lastConversationMsg.getTimestamp());
 	}
 
 	/**
@@ -370,12 +380,11 @@ public class ConvInfo implements Comparable<ConvInfo>
 
 		public ConvInfo build()
 		{
-			if (!this.validateConvInfo())
+			if (this.validateConvInfo())
 			{
-				throw new IllegalArgumentException("No msisdn set.! ConvInfo object cannot be created.");
+				return new ConvInfo(this);
 			}
-
-			return new ConvInfo(this);
+			return null;
 		}
 
 		/**
@@ -384,9 +393,13 @@ public class ConvInfo implements Comparable<ConvInfo>
 		 * @param builder
 		 * @return
 		 */
-		private boolean validateConvInfo()
+		protected boolean validateConvInfo()
 		{
-			return !(TextUtils.isEmpty(this.msisdn));
+			if (TextUtils.isEmpty(this.msisdn))
+			{
+				throw new IllegalArgumentException("No msisdn set.! ConvInfo object cannot be created.");
+			}
+			return true;
 		}
 
 	}

@@ -2381,7 +2381,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				metadata = c.getString(c.getColumnIndex(DBConstants.CONVERSATION_METADATA));
 				try
 				{
-					conv.setMetadata(new ConversationMetadata(metadata));
+					if (conv instanceof OneToOneConversation)
+					{
+						conv.setMetadata(new ConversationMetadata(metadata));
+					}
+					else if (conv instanceof OneToNConversation)
+					{
+						conv.setMetadata(new OneToNConversationMetadata(metadata));
+					}
 				}
 				catch (JSONException e)
 				{

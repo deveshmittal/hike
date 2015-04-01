@@ -143,9 +143,12 @@ public abstract class Conversation implements Comparable<Conversation>
 	/**
 	 * Returns a friendly label for the conversation
 	 * 
-	 * @return
+	 * @return conversationName or msisdn
 	 */
-	public abstract String getLabel();
+	public String getLabel()
+	{
+		return convInfo.getLabel();
+	}
 
 	public long getSortingTimeStamp()
 	{

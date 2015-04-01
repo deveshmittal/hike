@@ -384,7 +384,7 @@ public class ConversationsAdapter extends BaseAdapter
 					}
 					else
 					{
-						String name = info.getConversationName().toLowerCase();
+						String name = info.getLabel().toLowerCase();
 						int startIndex = 0;
 						if (name.startsWith(textToBeFiltered))
 						{
@@ -478,7 +478,7 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 
 		TextView contactView = viewHolder.headerText;
-		String name = convInfo.getConversationName();
+		String name = convInfo.getLabel();
 		Integer startSpanIndex = convSpanStartIndexes.get(convInfo.getMsisdn());
 		if(isSearchModeOn && startSpanIndex!=null)
 		{
@@ -735,7 +735,7 @@ public class ConversationsAdapter extends BaseAdapter
 				{
 					String dndName;
 					dndName = convInfo instanceof OneToNConvInfo ? ((OneToNConvInfo) convInfo).getConvParticipantName(dndNumbers.optString(i)) : Utils
-							.getFirstName(convInfo.getConversationName());
+							.getFirstName(convInfo.getLabel());
 					if (i < dndNumbers.length() - 2)
 					{
 						dndNames.append(dndName + ", ");
@@ -757,7 +757,7 @@ public class ConversationsAdapter extends BaseAdapter
 //			if (convInfo.isOnhike())
 			{
 				boolean firstIntro = convInfo.getMsisdn().hashCode() % 2 == 0;
-				markedUp = String.format(context.getString(firstIntro ? R.string.start_thread1 : R.string.start_thread2), Utils.getFirstName(convInfo.getMsisdn()));
+				markedUp = String.format(context.getString(firstIntro ? R.string.start_thread1 : R.string.start_thread2), Utils.getFirstName(convInfo.getLabel()));
 			}
 //			else
 //			{
@@ -774,7 +774,7 @@ public class ConversationsAdapter extends BaseAdapter
 			}
 			else
 			{
-				participantName = Utils.getFirstName(convInfo.getConversationName());
+				participantName = Utils.getFirstName(convInfo.getLabel());
 			}
 			
 			markedUp = String.format(message.getMessage(), participantName);
@@ -829,7 +829,7 @@ public class ConversationsAdapter extends BaseAdapter
 			}
 			else
 			{
-				nameString = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : Utils.getFirstName(convInfo.getConversationName());
+				nameString = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : Utils.getFirstName(convInfo.getLabel());
 			}
 
 			markedUp = context.getString(R.string.chat_bg_changed, nameString);
