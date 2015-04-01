@@ -77,6 +77,15 @@ public class ConvInfo implements Comparable<ConvInfo>
 		this.mConversationName = mConversationName;
 	}
 
+
+	/**
+	 * @return mConversationName or msisdn
+	 */
+	public String getLabel()
+	{
+		return (TextUtils.isEmpty(getConversationName()) ? getMsisdn() : getConversationName());
+	}
+	
 	/**
 	 * @return the unreadCount
 	 */

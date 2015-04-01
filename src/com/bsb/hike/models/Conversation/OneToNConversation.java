@@ -67,6 +67,16 @@ public abstract class OneToNConversation extends Conversation
 		
 		setConversationAlive(builder.isAlive);
 	}
+	
+	/**
+	 * Returns a friendly label for the conversation
+	 * 
+	 * @return conversationName or msisdn
+	 */
+	public String getLabel()
+	{
+		return ((OneToNConvInfo) convInfo).getLabel();
+	}
 
 	/**
 	 * @return the conversationOwner

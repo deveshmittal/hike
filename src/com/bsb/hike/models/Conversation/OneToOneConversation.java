@@ -52,15 +52,6 @@ public class OneToOneConversation extends Conversation
 		}
 	}
 
-	/*
-	 * @see com.bsb.hike.models.Conversation.Conversation#getLabel()
-	 */
-	@Override
-	public String getLabel()
-	{
-		return (TextUtils.isEmpty(getConversationName()) ? getMsisdn() : getConversationName());
-	}
-
 	/**
 	 * Builder base class extending {@link Conversation.InitBuilder}
 	 * 
