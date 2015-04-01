@@ -1372,7 +1372,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
 					deleteConfirmDialog.setHeader(R.string.delete);
-					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_chat_msg, conv.getConversationName()));
+					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_chat_msg, conv.getLabel()));
 					
 					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
 					{
@@ -1399,7 +1399,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
 					deleteConfirmDialog.setHeader(R.string.delete);
-					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_group_msg, conv.getConversationName()));
+					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_group_msg, conv.getLabel()));
 					
 					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
 					{
