@@ -258,8 +258,6 @@ public class OneToNConversationUtils {
 		ArrayList<ContactInfo> contacts = HikeConversationsDatabase.getInstance().addBroadcastRecipientConversations(convMessage);
 		
 		sendPubSubForConvScreenBroadcastMessage(convMessage, contacts);
-        // publishing mqtt packet
-        HikeMqttManagerNew.getInstance().sendMessage(convMessage.serializeDeliveryReportRead(), HikeMqttManagerNew.MQTT_QOS_ONE);
 	}
 	
 
