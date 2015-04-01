@@ -87,19 +87,10 @@ public class OneToNConversationUtils {
 	{
 		return Utils.isGroupConversation(msisdn) || Utils.isBroadcastConversation(msisdn);
 	}
-	
-	public static void createGroup(Activity activity, ArrayList<ContactInfo> selectedContactList)
+
+	public static void createGroup(Activity activity, ArrayList<ContactInfo> selectedContactList, String groupName)
 	{
 		String groupId;
-		String groupName;
-		if (activity.getIntent().hasExtra(HikeConstants.Extras.GROUP_NAME))
-		{
-			groupName = activity.getIntent().getStringExtra(HikeConstants.Extras.GROUP_NAME);
-		}
-		else
-		{
-			groupName = BroadcastConversation.defaultBroadcastName(selectedContactList);
-		}
 		if (activity.getIntent().hasExtra(HikeConstants.Extras.BROADCAST_LIST))
 		{
 			groupId = activity.getIntent().getStringExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST);
@@ -164,13 +155,13 @@ public class OneToNConversationUtils {
 			JSONObject gcjPacket = groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
 			if (groupConversation instanceof BroadcastConversation)
 			{
-				gcjPacket.put(HikeConstants.NEW_GROUP, newGroup);
+				gcjPacket.put(HikeConstants.NEW_BROADCAST, newGroup);
 			}
 			else if (groupConversation instanceof GroupConversation)
 			{
-				gcjPacket.put(HikeConstants.NEW_BROADCAST, newGroup);
+				gcjPacket.put(HikeConstants.NEW_GROUP, newGroup);
 			}
-			ConvMessage msg = new ConvMessage(gcjPacket, groupConversation, activity.getBaseContext(), true);
+			ConvMessage msg = new ConvMessage(gcjPacket, groupConversation, activity, true);
 			ContactManager.getInstance().updateGroupRecency(groupId, msg.getTimestamp());
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, msg);
 		}
@@ -207,6 +198,11 @@ public class OneToNConversationUtils {
 		}
 		HikeMqttManagerNew.getInstance().sendMessage(gcjJson, HikeMqttManagerNew.MQTT_QOS_ONE);
 
+		if (OneToNConversationUtils.isBroadcastConversation(groupId) && !newGroup)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.PARTICIPANT_JOINED_ONETONCONV, gcjJson);
+		}
+
 		ContactInfo conversationContactInfo = new ContactInfo(groupId, groupId, groupId, groupId);
 		Intent intent = IntentFactory.createChatThreadIntentFromContactInfo(activity, conversationContactInfo, true);
 		intent.setClass(activity, ChatThread.class);
@@ -238,7 +234,7 @@ public class OneToNConversationUtils {
 		case 1:
 			return name;
 		default:
-			for (int i=1; i<groupParticipants.size(); i++)
+			for (int i = 1; i < groupParticipants.size(); i++)
 			{
 				name += ", " + Utils.extractFullFirstName(groupParticipants.get(i).getContactInfo().getFirstNameAndSurname());
 			}

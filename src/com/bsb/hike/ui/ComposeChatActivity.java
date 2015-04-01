@@ -178,6 +178,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private boolean nuxIncentiveMode;
 	
+	private String groupName = null;
+
 	private int triggerPointForPopup=ProductPopupsConstants.PopupTriggerPoints.UNKNOWN.ordinal();
 
 	 private HorizontalFriendsFragment newFragment;
@@ -214,6 +216,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			existingGroupOrBroadcastId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST);
 		}
 
+		if (getIntent().hasExtra(HikeConstants.Extras.GROUP_NAME))
+		{
+			groupName = getIntent().getStringExtra(HikeConstants.Extras.GROUP_NAME);
+		}
+		
 		if (savedInstanceState != null)
 		{
 			deviceDetailsSent = savedInstanceState.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
@@ -1019,7 +1026,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 				else if (getIntent().hasExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST))
 				{
-					OneToNConversationUtils.createGroup(ComposeChatActivity.this, adapter.getAllSelectedContacts());
+					OneToNConversationUtils.createGroup(ComposeChatActivity.this, adapter.getAllSelectedContacts(), groupName);
 				}
 				else if (composeMode == CREATE_GROUP_MODE)
 				{
@@ -1029,7 +1036,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						Toast.makeText(getApplicationContext(), getString(R.string.minContactInGroupErr, MIN_MEMBERS_GROUP_CHAT), Toast.LENGTH_SHORT).show();
 						return;
 					}
-					OneToNConversationUtils.createGroup(ComposeChatActivity.this, adapter.getAllSelectedContacts());
+					OneToNConversationUtils.createGroup(ComposeChatActivity.this, adapter.getAllSelectedContacts(), groupName);
 				}
 			}
 		});

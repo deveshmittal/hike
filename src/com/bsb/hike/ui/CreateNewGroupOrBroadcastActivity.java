@@ -323,7 +323,8 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 			ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn, true, false);
 			selectedContactList.add(contactInfo);
 		}
-		OneToNConversationUtils.createGroup(this, selectedContactList);
+		String broadcastName = groupOrBroadcastName.getText().toString().trim();
+		OneToNConversationUtils.createGroup(this, selectedContactList, broadcastName);
 	}
 	
 	@Override
