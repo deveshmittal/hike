@@ -2349,16 +2349,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if (HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP.equals(type))
 		{
-			if (mAdapter == null || mAdapter.isEmpty())
-			{
-				return;
-			}
-			int position = (Integer) object;
-//			final Conversation conversation = mAdapter.getItem(position);
-//			if (!(conversation instanceof ConversationTip && ((ConversationTip) conversation).isStealthFtueTip()))
-//			{
-//				return;
-//			}
 
 			if (!isAdded())
 			{
@@ -2370,7 +2360,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void run()
 				{
-//					removeStealthConvTip(conversation);
+					removeStealthConvTip();
 				}
 			});
 		}
@@ -2878,12 +2868,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		showingStealthFtueConvTip = true;
 	}
 
-	protected void removeStealthConvTip(Conversation conversation)
+	protected void removeStealthConvTip()
 	{
 		HikeSharedPreferenceUtil.getInstance().removeData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP);
 		showingStealthFtueConvTip = false;
-//		mAdapter.remove(conversation);
-		notifyDataSetChanged();
+		if (tipView != null)
+		{
+			getListView().removeHeaderView(tipView);
+			tipView = null;
+		}
 	}
 
 	private void clearConversation(String msisdn)
