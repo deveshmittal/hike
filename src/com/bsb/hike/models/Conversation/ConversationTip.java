@@ -1,11 +1,17 @@
 package com.bsb.hike.models.Conversation;
 
 import android.content.Context;
+import android.os.CountDownTimer;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 
 public class ConversationTip
 {
@@ -39,39 +45,120 @@ public class ConversationTip
 
 	private LayoutInflater inflater;
 
+	private Context context;
+
+	CountDownSetter countDownSetter;
+
 	public ConversationTip(int tipType, Context context)
 	{
 		this.tipType = tipType;
+		this.context = context;
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	public View getView(int tipType, ViewGroup parent)
+	public View getView()
 	{
+		View v;
 		switch (tipType)
 		{
 		case STEALTH_FTUE_TIP:
+			v = inflater.inflate(R.layout.stealth_ftue_conversation_tip, null, false);
+			// TODO Add animation Code here
+			return v;
+
 		case RESET_STEALTH_TIP:
-			return inflater.inflate(R.layout.stealth_ftue_conversation_tip, parent, false);
+			v = inflater.inflate(R.layout.stealth_ftue_conversation_tip, null, false);
+			TextView headerText = (TextView) v.findViewById(R.id.tip);
+			long remainingTime = HikeConstants.RESET_COMPLETE_STEALTH_TIME_MS
+					- (System.currentTimeMillis() - HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l));
+
+			if (remainingTime <= 0)
+			{
+				headerText.setText(Html.fromHtml(context.getResources().getString(R.string.tap_to_reset_stealth_tip)));
+			}
+			else
+			{
+				if (countDownSetter == null)
+				{
+					countDownSetter = new CountDownSetter(headerText, remainingTime, 1000);
+					countDownSetter.start();
+
+					setTimeRemainingText(headerText, remainingTime);
+				}
+				else
+				{
+					countDownSetter.setTextView(headerText);
+				}
+
+			}
+			return v;
 
 		case WELCOME_HIKE_TIP:
-			return inflater.inflate(R.layout.welcome_hike_tip, parent, false);
+			v = inflater.inflate(R.layout.welcome_hike_tip, null, false);
+			((TextView) v.findViewById(R.id.tip_header)).setText(R.string.new_ui_welcome_tip_header);
+			((TextView) v.findViewById(R.id.tip_msg)).setText(R.string.new_ui_welcome_tip_msg);
+			return v;
 
 		case STEALTH_INFO_TIP:
+			v = inflater.inflate(R.layout.stealth_unread_tip, null, false);
+			((TextView) v.findViewById(R.id.tip_header)).setText(R.string.stealth_info_tip_header);
+			((TextView) v.findViewById(R.id.tip_msg)).setText(R.string.stealth_info_tip_subtext);
+			return v;
+
 		case STEALTH_UNREAD_TIP:
-			return inflater.inflate(R.layout.stealth_unread_tip, parent, false);
+			v = inflater.inflate(R.layout.stealth_unread_tip, null, false);
+			String headerTxt = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_UNREAD_TIP_HEADER, "");
+			String msgTxt = HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_UNREAD_TIP_MESSAGE, "");
+			((TextView) v.findViewById(R.id.tip_header)).setText(headerTxt);
+			((TextView) v.findViewById(R.id.tip_msg)).setText(msgTxt);
+			return v;
 
 		case ATOMIC_PROFILE_PIC_TIP:
+			v = generateAtomicTipViews();
+			((ImageView) v.findViewById(R.id.arrow_pointer)).setImageResource(R.drawable.ic_profile);
+			return v;
 		case ATOMIC_FAVOURTITES_TIP:
+			v = generateAtomicTipViews();
+			((ImageView) v.findViewById(R.id.arrow_pointer)).setImageResource(R.drawable.ic_favorites);
+			return v;
 		case ATOMIC_INVITE_TIP:
+			v = generateAtomicTipViews();
+			((ImageView) v.findViewById(R.id.arrow_pointer)).setImageResource(R.drawable.ic_rewards);
+			return v;
 		case ATOMIC_STATUS_TIP:
+			v = generateAtomicTipViews();
+			((ImageView) v.findViewById(R.id.arrow_pointer)).setImageResource(R.drawable.ic_status_tip);
+			return v;
 		case ATOMIC_INFO_TIP:
+			v = generateAtomicTipViews();
+			((ImageView) v.findViewById(R.id.arrow_pointer)).setImageResource(R.drawable.ic_information);
+			return v;
 		case ATOMIC_HTTP_TIP:
+			v = generateAtomicTipViews();
+			((ImageView) v.findViewById(R.id.arrow_pointer)).setImageResource(R.drawable.ic_profile);
+			return v;
 		case ATOMIC_APP_GENERIC_TIP:
-			return inflater.inflate(R.layout.tip_left_arrow, parent, false);
+			v = generateAtomicTipViews();
+			((ImageView) v.findViewById(R.id.arrow_pointer)).setImageDrawable(null);
+			return v;
 
 		default:
 			return null;
 		}
+	}
+
+	private View generateAtomicTipViews()
+	{
+		View v = inflater.inflate(R.layout.tip_left_arrow, null, false);
+		TextView header = (TextView) v.findViewById(R.id.tip_header);
+		TextView subText = (TextView) v.findViewById(R.id.tip_msg);
+		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance();
+		String headerTxt1 = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_MAIN, "");
+		String message = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_MESSAGE_MAIN, "");
+		header.setText(headerTxt1);
+		subText.setText(message);
+		return v;
+
 	}
 
 	public int getTipType()
@@ -112,5 +199,51 @@ public class ConversationTip
 	public boolean isStealthUnreadTip()
 	{
 		return tipType == STEALTH_UNREAD_TIP;
+	}
+
+	private class CountDownSetter extends CountDownTimer
+	{
+		TextView textView;
+
+		public CountDownSetter(TextView textView, long millisInFuture, long countDownInterval)
+		{
+			super(millisInFuture, countDownInterval);
+			this.textView = textView;
+		}
+
+		@Override
+		public void onFinish()
+		{
+			if (textView == null)
+			{
+				return;
+			}
+			textView.setText(Html.fromHtml(context.getResources().getString(R.string.tap_to_reset_stealth_tip)));
+		}
+
+		@Override
+		public void onTick(long millisUntilFinished)
+		{
+			if (textView == null)
+			{
+				return;
+			}
+
+			setTimeRemainingText(textView, millisUntilFinished);
+		}
+
+		public void setTextView(TextView tv)
+		{
+			this.textView = tv;
+		}
+	}
+
+	private void setTimeRemainingText(TextView textView, long millisUntilFinished)
+	{
+		long secondsUntilFinished = millisUntilFinished / 1000;
+		int minutes = (int) (secondsUntilFinished / 60);
+		int seconds = (int) (secondsUntilFinished % 60);
+		String text = String.format("%1$02d:%2$02d", minutes, seconds);
+		textView.setText(Html.fromHtml(context.getString(R.string.reset_stealth_tip, text)));
 	}
 }
