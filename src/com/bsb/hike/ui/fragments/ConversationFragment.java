@@ -239,6 +239,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private ConversationTip convTip;
 	
 	private View tipView;
+	
+	private int tipType = ConversationTip.NO_TIP;
 
 	private enum hikeBotConvStat
 	{
@@ -1650,7 +1652,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			convTip = new ConversationTip(getActivity(), this);
 		}
-		int tipType = ConversationTip.NO_TIP;
 		
 		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance();
 		String tip = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
@@ -3289,41 +3290,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 	}
 
-	private void removeTipIfExists(int tipType)
+	private void removeTipIfExists(int whichTip)
 	{
-//		if (mAdapter.isEmpty())
-//		{
-//			return;
-//		}
-//
-//		Conversation conversation = mAdapter.getItem(0);
-//
-//		/*
-//		 * Remove tip if already showing as the first element on the UI
-//		 */
-//		if(conversation instanceof ConversationTip && ((ConversationTip) conversation).getTipType() == tipType)
-//		{
-//			mAdapter.remove(conversation);
-//			switch (tipType)
-//			{
-//				case ConversationTip.RESET_STEALTH_TIP:
-//					mAdapter.resetCountDownSetter();
-//					break;
-//				case ConversationTip.WELCOME_HIKE_TIP:
-//					showingWelcomeHikeConvTip = false;
-//					break;
-//				default:
-//					break;
-//			}
-//			notifyDataSetChanged();
-//		}
-
+		if (tipType != whichTip)
 		/*
 		 * Remove tip always: for cases when we want to remove the tip before it is actually shown on the UI
 		 */
 		switch (tipType)
 		{
 			case ConversationTip.WELCOME_HIKE_TIP:
+				showingWelcomeHikeConvTip = false;
 				HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
 				break;
 			case ConversationTip.STEALTH_INFO_TIP:
@@ -3336,10 +3312,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				break;
 		}
 
-		if (mAdapter.getCount() == 0)
-		{
-			setEmptyState();
-		}
 	}
 
 	@Override
@@ -3409,10 +3381,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	@Override
 	public void closeTip(int whichTip)
 	{
-		if (tipView != null)
+		if (tipView != null && tipType == whichTip)
 		{
 			getListView().removeHeaderView(tipView);
 			tipView = null;
+			whichTip = ConversationTip.NO_TIP;
 		}
 	}
 
