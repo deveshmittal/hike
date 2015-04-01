@@ -1057,18 +1057,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		// TODO Auto-generated method stub
 		super.onStop();
-//		if (showingStealthFtueConvTip)
-//		{
-//			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-//			Conversation convTip = displayedConversations.get(0);
-//			removeStealthConvTip(convTip);
-//		}
-//		
-//		if (showingWelcomeHikeConvTip)
-//		{
-//			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-//			removeTipIfExists(ConversationTip.WELCOME_HIKE_TIP);
-//		}
+		if (showingStealthFtueConvTip)
+		{
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			removeStealthConvTip();
+		}
+		
+		if (showingWelcomeHikeConvTip)
+		{
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			removeTipIfExists(ConversationTip.WELCOME_HIKE_TIP);
+		}
 
 	}
 	
@@ -2863,10 +2862,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	 */
 	protected void showStealthConvTip()
 	{
-//		displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_FTUE_TIP));
-		notifyDataSetChanged();
-		HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, true);
-		showingStealthFtueConvTip = true;
+		if (convTip == null)
+		{
+			convTip = new ConversationTip(getActivity(), this);
+		}
+
+		tipType = ConversationTip.STEALTH_FTUE_TIP;
+		tipView = convTip.getView(tipType);
+		if (tipView != null)
+		{
+			getListView().addHeaderView(tipView);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, true);
+			showingStealthFtueConvTip = true;
+		}
 	}
 
 	protected void removeStealthConvTip()
@@ -3311,7 +3319,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			default:
 				break;
 		}
-
 	}
 
 	@Override
