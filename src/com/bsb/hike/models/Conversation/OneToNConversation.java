@@ -53,6 +53,9 @@ public abstract class OneToNConversation extends Conversation
 	protected OneToNConversation(InitBuilder<?> builder)
 	{
 		super(builder);
+		
+		setConvInfo(builder.convInfoBuilder.build());
+		
 		this.conversationOwner = builder.conversationOwner;
 
 		this.conversationParticipantList = builder.conversationParticipantList;
@@ -365,10 +368,13 @@ public abstract class OneToNConversation extends Conversation
 		private int unreadPinnedMessageCount;
 		
 		private boolean isAlive;
+		
+		private OneToNConvInfo.ConvInfoBuilder convInfoBuilder;
 
 		public InitBuilder(String msisdn)
 		{
 			super(msisdn);
+			this.convInfoBuilder = new OneToNConvInfo.ConvInfoBuilder(msisdn);
 		}
 
 		public P setConversationOwner(String conversationOwner)

@@ -75,6 +75,16 @@ public class OneToNConvInfo extends ConvInfo
 			this.isConversationAlive = alive;
 			return getSelfObject();
 		}
+		
+		@Override
+		public ConvInfo build()
+		{
+			if (this.validateConvInfo())
+			{
+				return new OneToNConvInfo(this);
+			}
+			return null;
+		}
 	}
 
 	public static class ConvInfoBuilder extends OneToNConvInfo.InitBuilder<ConvInfoBuilder>
