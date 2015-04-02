@@ -1086,15 +1086,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id)
 	{
-		if (isTipShowing() && position == 0)
+		/**
+		 * Ignoring the clicks on header if any.
+		 */
+		if (position < getListView().getHeaderViewsCount())
 		{
 			return;
 		}
 
-		if(isTipShowing())
-		{
-			position--;
-		}
+		position -= getListView().getHeaderViewsCount();
 		
 		ConvInfo convInfo = (ConvInfo) mAdapter.getItem(position);
 		
@@ -1115,11 +1115,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 	}
 	
-	private boolean isTipShowing()
-	{
-		return tipView != null;
-	}
-
 	private void recordSearchItemClicked(ConvInfo convInfo, int position, String text)
 	{
 		String SEARCH_RESULT = "srchRslt";
@@ -1292,10 +1287,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
+		
+		if (position < getListView().getHeaderViewsCount())
+		{
+			return false;
+		}
+		
+		position -= getListView().getHeaderViewsCount();
+		
 		if (position >= mAdapter.getCount())
 		{
 			return false;
 		}
+		
 		ArrayList<String> optionsList = new ArrayList<String>();
 
 		final ConvInfo conv = (ConvInfo) mAdapter.getItem(position);
