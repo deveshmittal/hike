@@ -37,6 +37,7 @@ import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.GroupConversation;
+import com.bsb.hike.models.Conversation.OneToNConversation;
 import com.bsb.hike.models.Conversation.OneToNConversationMetadata;
 import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.utils.EmoticonTextWatcher;
@@ -148,6 +149,16 @@ public class GroupChatThread extends OneToNChatThread
 		super.setupActionBar();
 		
 		setAvatar(R.drawable.ic_default_avatar_group);
+	}
+	
+	/**
+	 * Done to typecast conversation as GroupConversation here
+	 */
+	@Override
+	protected Conversation fetchConversation()
+	{
+		mConversation = oneToNConversation = (GroupConversation) mConversationDb.getConversation(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
+		return super.fetchConversation();
 	}
 
 	@Override

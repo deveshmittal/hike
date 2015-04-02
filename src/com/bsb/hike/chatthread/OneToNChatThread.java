@@ -138,7 +138,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	protected Conversation fetchConversation()
 	{
 		Logger.i(TAG, "fetch group conversation " + Thread.currentThread().getName());
-		mConversation = oneToNConversation = (OneToNConversation) mConversationDb.getConversation(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
+		
 		if (mConversation == null)
 		{
 			/* the user must have deleted the chat. */
