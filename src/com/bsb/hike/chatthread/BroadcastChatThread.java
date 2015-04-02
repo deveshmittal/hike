@@ -104,6 +104,7 @@ public class BroadcastChatThread extends OneToNChatThread
 	@Override
 	protected void fetchConversationFinished(Conversation conversation)
 	{
+		showTips();
 		oneToNConversation = (BroadcastConversation) conversation;
 		super.fetchConversationFinished(conversation);
 	}
@@ -174,5 +175,18 @@ public class BroadcastChatThread extends OneToNChatThread
 		{
 			groupCountTextView.setText(activity.getResources().getString(R.string.num_people, (numActivePeople)));
 		}
+	}
+	
+	/*
+	 * Called in UI Thread
+	 * 
+	 * @see com.bsb.hike.chatthread.ChatThread#fetchConversationFinished(com.bsb.hike.models.Conversation)
+	 */
+
+	private void showTips()
+	{
+		mTips = new ChatThreadTips(activity.getBaseContext(), activity.findViewById(R.id.chatThreadParentLayout), new int[] {}, sharedPreference);
+
+		mTips.showTip();
 	}
 }
