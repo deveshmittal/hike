@@ -158,7 +158,17 @@ public class GroupChatThread extends OneToNChatThread
 	protected Conversation fetchConversation()
 	{
 		mConversation = oneToNConversation = (GroupConversation) mConversationDb.getConversation(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
+		// imp message from DB like pin
+		fetchImpMessage();
 		return super.fetchConversation();
+	}
+	
+	private void fetchImpMessage()
+	{
+		if (oneToNConversation.getMetadata() != null && oneToNConversation.getMetadata().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
+		{
+			oneToNConversation.setPinnedConvMessage(mConversationDb.getLastPinForConversation(oneToNConversation));
+		}
 	}
 
 	@Override

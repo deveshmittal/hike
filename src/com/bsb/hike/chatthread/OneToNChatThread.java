@@ -149,19 +149,6 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 			return null;
 		}
 
-		// Setting a flag which tells us whether the group contains sms users or not.
-		boolean hasSmsUser = false;
-		for (Entry<String, PairModified<GroupParticipant, String>> entry : oneToNConversation.getConversationParticipantList().entrySet())
-		{
-			GroupParticipant groupParticipant = entry.getValue().getFirst();
-			if (!groupParticipant.getContactInfo().isOnhike())
-			{
-				hasSmsUser = true;
-				break;
-			}
-		}
-		// imp message from DB like pin
-		fetchImpMessage();
 		// Set participant read by list
 		Pair<String, Long> pair = HikeConversationsDatabase.getInstance().getReadByValueForGroup(oneToNConversation.getMsisdn());
 		if (pair != null)
@@ -179,14 +166,6 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		oneToNConversation.setBlocked(ContactManager.getInstance().isBlocked(oneToNConversation.getConversationOwner()));
 
 		return oneToNConversation;
-	}
-
-	private void fetchImpMessage()
-	{
-		if (mConversation.getMetadata() != null && oneToNConversation.getMetadata().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
-		{
-			oneToNConversation.setPinnedConvMessage(mConversationDb.getLastPinForConversation(oneToNConversation));
-		}
 	}
 
 	@Override
