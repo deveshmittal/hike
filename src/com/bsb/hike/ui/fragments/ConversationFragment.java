@@ -1446,25 +1446,27 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				else if (getString(R.string.delete_broadcast).equals(option))
 				{
-					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
-					deleteConfirmDialog.setHeader(R.string.delete);
-					deleteConfirmDialog.setBody(getString(R.string.delete_broadcast_confirm));
-					
-					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					HikeDialogFactory.showDialog(getActivity(), HikeDialogFactory.DELETE_BROADCAST_DIALOG, new HikeDialogListener()
 					{
-
+						
 						@Override
-						public void onClick(View v)
+						public void positiveClicked(HikeDialog hikeDialog)
 						{
 							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
 							deleteConversation(conv);
-							deleteConfirmDialog.dismiss();
+							hikeDialog.dismiss();
 						}
-					};
-
-					deleteConfirmDialog.setOkButton(android.R.string.ok, dialogOkClickListener);
-					deleteConfirmDialog.setCancelButton(R.string.cancel);
-					deleteConfirmDialog.show();
+						
+						@Override
+						public void neutralClicked(HikeDialog hikeDialog)
+						{
+						}
+						
+						@Override
+						public void negativeClicked(HikeDialog hikeDialog)
+						{
+						}
+					}, conv.getLabel());
 				}
 				else if (getString(R.string.email_conversations).equals(option))
 				{
@@ -1601,7 +1603,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	}
 
 
-	protected void clearConversation(final Conversation conv)
+	protected void clearConversation(final ConvInfo conv)
 	{
 		HikeDialogFactory.showDialog(this.getActivity(), HikeDialogFactory.CLEAR_CONVERSATION_DIALOG, new HikeDialogListener()
 		{

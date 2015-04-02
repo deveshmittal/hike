@@ -610,7 +610,7 @@ public class IntentFactory
 		return intent;
 	}
 
-	public static Intent getStickerShopIntent(Activity context)
+	public static Intent getStickerShopIntent(Context context)
 	{
 		Intent intent = new Intent(context, StickerShopActivity.class);
 		return intent;

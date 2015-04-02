@@ -1695,11 +1695,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.SHOW_NEW_BROADCAST_RED_DOT, false);
 					if (HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.SHOW_BROADCAST_FTUE_SCREEN, true))
 					{
-						IntentManager.createBroadcastFtue(HomeActivity.this);
+						IntentFactory.createBroadcastFtue(HomeActivity.this);
 					}
 					else
 					{
-						IntentManager.createBroadcastDefault(HomeActivity.this);
+						IntentFactory.createBroadcastDefault(HomeActivity.this);
 					}
 					break;
 				}
@@ -1793,7 +1793,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 12:
 					// Take a photo
 					accountPrefs.edit().putBoolean(HikeConstants.SHOW_PHOTOS_RED_DOT, false).commit();
-					IntentManager.openHikeCameraActivity(HomeActivity.this);
+					IntentFactory.openHikeCameraActivity(HomeActivity.this);
 					sendAnalyticsTakePicture();
 					break;
 				}

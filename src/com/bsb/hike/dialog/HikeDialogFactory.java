@@ -112,6 +112,8 @@ public class HikeDialogFactory
 	
 	public static final int VOIP_INTRO_DIALOG = 31;
 
+	public static final int DELETE_BROADCAST_DIALOG = 32;
+
 	public static HikeDialog showDialog(Context context, int whichDialog, Object... data)
 	{
 		return showDialog(context, whichDialog, null, data);
@@ -172,6 +174,7 @@ public class HikeDialogFactory
 		case DELETE_GROUP_DIALOG:
 		case DELETE_ALL_CONVERSATIONS:
 		case DELETE_MESSAGES_DIALOG:
+		case DELETE_BROADCAST_DIALOG:
 			return showDeleteMessagesDialog(dialogId, context, listener, data);
 			
 		case GPS_DIALOG:
@@ -410,7 +413,7 @@ public class HikeDialogFactory
 					break;
 				case R.id.btn_just_once:
 					saveImageQualitySettings(editor, small, medium, original);
-					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, false);
+					HikeSharedPreferenceUtil.getInstance().saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, false);
 					callOnSucess(listener, hikeDialog);
 					break;
 				}
@@ -936,6 +939,13 @@ public class HikeDialogFactory
 			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
 			break;
 			
+		case DELETE_BROADCAST_DIALOG:
+			deleteConfirmDialog.setHeader(R.string.delete);
+			deleteConfirmDialog.setBody(context.getString(R.string.delete_broadcast_confirm));
+			deleteConfirmDialog.setOkButton(android.R.string.ok, positiveListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
+			break;
+			
 		case DELETE_ALL_CONVERSATIONS:
 			deleteConfirmDialog.setHeader(R.string.deleteconversations);
 			deleteConfirmDialog.setBody(R.string.delete_all_question);
@@ -1203,7 +1213,7 @@ public class HikeDialogFactory
 		animation.setFillAfter(true);
 		betaTag.startAnimation(animation);
 		dialog.show();
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_VOIP_INTRO_TIP, true);
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.SHOWN_VOIP_INTRO_TIP, true);
 		return dialog;
 	}
 }
