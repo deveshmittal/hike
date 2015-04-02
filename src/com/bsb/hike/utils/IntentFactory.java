@@ -385,6 +385,27 @@ public class IntentFactory
 	}
 
 	/**
+	 * Returns intent for viewing broadcast profile screen
+	 * 
+	 * @param context
+	 * @param mMsisdn
+	 * @return
+	 */
+
+	public static Intent getBroadcastProfileIntent(Context context, String mMsisdn)
+	{
+		Intent intent = new Intent();
+
+		intent.setClass(context, ProfileActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		intent.putExtra(HikeConstants.Extras.BROADCAST_LIST, true);
+		intent.putExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST, mMsisdn);
+
+		return intent;
+	}
+	
+	/**
 	 * Used for retrieving the intent to place a call
 	 * 
 	 * @param mMsisdn

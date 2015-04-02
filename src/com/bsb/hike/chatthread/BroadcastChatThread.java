@@ -6,6 +6,7 @@ package com.bsb.hike.chatthread;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Intent;
 import android.view.MotionEvent;
 
 import com.actionbarsherlock.view.Menu;
@@ -16,6 +17,9 @@ import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.Conversation.BroadcastConversation;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.OneToNConversation;
+import com.bsb.hike.utils.IntentFactory;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 /**
  * @author piyush
@@ -23,6 +27,8 @@ import com.bsb.hike.models.Conversation.OneToNConversation;
  */
 public class BroadcastChatThread extends OneToNChatThread
 {
+
+	private static final String TAG = "broadcastChatThread";
 
 	/**
 	 * @param activity
@@ -94,7 +100,40 @@ public class BroadcastChatThread extends OneToNChatThread
 	@Override
 	protected void fetchConversationFinished(Conversation conversation)
 	{
-		oneToNConversation = (BroadcastConversation)conversation;
+		oneToNConversation = (BroadcastConversation) conversation;
 		super.fetchConversationFinished(conversation);
+	}
+	
+	@Override
+	public void itemClicked(OverFlowMenuItem item)
+	{
+		switch (item.id)
+		{
+		case R.string.broadcast_profile:
+			openProfileScreen();
+			break;
+		case R.string.add_shortcut:
+			Utils.createShortcut(activity, oneToNConversation.getConvInfo());
+			break;
+		default:
+			Logger.d(TAG, "Calling super Class' itemClicked");
+			super.itemClicked(item);
+		}
+	}
+	
+	/**
+	 * Used to launch Profile Activity from GroupChatThread
+	 */
+	@Override
+	protected void openProfileScreen()
+	{
+		/**
+		 * Proceeding only if the group is alive
+		 */
+		Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
+
+		Intent intent = IntentFactory.getBroadcastProfileIntent(activity.getApplicationContext(), msisdn);
+
+		activity.startActivity(intent);
 	}
 }
