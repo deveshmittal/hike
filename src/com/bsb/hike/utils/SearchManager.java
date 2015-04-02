@@ -209,7 +209,14 @@ public class SearchManager
 
 	private int getCurrentCursor(int cursorPosition)
 	{
-		return (cursorPosition + itemViewBacklash);
+		if ((cursorPosition + itemViewBacklash) < itemList.size())
+		{
+			return (cursorPosition + itemViewBacklash);
+		}
+		else
+		{
+			return cursorPosition;
+		}
 	}
 
 	private boolean searchAllMessages(int from, int to)
