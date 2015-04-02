@@ -33,11 +33,11 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.Conversation.MetaData;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.models.Conversation.Conversation;
+import com.bsb.hike.models.Conversation.GroupConversation;
+import com.bsb.hike.models.Conversation.OneToNConversationMetadata;
 import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.IntentFactory;
@@ -77,7 +77,7 @@ public class GroupChatThread extends OneToNChatThread
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if (groupConversation != null)
+		if (oneToNConversation != null)
 		{
 			mActionBar.onCreateOptionsMenu(menu, R.menu.group_chat_thread_menu, getOverFlowItems(), this, this);
 			updateUnreadPinCount();
@@ -110,12 +110,12 @@ public class GroupChatThread extends OneToNChatThread
 
 		List<OverFlowMenuItem> list = new ArrayList<OverFlowMenuItem>();
 		int unreadPinCount = 0;
-		if (groupConversation != null)
+		if (oneToNConversation != null)
 		{
 			/**
 			 * It could be possible that conversation, (which loads on a background thread) is created before the UI thread calls for overflow menu creation.
 			 */
-			unreadPinCount = groupConversation.getUnreadPinCount();
+			unreadPinCount = oneToNConversation.getUnreadPinnedMessageCount();
 		}
 		list.add(new OverFlowMenuItem(getString(R.string.group_profile), unreadPinCount, 0, R.string.group_profile));
 
@@ -131,7 +131,7 @@ public class GroupChatThread extends OneToNChatThread
 	@Override
 	public boolean onDoubleTap(MotionEvent e)
 	{
-		if (!groupConversation.getIsGroupAlive())
+		if (!oneToNConversation.isConversationAlive())
 		{
 			return false;
 		}
@@ -146,16 +146,16 @@ public class GroupChatThread extends OneToNChatThread
 	{
 		mHashSpanWatcher = new HashSpanWatcher(mComposeView, HASH_PIN, getResources().getColor(R.color.sticky_yellow));
 		showTips();
-		groupConversation = (GroupConversation) conversation;
+		oneToNConversation = (GroupConversation) conversation;
 		super.fetchConversationFinished(conversation);
 
 		/**
 		 * Is the group owner blocked ? If true then show the block overlay with appropriate strings
 		 */
 
-		if (groupConversation.isConvBlocked())
+		if (oneToNConversation.isBlocked())
 		{
-			String label = groupConversation.getGroupParticipantFirstName(groupConversation.getGroupOwner());
+			String label = oneToNConversation.getConversationParticipantName(oneToNConversation.getConversationOwner());
 
 			showBlockOverlay(label);
 
@@ -163,12 +163,12 @@ public class GroupChatThread extends OneToNChatThread
 
 		showTips();
 
-		toggleConversationMuteViewVisibility(groupConversation.isMuted());
-		toggleGroupLife(groupConversation.getIsGroupAlive());
+		toggleConversationMuteViewVisibility(oneToNConversation.isMuted());
+		toggleGroupLife(oneToNConversation.isConversationAlive());
 		addUnreadCountMessage();
-		if (groupConversation.getImpMessage() != null)
+		if (oneToNConversation.getPinnedConvMessage() != null)
 		{
-			showStickyMessageAtTop(groupConversation.getImpMessage(), false);
+			showStickyMessageAtTop(oneToNConversation.getPinnedConvMessage(), false);
 		}
 
 		updateUnreadPinCount();
@@ -265,7 +265,7 @@ public class GroupChatThread extends OneToNChatThread
 
 		if (convMessage.isSent())
 		{
-			groupConversation.setupReadByList(null, convMessage.getMsgID());
+			oneToNConversation.setupReadByList(null, convMessage.getMsgID());
 		}
 
 		if (convMessage.getTypingNotification() == null && typingNotification != null)
@@ -290,7 +290,7 @@ public class GroupChatThread extends OneToNChatThread
 
 		if (groupMute.first.equals(msisdn))
 		{
-			groupConversation.setIsMuted(groupMute.second);
+			oneToNConversation.setIsMute(groupMute.second);
 		}
 
 		sendUIMessage(MUTE_CONVERSATION_TOGGLED, groupMute.second);
@@ -336,7 +336,7 @@ public class GroupChatThread extends OneToNChatThread
 
 	private void toggleGroupLife(boolean alive)
 	{
-		groupConversation.setGroupAlive(alive);
+		oneToNConversation.setConversationAlive(alive);
 		activity.findViewById(R.id.send_message).setEnabled(alive);
 		activity.findViewById(R.id.msg_compose).setVisibility(alive ? View.VISIBLE : View.INVISIBLE);
 		activity.findViewById(R.id.emo_btn).setEnabled(alive);
@@ -346,7 +346,7 @@ public class GroupChatThread extends OneToNChatThread
 	
 	private void addUnreadCountMessage()
 	{
-		if (groupConversation.getUnreadCount() > 0 && groupConversation.getMessages().size() > 0)
+		if (oneToNConversation.getUnreadCount() > 0 && oneToNConversation.getMessagesList().size() > 0)
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
 			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null))
@@ -380,7 +380,7 @@ public class GroupChatThread extends OneToNChatThread
 
 		else
 		{
-			toggleConversationMuteViewVisibility(groupConversation.isMuted());
+			toggleConversationMuteViewVisibility(oneToNConversation.isMuted());
 		}
 	}
 	
@@ -391,7 +391,6 @@ public class GroupChatThread extends OneToNChatThread
 	private void handleGroupRevived()
 	{
 		toggleGroupLife(true);
-		groupConversation.setGroupMemberAliveCount(0);
 	}
 	
 	@Override
@@ -402,7 +401,7 @@ public class GroupChatThread extends OneToNChatThread
 		if (isShowingPin())
 		{
 			hidePinFromUI(true);
-			Utils.resetPinUnreadCount(groupConversation);
+			Utils.resetPinUnreadCount(oneToNConversation);
 			updateUnreadPinCount();
 		}
 	}
@@ -676,7 +675,7 @@ public class GroupChatThread extends OneToNChatThread
 	{
 		Intent intent = IntentFactory.getPinHistoryIntent(activity.getApplicationContext(), msisdn);
 		activity.startActivity(intent);
-		Utils.resetPinUnreadCount(mConversation);
+		Utils.resetPinUnreadCount(oneToNConversation);
 
 		HAManager.getInstance().record(viaMenu ? HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU : HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK, AnalyticsConstants.UI_EVENT,
 				AnalyticsConstants.CLICK_EVENT);
@@ -730,7 +729,7 @@ public class GroupChatThread extends OneToNChatThread
 		}
 		else
 		{
-			name = groupConversation.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()) + PIN_MESSAGE_SEPARATOR;
+			name = oneToNConversation.getConversationParticipantName(impMessage.getGroupParticipantMsisdn()) + PIN_MESSAGE_SEPARATOR;
 		}
 
 		ForegroundColorSpan fSpan = new ForegroundColorSpan(getResources().getColor(R.color.pin_name_color));
@@ -801,7 +800,7 @@ public class GroupChatThread extends OneToNChatThread
 	private void hidePin()
 	{
 		hidePinFromUI(true);
-		MetaData metadata = mConversation.getMetaData();
+		OneToNConversationMetadata metadata = (OneToNConversationMetadata) mConversation.getMetadata();
 		try
 		{
 			metadata.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, false);
@@ -819,9 +818,9 @@ public class GroupChatThread extends OneToNChatThread
 	 */
 	private void toggleMuteGroup()
 	{
-		groupConversation.setIsMuted(!(groupConversation.isMuted()));
+		oneToNConversation.setIsMute(!(oneToNConversation.isMuted()));
 
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MUTE_CONVERSATION_TOGGLED, new Pair<String, Boolean>(groupConversation.getMsisdn(), groupConversation.isMuted()));
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MUTE_CONVERSATION_TOGGLED, new Pair<String, Boolean>(oneToNConversation.getMsisdn(), oneToNConversation.isMuted()));
 	}
 
 }
