@@ -46,17 +46,13 @@ import com.bsb.hike.utils.Utils;
 
 public abstract class OneToNChatThread extends ChatThread implements HashTagModeListener
 {
-	protected static final int LATEST_PIN_DELETED = 203;
-
-	private static final int BULK_MESSAGE_RECEIVED = 204;
-
 	protected static final int SHOW_IMP_MESSAGE = 205;
 
 	protected static final int GROUP_REVIVED = 206;
 
 	private static final int PARTICIPANT_JOINED_OR_LEFT_CONVERSATION = 207;
 
-	private static final String TAG = "groupchatthread";
+	private static final String TAG = "onetonchatthread";
 
 	protected HashSpanWatcher mHashSpanWatcher;
 
@@ -261,14 +257,8 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		case HikePubSub.GROUP_MESSAGE_DELIVERED_READ:
 			onMessageRead(object);
 			break;
-		case HikePubSub.LATEST_PIN_DELETED:
-			onLatestPinDeleted(object);
-			break;
 		case HikePubSub.CONV_META_DATA_UPDATED:
 			onConvMetadataUpdated(object);
-			break;
-		case HikePubSub.BULK_MESSAGE_RECEIVED:
-			onBulkMessageReceived(object);
 			break;
 		case HikePubSub.GROUP_REVIVED:
 			onGroupRevived(object);
@@ -296,9 +286,6 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		{
 		case UPDATE_AVATAR:
 			setAvatar(R.drawable.ic_default_avatar_group);
-			break;
-		case BULK_MESSAGE_RECEIVED:
-			addBulkMessages((LinkedList<ConvMessage>) msg.obj);
 			break;
 		case PARTICIPANT_JOINED_OR_LEFT_CONVERSATION:
 			incrementGroupParticipants((int) msg.obj);
@@ -395,45 +382,6 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	}
 
 	/**
-	 * Used to set unread pin count
-	 */
-	protected void updateUnreadPinCount()
-	{
-		if (oneToNConversation != null)
-		{
-			int unreadPinCount = oneToNConversation.getUnreadPinnedMessageCount();
-			mActionBar.updateOverflowMenuIndicatorCount(unreadPinCount);
-			mActionBar.updateOverflowMenuItemCount(R.string.group_profile, unreadPinCount);
-		}
-	}
-
-	/**
-	 * Called from the pubSub thread
-	 * 
-	 * @param object
-	 */
-	private void onLatestPinDeleted(Object object)
-	{
-		long msgId = (Long) object;
-
-		try
-		{
-			long pinIdFromMetadata = oneToNConversation.getMetadata().getLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
-
-			if (msgId == pinIdFromMetadata)
-			{
-				sendUIMessage(LATEST_PIN_DELETED, true);
-			}
-		}
-
-		catch (JSONException e)
-		{
-			Logger.wtf(TAG, "Got an exception during the pubSub : onLatestPinDeleted " + e.toString());
-		}
-
-	}
-
-	/**
 	 * Called from the pubSub thread
 	 * 
 	 * @param object
@@ -452,119 +400,6 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	{
 		super.onResume();
 
-	}
-
-	private void onBulkMessageReceived(Object object)
-	{
-		HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
-
-		LinkedList<ConvMessage> messagesList = messageListMap.get(msisdn);
-
-		String bulkLabel = null;
-
-		/**
-		 * Proceeding only if messages list is not null
-		 */
-
-		if (messagesList != null)
-		{
-			ConvMessage pinConvMessage = null;
-
-			JSONArray ids = new JSONArray();
-
-			for (ConvMessage convMessage : messagesList)
-			{
-				if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-				{
-					pinConvMessage = convMessage;
-				}
-
-				if (activity.hasWindowFocus())
-				{
-
-					convMessage.setState(ConvMessage.State.RECEIVED_READ);
-
-					if (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
-					{
-						ids.put(String.valueOf(convMessage.getMappedMsgID()));
-					}
-				}
-
-				if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
-				{
-					ContactManager contactManager = ContactManager.getInstance();
-					oneToNConversation.setConversationParticipantList(contactManager.getGroupParticipants(oneToNConversation.getMsisdn(), false, false));
-				}
-
-				bulkLabel = convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? oneToNConversation.getLabel() : null;
-
-				if (isActivityVisible && SoundUtils.isTickSoundEnabled(activity.getApplicationContext()))
-				{
-
-					SoundUtils.playSoundFromRaw(activity.getApplicationContext(), R.raw.received_message);
-				}
-
-			}
-
-			sendUIMessage(SET_LABEL, bulkLabel);
-
-			sendUIMessage(BULK_MESSAGE_RECEIVED, messagesList);
-
-			sendUIMessage(SHOW_IMP_MESSAGE, pinConvMessage);
-
-			if (ids != null && ids.length() > 0)
-			{
-				ChatThreadUtils.doBulkMqttPublish(ids, msisdn);
-			}
-		}
-	}
-
-	/**
-	 * Adds a complete list of messages at the end of the messages list and updates the UI at once
-	 * 
-	 * @param messagesList
-	 *            The list of messages to be added
-	 */
-
-	private void addBulkMessages(LinkedList<ConvMessage> messagesList)
-	{
-		/**
-		 * Proceeding only if the messages are not null
-		 */
-
-		if (messagesList != null)
-		{
-
-			/**
-			 * If we were showing the typing bubble, we remove it, add the new messages and add the typing bubble again
-			 */
-
-			TypingNotification typingNotification = removeTypingNotification();
-
-			mAdapter.addMessages(messagesList, messages.size());
-
-			reachedEnd = false;
-
-			ConvMessage convMessage = messagesList.get(messagesList.size() - 1);
-
-			/**
-			 * We add back the typing notification if the message was sent by the user.
-			 */
-
-			if (typingNotification != null && (!((GroupTypingNotification) typingNotification).getGroupParticipantList().isEmpty()))
-			{
-				Logger.d(TAG, "Size in chat thread: " + ((GroupTypingNotification) typingNotification).getGroupParticipantList().size());
-				mAdapter.addMessage(new ConvMessage(typingNotification));
-			}
-
-			mAdapter.notifyDataSetChanged();
-
-			/**
-			 * Don't scroll to bottom if the user is at older messages. It's possible user might be reading them.
-			 */
-			tryScrollingToBottom(convMessage, messagesList.size());
-
-		}
 	}
 
 	/**
