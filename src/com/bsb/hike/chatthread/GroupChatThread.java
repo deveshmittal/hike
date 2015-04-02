@@ -254,9 +254,31 @@ public class GroupChatThread extends OneToNChatThread
 		case R.string.mute_group:
 			toggleMuteGroup();
 			break;
+		case R.string.group_profile:
+			openProfileScreen();
+			break;
 		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
 			super.itemClicked(item);
+		}
+	}
+	
+	/**
+	 * Used to launch Profile Activity from GroupChatThread
+	 */
+	@Override
+	protected void openProfileScreen()
+	{
+		/**
+		 * Proceeding only if the group is alive
+		 */
+		if (oneToNConversation.isConversationAlive())
+		{
+			Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
+
+			Intent intent = IntentFactory.getGroupProfileIntent(activity.getApplicationContext(), msisdn);
+
+			activity.startActivity(intent);
 		}
 	}
 
