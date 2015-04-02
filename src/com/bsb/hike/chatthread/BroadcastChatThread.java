@@ -8,6 +8,7 @@ import java.util.List;
 
 import android.view.MotionEvent;
 
+import com.actionbarsherlock.view.Menu;
 import com.bsb.hike.R;
 import com.bsb.hike.media.OverFlowMenuItem;
 
@@ -37,6 +38,17 @@ public class BroadcastChatThread extends OneToNChatThread
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		if (oneToNConversation != null)
+		{
+			mActionBar.onCreateOptionsMenu(menu, R.menu.broadcast_chat_thread_menu, getOverFlowItems(), this, this);
+			return super.onCreateOptionsMenu(menu);
+		}
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
