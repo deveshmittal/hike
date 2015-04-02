@@ -1761,6 +1761,22 @@ public class HikeConstants
 
 		public static final String STICKER_UNCHECK_BOX_CLICKED = "stickerUnchkBoxClicked";
 
+		public static final String SETTING_CLICKED = "stgMS";
+
+		public static final String PRIVACY_SETTING_CLICKED = "psMS";
+
+		public static final String LS_SETTING_CLICKED = "psLS";
+
+		public static final String LS_EVERYONE_CLICKED = "psLS_E";
+
+		public static final String LS_MY_CONTACTS_CLICKED = "psLS_M";
+
+		public static final String LS_FAVOURITES_CLICKED = "psLS_F";
+
+		public static final String LS_NOBODY_CLICKED = "psLS_N";
+
+		public static final String MANAGE_FAV_LIST_SETTING = "psMFav";
+
 		/*
 		 * Settings screen <screen> = settingsS <event> = notifNUJEnabled, notifH2OEnabled, notifNUJDisabled, notifH2ODisabled
 		 */

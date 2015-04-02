@@ -312,6 +312,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 				IntentManager.openSettingAccount(this);
 				break;
 			case 6:
+				Utils.logClickEvent(HikeConstants.LogEvent.PRIVACY_SETTING_CLICKED);
 				IntentManager.openSettingPrivacy(this);
 				break;
 			case 7:
@@ -336,6 +337,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 				IntentManager.openSettingAccount(this);
 				break;
 			case 5:
+				Utils.logClickEvent(HikeConstants.LogEvent.PRIVACY_SETTING_CLICKED);
 				IntentManager.openSettingPrivacy(this);
 				break;
 			case 6:
