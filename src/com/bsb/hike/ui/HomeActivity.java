@@ -1381,12 +1381,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					itemImageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
 					itemImageView.setImageResource(R.drawable.ic_default_avatar);
 				}
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);
+				convertView.findViewById(R.id.item_image_view).setVisibility(View.VISIBLE);
 			}
 			else
 			{
 
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
+				convertView.findViewById(R.id.item_image_view).setVisibility(View.GONE);
 			}
 
 			int currentCredits = accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0);

@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
@@ -84,8 +85,18 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 				}
 				itemTextView.setText(item.text);
 
-				convertView.findViewById(R.id.profile_image_view)
-						.setVisibility(View.GONE);
+				if (item.drawableId != 0)
+				{
+					convertView.findViewById(R.id.item_image_view).setVisibility(View.VISIBLE);
+					convertView.findViewById(R.id.avatar_frame).setVisibility(View.GONE);
+					ImageView itemIcon = (ImageView) convertView.findViewById(R.id.item_icon);
+					itemIcon.setBackgroundResource(item.drawableId);
+					itemIcon.setImageResource(0);
+				}
+				else
+				{
+					convertView.findViewById(R.id.item_image_view).setVisibility(View.GONE);
+				}
 
 				TextView freeSmsCount = (TextView) convertView
 						.findViewById(R.id.free_sms_count);

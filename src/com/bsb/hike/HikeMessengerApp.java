@@ -459,7 +459,9 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String DETAILED_HTTP_LOGGING_ENABLED = "detailedHttpLoggingEnabled";
 
-	public static final String CT_SEARCH_INDICATOR_SHOWN = "ctSearchIndiShown";
+	public static final String CT_SEARCH_INDICATOR_SHOWN = "ctSearchIndiShowntwo";
+
+	public static final String CT_SEARCH_CLICKED = "ctSearchClickedtwo";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 

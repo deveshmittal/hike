@@ -12,7 +12,7 @@
         android:layout_height="wrap_content" >
 
         <RelativeLayout
-            android:id="@+id/profile_image_view"
+            android:id="@+id/item_image_view"
             android:layout_width="@dimen/small_avatar"
             android:layout_height="@dimen/small_avatar"
             android:layout_alignParentRight="true" >

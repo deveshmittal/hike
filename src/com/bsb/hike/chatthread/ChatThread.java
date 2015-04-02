@@ -652,8 +652,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected OverFlowMenuItem[] getOverFlowMenuItems()
 	{
+		OverFlowMenuItem searchItem;
+		if (HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).getData(HikeMessengerApp.CT_SEARCH_CLICKED, false) || messages.isEmpty())
+		{
+			searchItem = new OverFlowMenuItem(getString(R.string.search), 0, 0, R.string.search);
+		}
+		else
+		{
+			searchItem = new OverFlowMenuItem(getString(R.string.search), 0, R.drawable.ic_top_bar_indicator_search, R.string.search);
+		}
 		return new OverFlowMenuItem[] {
-				new OverFlowMenuItem(getString(R.string.search), 0, 0, R.string.search),
+				searchItem,
 				new OverFlowMenuItem(getString(R.string.clear_chat), 0, 0, R.string.clear_chat),
 				new OverFlowMenuItem(getString(R.string.email_chat), 0, 0, R.string.email_chat)};
 	}
@@ -1022,13 +1031,19 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private void setupSearchMode()
 	{
+		if (!HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).getData(HikeMessengerApp.CT_SEARCH_CLICKED, false))
+		{
+			HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).saveData(HikeMessengerApp.CT_SEARCH_CLICKED, true);
+		}
+
 		mActionMode.showActionMode(SEARCH_ACTION_MODE, R.layout.search_action_bar);
 		setUpSearchViews();
-		
+
 		if (messageSearchManager == null)
 		{
 			messageSearchManager = new SearchManager();
 		}
+		Logger.d("search","call to initialize:" + messages.size());
 		messageSearchManager.init(messages);
 	}
 	
@@ -2255,8 +2270,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (!HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).getData(HikeMessengerApp.CT_SEARCH_INDICATOR_SHOWN, false)
 				&& !mActionBar.isOverflowMenuIndicatorInUse() && (firstVisibleItem + visibleItemCount + 1) < totalItemCount && !loadingMoreMessages)
 		{
+			// If user has already discovered search option, theres on need to show the search icon on overflow menu icon.
+			// Just mark it already shown and move on.
+			if (HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).getData(HikeMessengerApp.CT_SEARCH_CLICKED, false))
+			{
+				HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).saveData(HikeMessengerApp.CT_SEARCH_INDICATOR_SHOWN, true);
+			}
 			// If the indicator is successfully displayed the setting is saved, so that its not shown again.
-			if (mActionBar.updateOverflowMenuIndicatorImage(R.drawable.ic_top_bar_indicator_search))
+			else if (mActionBar.updateOverflowMenuIndicatorImage(R.drawable.ic_top_bar_indicator_search))
 			{
 				HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).saveData(HikeMessengerApp.CT_SEARCH_INDICATOR_SHOWN, true);
 			}
