@@ -23,12 +23,12 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.Conversation.MetaData;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.models.Conversation.Conversation;
+import com.bsb.hike.models.Conversation.OneToNConversation;
+import com.bsb.hike.models.Conversation.OneToNConversationMetadata;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.utils.ChatTheme;
@@ -60,7 +60,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 
 	protected HashSpanWatcher mHashSpanWatcher;
 
-	protected GroupConversation groupConversation;
+	protected OneToNConversation oneToNConversation;
 
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -107,11 +107,11 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		 * Defensive check
 		 */
 
-		if (groupConversation == null)
+		if (oneToNConversation == null)
 		{
 			return false;
 		}
-		return groupConversation.isMuted();
+		return oneToNConversation.isMuted();
 	}
 
 	@Override
@@ -138,7 +138,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	protected Conversation fetchConversation()
 	{
 		Logger.i(TAG, "fetch group conversation " + Thread.currentThread().getName());
-		mConversation = groupConversation = (GroupConversation) mConversationDb.getConversation(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
+		mConversation = oneToNConversation = (OneToNConversation) mConversationDb.getConversation(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
 		if (mConversation == null)
 		{
 			/* the user must have deleted the chat. */
@@ -151,7 +151,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 
 		// Setting a flag which tells us whether the group contains sms users or not.
 		boolean hasSmsUser = false;
-		for (Entry<String, PairModified<GroupParticipant, String>> entry : groupConversation.getGroupParticipantList().entrySet())
+		for (Entry<String, PairModified<GroupParticipant, String>> entry : oneToNConversation.getConversationParticipantList().entrySet())
 		{
 			GroupParticipant groupParticipant = entry.getValue().getFirst();
 			if (!groupParticipant.getContactInfo().isOnhike())
@@ -160,33 +160,32 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 				break;
 			}
 		}
-		groupConversation.setHasSmsUser(hasSmsUser);
 		// imp message from DB like pin
 		fetchImpMessage();
 		// Set participant read by list
-		Pair<String, Long> pair = HikeConversationsDatabase.getInstance().getReadByValueForGroup(mConversation.getMsisdn());
+		Pair<String, Long> pair = HikeConversationsDatabase.getInstance().getReadByValueForGroup(oneToNConversation.getMsisdn());
 		if (pair != null)
 		{
 			String readBy = pair.first;
 			long msgId = pair.second;
-			groupConversation.setupReadByList(readBy, msgId);
+			oneToNConversation.setupReadByList(readBy, msgId);
 		}
 
 		// fetch theme
 		ChatTheme currentTheme = mConversationDb.getChatThemeForMsisdn(msisdn);
 		Logger.d("ChatThread", "Calling setchattheme from createConversation");
-		groupConversation.setTheme(currentTheme);
+		oneToNConversation.setChatTheme(currentTheme);
 
-		groupConversation.setConvBlocked(ContactManager.getInstance().isBlocked(groupConversation.getGroupOwner()));
+		oneToNConversation.setBlocked(ContactManager.getInstance().isBlocked(oneToNConversation.getConversationOwner()));
 
-		return groupConversation;
+		return oneToNConversation;
 	}
 
 	private void fetchImpMessage()
 	{
-		if (mConversation.getMetaData() != null && mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
+		if (mConversation.getMetadata() != null && oneToNConversation.getMetadata().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
 		{
-			groupConversation.setImpMessage(mConversationDb.getLastPinForConversation(mConversation));
+			oneToNConversation.setPinnedConvMessage(mConversationDb.getLastPinForConversation(oneToNConversation));
 		}
 	}
 
@@ -205,7 +204,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	protected void handleSystemMessages()
 	{
 		ContactManager conMgr = ContactManager.getInstance();
-		groupConversation.setGroupParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), false, false));
+		oneToNConversation.setConversationParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), false, false));
 	}
 	
 	@Override
@@ -274,7 +273,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		String participant = pair.second.second;
 		// TODO we could keep a map of msgId -> conversation objects
 		// somewhere to make this faster
-		groupConversation.updateReadByList(participant, mrMsgId);
+		oneToNConversation.updateReadByList(participant, mrMsgId);
 		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
 	}
 
@@ -342,7 +341,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	protected void sendPoke()
 	{
 		super.sendPoke();
-		if (!groupConversation.isMuted())
+		if (!oneToNConversation.isMuted())
 		{
 			Utils.vibrateNudgeReceived(activity.getApplicationContext());
 		}
@@ -367,8 +366,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	 */
 	private void incrementGroupParticipants(int morePeopleCount)
 	{
-		int numActivePeople = groupConversation.getGroupMemberAliveCount() + morePeopleCount;
-		groupConversation.setGroupMemberAliveCount(numActivePeople);
+		int numActivePeople = oneToNConversation.getParticipantListSize() + morePeopleCount;
 
 		TextView groupCountTextView = (TextView) mActionBarView.findViewById(R.id.contact_status);
 
@@ -393,13 +391,13 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	@Override
 	protected String getMsisdnMainUser()
 	{
-		return groupConversation.getGroupOwner();
+		return oneToNConversation.getConversationOwner();
 	}
 
 	@Override
 	protected String getBlockedUserLabel()
 	{
-		return groupConversation.getGroupParticipantFirstName(groupConversation.getGroupOwner());
+		return oneToNConversation.getConversationParticipantName(oneToNConversation.getConversationOwner());
 	}
 
 	/**
@@ -411,7 +409,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		/**
 		 * Proceeding only if the group is alive
 		 */
-		if (groupConversation.getIsGroupAlive())
+		if (oneToNConversation.isConversationAlive())
 		{
 			Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
 
@@ -455,9 +453,9 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	 */
 	protected void updateUnreadPinCount()
 	{
-		if (groupConversation != null)
+		if (oneToNConversation != null)
 		{
-			int unreadPinCount = groupConversation.getUnreadPinCount();
+			int unreadPinCount = oneToNConversation.getUnreadPinnedMessageCount();
 			mActionBar.updateOverflowMenuIndicatorCount(unreadPinCount);
 			mActionBar.updateOverflowMenuItemCount(R.string.group_profile, unreadPinCount);
 		}
@@ -474,7 +472,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 
 		try
 		{
-			long pinIdFromMetadata = mConversation.getMetaData().getLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+			long pinIdFromMetadata = oneToNConversation.getMetadata().getLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 
 			if (msgId == pinIdFromMetadata)
 			{
@@ -496,9 +494,10 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	 */
 	private void onConvMetadataUpdated(Object object)
 	{
-		if (msisdn.equals(((MetaData) object).getGroupId()))
+		Pair<String, OneToNConversationMetadata> pair = (Pair<String, OneToNConversationMetadata>) object;
+		if (msisdn.equals(pair.first))
 		{
-			groupConversation.setMetaData(((MetaData) object));
+			oneToNConversation.setMetadata(pair.second);
 		}
 	}
 
@@ -548,10 +547,10 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 				if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 				{
 					ContactManager contactManager = ContactManager.getInstance();
-					groupConversation.setGroupParticipantList(contactManager.getGroupParticipants(groupConversation.getMsisdn(), false, false));
+					oneToNConversation.setConversationParticipantList(contactManager.getGroupParticipants(oneToNConversation.getMsisdn(), false, false));
 				}
 
-				bulkLabel = convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? groupConversation.getLabel() : null;
+				bulkLabel = convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? oneToNConversation.getLabel() : null;
 
 				if (isActivityVisible && SoundUtils.isTickSoundEnabled(activity.getApplicationContext()))
 				{
@@ -632,7 +631,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	{
 		for (String msgMsisdn : second)
 		{
-			groupConversation.updateReadByList(msgMsisdn, mrMsgId);
+			oneToNConversation.updateReadByList(msgMsisdn, mrMsgId);
 		}
 	}
 
@@ -695,7 +694,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		if (object instanceof JSONObject)
 		{
 			String msgMsisdn = ((JSONObject) object).optString(HikeConstants.TO);
-			if (msgMsisdn != null && groupConversation.getMsisdn().equals(msgMsisdn))
+			if (msgMsisdn != null && oneToNConversation.getMsisdn().equals(msgMsisdn))
 			{
 				return true;
 			}

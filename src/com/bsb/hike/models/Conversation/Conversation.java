@@ -108,6 +108,15 @@ public abstract class Conversation implements Comparable<Conversation>
 	}
 
 	/**
+	 * @param isOnHike
+	 *            the isOnHike to set
+	 */
+	public void setOnHike(boolean isOnHike)
+	{
+		convInfo.setOnHike(isOnHike);
+	}
+	
+	/**
 	 * @param chatTheme
 	 *            the chatTheme to set
 	 */
@@ -141,6 +150,20 @@ public abstract class Conversation implements Comparable<Conversation>
 		return convInfo.isMute();
 	}
 
+	public boolean isBlocked()
+	{
+		return convInfo.isBlocked();
+	}
+	
+	/**
+	 * @param isBlocked
+	 *            the isBlocked to set
+	 */
+	public void setBlocked(boolean isBlocked)
+	{
+		convInfo.setBlocked(isBlocked);
+	}
+	
 	/**
 	 * Returns a friendly label for the conversation
 	 * 
