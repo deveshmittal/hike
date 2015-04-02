@@ -110,16 +110,16 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
-import com.bsb.hike.platform.PlatformWebMessageMetadata;
+import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
@@ -307,7 +307,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	/**
 	 * This method is called from the UI Handler's handleMessage. All the tasks performed by this are supposed to run on the UI Thread only.
 	 * 
-	 * This is also overriden by {@link OneToOneChatThread} and {@link GroupChatThread}
+	 * This is also overriden by {@link OneToOneChatThread} and {@link OneToNChatThread}
 	 * 
 	 * @param msg
 	 */
@@ -461,7 +461,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		mActionBar = new HikeActionBar(activity);
 		mConversationDb = HikeConversationsDatabase.getInstance();
-		sharedPreference = HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext());
+		sharedPreference = HikeSharedPreferenceUtil.getInstance();
 	}
 
 	/**
@@ -588,7 +588,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			onShareLocation(data);
 			break;
 		case AttachmentPicker.FILE:
-			ChatThreadUtils.onShareFile(activity.getApplicationContext(), msisdn, data, mConversation.isOnhike());
+			ChatThreadUtils.onShareFile(activity.getApplicationContext(), msisdn, data, mConversation.isOnHike());
 			break;
 		case AttachmentPicker.CONTACT:
 			onShareContact(resultCode, data);
@@ -614,7 +614,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			emailChat();
 			break;
 		case AttachmentPicker.GALLERY:
-			startHikeGallery(mConversation.isOnhike());
+			startHikeGallery(mConversation.isOnHike());
 			break;
 		case R.string.search:
 			setupSearchMode();
@@ -756,7 +756,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			showToast(R.string.text_empty_error);
 			return null; // Do not create message
 		}
-		ConvMessage convMessage = Utils.makeConvMessage(msisdn, message, mConversation.isOnhike());
+		ConvMessage convMessage = Utils.makeConvMessage(msisdn, message, mConversation.isOnHike());
 		// TODO : PinShowing related code -gaurav
 		mComposeView.setText("");
 		if (mComposeViewWatcher != null)
@@ -798,9 +798,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	private void recordFirstTimeStickerClick()
 	{
-		if (!HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).getData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, false))
+		if (!HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, false))
 		{
-			HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).saveData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, true);
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, true);
 
 			HAManager.getInstance().record(HikeConstants.LogEvent.STICKER_BTN_CLICKED, AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, EventPriority.HIGH);
 		}
@@ -856,7 +856,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mTips.hideTip();
 		}
 
-		initAttachmentPicker(mConversation.isOnhike());
+		initAttachmentPicker(mConversation.isOnHike());
 		int width = (int) (Utils.scaledDensityMultiplier * 270);
 		int xOffset = -(int) (276 * Utils.scaledDensityMultiplier);
 		int yOffset = -(int) (0.5 * Utils.scaledDensityMultiplier);
@@ -1121,13 +1121,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void imageCaptured(Uri uri)
 	{
-		ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, uri, HikeFileType.IMAGE, mConversation.isOnhike());
+		ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, uri, HikeFileType.IMAGE, mConversation.isOnHike());
 	}
 
 	@Override
 	public void imageCaptured(String imagePath)
 	{
-		ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, imagePath, HikeFileType.IMAGE, mConversation.isOnhike(), FTAnalyticEvents.CAMERA_ATTACHEMENT);
+		ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, imagePath, HikeFileType.IMAGE, mConversation.isOnHike(), FTAnalyticEvents.CAMERA_ATTACHEMENT);
 	}
 
 	@Override
@@ -1143,10 +1143,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (requestCode)
 		{
 		case AttachmentPicker.AUDIO:
-			ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, filePath, HikeFileType.AUDIO, mConversation.isOnhike(), FTAnalyticEvents.AUDIO_ATTACHEMENT);
+			ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, filePath, HikeFileType.AUDIO, mConversation.isOnHike(), FTAnalyticEvents.AUDIO_ATTACHEMENT);
 			break;
 		case AttachmentPicker.VIDEO:
-			ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, filePath, HikeFileType.VIDEO, mConversation.isOnhike(), FTAnalyticEvents.VIDEO_ATTACHEMENT);
+			ChatThreadUtils.uploadFile(activity.getApplicationContext(), msisdn, filePath, HikeFileType.VIDEO, mConversation.isOnHike(), FTAnalyticEvents.VIDEO_ATTACHEMENT);
 			break;
 		}
 
@@ -1178,7 +1178,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			double latitude = data.getDoubleExtra(HikeConstants.Extras.LATITUDE, 0);
 			double longitude = data.getDoubleExtra(HikeConstants.Extras.LONGITUDE, 0);
 			int zoomLevel = data.getIntExtra(HikeConstants.Extras.ZOOM_LEVEL, 0);
-			ChatThreadUtils.initialiseLocationTransfer(activity.getApplicationContext(), msisdn, latitude, longitude, zoomLevel, mConversation.isOnhike());
+			ChatThreadUtils.initialiseLocationTransfer(activity.getApplicationContext(), msisdn, latitude, longitude, zoomLevel, mConversation.isOnHike());
 		}
 	}
 
@@ -1218,7 +1218,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (dialog.getId())
 		{
 		case HikeDialogFactory.CONTACT_SEND_DIALOG:
-			ChatThreadUtils.initialiseContactTransfer(activity.getApplicationContext(), msisdn, ((PhonebookContact) dialog.data).jsonData, mConversation.isOnhike());
+			ChatThreadUtils.initialiseContactTransfer(activity.getApplicationContext(), msisdn, ((PhonebookContact) dialog.data).jsonData, mConversation.isOnHike());
 			dialog.dismiss();
 
 			break;
@@ -1272,7 +1272,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		Logger.i(TAG, "Audio Recorded " + filePath + "--" + duration);
 		ChatThreadUtils.initialiseFileTransfer(activity.getApplicationContext(), msisdn, filePath, null, HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE,
-				true, duration, false, mConversation.isOnhike(), FTAnalyticEvents.AUDIO_ATTACHEMENT);
+				true, duration, false, mConversation.isOnHike(), FTAnalyticEvents.AUDIO_ATTACHEMENT);
 	}
 
 	@Override
@@ -1385,14 +1385,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * 
 		 * Adapter has to show UI elements like tips, day/date of messages, unknown contact headers etc.
 		 */
-		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
+		messages = new ArrayList<ConvMessage>(mConversation.getMessagesList());
 
 		mMessageMap = new HashMap<Long, ConvMessage>();
 		addtoMessageMap(0, messages.size());
 
 		initListViewAndAdapter(); // init adapter, listView and add clicks etc
 		setupActionBar(); // Setup the action bar
-		currentTheme = mConversation.getTheme();
+		currentTheme = mConversation.getChatTheme();
 		updateUIAsPerTheme(currentTheme);// it has to be done after setting adapter
 		initMessageSenderLayout();
 
@@ -1506,7 +1506,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void sendPoke()
 	{
-		ConvMessage convMessage = Utils.makeConvMessage(msisdn, getString(R.string.poke_msg), mConversation.isOnhike());
+		ConvMessage convMessage = Utils.makeConvMessage(msisdn, getString(R.string.poke_msg), mConversation.isOnHike());
 		ChatThreadUtils.setPokeMetadata(convMessage);
 		sendMessage(convMessage);
 	}
@@ -1546,7 +1546,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mConversationsView.setOnScrollListener(this);
 		loadingMoreMessages = false;
 
-		updateUIAsPerTheme(mConversation.getTheme());// it has to be done after setting adapter
+		updateUIAsPerTheme(mConversation.getChatTheme());// it has to be done after setting adapter
 	}
 
 	protected void takeActionBasedOnIntent()
@@ -1585,7 +1585,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 		else if (intent.hasExtra(HikeConstants.Extras.FILE_PATH))
 		{
-			ChatThreadUtils.onShareFile(activity.getApplicationContext(), msisdn, intent, mConversation.isOnhike());
+			ChatThreadUtils.onShareFile(activity.getApplicationContext(), msisdn, intent, mConversation.isOnHike());
 			// Making sure the file does not get forwarded again on
 			// orientation change.
 			intent.removeExtra(HikeConstants.Extras.FILE_PATH);
@@ -1609,7 +1609,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					if (msgExtrasJson.has(HikeConstants.Extras.MSG))
 					{
 						String msg = msgExtrasJson.getString(HikeConstants.Extras.MSG);
-						ConvMessage convMessage = Utils.makeConvMessage(msisdn, msg, mConversation.isOnhike());
+						ConvMessage convMessage = Utils.makeConvMessage(msisdn, msg, mConversation.isOnHike());
 						sendMessage(convMessage);
 					}
 					else if (msgExtrasJson.has(HikeConstants.Extras.POKE))
@@ -1652,12 +1652,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 						if (Utils.isPicasaUri(filePath))
 						{
-							FileTransferManager.getInstance(activity.getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, msisdn, mConversation.isOnhike());
+							FileTransferManager.getInstance(activity.getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, msisdn, mConversation.isOnHike());
 						}
 						else
 						{
 							ChatThreadUtils.initialiseFileTransfer(activity.getApplicationContext(), msisdn, filePath, fileKey, hikeFileType, fileType, isRecording,
-									recordingDuration, true, mConversation.isOnhike(), attachmentType);
+									recordingDuration, true, mConversation.isOnHike(), attachmentType);
 						}
 					}
 					else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE)
@@ -1666,14 +1666,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						double latitude = msgExtrasJson.getDouble(HikeConstants.Extras.LATITUDE);
 						double longitude = msgExtrasJson.getDouble(HikeConstants.Extras.LONGITUDE);
 						int zoomLevel = msgExtrasJson.getInt(HikeConstants.Extras.ZOOM_LEVEL);
-						ChatThreadUtils.initialiseLocationTransfer(activity.getApplicationContext(), msisdn, latitude, longitude, zoomLevel, mConversation.isOnhike());
+						ChatThreadUtils.initialiseLocationTransfer(activity.getApplicationContext(), msisdn, latitude, longitude, zoomLevel, mConversation.isOnHike());
 					}
 					else if (msgExtrasJson.has(HikeConstants.Extras.CONTACT_METADATA))
 					{
 						try
 						{
 							JSONObject contactJson = new JSONObject(msgExtrasJson.getString(HikeConstants.Extras.CONTACT_METADATA));
-							ChatThreadUtils.initialiseContactTransfer(activity.getApplicationContext(), msisdn, contactJson, mConversation.isOnhike());
+							ChatThreadUtils.initialiseContactTransfer(activity.getApplicationContext(), msisdn, contactJson, mConversation.isOnHike());
 						}
 						catch (JSONException e)
 						{
@@ -1700,7 +1700,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
                     else if(msgExtrasJson.optInt(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE) == HikeConstants.MESSAGE_TYPE.CONTENT){
                         // as we will be changing msisdn and hike status while inserting in DB
-                        ConvMessage convMessage = Utils.makeConvMessage(msisdn, mConversation.isOnhike());
+                        ConvMessage convMessage = Utils.makeConvMessage(msisdn, mConversation.isOnHike());
                         convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.CONTENT);
                         convMessage.platformMessageMetadata = new PlatformMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA), activity.getApplicationContext());
                         convMessage.platformMessageMetadata.addThumbnailsToMetadata();
@@ -1713,16 +1713,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					else if(msgExtrasJson.optInt(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE) == HikeConstants.MESSAGE_TYPE.WEB_CONTENT || msgExtrasJson.optInt(
 							HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE) == HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT){
 						// as we will be changing msisdn and hike status while inserting in DB
-						ConvMessage convMessage = Utils.makeConvMessage(msisdn,msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE), mConversation.isOnhike());
+						ConvMessage convMessage = Utils.makeConvMessage(msisdn,msgExtrasJson.getString(HikeConstants.HIKE_MESSAGE), mConversation.isOnHike());
 						convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT);
-						convMessage.platformWebMessageMetadata = new PlatformWebMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
+						convMessage.webMetadata = new WebMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
 						JSONObject json = new JSONObject();
 						try
 						{
-							json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+							json.put(HikePlatformConstants.CARD_TYPE, convMessage.webMetadata.getAppName());
 							json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_FORWARD);
 							json.put(AnalyticsConstants.TO, msisdn);
-							HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+							HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 						}
 						catch (JSONException e)
 						{
@@ -1760,7 +1760,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			String fileType = intent.getStringExtra(HikeConstants.Extras.FILE_TYPE);
 			for (String filePath : filePaths)
 			{
-				ChatThreadUtils.initiateFileTransferFromIntentData(activity.getApplicationContext(), msisdn, fileType, filePath, mConversation.isOnhike(), FTAnalyticEvents.OTHER_ATTACHEMENT);
+				ChatThreadUtils.initiateFileTransferFromIntentData(activity.getApplicationContext(), msisdn, fileType, filePath, mConversation.isOnHike(), FTAnalyticEvents.OTHER_ATTACHEMENT);
 			}
 			intent.removeExtra(HikeConstants.Extras.FILE_PATHS);
 		}
@@ -3013,7 +3013,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void setAvatar(int defaultResId)
 	{
 		ImageView avatar = (ImageView) mActionBarView.findViewById(R.id.avatar);
-		Drawable avatarDrawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
+		Drawable avatarDrawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
 
 		if (avatarDrawable != null)
 		{
@@ -3151,11 +3151,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			JSONObject json = new JSONObject();
 			try
 			{
-				json.put(HikePlatformConstants.CARD_TYPE, convMessage.platformWebMessageMetadata.getAppName());
+				json.put(HikePlatformConstants.CARD_TYPE, convMessage.webMetadata.getAppName());
 				json.put(AnalyticsConstants.EVENT_KEY, HikePlatformConstants.CARD_DELETE);
 				json.put(AnalyticsConstants.ORIGIN, origin);
 				json.put(AnalyticsConstants.CHAT_MSISDN, msisdn);
-				HikeAnalyticsEvent.analyticsForPlatformAndBots(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json, AnalyticsConstants.EVENT_TAG_PLATFORM);
+				HikeAnalyticsEvent.analyticsForCards(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, json);
 			}
 			catch (JSONException e)
 			{
@@ -3314,7 +3314,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	}
 
 	/**
-	 * Used to call {@link #showOverlay(boolean, String, String, String)} from {@link OneToOneChatThread} or {@link GroupChatThread}
+	 * Used to call {@link #showOverlay(boolean, String, String, String)} from {@link OneToOneChatThread} or {@link OneToNChatThread}
 	 * 
 	 * @param label
 	 */
@@ -3360,14 +3360,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	private void inviteUser()
 	{
-		if (mConversation.isOnhike())
+		if (mConversation.isOnHike())
 		{
 			Toast.makeText(activity, R.string.already_hike_user, Toast.LENGTH_LONG).show();
 		}
 
 		else
 		{
-			Utils.sendInviteUtil(new ContactInfo(msisdn, msisdn, mConversation.getContactName(), msisdn), activity.getApplicationContext(),
+			Utils.sendInviteUtil(new ContactInfo(msisdn, msisdn, mConversation.getConversationName(), msisdn), activity.getApplicationContext(),
 					HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED, getString(R.string.native_header), getString(R.string.native_info));
 
 		}
@@ -3401,7 +3401,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	}
 
 	/**
-	 * This method is overriden by {@link OneToOneChatThread} and {@link GroupChatThread}
+	 * This method is overriden by {@link OneToOneChatThread} and {@link OneToNChatThread}
 	 * 
 	 * @return
 	 */
@@ -3417,7 +3417,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void blockUnBlockUser(boolean isBlocked)
 	{
-		mConversation.setConvBlocked(isBlocked);
+		mConversation.setBlocked(isBlocked);
 
 		if (isBlocked)
 		{
@@ -3439,7 +3439,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void onBlockUserclicked()
 	{
-		if (mConversation.isConvBlocked())
+		if (mConversation.isBlocked())
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, msisdn);
 		}
@@ -3459,7 +3459,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	private void sendSticker(Sticker sticker, String source)
 	{
-		ConvMessage convMessage = Utils.makeConvMessage(msisdn, StickerManager.STICKER_MESSAGE_TAG, mConversation.isOnhike());
+		ConvMessage convMessage = Utils.makeConvMessage(msisdn, StickerManager.STICKER_MESSAGE_TAG, mConversation.isOnHike());
 		ChatThreadUtils.setStickerMetadata(convMessage, sticker.getCategoryId(), sticker.getStickerId(), source);
 		sendMessage(convMessage);
 	}
@@ -3810,7 +3810,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	// ------------------------ ACTIONMODE CALLBACKS -------------------------------
 	/**
-	 * These methods is also overriden by {@link GroupChatThread} for pins
+	 * These methods is also overriden by {@link OneToNChatThread} for pins
 	 */
 	@Override
 	public void actionModeDestroyed(int id)
@@ -3917,9 +3917,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					{
 						multiMsgFwdObject.put(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE, HikeConstants.MESSAGE_TYPE.FORWARD_WEB_CONTENT);
 						multiMsgFwdObject.put(HikeConstants.HIKE_MESSAGE, message.getMessage());
-						if (message.platformWebMessageMetadata != null)
+						if (message.webMetadata != null)
 						{
-							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.platformWebMessageMetadata.JSONtoString()));
+							multiMsgFwdObject.put(HikeConstants.METADATA, PlatformContent.getForwardCardData(message.webMetadata.JSONtoString()));
 
 						}
 					}

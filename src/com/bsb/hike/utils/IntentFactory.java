@@ -1,16 +1,20 @@
 package com.bsb.hike.utils;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Message;
 import android.provider.ContactsContract.Contacts;
@@ -21,33 +25,45 @@ import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.chatthread.ChatThread;
 import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.Conversation.ConvInfo;
+import com.bsb.hike.models.Conversation.OneToNConvInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
+import com.bsb.hike.ui.CreateNewGroupOrBroadcastActivity;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.FileSelectActivity;
+import com.bsb.hike.ui.FtueBroadcast;
 import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.ui.HikeAuthActivity;
+import com.bsb.hike.ui.HikeCameraActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.NUXInviteActivity;
 import com.bsb.hike.ui.NuxSendCustomMessageActivity;
+import com.bsb.hike.ui.PeopleActivity;
+import com.bsb.hike.ui.PictureEditer;
 import com.bsb.hike.ui.PinHistoryActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.ShareLocation;
 import com.bsb.hike.ui.SignupActivity;
+import com.bsb.hike.ui.StickerSettingsActivity;
 import com.bsb.hike.ui.StickerShopActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
+import com.bsb.hike.voip.VoIPConstants;
+import com.bsb.hike.voip.VoIPService;
+import com.bsb.hike.voip.VoIPUtils;
+import com.bsb.hike.voip.view.CallRateActivity;
+import com.bsb.hike.voip.view.VoIPActivity;
 
 public class IntentFactory
 {
@@ -108,7 +124,7 @@ public class IntentFactory
 		Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
 		whatsappIntent.setType("text/plain");
 		whatsappIntent.setPackage(HikeConstants.PACKAGE_WATSAPP);
-		String inviteText = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, context.getString(R.string.watsapp_invitation));
+		String inviteText = HikeSharedPreferenceUtil.getInstance().getData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, context.getString(R.string.watsapp_invitation));
 		String inviteToken = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeConstants.INVITE_TOKEN, "");
 		inviteText = inviteText + inviteToken;
 		whatsappIntent.putExtra(Intent.EXTRA_TEXT, inviteText);
@@ -118,7 +134,7 @@ public class IntentFactory
 		}
 		catch (android.content.ActivityNotFoundException ex)
 		{
-			Toast.makeText(context.getApplicationContext(), "Could not find WatsApp in System", Toast.LENGTH_SHORT).show();
+			Toast.makeText(context.getApplicationContext(), "Could not find WhatsApp in System", Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -198,6 +214,14 @@ public class IntentFactory
 		return intent;
 	}
 
+	public static void createNewBroadcastActivityIntent(Context appContext, List<String> selectedContactList)
+	{
+		Intent intent = new Intent(appContext.getApplicationContext(), CreateNewGroupOrBroadcastActivity.class);
+		intent.putStringArrayListExtra(HikeConstants.Extras.BROADCAST_RECIPIENTS, (ArrayList<String>)selectedContactList);
+		intent.putExtra(HikeConstants.IS_BROADCAST, true);
+		appContext.startActivity(intent);
+	}
+
 	public static Intent getForwardStickerIntent(Context context, String stickerId, String categoryId)
 	{
 		Utils.sendUILogEvent(HikeConstants.LogEvent.FORWARD_MSG);
@@ -219,7 +243,35 @@ public class IntentFactory
 		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 		return intent;
 	}
-
+	
+	public static void createBroadcastFtue(Context appContext)
+	{
+		Intent intent = new Intent(appContext.getApplicationContext(), FtueBroadcast.class);
+		intent.putExtra(HikeConstants.Extras.COMPOSE_MODE, HikeConstants.Extras.CREATE_BROADCAST_MODE);
+		intent.putExtra(HikeConstants.Extras.CREATE_BROADCAST, true);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		appContext.startActivity(intent);
+	}
+	
+	public static void createBroadcastDefault(Context appContext)
+	{
+		Intent intent = new Intent(appContext.getApplicationContext(), ComposeChatActivity.class);
+		intent.putExtra(HikeConstants.Extras.COMPOSE_MODE, HikeConstants.Extras.CREATE_BROADCAST_MODE);
+		intent.putExtra(HikeConstants.Extras.CREATE_BROADCAST, true);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		appContext.startActivity(intent);
+	}
+	
+	public static void onBackPressedCreateNewBroadcast(Context appContext, ArrayList<String> broadcastRecipients)
+	{
+		Intent intent = new Intent(appContext.getApplicationContext(), ComposeChatActivity.class);
+		intent.putStringArrayListExtra(HikeConstants.Extras.BROADCAST_RECIPIENTS, broadcastRecipients);
+		intent.putExtra(HikeConstants.Extras.COMPOSE_MODE, HikeConstants.Extras.CREATE_BROADCAST_MODE);
+		intent.putExtra(HikeConstants.Extras.CREATE_BROADCAST, true);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		appContext.startActivity(intent);
+	}
+	
 	public static Intent getImageCaptureIntent(Context context)
 	{
 		/*
@@ -242,7 +294,7 @@ public class IntentFactory
 		/*
 		 * For images, save the file path as a preferences since in some devices the reference to the file becomes null.
 		 */
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.FILE_PATH, selectedFile.getAbsolutePath());
+		HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.FILE_PATH, selectedFile.getAbsolutePath());
 		return pickIntent;
 	}
 
@@ -302,7 +354,7 @@ public class IntentFactory
 		/**
 		 * Negation of is self chat true
 		 */
-		if (!(HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.MSISDN_SETTING, "").equals(mMsisdn)))
+		if (!(HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.MSISDN_SETTING, "").equals(mMsisdn)))
 		{
 			intent.putExtra(HikeConstants.Extras.CONTACT_INFO, mMsisdn);
 			intent.putExtra(HikeConstants.Extras.ON_HIKE, isConvOnHike);
@@ -367,15 +419,15 @@ public class IntentFactory
 		return createChatThreadIntentFromMsisdn(context, isGroupConv ? contactInfo.getId() : contactInfo.getMsisdn(), openKeyBoard);
 	}
 	
-	public static Intent createChatThreadIntentFromConversation(Context context, Conversation conversation)
+	public static Intent createChatThreadIntentFromConversation(Context context, ConvInfo conversation)
 	{
 		Intent intent = new Intent(context, ChatThreadActivity.class);
-		if (conversation.getContactName() != null)
+		if (conversation.getConversationName() != null)
 		{
-			intent.putExtra(HikeConstants.Extras.NAME, conversation.getContactName());
+			intent.putExtra(HikeConstants.Extras.NAME, conversation.getConversationName());
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
-		String whichChatThread = (conversation instanceof GroupConversation) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD;
+		String whichChatThread = (conversation instanceof OneToNConvInfo) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD;
 		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, whichChatThread);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
@@ -402,11 +454,43 @@ public class IntentFactory
 		return intent;
 	}
 	
+	public static Intent getForwardImageIntent(Context context, File argFile)
+	{
+		Intent intent = new Intent(context, ComposeChatActivity.class);
+		intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+		intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(argFile));
+		intent.setType("image");
+		return intent;
+	}
+
+	public static Intent getHikeGalleryPickerIntent(Context context, boolean allowMultiSelect, PendingIntent argIntent)
+	{
+		Intent intent = new Intent(context, GalleryActivity.class);
+		Bundle b = new Bundle();
+		b.putParcelable(GalleryActivity.PENDING_INTENT_KEY, argIntent);
+		b.putBoolean(GalleryActivity.DISABLE_MULTI_SELECT_KEY, !allowMultiSelect);
+		intent.putExtras(b);
+		return intent;
+	}
+	
+	public static Intent getHikeGalleryPickerIntentForResult(Context context, boolean allowMultiSelect,boolean categorizeByFolders,int actionBarType,PendingIntent argIntent)
+	{
+		Intent intent = new Intent(context, GalleryActivity.class);
+		Bundle b = new Bundle();
+		b.putParcelable(GalleryActivity.PENDING_INTENT_KEY, argIntent);
+		b.putBoolean(GalleryActivity.RETURN_RESULT_KEY, true);
+		b.putBoolean(GalleryActivity.DISABLE_MULTI_SELECT_KEY, !allowMultiSelect);
+		b.putBoolean(GalleryActivity.FOLDERS_REQUIRED_KEY, categorizeByFolders);
+		b.putInt(GalleryActivity.ACTION_BAR_TYPE_KEY, actionBarType);
+		intent.putExtras(b);
+		return intent;
+	}
+
 	public static void openConnectedApps(Context appContext)
 	{
 		appContext.startActivity(new Intent(appContext, ConnectedAppsActivity.class));
 	}
-	
+
 	public static void openHikeSDKAuth(Context appContext, Message msg)
 	{
 		Intent hikeAuthIntent = new Intent("com.bsb.hike.ui.HikeAuthActivity");
@@ -432,13 +516,26 @@ public class IntentFactory
 		appContext.startActivity(i);
 	}
 	
+	public static void openHomeActivity(Context context)
+	{
+		Intent in = new Intent(context, HomeActivity.class);
+		context.startActivity(in);
+	}
+	
+	public static void openHomeActivity(Context context,boolean handlingCrash)
+	{
+		Intent in = new Intent(context, HomeActivity.class);
+        in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        context.startActivity(in);
+	}
+
 	public static Intent openInviteFriends(Activity context)
 	{
 		Intent in = new Intent(context, NUXInviteActivity.class);
 		in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return in;
 	}
-	
+
 	public static Intent openNuxFriendSelector(Activity context)
 	{
 		Intent in = new Intent(context, ComposeChatActivity.class);
@@ -446,7 +543,7 @@ public class IntentFactory
 		in.putExtra(HikeConstants.Extras.NUX_INCENTIVE_MODE, true);
 		return in;
 	}
-	
+
 	public static Intent openNuxCustomMessage(Activity context)
 	{
 		Intent in = new Intent(context, NuxSendCustomMessageActivity.class);
@@ -499,9 +596,96 @@ public class IntentFactory
 		return intent;
 	}
 
-	public static Intent getStickerShopIntent(Context mContext)
+	public static Intent getComposeChatIntent(Activity context)
 	{
-		return new Intent(mContext, StickerShopActivity.class);
+		Intent intent = new Intent(context, ComposeChatActivity.class);
+		intent.putExtra(HikeConstants.Extras.EDIT, true);
+		return intent;
+	}
+	
+	public static Intent getFavouritesIntent(Activity context)
+	{
+		Intent intent = new Intent(context, PeopleActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		return intent;
 	}
 
+	public static Intent getStickerShopIntent(Context context)
+	{
+		Intent intent = new Intent(context, StickerShopActivity.class);
+		return intent;
+	}
+
+	public static Intent getStickerSettingIntent(Activity context)
+	{
+		Intent intent = new Intent(context, StickerSettingsActivity.class);
+		return intent;
+	}
+	
+	public static Intent getProfileIntent(Activity context)
+	{
+
+		Intent intent = new Intent();
+		intent.setClass(context, ProfileActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		return intent;
+	}
+
+	public static void openHikeCameraActivity(Activity argActivity)
+	{
+		Intent in = new Intent(argActivity, HikeCameraActivity.class);
+		argActivity.startActivity(in);
+	}
+
+	public static Intent getChatThreadIntent(Context context, String msisdn)
+	{
+		Intent intent = new Intent(context, ChatThread.class);
+		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		return intent;
+	}
+
+	public static Intent getVoipCallIntent(Context context, String msisdn, VoIPUtils.CallSource source)
+	{
+		Intent intent = new Intent(context, VoIPService.class);
+		intent.putExtra(VoIPConstants.Extras.ACTION, VoIPConstants.Extras.OUTGOING_CALL);
+		intent.putExtra(VoIPConstants.Extras.MSISDN, msisdn);
+		intent.putExtra(VoIPConstants.Extras.CALL_SOURCE, source.ordinal());
+		return intent;
+	}
+
+	public static Intent getVoipCallRateActivityIntent(Context context)
+	{
+		Intent intent = new Intent(context, CallRateActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+		return intent;
+	}
+
+	public static Intent getVoipIncomingCallIntent(Context context)
+	{
+		Intent intent = new Intent(context, VoIPActivity.class);
+		intent.putExtra(VoIPConstants.Extras.INCOMING_CALL, true);
+		intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		if(HikeMessengerApp.currentState != HikeMessengerApp.CurrentState.RESUMED && HikeMessengerApp.currentState != HikeMessengerApp.CurrentState.OPENED)
+		{
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+		}
+		else
+		{
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		}
+		return intent;
+	}
+	
+	public static Intent getBrowserIntent(String url)
+	{
+		return new Intent(Intent.ACTION_VIEW,Uri.parse(url));
+	}
+	
+	public static Intent getPictureEditorActivityIntent(String imageFileName)
+	{
+		Intent i = new Intent(HikeMessengerApp.getInstance().getApplicationContext(), PictureEditer.class);
+		i.putExtra(HikeConstants.HikePhotos.FILENAME, imageFileName);
+		return i;
+	}
 }

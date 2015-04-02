@@ -1,8 +1,6 @@
 package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +17,7 @@ import android.util.Pair;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.OneToNConversationUtils;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
@@ -285,7 +283,7 @@ class PersistenceCache extends ContactsCache
 			GroupDetails grpDetails = groupPersistence.get(groupId);
 			if (null != grpDetails)
 			{
-				grpDetails.setGroupName(name);
+				grpDetails.setCustomGroupName(name);
 			}
 		}
 		finally
@@ -323,7 +321,7 @@ class PersistenceCache extends ContactsCache
 		/**
 		 * Always try to take locks when and where required. Here we are separating out locking into different zones so that lock acquired should be for minimum time possible.
 		 */
-		if (Utils.isGroupConversation(msisdn))
+		if (OneToNConversationUtils.isOneToNConversation(msisdn))
 		{
 			GroupDetails grpDetails = null;
 			readLock.lock();
@@ -350,7 +348,7 @@ class PersistenceCache extends ContactsCache
 			{
 				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(msisdn, false, false);
 				String grpName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
-				grpDetails.setGroupName(grpName);
+				grpDetails.setDefaultGroupName(grpName);
 				return grpName;
 			}
 			finally
@@ -387,6 +385,30 @@ class PersistenceCache extends ContactsCache
 		}
 	}
 
+	void updateDefaultGroupName(String grpId)
+	{
+		readLock.lock();
+		try
+		{
+			GroupDetails grpDetails = groupPersistence.get(grpId);
+			if (null != grpDetails)
+			{
+				String grpName = grpDetails.getCustomGroupName();
+				if (!TextUtils.isEmpty(grpName))
+				{
+					return;
+				}
+				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(grpId, false, false);
+				grpName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+				grpDetails.setDefaultGroupName(grpName);
+			}
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
+	
 	/**
 	 * Returns name of a contact using groupId. This first checks the contactInfo name as contact can be saved contact or unsaved contact.For unsaved we need group id as unsaved
 	 * contacts name is different in different groups
@@ -573,7 +595,7 @@ class PersistenceCache extends ContactsCache
 					{
 						List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(msisdn, false, false);
 						String grpName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
-						grpDetails.setGroupName(grpName);
+						grpDetails.setDefaultGroupName(grpName);
 					}
 				}
 			}
@@ -788,7 +810,7 @@ class PersistenceCache extends ContactsCache
 		readLock.lock();
 		try
 		{
-			if (Utils.isGroupConversation(id))
+			if (OneToNConversationUtils.isOneToNConversation(id))
 				return groupPersistence.containsKey(id);
 			else
 				return convsContactsPersistence.containsKey(id);
@@ -900,7 +922,7 @@ class PersistenceCache extends ContactsCache
 			{
 				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(grpId, false, false);
 				groupName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
-				grpDetails.setGroupName(groupName);
+				grpDetails.setDefaultGroupName(groupName);
 			}
 			groupPersistence.put(grpId, grpDetails);
 		}
@@ -922,12 +944,13 @@ class PersistenceCache extends ContactsCache
 		try
 		{
 			ConcurrentLinkedQueue<PairModified<String, String>> clq = new ConcurrentLinkedQueue<PairModified<String, String>>();
+			String defaultGroupName = null;
 			if (TextUtils.isEmpty(groupName) || groupName.equals(grpId))
 			{
 				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(grpId, false, false);
-				groupName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+				defaultGroupName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
 			}
-			GroupDetails grpDetails = new GroupDetails(grpId, groupName, alive, clq);
+			GroupDetails grpDetails = new GroupDetails(grpId, groupName, defaultGroupName, alive, clq);
 			groupPersistence.put(grpId, grpDetails);
 		}
 		finally
