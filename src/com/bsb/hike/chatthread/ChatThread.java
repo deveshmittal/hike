@@ -580,6 +580,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void preShowOverflowMenu(List<OverFlowMenuItem> overflowItems)
 	{
 		mActionBar.updateOverflowMenuItemActiveState(R.string.search, !messages.isEmpty());
+		if (!HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).getData(HikeMessengerApp.CT_SEARCH_CLICKED, false) && !messages.isEmpty())
+		{
+			mActionBar.updateOverflowMenuItemIcon(R.string.search, R.drawable.ic_top_bar_indicator_search);
+		}
+		else
+		{
+			mActionBar.updateOverflowMenuItemIcon(R.string.search, 0);
+		}
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -652,17 +660,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected OverFlowMenuItem[] getOverFlowMenuItems()
 	{
-		OverFlowMenuItem searchItem;
-		if (HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).getData(HikeMessengerApp.CT_SEARCH_CLICKED, false) || messages.isEmpty())
-		{
-			searchItem = new OverFlowMenuItem(getString(R.string.search), 0, 0, R.string.search);
-		}
-		else
-		{
-			searchItem = new OverFlowMenuItem(getString(R.string.search), 0, R.drawable.ic_top_bar_indicator_search, R.string.search);
-		}
 		return new OverFlowMenuItem[] {
-				searchItem,
+				new OverFlowMenuItem(getString(R.string.search), 0, 0, R.string.search),
 				new OverFlowMenuItem(getString(R.string.clear_chat), 0, 0, R.string.clear_chat),
 				new OverFlowMenuItem(getString(R.string.email_chat), 0, 0, R.string.email_chat)};
 	}
@@ -673,6 +672,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 * Hiding any open tip
 		 */
 		mTips.hideTip();
+
+		// Remove the indicator if any on the overflow menu.
+		mActionBar.updateOverflowMenuIndicatorImage(0);
 
 		int width = getResources().getDimensionPixelSize(R.dimen.overflow_menu_width);
 		int rightMargin = width + getResources().getDimensionPixelSize(R.dimen.overflow_menu_right_margin);

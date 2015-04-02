@@ -306,7 +306,33 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 				}
 			}
 		}
+	}
 
+	/**
+	 * Can be used to update the icon of an overflow menu item on the fly
+	 * 
+	 * @param itemId
+	 * @param enabled
+	 */
+	public void updateOverflowMenuItemIcon(int itemId, int drawableId)
+	{
+		List<OverFlowMenuItem> mItems = getOverFlowMenuItems();
+
+		/**
+		 * Defensive check
+		 */
+		if (mItems != null)
+		{
+			for (OverFlowMenuItem overFlowMenuItem : mItems)
+			{
+				if (overFlowMenuItem.id == itemId)
+				{
+					overFlowMenuItem.drawableId = drawableId;
+					notifyDateSetChanged();
+					break;
+				}
+			}
+		}
 	}
 	
 	public void setOverflowViewListener(OverflowViewListener viewListener)

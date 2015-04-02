@@ -271,6 +271,20 @@ public class HikeActionBar
 	}
 
 	/**
+	 * Can be used to update the title of an overflow menu item on the fly
+	 * 
+	 * @param itemId
+	 * @param newTitle
+	 */
+	protected void updateOverflowMenuItemIcon(int itemId, int drawableId)
+	{
+		if(overFlowMenuLayout!=null)
+		{
+			overFlowMenuLayout.updateOverflowMenuItemIcon(itemId, drawableId);
+		}
+	}
+
+	/**
 	 * This is used to update/show indicator image on the overflow menu icon. This will be called from the UI Thread
 	 * 
 	 * Can also be used by any other futuristic feature
