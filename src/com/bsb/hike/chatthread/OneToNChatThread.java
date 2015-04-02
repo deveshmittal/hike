@@ -353,15 +353,6 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		}
 	}
 
-	/**
-	 * Overriding it here because the message oculd be of type Pin, which needs to animated if the pin view is not yet shown.
-	 */
-	@Override
-	protected void sendMessage(ConvMessage convMessage)
-	{
-		
-	}
-
 	@Override
 	protected String getMsisdnMainUser()
 	{
