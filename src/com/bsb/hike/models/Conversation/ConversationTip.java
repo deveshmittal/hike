@@ -25,7 +25,7 @@ import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -450,55 +450,55 @@ public class ConversationTip implements OnClickListener
 			switch (what)
 			{
 			case HikeConstants.ATOMIC_APP_TIP_SETTINGS:
-				IntentManager.openSetting(context);
+				IntentFactory.openSetting(context);
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_NOTIF:
-				IntentManager.openSettingNotification(context);
+				IntentFactory.openSettingNotification(context);
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_NOTIF_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_PRIVACY:
-				IntentManager.openSettingPrivacy(context);
+				IntentFactory.openSettingPrivacy(context);
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_PRIVACY_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_SMS:
-				IntentManager.openSettingSMS(context);
+				IntentFactory.openSettingSMS(context);
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_SMS_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_SETTINGS_MEDIA:
-				IntentManager.openSettingMedia(context);
+				IntentFactory.openSettingMedia(context);
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_SETTINGS_MEDIA_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_INVITE_FREE_SMS:
-				IntentManager.openInviteSMS(context);
+				IntentFactory.openInviteSMS(context);
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_FREE_SMS_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_INVITE_WATSAPP:
 				if (Utils.isPackageInstalled(context, HikeConstants.PACKAGE_WATSAPP))
 				{
-					IntentManager.openInviteWatsApp(context);
+					IntentFactory.openInviteWatsApp(context);
 				}
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_INVITE_WHATSAPP_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_TIMELINE:
-				IntentManager.openTimeLine(context);
+				IntentFactory.openTimeLine(context);
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_TIMELINE_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_HIKE_EXTRA:
-				IntentManager.openHikeExtras(context);
+				IntentFactory.openHikeExtras(context);
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;
 			case HikeConstants.ATOMIC_APP_TIP_HIKE_REWARDS:
-				IntentManager.openHikeRewards(context);
+				IntentFactory.openHikeRewards(context);
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED);
 				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				break;

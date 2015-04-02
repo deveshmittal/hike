@@ -1419,4 +1419,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="photos_oom_load">Unable to load Image!\nNot Enough Memory On Device.</string>
     <string name="photos_oom_retry">Try Again!</string>
     <string name="photos_oom_camera">Unable to capture Image</string>
+    <string name="search_hint">Search</string>
 </resources>

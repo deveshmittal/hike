@@ -70,11 +70,9 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ProfileAdapter;
-import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.dialog.CustomAlertDialog;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
@@ -3006,26 +3004,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private void removeFromGroup(final ContactInfo contactInfo)
 	{
-<<<<<<< HEAD
 		HikeDialogFactory.showDialog(this, HikeDialogFactory.DELETE_FROM_GROUP, new HikeDialogListener()
-=======
-		String message;
-		final CustomAlertDialog confirmDialog = new CustomAlertDialog(ProfileActivity.this);
-		if (this.profileType == ProfileType.BROADCAST_INFO)
-		{
-			confirmDialog.setHeader(R.string.remove_from_broadcast);
-			message = getString(R.string.remove_confirm_broadcast, contactInfo.getFirstName());
-		}
-		else
-		{
-			confirmDialog.setHeader(R.string.remove_from_group);
-			message = getString(R.string.remove_confirm, contactInfo.getFirstName());
-		}
-		confirmDialog.setBody(message);
-		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
->>>>>>> f4528b1503497fe4fcb7d759a29ce0bc85913ec0
-		{
-			
+		{	
 			@Override
 			public void positiveClicked(HikeDialog hikeDialog)
 			{

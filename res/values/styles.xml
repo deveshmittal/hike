@@ -390,15 +390,6 @@
         <item name="android:paddingRight">8dp</item>
     </style>
 
-    <style name="CustomIconPageIndicator" parent="Widget.IconPageIndicator">
-        <item name="android:background">@drawable/emoticon_tab_indicator</item>
-        <item name="android:divider">@drawable/emoticon_tab_divider</item>
-        <item name="android:showDividers">middle</item>
-        <item name="android:tabStripEnabled">false</item>
-        <item name="android:layout_marginLeft">0dp</item>
-        <item name="android:layout_marginRight">0dp</item>
-    </style>
-    
     <style name="TabText">
         <item name="android:textColor">@drawable/tab_text_selector</item>
         <item name="android:textSize">12sp</item>

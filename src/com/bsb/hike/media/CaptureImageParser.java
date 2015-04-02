@@ -40,7 +40,7 @@ public class CaptureImageParser
 	{
 		Logger.d(TAG, "onactivity result");
 
-		HikeSharedPreferenceUtil sharedPreference = HikeSharedPreferenceUtil.getInstance(context.getApplicationContext());
+		HikeSharedPreferenceUtil sharedPreference = HikeSharedPreferenceUtil.getInstance();
 		if (resultCode == Activity.RESULT_OK)
 		{
 			Logger.d(TAG, "onactivity result ok");

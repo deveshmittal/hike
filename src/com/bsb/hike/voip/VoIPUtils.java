@@ -39,7 +39,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -362,10 +362,10 @@ public class VoIPUtils {
 
 	public static NotificationCompat.Action[] getMissedCallNotifActions(Context context, String msisdn)
 	{
-		Intent callIntent = IntentManager.getVoipCallIntent(context, msisdn, CallSource.MISSED_CALL_NOTIF);
+		Intent callIntent = IntentFactory.getVoipCallIntent(context, msisdn, CallSource.MISSED_CALL_NOTIF);
 		PendingIntent callPendingIntent = PendingIntent.getService(context, 0, callIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		Intent messageIntent = IntentManager.getChatThreadIntent(context, msisdn);
+		Intent messageIntent = IntentFactory.getChatThreadIntent(context, msisdn);
 		messageIntent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
 		PendingIntent messagePendingIntent = PendingIntent.getActivity(context, 0, messageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
