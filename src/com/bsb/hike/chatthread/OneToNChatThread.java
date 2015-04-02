@@ -364,7 +364,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	 * 
 	 * @param morePeopleCount
 	 */
-	private void incrementGroupParticipants(int morePeopleCount)
+	protected void incrementGroupParticipants(int morePeopleCount)
 	{
 		int numActivePeople = oneToNConversation.getParticipantListSize() + morePeopleCount;
 

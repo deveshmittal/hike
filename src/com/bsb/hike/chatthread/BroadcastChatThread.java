@@ -8,12 +8,16 @@ import java.util.List;
 
 import android.content.Intent;
 import android.view.MotionEvent;
+import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.media.OverFlowMenuItem;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.Conversation.BroadcastConversation;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.OneToNConversation;
@@ -135,5 +139,40 @@ public class BroadcastChatThread extends OneToNChatThread
 		Intent intent = IntentFactory.getBroadcastProfileIntent(activity.getApplicationContext(), msisdn);
 
 		activity.startActivity(intent);
+	}
+	
+	@Override
+	protected void addMessage(ConvMessage convMessage)
+	{
+		mAdapter.addMessage(convMessage);
+		if (convMessage.isSent())
+		{
+			oneToNConversation.setupReadByList(null, convMessage.getMsgID());
+		}
+		super.addMessage(convMessage);
+	}
+	
+	@Override
+	protected void sendMessage(ConvMessage convMessage)
+	{
+		if (convMessage != null)
+		{
+			addMessage(convMessage);
+			convMessage.setMessageOriginType(OriginType.BROADCAST);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
+		}
+	}
+	
+	@Override
+	protected void incrementGroupParticipants(int morePeopleCount)
+	{
+		int numActivePeople = oneToNConversation.getParticipantListSize() + morePeopleCount;
+
+		TextView groupCountTextView = (TextView) mActionBarView.findViewById(R.id.contact_status);
+
+		if (numActivePeople > 0)
+		{
+			groupCountTextView.setText(activity.getResources().getString(R.string.num_people, (numActivePeople)));
+		}
 	}
 }
