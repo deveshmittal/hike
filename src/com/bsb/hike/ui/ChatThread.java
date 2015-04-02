@@ -3603,6 +3603,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				
 				List<Pair<Long, JSONObject>> pairList = mConversationDb.updateStatusAndSendDeliveryReport(mConversation.getMsisdn());
 				
+				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+				
 				if(pairList == null)
 				{
 					return;
@@ -3642,8 +3644,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						ids.put(pair.first);
 					}
 				}
-				
-				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
 				Logger.d("UnreadBug", "Unread count event triggered");
 				Logger.d(AnalyticsConstants.MSG_REL_TAG, "inside API setMessageRead in CT ===========================================");
