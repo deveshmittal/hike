@@ -41,8 +41,8 @@ import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -295,25 +295,25 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			switch (position)
 			{
 			case 1:
-				IntentManager.openSettingNotification(this);
+				IntentFactory.openSettingNotification(this);
 				break;
 			case 2:
-				IntentManager.openSettingMedia(this);
+				IntentFactory.openSettingMedia(this);
 				break;
 			case 3:
-				IntentManager.openSettingSMS(this);
+				IntentFactory.openSettingSMS(this);
 				break;
 			case 4:
-				IntentManager.openConnectedApps(this);
+				IntentFactory.openConnectedApps(this);
 				break;
 			case 5:
-				IntentManager.openSettingAccount(this);
+				IntentFactory.openSettingAccount(this);
 				break;
 			case 6:
-				IntentManager.openSettingPrivacy(this);
+				IntentFactory.openSettingPrivacy(this);
 				break;
 			case 7:
-				IntentManager.openSettingHelp(this);
+				IntentFactory.openSettingHelp(this);
 				break;
 			}
 		}
@@ -322,22 +322,22 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			switch (position)
 			{
 			case 1:
-				IntentManager.openSettingNotification(this);
+				IntentFactory.openSettingNotification(this);
 				break;
 			case 2:
-				IntentManager.openSettingMedia(this);
+				IntentFactory.openSettingMedia(this);
 				break;
 			case 3:
-				IntentManager.openSettingSMS(this);
+				IntentFactory.openSettingSMS(this);
 				break;
 			case 4:
-				IntentManager.openSettingAccount(this);
+				IntentFactory.openSettingAccount(this);
 				break;
 			case 5:
-				IntentManager.openSettingPrivacy(this);
+				IntentFactory.openSettingPrivacy(this);
 				break;
 			case 6:
-				IntentManager.openSettingHelp(this);
+				IntentFactory.openSettingHelp(this);
 				break;
 			}
 		}
