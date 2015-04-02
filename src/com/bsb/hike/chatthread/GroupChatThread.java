@@ -222,9 +222,6 @@ public class GroupChatThread extends OneToNChatThread
 		case MUTE_CONVERSATION_TOGGLED:
 			muteConvToggledUIChange((boolean) msg.obj);
 			break;
-		case GROUP_REVIVED:
-			handleGroupRevived();
-			break;
 		case LATEST_PIN_DELETED:
 			hidePinFromUI((boolean) msg.obj);
 			break;
@@ -404,16 +401,6 @@ public class GroupChatThread extends OneToNChatThread
 		mTips.showTip();
 	}
 
-	private void toggleGroupLife(boolean alive)
-	{
-		oneToNConversation.setConversationAlive(alive);
-		activity.findViewById(R.id.send_message).setEnabled(alive);
-		activity.findViewById(R.id.msg_compose).setVisibility(alive ? View.VISIBLE : View.INVISIBLE);
-		activity.findViewById(R.id.emo_btn).setEnabled(alive);
-		activity.findViewById(R.id.sticker_btn).setEnabled(alive);
-		// TODO : Hide popup OR dialog if visible
-	}
-	
 	private void addUnreadCountMessage()
 	{
 		if (oneToNConversation.getUnreadCount() > 0 && oneToNConversation.getMessagesList().size() > 0)
@@ -452,15 +439,6 @@ public class GroupChatThread extends OneToNChatThread
 		{
 			toggleConversationMuteViewVisibility(oneToNConversation.isMuted());
 		}
-	}
-	
-	/**
-	 * This method is called on the UI thread
-	 * 
-	 */
-	private void handleGroupRevived()
-	{
-		toggleGroupLife(true);
 	}
 	
 	@Override

@@ -1,15 +1,10 @@
 package com.bsb.hike.chatthread;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Intent;
 import android.os.Message;
 import android.text.Editable;
 import android.util.Pair;
@@ -22,8 +17,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.Conversation.Conversation;
@@ -32,10 +25,7 @@ import com.bsb.hike.models.Conversation.OneToNConversationMetadata;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.utils.ChatTheme;
-import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.PairModified;
-import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -290,11 +280,33 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		case PARTICIPANT_JOINED_OR_LEFT_CONVERSATION:
 			incrementGroupParticipants((int) msg.obj);
 			break;
+		case GROUP_REVIVED:
+			handleGroupRevived();
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in Group ChatThread. Calling super class' handleUIMessage");
 			super.handleUIMessage(msg);
 			break;
 		}
+	}
+	
+	/**
+	 * This method is called on the UI thread
+	 * 
+	 */
+	private void handleGroupRevived()
+	{
+		toggleGroupLife(true);
+	}
+	
+	protected void toggleGroupLife(boolean alive)
+	{
+		oneToNConversation.setConversationAlive(alive);
+		activity.findViewById(R.id.send_message).setEnabled(alive);
+		activity.findViewById(R.id.msg_compose).setVisibility(alive ? View.VISIBLE : View.INVISIBLE);
+		activity.findViewById(R.id.emo_btn).setEnabled(alive);
+		activity.findViewById(R.id.sticker_btn).setEnabled(alive);
+		// TODO : Hide popup OR dialog if visible
 	}
 
 	/**
