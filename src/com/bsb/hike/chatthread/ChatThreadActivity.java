@@ -1,6 +1,5 @@
 package com.bsb.hike.chatthread;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -44,7 +43,7 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	{
 		String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
 		if (HikeMessengerApp.isStealthMsisdn(msisdn)
-				&& HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF) != HikeConstants.STEALTH_ON)
+				&& HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF) != HikeConstants.STEALTH_ON)
 		{
 			return false;
 		}

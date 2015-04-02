@@ -42,9 +42,10 @@ import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.Conversation.Conversation;
+import com.bsb.hike.models.Conversation.ConversationMetadata;
+import com.bsb.hike.models.Conversation.OneToNConversationMetadata;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -355,7 +356,7 @@ public class ChatThreadUtils
 			jsonObject.put(HikeConstants.DATA, data);
 			jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.CHAT_BACKGROUD);
 			jsonObject.put(HikeConstants.TO, conv.getMsisdn());
-			jsonObject.put(HikeConstants.FROM, HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.MSISDN_SETTING, ""));
+			jsonObject.put(HikeConstants.FROM, HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.MSISDN_SETTING, ""));
 
 			convMessage = new ConvMessage(jsonObject, conv, context, true);
 
@@ -463,13 +464,13 @@ public class ChatThreadUtils
 	{
 		if (mConversation != null)
 		{
-			MetaData metadata = mConversation.getMetaData();
+			OneToNConversationMetadata metadata = (OneToNConversationMetadata) mConversation.getMetadata();
 			if (!metadata.isPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN) && isActivityVisible)
 			{
 				try
 				{
 					metadata.setPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
-					metadata.decrementUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+					metadata.decrementUnreadPinCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 				}
 				catch (JSONException e)
 				{
