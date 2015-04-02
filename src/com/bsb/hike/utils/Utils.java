@@ -168,7 +168,6 @@ import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.TrafficsStatsFile;
-import com.bsb.hike.chatthread.ChatThread;
 import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -824,12 +823,12 @@ public class Utils
 	public static String getGroupJoinHighlightText(JSONArray participantInfoArray, OneToNConversation conversation)
 	{
 		JSONObject participant = (JSONObject) participantInfoArray.opt(0);
-		String highlight = ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(participant.optString(HikeConstants.MSISDN));
+		String highlight = ((OneToNConversation) conversation).getConvParticipantFirstNameAndSurname(participant.optString(HikeConstants.MSISDN));
 
 		if (participantInfoArray.length() == 2)
 		{
 			JSONObject participant2 = (JSONObject) participantInfoArray.opt(1);
-			String name2 = ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(participant2.optString(HikeConstants.MSISDN));
+			String name2 = ((OneToNConversation) conversation).getConvParticipantFirstNameAndSurname(participant2.optString(HikeConstants.MSISDN));
 
 			highlight += " and " + name2;
 		}
