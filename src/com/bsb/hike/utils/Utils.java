@@ -3436,18 +3436,6 @@ public class Utils
 		return !convMessage.isSent() && convMessage.getState() == State.RECEIVED_UNREAD && convMessage.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE;
 	}
 
-	public static Intent createIntentForConversation(Context context, ConvInfo convInfo)
-	{
-		Intent intent = new Intent(context, ChatThread.class);
-		if (convInfo.getConversationName() != null)
-		{
-			intent.putExtra(HikeConstants.Extras.NAME, convInfo.getConversationName());
-		}
-		intent.putExtra(HikeConstants.Extras.MSISDN, convInfo.getMsisdn());
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		return intent;
-	}
-
 	public static void createShortcut(Activity activity, ConvInfo conv)
 	{
 		Intent shortcutIntent = IntentFactory.createChatThreadIntentFromConversation(activity, conv);

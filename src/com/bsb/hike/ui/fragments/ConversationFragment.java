@@ -1098,7 +1098,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		
 		ConvInfo convInfo = (ConvInfo) mAdapter.getItem(position);
 		
-		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), convInfo);
+		Intent intent = IntentFactory.createChatThreadIntentFromConversation(getSherlockActivity(), convInfo);
 		startActivity(intent);
 		
 		if (searchMode)
