@@ -38,18 +38,18 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.modules.iface.ITransientCache;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.OneToNConversationUtils;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
@@ -145,7 +145,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	}
 
 	/**
-	 * This is used to remove the list of msisdns from either group or 1-1 conversation and should be called when multiple group or one to one conversations are deleted.
+	 * This is used to remove the list of msisdns from either 1-n or 1-1 conversation and should be called when multiple group or one to one conversations are deleted.
 	 * 
 	 * @param msisdns
 	 */
@@ -153,7 +153,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	{
 		for (String ms : msisdns)
 		{
-			if (Utils.isGroupConversation(ms))
+			if (OneToNConversationUtils.isOneToNConversation(ms))
 			{
 				persistenceCache.removeGroup(ms);
 				transientCache.removeGroup(ms);
@@ -1084,35 +1084,26 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		return transientCache.doesContactExist(msisdn);
 	}
 
-	public void makeOlderAvatarsRounded()
-	{
-		hDb.makeOlderAvatarsRounded();
-	}
-
 	/**
 	 * This method returns a drawable of an icon from the database
 	 * 
 	 * @param msisdn
-	 * @param rounded
-	 *            if true returns rounded drawable from rounded thumbnails table
 	 * @return
 	 */
-	public Drawable getIcon(String msisdn, boolean rounded)
+	public Drawable getIcon(String msisdn)
 	{
-		return hDb.getIcon(msisdn, rounded);
+		return hDb.getIcon(msisdn);
 	}
 
 	/**
 	 * This method returns a byte array of an icon from the database
 	 * 
 	 * @param id
-	 * @param rounded
-	 *            if true returns rounded thumbnail byte array from rounded thumbnails table
 	 * @return
 	 */
-	public byte[] getIconByteArray(String id, boolean rounded)
+	public byte[] getIconByteArray(String id)
 	{
-		return hDb.getIconByteArray(id, rounded);
+		return hDb.getIconByteArray(id);
 	}
 
 	/**
@@ -1222,6 +1213,18 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	}
 
 	/**
+	 * Returns a list of participants in a 1-n conversation with their names in case of unsaved contact. This method also increases reference count if the contact is already loaded
+	 * in memory
+	 * 
+	 * @param convId
+	 * @return
+	 */
+	public List<PairModified<GroupParticipant, String>> getActiveConversationParticipants(String convId)
+	{
+		return getGroupParticipants(convId, true, false);
+	}
+
+	/**
 	 * Returns a list of participants of a group with their names in case of unsaved contact. This method also increases the reference count if contact is already loaded in memory
 	 * 
 	 * @param groupId
@@ -1318,6 +1321,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	public void addGroupParticipants(String groupId, Map<String, PairModified<GroupParticipant, String>> participantList)
 	{
 		transientCache.addGroupParticipants(groupId, participantList);
+		persistenceCache.updateDefaultGroupName(groupId);
 	}
 
 	/**
@@ -1329,6 +1333,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	public void removeGroupParticipant(String groupId, String msisdn)
 	{
 		transientCache.removeGroupParticipants(groupId, msisdn);
+		persistenceCache.updateDefaultGroupName(groupId);
 	}
 
 	/**
@@ -1339,6 +1344,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	public void removeGroupParticipant(String groupId, Collection<String> msisdns)
 	{
 		transientCache.removeGroupParticipants(groupId, msisdns);
+		persistenceCache.updateDefaultGroupName(groupId);
 	}
 
 	public void removeGroup(String groupId)
@@ -1942,17 +1948,20 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		{
 			if(group.isGroupAlive())
 			{
-				int numMembers = 0;
-				if(groupCountMap.containsKey(group.getGroupId()))
+				if (!Utils.isBroadcastConversation(group.getGroupId()))
 				{
-					numMembers = groupCountMap.get(group.getGroupId());
+					int numMembers = 0;
+					if(groupCountMap.containsKey(group.getGroupId()))
+					{
+						numMembers = groupCountMap.get(group.getGroupId());
+					}
+					String numberMembers = context.getString(R.string.num_people, (numMembers + 1));
+
+					ContactInfo groupContact = new ContactInfo(group.getGroupId(), group.getGroupId(), group.getGroupName(), numberMembers, true);
+					groupContact.setLastMessaged(group.getTimestamp());
+
+					groupContacts.add(groupContact);
 				}
-				String numberMembers = context.getString(R.string.num_people, (numMembers + 1));
-
-				ContactInfo groupContact = new ContactInfo(group.getGroupId(), group.getGroupId(), group.getGroupName(), numberMembers, true);
-				groupContact.setLastMessaged(group.getTimestamp());
-
-				groupContacts.add(groupContact);
 			}
 		}
 		if(shouldSort)

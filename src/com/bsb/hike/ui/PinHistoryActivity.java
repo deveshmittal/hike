@@ -44,7 +44,7 @@ import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.Conversation.OneToNConversation;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
@@ -63,7 +63,7 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		
 	private HikeConversationsDatabase mDb;
 
-	private Conversation mConversation;
+	private OneToNConversation mConversation;
 	
 	private long convId;
 	
@@ -105,7 +105,7 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		mDb = HikeConversationsDatabase.getInstance();
 		
-		this.mConversation = mDb.getConversation(msisdn, 0, true);
+		this.mConversation = (OneToNConversation) mDb.getConversation(msisdn, 0, true);
 		
 		this.textPins = mDb.getAllPinMessage(0, HikeConstants.MAX_PINS_TO_LOAD_INITIALLY, msisdn, mConversation);
 		

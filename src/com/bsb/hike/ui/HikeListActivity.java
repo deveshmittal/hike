@@ -44,15 +44,14 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.analytics.HAManager;
-import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
@@ -134,6 +133,9 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		setupActionBar();
 		Utils.executeContactListResultTask(new SetupContactList());
 		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+		
+		
+		showProductPopup(ProductPopupsConstants.PopupTriggerPoints.INVITE_SMS.ordinal());
 	}
 
 	private void init()
@@ -258,7 +260,6 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			{
 			}
 		}, selectAllChecked, selectedContacts.size());
-		
 	}
 
 	private void setLabel()
@@ -332,6 +333,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 
 		boolean loadOnUiThread;
+		private CheckBox selectAllCB;
 
 		@Override
 		protected void onPreExecute()
@@ -376,8 +378,8 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				selectAllContainer.setVisibility(View.VISIBLE);
 
 				final TextView selectAllText = (TextView) findViewById(R.id.select_all_text);
-				final CheckBox selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
-
+				 selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
+				
 				final int size = contactList.size();
 
 				selectAllText.setText(getString(R.string.select_all, size));
@@ -391,7 +393,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 						selectAllText.setText(getString(isChecked ? R.string.deselect_all : R.string.select_all, size));
 					}
 				});
-
+				
 				selectAllContainer.setOnClickListener(new OnClickListener()
 				{
 
@@ -405,7 +407,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				getRecommendedInvitesList(contactList, firstSectionList);
 				break;
 			}
-
+			
 			HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> completeSectionsData = new HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>>();
 			contactList.removeAll(firstSectionList);
 			if (!firstSectionList.isEmpty())
@@ -419,6 +421,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			listView.setAdapter(adapter);
 			listView.setEmptyView(findViewById(android.R.id.empty));
 			setupActionBarElements();
+			
+			if (selectAllCB != null && getIntent().getBooleanExtra(ProductPopupsConstants.SELECTALL, false))
+			{
+				selectAllCB.setChecked(true);
+			}
 		}
 	}
 

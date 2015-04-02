@@ -47,10 +47,10 @@ import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
 import com.bsb.hike.filetransfer.FileTransferManager;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
+import com.bsb.hike.models.Conversation.Conversation;
+import com.bsb.hike.models.Conversation.OneToNConversation;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
@@ -476,7 +476,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 							// if delete media from phone is checked
 							if(((CustomAlertDialog) hikeDialog).isChecked() && hsf.exactFilePathFileExists())
 							{
-								hsf.getFileFromExactFilePath().delete();
+								hsf.delete(getApplicationContext());
 							}
 							iterator.remove();
 						}
@@ -619,7 +619,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	public static Intent getHikeSharedFilesActivityIntent(Context context, Conversation conversation)
 	{
 		Pair<String[], String[]> msisdnAndNameArrays = Utils.getMsisdnToNameArray(conversation);
-		return getHikeSharedFilesActivityIntent(context, conversation instanceof GroupConversation, conversation.getLabel(), 
+		return getHikeSharedFilesActivityIntent(context, conversation instanceof OneToNConversation, conversation.getLabel(), 
 				msisdnAndNameArrays.first, msisdnAndNameArrays.second, conversation.getMsisdn());
 	}
 	/**
@@ -664,7 +664,8 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	{
 		boolean isRemoved = super.removeFragment(tag);
 		if (isRemoved)
-		{	
+		{
+			getSupportActionBar().show();
 			setupActionBar();
 		}
 		return isRemoved;

@@ -33,7 +33,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.GalleryAdapter;
-import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.dialog.HikeDialogListener;
@@ -567,7 +566,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	
 	private void showTipIfRequired()
 	{
-		final HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this);
+		final HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance();
 		if(pref.getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false) && pref.getData(HikeConstants.SHOW_IMAGE_QUALITY_TIP, true))
 		{
 			View view = LayoutInflater.from(this).inflate(R.layout.tip_right_arrow, null);
