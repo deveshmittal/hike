@@ -775,6 +775,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	public void charResetAfterSeperator()
 	{
 		adapter.removeFilter();
+		setupForSelectAll();
 	}
 
 	private void setMode(int mode)
@@ -881,6 +882,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					selectAllMode = true;
 					tv.setText(getString(R.string.unselect_all_hike));
 //					adapter.clearAllSelection(true);
+					if (composeMode == CREATE_BROADCAST_MODE)
+					{
+						if (adapter.getOnHikeContactsCount() > HikeConstants.MAX_CONTACTS_IN_BROADCAST)
+						{
+							showToast(getString(R.string.maxContactInBroadcastErr, HikeConstants.MAX_CONTACTS_IN_BROADCAST));
+							tv.setText(getString(R.string.select_all_hike));
+							buttonView.setChecked(false);
+							return;
+						}
+					}
 					adapter.selectAllContacts(true);
 					tagEditText.clear(false);
 					int selected = adapter.getCurrentSelection();

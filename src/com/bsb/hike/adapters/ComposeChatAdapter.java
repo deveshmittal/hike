@@ -608,6 +608,11 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		return existingParticipants.size();
 	}
 
+	public int getOnHikeContactsCount()
+	{
+		return hikeContactsList.size();
+	}
+	
 	public void setShowExtraAtFirst(boolean showExtraAtFirst)
 	{
 		this.showExtraAtFirst = showExtraAtFirst;
