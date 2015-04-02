@@ -83,7 +83,8 @@ public class GroupChatThread extends OneToNChatThread
 			updateUnreadPinCount();
 			return super.onCreateOptionsMenu(menu);
 		}
-		return super.onCreateOptionsMenu(menu);
+		
+		return false;
 	}
 
 	@Override
@@ -139,6 +140,14 @@ public class GroupChatThread extends OneToNChatThread
 		{
 			return super.onDoubleTap(e);
 		}
+	}
+	
+	@Override
+	protected void setupActionBar()
+	{
+		super.setupActionBar();
+		
+		setAvatar(R.drawable.ic_default_avatar_group);
 	}
 
 	@Override

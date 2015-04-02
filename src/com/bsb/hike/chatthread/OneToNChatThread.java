@@ -54,7 +54,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 
 	protected static final int GROUP_REVIVED = 206;
 
-	private static final int PARTICIPANT_JOINED_OR_LEFT_GROUP = 207;
+	private static final int PARTICIPANT_JOINED_OR_LEFT_CONVERSATION = 207;
 
 	private static final String TAG = "groupchatthread";
 
@@ -324,7 +324,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		case BULK_MESSAGE_RECEIVED:
 			addBulkMessages((LinkedList<ConvMessage>) msg.obj);
 			break;
-		case PARTICIPANT_JOINED_OR_LEFT_GROUP:
+		case PARTICIPANT_JOINED_OR_LEFT_CONVERSATION:
 			incrementGroupParticipants((int) msg.obj);
 			break;
 		default:
@@ -351,8 +351,6 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	protected void setupActionBar()
 	{
 		super.setupActionBar();
-
-		setAvatar(R.drawable.ic_default_avatar_group);
 
 		setLabel(mConversation.getLabel());
 
@@ -679,7 +677,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 				addPeopleCount = -1;
 			}
 
-			sendUIMessage(PARTICIPANT_JOINED_OR_LEFT_GROUP, addPeopleCount);
+			sendUIMessage(PARTICIPANT_JOINED_OR_LEFT_CONVERSATION, addPeopleCount);
 		}
 	}
 
