@@ -228,6 +228,9 @@ public class SearchManager
 		}
 		for (; from <= to; from++)
 		{
+			if (from >= itemList.size())
+				continue;
+
 			if (itemList.get(from).doesItemContain(searchText))
 			{
 				Logger.d("search", "adding: " + from);
@@ -246,6 +249,9 @@ public class SearchManager
 		{
 			for (; from >= to; from--)
 			{
+				if (from >= itemList.size())
+					continue;
+
 				if (itemList.get(from).doesItemContain(searchText))
 				{
 					Logger.d("search", "adding: " + from);
@@ -270,6 +276,9 @@ public class SearchManager
 		{
 			for (; from <= to; from++)
 			{
+				if (from >= itemList.size())
+					continue;
+
 				if (itemList.get(from).doesItemContain(searchText))
 				{
 					Logger.d("search", "adding: " + from);
