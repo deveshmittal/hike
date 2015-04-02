@@ -19,8 +19,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 
 public class OverFlowMenuLayout implements OnItemClickListener {
-	public static interface OverflowMenuListener{
-		public void preShowOverflowMenu();
+	public static interface OverflowViewListener{
+		public void preShowOverflowMenu(List<OverFlowMenuItem> overflowItems);
 	}
 	protected Context context;
 	protected List<OverFlowMenuItem> overflowItems;
@@ -28,7 +28,7 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 	protected View viewToShow;
 	protected PopUpLayout popUpLayout;
 	private OnDismissListener mOnDismisslistener;
-	private OverflowMenuListener menuListener;
+	private OverflowViewListener viewListener;
 	
 	/**
 	 * This class is made to show overflow menu items, by default it populates
@@ -74,6 +74,14 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 
 				TextView itemTextView = (TextView) convertView
 						.findViewById(R.id.item_title);
+				if (item.enabled)
+				{
+					itemTextView.setTextColor(context.getResources().getColor(R.color.overflow_item_text_enabled));
+				}
+				else
+				{
+					itemTextView.setTextColor(context.getResources().getColor(R.color.overflow_item_text_disabled));
+				}
 				itemTextView.setText(item.text);
 
 				convertView.findViewById(R.id.profile_image_view)
@@ -90,13 +98,21 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 				{	
 					newGamesIndicator.setVisibility(View.GONE);
 				}
-				
 				else
 				{
 					newGamesIndicator.setText(setUnreadCounter(item.unreadCount));
 					newGamesIndicator.setVisibility(View.VISIBLE);
 				}
 
+				// Disabling click operation for disabled item.
+				if (item.enabled)
+				{
+					convertView.setClickable(false);
+				}
+				else
+				{
+					convertView.setClickable(true);
+				}
 				return convertView;
 			}
 		});
@@ -106,6 +122,11 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 
+		// If item is disabled
+		if (!((OverFlowMenuItem) arg0.getAdapter().getItem(arg2)).enabled)
+		{
+			return;
+		}
 		listener.itemClicked((OverFlowMenuItem) arg0.getAdapter().getItem(arg2));
 		popUpLayout.dismiss();
 	}
@@ -126,9 +147,9 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 	public void show(int width, int height, int xOffset, int yOffset, View anchor, int inputMethodMode)
 	{
 		initView();
-		if(menuListener!=null)
+		if(viewListener!=null)
 		{
-			menuListener.preShowOverflowMenu();
+			viewListener.preShowOverflowMenu(overflowItems);
 		}
 		popUpLayout.showPopUpWindow(width, height, xOffset, yOffset, anchor,
 				getView(), inputMethodMode);
@@ -248,10 +269,38 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 		}
 
 	}
-	
-	public void setOverflowListener(OverflowMenuListener menuListener)
+
+	/**
+	 * Can be used to update the active state of an overflow menu item on the fly
+	 * 
+	 * @param itemId
+	 * @param enabled
+	 */
+	public void updateOverflowMenuItemActiveState(int itemId, boolean enabled)
 	{
-		this.menuListener = menuListener;
+		List<OverFlowMenuItem> mItems = getOverFlowMenuItems();
+
+		/**
+		 * Defensive check
+		 */
+		if (mItems != null)
+		{
+			for (OverFlowMenuItem overFlowMenuItem : mItems)
+			{
+				if (overFlowMenuItem.id == itemId)
+				{
+					overFlowMenuItem.enabled = enabled;
+					notifyDateSetChanged();
+					break;
+				}
+			}
+		}
+
+	}
+	
+	public void setOverflowViewListener(OverflowViewListener viewListener)
+	{
+		this.viewListener = viewListener;
 	}
 
 }

@@ -95,6 +95,7 @@ import com.bsb.hike.media.CaptureImageParser;
 import com.bsb.hike.media.CaptureImageParser.CaptureImageListener;
 import com.bsb.hike.media.EmoticonPicker;
 import com.bsb.hike.media.OverFlowMenuItem;
+import com.bsb.hike.media.OverFlowMenuLayout.OverflowViewListener;
 import com.bsb.hike.media.OverflowItemClickListener;
 import com.bsb.hike.media.PickContactParser;
 import com.bsb.hike.media.PickFileParser;
@@ -145,7 +146,8 @@ import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, CaptureImageListener,
 		PickFileListener, StickerPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener,
-		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, PopupListener, BackKeyListener
+		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, PopupListener, BackKeyListener,
+		OverflowViewListener
 {
 	private static final String TAG = "chatthread";
 
@@ -553,6 +555,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		// overflow is common between all, one to one and group
 		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(this);
+		mActionBar.setOverflowViewListener(this);
 		return true;
 	}
 
@@ -570,6 +573,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			return true;
 		}
 		return false;
+	}
+
+	
+	@Override
+	public void preShowOverflowMenu(List<OverFlowMenuItem> overflowItems)
+	{
+		mActionBar.updateOverflowMenuItemActiveState(R.string.search, !messages.isEmpty());
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data)

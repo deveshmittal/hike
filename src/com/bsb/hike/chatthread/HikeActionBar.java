@@ -19,6 +19,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.media.OverFlowMenuLayout;
 import com.bsb.hike.media.OverflowItemClickListener;
+import com.bsb.hike.media.OverFlowMenuLayout.OverflowViewListener;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -76,6 +77,11 @@ public class HikeActionBar
 	public void onPreareOptionsMenu(Menu menu)
 	{
 
+	}
+
+	public void setOverflowViewListener(OverflowViewListener viewListener)
+	{
+		overFlowMenuLayout.setOverflowViewListener(viewListener);
 	}
 
 	/**
@@ -247,6 +253,20 @@ public class HikeActionBar
 		if(overFlowMenuLayout!=null)
 		{
 			overFlowMenuLayout.updateOverflowMenuItemString(itemId, newTitle);
+		}
+	}
+	
+	/**
+	 * Can be used to update the active state of an overflow menu item on the fly
+	 * 
+	 * @param itemId
+	 * @param enabled
+	 */
+	protected void updateOverflowMenuItemActiveState(int itemId, boolean enabled)
+	{
+		if(overFlowMenuLayout!=null)
+		{
+			overFlowMenuLayout.updateOverflowMenuItemActiveState(itemId, enabled);
 		}
 	}
 
