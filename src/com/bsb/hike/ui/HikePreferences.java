@@ -2,7 +2,6 @@ package com.bsb.hike.ui;
 
 import java.util.Map;
 
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -54,6 +53,7 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
+import com.bsb.hike.view.IconListPreference;
 import com.bsb.hike.view.NotificationToneListPreference;
 
 public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, 
@@ -912,7 +912,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 
 	private void updatePrivacyPrefView()
 	{
-		ListPreference lp = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.LAST_SEEN_PREF_LIST);
+		IconListPreference lp = (IconListPreference) getPreferenceScreen().findPreference(HikeConstants.LAST_SEEN_PREF_LIST);
 		lp.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
 		{
 
@@ -964,6 +964,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		lp.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
+				if(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean(HikeConstants.HIGHLIGHT_NLS_PERF, true))
+				{
+					PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean(HikeConstants.HIGHLIGHT_NLS_PERF, false).commit();
+					if(preference instanceof IconListPreference)
+						((IconListPreference)preference).setTitleColor(R.color.list_item_header);
+				}
 				Utils.logClickEvent(HikeConstants.LogEvent.LS_SETTING_CLICKED);
 				return false;
 			}
@@ -973,6 +979,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			lp.setSummary(ls_summary);
 		}
+		if(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean(HikeConstants.HIGHLIGHT_NLS_PERF, true))
+			lp.setTitleColor(R.color.unread_message_blue);
 		lp.setTitle(lp.getTitle() + " : " + lp.getEntry());
 	}
 

@@ -2561,4 +2561,6 @@ public class HikeConstants
 	public static final String WHITELISTED_DOMAINS[] = new String[]{"hike.in"};
 	
 	public static final String BLACKLIST_DOMAIN_ANALYTICS = "blacklist";
+
+	public static final String HIGHLIGHT_NLS_PERF = "nlsHighlightPerf";
 }
