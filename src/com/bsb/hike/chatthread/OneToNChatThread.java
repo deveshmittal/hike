@@ -250,19 +250,19 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	{
 		switch (type)
 		{
-		case HikePubSub.GROUP_MESSAGE_DELIVERED_READ:
+		case HikePubSub.ONETON_MESSAGE_DELIVERED_READ:
 			onMessageRead(object);
 			break;
 		case HikePubSub.CONV_META_DATA_UPDATED:
 			onConvMetadataUpdated(object);
 			break;
-		case HikePubSub.GROUP_REVIVED:
+		case HikePubSub.CONVERSATION_REVIVED:
 			onGroupRevived(object);
 			break;
-		case HikePubSub.PARTICIPANT_JOINED_GROUP:
+		case HikePubSub.PARTICIPANT_JOINED_ONETONCONV:
 			onParticipantJoinedOrLeftGroup(object, true);
 			break;
-		case HikePubSub.PARTICIPANT_LEFT_GROUP:
+		case HikePubSub.PARTICIPANT_LEFT_ONETONCONV:
 			onParticipantJoinedOrLeftGroup(object, false);
 			break;
 		case HikePubSub.BULK_MESSAGE_RECEIVED:

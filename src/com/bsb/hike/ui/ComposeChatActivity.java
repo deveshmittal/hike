@@ -1020,7 +1020,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		if(Utils.isBroadcastConversation(groupId))
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.PARTICIPANT_JOINED_GROUP, gcjJson);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.PARTICIPANT_JOINED_ONETONCONV, gcjJson);
 		}
 
 		ContactInfo conversationContactInfo = new ContactInfo(groupId, groupId, groupId, groupId);

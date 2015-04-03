@@ -51,7 +51,7 @@ public class BroadcastChatThread extends OneToNChatThread
 	@Override
     protected String[] getPubSubListeners()
     {
-        return new String[] { HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_REVIVED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP };
+        return new String[] { HikePubSub.ONETON_MESSAGE_DELIVERED_READ, HikePubSub.CONVERSATION_REVIVED, HikePubSub.PARTICIPANT_JOINED_ONETONCONV, HikePubSub.PARTICIPANT_LEFT_ONETONCONV };
     }
 	
 	@Override
@@ -127,16 +127,11 @@ public class BroadcastChatThread extends OneToNChatThread
 	}
 	
 	/**
-	 * Used to launch Profile Activity from GroupChatThread
+	 * Used to launch Profile Activity from BroadcastChatThread
 	 */
 	@Override
 	protected void openProfileScreen()
 	{
-		/**
-		 * Proceeding only if the group is alive
-		 */
-		Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
-
 		Intent intent = IntentFactory.getBroadcastProfileIntent(activity.getApplicationContext(), msisdn);
 
 		activity.startActivity(intent);
