@@ -1142,8 +1142,6 @@ public class HikeConstants
 
 		public static final String FADE_IN = "fadeIn";
 
-		public static final String ANIMATED_ONCE = "animatedOnce";
-
 		public static final String EDIT_PROFILE = "editProfile";
 
 		public static final String EMAIL = "email";
@@ -1243,7 +1241,13 @@ public class HikeConstants
 		public static final String ZOOM_LEVEL = "zoomLevel";
 
 		public static final String CONTACT_INFO = "contactInfo";
-
+		
+		public static final String WHICH_CHAT_THREAD = "whichChatThread";
+		
+		public static final String ONE_TO_ONE_CHAT_THREAD = "oneToOne";
+		
+		public static final String GROUP_CHAT_THREAD = "groupChat";
+		
 		public static final String CONTACT_INFO_TIMELINE = "contactInfoTimeline";
 
 		public static final String CONTACT_ID = "contactId";
@@ -1987,6 +1991,14 @@ public class HikeConstants
 
 		public static final String GROUP_CHAT_NAME = "gcn";
 
+		public static final String BROADCAST_LIST_JOIN = "gcj";
+
+		public static final String BROADCAST_LIST_LEAVE = "gcl";
+
+		public static final String BROADCAST_LIST_END = "gce";
+
+		public static final String BROADCAST_LIST_NAME = "gcn";
+		
 		public static final String ANALYTICS_EVENT = "le";
 
 		public static final String UPDATE_AVAILABLE = "ua";

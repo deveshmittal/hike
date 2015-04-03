@@ -1,10 +1,10 @@
 package com.bsb.hike.models;
 
-import com.bsb.hike.db.DBConstants;
+import java.util.ArrayList;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.util.ArrayList;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -14,16 +14,22 @@ import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.Conversation.Conversation;
+import com.bsb.hike.models.Conversation.GroupConversation;
+import com.bsb.hike.models.Conversation.OneToNConversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.GroupUtils;
+import com.bsb.hike.utils.OneToNConversationUtils;
+import com.bsb.hike.utils.SearchManager.Searchable;
 import com.bsb.hike.utils.Utils;
 
-public class ConvMessage
+public class ConvMessage implements Searchable
+
 {
 	private boolean isBlockAddHeader;
 
@@ -478,14 +484,14 @@ public class ConvMessage
 		{
 		case PARTICIPANT_JOINED:
 			JSONArray arr = metadata.getGcjParticipantInfo();
-			String highlight = Utils.getGroupJoinHighlightText(arr, (GroupConversation) conversation);
-			this.mMessage = GroupUtils.getParticipantAddedMessage(this, context, highlight);
+			String highlight = Utils.getGroupJoinHighlightText(arr, (OneToNConversation) conversation);
+			this.mMessage = OneToNConversationUtils.getParticipantAddedMessage(this, context, highlight);
 			break;
 		case PARTICIPANT_LEFT:
-			this.mMessage = GroupUtils.getParticipantRemovedMessage(conversation, context, ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn()));
+			this.mMessage = OneToNConversationUtils.getParticipantRemovedMessage(conversation.getMsisdn(), context, ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(metadata.getMsisdn()));
 			break;
 		case GROUP_END:
-			this.mMessage = GroupUtils.getConversationEndedMessage(conversation, context);
+			this.mMessage = OneToNConversationUtils.getConversationEndedMessage(conversation.getMsisdn(), context);
 			break;
 		case USER_JOIN:
 			//This is to specifically handle the cases for which pushes are not required for UJ, UL, etc.\
@@ -496,7 +502,7 @@ public class ConvMessage
 			{
 				if (conversation instanceof GroupConversation)
 				{
-					fName = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn());
+					fName = ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(metadata.getMsisdn());
 				}
 				else
 				{
@@ -516,7 +522,7 @@ public class ConvMessage
 			String name;
 			if (conversation instanceof GroupConversation)
 			{
-				name = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn());
+				name = ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(metadata.getMsisdn());
 			}
 			else
 			{
@@ -529,11 +535,11 @@ public class ConvMessage
 			String msisdn = metadata.getMsisdn();
 			String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-			String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(msisdn);
+			String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getConvParticipantFirstNameAndSurname(msisdn);
 			
 			if (participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME)
 			{
-				this.mMessage = GroupUtils.getConversationNameChangedMessage(conversation, context, participantName);
+				this.mMessage = OneToNConversationUtils.getConversationNameChangedMessage(conversation.getMsisdn(), context, participantName);
 			}
 			else
 			{
@@ -565,9 +571,9 @@ public class ConvMessage
 			{
 
 				String nameString;
-				if (conversation instanceof GroupConversation)
+				if (conversation instanceof OneToNConversation)
 				{
-					nameString = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(metadata.getMsisdn());
+					nameString = ((OneToNConversation) conversation).getConvParticipantFirstNameAndSurname(metadata.getMsisdn());
 				}
 				else
 				{
@@ -988,9 +994,9 @@ public class ConvMessage
 		}
 	}
 
-	public boolean isGroupChat()
+	public boolean isOneToNChat()
 	{
-		return Utils.isGroupConversation(this.mMsisdn);
+		return OneToNConversationUtils.isOneToNConversation(this.mMsisdn);
 	}
 
 	/**
@@ -1066,6 +1072,33 @@ public class ConvMessage
 		this.mMsisdn = msisdn;
 	}
 
+	@Override
+	public boolean doesItemContain(String s)
+	{
+		if (isFileTransferMessage())
+		{
+			if (getMetadata().getHikeFiles().get(0).getFileName().toLowerCase().contains(s))
+			{
+				return true;
+			}
+		}
+		else if (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
+		{
+			if (getMetadata().getStatusMessage().getText().toLowerCase().contains(s))
+			{
+				return true;
+			}
+		}
+		if (!TextUtils.isEmpty(getMessage()))
+		{
+			if (getMessage().toLowerCase().contains(s))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public boolean isVoipMissedCallMsg()
 	{
 		return participantInfoState == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING;
@@ -1073,7 +1106,6 @@ public class ConvMessage
 	
 	public boolean isBroadcastConversation() {
 		return Utils.isBroadcastConversation(this.mMsisdn);
-
 	}
 	
 	public boolean isBroadcastMessage() {

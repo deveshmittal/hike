@@ -570,7 +570,7 @@
     <string name="new_update">New Update</string>
     <string name="invite_via_facebook">Invite Via Facebook</string>
     <string name="invite_via_twitter">Invite Via Twitter</string>
-    <string name="search_hint">Search</string>
+    <string name="search">Search</string>
     <string name="fb_invite_success">Invite Successful</string>
     <string name="fb_invite_failed">Invite Canceled</string>
     <string name="social_invite_network_error">Unable to send invite. Check network settings.</string>
@@ -1258,6 +1258,10 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="pack_visible">Visible in sticker palette</string>
     <string name="pack_hidden">Hidden from sticker palette</string>
     <string name="pack_rank">%1$d.</string>
+	<string name="error_pick_location">Error while picking location</string> 
+	<string name="zero_sms_hint">0 Free SMS left...</string>
+	<string name="some_error">Some error occured!</string>
+	<string name="pin_self">You</string>
     <string name="hike_upgrade_string">Making hike faster and better for you</string>
     <string name="some_error">Some error occured!</string>
     <string name="nux_fwd_search_hint">Names go here...</string>
@@ -1367,6 +1371,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="voip_missed_call_action">Call Back</string>
     <string name="voip_missed_call_message">Message</string>
     <string name="valentine_day">Happy Valentine\'s Day</string>
+    <string name="empty_email">You have no messages in this conversation to e-mail.</string>
+    <string name="no_results">No results</string>
     <string name="take_photo">Take a photo</string>
     <string name="photo_dp_saving">Saving as profile photo..</string>
     <string name="photo_dp_saved">All set!</string>
@@ -1413,4 +1419,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="photos_oom_load">Unable to load Image!\nNot Enough Memory On Device.</string>
     <string name="photos_oom_retry">Try Again!</string>
     <string name="photos_oom_camera">Unable to capture Image</string>
+    <string name="search_hint">Search</string>
 </resources>
