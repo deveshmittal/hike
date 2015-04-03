@@ -2213,7 +2213,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 					conv.updateLastConvMessage(initialConvMessage);
 				}
 
-				HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_CONVERSATION, conv);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_CONVERSATION, conv.getConvInfo());
 				return conv;
 
 			}
