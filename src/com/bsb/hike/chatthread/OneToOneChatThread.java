@@ -204,10 +204,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 		list.add(new OverFlowMenuItem(mConversation.isBlocked() ? getString(R.string.unblock_title) : getString(R.string.block_title), 0, 0, R.string.block_title));
-		if (!ContactManager.getInstance().isBlocked(mContactInfo.getMsisdn())
-				&& (mContactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND
-						|| mContactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED 
-						|| mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED)) {
+		if (mConversation.isBlocked() && mContactInfo.isNotOrRejectedFavourite())
+		{
 			list.add(new OverFlowMenuItem(getString(R.string.add_as_favorite_menu), 0, 0, R.string.add_as_favorite_menu));
 		}
 		return list;
@@ -1174,10 +1172,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			showThemePicker();
 			break;
 		case R.string.add_as_favorite_menu:
-			FavoriteType favoriteType = FavoriteType.REQUEST_SENT;
-			mContactInfo.setFavoriteType(favoriteType);
-			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(mContactInfo, favoriteType);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+			addFavorite();
 			break;
 		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
@@ -2465,5 +2460,16 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		super.showThemePicker();
 		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip);
+	}
+
+	/*
+	 * Adding user as favorite
+	 */
+	private void addFavorite()
+	{
+		FavoriteType favoriteType = FavoriteType.REQUEST_SENT;
+		mContactInfo.setFavoriteType(favoriteType);
+		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(mContactInfo, favoriteType);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 	}
 }
