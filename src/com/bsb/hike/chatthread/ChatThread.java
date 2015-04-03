@@ -138,6 +138,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
+import android.text.InputType;
 import com.bsb.hike.productpopup.ProductPopupsConstants;
 
 /**
@@ -210,6 +211,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static final int SEARCH_PREVIOUS = 26;
 
     protected static final int SET_WINDOW_BG = 27;
+   
+    private int NUDGE_TOAST_OCCURENCE = 2;
+    	
+    private int currentNudgeCount = 0;
     
 	protected ChatThreadActivity activity;
 
@@ -244,6 +249,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected boolean isActivityVisible = true;
 
 	protected boolean reachedEnd = false;
+	
+	private boolean _doubleTapPref = false;
+
 
 	private int currentFirstVisibleItem = Integer.MAX_VALUE;
 
@@ -485,6 +493,23 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		addOnClickListeners();
 
 		showNetworkError(ChatThreadUtils.checkNetworkError());
+		defineEnterAction();
+	}
+
+	private void defineEnterAction() {
+		if (mComposeView != null) {
+			//Its a workaround to set the multiline editfield when android:imeOptions="actionSend".
+    		mComposeView.setHorizontallyScrolling(false);
+			mComposeView.setMaxLines(4);
+			//if send on enter setting is unchecked then send button will send the cursor to the next line.
+			if (!PreferenceManager.getDefaultSharedPreferences(
+					activity.getApplicationContext()).getBoolean(
+					HikeConstants.SEND_ENTER_PREF, false)) {
+				mComposeView.setInputType(mComposeView.getInputType()
+						| InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+			}
+
+		}
 	}
 
 	/**
@@ -1526,6 +1551,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	private void initGestureDetector()
 	{
+		_doubleTapPref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.DOUBLE_TAP_PREF, true);
 		mGestureDetector = new GestureDetector(activity.getApplicationContext(), this);
 	}
 
@@ -1535,6 +1561,26 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		Logger.d(TAG, "Double Tap motion");
 		if(mActionMode.isActionModeOn())
 		{
+			return false;
+		}
+		if (!_doubleTapPref)
+		{
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.UNCHECKED_NUDGE);
+                HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException ex)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
+			currentNudgeCount++;
+			if(currentNudgeCount>NUDGE_TOAST_OCCURENCE)
+			{
+				Toast.makeText(activity.getApplicationContext(), R.string.nudge_toast, Toast.LENGTH_SHORT).show();
+				currentNudgeCount=0;
+			}
 			return false;
 		}
 			sendPoke();
@@ -4165,8 +4211,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 					|| ((keyEvent != null) && (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) && (keyEvent.getAction() != KeyEvent.ACTION_UP) && (getResources()
 							.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)))
 			{
-				sendButtonClicked();
-				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+				
+				if (!TextUtils.isEmpty(mComposeView.getText())) {
+					sendButtonClicked();
+				}
 				return true;
 			}
 			else if (actionId == EditorInfo.IME_ACTION_SEARCH)
