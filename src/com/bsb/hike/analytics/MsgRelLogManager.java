@@ -33,19 +33,22 @@ public class MsgRelLogManager
 	 */
 	public static void startMessageRelLogging(ConvMessage convMessage, String msgType)
 	{
-		if (isMessageToBeTracked(msgType))
+		if (convMessage != null && !Utils.isGroupConversation(convMessage.getMsisdn()))
 		{
-			Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
-			Logger.d(AnalyticsConstants.MSG_REL_TAG, "Starting message sending");
-			if (convMessage.getPrivateData() == null)
+			if (isMessageToBeTracked(msgType))
 			{
-				convMessage.setPrivateData(new MessagePrivateData(UUID.randomUUID().toString(), msgType));
+				Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+				Logger.d(AnalyticsConstants.MSG_REL_TAG, "Starting message sending");
+				if (convMessage.getPrivateData() == null)
+				{
+					convMessage.setPrivateData(new MessagePrivateData(UUID.randomUUID().toString(), msgType));
+				}
+				else
+				{
+					Logger.e(MsgRelLogManager.class.getSimpleName(), "Found Conv Message With NUll PD, should not be case ");
+				}
+				recordMsgRel(convMessage.getPrivateData().getTrackID(), MsgRelEventType.SEND_BUTTON_CLICKED, msgType);
 			}
-			else
-			{
-				Logger.e(MsgRelLogManager.class.getSimpleName(), "Found Conv Message With NUll PD, should not be case ");
-			}
-			recordMsgRel(convMessage.getPrivateData().getTrackID(), MsgRelEventType.SEND_BUTTON_CLICKED, msgType);
 		}
 	}
 
@@ -121,7 +124,7 @@ public class MsgRelLogManager
 	public static void logMsgRelEvent(ConvMessage convMessage, String eventType)
 	{
 		MessagePrivateData messagePrivateData = convMessage.getPrivateData();
-		if (messagePrivateData != null && messagePrivateData.getTrackID() != null)
+		if (messagePrivateData != null && messagePrivateData.getTrackID() != null && !Utils.isGroupConversation(convMessage.getMsisdn()))
 		{
 			recordMsgRel(messagePrivateData.getTrackID(), eventType, messagePrivateData.getMsgType());
 		}
