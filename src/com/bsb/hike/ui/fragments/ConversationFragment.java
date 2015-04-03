@@ -3381,6 +3381,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private void removeTipIfExists(int whichTip)
 	{
 		if (tipType != whichTip)
+		{
+			return;
+		}
 		/*
 		 * Remove tip always: for cases when we want to remove the tip before it is actually shown on the UI
 		 */
@@ -3477,6 +3480,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			getListView().removeHeaderView(tipView);
 			tipView = null;
+			removeTipIfExists(whichTip);
 			tipType = ConversationTip.NO_TIP;
 		}
 	}
