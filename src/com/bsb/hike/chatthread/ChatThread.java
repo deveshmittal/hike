@@ -3533,7 +3533,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (messages != null && messages.size() > 0)
 		{
 			EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(activity, null);
-			Utils.executeConvAsyncTask(emailTask, mConversation);
+			Utils.executeConvAsyncTask(emailTask, mConversation.getConvInfo());
 		}
 		
 		else

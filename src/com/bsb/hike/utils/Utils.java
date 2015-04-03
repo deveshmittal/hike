@@ -3373,7 +3373,7 @@ public class Utils
 		}
 	}
 
-	public static void executeConvAsyncTask(AsyncTask<Conversation, Void, Conversation[]> asyncTask, Conversation... conversations)
+	public static void executeConvInfoAsyncTask(AsyncTask<ConvInfo, Void, ConvInfo[]> asyncTask, ConvInfo... conversations)
 	{
 		if (Utils.isHoneycombOrHigher())
 		{
@@ -3385,7 +3385,8 @@ public class Utils
 		}
 	}
 	
-	public static void executeConvAsyncTask(AsyncTask<ConvInfo, Void, ConvInfo[]> asyncTask, ConvInfo... conversations)
+	
+	public static void executeConvAsyncTask(AsyncTask<ConvInfo, Void, Conversation[]> asyncTask, ConvInfo... conversations)
 	{
 		if (Utils.isHoneycombOrHigher())
 		{
