@@ -425,7 +425,7 @@ public class IntentFactory
 
 		intent.setClass(context, ChatThreadActivity.class);
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdnOrGroupId);
-		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, ChatThreadUtils.whichChatThreadToOpen(msisdnOrGroupId));
+		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, ChatThreadUtils.getChatThreadType(msisdnOrGroupId));
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		
 		return intent;
@@ -447,7 +447,7 @@ public class IntentFactory
 			intent.putExtra(HikeConstants.Extras.NAME, conversation.getConversationName());
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
-		String whichChatThread = ChatThreadUtils.whichChatThreadToOpen(conversation.getMsisdn());
+		String whichChatThread = ChatThreadUtils.getChatThreadType(conversation.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, whichChatThread);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;

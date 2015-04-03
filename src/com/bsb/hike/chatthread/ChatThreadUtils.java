@@ -537,7 +537,7 @@ public class ChatThreadUtils
 	 * @param msisdn
 	 * @return
 	 */
-	public static String whichChatThreadToOpen(String msisdn)
+	public static String getChatThreadType(String msisdn)
 	{
 		if (Utils.isBroadcastConversation(msisdn))
 		{

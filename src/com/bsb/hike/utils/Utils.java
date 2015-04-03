@@ -3979,7 +3979,7 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		String whichChatThread = ChatThreadUtils.whichChatThreadToOpen(contactInfo.getMsisdn());
+		String whichChatThread = ChatThreadUtils.getChatThreadType(contactInfo.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, whichChatThread);
 		context.startActivity(intent);
 	}

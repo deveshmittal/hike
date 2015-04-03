@@ -343,7 +343,7 @@ public class HikeNotification
 			notificationIntent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
 		}
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
-		notificationIntent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, ChatThreadUtils.whichChatThreadToOpen(contactInfo.getMsisdn()));
+		notificationIntent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, ChatThreadUtils.getChatThreadType(contactInfo.getMsisdn()));
 		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		/*
@@ -613,7 +613,7 @@ public class HikeNotification
 		String firstMsisdn = msisdnList.get(0);
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, (firstMsisdn));
 		notificationIntent.putExtra(HikeConstants.Extras.NAME, (nameMap.get(firstMsisdn)));
-		notificationIntent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, ChatThreadUtils.whichChatThreadToOpen(firstMsisdn));
+		notificationIntent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, ChatThreadUtils.getChatThreadType(firstMsisdn));
 		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
