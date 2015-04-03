@@ -108,6 +108,11 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 			setIntent(intent);
 			chatThread.onNewIntent();
 		}
+		else
+		{
+			setIntent(intent);
+			chatThread.takeActionBasedOnIntent();
+		}
 	}
 	
 	private boolean processNewIntent(Intent intent)
