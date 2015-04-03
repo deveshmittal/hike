@@ -5561,18 +5561,4 @@ public class Utils
 		}
 		return fullFirstName;
 	}
-
-	public static void logClickEvent(String eventKey)
-	{
-		try
-		{
-			JSONObject md = new JSONObject();
-			md.put(HikeConstants.EVENT_KEY, eventKey);
-			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
-		}
-		catch(JSONException e)
-		{
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
-		}
-	}
 }

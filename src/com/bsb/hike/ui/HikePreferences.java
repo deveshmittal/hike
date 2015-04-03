@@ -727,7 +727,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.FAV_LIST_PREF.equals(preference.getKey()))
 		{
-			Utils.logClickEvent(HikeConstants.LogEvent.MANAGE_FAV_LIST_SETTING);
+			HAManager.logClickEvent(HikeConstants.LogEvent.MANAGE_FAV_LIST_SETTING);
 			Intent intent = new Intent(HikePreferences.this, PeopleActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
@@ -930,22 +930,22 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 							isLSEnabled = false;
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_nobody_key);
 							ls_summary = getApplicationContext().getString(R.string.ls_nobody_summary);
-							Utils.logClickEvent(HikeConstants.LogEvent.LS_NOBODY_CLICKED);
+							HAManager.logClickEvent(HikeConstants.LogEvent.LS_NOBODY_CLICKED);
 							break;
 						case EVERYONE:
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_everyone_key);
 							ls_summary = getApplicationContext().getString(R.string.ls_everyone_summary);
-							Utils.logClickEvent(HikeConstants.LogEvent.LS_EVERYONE_CLICKED);
+							HAManager.logClickEvent(HikeConstants.LogEvent.LS_EVERYONE_CLICKED);
 							break;
 						case FAVORITES:
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_favorites_key);
 							ls_summary = getApplicationContext().getString(R.string.ls_favorites_summary);
-							Utils.logClickEvent(HikeConstants.LogEvent.LS_FAVOURITES_CLICKED);
+							HAManager.logClickEvent(HikeConstants.LogEvent.LS_FAVOURITES_CLICKED);
 							break;
 						case MY_CONTACTS:
 							selectedPrivacyValue = getApplicationContext().getString(R.string.privacy_my_contacts_key);
 							ls_summary = getApplicationContext().getString(R.string.ls_my_contacts_summary);
-							Utils.logClickEvent(HikeConstants.LogEvent.LS_MY_CONTACTS_CLICKED);
+							HAManager.logClickEvent(HikeConstants.LogEvent.LS_MY_CONTACTS_CLICKED);
 							break;
 					}
 					preference.setTitle(getString(R.string.last_seen_header) + " : " + selectedPrivacyValue);
@@ -970,7 +970,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					if(preference instanceof IconListPreference)
 						((IconListPreference)preference).setTitleColor(R.color.list_item_header);
 				}
-				Utils.logClickEvent(HikeConstants.LogEvent.LS_SETTING_CLICKED);
+				HAManager.logClickEvent(HikeConstants.LogEvent.LS_SETTING_CLICKED);
 				return false;
 			}
 		});

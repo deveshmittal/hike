@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.text.TextUtils;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.analytics.AnalyticsConstants.AppOpenSource;
 import com.bsb.hike.models.ConvMessage;
@@ -792,6 +793,24 @@ public class HAManager
 		catch (JSONException e)
 		{
 			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Used for logging UI click event
+	 * @param eventKey
+	 */
+	public static void logClickEvent(String eventKey)
+	{
+		try
+		{
+			JSONObject md = new JSONObject();
+			md.put(HikeConstants.EVENT_KEY, eventKey);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 	}
 
