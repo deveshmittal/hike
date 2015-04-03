@@ -574,7 +574,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		if (!pair.first)
 		{
-			setAvatar(R.drawable.ic_default_avatar);
+			setAvatar();
 		}
 
 		setLabel(pair.second);
@@ -619,9 +619,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		case REMOVE_UNDELIVERED_MESSAGES:
 			removeUndeliveredMessages(msg.obj);
-			break;
-		case UPDATE_AVATAR:
-			setAvatar(R.drawable.ic_default_avatar);
 			break;
 		case BULK_MESSAGE_RECEIVED:
 			addBulkMessages((LinkedList<ConvMessage>) msg.obj);
@@ -959,8 +956,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected void setupActionBar()
 	{
 		super.setupActionBar();
-
-		setAvatar(R.drawable.ic_default_avatar);
 
 		setLabel(getConvLabel());
 
