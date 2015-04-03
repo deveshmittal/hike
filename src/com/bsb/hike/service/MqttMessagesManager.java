@@ -2552,7 +2552,7 @@ public class MqttMessagesManager
 			MessagePrivateData pd = convMessage.getPrivateData();
 			if (pd != null && pd.getTrackID() != null)
 			{
-				MsgRelLogManager.recordMsgRel(pd.getTrackID(), Long.parseLong(msisdn), MsgRelEventType.RECIEVR_RECV_MSG);
+				MsgRelLogManager.recordMsgRel(pd.getTrackID(), MsgRelEventType.RECIEVR_RECV_MSG);
 			}
 		}
 
