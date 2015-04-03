@@ -70,6 +70,10 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 		{
 			chatThread = new GroupChatThread(this, intent.getStringExtra(HikeConstants.Extras.MSISDN));
 		}
+		else if (HikeConstants.Extras.BROADCAST_CHAT_THREAD.equals(whichChatThread))
+		{
+			chatThread = new BroadcastChatThread(this, intent.getStringExtra(HikeConstants.Extras.MSISDN));
+		}
 		else
 		{
 			throw new IllegalArgumentException("Which chat thread I am !!! Did you pass proper arguments?");
