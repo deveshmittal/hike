@@ -1549,8 +1549,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		
 		if (!(mConversation instanceof GroupConversation) && contactInfo.isOnhike() && (!mConversation.isBotConv()))
 		{
-			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED
-					|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED)
+			if (!ContactManager.getInstance().isBlocked(contactInfo.getMsisdn()) && (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND
+					|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED
+					|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED))
 			{
 				optionsList.add(new OverFlowMenuItem(getString(R.string.add_as_favorite_menu), 7));
 			}
