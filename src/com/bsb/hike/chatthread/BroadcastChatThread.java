@@ -127,16 +127,11 @@ public class BroadcastChatThread extends OneToNChatThread
 	}
 	
 	/**
-	 * Used to launch Profile Activity from GroupChatThread
+	 * Used to launch Profile Activity from BroadcastChatThread
 	 */
 	@Override
 	protected void openProfileScreen()
 	{
-		/**
-		 * Proceeding only if the group is alive
-		 */
-		Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
-
 		Intent intent = IntentFactory.getBroadcastProfileIntent(activity.getApplicationContext(), msisdn);
 
 		activity.startActivity(intent);
