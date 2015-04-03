@@ -782,6 +782,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void audioRecordClicked()
 	{
+		showAudioRecordView();
+	}
+
+	protected void showAudioRecordView()
+	{
 		audioRecordView.show();
 	}
 
@@ -1766,7 +1771,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 
 		/**
-		 * 6. Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
+		 * 6. Show audio recording dialog
+		 */
+		else if(intent.hasExtra(HikeConstants.Extras.SHOW_RECORDING_DIALOG))
+		{
+			showAudioRecordView();
+		}
+
+		/**
+		 * 7. Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 		 */
 		else
 		{
