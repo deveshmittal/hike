@@ -114,6 +114,13 @@ public class IntentFactory
 		context.startActivity(intent);
 	}
 
+	public static void openSettingChat(Context context) {
+		Intent intent = new Intent(context, HikePreferences.class);
+		intent.putExtra(HikeConstants.Extras.PREF,
+				R.xml.chat_settings_preferences);
+		intent.putExtra(HikeConstants.Extras.TITLE, R.string.settings_chat);
+		context.startActivity(intent);
+	}
 	public static void openInviteSMS(Context context)
 	{
 		context.startActivity(new Intent(context, HikeListActivity.class));
