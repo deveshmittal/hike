@@ -27,11 +27,11 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.chatthread.ChatThread;
 import com.bsb.hike.chatthread.ChatThreadActivity;
+import com.bsb.hike.chatthread.ChatThreadUtils;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Conversation.ConvInfo;
-import com.bsb.hike.models.Conversation.OneToNConvInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
@@ -282,9 +282,9 @@ public class IntentFactory
 	public static Intent getImageCaptureIntent(Context context)
 	{
 		/*
-		 * Storing images in DCIM folder of the camera
+		 * Storing images in hike media folder of the camera
 		 */
-		File selectedDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
+		File selectedDir = new File(Utils.getFileParent(HikeFileType.IMAGE, false));
 		if (!selectedDir.exists())
 		{
 			if (!selectedDir.mkdirs())
@@ -293,7 +293,7 @@ public class IntentFactory
 				return null;
 			}
 		}
-		String fileName = Utils.getOriginalFile(HikeFileType.IMAGE, null);
+		String fileName = HikeConstants.CAM_IMG_PREFIX + Utils.getOriginalFile(HikeFileType.IMAGE, null);
 		File selectedFile = new File(selectedDir.getPath() + File.separator + fileName);
 		
 		Intent pickIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -392,6 +392,27 @@ public class IntentFactory
 	}
 
 	/**
+	 * Returns intent for viewing broadcast profile screen
+	 * 
+	 * @param context
+	 * @param mMsisdn
+	 * @return
+	 */
+
+	public static Intent getBroadcastProfileIntent(Context context, String mMsisdn)
+	{
+		Intent intent = new Intent();
+
+		intent.setClass(context, ProfileActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		intent.putExtra(HikeConstants.Extras.BROADCAST_LIST, true);
+		intent.putExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST, mMsisdn);
+
+		return intent;
+	}
+	
+	/**
 	 * Used for retrieving the intent to place a call
 	 * 
 	 * @param mMsisdn
@@ -411,8 +432,7 @@ public class IntentFactory
 
 		intent.setClass(context, ChatThreadActivity.class);
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdnOrGroupId);
-		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, Utils.isGroupConversation(msisdnOrGroupId) ? HikeConstants.Extras.GROUP_CHAT_THREAD
-				: HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD);
+		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, ChatThreadUtils.getChatThreadType(msisdnOrGroupId));
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		
 		return intent;
@@ -434,7 +454,7 @@ public class IntentFactory
 			intent.putExtra(HikeConstants.Extras.NAME, conversation.getConversationName());
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
-		String whichChatThread = (conversation instanceof OneToNConvInfo) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD;
+		String whichChatThread = ChatThreadUtils.getChatThreadType(conversation.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, whichChatThread);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
