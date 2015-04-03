@@ -2309,8 +2309,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		currentFirstVisibleItem = firstVisibleItem;
 	}
-
+	
 	private void showOverflowIndicatorIfRequired(int firstVisibleItem, int visibleItemCount, int totalItemCount)
+	{
+		showOverflowSearchIndicatorIfRequired(firstVisibleItem, visibleItemCount, totalItemCount);
+	}
+
+	private void showOverflowSearchIndicatorIfRequired(int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
 		/* 
 		 * SEARCH INDICATOR
