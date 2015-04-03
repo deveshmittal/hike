@@ -85,7 +85,6 @@ import com.bsb.hike.models.NuxSelectFriends;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.Conversation.BotConversation;
 import com.bsb.hike.models.Conversation.ConvInfo;
-import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.ConversationTip;
 import com.bsb.hike.models.Conversation.ConversationTip.ConversationTipClickedListener;
 import com.bsb.hike.models.Conversation.OneToNConvInfo;
@@ -2003,9 +2002,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if (HikePubSub.NEW_CONVERSATION.equals(type))
 		{
-			Conversation conv = (Conversation) object;
-			final ConvInfo convInfo = conv.getConvInfo();
-			
+			final ConvInfo convInfo = (ConvInfo) object;
 			if (HikeMessengerApp.hikeBotNamesMap.containsKey(convInfo.getMsisdn()))
 			{
 				convInfo.setmConversationName(HikeMessengerApp.hikeBotNamesMap.get(convInfo.getMsisdn()));
