@@ -49,6 +49,7 @@ import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -203,6 +204,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 		list.add(new OverFlowMenuItem(mConversation.isBlocked() ? getString(R.string.unblock_title) : getString(R.string.block_title), 0, 0, R.string.block_title));
+		if (!ContactManager.getInstance().isBlocked(mContactInfo.getMsisdn())
+				&& (mContactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND
+						|| mContactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED 
+						|| mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED)) {
+			list.add(new OverFlowMenuItem(getString(R.string.add_as_favorite_menu), 0, 0, R.string.add_as_favorite_menu));
+		}
 		return list;
 	}
 
@@ -1165,6 +1172,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		case R.string.chat_theme:
 			showThemePicker();
+			break;
+		case R.string.add_as_favorite_menu:
+			FavoriteType favoriteType = FavoriteType.REQUEST_SENT;
+			mContactInfo.setFavoriteType(favoriteType);
+			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(mContactInfo, favoriteType);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 			break;
 		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
