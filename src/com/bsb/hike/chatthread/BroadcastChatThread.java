@@ -153,6 +153,7 @@ public class BroadcastChatThread extends OneToNChatThread
 	{
 		if (convMessage != null)
 		{
+			setSentTo(convMessage);
 			addMessage(convMessage);
 			convMessage.setMessageOriginType(OriginType.BROADCAST);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
@@ -183,5 +184,15 @@ public class BroadcastChatThread extends OneToNChatThread
 		mTips = new ChatThreadTips(activity.getBaseContext(), activity.findViewById(R.id.chatThreadParentLayout), new int[] {}, sharedPreference);
 
 		mTips.showTip();
+	}
+	
+	/**
+	 * This method adds the recipientsList in the ConvMessage object
+	 */
+	public void setSentTo(ConvMessage convMessage)
+	{
+		ArrayList<String> sentToList = new ArrayList<String>();
+		sentToList.addAll(oneToNConversation.getConversationParticipantList().keySet());
+		convMessage.setSentToMsisdnsList(sentToList);	
 	}
 }
