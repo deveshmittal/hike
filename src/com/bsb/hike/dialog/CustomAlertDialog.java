@@ -143,10 +143,11 @@ public class CustomAlertDialog extends HikeDialog
 		bodyCheckBox.setText(checkBoxStringResId);
 	}
 
-	public void setCheckBox(int checkBoxStringResId)
+	public void setCheckBox(int checkBoxStringResId, boolean isChecked)
 	{
 		bodyCheckBox.setVisibility(View.VISIBLE);
 		bodyCheckBox.setText(checkBoxStringResId);
+		bodyCheckBox.setChecked(isChecked);
 	}
 	
 	public boolean isChecked()

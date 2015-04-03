@@ -558,7 +558,7 @@ public class MqttMessagesManager
 	/*
 	 * adding message in db if not duplicate. In case of duplicate message we don't do further processing and return
 	 */
-		if (!convDb.addConversationMessages(convMessage))
+		if (!convDb.addConversationMessages(convMessage,true))
 		{
 			return;
 		}
@@ -584,7 +584,7 @@ public class MqttMessagesManager
 			ConvMessage convMessageNew = convDb.showParticipantStatusMessage(convMessage.getMsisdn());
 			if (convMessageNew != null)
 			{
-				if (convDb.addConversationMessages(convMessageNew))
+				if (convDb.addConversationMessages(convMessageNew,true))
 				{
 					this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessageNew);
 				}
@@ -2969,7 +2969,7 @@ public class MqttMessagesManager
 			return null;
 		}
 		
-		convDb.addConversationMessages(convMessage);
+		convDb.addConversationMessages(convMessage,true);
 		
 		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		

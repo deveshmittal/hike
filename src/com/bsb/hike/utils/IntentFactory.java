@@ -275,9 +275,9 @@ public class IntentFactory
 	public static Intent getImageCaptureIntent(Context context)
 	{
 		/*
-		 * Storing images in DCIM folder of the camera
+		 * Storing images in hike media folder of the camera
 		 */
-		File selectedDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
+		File selectedDir = new File(Utils.getFileParent(HikeFileType.IMAGE, false));
 		if (!selectedDir.exists())
 		{
 			if (!selectedDir.mkdirs())
@@ -286,7 +286,7 @@ public class IntentFactory
 				return null;
 			}
 		}
-		String fileName = Utils.getOriginalFile(HikeFileType.IMAGE, null);
+		String fileName = HikeConstants.CAM_IMG_PREFIX + Utils.getOriginalFile(HikeFileType.IMAGE, null);
 		File selectedFile = new File(selectedDir.getPath() + File.separator + fileName);
 		
 		Intent pickIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
