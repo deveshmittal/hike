@@ -764,7 +764,7 @@ public class GroupChatThread extends OneToNChatThread
 		}
 		else
 		{
-			name = oneToNConversation.getConversationParticipantName(impMessage.getGroupParticipantMsisdn()) + PIN_MESSAGE_SEPARATOR;
+			name = oneToNConversation.getConvParticipantFirstNameAndSurname(impMessage.getGroupParticipantMsisdn()) + PIN_MESSAGE_SEPARATOR;
 		}
 
 		ForegroundColorSpan fSpan = new ForegroundColorSpan(getResources().getColor(R.color.pin_name_color));
