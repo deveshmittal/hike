@@ -137,6 +137,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
+import com.bsb.hike.productpopup.ProductPopupsConstants;
 
 /**
  * 
@@ -567,6 +568,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 		case R.id.attachment:
 			showAttchmentPicker();
+			activity.showProductPopup(ProductPopupsConstants.PopupTriggerPoints.ATCH_SCR.ordinal());
 			return true;
 		}
 		return false;
@@ -794,6 +796,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		
 		mShareablePopupLayout.togglePopup(mStickerPicker, activity.getResources().getConfiguration().orientation);
+		activity.showProductPopup(ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal());
 	}
 	
 	private void recordFirstTimeStickerClick()
