@@ -1177,8 +1177,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="notifications_contact_join_title">Contact joining hike</string>
     <string name="share_with_names_numbers">Share with %1$s and %2$d others?</string>
     <string name="forward_to_names_numbers">Send message to %1$s and %2$d others?</string>
-    <string name="select_all_hike">Select all Hike contacts</string>
-    <string name="unselect_all_hike">Unselect all Hike contacts</string>
     <string name="recent_chats">RECENT CHATS</string>
     <string name="new_chat_compose_hint">Search by name or number</string>
     <string name="forward_tip_heading">Sharing made easy</string>
@@ -1420,4 +1418,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="photos_oom_retry">Try Again!</string>
     <string name="photos_oom_camera">Unable to capture Image</string>
     <string name="search_hint">Search</string>
+    <string name="select_all_hike">Select all</string>
+    <string name="unselect_all_hike">Unselect all</string>
 </resources>
