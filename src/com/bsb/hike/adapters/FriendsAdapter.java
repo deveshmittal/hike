@@ -46,6 +46,7 @@ import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.LastSeenComparator;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.OneToNConversationUtils;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
 import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
@@ -337,7 +338,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					else
 					{
 						String msisdn = info.getMsisdn();
-						if (msisdn != null && !Utils.isGroupConversation(msisdn))
+						if (msisdn != null && !OneToNConversationUtils.isOneToNConversation(msisdn))
 						{
 							if(msisdn.contains(textToBeFiltered))
 							{
