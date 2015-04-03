@@ -407,7 +407,8 @@ public class IntentFactory
 		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, Utils.isGroupConversation(msisdnOrGroupId) ? HikeConstants.Extras.GROUP_CHAT_THREAD
 				: HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD);
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
-		
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
 		return intent;
 	}
 
