@@ -531,7 +531,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			if (mConversation.isOnHike())
 			{
 				ConvMessage msg = findMessageById(msgId);
-				if (!msg.isSMS()) // Since ConvMessage is not sent as SMS, hence add it to undeliveredMap
+				if (!msg.isSMS() && (!msg.isBroadcastMessage())) // Since ConvMessage is not sent as SMS, hence add it to undeliveredMap
 				{
 					sendUIMessage(ADD_UNDELIVERED_MESSAGE, msg);
 				}

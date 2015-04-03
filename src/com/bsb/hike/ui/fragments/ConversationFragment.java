@@ -191,9 +191,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, 
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
-			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
+			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.ONETON_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
 			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.CONV_UNREAD_COUNT_MODIFIED,
-			HikePubSub.CONVERSATION_TS_UPDATED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP};
+			HikePubSub.CONVERSATION_TS_UPDATED, HikePubSub.PARTICIPANT_JOINED_ONETONCONV, HikePubSub.PARTICIPANT_LEFT_ONETONCONV};
 
 	private ConversationsAdapter mAdapter;
 
@@ -1401,7 +1401,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						{
 							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
 							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
-							Utils.executeConvAsyncTask(task, conv);
+							Utils.executeConvInfoAsyncTask(task, conv);
 							hikeDialog.dismiss();
                             if (Utils.isBot(conv.getMsisdn()))
                             {
@@ -1473,8 +1473,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				else if (getString(R.string.email_conversations).equals(option))
 				{
 					EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(getSherlockActivity(), ConversationFragment.this);
-//					TODO 
-//					Utils.executeConvAsyncTask(task, conv);
+					Utils.executeConvAsyncTask(task, conv);
                     if (Utils.isBot(conv.getMsisdn()))
                     {
                         BotConversation.analyticsForBots(conv, HikePlatformConstants.BOT_EMAIL_CONVERSATION, AnalyticsConstants.CLICK_EVENT);
@@ -1794,7 +1793,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private void deleteConversation(ConvInfo conv)
 	{
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
-		Utils.executeConvAsyncTask(task, conv);
+		Utils.executeConvInfoAsyncTask(task, conv);
 	}
 
 	private void toggleTypingNotification(boolean isTyping, TypingNotification typingNotification)
@@ -2109,11 +2108,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		/*
 		 * Receives conversation group-id, the message id for the message read packet, and the participant msisdn.
 		 */
-		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type) || HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
+		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type) || HikePubSub.ONETON_MESSAGE_DELIVERED_READ.equals(type))
 		{
 			String sender = null;
 			long[] ids;
-			if (HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
+			if (HikePubSub.ONETON_MESSAGE_DELIVERED_READ.equals(type))
 			{
 				Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
 				sender = pair.first;
@@ -2815,7 +2814,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			updateTimestampAndSortConversations(object);
 		}
-		else if (HikePubSub.PARTICIPANT_JOINED_GROUP.equals(type) || HikePubSub.PARTICIPANT_LEFT_GROUP.equals(type))
+		else if (HikePubSub.PARTICIPANT_JOINED_ONETONCONV.equals(type) || HikePubSub.PARTICIPANT_LEFT_ONETONCONV.equals(type))
 		{
 			String groupId = ((JSONObject) object).optString(HikeConstants.TO);
 			if(TextUtils.isEmpty(groupId))
@@ -3265,7 +3264,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				editor.commit();
 				Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
 				DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
-				Utils.executeConvAsyncTask(task, convInfo);
+				Utils.executeConvInfoAsyncTask(task, convInfo);
 			}
 		}
 		if(mAdapter != null)

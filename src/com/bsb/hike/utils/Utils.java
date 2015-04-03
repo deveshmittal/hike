@@ -168,8 +168,8 @@ import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.analytics.TrafficsStatsFile;
-import com.bsb.hike.chatthread.ChatThread;
 import com.bsb.hike.chatthread.ChatThreadActivity;
+import com.bsb.hike.chatthread.ChatThreadUtils;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.dialog.HikeDialog;
@@ -3373,7 +3373,7 @@ public class Utils
 		}
 	}
 
-	public static void executeConvAsyncTask(AsyncTask<Conversation, Void, Conversation[]> asyncTask, Conversation... conversations)
+	public static void executeConvInfoAsyncTask(AsyncTask<ConvInfo, Void, ConvInfo[]> asyncTask, ConvInfo... conversations)
 	{
 		if (Utils.isHoneycombOrHigher())
 		{
@@ -3385,7 +3385,8 @@ public class Utils
 		}
 	}
 	
-	public static void executeConvAsyncTask(AsyncTask<ConvInfo, Void, ConvInfo[]> asyncTask, ConvInfo... conversations)
+	
+	public static void executeConvAsyncTask(AsyncTask<ConvInfo, Void, Conversation[]> asyncTask, ConvInfo... conversations)
 	{
 		if (Utils.isHoneycombOrHigher())
 		{
@@ -3979,7 +3980,7 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		String whichChatThread = isGroupConversation(contactInfo.getMsisdn()) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD;
+		String whichChatThread = ChatThreadUtils.getChatThreadType(contactInfo.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, whichChatThread);
 		context.startActivity(intent);
 	}
