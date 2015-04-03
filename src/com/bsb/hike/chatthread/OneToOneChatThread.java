@@ -1592,7 +1592,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				continue;
 			}
 			
-			else if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
+			else if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS() && !convMessage.isBroadcastMessage())
 			{
 				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
 			}
