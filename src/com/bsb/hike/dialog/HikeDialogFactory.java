@@ -2,9 +2,6 @@ package com.bsb.hike.dialog;
 
 import java.util.ArrayList;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -48,7 +45,6 @@ import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontTextView;
 
@@ -899,7 +895,7 @@ public class HikeDialogFactory
 		case DELETE_FILES_DIALOG:
 			deleteConfirmDialog.setBody(((int) data[0] == 1) ? context.getString(R.string.confirm_delete_msg) : context.getString(R.string.confirm_delete_msgs, (int) data[0]));
 			deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header);
-			deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
+			deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard, true);
 			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
 			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
 			break;
@@ -958,7 +954,7 @@ public class HikeDialogFactory
 			deleteConfirmDialog.setBody((int) data[0] == 1 ? context.getString(R.string.confirm_delete_msg) : context.getString(R.string.confirm_delete_msgs, (int) data[0]));
 			if ((boolean) data[1] == true)
 			{
-				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
+				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard, true);
 			}
 			deleteConfirmDialog.setOkButton(R.string.delete, positiveListener);
 			deleteConfirmDialog.setCancelButton(R.string.cancel, negativeListener);
