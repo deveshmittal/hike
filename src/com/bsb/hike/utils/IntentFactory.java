@@ -637,14 +637,6 @@ public class IntentFactory
 		argActivity.startActivity(in);
 	}
 
-	public static Intent getChatThreadIntent(Context context, String msisdn)
-	{
-		Intent intent = new Intent(context, ChatThread.class);
-		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		return intent;
-	}
-
 	public static Intent getVoipCallIntent(Context context, String msisdn, VoIPUtils.CallSource source)
 	{
 		Intent intent = new Intent(context, VoIPService.class);
