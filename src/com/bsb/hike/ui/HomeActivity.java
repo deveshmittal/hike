@@ -1650,6 +1650,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					intent = IntentFactory.getRewardsIntent(HomeActivity.this);
 					break;
 				case HikeConstants.HOME_ACTIVITY_OVERFLOW.SETTINGS:
+					HAManager.logClickEvent(HikeConstants.LogEvent.SETTING_CLICKED);
 					intent = new Intent(HomeActivity.this, SettingsActivity.class);
 					break;
 				case HikeConstants.HOME_ACTIVITY_OVERFLOW.NEW_GROUP:

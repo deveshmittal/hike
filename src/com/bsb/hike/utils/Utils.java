@@ -1134,6 +1134,7 @@ public class Utils
 			data.put(HikeConstants.SENDBOT, sendbot);
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 			data.put(HikeConstants.RESOLUTION_ID, Utils.getResolutionId());
+			data.put(HikeConstants.NEW_LAST_SEEN_SETTING, true);
 			requestAccountInfo.put(HikeConstants.DATA, data);
 			HikeMqttManagerNew.getInstance().sendMessage(requestAccountInfo, HikeMqttManagerNew.MQTT_QOS_ONE);
 		}
@@ -5460,8 +5461,14 @@ public class Utils
 		}
 		return false;
 	}
-	
-	
+
+	public static boolean isLastSeenSetToFavorite()
+	{
+		Context appContext = HikeMessengerApp.getInstance().getApplicationContext();
+		String defValue = appContext.getString(R.string.privacy_my_contacts);
+		return PreferenceManager.getDefaultSharedPreferences(appContext).getString(HikeConstants.LAST_SEEN_PREF_LIST, defValue)
+				.equals(appContext.getString(R.string.privacy_favorites));
+	}
 	
 	public static void launchPlayStore(String packageName,Context context)
 	{
