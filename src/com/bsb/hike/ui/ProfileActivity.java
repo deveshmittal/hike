@@ -1056,7 +1056,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST);
 			oneToNConversation = (BroadcastConversation) hCDB.getConversation(mLocalMSISDN, 0, true);
 			sharedMediaCount = hCDB.getSharedMediaCount(mLocalMSISDN,true);
-			sharedPinCount = hCDB.getPinCount(mLocalMSISDN);
+			sharedPinCount = 0;
 		}
 		else if (this.profileType == ProfileType.GROUP_INFO)
 		{
