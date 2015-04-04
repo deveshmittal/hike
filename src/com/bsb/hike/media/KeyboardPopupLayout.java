@@ -202,8 +202,11 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		/**
 		 * Removing the global layout listener
 		 */
-		this.mainView.getViewTreeObserver().removeGlobalOnLayoutListener(mGlobalLayoutListener);
-		this.mainView = null;
+		if (mainView != null)
+		{
+			this.mainView.getViewTreeObserver().removeGlobalOnLayoutListener(mGlobalLayoutListener);
+			this.mainView = null;
+		}
 	}
 	
 	private ViewTreeObserver.OnGlobalLayoutListener mGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener()
