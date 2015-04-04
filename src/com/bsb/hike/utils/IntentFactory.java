@@ -114,6 +114,13 @@ public class IntentFactory
 		context.startActivity(intent);
 	}
 
+	public static void openSettingChat(Context context) {
+		Intent intent = new Intent(context, HikePreferences.class);
+		intent.putExtra(HikeConstants.Extras.PREF,
+				R.xml.chat_settings_preferences);
+		intent.putExtra(HikeConstants.Extras.TITLE, R.string.settings_chat);
+		context.startActivity(intent);
+	}
 	public static void openInviteSMS(Context context)
 	{
 		context.startActivity(new Intent(context, HikeListActivity.class));
@@ -427,7 +434,8 @@ public class IntentFactory
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdnOrGroupId);
 		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, ChatThreadUtils.getChatThreadType(msisdnOrGroupId));
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
-		
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
 		return intent;
 	}
 
@@ -655,14 +663,6 @@ public class IntentFactory
 	{
 		Intent in = new Intent(argActivity, HikeCameraActivity.class);
 		argActivity.startActivity(in);
-	}
-
-	public static Intent getChatThreadIntent(Context context, String msisdn)
-	{
-		Intent intent = new Intent(context, ChatThread.class);
-		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		return intent;
 	}
 
 	public static Intent getVoipCallIntent(Context context, String msisdn, VoIPUtils.CallSource source)

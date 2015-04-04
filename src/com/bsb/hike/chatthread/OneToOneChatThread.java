@@ -49,6 +49,7 @@ import com.bsb.hike.dialog.HikeDialog;
 import com.bsb.hike.dialog.HikeDialogFactory;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -57,6 +58,8 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.OneToOneConversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.httpmgr.RequestToken;
+import com.bsb.hike.modules.lastseenmgr.FetchLastSeenTask;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -82,6 +85,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	private LastSeenScheduler lastSeenScheduler;
 
+	private RequestToken lastSeenRequestToken;
+	
 	private Dialog smsDialog;
 
 	private int mCredits;
@@ -199,6 +204,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 		list.add(new OverFlowMenuItem(mConversation.isBlocked() ? getString(R.string.unblock_title) : getString(R.string.block_title), 0, 0, R.string.block_title));
+		if (mConversation.isBlocked() && mContactInfo.isNotOrRejectedFavourite())
+		{
+			list.add(new OverFlowMenuItem(getString(R.string.add_as_favorite_menu), 0, 0, R.string.add_as_favorite_menu));
+		}
 		return list;
 	}
 
@@ -250,16 +259,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		if (ChatThreadUtils.shouldShowLastSeen(activity.getApplicationContext(), mContactInfo.getFavoriteType(), mConversation.isOnHike()))
 		{
-
-			/*
-			 * Making sure nothing is already scheduled wrt last seen.
-			 */
-			resetLastSeenScheduler();
-
-			LastSeenScheduler lastSeenScheduler = LastSeenScheduler.getInstance(activity.getApplicationContext());
-			lastSeenScheduler.start(mContactInfo.getMsisdn(), this);
-			
-			HAManager.getInstance().recordLastSeenEvent(OneToOneChatThread.class.getName(), "createConversation", null, msisdn);
+			checkAndStartLastSeenTask();
 		}
 
 		/**
@@ -293,6 +293,14 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			lastSeenScheduler.stop(false);
 			lastSeenScheduler = null;
+		}
+	}
+
+	private void cancelFetchLastseenTask()
+	{
+		if (lastSeenRequestToken != null)
+		{
+			lastSeenRequestToken.cancel();
 		}
 	}
 
@@ -571,7 +579,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		if (!pair.first)
 		{
-			setAvatar(R.drawable.ic_default_avatar);
+			setAvatar();
 		}
 
 		setLabel(pair.second);
@@ -616,9 +624,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		case REMOVE_UNDELIVERED_MESSAGES:
 			removeUndeliveredMessages(msg.obj);
-			break;
-		case UPDATE_AVATAR:
-			setAvatar(R.drawable.ic_default_avatar);
 			break;
 		case BULK_MESSAGE_RECEIVED:
 			addBulkMessages((LinkedList<ConvMessage>) msg.obj);
@@ -957,8 +962,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		super.setupActionBar();
 
-		setAvatar(R.drawable.ic_default_avatar);
-
 		setLabel(getConvLabel());
 
 		setLastSeenTextBasedOnHikeValue(mConversation.isOnHike());
@@ -1163,6 +1166,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case R.string.chat_theme:
 			showThemePicker();
 			break;
+		case R.string.add_as_favorite_menu:
+			addFavorite();
+			break;
 		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
 			super.itemClicked(item);
@@ -1268,7 +1274,14 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			prefsUtil.saveData(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, true);
 		}
 
-		resetLastSeenScheduler();
+		if (Utils.isOkHttp())
+		{
+			cancelFetchLastseenTask();
+		}
+		else
+		{
+			resetLastSeenScheduler();
+		}
 	}
 
 	private void onBulkMessageReceived(Object object)
@@ -1417,24 +1430,55 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	}
 
+	private void startFetchLastSeenTask()
+	{
+		cancelFetchLastseenTask();
+		FetchLastSeenTask fetchLastseenTask = new FetchLastSeenTask(mContactInfo.getMsisdn());
+		lastSeenRequestToken = fetchLastseenTask.start();
+	}
+	
 	/**
 	 * UI Thread
 	 */
 	private void scheduleLastSeen()
 	{
-		if (lastSeenScheduler == null)
+		if (Utils.isOkHttp())
 		{
-			lastSeenScheduler = LastSeenScheduler.getInstance(activity.getApplicationContext());
+			startFetchLastSeenTask();
 		}
-
 		else
 		{
-			lastSeenScheduler.stop(false);
-		}
+			if (lastSeenScheduler == null)
+			{
+				lastSeenScheduler = LastSeenScheduler.getInstance(activity.getApplicationContext());
+			}
+			else
+			{
+				lastSeenScheduler.stop(false);
+			}
 
-		lastSeenScheduler.start(mContactInfo.getMsisdn(), this);
+			lastSeenScheduler.start(mContactInfo.getMsisdn(), this);
+		}
 	}
 
+	private void checkAndStartLastSeenTask()
+	{
+		/*
+		 * Making sure nothing is already scheduled wrt last seen.
+		 */
+		if (Utils.isOkHttp())
+		{
+			startFetchLastSeenTask();
+		}
+		else
+		{
+			resetLastSeenScheduler();
+			lastSeenScheduler = LastSeenScheduler.getInstance(activity.getApplicationContext());
+			lastSeenScheduler.start(mContactInfo.getMsisdn(), this);
+		}
+		HAManager.getInstance().recordLastSeenEvent(OneToOneChatThread.class.getName(), "createConversation", null, msisdn);
+	}
+	
 	@Override
 	protected void takeActionBasedOnIntent()
 	{
@@ -1556,7 +1600,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				continue;
 			}
 			
-			else if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
+			else if (convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS() && !convMessage.isBroadcastMessage())
 			{
 				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
 			}
@@ -2411,5 +2455,16 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		super.showThemePicker();
 		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip);
+	}
+
+	/*
+	 * Adding user as favorite
+	 */
+	private void addFavorite()
+	{
+		FavoriteType favoriteType = FavoriteType.REQUEST_SENT;
+		mContactInfo.setFavoriteType(favoriteType);
+		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(mContactInfo, favoriteType);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 	}
 }
