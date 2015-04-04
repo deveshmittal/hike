@@ -328,6 +328,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		switch (msg.what)
 		{
+		case UPDATE_AVATAR:
+			setAvatar();
+			break;
 		case SET_WINDOW_BG:
 			setWindowBackGround();
 			break;
@@ -3143,25 +3146,21 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	/**
 	 * This method is used to setAvatar for a contact.
 	 */
-	protected void setAvatar(int defaultResId)
+	protected void setAvatar()
 	{
 		ImageView avatar = (ImageView) mActionBarView.findViewById(R.id.avatar);
-		Drawable avatarDrawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
-
-		if (avatarDrawable != null)
+		if (avatar == null)
 		{
-			avatar.setScaleType(ScaleType.FIT_CENTER);
-			avatar.setImageDrawable(avatarDrawable);
-			avatar.setBackgroundDrawable(null);
+			return;
 		}
 
-		else
+		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
+		if (drawable == null)
 		{
-			avatar.setScaleType(ScaleType.CENTER_INSIDE);
-			avatar.setImageDrawable(activity.getResources().getDrawable(defaultResId));
-			avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
+			drawable = HikeMessengerApp.getLruCache().getDefaultAvatar(msisdn, false);
 		}
-
+		avatar.setScaleType(ScaleType.FIT_CENTER);
+		avatar.setImageDrawable(drawable);
 	}
 
 	/**
@@ -3389,6 +3388,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		contactInfoContainer.setOnClickListener(this);
 		backContainer.setOnClickListener(this);
+		
+		setAvatar();
 	}
 
 	/**
