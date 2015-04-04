@@ -200,7 +200,6 @@ public class OneToNConversationUtils {
 
 		ContactInfo conversationContactInfo = new ContactInfo(oneToNConvId, oneToNConvId, oneToNConvId, oneToNConvId);
 		Intent intent = IntentFactory.createChatThreadIntentFromContactInfo(activity, conversationContactInfo, true);
-		intent.setClass(activity, ChatThread.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		activity.startActivity(intent);
 		activity.finish();
