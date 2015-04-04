@@ -371,11 +371,11 @@ public class ConversationsAdapter extends BaseAdapter
 				try
 				{
 					boolean found = false;
-					if (textToBeFiltered.equals("broadcast") && OneToNConversationUtils.isBroadcastConversation(info.getMsisdn()))
+					if (textToBeFiltered.equals(R.string.broadcast) && OneToNConversationUtils.isBroadcastConversation(info.getMsisdn()))
 					{
 						found = true;
 					}
-					else if (textToBeFiltered.equals("group") && OneToNConversationUtils.isGroupConversation(info.getMsisdn()) && !OneToNConversationUtils.isBroadcastConversation(info.getMsisdn()))
+					else if (textToBeFiltered.equals(R.string.group) && OneToNConversationUtils.isGroupConversation(info.getMsisdn()) && !OneToNConversationUtils.isBroadcastConversation(info.getMsisdn()))
 					{
 						found = true;
 					}
