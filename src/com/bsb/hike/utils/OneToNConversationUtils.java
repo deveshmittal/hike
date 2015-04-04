@@ -88,7 +88,7 @@ public class OneToNConversationUtils {
 		return Utils.isGroupConversation(msisdn) || Utils.isBroadcastConversation(msisdn);
 	}
 
-	public static void createGroup(Activity activity, ArrayList<ContactInfo> selectedContactList, String groupName)
+	public static void createGroupOrBroadcast(Activity activity, ArrayList<ContactInfo> selectedContactList, String groupName)
 	{
 		String groupId;
 		if (activity.getIntent().hasExtra(HikeConstants.Extras.BROADCAST_LIST))

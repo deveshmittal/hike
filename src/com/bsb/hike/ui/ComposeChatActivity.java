@@ -1026,7 +1026,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 				else if (getIntent().hasExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST))
 				{
-					OneToNConversationUtils.createGroup(ComposeChatActivity.this, adapter.getAllSelectedContacts(), groupName);
+					OneToNConversationUtils.createGroupOrBroadcast(ComposeChatActivity.this, adapter.getAllSelectedContacts(), groupName);
 				}
 				else if (composeMode == CREATE_GROUP_MODE)
 				{
@@ -1036,7 +1036,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						Toast.makeText(getApplicationContext(), getString(R.string.minContactInGroupErr, MIN_MEMBERS_GROUP_CHAT), Toast.LENGTH_SHORT).show();
 						return;
 					}
-					OneToNConversationUtils.createGroup(ComposeChatActivity.this, adapter.getAllSelectedContacts(), groupName);
+					OneToNConversationUtils.createGroupOrBroadcast(ComposeChatActivity.this, adapter.getAllSelectedContacts(), groupName);
 				}
 			}
 		});
