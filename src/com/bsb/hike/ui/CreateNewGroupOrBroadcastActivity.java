@@ -324,6 +324,7 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 			selectedContactList.add(contactInfo);
 		}
 		String broadcastName = groupOrBroadcastName.getText().toString().trim();
+		getIntent().putExtra(HikeConstants.Extras.GROUP_BROADCAST_ID, groupOrBroadcastId);
 		OneToNConversationUtils.createGroupOrBroadcast(this, selectedContactList, broadcastName);
 	}
 	
@@ -469,10 +470,5 @@ public class CreateNewGroupOrBroadcastActivity extends ChangeProfileImageBaseAct
 		{
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
-	}
-	
-	public String getGroupOrBroadcastId()
-	{
-		return groupOrBroadcastId;
 	}
 }

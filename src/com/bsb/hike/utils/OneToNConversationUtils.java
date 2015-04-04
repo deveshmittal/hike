@@ -102,15 +102,11 @@ public class OneToNConversationUtils {
 
 		if (TextUtils.isEmpty(oneToNConvId))
 		{
-			// Create new group
-			if (activity.getIntent().hasExtra(HikeConstants.IS_BROADCAST))
-			{
-				oneToNConvId = ((CreateNewGroupOrBroadcastActivity) activity).getGroupOrBroadcastId();
-			}
-			else
-			{
-				oneToNConvId = activity.getIntent().getStringExtra(HikeConstants.Extras.GROUP_BROADCAST_ID);
-			}
+			oneToNConvId = activity.getIntent().getStringExtra(HikeConstants.Extras.GROUP_BROADCAST_ID);
+				if (TextUtils.isEmpty(oneToNConvId))
+				{
+					throw new IllegalArgumentException("No convId set.! Conversation cannot be created.");
+				}
 			newOneToNConv = true;
 		}
 		else
