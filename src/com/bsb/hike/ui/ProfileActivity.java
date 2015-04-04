@@ -1079,22 +1079,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		sharedFileCount = hCDB.getSharedMediaCount(mLocalMSISDN, false);
 		participantMap = oneToNConversation.getConversationParticipantList();
-		List<String> inactiveMsisdns = new ArrayList<String>();
-		/*
-		 * Removing inactive participants
-		 */
-		for (Entry<String, PairModified<GroupParticipant, String>> participantEntry : participantMap.entrySet())
-		{
-			GroupParticipant groupParticipant = participantEntry.getValue().getFirst();
-			if (groupParticipant.hasLeft())
-			{
-				inactiveMsisdns.add(participantEntry.getKey());
-			}
-		}
-		for (String msisdn : inactiveMsisdns)
-		{
-			participantMap.remove(msisdn);
-		}
 
 		httpRequestURL = "/group/" + oneToNConversation.getMsisdn();
 
