@@ -3858,7 +3858,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				String groupName = groupCursor.getString(groupNameIdx);
 
 				List<PairModified<GroupParticipant, String>> groupParticipantMap = ContactManager.getInstance().getGroupParticipants(groupId, true, false, false);
-				groupName = TextUtils.isEmpty(groupName) ? OneToNConversationUtils.defaultGroupName(groupParticipantMap) : groupName;
+				groupName = TextUtils.isEmpty(groupName) ? OneToNConversationUtils.defaultGroupOrBroadcastName(groupParticipantMap) : groupName;
 				int numMembers = groupParticipantMap.size();
 
 				// Here we make this string the msisdn so that it can be

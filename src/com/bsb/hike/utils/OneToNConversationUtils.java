@@ -88,100 +88,100 @@ public class OneToNConversationUtils {
 		return Utils.isGroupConversation(msisdn) || Utils.isBroadcastConversation(msisdn);
 	}
 
-	public static void createGroupOrBroadcast(Activity activity, ArrayList<ContactInfo> selectedContactList, String groupName)
+	public static void createGroupOrBroadcast(Activity activity, ArrayList<ContactInfo> selectedContactList, String convName)
 	{
-		String groupId;
+		String oneToNConvId;
 		if (activity.getIntent().hasExtra(HikeConstants.Extras.BROADCAST_LIST))
 		{
-			groupId = activity.getIntent().getStringExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST);
+			oneToNConvId = activity.getIntent().getStringExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST);
 		}
 		else
 		{
-			groupId = activity.getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
+			oneToNConvId = activity.getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 		}
-		boolean newGroup = false;
+		boolean newOneToNConv = false;
 
-		if (TextUtils.isEmpty(groupId))
+		if (TextUtils.isEmpty(oneToNConvId))
 		{
 			// Create new group
 			if (activity.getIntent().hasExtra(HikeConstants.IS_BROADCAST))
 			{
-				groupId = ((CreateNewGroupOrBroadcastActivity) activity).getGroupOrBroadcastId();
+				oneToNConvId = ((CreateNewGroupOrBroadcastActivity) activity).getGroupOrBroadcastId();
 			}
 			else
 			{
-				groupId = activity.getIntent().getStringExtra(HikeConstants.Extras.GROUP_BROADCAST_ID);
+				oneToNConvId = activity.getIntent().getStringExtra(HikeConstants.Extras.GROUP_BROADCAST_ID);
 			}
-			newGroup = true;
+			newOneToNConv = true;
 		}
 		else
 		{
 			// Group alredy exists. Fetch existing participants.
-			newGroup = false;
+			newOneToNConv = false;
 		}
 		Map<String, PairModified<GroupParticipant, String>> participantList = new HashMap<String, PairModified<GroupParticipant, String>>();
 
 		for (ContactInfo particpant : selectedContactList)
 		{
-			GroupParticipant groupParticipant = new GroupParticipant(particpant);
-			participantList.put(particpant.getMsisdn(), new PairModified<GroupParticipant, String>(groupParticipant, groupParticipant.getContactInfo().getNameOrMsisdn()));
+			GroupParticipant convParticipant = new GroupParticipant(particpant);
+			participantList.put(particpant.getMsisdn(), new PairModified<GroupParticipant, String>(convParticipant, convParticipant.getContactInfo().getNameOrMsisdn()));
 		}
 		ContactInfo userContactInfo = Utils.getUserContactInfo(activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE));
 
-		OneToNConversation groupConversation;
+		OneToNConversation oneToNConversation;
 		if (activity.getIntent().hasExtra(HikeConstants.IS_BROADCAST))
 		{
-			groupConversation = new BroadcastConversation.ConversationBuilder(groupId).setConversationOwner(userContactInfo.getMsisdn()).setIsAlive(true).build();
+			oneToNConversation = new BroadcastConversation.ConversationBuilder(oneToNConvId).setConversationOwner(userContactInfo.getMsisdn()).setIsAlive(true).build();
 		}
 		else
 		{
-			groupConversation = new GroupConversation.ConversationBuilder(groupId).setConversationOwner(userContactInfo.getMsisdn()).setIsAlive(true).build();
+			oneToNConversation = new GroupConversation.ConversationBuilder(oneToNConvId).setConversationOwner(userContactInfo.getMsisdn()).setIsAlive(true).build();
 		}
-		groupConversation.setConversationParticipantList(participantList);
+		oneToNConversation.setConversationParticipantList(participantList);
 
-		Logger.d(activity.getClass().getSimpleName(), "Creating group: " + groupId);
+		Logger.d(activity.getClass().getSimpleName(), "Creating group: " + oneToNConvId);
 		HikeConversationsDatabase mConversationDb = HikeConversationsDatabase.getInstance();
-		mConversationDb.addRemoveGroupParticipants(groupId, groupConversation.getConversationParticipantList(), false);
-		if (newGroup)
+		mConversationDb.addRemoveGroupParticipants(oneToNConvId, oneToNConversation.getConversationParticipantList(), false);
+		if (newOneToNConv)
 		{
-			mConversationDb.addConversation(groupConversation.getMsisdn(), false, groupName, groupConversation.getConversationOwner());
-			ContactManager.getInstance().insertGroup(groupConversation.getMsisdn(),groupName);
+			mConversationDb.addConversation(oneToNConversation.getMsisdn(), false, convName, oneToNConversation.getConversationOwner());
+			ContactManager.getInstance().insertGroup(oneToNConversation.getMsisdn(),convName);
 		}
 
 		try
 		{
 			// Adding this boolean value to show a different system message
 			// if its a new group
-			JSONObject gcjPacket = groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
-			if (groupConversation instanceof BroadcastConversation)
+			JSONObject gcjPacket = oneToNConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
+			if (oneToNConversation instanceof BroadcastConversation)
 			{
-				gcjPacket.put(HikeConstants.NEW_BROADCAST, newGroup);
+				gcjPacket.put(HikeConstants.NEW_BROADCAST, newOneToNConv);
 			}
-			else if (groupConversation instanceof GroupConversation)
+			else if (oneToNConversation instanceof GroupConversation)
 			{
-				gcjPacket.put(HikeConstants.NEW_GROUP, newGroup);
+				gcjPacket.put(HikeConstants.NEW_GROUP, newOneToNConv);
 			}
-			ConvMessage msg = new ConvMessage(gcjPacket, groupConversation, activity, true);
-			ContactManager.getInstance().updateGroupRecency(groupId, msg.getTimestamp());
+			ConvMessage msg = new ConvMessage(gcjPacket, oneToNConversation, activity, true);
+			ContactManager.getInstance().updateGroupRecency(oneToNConvId, msg.getTimestamp());
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, msg);
 		}
 		catch (JSONException e)
 		{
 			e.printStackTrace();
 		}
-		JSONObject gcjJson = groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
+		JSONObject gcjJson = oneToNConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
 		/*
 		 * Adding the group name to the packet
 		 */
-		if (newGroup)
+		if (newOneToNConv)
 		{
 			JSONObject metadata = new JSONObject();
 			try
 			{
-				metadata.put(HikeConstants.NAME, groupName);
+				metadata.put(HikeConstants.NAME, convName);
 
 				String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
-				String fileName = Utils.getTempProfileImageFileName(groupId);
+				String fileName = Utils.getTempProfileImageFileName(oneToNConvId);
 				File groupImageFile = new File(directory, fileName);
 
 				if (groupImageFile.exists())
@@ -198,12 +198,12 @@ public class OneToNConversationUtils {
 		}
 		HikeMqttManagerNew.getInstance().sendMessage(gcjJson, HikeMqttManagerNew.MQTT_QOS_ONE);
 
-		if (OneToNConversationUtils.isBroadcastConversation(groupId) && !newGroup)
+		if (oneToNConversation instanceof BroadcastConversation && !newOneToNConv)
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.PARTICIPANT_JOINED_ONETONCONV, gcjJson);
 		}
 
-		ContactInfo conversationContactInfo = new ContactInfo(groupId, groupId, groupId, groupId);
+		ContactInfo conversationContactInfo = new ContactInfo(oneToNConvId, oneToNConvId, oneToNConvId, oneToNConvId);
 		Intent intent = IntentFactory.createChatThreadIntentFromContactInfo(activity, conversationContactInfo, true);
 		intent.setClass(activity, ChatThread.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

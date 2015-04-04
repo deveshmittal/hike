@@ -346,7 +346,7 @@ class PersistenceCache extends ContactsCache
 			try
 			{
 				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(msisdn, false, false);
-				String grpName = OneToNConversationUtils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+				String grpName = OneToNConversationUtils.defaultGroupOrBroadcastName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
 				grpDetails.setDefaultGroupName(grpName);
 				return grpName;
 			}
@@ -398,7 +398,7 @@ class PersistenceCache extends ContactsCache
 					return;
 				}
 				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(grpId, false, false);
-				grpName = OneToNConversationUtils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+				grpName = OneToNConversationUtils.defaultGroupOrBroadcastName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
 				grpDetails.setDefaultGroupName(grpName);
 			}
 		}
@@ -593,7 +593,7 @@ class PersistenceCache extends ContactsCache
 					if (TextUtils.isEmpty(groupName) || groupName.equals(grpDetails.getGroupId()))
 					{
 						List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(msisdn, false, false);
-						String grpName = OneToNConversationUtils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+						String grpName = OneToNConversationUtils.defaultGroupOrBroadcastName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
 						grpDetails.setDefaultGroupName(grpName);
 					}
 				}
@@ -920,7 +920,7 @@ class PersistenceCache extends ContactsCache
 			if (TextUtils.isEmpty(groupName) || groupName.equals(grpId))
 			{
 				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(grpId, false, false);
-				groupName = OneToNConversationUtils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+				groupName = OneToNConversationUtils.defaultGroupOrBroadcastName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
 				grpDetails.setDefaultGroupName(groupName);
 			}
 			groupPersistence.put(grpId, grpDetails);
@@ -947,7 +947,7 @@ class PersistenceCache extends ContactsCache
 			if (TextUtils.isEmpty(groupName) || groupName.equals(grpId))
 			{
 				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(grpId, false, false);
-				defaultGroupName = OneToNConversationUtils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+				defaultGroupName = OneToNConversationUtils.defaultGroupOrBroadcastName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
 			}
 			GroupDetails grpDetails = new GroupDetails(grpId, groupName, defaultGroupName, alive, clq);
 			groupPersistence.put(grpId, grpDetails);
