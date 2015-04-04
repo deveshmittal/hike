@@ -25,6 +25,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.OneToNConversationUtils;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.MySoftReference;
 
@@ -331,11 +332,11 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		int index = BitmapUtils.iconHash(msisdn) % (HikeConstants.DEFAULT_AVATAR_KEYS.length);
 		
 		String key = HikeConstants.DEFAULT_AVATAR_KEYS[index];
-		if(Utils.isBroadcastConversation(msisdn))
+		if(OneToNConversationUtils.isBroadcastConversation(msisdn))
 		{
 			key += HikeConstants.IS_BROADCAST;
 		}
-		else if(Utils.isGroupConversation(msisdn))
+		else if(OneToNConversationUtils.isGroupConversation(msisdn))
 		{
 			key += HikeConstants.IS_GROUP;
 		}

@@ -434,7 +434,7 @@ public class IntentFactory
 	{
 		// If the contact info was made using a group conversation, then the
 		// Group ID is in the contact ID
-		boolean isGroupConv = Utils.isGroupConversation(contactInfo.getMsisdn());
+		boolean isGroupConv = OneToNConversationUtils.isOneToNConversation(contactInfo.getMsisdn());
 		return createChatThreadIntentFromMsisdn(context, isGroupConv ? contactInfo.getId() : contactInfo.getMsisdn(), openKeyBoard);
 	}
 	

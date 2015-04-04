@@ -2171,12 +2171,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				Conversation conv = null;
 				if (OneToNConversationUtils.isOneToNConversation(msisdn))
 				{
-					if (Utils.isGroupConversation(msisdn))
+					if (OneToNConversationUtils.isGroupConversation(msisdn))
 					{
 						conv = new GroupConversation.ConversationBuilder(msisdn).setConvName((contactInfo != null) ? contactInfo.getName() : null).setConversationOwner(groupOwner)
 								.setIsAlive(true).build();
 					}
-					else if (Utils.isBroadcastConversation(msisdn))
+					else if (OneToNConversationUtils.isBroadcastConversation(msisdn))
 					{
 						conv = new BroadcastConversation.ConversationBuilder(msisdn).setConvName((contactInfo != null) ? contactInfo.getName() : null).setConversationOwner(groupOwner)
 								.setIsAlive(true).build();
@@ -2341,7 +2341,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			/**
 			 * Group Conversation
 			 */
-			if (Utils.isGroupConversation(msisdn))
+			if (OneToNConversationUtils.isGroupConversation(msisdn))
 			{
 				conv = getGroupConversation(msisdn);
 				conv.setIsStealth(isStealth);
@@ -2349,7 +2349,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			/**
 			 * Broadcast Conversation
 			 */
-			else if (Utils.isBroadcastConversation(msisdn))
+			else if (OneToNConversationUtils.isBroadcastConversation(msisdn))
 			{
 				conv = getBroadcastConversation(msisdn);
 				conv.setIsStealth(isStealth);
@@ -2492,7 +2492,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				conv = getGroupConversation(msisdn);
 			}
 			
-			else if (Utils.isBroadcastConversation(msisdn))
+			else if (OneToNConversationUtils.isBroadcastConversation(msisdn))
 			{
 				conv = getBroadcastConversation(msisdn);
 			}
@@ -3858,7 +3858,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				String groupName = groupCursor.getString(groupNameIdx);
 
 				List<PairModified<GroupParticipant, String>> groupParticipantMap = ContactManager.getInstance().getGroupParticipants(groupId, true, false, false);
-				groupName = TextUtils.isEmpty(groupName) ? OneToNConversationUtils.defaultGroupOrBroadcastName(groupParticipantMap) : groupName;
+				groupName = TextUtils.isEmpty(groupName) ? OneToNConversation.defaultConversationName(groupParticipantMap) : groupName;
 				int numMembers = groupParticipantMap.size();
 
 				// Here we make this string the msisdn so that it can be

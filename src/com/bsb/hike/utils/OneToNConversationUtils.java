@@ -2,7 +2,6 @@ package com.bsb.hike.utils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,25 +66,25 @@ public class OneToNConversationUtils {
 	
 	public static String getParticipantRemovedMessage(String msisdn, Context context, String participantName)
 	{
-		String participantRemovedMessage = String.format(context.getString(Utils.isBroadcastConversation(msisdn) ? R.string.removed_from_broadcast : R.string.left_conversation), participantName);
+		String participantRemovedMessage = String.format(context.getString(isBroadcastConversation(msisdn) ? R.string.removed_from_broadcast : R.string.left_conversation), participantName);
 		return participantRemovedMessage;
 	}
 	
 	public static String getConversationNameChangedMessage(String msisdn, Context context, String participantName)
 	{
-		String nameChangedMessage = String.format(context.getString(Utils.isBroadcastConversation(msisdn) ? R.string.change_broadcast_name : R.string.change_group_name), participantName);
+		String nameChangedMessage = String.format(context.getString(isBroadcastConversation(msisdn) ? R.string.change_broadcast_name : R.string.change_group_name), participantName);
 		return nameChangedMessage;
 	}
 	
 	public static String getConversationEndedMessage(String msisdn, Context context)
 	{
-		String message = context.getString(Utils.isBroadcastConversation(msisdn) ? R.string.broadcast_list_end : R.string.group_chat_end);
+		String message = context.getString(isBroadcastConversation(msisdn) ? R.string.broadcast_list_end : R.string.group_chat_end);
 		return message;
 	}
 	
 	public static boolean isOneToNConversation(String msisdn)
 	{
-		return Utils.isGroupConversation(msisdn) || Utils.isBroadcastConversation(msisdn);
+		return isGroupConversation(msisdn) || isBroadcastConversation(msisdn);
 	}
 
 	public static void createGroupOrBroadcast(Activity activity, ArrayList<ContactInfo> selectedContactList, String convName)
@@ -211,42 +210,20 @@ public class OneToNConversationUtils {
 		activity.finish();
 	}
 
-	public static String defaultGroupName(List<PairModified<GroupParticipant, String>> participantList)
-	{
-		List<GroupParticipant> groupParticipants = new ArrayList<GroupParticipant>();
-		for (PairModified<GroupParticipant, String> participant : participantList)
-		{
-			if (!participant.getFirst().hasLeft())
-			{
-				groupParticipants.add(participant.getFirst());
-			}
-		}
-		Collections.sort(groupParticipants);
-		String name = null;
-		if (groupParticipants.size() > 0)
-		{
-			name = Utils.extractFullFirstName(groupParticipants.get(0).getContactInfo().getFirstNameAndSurname());
-		}
-		switch (groupParticipants.size())
-		{
-		case 0:
-			return "";
-		case 1:
-			return name;
-		default:
-			for (int i = 1; i < groupParticipants.size(); i++)
-			{
-				name += ", " + Utils.extractFullFirstName(groupParticipants.get(i).getContactInfo().getFirstNameAndSurname());
-			}
-			return name;
-		}
-	}
-
+	/**
+	 * To ensure that group Conversation and Broadcast conversation are mutually exclusive, we add the !isBroadCast check
+	 * @param msisdn
+	 * @return
+	 */
 	public static boolean isGroupConversation(String msisdn)
 	{
-		return msisdn != null && !msisdn.startsWith("+");
+		return msisdn != null && !msisdn.startsWith("+") && !isBroadcastConversation(msisdn);
 	}
 	
+	/**
+	 * @param msisdn
+	 * @return
+	 */
 	public static boolean isBroadcastConversation(String msisdn)
 	{
 		return msisdn!=null && msisdn.startsWith("b:");

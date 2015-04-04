@@ -492,11 +492,11 @@ public class ConversationsAdapter extends BaseAdapter
 			contactView.setText(name);
 		}
 
-		if (Utils.isBroadcastConversation(convInfo.getMsisdn()))
+		if (OneToNConversationUtils.isBroadcastConversation(convInfo.getMsisdn()))
 		{
 				contactView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 		}
-		else if (Utils.isGroupConversation(convInfo.getMsisdn()))
+		else if (OneToNConversationUtils.isGroupConversation(convInfo.getMsisdn()))
 		{
 				contactView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_group, 0, 0, 0);
 		}
