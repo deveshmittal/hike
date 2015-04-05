@@ -3635,13 +3635,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							}
 							else
 							{
-								ids.put(pair.first);
+								ids.put(String.valueOf(pair.first));
 							}
 						}
 					}
 					else
 					{
-						ids.put(pair.first);
+						ids.put(String.valueOf(pair.first));
 					}
 				}
 
