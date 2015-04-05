@@ -42,6 +42,9 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.MsgRelLogManager;
+import com.bsb.hike.analytics.AnalyticsConstants.MessageType;
+import com.bsb.hike.analytics.AnalyticsConstants.MsgRelEventType;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.dialog.H20Dialog;
@@ -54,6 +57,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.MessagePrivateData;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.OneToOneConversation;
@@ -441,6 +445,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			{
 				msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
 				removeFromMessageMap(msg);
+				
+				//Log Events For Message Reliability
+				MessagePrivateData pd = msg.getPrivateData();
+				if(pd != null && pd.getTrackID() != null)
+				{
+					Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+					Logger.d(AnalyticsConstants.MSG_REL_TAG, "Read Shown to Sender:track_id "+ msg.getPrivateData().getTrackID());
+					MsgRelLogManager.logMsgRelEvent(msg, MsgRelEventType.MR_SHOWN_AT_SENEDER_SCREEN);
+				}
 			}
 		}
 		if (mConversation.isOnHike())
@@ -1520,6 +1533,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 		super.sendButtonClicked();
+		
 	}
 
 	/**

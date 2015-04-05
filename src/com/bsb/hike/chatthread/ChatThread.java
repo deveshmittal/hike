@@ -79,6 +79,9 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.MsgRelLogManager;
+import com.bsb.hike.analytics.AnalyticsConstants.MessageType;
+import com.bsb.hike.analytics.AnalyticsConstants.MsgRelEventType;
 import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.chatthread.HikeActionMode.ActionModeListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -122,6 +125,7 @@ import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.platform.WebMetadata;
 import com.bsb.hike.platform.content.PlatformContent;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.GalleryActivity;
@@ -138,7 +142,9 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
+
 import android.text.InputType;
+
 import com.bsb.hike.productpopup.ProductPopupsConstants;
 
 /**
@@ -799,7 +805,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void sendMessage()
 	{
-		sendMessage(createConvMessageFromCompose());
+		ConvMessage convMessage = createConvMessageFromCompose();
+
+		// 1) user pressed send button i.e sending Text Message
+		MsgRelLogManager.startMessageRelLogging(convMessage, MessageType.TEXT);
+				
+		sendMessage(convMessage);
 	}
 
 	protected ConvMessage createConvMessageFromCompose()
@@ -1599,6 +1610,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		ConvMessage convMessage = Utils.makeConvMessage(msisdn, getString(R.string.poke_msg), mConversation.isOnHike());
 		ChatThreadUtils.setPokeMetadata(convMessage);
+
+		// 1) user double clicked on Chat Screen i.e Sending nudge
+		MsgRelLogManager.startMessageRelLogging(convMessage, MessageType.TEXT);
+				
 		sendMessage(convMessage);
 	}
 
@@ -2688,6 +2703,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			if (activity.hasWindowFocus())
 			{
 				ChatThreadUtils.publishReadByForMessage(message, mConversationDb, msisdn);
+				
+				if(message.getPrivateData() != null && message.getPrivateData().getTrackID() != null)
+				{
+					//Logs for Msg Reliability
+					Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+					Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver reads msg on already opened screen,track_id:- " + message.getPrivateData().getTrackID());
+					MsgRelLogManager.logMsgRelEvent(message, MsgRelEventType.RECEIVER_OPENS_CONV_SCREEN);
+				}
 			}
 
 			if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
@@ -3595,7 +3618,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		ConvMessage convMessage = Utils.makeConvMessage(msisdn, StickerManager.STICKER_MESSAGE_TAG, mConversation.isOnHike());
 		ChatThreadUtils.setStickerMetadata(convMessage, sticker.getCategoryId(), sticker.getStickerId(), source);
+
+		// 1) user clicked sticker in Sticker Pallete i.e Sending Sticker
+		MsgRelLogManager.startMessageRelLogging(convMessage, MessageType.STICKER);
+				
 		sendMessage(convMessage);
+		
 	}
 
 	private void sendChatThemeMessage()
@@ -3701,25 +3729,104 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 		if (isLastMessageReceivedAndUnread())
 		{
-			if (PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+			try
 			{
-				setSMSReadInNative();
+				if (PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+				{
+					setSMSReadInNative();
+				}
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+
+				List<Pair<Long, JSONObject>> pairList = mConversationDb.updateStatusAndSendDeliveryReport(mConversation.getMsisdn());
+
+				if (pairList == null)
+				{
+					return;
+				}
+
+				JSONObject dataMR = new JSONObject();
+
+				JSONArray ids = new JSONArray();
+
+				for (int i = 0; i < pairList.size(); i++)
+				{
+					Pair<Long, JSONObject> pair = pairList.get(i);
+					JSONObject object = pair.second;
+					if (object.has(HikeConstants.PRIVATE_DATA))
+					{
+						String pdString = object.optString(HikeConstants.PRIVATE_DATA);
+						JSONObject pd = new JSONObject(pdString);
+						if (pd != null)
+						{
+							String trackId = pd.optString(HikeConstants.MSG_REL_UID);
+							if (trackId != null)
+							{
+								dataMR.putOpt(String.valueOf(pair.first), pd);
+								// Logs for Msg Reliability
+								Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+								Logger.d(AnalyticsConstants.MSG_REL_TAG, "Receiver reads msg on after opening screen,track_id:- " + trackId);
+								MsgRelLogManager.recordMsgRel(trackId, MsgRelEventType.RECEIVER_OPENS_CONV_SCREEN);
+							}
+							else
+							{
+								ids.put(pair.first);
+							}
+						}
+					}
+					else
+					{
+						ids.put(pair.first);
+					}
+				}
+
+				Logger.d("UnreadBug", "Unread count event triggered");
+				Logger.d(AnalyticsConstants.MSG_REL_TAG, "inside API setMessageRead in CT ===========================================");
+				Logger.d(AnalyticsConstants.MSG_REL_TAG, "Going to set MR/NMR as user is on chat screen ");
+
+				/*
+				 * If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read avoid sending read notifications for group chats
+				 */
+				if (ids != null && ids.length() > 0)
+				{
+					JSONObject object = new JSONObject();
+					object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
+					object.put(HikeConstants.TO, mConversation.getMsisdn());
+					object.put(HikeConstants.DATA, ids);
+
+					// Logs for Msg Reliability
+					Logger.d(AnalyticsConstants.MSG_REL_TAG, "MR Packet gen API setMessageRead:- " + object);
+					HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
+				}
+
+				if (dataMR != null && dataMR.length() > 0)
+				{
+					JSONObject object = new JSONObject();
+					object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.NEW_MESSAGE_READ);
+					object.put(HikeConstants.TO, mConversation.getMsisdn());
+					object.put(HikeConstants.DATA, dataMR);
+
+					// Logs for Msg Reliability
+					Logger.d(AnalyticsConstants.MSG_REL_TAG, "NMR Packet gen API setMessageRead:- " + object);
+					HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_QOS_ONE);
+				}
+				Logger.d(TAG, "Unread Count event triggered");
+
+				/**
+				 * If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read avoid sending read notifications for group chats
+				 * 
+				 */
+				//TODO this needs to be verified before merging
+				ChatThreadUtils.publishMessagesRead(ids, msisdn);
+
+			}
+			catch (JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 
-			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(mConversation.getMsisdn());
-
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
-
-			Logger.d(TAG, "Unread Count event triggered");
-
-			/**
-			 * If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read avoid sending read notifications for group chats
-			 * 
-			 */
-			ChatThreadUtils.publishMessagesRead(ids, msisdn);
-
 		}
-
 	}
 
 	/**
