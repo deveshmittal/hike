@@ -1105,7 +1105,7 @@ public class ConvMessage implements Searchable
 	}
 	
 	public boolean isBroadcastConversation() {
-		return Utils.isBroadcastConversation(this.mMsisdn);
+		return OneToNConversationUtils.isBroadcastConversation(this.mMsisdn);
 	}
 	
 	public boolean isBroadcastMessage() {

@@ -42,6 +42,7 @@ import com.bsb.hike.platform.HikeSDKMessageFilter;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.SmsMessageStatusReceiver;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.OneToNConversationUtils;
 import com.bsb.hike.utils.Utils;
 
 public class DbConversationListener implements Listener
@@ -114,7 +115,7 @@ public class DbConversationListener implements Listener
 					}
 					if (convMessage.isBroadcastConversation())
 					{
-						Utils.addBroadcastRecipientConversations(convMessage);
+						OneToNConversationUtils.addBroadcastRecipientConversations(convMessage);
 					}
 				}
 				// Recency was already updated when the ft message was added.

@@ -833,7 +833,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
 		}
 	}
-
+	
 	protected void audioRecordClicked()
 	{
 		showAudioRecordView();
@@ -3123,7 +3123,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		for (long msgId = baseId; msgId < (baseId + count); msgId++)
 		{
-			setStateAndUpdateView(msgId, false);
+//			View has to be updated only in case of Broadcast Conversation and not for corresponding 1-1 chats. This check is for optimization.
+//			baseId = msgId corresponding to BroadcastConversation
+//			rest of msgIds are for corresponding 1-1 Conversations
+			if (msgId == baseId)
+			{
+				setStateAndUpdateView(msgId, true);
+			}
+			else
+			{
+				setStateAndUpdateView(msgId, false);
+			}
 		}
 
 		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
@@ -3664,7 +3674,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (messages != null && messages.size() > 0)
 		{
 			EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(activity, null);
-			Utils.executeConvAsyncTask(emailTask, mConversation);
+			Utils.executeConvAsyncTask(emailTask, mConversation.getConvInfo());
 		}
 		
 		else

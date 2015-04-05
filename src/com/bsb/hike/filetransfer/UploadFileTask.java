@@ -61,8 +61,8 @@ import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.ConvMessage.OriginType;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
@@ -72,6 +72,7 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.OneToNConversationUtils;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.video.HikeVideoCompressor;
@@ -695,7 +696,7 @@ public class UploadFileTask extends FileTransferBase
 						String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
 						convMessageObject.addToSentToMsisdnsList(msisdn);
 					}
-					Utils.addBroadcastRecipientConversations(convMessageObject);
+					OneToNConversationUtils.addBroadcastRecipientConversations(convMessageObject);
 				}
 				
 				//Message sent from here will contain file key and also message_id ==> this is actually being sent to the server.
