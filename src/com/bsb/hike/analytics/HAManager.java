@@ -64,7 +64,7 @@ public class HAManager
 	private NetworkListener listner;
 	
 	private Session fgSessionInstance;
-		
+	
 	/**
 	 * Constructor
 	 */
@@ -121,6 +121,7 @@ public class HAManager
 		
 		// set network listener
 		listner = new NetworkListener(this.context);
+		
 	}
 	
 	/**
@@ -754,7 +755,7 @@ public class HAManager
 		{
 			metadata = new JSONObject();
 			
-			metadata.put("screen", screen);
+			metadata.put("scr", screen);
 			
 			metadata.put("api", api);
 			
@@ -765,7 +766,7 @@ public class HAManager
 			
 			if(!TextUtils.isEmpty(toUser))
 			{
-				metadata.put("to_user", toUser);
+				metadata.put("to", toUser);
 			}
 			
 			HAManager.getInstance().record(AnalyticsConstants.LAST_SEEN_ANALYTICS, AnalyticsConstants.NON_UI_EVENT, EventPriority.HIGH, metadata, AnalyticsConstants.LAST_SEEN_ANALYTICS);
@@ -842,6 +843,24 @@ public class HAManager
 		catch (JSONException e)
 		{
 			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Used for logging UI click event
+	 * @param eventKey
+	 */
+	public static void logClickEvent(String eventKey)
+	{
+		try
+		{
+			JSONObject md = new JSONObject();
+			md.put(HikeConstants.EVENT_KEY, eventKey);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 	}
 
