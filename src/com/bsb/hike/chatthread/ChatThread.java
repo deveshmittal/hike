@@ -3390,6 +3390,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			setupActionBar();
 			activity.updateActionBarColor(currentTheme.headerBgResId());
+			activity.getSupportActionBar().show();
 		}
 		return isRemoved;
 	}
