@@ -1734,7 +1734,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		
 		if (tipView != null)
 		{
-			getListView().addHeaderView(tipView);
+			checkAndAddListViewHeader(tipView);
 		}
 	}
 
@@ -2900,12 +2900,33 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		tipView = convTip.getView(tipType);
 		if (tipView != null)
 		{
-			getListView().addHeaderView(tipView);
+			checkAndAddListViewHeader(tipView);
 			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, true);
 			showingStealthFtueConvTip = true;
 		}
 	}
 	
+	/**
+	 * Workaround for bug where the header needs to be added after adapter has been set in the list view
+	 * @param headerView
+	 */
+	private void checkAndAddListViewHeader(View headerView)
+	{
+		ListAdapter adapter = getListAdapter();
+
+		if (adapter != null)
+		{
+			setListAdapter(null);
+			getListView().addHeaderView(headerView);
+			setListAdapter(adapter);
+		}
+
+		else
+		{
+			getListView().addHeaderView(headerView);
+		}
+	}
+
 	protected void showStealthInfoTip()
 	{
 		if (convTip == null)
@@ -2918,7 +2939,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		tipView = convTip.getView(tipType);
 		if (tipView != null)
 		{
-			getListView().addHeaderView(tipView);
+			checkAndAddListViewHeader(tipView);
 		}
 	}
 	
@@ -2935,7 +2956,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		tipView = convTip.getView(tipType);
 		if (tipView != null)
 		{
-			getListView().addHeaderView(tipView);
+			checkAndAddListViewHeader(tipView);
 		}
 	}
 
