@@ -1417,6 +1417,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						@Override
 						public void negativeClicked(HikeDialog hikeDialog)
 						{
+							hikeDialog.dismiss();
 						}
 					}, conv.getLabel());
 					
@@ -1442,6 +1443,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						@Override
 						public void negativeClicked(HikeDialog hikeDialog)
 						{
+							hikeDialog.dismiss();
 						}
 					}, conv.getLabel());
 					
@@ -1467,6 +1469,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						@Override
 						public void negativeClicked(HikeDialog hikeDialog)
 						{
+							hikeDialog.dismiss();
 						}
 					}, conv.getLabel());
 				}
@@ -1624,8 +1627,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			@Override
 			public void negativeClicked(HikeDialog hikeDialog)
 			{
+				hikeDialog.dismiss();
 			}
-		}, null);
+		});
 	}
 
 	private void fetchConversations()
@@ -3240,8 +3244,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void negativeClicked(HikeDialog hikeDialog)
 				{
+					hikeDialog.dismiss();
 				}
-			}, null);
+			});
 		}
 	}
 
