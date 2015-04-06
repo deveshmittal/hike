@@ -15,9 +15,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.Intent;
-import android.os.CountDownTimer;
-import android.text.Html;
 import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -44,21 +41,15 @@ import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.Conversation.ConvInfo;
 import com.bsb.hike.models.Conversation.OneToNConvInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.ui.PeopleActivity;
-import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.ui.StatusUpdate;
-import com.bsb.hike.ui.TellAFriend;
-import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.OneToNConversationUtils;
@@ -402,16 +393,16 @@ public class ConversationsAdapter extends BaseAdapter
 			String msisdn = convInfo.getMsisdn();
 			String name = convInfo.getConversationName();
 			// For Groups/Broadcasts, the contact name can be empty, so the search is to be performed on the diaplayed name.
-			if (Utils.isGroupConversation(msisdn))
+			if (OneToNConversationUtils.isGroupConversation(msisdn))
 			{
 				// getLabel() fetches the appropriate display name.
 				name = convInfo.getLabel();
 			}
-			if (textToBeFiltered.equals("broadcast") && Utils.isBroadcastConversation(msisdn))
+			if (textToBeFiltered.equals("broadcast") && OneToNConversationUtils.isBroadcastConversation(msisdn))
 			{
 				found = true;
 			}
-			else if (textToBeFiltered.equals("group") && Utils.isGroupConversation(msisdn) && !Utils.isBroadcastConversation(msisdn))
+			else if (textToBeFiltered.equals("group") && OneToNConversationUtils.isGroupConversation(msisdn))
 			{
 				found = true;
 			}
@@ -528,11 +519,11 @@ public class ConversationsAdapter extends BaseAdapter
 			contactView.setText(name);
 		}
 
-		if (Utils.isBroadcastConversation(convInfo.getMsisdn()))
+		if (OneToNConversationUtils.isBroadcastConversation(convInfo.getMsisdn()))
 		{
 				contactView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 		}
-		else if (Utils.isGroupConversation(convInfo.getMsisdn()))
+		else if (OneToNConversationUtils.isGroupConversation(convInfo.getMsisdn()))
 		{
 				contactView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_group, 0, 0, 0);
 		}
