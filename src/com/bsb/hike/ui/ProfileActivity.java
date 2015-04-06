@@ -2889,6 +2889,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			@Override
 			public void negativeClicked(HikeDialog hikeDialog)
 			{
+				hikeDialog.dismiss();
 			}
 		}, contactInfo.getFirstName());	
 		
@@ -2958,9 +2959,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			@Override
 			public void negativeClicked(HikeDialog hikeDialog)
 			{
-				
+				hikeDialog.dismiss();
 			}
-		}, null);
+		});
 	}
 
 	private void deleteStatus(final String statusId)
