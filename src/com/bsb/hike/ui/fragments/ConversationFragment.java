@@ -1331,7 +1331,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else
 		{
-				if (Utils.isBroadcastConversation(conv.getMsisdn()))
+				if (OneToNConversationUtils.isBroadcastConversation(conv.getMsisdn()))
 				{
 					optionsList.add(getString(R.string.broadcast_info));
 				}
@@ -1350,12 +1350,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(ContactManager.getInstance().isBlocked(conv.getMsisdn())?getString(R.string.unblock_title):getString(R.string.block_title));
 		}
-		if (Utils.isGroupConversation(conv.getMsisdn()))
+		if (OneToNConversationUtils.isGroupConversation(conv.getMsisdn()))
 		{
 			optionsList.add(getString(R.string.delete_leave));
 		}
 		
-		else if (Utils.isBroadcastConversation(conv.getMsisdn()))
+		else if (OneToNConversationUtils.isBroadcastConversation(conv.getMsisdn()))
 		{
 			optionsList.add(getString(R.string.delete_broadcast));
 		}
@@ -2006,9 +2006,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				convInfo.setmConversationName(HikeMessengerApp.hikeBotNamesMap.get(convInfo.getMsisdn()));
 			}
-			Logger.d(getClass().getSimpleName(), "New Conversation. Group Conversation? " + (Utils.isGroupConversation(convInfo.getMsisdn())));
+			Logger.d(getClass().getSimpleName(), "New Conversation. Group Conversation? " + (OneToNConversationUtils.isOneToNConversation(convInfo.getMsisdn())));
 			mConversationsByMSISDN.put(convInfo.getMsisdn(), convInfo);
-			if (convInfo.getLastConversationMsg() == null && !(Utils.isGroupConversation(convInfo.getMsisdn())))
+			if (convInfo.getLastConversationMsg() == null && !(OneToNConversationUtils.isOneToNConversation(convInfo.getMsisdn())))
 			{
 				return;
 			}
@@ -2824,7 +2824,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			
 			// This Pubsub is currently used here only to update default name
 			// of a broadcast conversation.
-			if(!Utils.isBroadcastConversation(groupId))
+			if(!OneToNConversationUtils.isBroadcastConversation(groupId))
 			{
 				return;
 			}
@@ -3322,7 +3322,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	
 	protected void viewGroupInfo(ConvInfo convInfo) {
 		Intent intent = new Intent(getActivity(), ProfileActivity.class);
-		if (Utils.isBroadcastConversation(convInfo.getMsisdn()))
+		if (OneToNConversationUtils.isBroadcastConversation(convInfo.getMsisdn()))
 		{
 			intent.putExtra(HikeConstants.Extras.BROADCAST_LIST, true);
 			intent.putExtra(HikeConstants.Extras.EXISTING_BROADCAST_LIST, convInfo.getMsisdn());
