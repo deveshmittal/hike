@@ -1834,6 +1834,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				if (parentView == null)
 				{
 					notifyDataSetChanged();
+					return;
 				}
 				
 				mAdapter.updateViewsRelatedToTypingNotif(parentView, convInfo);
@@ -1848,6 +1849,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				if (parentView == null)
 				{
 					notifyDataSetChanged();
+					return;
 				}
 				
 				mAdapter.updateViewsRelatedToLastMessage(parentView, convInfo.getLastConversationMsg(), convInfo);
