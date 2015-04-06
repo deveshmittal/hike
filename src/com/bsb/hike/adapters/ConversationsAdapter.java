@@ -393,7 +393,7 @@ public class ConversationsAdapter extends BaseAdapter
 			String msisdn = convInfo.getMsisdn();
 			String name = convInfo.getConversationName();
 			// For Groups/Broadcasts, the contact name can be empty, so the search is to be performed on the diaplayed name.
-			if (OneToNConversationUtils.isGroupConversation(msisdn))
+			if (OneToNConversationUtils.isGroupConversation(msisdn) || OneToNConversationUtils.isBroadcastConversation(msisdn))
 			{
 				// getLabel() fetches the appropriate display name.
 				name = convInfo.getLabel();
