@@ -16,6 +16,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.db.DBConstants;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.GroupConversation;
@@ -462,6 +463,7 @@ public class ConvMessage implements Searchable
 		{
 			this.shouldShowPush = data.optBoolean(HikeConstants.PUSH, true);
 		}
+		
 	}
 
 	public ConvMessage(JSONObject obj, Conversation conversation, Context context, boolean isSelfGenerated) throws JSONException
