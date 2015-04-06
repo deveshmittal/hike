@@ -315,10 +315,10 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 				IntentFactory.openConnectedApps(this);
 				break;
 			case 6:
-				HAManager.logClickEvent(HikeConstants.LogEvent.PRIVACY_SETTING_CLICKED);
-				IntentFactory.openSettingPrivacy(this);
+				IntentFactory.openSettingAccount(this);
 				break;
 			case 7:
+				HAManager.logClickEvent(HikeConstants.LogEvent.PRIVACY_SETTING_CLICKED);
 				IntentFactory.openSettingPrivacy(this);
 				break;
 			case 8:
@@ -343,10 +343,10 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 				IntentFactory.openSettingSMS(this);
 				break;
 			case 5:
-				HAManager.logClickEvent(HikeConstants.LogEvent.PRIVACY_SETTING_CLICKED);
-				IntentFactory.openSettingPrivacy(this);
+				IntentFactory.openSettingAccount(this);
 				break;
 			case 6:
+				HAManager.logClickEvent(HikeConstants.LogEvent.PRIVACY_SETTING_CLICKED);
 				IntentFactory.openSettingPrivacy(this);
 				break;
 			case 7:
