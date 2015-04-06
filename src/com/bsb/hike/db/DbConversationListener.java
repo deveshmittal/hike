@@ -115,7 +115,6 @@ public class DbConversationListener implements Listener
 				if (!convMessage.isFileTransferMessage())
 				{
 					mConversationDb.addConversationMessages(convMessage,true);
-					//This inserts Msg into MessageTable and assigns msgID to convMessage
 				
 					// Adding Logs for Message Reliability
 					Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");

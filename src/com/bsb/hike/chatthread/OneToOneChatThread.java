@@ -42,6 +42,9 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.MsgRelLogManager;
+import com.bsb.hike.analytics.AnalyticsConstants.MessageType;
+import com.bsb.hike.analytics.AnalyticsConstants.MsgRelEventType;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.dialog.H20Dialog;
@@ -54,6 +57,8 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.MessagePrivateData;
+import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.OneToOneConversation;
@@ -65,6 +70,7 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.LastSeenScheduler;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SoundUtils;
@@ -441,6 +447,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			{
 				msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
 				removeFromMessageMap(msg);
+				
+				//Log Events For Message Reliability
+				MessagePrivateData pd = msg.getPrivateData();
+				if(pd != null && pd.getTrackID() != null)
+				{
+					Logger.d(AnalyticsConstants.MSG_REL_TAG, "===========================================");
+					Logger.d(AnalyticsConstants.MSG_REL_TAG, "Read Shown to Sender:track_id "+ msg.getPrivateData().getTrackID());
+					MsgRelLogManager.logMsgRelEvent(msg, MsgRelEventType.MR_SHOWN_AT_SENEDER_SCREEN);
+				}
 			}
 		}
 		if (mConversation.isOnHike())
@@ -949,11 +964,39 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	protected void sendPoke()
 	{
-		super.sendPoke();
+		/** Disabling super as we have to do logging specific to OneToOneChat
+			and we need convmessage object for logging
+		**/
+		//super.sendPoke();
+		
+		
+		//When MsgRelLogManager is removed / or when to for GC as well, we can go with super
+		ConvMessage convMessage = Utils.makeConvMessage(msisdn, getString(R.string.poke_msg), mConversation.isOnHike());
+		ChatThreadUtils.setPokeMetadata(convMessage);
+
+		// 1) user double clicked on Chat Screen i.e Sending nudge
+		MsgRelLogManager.startMessageRelLogging(convMessage, MessageType.TEXT);
+				
+		sendMessage(convMessage);
 
 		Utils.vibrateNudgeReceived(activity.getApplicationContext());
 	}
 
+	/** Overrriding as we have to do logging specific to OneToOneChat
+		and we need convmessage object for logging
+	 **/
+	@Override
+	protected void sendSticker(Sticker sticker, String source)
+	{
+		ConvMessage convMessage = Utils.makeConvMessage(msisdn, StickerManager.STICKER_MESSAGE_TAG, mConversation.isOnHike());
+		ChatThreadUtils.setStickerMetadata(convMessage, sticker.getCategoryId(), sticker.getStickerId(), source);
+
+		// 1) user clicked sticker in Sticker Pallete i.e Sending Sticker
+		MsgRelLogManager.startMessageRelLogging(convMessage, MessageType.STICKER);
+				
+		sendMessage(convMessage);
+	}
+	
 	/**
 	 * Overrides {@link ChatThread}'s {@link #setupActionBar()}, to set the last seen time
 	 */
@@ -1520,7 +1563,24 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 		super.sendButtonClicked();
+		
 	}
+
+	/**
+	 * Overrriding API as we have to log this event specific to OneToOne
+	 * When to go logging for GC we can go with super
+	 */
+	@Override
+	protected void sendMessage()
+	{
+		ConvMessage convMessage = createConvMessageFromCompose();
+
+		// 1) user pressed send button i.e sending Text Message
+		MsgRelLogManager.startMessageRelLogging(convMessage, MessageType.TEXT);
+				
+		sendMessage(convMessage);
+	}
+	
 
 	/**
 	 * H20 TIP FUNCTIONS START HERE. Unless explicitly stated, these functions are called on the UI Thread
@@ -1838,7 +1898,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			((TextView) hikeToOfflineTipView.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.reciever_is_offline, getConvLabel()));
 			((TextView) hikeToOfflineTipView.findViewById(R.id.send_button_text)).setText(R.string.next_uppercase);
 			hikeToOfflineTipView.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
-			hikeToOfflineTipView.findViewById(R.id.close_tip).setVisibility(View.GONE);
 
 			/**
 			 * If action mode is on and H20 Tip comes, so we are disabling NextButton to avoid interference
@@ -2111,7 +2170,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private void initializeH20Mode()
 	{
 		hikeToOfflineTipView.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
-		hikeToOfflineTipView.findViewById(R.id.close_tip).setVisibility(View.GONE);
 
 		for (Long msgid : undeliveredMessages.keySet())
 		{
