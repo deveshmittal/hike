@@ -1838,7 +1838,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			((TextView) hikeToOfflineTipView.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.reciever_is_offline, getConvLabel()));
 			((TextView) hikeToOfflineTipView.findViewById(R.id.send_button_text)).setText(R.string.next_uppercase);
 			hikeToOfflineTipView.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
-			hikeToOfflineTipView.findViewById(R.id.close_tip).setVisibility(View.GONE);
 
 			/**
 			 * If action mode is on and H20 Tip comes, so we are disabling NextButton to avoid interference
@@ -2111,7 +2110,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private void initializeH20Mode()
 	{
 		hikeToOfflineTipView.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
-		hikeToOfflineTipView.findViewById(R.id.close_tip).setVisibility(View.GONE);
 
 		for (Long msgid : undeliveredMessages.keySet())
 		{
