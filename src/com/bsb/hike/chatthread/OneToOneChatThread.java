@@ -58,6 +58,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.MessagePrivateData;
+import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.OneToOneConversation;
@@ -69,6 +70,7 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.LastSeenScheduler;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SoundUtils;
@@ -962,11 +964,39 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	protected void sendPoke()
 	{
-		super.sendPoke();
+		/** Disabling super as we have to do logging specific to OneToOneChat
+			and we need convmessage object for logging
+		**/
+		//super.sendPoke();
+		
+		
+		//When MsgRelLogManager is removed / or when to for GC as well, we can go with super
+		ConvMessage convMessage = Utils.makeConvMessage(msisdn, getString(R.string.poke_msg), mConversation.isOnHike());
+		ChatThreadUtils.setPokeMetadata(convMessage);
+
+		// 1) user double clicked on Chat Screen i.e Sending nudge
+		MsgRelLogManager.startMessageRelLogging(convMessage, MessageType.TEXT);
+				
+		sendMessage(convMessage);
 
 		Utils.vibrateNudgeReceived(activity.getApplicationContext());
 	}
 
+	/** Overrriding as we have to do logging specific to OneToOneChat
+		and we need convmessage object for logging
+	 **/
+	@Override
+	protected void sendSticker(Sticker sticker, String source)
+	{
+		ConvMessage convMessage = Utils.makeConvMessage(msisdn, StickerManager.STICKER_MESSAGE_TAG, mConversation.isOnHike());
+		ChatThreadUtils.setStickerMetadata(convMessage, sticker.getCategoryId(), sticker.getStickerId(), source);
+
+		// 1) user clicked sticker in Sticker Pallete i.e Sending Sticker
+		MsgRelLogManager.startMessageRelLogging(convMessage, MessageType.STICKER);
+				
+		sendMessage(convMessage);
+	}
+	
 	/**
 	 * Overrides {@link ChatThread}'s {@link #setupActionBar()}, to set the last seen time
 	 */
@@ -1535,6 +1565,22 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		super.sendButtonClicked();
 		
 	}
+
+	/**
+	 * Overrriding API as we have to log this event specific to OneToOne
+	 * When to go logging for GC we can go with super
+	 */
+	@Override
+	protected void sendMessage()
+	{
+		ConvMessage convMessage = createConvMessageFromCompose();
+
+		// 1) user pressed send button i.e sending Text Message
+		MsgRelLogManager.startMessageRelLogging(convMessage, MessageType.TEXT);
+				
+		sendMessage(convMessage);
+	}
+	
 
 	/**
 	 * H20 TIP FUNCTIONS START HERE. Unless explicitly stated, these functions are called on the UI Thread
