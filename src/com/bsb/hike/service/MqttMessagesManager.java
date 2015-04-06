@@ -2539,7 +2539,7 @@ public class MqttMessagesManager
 			
 			// Adding Logs for Message Reliability
 			MessagePrivateData pd = convMessage.getPrivateData();
-			if (pd != null && pd.getTrackID() != null && !Utils.isGroupConversation(convMessage.getMsisdn()))
+			if (pd != null && pd.getTrackID() != null && !OneToNConversationUtils.isGroupConversation(convMessage.getMsisdn()))
 			{
 				MsgRelLogManager.recordMsgRel(pd.getTrackID(), MsgRelEventType.RECIEVR_RECV_MSG);
 			}
