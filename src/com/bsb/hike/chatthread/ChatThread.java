@@ -614,8 +614,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void preShowOverflowMenu(List<OverFlowMenuItem> overflowItems)
 	{
-		mActionBar.updateOverflowMenuItemActiveState(R.string.search, !messages.isEmpty());
-		
+		mActionBar.updateOverflowMenuItemActiveState(getMenuItemsToBeModified());
+
 		if (!sharedPreference.getData(HikeMessengerApp.CT_SEARCH_CLICKED, false) && !messages.isEmpty())
 		{
 			mActionBar.updateOverflowMenuItemIcon(R.string.search, R.drawable.ic_top_bar_indicator_search);
@@ -625,7 +625,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mActionBar.updateOverflowMenuItemIcon(R.string.search, 0);
 		}
 	}
-
+	
+	/**
+	 * @return arrayList of overflow menu items that are modified before menu is shown
+	 */
+	public ArrayList<Pair<Integer, Boolean>>  getMenuItemsToBeModified()
+	{
+		ArrayList<Pair<Integer, Boolean>> itemsPair = new ArrayList<Pair<Integer,Boolean>>();
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.search, !messages.isEmpty()));
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.clear_chat, !messages.isEmpty()));
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.email_chat, !messages.isEmpty()));
+		
+		return itemsPair;
+	}
+ 
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		Logger.i(TAG, "on activity result " + requestCode + " result " + resultCode);
