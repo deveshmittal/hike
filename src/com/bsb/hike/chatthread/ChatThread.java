@@ -615,6 +615,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void preShowOverflowMenu(List<OverFlowMenuItem> overflowItems)
 	{
 		mActionBar.updateOverflowMenuItemActiveState(R.string.search, !messages.isEmpty());
+		
 		if (!sharedPreference.getData(HikeMessengerApp.CT_SEARCH_CLICKED, false) && !messages.isEmpty())
 		{
 			mActionBar.updateOverflowMenuItemIcon(R.string.search, R.drawable.ic_top_bar_indicator_search);
@@ -4331,6 +4332,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		}
 	}
-	
-	
+
+	public void onKeyUp()
+	{
+		if (mActionBar != null)
+		{
+			showOverflowMenu();
+		}
+	}
 }
