@@ -1995,7 +1995,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 
 				dialogShowing = null;
-				dialog.dismiss();
+				hikeDialog.dismiss();
 				HomeActivity.this.dialog = null;
 			}
 
