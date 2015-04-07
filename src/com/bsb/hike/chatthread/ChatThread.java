@@ -4104,7 +4104,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, msisdn);
 			activity.startActivity(intent);
-			mActionMode.finish();
 			return true;
 
 		case R.id.copy_msgs:
