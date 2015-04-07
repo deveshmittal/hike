@@ -4195,7 +4195,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		
 		if (themePicker != null && themePicker.isShowing())
 		{
-			themePicker.refreshViews();
+			themePicker.refreshViews(true);
 		}
 	}
 	

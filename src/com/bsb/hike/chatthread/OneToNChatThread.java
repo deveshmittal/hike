@@ -526,13 +526,6 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		}
 	}
 
-	@Override
-	protected void showThemePicker()
-	{
-		super.showThemePicker();
-		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip_group);
-	}
-	
 	protected void onBulkMessageReceived(Object object)
 	{
 		HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;

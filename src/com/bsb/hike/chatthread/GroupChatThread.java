@@ -1,7 +1,6 @@
 package com.bsb.hike.chatthread;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.json.JSONException;
@@ -888,5 +887,13 @@ public class GroupChatThread extends OneToNChatThread
 		}
 
 	}
+	
+	@Override
+	protected void showThemePicker()
+	{
+		super.showThemePicker();
+		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip_group, activity.getResources().getConfiguration().orientation);
+	}
+
 	
 }
