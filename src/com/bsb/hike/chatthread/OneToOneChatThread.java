@@ -188,6 +188,13 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		Logger.i(TAG, "menu item click" + item.getItemId());
+		
+//		Not allowing user to access actionbar items on a blocked user's chatThread
+		if (mConversation.isBlocked())
+		{
+			return false;
+		}
+		
 		switch (item.getItemId())
 		{
 			case R.id.voip_call:
