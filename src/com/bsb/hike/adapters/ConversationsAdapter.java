@@ -371,7 +371,7 @@ public class ConversationsAdapter extends BaseAdapter
 				try
 				{
 					boolean found = false;
-					if (textToBeFiltered.equals(R.string.broadcast) && OneToNConversationUtils.isBroadcastConversation(info.getMsisdn()))
+					if (textToBeFiltered.equals(context.getString(R.string.broadcast).toLowerCase()) && OneToNConversationUtils.isBroadcastConversation(info.getMsisdn()))
 					{
 						found = true;
 					}
