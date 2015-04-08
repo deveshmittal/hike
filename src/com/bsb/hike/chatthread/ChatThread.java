@@ -4249,18 +4249,23 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		if ((view == mComposeView))
 		{
-
+	     // On some phones (like: micromax A120) "actionId" always comes 0, so added one more optional check (view.getId() ==R.id.msg_compose) & (view.getId() ==R.id.search_text)
 			if ((actionId == EditorInfo.IME_ACTION_SEND)
-					|| ((keyEvent != null) && (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) && (keyEvent.getAction() != KeyEvent.ACTION_UP) && (getResources()
-							.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)))
-			{
+					|| ((view.getId() == R.id.msg_compose) && PreferenceManager
+							.getDefaultSharedPreferences(
+									activity.getApplicationContext())
+							.getBoolean(HikeConstants.SEND_ENTER_PREF, false))
+					|| ((keyEvent != null)
+							&& (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+							&& (keyEvent.getAction() != KeyEvent.ACTION_UP) && (getResources()
+							.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)))	{
 				
 				if (!TextUtils.isEmpty(mComposeView.getText())) {
 					sendButtonClicked();
 				}
 				return true;
 			}
-			else if (actionId == EditorInfo.IME_ACTION_SEARCH)
+			else if (actionId == EditorInfo.IME_ACTION_SEARCH||(view.getId() ==R.id.search_text))
 			{
 				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
 				searchMessage(false);
