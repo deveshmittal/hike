@@ -1,6 +1,5 @@
 package com.bsb.hike.chatthread;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
@@ -173,7 +172,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	protected void handleSystemMessages()
 	{
 		ContactManager conMgr = ContactManager.getInstance();
-		oneToNConversation.setConversationParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), false, false));
+		oneToNConversation.setConversationParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), true, false));
 	}
 	
 	@Override
@@ -261,10 +260,8 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 			onGroupRevived(object);
 			break;
 		case HikePubSub.PARTICIPANT_JOINED_ONETONCONV:
-			onParticipantJoinedOrLeftGroup(object, true);
-			break;
 		case HikePubSub.PARTICIPANT_LEFT_ONETONCONV:
-			onParticipantJoinedOrLeftGroup(object, false);
+			onParticipantJoinedOrLeftGroup(object);
 			break;
 		case HikePubSub.BULK_MESSAGE_RECEIVED:
 			onBulkMessageReceived(object);
@@ -285,7 +282,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		switch (msg.what)
 		{
 		case PARTICIPANT_JOINED_OR_LEFT_CONVERSATION:
-			incrementGroupParticipants((int) msg.obj);
+			showActiveConversationMemberCount();
 			break;
 		case GROUP_REVIVED:
 			handleGroupRevived();
@@ -339,7 +336,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 
 		setLabel(mConversation.getLabel());
 
-		incrementGroupParticipants(0);
+		showActiveConversationMemberCount();
 	}
 
 	/**
@@ -347,18 +344,18 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	 * 
 	 * @param morePeopleCount
 	 */
-	protected void incrementGroupParticipants(int morePeopleCount)
+	protected void showActiveConversationMemberCount()
 	{
-		int numActivePeople = oneToNConversation.getParticipantListSize() + morePeopleCount;
-
-		TextView groupCountTextView = (TextView) mActionBarView.findViewById(R.id.contact_status);
+		int numActivePeople = oneToNConversation.getParticipantListSize();
+		
+		TextView memberCountTextView = (TextView) mActionBarView.findViewById(R.id.contact_status);
 
 		if (numActivePeople > 0)
 		{
 			/**
 			 * Incrementing numActivePeople by + 1 to add self
 			 */
-			groupCountTextView.setText(activity.getResources().getString(R.string.num_people, (numActivePeople + 1)));
+			memberCountTextView.setText(activity.getResources().getString(R.string.num_people, (numActivePeople + 1)));
 		}
 	}
 
@@ -453,36 +450,16 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	 * 
 	 * @param object
 	 */
-	private void onParticipantJoinedOrLeftGroup(Object object, boolean joined)
+	private void onParticipantJoinedOrLeftGroup(Object object)
 	{
 		/**
 		 * Received message for current open chatThread
 		 */
 		if (shouldProcessGCJOrGCK(object)) // Defensive check
 		{
-			int addPeopleCount = 0;
-			if (joined) // Participants added
-			{
-				JSONObject jObj = (JSONObject) object;
-
-				JSONArray participants = jObj.optJSONArray(HikeConstants.DATA);
-
-				if (participants == null) // If we don't get participants, we simply return here.
-				{
-					Logger.wtf(TAG, "onParticipantJoinedOrLeftGroup : Getting null participants array in : " + object.toString());
-					return;
-				}
-
-				addPeopleCount = participants.length();
-			}
-
-			else
-			// A participant has been kicked out
-			{
-				addPeopleCount = -1;
-			}
-
-			sendUIMessage(PARTICIPANT_JOINED_OR_LEFT_CONVERSATION, addPeopleCount);
+			ContactManager conMgr = ContactManager.getInstance();
+			oneToNConversation.setConversationParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), true, false));
+			uiHandler.sendEmptyMessage(PARTICIPANT_JOINED_OR_LEFT_CONVERSATION);
 		}
 	}
 
@@ -565,7 +542,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 				if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 				{
 					ContactManager contactManager = ContactManager.getInstance();
-					oneToNConversation.setConversationParticipantList(contactManager.getGroupParticipants(oneToNConversation.getMsisdn(), false, false));
+					oneToNConversation.setConversationParticipantList(contactManager.getGroupParticipants(oneToNConversation.getMsisdn(), true, false));
 				}
 
 				bulkLabel = convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? oneToNConversation.getLabel() : null;

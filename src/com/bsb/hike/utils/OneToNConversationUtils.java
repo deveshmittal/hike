@@ -193,7 +193,7 @@ public class OneToNConversationUtils {
 		}
 		HikeMqttManagerNew.getInstance().sendMessage(gcjJson, HikeMqttManagerNew.MQTT_QOS_ONE);
 
-		if (oneToNConversation instanceof BroadcastConversation && !newOneToNConv)
+		if (!newOneToNConv)
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.PARTICIPANT_JOINED_ONETONCONV, gcjJson);
 		}
