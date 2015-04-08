@@ -52,7 +52,7 @@ public class BroadcastChatThread extends OneToNChatThread
 	@Override
     protected String[] getPubSubListeners()
     {
-        return new String[] { HikePubSub.ONETON_MESSAGE_DELIVERED_READ, HikePubSub.CONVERSATION_REVIVED, HikePubSub.PARTICIPANT_JOINED_ONETONCONV, HikePubSub.PARTICIPANT_LEFT_ONETONCONV };
+        return new String[] { HikePubSub.ONETON_MESSAGE_DELIVERED_READ, HikePubSub.CONVERSATION_REVIVED, HikePubSub.PARTICIPANT_JOINED_ONETONCONV, HikePubSub.PARTICIPANT_LEFT_ONETONCONV, HikePubSub.PARTICIPANT_JOINED_SYSTEM_MESSAGE };
     }
 	
 	@Override

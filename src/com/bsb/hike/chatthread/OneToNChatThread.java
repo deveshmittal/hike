@@ -266,6 +266,9 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		case HikePubSub.BULK_MESSAGE_RECEIVED:
 			onBulkMessageReceived(object);
 			break;
+		case HikePubSub.PARTICIPANT_JOINED_SYSTEM_MESSAGE:
+			onMessageReceived(object);
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching PubSub event in Group ChatThread. Calling super class' onEventReceived");
 			super.onEventReceived(type, object);
