@@ -744,7 +744,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	public void charResetAfterSeperator()
 	{
 		adapter.removeFilter();
-		setupForSelectAll();
+		
+//		We do not add 'Select all' button at the bottom for Group Chats
+		if (!(this.composeMode == CREATE_GROUP_MODE))
+		{
+			setupForSelectAll();
+		}
 	}
 
 	private void setMode(int mode)
