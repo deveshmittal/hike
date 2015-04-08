@@ -13,13 +13,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -55,6 +54,8 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 	public static final String ACTION_BAR_TYPE_KEY = "action_bar";
 
 	public static final String RETURN_RESULT_KEY = "return_result";
+	
+	private static final int GALLERY_ACTIVITY = 31;
 
 	public static final int PHOTOS_EDITOR_ACTION_BAR_TYPE = 1;
 
@@ -545,6 +546,9 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			setResult(RESULT_OK);
 			finish();
 			break;
+		case GALLERY_ACTIVITY:
+			Logger.d("GalleryActivity", "Inside onActivity Result. Perhaps this activity was started by itself only : " + requestCode);
+			break;
 		default:
 			super.onActivityResult(requestCode, resultCode, data);
 		}
@@ -588,7 +592,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			{
 				intent.putExtra(START_FOR_RESULT, sendResult);
 			}
-			startActivityForResult(intent, AttachmentPicker.GALLERY);
+			startActivityForResult(intent, GALLERY_ACTIVITY);
 		}
 		else
 		{

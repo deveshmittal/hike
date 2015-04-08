@@ -543,13 +543,13 @@ public abstract class OneToNConversation extends Conversation
 		if (OneToNConversationUtils.isBroadcastConversation(msisdn))
 		{
 			conversation = new BroadcastConversation.ConversationBuilder(msisdn).setConversationOwner(jsonObj.getString(HikeConstants.FROM))
-					.setConversationParticipantsList(participants).setConversationOwner(convName).build();
+					.setConversationParticipantsList(participants).setConvName(convName).build();
 
 		}
 		else
 		{
 			conversation = new GroupConversation.ConversationBuilder(msisdn).setConversationOwner(jsonObj.getString(HikeConstants.FROM))
-					.setConversationParticipantsList(participants).setConversationOwner(convName).build();
+					.setConversationParticipantsList(participants).setConvName(convName).build();
 		}
 
 		return conversation;

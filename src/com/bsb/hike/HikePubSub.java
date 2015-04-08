@@ -390,7 +390,9 @@ public class HikePubSub implements Runnable
 
 	public static final String CONVERSATION_TS_UPDATED = "conversationTSUpdated";
 
-	public static String MUTE_BOT = "muteBot";
+	public static final String MUTE_BOT = "muteBot";
+	
+	public static final String PARTICIPANT_JOINED_SYSTEM_MESSAGE = "participantJoinedSystemMsg";
 	
 	private final Thread mThread;
 

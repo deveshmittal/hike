@@ -489,28 +489,42 @@ public class ChatThreadUtils
 	}
 	
 	/**
+	 * Utility method to get Status bar height in Android phones using reflection
+	 * 
+	 * @param context
+	 * @return
+	 */
+	public static int getStatusBarHeight(Context context)
+	{
+		int result = 0;
+		int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+		if (resourceId > 0)
+		{
+			result = context.getResources().getDimensionPixelSize(resourceId);
+		}
+		return result;
+	}
+	
+	/**
 	 * This method scales the image proportional to the given view height and width. By using {@code Matrix.ScaleToFit} instead of {@link ScaleType} we avoid the image view from moving
 	 * up/down when keyboard opens. This method also preserves the aspect ratio of the original bitmap by calculating its new height/width opportunistically
 	 * 
 	 * @param drawable
 	 * @param imageView
 	 */
-	
 	protected static void applyMatrixTransformationToImageView(Drawable drawable, ImageView imageView)
 	{
-		Rect r = new Rect();
-		imageView.getWindowVisibleDisplayFrame(r);
-		
 		/**
 		 * Drawable width and height
 		 */
 		float imageWidth = drawable.getIntrinsicWidth();
 		float imageHeight =drawable.getIntrinsicHeight();
+		
 		/**
 		 * View height and width
 		 */
-		float viewHeight = r.bottom - r.top;
-		float viewWidth = r.right - r.left;
+		float viewWidth = imageView.getContext().getResources().getDisplayMetrics().widthPixels;
+		float viewHeight = imageView.getContext().getResources().getDisplayMetrics().heightPixels - getStatusBarHeight(imageView.getContext());
 		
 		RectF dst; //Destination rectangle frame in which we have to place the drawable
 		/**

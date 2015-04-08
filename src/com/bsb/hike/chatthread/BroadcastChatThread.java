@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Intent;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
@@ -51,7 +52,7 @@ public class BroadcastChatThread extends OneToNChatThread
 	@Override
     protected String[] getPubSubListeners()
     {
-        return new String[] { HikePubSub.ONETON_MESSAGE_DELIVERED_READ, HikePubSub.CONVERSATION_REVIVED, HikePubSub.PARTICIPANT_JOINED_ONETONCONV, HikePubSub.PARTICIPANT_LEFT_ONETONCONV };
+        return new String[] { HikePubSub.ONETON_MESSAGE_DELIVERED_READ, HikePubSub.CONVERSATION_REVIVED, HikePubSub.PARTICIPANT_JOINED_ONETONCONV, HikePubSub.PARTICIPANT_LEFT_ONETONCONV, HikePubSub.PARTICIPANT_JOINED_SYSTEM_MESSAGE };
     }
 	
 	@Override
@@ -153,15 +154,15 @@ public class BroadcastChatThread extends OneToNChatThread
 	}
 	
 	@Override
-	protected void incrementGroupParticipants(int morePeopleCount)
+	protected void showActiveConversationMemberCount()
 	{
-		int numActivePeople = oneToNConversation.getParticipantListSize() + morePeopleCount;
-
-		TextView groupCountTextView = (TextView) mActionBarView.findViewById(R.id.contact_status);
+		int numActivePeople = oneToNConversation.getParticipantListSize();
+		
+		TextView memberCountTextView = (TextView) mActionBarView.findViewById(R.id.contact_status);
 
 		if (numActivePeople > 0)
 		{
-			groupCountTextView.setText(activity.getResources().getString(R.string.num_people, (numActivePeople)));
+			memberCountTextView.setText(activity.getResources().getString(R.string.num_people, (numActivePeople)));
 		}
 	}
 	

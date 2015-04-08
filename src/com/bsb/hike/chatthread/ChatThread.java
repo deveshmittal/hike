@@ -614,7 +614,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void preShowOverflowMenu(List<OverFlowMenuItem> overflowItems)
 	{
-		mActionBar.updateOverflowMenuItemActiveState(R.string.search, !messages.isEmpty());
+		mActionBar.updateOverflowMenuItemActiveState(getMenuItemsToBeModified());
+
 		if (!sharedPreference.getData(HikeMessengerApp.CT_SEARCH_CLICKED, false) && !messages.isEmpty())
 		{
 			mActionBar.updateOverflowMenuItemIcon(R.string.search, R.drawable.ic_top_bar_indicator_search);
@@ -624,7 +625,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mActionBar.updateOverflowMenuItemIcon(R.string.search, 0);
 		}
 	}
-
+	
+	/**
+	 * @return arrayList of overflow menu items that are modified before menu is shown
+	 */
+	public ArrayList<Pair<Integer, Boolean>>  getMenuItemsToBeModified()
+	{
+		ArrayList<Pair<Integer, Boolean>> itemsPair = new ArrayList<Pair<Integer,Boolean>>();
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.search, !messages.isEmpty()));
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.clear_chat, !messages.isEmpty()));
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.email_chat, !messages.isEmpty()));
+		
+		return itemsPair;
+	}
+ 
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		Logger.i(TAG, "on activity result " + requestCode + " result " + resultCode);
@@ -848,7 +862,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void stickerClicked()
 	{
-		if (mTips.isGivenTipShowing(ChatThreadTips.STICKER_TIP))
+		if (mTips.isGivenTipShowing(ChatThreadTips.STICKER_TIP) || (!mTips.seenTip(ChatThreadTips.STICKER_TIP)))
 		{
 			mTips.setTipSeen(ChatThreadTips.STICKER_TIP);
 			recordFirstTimeStickerClick();
@@ -883,7 +897,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mShareablePopupLayout.togglePopup(mEmoticonPicker, activity.getResources().getConfiguration().orientation);
 	}
 
-	protected void showThemePicker()
+	protected void setUpThemePicker()
 	{
 		/**
 		 * We can now dismiss the chatTheme tip if it is there or we can hide any other visible tip
@@ -3390,6 +3404,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			setupActionBar();
 			activity.updateActionBarColor(currentTheme.headerBgResId());
+			activity.getSupportActionBar().show();
 		}
 		return isRemoved;
 	}
@@ -4089,7 +4104,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, msisdn);
 			activity.startActivity(intent);
-			mActionMode.finish();
 			return true;
 
 		case R.id.copy_msgs:
@@ -4193,7 +4207,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		
 		if (themePicker != null && themePicker.isShowing())
 		{
-			themePicker.refreshViews();
+			themePicker.refreshViews(true);
 		}
 	}
 	
@@ -4335,6 +4349,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		}
 	}
-	
-	
+
+	public void onMenuKeyPressed()
+	{
+		if (mActionBar != null)
+		{
+			showOverflowMenu();
+		}
+	}
 }

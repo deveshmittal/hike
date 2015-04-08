@@ -41,10 +41,10 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.analytics.HAManager;
-import com.bsb.hike.analytics.MsgRelLogManager;
 import com.bsb.hike.analytics.AnalyticsConstants.MessageType;
 import com.bsb.hike.analytics.AnalyticsConstants.MsgRelEventType;
+import com.bsb.hike.analytics.HAManager;
+import com.bsb.hike.analytics.MsgRelLogManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.dialog.H20Dialog;
@@ -70,11 +70,11 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.LastSeenScheduler;
-import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.OneToNConversationUtils;
 import com.bsb.hike.utils.SoundUtils;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPUtils;
 
@@ -128,6 +128,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	private static final int ADD_UNDELIVERED_MESSAGE = 114;
 
+	private static final int SHOW_CALL_ICON = 115;
+	
 	private static short H2S_MODE = 0; // Hike to SMS Mode
 
 	private static short H2H_MODE = 1; // Hike to Hike Mode
@@ -186,6 +188,13 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		Logger.i(TAG, "menu item click" + item.getItemId());
+		
+//		Not allowing user to access actionbar items on a blocked user's chatThread
+		if (mConversation.isBlocked())
+		{
+			return false;
+		}
+		
 		switch (item.getItemId())
 		{
 			case R.id.voip_call:
@@ -532,6 +541,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		case HikePubSub.USER_JOINED:
 			onUserJoinedOrLeft(object, true);
+			uiHandler.sendEmptyMessage(SHOW_CALL_ICON);
 			break;
 		case HikePubSub.USER_LEFT:
 			onUserJoinedOrLeft(object, false);
@@ -658,6 +668,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		case ADD_UNDELIVERED_MESSAGE:
 			addToUndeliveredMessages((ConvMessage) msg.obj);
+			break;
+		case SHOW_CALL_ICON:
+			if(shouldShowCallIcon())
+			{
+				mActionBar.getMenuItem(R.id.voip_call).setVisible(true);
+			}
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
@@ -2509,11 +2525,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		return Utils.isVoipActivated(activity.getApplicationContext()) && mConversation.isOnHike() && !HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn);
 	}
 	
-	@Override
 	protected void showThemePicker()
 	{
-		super.showThemePicker();
-		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip);
+		setUpThemePicker();
+		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip, activity.getResources().getConfiguration().orientation);
 	}
 
 	/*
