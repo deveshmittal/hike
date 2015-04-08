@@ -111,9 +111,6 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	{
 		switch (item.id)
 		{
-		case R.string.chat_theme:
-			showThemePicker();
-			break;
 		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
 			super.itemClicked(item);
