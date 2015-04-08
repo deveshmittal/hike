@@ -4333,7 +4333,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	}
 
-	public void onKeyUp()
+	public void onMenuKeyPressed()
 	{
 		if (mActionBar != null)
 		{
