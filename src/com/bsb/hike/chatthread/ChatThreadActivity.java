@@ -259,7 +259,7 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 					return super.onKeyUp(keyCode, event);
 				}
 				
-				chatThread.onKeyUp();
+				chatThread.onMenuKeyPressed();
 				return true;
 			}
 		}

@@ -897,7 +897,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mShareablePopupLayout.togglePopup(mEmoticonPicker, activity.getResources().getConfiguration().orientation);
 	}
 
-	protected void showThemePicker()
+	protected void setUpThemePicker()
 	{
 		/**
 		 * We can now dismiss the chatTheme tip if it is there or we can hide any other visible tip
@@ -4350,7 +4350,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	}
 
-	public void onKeyUp()
+	public void onMenuKeyPressed()
 	{
 		if (mActionBar != null)
 		{

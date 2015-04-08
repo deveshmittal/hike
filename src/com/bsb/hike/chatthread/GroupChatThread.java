@@ -250,6 +250,9 @@ public class GroupChatThread extends OneToNChatThread
 		case R.string.group_profile:
 			openProfileScreen();
 			break;
+		case R.string.chat_theme:
+			showThemePicker();
+			break;
 		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
 			super.itemClicked(item);
@@ -894,10 +897,9 @@ public class GroupChatThread extends OneToNChatThread
 
 	}
 	
-	@Override
 	protected void showThemePicker()
 	{
-		super.showThemePicker();
+		setUpThemePicker();
 		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip_group, activity.getResources().getConfiguration().orientation);
 	}
 
