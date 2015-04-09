@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Intent;
-import android.util.Pair;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
@@ -21,7 +20,6 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.OriginType;
 import com.bsb.hike.models.Conversation.BroadcastConversation;
 import com.bsb.hike.models.Conversation.Conversation;
-import com.bsb.hike.models.Conversation.OneToNConversation;
 import com.bsb.hike.utils.IntentFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -187,5 +185,20 @@ public class BroadcastChatThread extends OneToNChatThread
 		ArrayList<String> sentToList = new ArrayList<String>();
 		sentToList.addAll(oneToNConversation.getConversationParticipantList().keySet());
 		convMessage.setSentToMsisdnsList(sentToList);	
+	}
+	
+	@Override
+	protected boolean wasTipSetSeen(int whichTip)
+	{
+		return false;
+	}
+	
+	/**
+	 * No need to hide sticker tip as it won't be shown in BroadcastChatThread
+	 */
+	@Override
+	protected void closeStickerTip()
+	{
+		return;
 	}
 }

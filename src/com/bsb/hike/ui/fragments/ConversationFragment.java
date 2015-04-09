@@ -40,6 +40,7 @@ import android.view.ViewStub;
 import android.view.ViewStub.OnInflateListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -2385,6 +2386,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				return;
 			}
+			/**
+			 * Setting stealth mode off as we are hiding the StealthFTUE convTip
+			 */
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			
 			getActivity().runOnUiThread(new Runnable()
 			{
 
@@ -2401,6 +2407,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				return;
 			}
+			/**
+			 * Setting stealth mode on as we need to show the StealthFTUE convTip
+			 */
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON);
+			
 			getActivity().runOnUiThread(new Runnable()
 			{
 
@@ -2903,11 +2914,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (tipView != null)
 		{
 			checkAndAddListViewHeader(tipView);
+			animateListView();
 			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, true);
 			showingStealthFtueConvTip = true;
 		}
 	}
 	
+	private void animateListView()
+	{
+		TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.scaledDensityMultiplier, 0);
+		animation.setDuration(300);
+		parent.startAnimation(animation);
+	}
+
 	/**
 	 * Workaround for bug where the header needs to be added after adapter has been set in the list view
 	 * @param headerView
@@ -2959,6 +2978,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (tipView != null)
 		{
 			checkAndAddListViewHeader(tipView);
+			animateListView();
 		}
 	}
 

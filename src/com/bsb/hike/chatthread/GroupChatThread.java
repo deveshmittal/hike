@@ -538,11 +538,7 @@ public class GroupChatThread extends OneToNChatThread
 
 		content.findViewById(R.id.emo_btn).setOnClickListener(this);
 
-		if (mTips.isGivenTipShowing(ChatThreadTips.PIN_TIP))
-		{
-			mTips.setTipSeen(ChatThreadTips.PIN_TIP);
-		}
-
+		wasTipSetSeen(ChatThreadTips.PIN_TIP);
 	}
 	
 	private void playPinCreateViewAnim()
