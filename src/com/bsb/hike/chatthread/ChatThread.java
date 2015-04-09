@@ -661,7 +661,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			onShareContact(resultCode, data);
 			break;
 		case AttachmentPicker.GALLERY:
-			if (resultCode == Activity.RESULT_OK)
+			if (resultCode == GalleryActivity.GALLERY_ACTIVITY_RESULT_CODE)
 			{
 				mConversationsView.requestFocusFromTouch();
 				mConversationsView.setSelection(messages.size() - 1);
