@@ -654,7 +654,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			onShareLocation(data);
 			break;
 		case AttachmentPicker.FILE:
-			ChatThreadUtils.onShareFile(activity.getApplicationContext(), msisdn, data, mConversation.isOnHike());
+			/**
+			 * data == null indicates that we did not select any file to send.
+			 */
+			if (data != null)
+			{
+				ChatThreadUtils.onShareFile(activity.getApplicationContext(), msisdn, data, mConversation.isOnHike());
+			}
 			break;
 		case AttachmentPicker.CONTACT:
 			onShareContact(resultCode, data);
