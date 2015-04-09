@@ -26,7 +26,7 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 		public boolean onActionItemClicked(int actionModeId, MenuItem menuItem);
 	}
 
-	private static final int DEFAULT_LAYOUT_RESID = R.layout.hike_action_mode;
+	public static final int DEFAULT_LAYOUT_RESID = R.layout.hike_action_mode;
 
 	protected ActionMode mActionMode;
 
@@ -129,15 +129,15 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 
 	public void showActionMode(int id, int layoutId)
 	{
-		this.defaultLayoutId = layoutId;
-		showActionMode(id, actionModeTitle, doneButtonText);
+		showActionMode(id, actionModeTitle, doneButtonText, layoutId);
 	}
 
-	public void showActionMode(int id, String title, String doneButtonText)
+	public void showActionMode(int id, String title, String doneButtonText, int layoutId)
 	{
 		this.actionModeId = id;
 		this.actionModeTitle = title;
 		this.doneButtonText = doneButtonText;
+		this.defaultLayoutId = layoutId;
 		mActivity.startActionMode(this);
 	}
 	

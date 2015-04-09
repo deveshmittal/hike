@@ -511,7 +511,7 @@ public class GroupChatThread extends OneToNChatThread
 	
 	private void showPinCreateView()
 	{
-		mActionMode.showActionMode(PIN_CREATE_ACTION_MODE, getString(R.string.create_pin), getString(R.string.pin));
+		mActionMode.showActionMode(PIN_CREATE_ACTION_MODE, getString(R.string.create_pin), getString(R.string.pin), HikeActionMode.DEFAULT_LAYOUT_RESID);
 		// TODO : dismissPopupWindow was here : gaurav
 
 		View content = activity.findViewById(R.id.impMessageCreateView);
