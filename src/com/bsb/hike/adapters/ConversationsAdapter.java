@@ -278,7 +278,7 @@ public class ConversationsAdapter extends BaseAdapter
 			List<ContactInfo> allContacts = ContactManager.getInstance().getAllContacts();
 			for (ContactInfo contact : allContacts)
 			{
-				ConvInfo convInfo = new ConvInfo.ConvInfoBuilder(contact.getMsisdn()).setConvName(contact.getName()).build();
+				ConvInfo convInfo = new ConvInfo.ConvInfoBuilder(contact.getMsisdn()).setConvName(contact.getName()).setOnHike(contact.isOnhike()).build();
 				
 				if(stealthConversations.contains(convInfo) || conversationsMsisdns.contains(contact.getMsisdn()) || !convInfo.isOnHike())
 				{
