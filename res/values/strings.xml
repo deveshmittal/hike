@@ -549,7 +549,7 @@
     <string name="attach">Attach</string>
     <string name="new_group">New Group</string>
     <string name="new_broadcast">New Broadcast</string>
-    <string name="broadcast">broadcast</string>
+    <string name="broadcast">Broadcast</string>
     <string name="sent_friend_request">Sent a friend request</string>
     <string name="xyz_posted_update">%1$s posted an update</string>
     <string name="sent_you_friend_request">Sent you a friend request</string>

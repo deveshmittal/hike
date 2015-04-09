@@ -614,8 +614,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void preShowOverflowMenu(List<OverFlowMenuItem> overflowItems)
 	{
-		mActionBar.updateOverflowMenuItemActiveState(R.string.search, !messages.isEmpty());
-		
+		mActionBar.updateOverflowMenuItemActiveState(getMenuItemsToBeModified());
+
 		if (!sharedPreference.getData(HikeMessengerApp.CT_SEARCH_CLICKED, false) && !messages.isEmpty())
 		{
 			mActionBar.updateOverflowMenuItemIcon(R.string.search, R.drawable.ic_top_bar_indicator_search);
@@ -625,7 +625,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mActionBar.updateOverflowMenuItemIcon(R.string.search, 0);
 		}
 	}
-
+	
+	/**
+	 * @return arrayList of overflow menu items that are modified before menu is shown
+	 */
+	public ArrayList<Pair<Integer, Boolean>>  getMenuItemsToBeModified()
+	{
+		ArrayList<Pair<Integer, Boolean>> itemsPair = new ArrayList<Pair<Integer,Boolean>>();
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.search, !messages.isEmpty()));
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.clear_chat, !messages.isEmpty()));
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.email_chat, !messages.isEmpty()));
+		
+		return itemsPair;
+	}
+ 
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		Logger.i(TAG, "on activity result " + requestCode + " result " + resultCode);
@@ -4091,7 +4104,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, msisdn);
 			activity.startActivity(intent);
-			mActionMode.finish();
 			return true;
 
 		case R.id.copy_msgs:
@@ -4237,18 +4249,23 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		if ((view == mComposeView))
 		{
-
+	     // On some phones (like: micromax A120) "actionId" always comes 0, so added one more optional check (view.getId() ==R.id.msg_compose) & (view.getId() ==R.id.search_text)
 			if ((actionId == EditorInfo.IME_ACTION_SEND)
-					|| ((keyEvent != null) && (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) && (keyEvent.getAction() != KeyEvent.ACTION_UP) && (getResources()
-							.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)))
-			{
+					|| ((view.getId() == R.id.msg_compose) && PreferenceManager
+							.getDefaultSharedPreferences(
+									activity.getApplicationContext())
+							.getBoolean(HikeConstants.SEND_ENTER_PREF, false))
+					|| ((keyEvent != null)
+							&& (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+							&& (keyEvent.getAction() != KeyEvent.ACTION_UP) && (getResources()
+							.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)))	{
 				
 				if (!TextUtils.isEmpty(mComposeView.getText())) {
 					sendButtonClicked();
 				}
 				return true;
 			}
-			else if (actionId == EditorInfo.IME_ACTION_SEARCH)
+			else if (actionId == EditorInfo.IME_ACTION_SEARCH||(view.getId() ==R.id.search_text))
 			{
 				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
 				searchMessage(false);

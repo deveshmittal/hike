@@ -494,6 +494,12 @@ public class GroupChatThread extends OneToNChatThread
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
+//		Not allowing user to access actionbar items on a blocked user's chatThread
+		if (oneToNConversation.isBlocked())
+		{
+			return false;
+		}
+		
 		switch (item.getItemId())
 		{
 		case R.id.pin_imp:
