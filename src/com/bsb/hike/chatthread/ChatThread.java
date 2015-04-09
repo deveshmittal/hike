@@ -2957,13 +2957,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 * This method is to be called before onNewIntent to cater to the following : 
 	 * 1. Save drafts for the current chat thread if any. 
 	 * 2. Dismiss stickers and emoticon pallete 
+	 * 3. If actionMode is on, dismiss it
 	 */
 	protected void onPreNewIntent()
 	{
+		Logger.d(TAG, "Calling ChatThread's onPreNewIntent()");
 		saveDraft();
 		if (mShareablePopupLayout.isShowing())
 		{
 			mShareablePopupLayout.dismiss();
+		}
+		
+		if(mActionMode!= null && mActionMode.isActionModeOn())
+		{
+			mActionMode.finish();
 		}
 	}
 	
