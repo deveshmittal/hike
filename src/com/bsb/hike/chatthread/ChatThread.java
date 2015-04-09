@@ -862,16 +862,21 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void stickerClicked()
 	{
-		if (mTips.isGivenTipShowing(ChatThreadTips.STICKER_TIP) || (!mTips.seenTip(ChatThreadTips.STICKER_TIP)))
-		{
-			mTips.setTipSeen(ChatThreadTips.STICKER_TIP);
-			recordFirstTimeStickerClick();
-		}
+		closeStickerTip();
 		
 		mShareablePopupLayout.togglePopup(mStickerPicker, activity.getResources().getConfiguration().orientation);
 		activity.showProductPopup(ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal());
 	}
 	
+	protected void closeStickerTip()
+	{
+		if (mTips.isGivenTipShowing(ChatThreadTips.STICKER_TIP) || (!mTips.seenTip(ChatThreadTips.STICKER_TIP)))
+		{
+			mTips.setTipSeen(ChatThreadTips.STICKER_TIP);
+			recordFirstTimeStickerClick();
+		}
+	}
+
 	private void recordFirstTimeStickerClick()
 	{
 		if (!HikeSharedPreferenceUtil.getInstance().getData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, false))
@@ -902,12 +907,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		/**
 		 * We can now dismiss the chatTheme tip if it is there or we can hide any other visible tip
 		 */
-		if (mTips.isGivenTipShowing(ChatThreadTips.ATOMIC_CHAT_THEME_TIP))
-		{
-			mTips.setTipSeen(ChatThreadTips.ATOMIC_CHAT_THEME_TIP);
-		}
-
-		else
+		if (!wasTipSetSeen(ChatThreadTips.ATOMIC_CHAT_THEME_TIP))
 		{
 			mTips.hideTip();
 		}
@@ -923,11 +923,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		/**
 		 * We can now dismiss the Attachment tip if it is there or we hide any other visible tip
 		 */
-		if (mTips.isGivenTipShowing(ChatThreadTips.ATOMIC_ATTACHMENT_TIP))
-		{
-			mTips.setTipSeen(ChatThreadTips.ATOMIC_ATTACHMENT_TIP);
-		}
-		else
+		if (!wasTipSetSeen(ChatThreadTips.ATOMIC_ATTACHMENT_TIP))
 		{
 			mTips.hideTip();
 		}
@@ -4356,5 +4352,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			showOverflowMenu();
 		}
+	}
+	
+	protected boolean wasTipSetSeen(int whichTip)
+	{
+		if (mTips.isGivenTipShowing(whichTip))
+		{
+			mTips.setTipSeen(whichTip);
+			return true;
+		}
+		
+		return false;
 	}
 }
