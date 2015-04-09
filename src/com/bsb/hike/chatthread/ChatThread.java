@@ -13,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
@@ -2169,7 +2168,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			 */
 			if (mActionMode.whichActionModeIsOn() != MULTI_SELECT_ACTION_MODE)
 			{
-				mActionMode.showActionMode(MULTI_SELECT_ACTION_MODE, activity.getString(R.string.selected_count, mAdapter.getSelectedCount()), true, R.menu.multi_select_chat_menu);
+				mActionMode.showActionMode(MULTI_SELECT_ACTION_MODE, activity.getString(R.string.selected_count, mAdapter.getSelectedCount()), true, R.menu.multi_select_chat_menu, HikeActionMode.DEFAULT_LAYOUT_RESID);
 			}
 
 			/**

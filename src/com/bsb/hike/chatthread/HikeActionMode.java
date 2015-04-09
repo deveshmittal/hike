@@ -149,12 +149,13 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	 * @param showMenu
 	 * @param menuResId
 	 */
-	public void showActionMode(int id, String title, boolean showMenu, int menuResId)
+	public void showActionMode(int id, String title, boolean showMenu, int menuResId, int layoutResId)
 	{
 		this.actionModeId = id;
 		this.actionModeTitle = title;
 		this.shouldInflateMenu = showMenu;
 		this.menuResId = showMenu ? menuResId : -1;
+		this.defaultLayoutId = layoutResId;
 		mActivity.startActionMode(this);
 	}
 
@@ -295,7 +296,13 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	
 	private void hideView(int resId)
 	{
-		mActionMode.getCustomView().findViewById(resId).setVisibility(View.GONE);
+		/**
+		*	It could be possible the view is not present in the CustomView set on the acitonMode
+		*/
+		if (mActionMode.getCustomView().findViewById(resId) != null)
+		{
+			mActionMode.getCustomView().findViewById(resId).setVisibility(View.GONE);
+		}
 	}
 	
 	/**
