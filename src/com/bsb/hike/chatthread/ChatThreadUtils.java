@@ -533,7 +533,7 @@ public class ChatThreadUtils
 		 */
 		if (imageWidth > imageHeight)
 		{
-			dst = new RectF(0, 0, (viewHeight * imageWidth/imageHeight), viewHeight);
+			dst = new RectF(0, 0, viewWidth, viewHeight);
 		}
 		
 		else
@@ -543,7 +543,7 @@ public class ChatThreadUtils
 		
 		Matrix matrix = new Matrix();
 		
-		matrix.setRectToRect(new RectF(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight()), dst, Matrix.ScaleToFit.CENTER);
+		matrix.setRectToRect(new RectF(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight()), dst, Matrix.ScaleToFit.FILL);
 		Logger.d(TAG, "Matrix:"+ matrix.toString());
 		imageView.setImageMatrix(matrix);
 	}
