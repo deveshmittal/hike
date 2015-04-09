@@ -2385,6 +2385,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				return;
 			}
+			/**
+			 * Setting stealth mode off as we are hiding the StealthFTUE convTip
+			 */
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			
 			getActivity().runOnUiThread(new Runnable()
 			{
 
@@ -2401,6 +2406,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				return;
 			}
+			/**
+			 * Setting stealth mode on as we need to show the StealthFTUE convTip
+			 */
+			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON);
+			
 			getActivity().runOnUiThread(new Runnable()
 			{
 
