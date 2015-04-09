@@ -1,6 +1,7 @@
 package com.bsb.hike.models;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,7 +18,9 @@ import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.Conversation.Conversation;
 import com.bsb.hike.models.Conversation.GroupConversation;
 import com.bsb.hike.models.Conversation.OneToNConversation;
@@ -1107,10 +1110,42 @@ public class ConvMessage implements Searchable
 	{
 		if (isFileTransferMessage())
 		{
-			if (getMetadata().getHikeFiles().get(0).getFileName().toLowerCase().contains(s))
+			HikeFile hikeFile = getMetadata().getHikeFiles().get(0);
+			if (hikeFile.getFileName().toLowerCase().contains(s))
 			{
 				return true;
 			}
+
+			if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+			{
+				String dispName = hikeFile.getDisplayName();
+				if (!TextUtils.isEmpty(dispName) && dispName.toLowerCase().contains(s))
+				{
+					return true;
+				}
+				List<ContactInfoData> items = Utils.getContactDataFromHikeFile(hikeFile);
+				String phone = null, email = null;
+				for (ContactInfoData contactInfoData : items)
+				{
+					if (contactInfoData.getDataType() == DataType.PHONE_NUMBER)
+					{
+						phone = contactInfoData.getData();
+						if (!TextUtils.isEmpty(phone) && phone.toLowerCase().contains(s))
+						{
+							return true;
+						}
+					}
+					else if (contactInfoData.getDataType() == DataType.EMAIL)
+					{
+						email = contactInfoData.getData().toLowerCase();
+						if (!TextUtils.isEmpty(email) && email.toLowerCase().contains(s))
+						{
+							return true;
+						}
+					}
+				}
+			}
+			
 		}
 		else if (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
 		{
