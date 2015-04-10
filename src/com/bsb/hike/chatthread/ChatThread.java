@@ -1174,7 +1174,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			{
 				activity.getSupportLoaderManager().restartLoader(SEARCH_PREVIOUS, null, this);
 			}
-			searchDialog = ProgressDialog.show(activity, null, "Searching...");
+			searchDialog = ProgressDialog.show(activity, null, getString(R.string.searching));
 		}
 	}
 

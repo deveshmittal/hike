@@ -1440,4 +1440,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="nudge_toast"> Sending nudges has been turned off.\nYou can turn it on in Settings > Chat Settings.</string>
     <string name="select_all_hike">Select all</string>
     <string name="unselect_all_hike">Unselect all</string>
+    <string name="searching">Searching...</string>
 </resources>
