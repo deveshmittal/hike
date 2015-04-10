@@ -1254,14 +1254,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	protected void openProfileScreen()
 	{
-		/**
-		 * Do nothing if the user is blocked
-		 */
-		if (mConversation.isBlocked())
-		{
-			return;
-		}
-
 		Intent profileIntent = IntentFactory.getSingleProfileIntent(activity.getApplicationContext(), mConversation.isOnHike(), msisdn);
 
 		activity.startActivity(profileIntent);
