@@ -22,6 +22,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -276,6 +277,10 @@ public class GroupChatThread extends OneToNChatThread
 
 			activity.startActivity(intent);
 		}
+		else
+		{
+			Toast.makeText(activity.getApplicationContext(), getString(R.string.group_chat_end), Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	@Override
@@ -495,8 +500,9 @@ public class GroupChatThread extends OneToNChatThread
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 //		Not allowing user to access actionbar items on a blocked user's chatThread
-		if (oneToNConversation.isBlocked())
+		if (!oneToNConversation.isConversationAlive())
 		{
+			Toast.makeText(activity.getApplicationContext(), getString(R.string.group_chat_end), Toast.LENGTH_SHORT).show();
 			return false;
 		}
 		
