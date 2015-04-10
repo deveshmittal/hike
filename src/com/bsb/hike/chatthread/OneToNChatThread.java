@@ -319,7 +319,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		oneToNConversation.setConversationAlive(alive);
 		activity.findViewById(R.id.send_message).setEnabled(alive);
 		activity.findViewById(R.id.msg_compose).setVisibility(alive ? View.VISIBLE : View.INVISIBLE);
-		activity.findViewById(R.id.emo_btn).setEnabled(alive);
+		activity.findViewById(R.id.emoticon_btn).setEnabled(alive);
 		activity.findViewById(R.id.sticker_btn).setEnabled(alive);
 		// TODO : Hide popup OR dialog if visible
 	}
