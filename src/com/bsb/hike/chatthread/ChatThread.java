@@ -1296,6 +1296,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			dialog.dismiss();
 			mActionMode.finish();
 			break;
+			
+		case HikeDialogFactory.CONTACT_SEND_DIALOG:
+		case HikeDialogFactory.CONTACT_SAVE_DIALOG:
+		case HikeDialogFactory.CLEAR_CONVERSATION_DIALOG:
+			dialog.dismiss();
+			break;
 		}
 	}
 
