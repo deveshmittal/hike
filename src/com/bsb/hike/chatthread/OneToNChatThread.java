@@ -47,6 +47,8 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	private static final int PARTICIPANT_JOINED_OR_LEFT_CONVERSATION = 207;
 	
 	protected static final int BULK_MESSAGE_RECEIVED = 208;
+	
+	protected static final int CONVERSATION_NAME_CHANGED = 209;
 
 	private static final String TAG = "onetonchatthread";
 
@@ -266,6 +268,9 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		case HikePubSub.PARTICIPANT_JOINED_SYSTEM_MESSAGE:
 			onMessageReceived(object);
 			break;
+		case HikePubSub.ONETONCONV_NAME_CHANGED:
+			onConversationNameChanged((String) object);
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching PubSub event in Group ChatThread. Calling super class' onEventReceived");
 			super.onEventReceived(type, object);
@@ -289,6 +294,9 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 			break;
 		case BULK_MESSAGE_RECEIVED:
 			addBulkMessages((LinkedList<ConvMessage>) msg.obj);
+			break;
+		case CONVERSATION_NAME_CHANGED:
+			setLabel(oneToNConversation.getConversationName());
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in Group ChatThread. Calling super class' handleUIMessage");
@@ -446,6 +454,25 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	}
 
 	/**
+	 * Called from PubSub Thread when conversation name is changed
+	 * 
+	 * @param object
+	 */
+	private void onConversationNameChanged(String msisdn)
+	{
+		/**
+		 * Received message for current open chatThread
+		 */
+		if (shouldProcessPubSubEvent(msisdn)) // Defensive check
+		{
+			ContactManager conMgr = ContactManager.getInstance();
+			String convName = conMgr.getName(oneToNConversation.getMsisdn());
+			oneToNConversation.setConversationName(convName);
+			uiHandler.sendEmptyMessage(CONVERSATION_NAME_CHANGED);
+		}
+	}
+	
+	/**
 	 * Called from PubSub Thread
 	 * 
 	 * @param object
@@ -455,7 +482,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		/**
 		 * Received message for current open chatThread
 		 */
-		if (shouldProcessGCJOrGCK(object)) // Defensive check
+		if (shouldProcessPubSubEvent(object)) // Defensive check
 		{
 			ContactManager conMgr = ContactManager.getInstance();
 			oneToNConversation.setConversationParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), true, false));
@@ -464,12 +491,12 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	}
 
 	/**
-	 * Indicates whether we should process a GCJ/GCK or not.
+	 * Indicates whether we should process a PubSub or not.
 	 * 
 	 * @param object
 	 * @return
 	 */
-	private boolean shouldProcessGCJOrGCK(Object object)
+	private boolean shouldProcessPubSubEvent(Object object)
 	{
 		if (object instanceof JSONObject)
 		{
@@ -480,8 +507,22 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 			}
 		}
 
-		// Default case :
-
+		return false;
+	}
+	
+	/**
+	 * Indicates whether we should process a PubSub or not.
+	 * 
+	 * @param object
+	 * @return
+	 */
+	private boolean shouldProcessPubSubEvent(String msisdn)
+	{
+		if (msisdn != null)
+		{
+			return msisdn.equals(this.msisdn);
+		}
+		
 		return false;
 	}
 

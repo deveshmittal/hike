@@ -22,6 +22,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -105,7 +106,8 @@ public class GroupChatThread extends OneToNChatThread
 	protected String[] getPubSubListeners()
 	{
 		return new String[] { HikePubSub.ONETON_MESSAGE_DELIVERED_READ, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONV_META_DATA_UPDATED,
-				HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.CONVERSATION_REVIVED, HikePubSub.PARTICIPANT_JOINED_ONETONCONV, HikePubSub.PARTICIPANT_LEFT_ONETONCONV, HikePubSub.PARTICIPANT_JOINED_SYSTEM_MESSAGE };
+				HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.CONVERSATION_REVIVED, HikePubSub.PARTICIPANT_JOINED_ONETONCONV, HikePubSub.PARTICIPANT_LEFT_ONETONCONV,
+				HikePubSub.PARTICIPANT_JOINED_SYSTEM_MESSAGE, HikePubSub.ONETONCONV_NAME_CHANGED };
 	}
 
 	private List<OverFlowMenuItem> getOverFlowItems()
@@ -275,6 +277,10 @@ public class GroupChatThread extends OneToNChatThread
 			Intent intent = IntentFactory.getGroupProfileIntent(activity.getApplicationContext(), msisdn);
 
 			activity.startActivity(intent);
+		}
+		else
+		{
+			Toast.makeText(activity.getApplicationContext(), getString(R.string.group_chat_end), Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -495,8 +501,9 @@ public class GroupChatThread extends OneToNChatThread
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 //		Not allowing user to access actionbar items on a blocked user's chatThread
-		if (oneToNConversation.isBlocked())
+		if (!oneToNConversation.isConversationAlive())
 		{
+			Toast.makeText(activity.getApplicationContext(), getString(R.string.group_chat_end), Toast.LENGTH_SHORT).show();
 			return false;
 		}
 		
@@ -511,7 +518,7 @@ public class GroupChatThread extends OneToNChatThread
 	
 	private void showPinCreateView()
 	{
-		mActionMode.showActionMode(PIN_CREATE_ACTION_MODE, getString(R.string.create_pin), getString(R.string.pin));
+		mActionMode.showActionMode(PIN_CREATE_ACTION_MODE, getString(R.string.create_pin), getString(R.string.pin), HikeActionMode.DEFAULT_LAYOUT_RESID);
 		// TODO : dismissPopupWindow was here : gaurav
 
 		View content = activity.findViewById(R.id.impMessageCreateView);
@@ -538,11 +545,7 @@ public class GroupChatThread extends OneToNChatThread
 
 		content.findViewById(R.id.emo_btn).setOnClickListener(this);
 
-		if (mTips.isGivenTipShowing(ChatThreadTips.PIN_TIP))
-		{
-			mTips.setTipSeen(ChatThreadTips.PIN_TIP);
-		}
-
+		wasTipSetSeen(ChatThreadTips.PIN_TIP);
 	}
 	
 	private void playPinCreateViewAnim()

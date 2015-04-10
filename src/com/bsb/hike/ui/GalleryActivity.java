@@ -56,6 +56,8 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 	public static final String RETURN_RESULT_KEY = "return_result";
 	
 	private static final int GALLERY_ACTIVITY = 31;
+	
+	public static final int GALLERY_ACTIVITY_RESULT_CODE = 97;
 
 	public static final int PHOTOS_EDITOR_ACTION_BAR_TYPE = 1;
 
@@ -543,11 +545,16 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		{
 		case AttachmentPicker.GALLERY:
 			Logger.d("GalleryActivity", "Inside onActivityResult : " + requestCode); 
-			setResult(RESULT_OK);
+			setResult(GALLERY_ACTIVITY_RESULT_CODE);
 			finish();
 			break;
 		case GALLERY_ACTIVITY:
 			Logger.d("GalleryActivity", "Inside onActivity Result. Perhaps this activity was started by itself only : " + requestCode);
+			if (resultCode == GALLERY_ACTIVITY_RESULT_CODE) //We need to send the same result back to the originator class
+			{
+				setResult(GALLERY_ACTIVITY_RESULT_CODE);
+				finish();
+			}
 			break;
 		default:
 			super.onActivityResult(requestCode, resultCode, data);

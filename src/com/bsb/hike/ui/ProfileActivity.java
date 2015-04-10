@@ -151,7 +151,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private SharedPreferences preferences;
 
-	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_ONETONCONV,
+	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.ONETONCONV_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_ONETONCONV,
 			HikePubSub.PARTICIPANT_LEFT_ONETONCONV, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
 			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.DELETE_MESSAGE, HikePubSub.CONTACT_ADDED, HikePubSub.UNREAD_PIN_COUNT_RESET, HikePubSub.MESSAGE_RECEIVED, HikePubSub.BULK_MESSAGE_RECEIVED };
 
@@ -2237,7 +2237,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			Logger.w(getClass().getSimpleName(), "The msisdn is null, we are doing something wrong.." + object);
 			return;
 		}
-		if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
+		if (HikePubSub.ONETONCONV_NAME_CHANGED.equals(type))
 		{
 			if (mLocalMSISDN.equals((String) object))
 			{

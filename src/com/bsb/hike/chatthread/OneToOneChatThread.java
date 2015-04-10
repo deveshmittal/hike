@@ -192,6 +192,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 //		Not allowing user to access actionbar items on a blocked user's chatThread
 		if (mConversation.isBlocked())
 		{
+			Toast.makeText(activity.getApplicationContext(), activity.getString(R.string.block_overlay_message, mConversation.getMsisdn()), Toast.LENGTH_SHORT).show();
 			return false;
 		}
 		
@@ -220,7 +221,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 		list.add(new OverFlowMenuItem(mConversation.isBlocked() ? getString(R.string.unblock_title) : getString(R.string.block_title), 0, 0, R.string.block_title));
-		if (mConversation.isBlocked() && mContactInfo.isNotOrRejectedFavourite())
+		if (mContactInfo.isNotOrRejectedFavourite())
 		{
 			list.add(new OverFlowMenuItem(getString(R.string.add_as_favorite_menu), 0, 0, R.string.add_as_favorite_menu));
 		}
@@ -1253,14 +1254,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	protected void openProfileScreen()
 	{
-		/**
-		 * Do nothing if the user is blocked
-		 */
-		if (mConversation.isBlocked())
-		{
-			return;
-		}
-
 		Intent profileIntent = IntentFactory.getSingleProfileIntent(activity.getApplicationContext(), mConversation.isOnHike(), msisdn);
 
 		activity.startActivity(profileIntent);
@@ -2238,7 +2231,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		 */
 		else
 		{
-			HikeDialogFactory.showDialog(activity, HikeDialogFactory.SHOW_H20_SMS_DIALOG, this, nativeOnly, getSelectedFreeSmsCount(), mCredits);
+			this.dialog = HikeDialogFactory.showDialog(activity, HikeDialogFactory.SHOW_H20_SMS_DIALOG, this, nativeOnly, getSelectedFreeSmsCount(), mCredits);
 		}
 	}
 
@@ -2269,6 +2262,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case HikeDialogFactory.SMS_CLIENT_DIALOG:
 			dialog.dismiss();
 			Utils.setReceiveSmsSetting(activity.getApplicationContext(), false);
+			this.dialog = null;
 			break;
 
 		default:
@@ -2312,7 +2306,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	private void showSMSClientDialog(boolean showingNativeInfoDialog)
 	{
-		HikeDialogFactory.showDialog(activity, HikeDialogFactory.SMS_CLIENT_DIALOG, this, false, null, showingNativeInfoDialog);
+		this.dialog = HikeDialogFactory.showDialog(activity, HikeDialogFactory.SMS_CLIENT_DIALOG, this, false, null, showingNativeInfoDialog);
 	}
 
 	private void onSMSClientDialogPositiveClick()
@@ -2540,5 +2534,14 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		mContactInfo.setFavoriteType(favoriteType);
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(mContactInfo, favoriteType);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+	}
+	
+	@Override
+	protected ArrayList<Pair<Integer, Boolean>> getMenuItemsToBeModified()
+	{
+		ArrayList<Pair<Integer, Boolean>> itemsPair = new ArrayList<Pair<Integer,Boolean>>();
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.add_as_favorite_menu, !mConversation.isBlocked()));
+		itemsPair.addAll(super.getMenuItemsToBeModified());
+		return itemsPair;
 	}
 }

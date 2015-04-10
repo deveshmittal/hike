@@ -373,7 +373,10 @@ public class ChatThreadTips implements OnClickListener, OnTouchListener
 		case STICKER_TIP:
 			mPrefs.saveData(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
 			closeTip();
-			mainView.findViewById(R.id.pulsatingDot).setVisibility(View.GONE);
+			if (mainView.findViewById(R.id.pulsatingDot) != null)  // Safety null check.
+			{
+				mainView.findViewById(R.id.pulsatingDot).setVisibility(View.GONE);
+			}
 			break;
 
 		case ATOMIC_ATTACHMENT_TIP:
