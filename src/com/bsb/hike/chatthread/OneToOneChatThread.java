@@ -2238,7 +2238,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		 */
 		else
 		{
-			HikeDialogFactory.showDialog(activity, HikeDialogFactory.SHOW_H20_SMS_DIALOG, this, nativeOnly, getSelectedFreeSmsCount(), mCredits);
+			this.dialog = HikeDialogFactory.showDialog(activity, HikeDialogFactory.SHOW_H20_SMS_DIALOG, this, nativeOnly, getSelectedFreeSmsCount(), mCredits);
 		}
 	}
 
@@ -2312,7 +2312,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	private void showSMSClientDialog(boolean showingNativeInfoDialog)
 	{
-		HikeDialogFactory.showDialog(activity, HikeDialogFactory.SMS_CLIENT_DIALOG, this, false, null, showingNativeInfoDialog);
+		this.dialog = HikeDialogFactory.showDialog(activity, HikeDialogFactory.SMS_CLIENT_DIALOG, this, false, null, showingNativeInfoDialog);
 	}
 
 	private void onSMSClientDialogPositiveClick()

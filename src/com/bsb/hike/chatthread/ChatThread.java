@@ -291,6 +291,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private static final String NEW_LINE_DELIMETER = "\n";
 	
 	private boolean ctSearchIndicatorShown;
+	
+	protected HikeDialog dialog;
 
 	private class ChatThreadBroadcasts extends BroadcastReceiver
 	{
@@ -1275,7 +1277,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		PhonebookContact contact = PickContactParser.onContactResult(resultCode, data, activity.getApplicationContext());
 		if (contact != null)
 		{
-			HikeDialogFactory.showDialog(activity, HikeDialogFactory.CONTACT_SEND_DIALOG, this, contact, getString(R.string.send), false);
+			this.dialog = HikeDialogFactory.showDialog(activity, HikeDialogFactory.CONTACT_SEND_DIALOG, this, contact, getString(R.string.send), false);
 		}
 	}
 
@@ -1284,7 +1286,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		PhonebookContact contact = PickContactParser.getContactData(contactId, activity);
 		if (contact != null)
 		{
-			HikeDialogFactory.showDialog(activity, HikeDialogFactory.CONTACT_SEND_DIALOG, this, contact, getString(R.string.send), false);
+			this.dialog = HikeDialogFactory.showDialog(activity, HikeDialogFactory.CONTACT_SEND_DIALOG, this, contact, getString(R.string.send), false);
 		}
 	}
 
@@ -1296,6 +1298,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HikeDialogFactory.DELETE_MESSAGES_DIALOG:
 			dialog.dismiss();
 			mActionMode.finish();
+			
+			this.dialog = null;
 			break;
 		}
 	}
@@ -3685,7 +3689,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	private void showClearConversationDialog()
 	{
-		HikeDialogFactory.showDialog(activity, HikeDialogFactory.CLEAR_CONVERSATION_DIALOG, this);
+		this.dialog = HikeDialogFactory.showDialog(activity, HikeDialogFactory.CLEAR_CONVERSATION_DIALOG, this);
 	}
 
 	/**
@@ -4034,7 +4038,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 		case R.id.delete_msgs:
 			ArrayList<Long> selectedMsgIdsToDelete = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
-			HikeDialogFactory.showDialog(activity, HikeDialogFactory.DELETE_MESSAGES_DIALOG, this, mAdapter.getSelectedCount(),
+			this.dialog = HikeDialogFactory.showDialog(activity, HikeDialogFactory.DELETE_MESSAGES_DIALOG, this, mAdapter.getSelectedCount(),
 					mAdapter.containsMediaMessage(selectedMsgIdsToDelete));
 			return true;
 
@@ -4217,6 +4221,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (themePicker != null && themePicker.isShowing())
 		{
 			themePicker.refreshViews(true);
+		}
+		
+		if (this.dialog != null)
+		{
+			dialog.dismiss();
 		}
 	}
 	
