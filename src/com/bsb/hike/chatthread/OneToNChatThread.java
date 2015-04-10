@@ -458,7 +458,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	 * 
 	 * @param object
 	 */
-	private void onConversationNameChanged(String msisdn)
+	protected void onConversationNameChanged(String msisdn)
 	{
 		/**
 		 * Received message for current open chatThread
