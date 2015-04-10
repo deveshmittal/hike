@@ -221,7 +221,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 
 		list.add(new OverFlowMenuItem(mConversation.isBlocked() ? getString(R.string.unblock_title) : getString(R.string.block_title), 0, 0, R.string.block_title));
-		if (mConversation.isBlocked() && mContactInfo.isNotOrRejectedFavourite())
+		if (mContactInfo.isNotOrRejectedFavourite())
 		{
 			list.add(new OverFlowMenuItem(getString(R.string.add_as_favorite_menu), 0, 0, R.string.add_as_favorite_menu));
 		}
@@ -2533,5 +2533,14 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		mContactInfo.setFavoriteType(favoriteType);
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(mContactInfo, favoriteType);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+	}
+	
+	@Override
+	protected ArrayList<Pair<Integer, Boolean>> getMenuItemsToBeModified()
+	{
+		ArrayList<Pair<Integer, Boolean>> itemsPair = new ArrayList<Pair<Integer,Boolean>>();
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.add_as_favorite_menu, !mConversation.isBlocked()));
+		itemsPair.addAll(super.getMenuItemsToBeModified());
+		return itemsPair;
 	}
 }

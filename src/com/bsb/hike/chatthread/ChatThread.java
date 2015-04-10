@@ -628,12 +628,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	/**
 	 * @return arrayList of overflow menu items that are modified before menu is shown
 	 */
-	public ArrayList<Pair<Integer, Boolean>>  getMenuItemsToBeModified()
+	protected ArrayList<Pair<Integer, Boolean>>  getMenuItemsToBeModified()
 	{
 		ArrayList<Pair<Integer, Boolean>> itemsPair = new ArrayList<Pair<Integer,Boolean>>();
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.search, !messages.isEmpty()));
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.clear_chat, !messages.isEmpty()));
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.email_chat, !messages.isEmpty()));
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.search, (!messages.isEmpty() && !mConversation.isBlocked())));
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.clear_chat, (!messages.isEmpty() && !mConversation.isBlocked())));
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.email_chat, (!messages.isEmpty() && !mConversation.isBlocked())));
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.chat_theme, !mConversation.isBlocked()));
 		
 		return itemsPair;
 	}
