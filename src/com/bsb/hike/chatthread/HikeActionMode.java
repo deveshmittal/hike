@@ -81,10 +81,7 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 			inflateMenu(menu);
 		}
 		
-		if (mListener != null)
-		{
-			mListener.initActionbarActionModeView(actionModeId, view);
-		}
+		initView();
 
 		return true;
 	}
@@ -92,7 +89,6 @@ public class HikeActionMode implements ActionMode.Callback, OnClickListener
 	@Override
 	public boolean onPrepareActionMode(ActionMode mode, Menu menu)
 	{
-		initView();
 		return true;
 	}
 

@@ -176,25 +176,11 @@ public class ThemePicker implements BackPressListener, OnDismissListener, OnClic
 
 	private ActionMode.Callback actionmodeCallback = new ActionMode.Callback()
 	{
-
 		@Override
 		public boolean onPrepareActionMode(ActionMode mode, Menu menu)
 		{
 			Logger.i(TAG, "on prepare actionmode");
-
-			View actionModeView = mode.getCustomView();
-			if (actionModeView == null)
-			{
-				return false;
-
-			}
-
-			View saveThemeBtn = actionModeView.findViewById(R.id.done_container);
-
-			saveThemeBtn.startAnimation(AnimationUtils.loadAnimation(sherlockFragmentActivity, R.anim.scale_in));
-
-			saveThemeBtn.setOnClickListener(ThemePicker.this);
-
+			
 			return true;
 		}
 
@@ -229,6 +215,13 @@ public class ThemePicker implements BackPressListener, OnDismissListener, OnClic
 			Logger.i(TAG, "on create action mode");
 			actionMode = mode;
 			mode.setCustomView(LayoutInflater.from(sherlockFragmentActivity).inflate(R.layout.hike_action_mode, null));
+			
+			View saveThemeBtn = mode.getCustomView().findViewById(R.id.done_container);
+
+			saveThemeBtn.startAnimation(AnimationUtils.loadAnimation(sherlockFragmentActivity, R.anim.scale_in));
+
+			saveThemeBtn.setOnClickListener(ThemePicker.this);
+			
 			return true;
 		}
 
