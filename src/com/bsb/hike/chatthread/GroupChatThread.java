@@ -1,7 +1,6 @@
 package com.bsb.hike.chatthread;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.json.JSONException;
@@ -106,7 +105,7 @@ public class GroupChatThread extends OneToNChatThread
 	protected String[] getPubSubListeners()
 	{
 		return new String[] { HikePubSub.ONETON_MESSAGE_DELIVERED_READ, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONV_META_DATA_UPDATED,
-				HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.CONVERSATION_REVIVED, HikePubSub.PARTICIPANT_JOINED_ONETONCONV, HikePubSub.PARTICIPANT_LEFT_ONETONCONV };
+				HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.CONVERSATION_REVIVED, HikePubSub.PARTICIPANT_JOINED_ONETONCONV, HikePubSub.PARTICIPANT_LEFT_ONETONCONV, HikePubSub.PARTICIPANT_JOINED_SYSTEM_MESSAGE };
 	}
 
 	private List<OverFlowMenuItem> getOverFlowItems()
@@ -250,6 +249,9 @@ public class GroupChatThread extends OneToNChatThread
 			break;
 		case R.string.group_profile:
 			openProfileScreen();
+			break;
+		case R.string.chat_theme:
+			showThemePicker();
 			break;
 		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
@@ -492,6 +494,12 @@ public class GroupChatThread extends OneToNChatThread
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
+//		Not allowing user to access actionbar items on a blocked user's chatThread
+		if (oneToNConversation.isBlocked())
+		{
+			return false;
+		}
+		
 		switch (item.getItemId())
 		{
 		case R.id.pin_imp:
@@ -888,5 +896,12 @@ public class GroupChatThread extends OneToNChatThread
 		}
 
 	}
+	
+	protected void showThemePicker()
+	{
+		setUpThemePicker();
+		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), currentTheme, R.string.chat_theme_tip_group, activity.getResources().getConfiguration().orientation);
+	}
+
 	
 }
