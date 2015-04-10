@@ -192,6 +192,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 //		Not allowing user to access actionbar items on a blocked user's chatThread
 		if (mConversation.isBlocked())
 		{
+			Toast.makeText(activity.getApplicationContext(), activity.getString(R.string.block_overlay_message, mConversation.getMsisdn()), Toast.LENGTH_SHORT).show();
 			return false;
 		}
 		
@@ -1253,14 +1254,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	protected void openProfileScreen()
 	{
-		/**
-		 * Do nothing if the user is blocked
-		 */
-		if (mConversation.isBlocked())
-		{
-			return;
-		}
-
 		Intent profileIntent = IntentFactory.getSingleProfileIntent(activity.getApplicationContext(), mConversation.isOnHike(), msisdn);
 
 		activity.startActivity(profileIntent);
@@ -2269,6 +2262,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case HikeDialogFactory.SMS_CLIENT_DIALOG:
 			dialog.dismiss();
 			Utils.setReceiveSmsSetting(activity.getApplicationContext(), false);
+			this.dialog = null;
 			break;
 
 		default:
