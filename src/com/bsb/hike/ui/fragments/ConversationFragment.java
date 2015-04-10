@@ -1057,18 +1057,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		// TODO Auto-generated method stub
 		super.onStop();
-		if (showingStealthFtueConvTip)
-		{
-			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-			removeStealthConvTip();
-		}
-		
-		if (showingWelcomeHikeConvTip)
-		{
-			HikeSharedPreferenceUtil.getInstance().saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-			removeTipIfExists(ConversationTip.WELCOME_HIKE_TIP);
-		}
-
 	}
 	
 	@Override
