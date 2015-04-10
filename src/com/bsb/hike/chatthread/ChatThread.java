@@ -280,7 +280,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static SearchManager messageSearchManager;
 
 	private String searchText;
-	
+
 	protected int selectedNonForwadableMsgs;
 
 	protected int shareableMessagesCount;
@@ -719,6 +719,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void showOverflowMenu()
 	{
+		if (mActionMode.whichActionModeIsOn() == SEARCH_ACTION_MODE)
+			return;
+
 		/**
 		 * Hiding any open tip
 		 */
