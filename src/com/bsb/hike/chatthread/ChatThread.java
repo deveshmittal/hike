@@ -2124,7 +2124,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			{
 				if (loaderId == SEARCH_NEXT)
 				{
-					position = messageSearchManager.getNextItem(chatThread.get().mConversationsView.getFirstVisiblePosition());
+					position = messageSearchManager.getNextItem(chatThread.get().mConversationsView.getFirstVisiblePosition(), chatThread.get().mConversationsView.getLastVisiblePosition());
 				}
 				else if (loaderId == SEARCH_PREVIOUS)
 				{
