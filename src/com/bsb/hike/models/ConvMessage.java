@@ -1111,12 +1111,14 @@ public class ConvMessage implements Searchable
 		if (isFileTransferMessage())
 		{
 			HikeFile hikeFile = getMetadata().getHikeFiles().get(0);
-			if (hikeFile.getFileName().toLowerCase().contains(s))
+			// Name of walkie talkie file is not user specified.
+			// No need to perform any search on this.
+			if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
 			{
-				return true;
+				return false;
 			}
-
-			if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+			// For contacts, search is to be performed on multiple values.
+			else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
 			{
 				String dispName = hikeFile.getDisplayName();
 				if (!TextUtils.isEmpty(dispName) && dispName.toLowerCase().contains(s))
@@ -1145,8 +1147,14 @@ public class ConvMessage implements Searchable
 					}
 				}
 			}
+			// Search on file name for all others
+			else if (hikeFile.getFileName().toLowerCase().contains(s))
+			{
+				return true;
+			}
 			
 		}
+		// Search on status messages.
 		else if (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
 		{
 			if (getMetadata().getStatusMessage().getText().toLowerCase().contains(s))
@@ -1154,7 +1162,14 @@ public class ConvMessage implements Searchable
 				return true;
 			}
 		}
-		if (!TextUtils.isEmpty(getMessage()))
+		// No search on sticker messages.
+		// Atleast till theres no tagging.
+		else if (isStickerMessage())
+		{
+			return false;
+		}
+		// Text search for all others
+		else if (!TextUtils.isEmpty(getMessage()))
 		{
 			if (getMessage().toLowerCase().contains(s))
 			{
