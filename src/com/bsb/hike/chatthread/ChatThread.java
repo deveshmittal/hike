@@ -1306,7 +1306,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HikeDialogFactory.CONTACT_SAVE_DIALOG:
 		case HikeDialogFactory.CLEAR_CONVERSATION_DIALOG:
 			dialog.dismiss();
+			this.dialog = null;
 			break;
+			
 		}
 	}
 

@@ -2262,6 +2262,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case HikeDialogFactory.SMS_CLIENT_DIALOG:
 			dialog.dismiss();
 			Utils.setReceiveSmsSetting(activity.getApplicationContext(), false);
+			this.dialog = null;
 			break;
 
 		default:
