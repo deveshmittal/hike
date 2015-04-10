@@ -277,7 +277,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected int selectedNonTextMsgs;
 
 	protected static SearchManager messageSearchManager;
-	
+
+	private String searchText;
+
 	protected int selectedNonForwadableMsgs;
 
 	protected int shareableMessagesCount;
@@ -725,6 +727,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void showOverflowMenu()
 	{
+		if (mActionMode.whichActionModeIsOn() == SEARCH_ACTION_MODE)
+			return;
+
 		/**
 		 * Hiding any open tip
 		 */
@@ -1092,6 +1097,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private void setupSearchMode()
 	{
+		searchText = null;
 		if (!sharedPreference.getData(HikeMessengerApp.CT_SEARCH_CLICKED, false))
 		{
 			sharedPreference.saveData(HikeMessengerApp.CT_SEARCH_CLICKED, true);
@@ -1156,7 +1162,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			{
 				activity.findViewById(R.id.search_clear_btn).setVisibility(View.VISIBLE);
 			}
-			String searchText = s.toString().toLowerCase();
+			searchText = s.toString().toLowerCase();
 			messageSearchManager.makeNewSearch(searchText);
 			mAdapter.setSearchText(searchText);
 			mAdapter.notifyDataSetChanged();
@@ -1165,15 +1171,18 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private void searchMessage(boolean searchNext)
 	{
-		if (searchNext)
+		if (!TextUtils.isEmpty(searchText))
 		{
-			activity.getSupportLoaderManager().restartLoader(SEARCH_NEXT, null, this);
+			if (searchNext)
+			{
+				activity.getSupportLoaderManager().restartLoader(SEARCH_NEXT, null, this);
+			}
+			else
+			{
+				activity.getSupportLoaderManager().restartLoader(SEARCH_PREVIOUS, null, this);
+			}
+			searchDialog = ProgressDialog.show(activity, null, getString(R.string.searching));
 		}
-		else
-		{
-			activity.getSupportLoaderManager().restartLoader(SEARCH_PREVIOUS, null, this);
-		}
-		searchDialog = ProgressDialog.show(activity, null, "Searching...");
 	}
 
 	private void updateUIforSearchResult(int position)
