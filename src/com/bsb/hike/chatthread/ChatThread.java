@@ -141,6 +141,8 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
+import com.bsb.hike.view.CustomLinearLayout;
+import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
 /**
  * 
@@ -150,7 +152,7 @@ import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, CaptureImageListener,
 		PickFileListener, StickerPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener,
 		Listener, ActionModeListener, HikeDialogListener, TextWatcher, OnDismissListener, OnEditorActionListener, OnKeyListener, PopupListener, BackKeyListener,
-		OverflowViewListener
+		OverflowViewListener, OnSoftKeyboardListener
 {
 	private static final String TAG = "chatthread";
 
@@ -1571,6 +1573,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		initComposeViewWatcher();
 		initGestureDetector();
+		((CustomLinearLayout) activity.findViewById(R.id.chat_layout)).setOnSoftKeyboardListener(this);
 	}
 
 	protected void initComposeViewWatcher()
@@ -2886,6 +2889,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		StickerManager.getInstance().saveCustomCategories();
 
 		releaseMessageMap();
+		
+		((CustomLinearLayout) activity.findViewById(R.id.chat_layout)).setOnSoftKeyboardListener(null);
 	}
 	
 	private void releaseStickerAndEmoticon()
@@ -4402,5 +4407,22 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public void onShown()
+	{
+		/**
+		 * If the last message was visible before opening the keyboard it can be hidden hence we need to scroll to bottom.
+		 */
+		if (mConversationsView != null && (mConversationsView.getLastVisiblePosition() == mConversationsView.getCount() - 1))
+		{
+			uiHandler.sendEmptyMessage(SCROLL_TO_END);
+		}
+	}
+	
+	@Override
+	public void onHidden()
+	{
 	}
 }
