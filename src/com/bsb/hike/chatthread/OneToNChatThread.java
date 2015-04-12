@@ -151,8 +151,6 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 		Logger.d("ChatThread", "Calling setchattheme from createConversation");
 		oneToNConversation.setChatTheme(currentTheme);
 
-		oneToNConversation.setBlocked(ContactManager.getInstance().isBlocked(oneToNConversation.getConversationOwner()));
-
 		return oneToNConversation;
 	}
 
@@ -371,12 +369,6 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	protected String getMsisdnMainUser()
 	{
 		return oneToNConversation.getConversationOwner();
-	}
-
-	@Override
-	protected String getBlockedUserLabel()
-	{
-		return oneToNConversation.getConversationParticipantName(oneToNConversation.getConversationOwner());
 	}
 
 	/**
