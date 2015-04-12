@@ -336,9 +336,9 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 	}
 
 	@Override
-	protected void setupActionBar()
+	protected void setupActionBar(boolean firstInflation)
 	{
-		super.setupActionBar();
+		super.setupActionBar(firstInflation);
 
 		setLabel(mConversation.getLabel());
 

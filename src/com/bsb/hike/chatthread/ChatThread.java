@@ -1483,7 +1483,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		addtoMessageMap(0, messages.size());
 
 		initListViewAndAdapter(); // init adapter, listView and add clicks etc
-		setupActionBar(); // Setup the action bar
+		setupActionBar(true); // Setup the action bar
 		currentTheme = mConversation.getChatTheme();
 		updateUIAsPerTheme(currentTheme);// it has to be done after setting adapter
 		initMessageSenderLayout();
@@ -3412,7 +3412,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		boolean isRemoved = activity.removeFragment(tag);
 		if (isRemoved && updateActionBar)
 		{
-			setupActionBar();
+			setupActionBar(false);
 			activity.updateActionBarColor(currentTheme.headerBgResId());
 			activity.getSupportActionBar().show();
 		}
@@ -3423,7 +3423,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 * Utility method used for setting up the ActionBar in the ChatThread.
 	 * 
 	 */
-	protected void setupActionBar()
+	protected void setupActionBar(boolean firstInflation)
 	{
 		mActionBarView = mActionBar.setCustomActionBarView(R.layout.chat_thread_action_bar);
 

@@ -143,6 +143,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private static final int DEFAULT_UNDELIVERED_WAIT_TIME = 30;
 
 	private static final int DEFAULT_SMS_LENGTH = 140;
+	
+	String prevLastSeen = null;
 
 	private View hikeToOfflineTipView;
 
@@ -753,7 +755,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			mContactInfo.setLastSeenTime(lastSeenTime);
 
 			String lastSeenString = Utils.getLastSeenTimeAsString(activity.getApplicationContext(), lastSeenTime, offline, false, true);
-
 			/**
 			 * mContactInfo.getOffline == 0 indicates user is online
 			 */
@@ -1033,14 +1034,38 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 * Overrides {@link ChatThread}'s {@link #setupActionBar()}, to set the last seen time
 	 */
 	@Override
-	protected void setupActionBar()
+	protected void setupActionBar(boolean firstInflation)
 	{
-		super.setupActionBar();
+		super.setupActionBar(firstInflation);
 
 		setLabel(getConvLabel());
 
-		setLastSeenTextBasedOnHikeValue(mConversation.isOnHike());
+		/**
+		 * If unsaved contact : do not show last seen first. Wait for the query to return the result
+		 */
+		
+		if (firstInflation)
+		{
+			if (mContactInfo.isUnknownContact())
+			{
+				hideLastSeenText();
+			}
+			else
+			{
+				setLastSeenTextBasedOnHikeValue(mConversation.isOnHike());
+			}
+		}
+		
+		else
+		{
+			setPrevLastSeenTextFromActionBar();
+		}
+	}
 
+	private void setPrevLastSeenTextFromActionBar()
+	{
+		Logger.d(TAG, " Previous lastSeen value : " + prevLastSeen);
+		setLastSeen(prevLastSeen);
 	}
 
 	/**
@@ -1083,13 +1108,14 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		 * Setting text on lastSeenView
 		 */
 		mLastSeenView.setText(text);
-
+		
+		prevLastSeen = text;
+		
 		if (mLastSeenView.getVisibility() == View.GONE)
 		{
 			/**
-			 * If the view was initially gone and conversation is on hike, we animate the label view in order to make lastSeenView visible
+			 * If the view was initially gone, we animate the label view in order to make lastSeenView visible
 			 */
-			if (mConversation.isOnHike())
 			{
 				mLastSeenView.setVisibility(View.INVISIBLE);
 
@@ -1114,11 +1140,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 						mLastSeenView.setVisibility(View.VISIBLE);
 					}
 				});
-			}
-
-			else
-			{
-				mLabelView.setVisibility(View.VISIBLE);
 			}
 		}
 		
