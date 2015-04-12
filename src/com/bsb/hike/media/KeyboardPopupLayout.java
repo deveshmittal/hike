@@ -70,6 +70,12 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 
 	public void showKeyboardPopup(View view)
 	{
+		if (mainView == null || mainView.getWindowToken() == null)
+		{
+			Logger.wtf("chatthread", "window token is null or view itself is null! Cannot show sticker/emoticons. Eating this exception");
+			return;
+		}
+		
 		boolean islandScape = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
 		int height = islandScape ? possibleKeyboardHeightLand : possibleKeyboardHeight;
 		if (height == 0)
