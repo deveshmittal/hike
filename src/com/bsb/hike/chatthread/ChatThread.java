@@ -4151,10 +4151,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		Logger.i(TAG, "onPopup Dismiss");
 		if(activity.findViewById(R.id.sticker_btn).isSelected())
 		{
+			mStickerPicker.resetToFirstPosition();
 			setStickerButtonSelected(false);
 		}
 		if(activity.findViewById(R.id.emoticon_btn).isSelected())
 		{
+			mEmoticonPicker.resetToFirstPosition();
 			setEmoticonButtonSelected(false);
 		}
 	}
