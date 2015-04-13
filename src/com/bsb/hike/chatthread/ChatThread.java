@@ -506,9 +506,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private void defineEnterAction() {
 		if (mComposeView != null) {
-			//Its a workaround to set the multiline editfield when android:imeOptions="actionSend".
-    		mComposeView.setHorizontallyScrolling(false);
-			mComposeView.setMaxLines(4);
 			//if send on enter setting is unchecked then send button will send the cursor to the next line.
 			if (!PreferenceManager.getDefaultSharedPreferences(
 					activity.getApplicationContext()).getBoolean(
@@ -516,6 +513,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				mComposeView.setInputType(mComposeView.getInputType()
 						| InputType.TYPE_TEXT_FLAG_MULTI_LINE);
 			}
+			//Its a workaround to set the multiline editfield when android:imeOptions="actionSend".
+    		mComposeView.setHorizontallyScrolling(false);
+			mComposeView.setMaxLines(4);
 
 		}
 	}
