@@ -174,18 +174,6 @@ public class GroupChatThread extends OneToNChatThread
 		oneToNConversation = (GroupConversation) conversation;
 		super.fetchConversationFinished(conversation);
 
-		/**
-		 * Is the group owner blocked ? If true then show the block overlay with appropriate strings
-		 */
-
-		if (oneToNConversation.isBlocked())
-		{
-			String label = oneToNConversation.getConversationParticipantName(oneToNConversation.getConversationOwner());
-
-			showBlockOverlay(label);
-
-		}
-
 		showTips();
 
 		toggleConversationMuteViewVisibility(oneToNConversation.isMuted());
@@ -500,7 +488,7 @@ public class GroupChatThread extends OneToNChatThread
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-//		Not allowing user to access actionbar items on a blocked user's chatThread
+//		Not allowing user to access actionbar items on a dead conversation
 		if (!oneToNConversation.isConversationAlive())
 		{
 			Toast.makeText(activity.getApplicationContext(), getString(R.string.group_chat_end), Toast.LENGTH_SHORT).show();
