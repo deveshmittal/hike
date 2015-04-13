@@ -1173,7 +1173,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	private void searchMessage(boolean searchNext, boolean loop)
 	{
-		if (!TextUtils.isEmpty(searchText))
+		if (!TextUtils.isEmpty(searchText) &&
+				// For some devices like micromax A120, one can get multiple calls from one user-input.
+				// Check on the dialog is optimal here as it directly reflects the user intentions.
+				(searchDialog == null || !searchDialog.isShowing()))
 		{
 			if (loop)
 			{
