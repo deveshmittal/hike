@@ -2593,6 +2593,21 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		return itemsPair;
 	}
 	
+	@Override
+	public void preShowOverflowMenu(List<OverFlowMenuItem> overflowItems)
+	{
+		/**
+		 * Removing favorites option if the user might have pressed on favorites or if we are accidentally showing it
+		 */
+		
+		if (!mContactInfo.isNotOrRejectedFavourite())
+		{
+			mActionBar.removeItemIfExists(R.string.add_as_favorite_menu);
+		}
+		
+		super.preShowOverflowMenu(overflowItems);
+	}
+	
 	/**
 	 * This runs only on the UI Thread
 	 * 
