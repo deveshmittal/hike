@@ -399,4 +399,13 @@ public class HikeActionBar
 	{
 		return overflowMenIndicatorInUse;
 	}
+
+	public void removeItemIfExists(int id)
+	{
+		if (overFlowMenuLayout != null)
+		{
+			overFlowMenuLayout.removeItem(id);
+		}
+	}
+
 }
