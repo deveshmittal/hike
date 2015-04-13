@@ -176,7 +176,7 @@ public class PopUpLayout implements OnTouchListener
 		// hide pop up if outside if touched
 		popup.setOutsideTouchable(true);
 		// to gain focus
-		popup.setFocusable(true);
+		popup.setFocusable(false);
 		
 		return popup;
 	}
