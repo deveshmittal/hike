@@ -62,6 +62,8 @@ public class GroupChatThread extends OneToNChatThread
 	
 	private static final int LATEST_PIN_DELETED = 303;
 	
+	private static final int GROUP_END = 304;
+	
 	private static final String HASH_PIN = "#pin";
 
 	private static final String PIN_MESSAGE_SEPARATOR = ": ";
@@ -107,7 +109,7 @@ public class GroupChatThread extends OneToNChatThread
 	{
 		return new String[] { HikePubSub.ONETON_MESSAGE_DELIVERED_READ, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONV_META_DATA_UPDATED,
 				HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.CONVERSATION_REVIVED, HikePubSub.PARTICIPANT_JOINED_ONETONCONV, HikePubSub.PARTICIPANT_LEFT_ONETONCONV,
-				HikePubSub.PARTICIPANT_JOINED_SYSTEM_MESSAGE, HikePubSub.ONETONCONV_NAME_CHANGED };
+				HikePubSub.PARTICIPANT_JOINED_SYSTEM_MESSAGE, HikePubSub.ONETONCONV_NAME_CHANGED, HikePubSub.GROUP_END };
 	}
 
 	private List<OverFlowMenuItem> getOverFlowItems()
@@ -205,6 +207,9 @@ public class GroupChatThread extends OneToNChatThread
 		case MESSAGE_RECEIVED:
 			addMessage((ConvMessage) msg.obj);
 			break;
+		case GROUP_END:
+			toggleGroupLife(false);
+			break;
 		default:
 			super.handleUIMessage(msg);
 			break;
@@ -221,6 +226,9 @@ public class GroupChatThread extends OneToNChatThread
 			break;
 		case HikePubSub.LATEST_PIN_DELETED:
 			onLatestPinDeleted(object);
+			break;
+		case HikePubSub.GROUP_END:
+			uiHandler.sendEmptyMessage(GROUP_END);
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching PubSub event in OneToNChatThread. Calling super class' onEventReceived");
