@@ -1116,8 +1116,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 		
 		mBottomView.setVisibility(View.GONE);
-		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
 		mComposeView.requestFocus();
+		Utils.showSoftKeyboard(activity.getApplicationContext());
 	}
 	
 	TextWatcher searchTextWatcher = new TextWatcher()
