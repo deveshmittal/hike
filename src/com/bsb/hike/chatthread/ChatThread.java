@@ -1191,12 +1191,19 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	}
 
-	private void updateUIforSearchResult(int position)
+	private void updateUIforSearchResult(final int position)
 	{
 		searchDialog.dismiss();
 		if (position >= 0)
 		{
-			mConversationsView.setSelection(position);
+			mConversationsView.post(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					mConversationsView.setSelection(position);
+				}
+			});
 		}
 		else
 		{
