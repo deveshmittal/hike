@@ -301,7 +301,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			case StickerManager.STICKERS_UPDATED:
 			case StickerManager.MORE_STICKERS_DOWNLOADED:
 			case StickerManager.STICKERS_DOWNLOADED:
-				mStickerPicker.updateIconPageIndicator();
+				mStickerPicker.notifyDataSetChanged();
 			}
 		}
 	}
@@ -379,8 +379,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			setLabel((String) msg.obj);
 			break;
 		case STICKER_CATEGORY_MAP_UPDATED:
-			mStickerPicker.updateStickerAdapter();
-			mStickerPicker.updateIconPageIndicator();
+			mStickerPicker.notifyDataSetChanged();
 			break;
 		case SCROLL_TO_END:
 			mConversationsView.setSelection(messages.size() - 1);
