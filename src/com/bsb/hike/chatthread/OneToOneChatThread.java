@@ -807,6 +807,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		else
 		{
+			setupSMSToggleLayout();
 			updateChatMetadata();
 		}
 
@@ -1124,7 +1125,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		if (super.updateUIAsPerTheme(theme))
 		{
-			setupSMSToggleLayout();
+			if (!mContactInfo.isUnknownContact())
+			{
+				setupSMSToggleLayout();
+			}
 		}
 		return false;
 	}
