@@ -210,8 +210,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static final int SEARCH_NEXT = 25;
 
 	protected static final int SEARCH_PREVIOUS = 26;
+	
+	protected static final int SEARCH_LOOP = 27;
 
-    protected static final int SET_WINDOW_BG = 27;
+    protected static final int SET_WINDOW_BG = 28;
    
     private int NUDGE_TOAST_OCCURENCE = 2;
     	
@@ -793,11 +795,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case R.id.next:
 			Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
-			searchMessage(true);
+			searchMessage(true,false);
 			break;
 		case R.id.previous:
 			Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
-			searchMessage(false);
+			searchMessage(false,false);
 			break;
 		case R.id.search_clear_btn:
 			mComposeView.setText("");
@@ -1169,11 +1171,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 	};
 
-	private void searchMessage(boolean searchNext)
+	private void searchMessage(boolean searchNext, boolean loop)
 	{
 		if (!TextUtils.isEmpty(searchText))
 		{
-			if (searchNext)
+			if (loop)
+			{
+				activity.getSupportLoaderManager().restartLoader(SEARCH_LOOP, null, this);
+			}
+			else if (searchNext)
 			{
 				activity.getSupportLoaderManager().restartLoader(SEARCH_NEXT, null, this);
 			}
@@ -2001,7 +2007,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			return new ConversationLoader(activity.getApplicationContext(), LOAD_MORE_MESSAGES, this);
 		}
-		else if (arg0 == SEARCH_NEXT || arg0 == SEARCH_PREVIOUS)
+		else if (arg0 == SEARCH_NEXT || arg0 == SEARCH_PREVIOUS || arg0 == SEARCH_LOOP)
 		{
 			return new MessageFinder(activity.getApplicationContext(), arg0, this);
 		}
@@ -2030,11 +2036,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		else if (arg0 instanceof MessageFinder)
 		{
 			MessageFinder loader = (MessageFinder) arg0;
-			if (loader.loaderId == SEARCH_NEXT)
-			{
-				updateUIforSearchResult((int) arg1);
-			}
-			else if (loader.loaderId == SEARCH_PREVIOUS)
+			int id = loader.loaderId;
+			if (id == SEARCH_LOOP || id == SEARCH_NEXT || id == SEARCH_PREVIOUS)
 			{
 				updateUIforSearchResult((int) arg1);
 			}
@@ -2149,7 +2152,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 				{
 					position = messageSearchManager.getNextItem(chatThread.get().mConversationsView.getFirstVisiblePosition(), chatThread.get().mConversationsView.getLastVisiblePosition());
 				}
-				else if (loaderId == SEARCH_PREVIOUS)
+				else if (loaderId == SEARCH_PREVIOUS || loaderId == SEARCH_LOOP)
 				{
 					position = messageSearchManager.getPrevItem(chatThread.get().mConversationsView.getFirstVisiblePosition());
 					while (position < 0)
@@ -2164,6 +2167,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 						chatThread.get().addMoreMessages(msgList);
 						loadMessageCount *= 2;
 						position = messageSearchManager.getPrevItem(chatThread.get().mConversationsView.getFirstVisiblePosition());
+					}
+					if (loaderId == SEARCH_LOOP && position < 0)
+					{
+						position = messageSearchManager.getNextItem(chatThread.get().mConversationsView.getFirstVisiblePosition(), chatThread.get().mConversationsView.getLastVisiblePosition());
 					}
 				}
 				return position;
@@ -4303,7 +4310,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			else if (actionId == EditorInfo.IME_ACTION_SEARCH||(view.getId() ==R.id.search_text))
 			{
 				Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
-				searchMessage(false);
+				searchMessage(false,true);
 				return true;
 			}
 			return false;
