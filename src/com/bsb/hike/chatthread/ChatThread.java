@@ -2992,6 +2992,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 * 1. Save drafts for the current chat thread if any. 
 	 * 2. Dismiss stickers and emoticon pallete 
 	 * 3. If actionMode is on, dismiss it
+	 * 4. If photoViewer fragment was attached, remove it
 	 */
 	protected void onPreNewIntent()
 	{
@@ -3005,6 +3006,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if(mActionMode!= null && mActionMode.isActionModeOn())
 		{
 			mActionMode.finish();
+		}
+		
+		if (activity.isFragmentAdded(HikeConstants.IMAGE_FRAGMENT_TAG))
+		{
+			activity.removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
 		}
 	}
 	
