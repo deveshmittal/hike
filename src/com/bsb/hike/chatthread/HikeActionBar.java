@@ -282,14 +282,9 @@ public class HikeActionBar
 	{
 		if (overFlowMenuLayout != null)
 		{
-			int count = 0;
 			for (Pair<Integer, Boolean> pair : itemList)
 			{
-				count =  overFlowMenuLayout.updateOverflowMenuItemActiveState(pair.first, pair.second, false) ? count + 1 : count;
-			}
-			if (count > 0)
-			{
-				overFlowMenuLayout.notifyDateSetChanged();
+				updateOverflowMenuItemActiveState(pair.first, pair.second);
 			}
 		}
 	}
