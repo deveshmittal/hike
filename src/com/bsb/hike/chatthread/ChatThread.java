@@ -5,6 +5,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -606,33 +607,38 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	
 	@Override
-	public void preShowOverflowMenu(List<OverFlowMenuItem> overflowItems)
+	public void onPrepareOverflowOptionsMenu(List<OverFlowMenuItem> overflowItems)
 	{
-		mActionBar.updateOverflowMenuItemActiveState(getMenuItemsToBeModified());
-
-		if (!sharedPreference.getData(HikeMessengerApp.CT_SEARCH_CLICKED, false) && !messages.isEmpty())
+		if (overflowItems == null)
 		{
-			mActionBar.updateOverflowMenuItemIcon(R.string.search, R.drawable.ic_top_bar_indicator_search);
+			return;
 		}
-		else
+
+		for (OverFlowMenuItem overFlowMenuItem : overflowItems)
 		{
-			mActionBar.updateOverflowMenuItemIcon(R.string.search, 0);
+
+			switch (overFlowMenuItem.id)
+			{
+			case R.string.search:
+				overFlowMenuItem.enabled = !messages.isEmpty();
+				if (!sharedPreference.getData(HikeMessengerApp.CT_SEARCH_CLICKED, false) && !messages.isEmpty())
+				{
+					overFlowMenuItem.drawableId = R.drawable.ic_top_bar_indicator_search;
+				}
+				else
+				{
+					overFlowMenuItem.drawableId = 0;
+				}
+				break;
+
+			case R.string.clear_chat:
+			case R.string.email_chat:
+				overFlowMenuItem.enabled = !messages.isEmpty();
+				break;
+			}
 		}
 	}
 	
-	/**
-	 * @return arrayList of overflow menu items that are modified before menu is shown
-	 */
-	protected ArrayList<Pair<Integer, Boolean>>  getMenuItemsToBeModified()
-	{
-		ArrayList<Pair<Integer, Boolean>> itemsPair = new ArrayList<Pair<Integer,Boolean>>();
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.search, (!messages.isEmpty())));
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.clear_chat, (!messages.isEmpty())));
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.email_chat, (!messages.isEmpty())));
-		
-		return itemsPair;
-	}
- 
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		Logger.i(TAG, "on activity result " + requestCode + " result " + resultCode);
