@@ -1,9 +1,7 @@
 package com.bsb.hike.chatthread;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -200,6 +198,35 @@ public class HikeActionBar
 		}
 	}
 	
+	/**
+	 * Can be used to update the active state of an overflow menu item on the fly
+	 * 
+	 * @param itemId
+	 * @param enabled
+	 */
+	protected void updateOverflowMenuItemActiveState(int itemId, boolean enabled)
+	{
+		if(overFlowMenuLayout!=null)
+		{
+			overFlowMenuLayout.updateOverflowMenuItemActiveState(itemId, enabled, true);
+		}
+	}
+	
+
+	/**
+	 * Can be used to update the title of an overflow menu item on the fly
+	 * 
+	 * @param itemId
+	 * @param newTitle
+	 */
+	protected void updateOverflowMenuItemIcon(int itemId, int drawableId)
+	{
+		if(overFlowMenuLayout!=null)
+		{
+			overFlowMenuLayout.updateOverflowMenuItemIcon(itemId, drawableId);
+		}
+	}
+
 	/**
 	 * This is used to update/show indicator image on the overflow menu icon. This will be called from the UI Thread
 	 * 
