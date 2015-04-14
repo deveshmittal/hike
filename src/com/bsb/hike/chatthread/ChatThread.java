@@ -4221,6 +4221,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			mShareablePopupLayout.onCloseKeyBoard();
 
 		}
+		
+		if (mActionMode != null && mActionMode.isActionModeOn())
+		{
+			mActionMode.finish();
+		}
 	}
 
 	public void onMenuKeyPressed()
