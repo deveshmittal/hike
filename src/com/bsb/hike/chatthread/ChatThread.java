@@ -4055,6 +4055,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			dialog.dismiss();
 		}
+		
+		if (mActionBar != null && mActionBar.isOverflowMenuShowing())
+		{
+			if (mShareablePopupLayout.isKeyboardOpen())
+			{
+				mActionBar.dismissOverflowMenu();
+			}
+		}
 	}
 	
 	/**

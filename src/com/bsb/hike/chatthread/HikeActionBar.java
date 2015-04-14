@@ -358,4 +358,22 @@ public class HikeActionBar
 			overFlowMenuLayout = null;
 		}
 	}
+	
+	public boolean isOverflowMenuShowing()
+	{
+		if (overFlowMenuLayout != null)
+		{
+			return overFlowMenuLayout.isShowing();
+		}
+		
+		return false;
+	}
+
+	public void dismissOverflowMenu()
+	{
+		if (overFlowMenuLayout != null)
+		{
+			overFlowMenuLayout.dismiss();
+		}
+	}
 }

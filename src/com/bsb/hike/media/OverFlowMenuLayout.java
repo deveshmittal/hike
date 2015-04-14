@@ -355,4 +355,21 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 		this.popUpLayout = null;
 	}
 
+	public boolean isShowing()
+	{
+		if (popUpLayout != null)
+		{
+			return popUpLayout.isShowing();
+		}
+		
+		return false;
+	}
+
+	public void dismiss()
+	{
+		if (popUpLayout != null)
+		{
+			popUpLayout.dismiss();
+		}
+	}
 }
