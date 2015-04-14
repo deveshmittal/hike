@@ -20,8 +20,14 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 
 public class OverFlowMenuLayout implements OnItemClickListener {
-	public static interface OverflowViewListener{
-		public void preShowOverflowMenu(List<OverFlowMenuItem> overflowItems);
+	public static interface OverflowViewListener
+	{
+		/**
+		 * This method will be called with a list of all overflow menu items. You can edit your menu items in this callback
+		 * 
+		 * @param overflowItems
+		 */
+		public void onPrepareOverflowOptionsMenu(List<OverFlowMenuItem> overflowItems);
 	}
 	protected Context context;
 	protected List<OverFlowMenuItem> overflowItems;
@@ -160,7 +166,7 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 		initView();
 		if(viewListener!=null)
 		{
-			viewListener.preShowOverflowMenu(overflowItems);
+			viewListener.onPrepareOverflowOptionsMenu(overflowItems);
 		}
 		popUpLayout.showPopUpWindow(width, height, xOffset, yOffset, anchor,
 				getView(), inputMethodMode);
@@ -352,6 +358,7 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 		this.viewListener = null;
 		this.listener = null;
 		this.mOnDismisslistener = null;
+		this.viewListener = null;
 		this.popUpLayout = null;
 	}
 

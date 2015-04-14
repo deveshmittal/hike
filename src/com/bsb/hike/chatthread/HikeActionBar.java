@@ -214,27 +214,6 @@ public class HikeActionBar
 		}
 	}
 	
-	/**
-	 * Can be used to update the active state of multiple overflow menu item on the fly
-	 * 
-	 * @param itemId
-	 * @param enabled
-	 */
-	protected void updateOverflowMenuItemActiveState(ArrayList<Pair<Integer, Boolean>> itemList)
-	{
-		if (overFlowMenuLayout != null)
-		{
-			int count = 0;
-			for (Pair<Integer, Boolean> pair : itemList)
-			{
-				count =  overFlowMenuLayout.updateOverflowMenuItemActiveState(pair.first, pair.second, false) ? count + 1 : count;
-			}
-			if (count > 0)
-			{
-				overFlowMenuLayout.notifyDateSetChanged();
-			}
-		}
-	}
 
 	/**
 	 * Can be used to update the title of an overflow menu item on the fly
