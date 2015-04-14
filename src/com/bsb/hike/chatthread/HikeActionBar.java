@@ -211,7 +211,6 @@ public class HikeActionBar
 			overFlowMenuLayout.updateOverflowMenuItemActiveState(itemId, enabled, true);
 		}
 	}
-	
 
 	/**
 	 * Can be used to update the title of an overflow menu item on the fly
