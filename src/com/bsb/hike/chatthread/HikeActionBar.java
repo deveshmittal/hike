@@ -2,7 +2,6 @@ package com.bsb.hike.chatthread;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -351,4 +350,12 @@ public class HikeActionBar
 		}
 	}
 
+	public void releseResources()
+	{
+		if (overFlowMenuLayout != null)
+		{
+			overFlowMenuLayout.releaseResources();
+			overFlowMenuLayout = null;
+		}
+	}
 }

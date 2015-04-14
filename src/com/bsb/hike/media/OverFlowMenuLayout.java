@@ -347,4 +347,12 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 		this.viewListener = viewListener;
 	}
 
+	public void releaseResources()
+	{
+		this.viewListener = null;
+		this.listener = null;
+		this.mOnDismisslistener = null;
+		this.popUpLayout = null;
+	}
+
 }

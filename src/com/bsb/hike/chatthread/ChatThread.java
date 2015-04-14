@@ -2847,7 +2847,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected abstract String[] getPubSubListeners();
 
 	/**
-	 * Mimics the onDestroy method of an Activity. It is used to release resources help by the ChatThread instance.
+	 * Mimics the onDestroy method of an Activity. It is used to release resources held by the ChatThread instance.
 	 */
 
 	public void onDestroy()
@@ -2865,8 +2865,19 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		releaseMessageMap();
 		
 		((CustomLinearLayout) activity.findViewById(R.id.chat_layout)).setOnSoftKeyboardListener(null);
+		
+		releaseActionBarResources();
 	}
 	
+	private void releaseActionBarResources()
+	{
+		if (mActionBar != null)
+		{
+			mActionBar.releseResources();
+			mActionBar = null;
+		}
+	}
+
 	private void releaseStickerAndEmoticon()
 	{
 		/**
