@@ -3413,7 +3413,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	private void saveDraft()
 	{
-		if (mComposeView != null && mComposeView.getVisibility() == View.VISIBLE)
+		if (mComposeView != null && mComposeView.getVisibility() == View.VISIBLE && mComposeView.getId() == R.id.msg_compose)
 		{
 			Editor editor = activity.getSharedPreferences(HikeConstants.DRAFT_SETTING, android.content.Context.MODE_PRIVATE).edit();
 			if (mComposeView.length() != 0)
