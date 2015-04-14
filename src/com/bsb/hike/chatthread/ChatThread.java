@@ -637,12 +637,27 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected ArrayList<Pair<Integer, Boolean>>  getMenuItemsToBeModified()
 	{
 		ArrayList<Pair<Integer, Boolean>> itemsPair = new ArrayList<Pair<Integer,Boolean>>();
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.search, (!messages.isEmpty() && !mConversation.isBlocked())));
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.clear_chat, (!messages.isEmpty() && !mConversation.isBlocked())));
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.email_chat, (!messages.isEmpty())));
+		boolean isMessageListEmpty = isMessageListEmpty();
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.search, (!isMessageListEmpty && !mConversation.isBlocked())));
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.clear_chat, (!isMessageListEmpty && !mConversation.isBlocked())));
+		itemsPair.add(new Pair<Integer, Boolean>(R.string.email_chat, (!isMessageListEmpty)));
 		itemsPair.add(new Pair<Integer, Boolean>(R.string.chat_theme, !mConversation.isBlocked()));
 		
 		return itemsPair;
+	}
+	
+	protected boolean isMessageListEmpty()
+	{
+		boolean isMessageListEmpty = messages.isEmpty();
+		if (!messages.isEmpty())
+		{
+			ConvMessage firstMessage = messages.get(0);
+			if (firstMessage.getTypingNotification() != null || firstMessage.isBlockAddHeader())
+			{
+				isMessageListEmpty = true;
+			}
+		}
+		return isMessageListEmpty;
 	}
  
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -2002,7 +2017,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	private int getMessagesStartIndex()
 	{
-		return messages.get(0).isBlockAddHeader() ? 1 : 0;
+		if (!messages.isEmpty() && messages.get(0).isBlockAddHeader())
+		{
+			return 1;
+		}
+		return 0;
 	}
 
 	@Override
