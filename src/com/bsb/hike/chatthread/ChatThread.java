@@ -215,6 +215,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected static final int SEARCH_LOOP = 27;
 
     protected static final int SET_WINDOW_BG = 28;
+
+    protected static final int SCROLL_TO_POSITION = 29;
    
     private int NUDGE_TOAST_OCCURENCE = 2;
     	
@@ -395,6 +397,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case SCROLL_TO_END:
 			mConversationsView.setSelection(messages.size() - 1);
+			break;
+		case SCROLL_TO_POSITION:
+			mConversationsView.setSelection((int)msg.obj);
 			break;
 		case STICKER_FTUE_TIP:
 			mTips.showStickerFtueTip();
@@ -1215,14 +1220,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		searchDialog.dismiss();
 		if (position >= 0)
 		{
-			mConversationsView.post(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					mConversationsView.setSelection(position);
-				}
-			});
+			sendUIMessage(SCROLL_TO_POSITION, position);
 		}
 		else
 		{
