@@ -134,39 +134,6 @@ public class HikeActionBar
 	}
 
 	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	public boolean enableMenuItem(int parameter)
-	{
-		// TODO implement me
-		return false;
-	}
-
-	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	public boolean disableMenuItem(int parameter)
-	{
-		// TODO implement me
-		return false;
-	}
-
-	/**
 	 * Returns the list of overflow menu items held by this ActionBar
 	 * @return
 	 */
@@ -181,30 +148,6 @@ public class HikeActionBar
 		{
 			return null;
 		}
-	}
-
-	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	public void setOverFlowMenuItems(Set<OverFlowMenuItem> parameter, OverflowItemClickListener parameter2)
-	{
-		// TODO implement me
-	}
-
-	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	public void setOverFloeClickListener(OverflowItemClickListener parameter)
-	{
-		// TODO implement me
 	}
 
 	public void showOverflowMenu(int width, int height, int xOffset, int yOffset, View anchor)
