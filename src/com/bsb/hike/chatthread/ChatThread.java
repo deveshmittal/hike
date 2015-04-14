@@ -859,8 +859,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		closeStickerTip();
 		
-		mShareablePopupLayout.togglePopup(mStickerPicker, activity.getResources().getConfiguration().orientation);
-		activity.showProductPopup(ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal());
+		if (mShareablePopupLayout.togglePopup(mStickerPicker, activity.getResources().getConfiguration().orientation))
+		{
+			activity.showProductPopup(ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal());
+		}
+		else
+		{
+			setStickerButtonSelected(false);
+			Toast.makeText(activity.getApplicationContext(), R.string.some_error, Toast.LENGTH_SHORT).show();	
+		}
 	}
 	
 	protected void closeStickerTip()
@@ -894,7 +901,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void emoticonClicked()
 	{
-		mShareablePopupLayout.togglePopup(mEmoticonPicker, activity.getResources().getConfiguration().orientation);
+		if (!mShareablePopupLayout.togglePopup(mEmoticonPicker, activity.getResources().getConfiguration().orientation))
+		{
+			setEmoticonButtonSelected(false);
+			Toast.makeText(activity.getApplicationContext(), R.string.some_error, Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	protected void setUpThemePicker()

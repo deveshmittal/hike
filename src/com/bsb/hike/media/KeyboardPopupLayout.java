@@ -68,12 +68,12 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		}
 	}
 
-	public void showKeyboardPopup(View view)
+	public boolean showKeyboardPopup(View view)
 	{
-		if (mainView == null || mainView.getWindowToken() == null)
+		if (mainView.getWindowToken() == null)
 		{
 			Logger.wtf("chatthread", "window token is null or view itself is null! Cannot show sticker/emoticons. Eating this exception");
-			return;
+			return false;
 		}
 		
 		boolean islandScape = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
@@ -113,6 +113,7 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 			updatePadding(popup.getHeight());
 		}
 		popup.showAtLocation(mainView, Gravity.BOTTOM, 0, 0);
+		return true;
 	}
 
 	@Override
