@@ -2598,31 +2598,48 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	}
 	
 	@Override
-	protected ArrayList<Pair<Integer, Boolean>> getMenuItemsToBeModified()
+	public void onPrepareOverflowOptionsMenu(List<OverFlowMenuItem> overflowItems)
 	{
-		ArrayList<Pair<Integer, Boolean>> itemsPair = new ArrayList<Pair<Integer,Boolean>>();
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.add_as_favorite_menu, !mConversation.isBlocked()));
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.search, (!messages.isEmpty() && !mConversation.isBlocked())));
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.clear_chat, (!messages.isEmpty() && !mConversation.isBlocked())));
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.email_chat, (!messages.isEmpty())));
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.chat_theme, !mConversation.isBlocked()));
-		
-		return itemsPair;
-	}
-	
-	@Override
-	public void preShowOverflowMenu(List<OverFlowMenuItem> overflowItems)
-	{
-		/**
-		 * Removing favorites option if the user might have pressed on favorites or if we are accidentally showing it
-		 */
-		
-		if (!mContactInfo.isNotOrRejectedFavourite())
+		if (overflowItems == null)
 		{
-			mActionBar.removeItemIfExists(R.string.add_as_favorite_menu);
+			return;
 		}
 		
-		super.preShowOverflowMenu(overflowItems);
+		super.onPrepareOverflowOptionsMenu(overflowItems);
+		
+		for (OverFlowMenuItem overFlowMenuItem : overflowItems)
+		{
+
+			switch (overFlowMenuItem.id)
+			{
+			case R.string.add_as_favorite_menu:
+				/**
+				 * Removing favorites option if the user might have pressed on favorites or if we are accidentally showing it
+				 */
+				if(!mContactInfo.isNotOrRejectedFavourite())
+				{
+					overflowItems.remove(overFlowMenuItem);
+				}
+				else
+				{
+					overFlowMenuItem.enabled = !mConversation.isBlocked();
+				}
+				break;
+				
+			case R.string.search:
+			case R.string.clear_chat:
+				overFlowMenuItem.enabled = !messages.isEmpty() && !mConversation.isBlocked();
+				break;
+				
+			case R.string.email_chat:
+				overFlowMenuItem.enabled = !messages.isEmpty();
+				break;
+				
+			case R.string.chat_theme:
+				overFlowMenuItem.enabled = !mConversation.isBlocked();
+				break;
+			}
+		}
 	}
 	
 	/**

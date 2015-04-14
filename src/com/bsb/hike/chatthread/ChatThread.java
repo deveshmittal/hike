@@ -5,6 +5,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -606,33 +607,38 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	
 	@Override
-	public void preShowOverflowMenu(List<OverFlowMenuItem> overflowItems)
+	public void onPrepareOverflowOptionsMenu(List<OverFlowMenuItem> overflowItems)
 	{
-		mActionBar.updateOverflowMenuItemActiveState(getMenuItemsToBeModified());
-
-		if (!sharedPreference.getData(HikeMessengerApp.CT_SEARCH_CLICKED, false) && !messages.isEmpty())
+		if (overflowItems == null)
 		{
-			mActionBar.updateOverflowMenuItemIcon(R.string.search, R.drawable.ic_top_bar_indicator_search);
+			return;
 		}
-		else
+
+		for (OverFlowMenuItem overFlowMenuItem : overflowItems)
 		{
-			mActionBar.updateOverflowMenuItemIcon(R.string.search, 0);
+
+			switch (overFlowMenuItem.id)
+			{
+			case R.string.search:
+				overFlowMenuItem.enabled = !messages.isEmpty();
+				if (!sharedPreference.getData(HikeMessengerApp.CT_SEARCH_CLICKED, false) && !messages.isEmpty())
+				{
+					overFlowMenuItem.drawableId = R.drawable.ic_top_bar_indicator_search;
+				}
+				else
+				{
+					overFlowMenuItem.drawableId = 0;
+				}
+				break;
+
+			case R.string.clear_chat:
+			case R.string.email_chat:
+				overFlowMenuItem.enabled = !messages.isEmpty();
+				break;
+			}
 		}
 	}
 	
-	/**
-	 * @return arrayList of overflow menu items that are modified before menu is shown
-	 */
-	protected ArrayList<Pair<Integer, Boolean>>  getMenuItemsToBeModified()
-	{
-		ArrayList<Pair<Integer, Boolean>> itemsPair = new ArrayList<Pair<Integer,Boolean>>();
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.search, (!messages.isEmpty())));
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.clear_chat, (!messages.isEmpty())));
-		itemsPair.add(new Pair<Integer, Boolean>(R.string.email_chat, (!messages.isEmpty())));
-		
-		return itemsPair;
-	}
- 
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		Logger.i(TAG, "on activity result " + requestCode + " result " + resultCode);
@@ -859,8 +865,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		closeStickerTip();
 		
-		mShareablePopupLayout.togglePopup(mStickerPicker, activity.getResources().getConfiguration().orientation);
-		activity.showProductPopup(ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal());
+		if (mShareablePopupLayout.togglePopup(mStickerPicker, activity.getResources().getConfiguration().orientation))
+		{
+			activity.showProductPopup(ProductPopupsConstants.PopupTriggerPoints.STKBUT_BUT.ordinal());
+		}
+		else
+		{
+			setStickerButtonSelected(false);
+			Toast.makeText(activity.getApplicationContext(), R.string.some_error, Toast.LENGTH_SHORT).show();	
+		}
 	}
 	
 	protected void closeStickerTip()
@@ -894,7 +907,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void emoticonClicked()
 	{
-		mShareablePopupLayout.togglePopup(mEmoticonPicker, activity.getResources().getConfiguration().orientation);
+		if (!mShareablePopupLayout.togglePopup(mEmoticonPicker, activity.getResources().getConfiguration().orientation))
+		{
+			setEmoticonButtonSelected(false);
+			Toast.makeText(activity.getApplicationContext(), R.string.some_error, Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	protected void setUpThemePicker()
@@ -2847,7 +2864,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected abstract String[] getPubSubListeners();
 
 	/**
-	 * Mimics the onDestroy method of an Activity. It is used to release resources help by the ChatThread instance.
+	 * Mimics the onDestroy method of an Activity. It is used to release resources held by the ChatThread instance.
 	 */
 
 	public void onDestroy()
@@ -2865,8 +2882,19 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		releaseMessageMap();
 		
 		((CustomLinearLayout) activity.findViewById(R.id.chat_layout)).setOnSoftKeyboardListener(null);
+		
+		releaseActionBarResources();
 	}
 	
+	private void releaseActionBarResources()
+	{
+		if (mActionBar != null)
+		{
+			mActionBar.releseResources();
+			mActionBar = null;
+		}
+	}
+
 	private void releaseStickerAndEmoticon()
 	{
 		/**
@@ -3391,7 +3419,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	private void saveDraft()
 	{
-		if (mComposeView != null && mComposeView.getVisibility() == View.VISIBLE)
+		if (mComposeView != null && mComposeView.getVisibility() == View.VISIBLE && mComposeView.getId() == R.id.msg_compose)
 		{
 			Editor editor = activity.getSharedPreferences(HikeConstants.DRAFT_SETTING, android.content.Context.MODE_PRIVATE).edit();
 			if (mComposeView.length() != 0)
@@ -4043,6 +4071,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (this.dialog != null)
 		{
 			dialog.dismiss();
+		}
+		
+		if (mActionBar != null && mActionBar.isOverflowMenuShowing())
+		{
+			if (mShareablePopupLayout.isKeyboardOpen())
+			{
+				mActionBar.dismissOverflowMenu();
+			}
 		}
 	}
 	

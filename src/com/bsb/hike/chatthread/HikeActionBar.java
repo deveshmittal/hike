@@ -2,7 +2,6 @@ package com.bsb.hike.chatthread;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -134,39 +133,6 @@ public class HikeActionBar
 	}
 
 	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	public boolean enableMenuItem(int parameter)
-	{
-		// TODO implement me
-		return false;
-	}
-
-	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	public boolean disableMenuItem(int parameter)
-	{
-		// TODO implement me
-		return false;
-	}
-
-	/**
 	 * Returns the list of overflow menu items held by this ActionBar
 	 * @return
 	 */
@@ -181,30 +147,6 @@ public class HikeActionBar
 		{
 			return null;
 		}
-	}
-
-	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	public void setOverFlowMenuItems(Set<OverFlowMenuItem> parameter, OverflowItemClickListener parameter2)
-	{
-		// TODO implement me
-	}
-
-	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	public void setOverFloeClickListener(OverflowItemClickListener parameter)
-	{
-		// TODO implement me
 	}
 
 	public void showOverflowMenu(int width, int height, int xOffset, int yOffset, View anchor)
@@ -258,56 +200,6 @@ public class HikeActionBar
 		}
 	}
 	
-	/**
-	 * Can be used to update the active state of an overflow menu item on the fly
-	 * 
-	 * @param itemId
-	 * @param enabled
-	 */
-	protected void updateOverflowMenuItemActiveState(int itemId, boolean enabled)
-	{
-		if(overFlowMenuLayout!=null)
-		{
-			overFlowMenuLayout.updateOverflowMenuItemActiveState(itemId, enabled, true);
-		}
-	}
-	
-	/**
-	 * Can be used to update the active state of multiple overflow menu item on the fly
-	 * 
-	 * @param itemId
-	 * @param enabled
-	 */
-	protected void updateOverflowMenuItemActiveState(ArrayList<Pair<Integer, Boolean>> itemList)
-	{
-		if (overFlowMenuLayout != null)
-		{
-			int count = 0;
-			for (Pair<Integer, Boolean> pair : itemList)
-			{
-				count =  overFlowMenuLayout.updateOverflowMenuItemActiveState(pair.first, pair.second, false) ? count + 1 : count;
-			}
-			if (count > 0)
-			{
-				overFlowMenuLayout.notifyDateSetChanged();
-			}
-		}
-	}
-
-	/**
-	 * Can be used to update the title of an overflow menu item on the fly
-	 * 
-	 * @param itemId
-	 * @param newTitle
-	 */
-	protected void updateOverflowMenuItemIcon(int itemId, int drawableId)
-	{
-		if(overFlowMenuLayout!=null)
-		{
-			overFlowMenuLayout.updateOverflowMenuItemIcon(itemId, drawableId);
-		}
-	}
-
 	/**
 	 * This is used to update/show indicator image on the overflow menu icon. This will be called from the UI Thread
 	 * 
@@ -408,4 +300,30 @@ public class HikeActionBar
 		}
 	}
 
+	public void releseResources()
+	{
+		if (overFlowMenuLayout != null)
+		{
+			overFlowMenuLayout.releaseResources();
+			overFlowMenuLayout = null;
+		}
+	}
+	
+	public boolean isOverflowMenuShowing()
+	{
+		if (overFlowMenuLayout != null)
+		{
+			return overFlowMenuLayout.isShowing();
+		}
+		
+		return false;
+	}
+
+	public void dismissOverflowMenu()
+	{
+		if (overFlowMenuLayout != null)
+		{
+			overFlowMenuLayout.dismiss();
+		}
+	}
 }
