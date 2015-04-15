@@ -148,7 +148,7 @@ public abstract class OneToNChatThread extends ChatThread implements HashTagMode
 
 		// fetch theme
 		ChatTheme currentTheme = mConversationDb.getChatThemeForMsisdn(msisdn);
-		Logger.d("ChatThread", "Calling setchattheme from createConversation");
+		Logger.d("ChatThread", "Calling  setchattheme from createConversation");
 		oneToNConversation.setChatTheme(currentTheme);
 
 		return oneToNConversation;
