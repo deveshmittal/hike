@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.support.v4.app.DialogFragment;
 import com.actionbarsherlock.internal.view.menu.MenuItemWrapper;
 import com.actionbarsherlock.internal.view.menu.MenuWrapper;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import static android.support.v4.app.Watson.OnCreateOptionsMenuListener;
 import static android.support.v4.app.Watson.OnOptionsItemSelectedListener;

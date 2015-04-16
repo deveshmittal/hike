@@ -7,9 +7,9 @@ import com.actionbarsherlock.ActionBarSherlock.OnCreatePanelMenuListener;
 import com.actionbarsherlock.ActionBarSherlock.OnMenuItemSelectedListener;
 import com.actionbarsherlock.ActionBarSherlock.OnPreparePanelListener;
 import com.actionbarsherlock.BuildConfig;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import java.util.ArrayList;
 
 /** I'm in ur package. Stealing ur variables. */

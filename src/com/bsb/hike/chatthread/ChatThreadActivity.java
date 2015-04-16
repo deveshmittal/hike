@@ -7,8 +7,8 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;

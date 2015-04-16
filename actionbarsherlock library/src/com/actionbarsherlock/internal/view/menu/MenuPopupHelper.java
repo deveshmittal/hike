@@ -36,7 +36,7 @@ import com.actionbarsherlock.R;
 import com.actionbarsherlock.internal.view.View_HasStateListenerSupport;
 import com.actionbarsherlock.internal.view.View_OnAttachStateChangeListener;
 import com.actionbarsherlock.internal.widget.IcsListPopupWindow;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.MenuItem;
 
 /**
  * Presents a menu as a small, simple popup anchored to another view.

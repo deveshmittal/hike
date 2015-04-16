@@ -4,8 +4,8 @@ import java.util.WeakHashMap;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.view.KeyEvent;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 
 public class MenuWrapper implements Menu {

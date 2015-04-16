@@ -16,7 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragment;
+import android.support.v4.app.Fragment;
 import com.bsb.hike.R;
 import com.bsb.hike.photos.HikeCameraHost;
 import com.bsb.hike.photos.HikePhotosListener;

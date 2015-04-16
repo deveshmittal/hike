@@ -14,9 +14,9 @@ import com.actionbarsherlock.ActionBarSherlock.OnCreatePanelMenuListener;
 import com.actionbarsherlock.ActionBarSherlock.OnMenuItemSelectedListener;
 import com.actionbarsherlock.ActionBarSherlock.OnPreparePanelListener;
 import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 public abstract class SherlockExpandableListActivity extends ExpandableListActivity implements OnCreatePanelMenuListener, OnPreparePanelListener, OnMenuItemSelectedListener, OnActionModeStartedListener, OnActionModeFinishedListener {
     private ActionBarSherlock mSherlock;

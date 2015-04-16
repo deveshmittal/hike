@@ -6,11 +6,11 @@ import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import com.bsb.hike.R;
 
 public class HikeActionMode implements ActionMode.Callback, OnClickListener

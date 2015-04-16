@@ -15,8 +15,8 @@ import com.actionbarsherlock.internal.app.ActionBarWrapper;
 import com.actionbarsherlock.internal.view.menu.MenuItemWrapper;
 import com.actionbarsherlock.internal.view.menu.MenuWrapper;
 import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 @ActionBarSherlock.Implementation(api = 14)
 public class ActionBarSherlockNative extends ActionBarSherlock {

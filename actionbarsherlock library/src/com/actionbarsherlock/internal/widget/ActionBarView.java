@@ -56,8 +56,8 @@ import com.actionbarsherlock.internal.view.menu.MenuPresenter;
 import com.actionbarsherlock.internal.view.menu.MenuView;
 import com.actionbarsherlock.internal.view.menu.SubMenuBuilder;
 import com.actionbarsherlock.view.CollapsibleActionView;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
 import static com.actionbarsherlock.internal.ResourcesCompat.getResources_getBoolean;

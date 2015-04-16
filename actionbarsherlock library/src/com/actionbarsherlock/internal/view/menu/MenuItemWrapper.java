@@ -8,7 +8,7 @@ import com.actionbarsherlock.internal.view.ActionProviderWrapper;
 import com.actionbarsherlock.internal.widget.CollapsibleActionViewWrapper;
 import com.actionbarsherlock.view.ActionProvider;
 import com.actionbarsherlock.view.CollapsibleActionView;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 
 public class MenuItemWrapper implements MenuItem, android.view.MenuItem.OnMenuItemClickListener {

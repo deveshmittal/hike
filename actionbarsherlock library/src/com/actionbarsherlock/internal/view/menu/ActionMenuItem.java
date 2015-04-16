@@ -23,7 +23,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
 
 import com.actionbarsherlock.view.ActionProvider;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 
 /**

@@ -51,9 +51,9 @@ import com.actionbarsherlock.internal.widget.ActionBarContextView;
 import com.actionbarsherlock.internal.widget.ActionBarView;
 import com.actionbarsherlock.internal.widget.ScrollingTabContainerView;
 import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import static com.actionbarsherlock.internal.ResourcesCompat.getResources_getBoolean;
 
 /**

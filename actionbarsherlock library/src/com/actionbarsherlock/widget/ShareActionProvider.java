@@ -26,9 +26,9 @@ import android.view.View;
 
 import com.actionbarsherlock.R;
 import com.actionbarsherlock.view.ActionProvider;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.MenuItem.OnMenuItemClickListener;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import com.actionbarsherlock.view.SubMenu;
 import com.actionbarsherlock.widget.ActivityChooserModel.OnChooseActivityListener;
 

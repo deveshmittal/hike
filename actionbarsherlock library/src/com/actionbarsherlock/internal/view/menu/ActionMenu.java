@@ -26,8 +26,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.view.KeyEvent;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 
 /**

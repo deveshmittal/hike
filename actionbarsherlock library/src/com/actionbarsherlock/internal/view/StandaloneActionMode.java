@@ -26,9 +26,9 @@ import com.actionbarsherlock.internal.view.menu.MenuPopupHelper;
 import com.actionbarsherlock.internal.view.menu.SubMenuBuilder;
 import com.actionbarsherlock.internal.widget.ActionBarContextView;
 import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 public class StandaloneActionMode extends ActionMode implements MenuBuilder.Callback {
     private Context mContext;

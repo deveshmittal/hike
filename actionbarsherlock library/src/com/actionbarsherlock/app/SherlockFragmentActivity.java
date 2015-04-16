@@ -11,9 +11,9 @@ import android.view.Window;
 import com.actionbarsherlock.ActionBarSherlock;
 import com.actionbarsherlock.BuildConfig;
 import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import static com.actionbarsherlock.ActionBarSherlock.OnActionModeFinishedListener;
 import static com.actionbarsherlock.ActionBarSherlock.OnActionModeStartedListener;
